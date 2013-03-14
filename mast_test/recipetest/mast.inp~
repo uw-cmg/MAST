@@ -1,0 +1,32 @@
+$unitcell
+2.0 0.0 0.0
+0.0 2.0 0.0
+0.0 0.0 2.0
+$end
+
+$mast
+program vasp
+system_name GaAsBi
+$end
+
+$geometry
+coord_type fractional
+Ga     0.000000     0.000000     0.000000
+Ga     0.500000     0.500000     0.000000
+Ga     0.000000     0.500000     0.500000
+Ga     0.500000     0.000000     0.500000
+As     0.250000     0.250000     0.250000
+As     0.750000     0.750000     0.250000
+As     0.250000     0.750000     0.750000
+As     0.750000     0.250000     0.750000
+$end
+
+$defects
+coord_type fractional
+vacancy 0.0 0.0 0.0 Ga
+interstitial 0.25 0.25 0.25 As
+$end
+
+$recipe
+recipe recipe_template.txt
+$end

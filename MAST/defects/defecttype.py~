@@ -1,0 +1,50 @@
+import numpy as np
+
+from ase.atom import Atom
+from ase.atoms import Atoms
+
+from MAST.utility.mastobj import MASTObj
+
+allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
+                'position': (tuple, tuple(), 'Position of the defect'),
+                'coordtype': (str, 'fractional', 'Coordinate type (cartesian or fractional'),
+                'defecttype': (str, str(), 'Intersitial or vacancy'),
+                'structure': (Atoms, Atoms(), 'ASE Atoms object'),
+               }
+
+class DefectType(MASTobj):
+    def __init__(self, **kwargs):
+        MASTobj.__init__(self, allowed_keys, **kwargs)
+
+        if (self.keywords['coordtype'] == 'fractional'):
+            self.keywords['position'] = self._direct2cart(self.keywords['position'])
+
+    def create_defect(self):
+        """Creates a defect, and returns the structure"""
+        defect = self._make_atom()
+
+        if (self.keywords['defecttype'].lower() == 'vacancy'):
+            print 'Making a vacancy!'
+            self.keywords['structure'] -= defect
+        elif (self.keywords['defecttype'].lower() == 'interstitial'):
+            print 'Making an interstitial!'
+            self.keywords['structure'] += defect
+        else:
+            raise RuntimeError('Defect type %s not supported' % self.keywords['defecttype'])
+
+    def _direct2cart(self, position):
+        """Converts between direct coordinates and cartesian coordinates"""
+        cell = self.keywords['structure'].get_cell()
+        print cell
+
+        xnew = np.dot(cell[:, 0], position)
+        ynew = np.dot(cell[:, 1], position)
+        znew = np.dot(cell[:, 2], position)
+
+        position = np.array([xnew, ynew, znew])
+        return position
+
+    def _make_atom(self):
+        """Takes information given in keywords to construct an Atom object"""
+
+        return Atom(self.keywords['atom'], position=self.keywords['position'])
