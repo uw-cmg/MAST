@@ -1,8 +1,10 @@
-class BaseIngredient:
-    def __init__(self, logger, keywords):
-        self.logger    = logger
-        self.keywords  = keywords
-        self.structure = list() 
+class BaseIngredient(MASTObj):
+    def __init__(self, allowed_keys, **kwargs):
+        allowed_keys_base = dict()
+        allowed_keys_base.update(allowed_keys) 
+        MASTObj.__init__(self, allowed_keys_base, **kwargs)
+        #self.logger    = logger #keep this space
+        self.structure = dict() 
 
     def generate_input(self):
         '''writes the files needed as input for the jobs'''
