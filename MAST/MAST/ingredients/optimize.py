@@ -16,7 +16,7 @@ import pdb
 
 
 
-class Optimize(MASTObj):
+class Optimize():
     def __init__(self, **kwargs):
         allowed_keys = {
                 'dir_name' : (str, str(), 'Name of optimization directory'),
@@ -27,8 +27,7 @@ class Optimize(MASTObj):
                 #'parent_final': (str, str(), 'Directory of final state'), #TA also don't need
                 'program': (str, str(), 'DFT program, e.g. "vasp"')
                 }
-        MASTObj.__init__(self, allowed_keys, **kwargs)
-        #BaseIngredient.__init__(self,**kwargs)
+        BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
         if self.keywords['program'] == "vasp":

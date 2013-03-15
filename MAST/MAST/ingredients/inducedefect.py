@@ -14,9 +14,9 @@ allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
                 'structure': (Structure, None, 'Pymatgen Structure object'),
                }
 
-class InduceDefect(MASTObj):
+class InduceDefect():
     def __init__(self, **kwargs):
-        MASTObj.__init__(self, allowed_keys, **kwargs)
+        BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
         if (self.keywords['coordtype'] == 'cartesian'):
             self.keywords['position'] = self._cart2frac(self.keywords['position'])

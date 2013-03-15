@@ -16,7 +16,7 @@ import pdb
 
 
 
-class PerformNEB(MASTObj):
+class PerformNEB():
     def __init__(self, **kwargs):
         #pdb.set_trace()
         allowed_keys = {
@@ -31,8 +31,7 @@ class PerformNEB(MASTObj):
                 'parent_final': (str, str(), 'Directory of final state'),
                 'program': (str, str(), 'DFT program, e.g. "vasp"')
                 }
-        MASTObj.__init__(self, allowed_keys, **kwargs)
-        #BaseIngredient.__init__(self,**kwargs)
+        BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
         if self.keywords['program'] == "vasp":
