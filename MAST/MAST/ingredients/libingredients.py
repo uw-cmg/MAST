@@ -5,6 +5,14 @@ class BaseIngredient(MASTObj):
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         #self.logger    = logger #keep this space
         self.structure = dict() 
+    
+    def get_structure_from_parent(self, parentpath):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.get_structure_from_parent(parentpath)
+        else:
+            print "Program not recognized."
+            return None
 
     def generate_input(self):
         '''writes the files needed as input for the jobs'''
