@@ -20,24 +20,3 @@ class BaseIngredient(MASTObj):
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
 
-
-class SinglePoint(BaseIngredient):
-    def __init__(self, keywords):
-        BaseIngredient.__init__(keywords)
-
-
-
-class Optimize(BaseIngredient):
-    def __init__(self, keywords):
-        BaseIngredient.__init__(keywords)
-
-
-class InduceDefect(BaseIngredient):
-    def __init__(self, keywords):
-        BaseIngredient.__init__(keywords)
-
-
-class OptimizeDefect(BaseIngredient):
-    def __init__(self, keywords):
-        BaseIngredient.__init__(keywords)
-
