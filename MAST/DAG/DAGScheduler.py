@@ -1,9 +1,21 @@
-class Job:
-    def __init__(self, name):
-        self.name         = name
-        self.pre_scripts  = []
-        self.post_scripts = []
+import datetime
+now = datetime.datetime.utcnow()
 
+class Job(object):
+    def __init__(self, name):
+        self.name = name
+        self.id = ''
+        self.pre_scripts = []
+        self.post_scripts = []
+        self.parents_name = []
+        self.parents_id = [] #for unique jobid in DB
+
+    def add_parents_name(self,pname):
+        self.parents_name.append(pname)
+        
+    def add_parents_id(self,pid):
+        self.parents_name.append(pid)
+        
     def add_pre_script(self, script):
         self.pre_scripts.append(script)
 
@@ -21,7 +33,42 @@ class Job:
             plan += ", ".join(self.post_scripts)
         plan += " )"
         return plan
+    
+    def get_jobinfo():
+        info ={ "job_id":self.id,
+                "job_name":self.name,
+                "start": None,
+                "end": None,
+                "dish_id": None
+            }
+        return 
 
+class Dish(object):
+    def __init__(self,name,id):
+        self.name = name
+        self.id = id #unique
+        self.jobs = [] #list of jobs
+        self.start = None #datetime
+        self.end = None #datetime
+        
+    def addjob(job):
+        self.jobs.append(job)
+        
+    def getjobsid():
+        jids = []
+        for job in self.jobs:
+            jids.append(job.id)
+        return jids
+    
+    def getinfo():
+        jids = self.jobs.getjobsid()
+        info = {"dish_id":"d_1",
+                "jobs_id":jids,
+                "start":now(),
+                "end":None
+            }
+        return info
+    
 class DAGParser:
     def __init__(self):
         pass
