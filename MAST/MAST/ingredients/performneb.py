@@ -53,21 +53,6 @@ class PerformNEB():
             print "Program " + self.keywords['program'] + " not supported for NEB."
             return None
     
-    def get_structure_from_parent(self, parentpath):
-        if self.keywords['program'] == "vasp":
-            structpath = os.path.join(parentpath, "CONTCAR")
-            parent_structure = Poscar.from_file(structpath, False).structure
-            return parent_structure
-        else:
-            print "Could not get structure."
-            return None
-
-    def get_energy_file_from_parent(self, parentpath, program):
-        if program == "vasp":
-            return os.path.join(parentpath, "OSZICAR")
-        else:
-            print "Could not get energy file."
-            return None
 
     def generate_files(self):
         struct_init = None
