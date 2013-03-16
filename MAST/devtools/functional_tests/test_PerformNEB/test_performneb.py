@@ -1,8 +1,8 @@
 import pymatgen
 import os
 #os.chdir("//home/tam/bin/git/tam_k3/MAST/ingredients")
-from MAST.ingredients.performneb import PerformNEB
-os.chdir("//home/tam/test_PerformNEB")
+from MAST.MAST.ingredients.performneb import PerformNEB
+os.chdir("//home/tam/bin/git/MAST4pymatgen/devtools/functional_tests/test_PerformNEB")
 #contcar_initial=pymatgen.io.vaspio.Poscar.from_file("//home/tam/test_PerformNEB/ep1FCC",False)
 #contcar_final=pymatgen.io.vaspio.Poscar.from_file("//home/tam/test_PerformNEB/ep2FCC",False)
 #NEBing=PerformNEB(dir_name="my_test_neb", structure_init=contcar_initial.structure, structure_final=contcar_final.structure, images=4)
