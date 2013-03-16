@@ -70,8 +70,13 @@ class PerformNEB():
             return None
 
     def generate_files(self):
-        struct_init = self.get_structure_from_parent(self.keywords['parent_init'])
-        struct_fin = self.get_structure_from_parent(self.keywords['parent_final'])
+        struct_init = None
+        struct_fin = None
+        struct_init = BaseIngredient.get_structure_from_parent(self.keywords['parent_init'])
+        struct_fin = BaseIngredient.get_structure_from_parent(self.keywords['parent_final'])
+        if (struct_init == None) or (struct_fin == None):
+            print "Error getting initial or final parent structure."
+            return
         image_structures = struct_init.interpolate(struct_fin, self.keywords['images'])
         self.set_up_neb(image_structures)
         return
