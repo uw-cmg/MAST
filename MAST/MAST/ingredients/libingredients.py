@@ -11,7 +11,7 @@ class BaseIngredient(MASTObj):
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.get_structure_from_parent(parentpath)
         else:
-            print "Program not recognized."
+            print "Program not recognized (in get_structure_from_parent)"
             return None
 
     def generate_input(self):
@@ -20,3 +20,11 @@ class BaseIngredient(MASTObj):
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
 
+    def images_complete(self):
+        '''Checks if all images in an NEB calculation are complete.'''
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.images_complete(self.keywords['dir_name'],self.keywords['images'])
+        else:
+            print "Program not recognized (in images_complete)"
+            return None
