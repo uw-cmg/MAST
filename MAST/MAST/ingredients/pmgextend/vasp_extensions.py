@@ -1,4 +1,5 @@
 from pymatgen.io.vaspio import *
+import numpy as np
 
 def get_max_enmax_from_Potcar(mypotcar):
     """Get maximum enmax value (float) from Potcar (combined list)"""
@@ -11,11 +12,16 @@ def get_max_enmax_from_Potcar(mypotcar):
         potcarct = potcarct + 1
     return max(enmax_list)
 
-def make_one_unfrozen_atom_poscar(myposcar, natom)
+def make_one_unfrozen_atom_poscar(myposcar, natom):
+    """Use selective dynamics to make a poscar with one unfrozen atom.
+        myposcar = Poscar
+        natom = the number of the atom to unfreeze
+        Returns: Poscar (use write_file function on it).
+    """
     mysd=np.zeros([sum(myposcar.natoms),3],bool)
-    mysd[natom][0]=True
-    mysd[natom][1]=True
-    mysd[natom][2]=True
+    mysd[natom-1][0]=True #indexing starts at 0
+    mysd[natom-1][1]=True
+    mysd[natom-1][2]=True
     myposcar.selective_dynamics = mysd
     return myposcar
 
