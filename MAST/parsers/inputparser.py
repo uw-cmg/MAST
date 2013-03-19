@@ -10,9 +10,9 @@
 import numpy as np
 import pymatgen as pmg
 
-from MAST.MAST.utility import InputOptions
-from MAST.MAST.utility import MASTObj
-from MAST.MAST.utility import MASTError
+from MAST.utility import InputOptions
+from MAST.utility import MASTObj
+from MAST.utility import MASTError
 
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
@@ -217,7 +217,7 @@ class InputParser(MASTObj):
 
     def parse_program_section(self, section_name, section_content, options):
         """Parse the program section and populate the options"""
-
+# making a dummy change
         section_content = section_content.split('\n')
 
         for line in section_content:
@@ -229,6 +229,5 @@ class InputParser(MASTObj):
             for opt in program_options:
                 opt = opt.split('=')
                 temp_dict[opt[0]] = opt[1]
-
 
             options.set_item(section_name, line[0].lower(), temp_dict)
