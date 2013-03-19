@@ -64,7 +64,7 @@ class PerformNEB():
         myd['LCHARG']="False"
         myd['LWAVE']="False"
         myd['NSW']=191
-        myd['MAGMOM']=5*len(rep_structure.sites)
+        myd['MAGMOM']="5*" + str(len(rep_structure.sites))
         myd['ENCUT']=MAST.ingredients.pmgextend.vasp_extend.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
 
