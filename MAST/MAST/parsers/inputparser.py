@@ -138,6 +138,7 @@ class InputParser(MASTObj):
                 atom_list.append(line[0])
                 coordinates.append(line[1:])
 
+        print coordinates
         coordinates = np.array(coordinates, dtype='float')
 
         options.set_item(section_name, 'coord_type', coord_type)
@@ -173,10 +174,6 @@ class InputParser(MASTObj):
         cell = np.array(cell, dtype='float')
 
         options.set_item(section_name, 'lattice', pmg.Lattice(cell))
-
-    def parse_program_section(self, section_name, section_content, options):
-        """Parse the program section and populate the options"""
-        raise NotImplementedError
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
@@ -217,3 +214,21 @@ class InputParser(MASTObj):
             line = line.split(self.delimeter)
             if (line[0] == 'recipe'):
                 options.set_item(section_name, 'recipe_file', line[1])
+
+    def parse_program_section(self, section_name, section_content, options):
+        """Parse the program section and populate the options"""
+
+        section_content = section_content.split('\n')
+
+        for line in section_content:
+            ingredient_dict = dict()
+            line = line[:-1].split('(')
+            program_options = line[1].split(',')
+            temp_dict = dict()
+
+            for opt in program_options:
+                opt = opt.split('=')
+                temp_dict[opt[0]] = opt[1]
+
+
+            options.set_item(section_name, line[0].lower(), temp_dict)
