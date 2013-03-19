@@ -56,7 +56,7 @@ class MAST(MASTObj):
         print self.input_options.get_item('defects', 'num_defects')
 
 # Begin DEBUG section
-        from MAST.ingredients.inducedefect import InduceDefect as ID
+        from MAST.MAST.ingredients.inducedefect import InduceDefect as ID
         for i in range(self.input_options.get_item('defects', 'num_defects')):
             key = 'defect' + str(i)
             print self.input_options.get_item('defects', 'defects')[key]

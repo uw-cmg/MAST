@@ -19,12 +19,12 @@ class PerformNEB(BaseIngredient):
         #pdb.set_trace()
         allowed_keys = {
                 'dir_name' : (str, str(), 'Name of NEB directory'),
-                'images': (int, 4, 'Number of interpolated images + 1'),
                 'parent_init': (str, str(), 'Directory of initial state'),
                 'parent_final': (str, str(), 'Directory of final state'),
                 'program': (str, str(), 'DFT program, e.g. "vasp"')
                 }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        prog_kwarg_dict = options.get_item('vasp',ingredient_name)
 
     def is_complete(self):
         return BaseIngredient.images_complete(self)
@@ -50,6 +50,7 @@ class PerformNEB(BaseIngredient):
         return structure_list
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
+
         myd=dict()
         myd['IBRION']=1
         myd['POTIM']=0.5

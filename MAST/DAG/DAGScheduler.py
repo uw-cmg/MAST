@@ -95,7 +95,7 @@ class DAGParser:
             init_keyword = elts[0].lower()
 
             #Job Keyword
-            if init_keyword == "job":
+            if init_keyword == "ingredient": #TTM 2013-03-19 change init_keyword "job" to "ingredient"
                 job_obj   = Job(elts[1])
                 jobs_dict.setdefault(elts[1], job_obj)
                 dependency_dict.setdefault(job_obj, set())
