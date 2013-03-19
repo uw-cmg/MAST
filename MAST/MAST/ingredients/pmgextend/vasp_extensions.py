@@ -11,4 +11,11 @@ def get_max_enmax_from_Potcar(mypotcar):
         potcarct = potcarct + 1
     return max(enmax_list)
 
+def make_one_unfrozen_atom_poscar(myposcar, natom)
+    mysd=np.zeros([sum(myposcar.natoms),3],bool)
+    mysd[natom][0]=True
+    mysd[natom][1]=True
+    mysd[natom][2]=True
+    myposcar.selective_dynamics = mysd
+    return myposcar
 
