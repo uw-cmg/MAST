@@ -1,1 +1,1 @@
-from MAST.mast import MAST
+from MAST.MAST.mast import MAST

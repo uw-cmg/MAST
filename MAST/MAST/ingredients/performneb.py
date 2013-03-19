@@ -1,11 +1,12 @@
 import numpy as np
 
+import pymatgen
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.utility.mastobj import MASTObj
-from MAST.ingredients.libingredients import BaseIngredient
+from MAST.MAST.utility.mastobj import MASTObj
+from MAST.MAST.ingredients.libingredients import BaseIngredient
 
 import os
 import shutil
@@ -13,7 +14,7 @@ import shutil
 
 
 
-class PerformNEB():
+class PerformNEB(BaseIngredient):
     def __init__(self, **kwargs):
         #pdb.set_trace()
         allowed_keys = {
@@ -26,7 +27,7 @@ class PerformNEB():
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
-        return BaseIngredient.images_complete()
+        return BaseIngredient.images_complete(self)
 
     def generate_files(self):
         image_structures = self.do_interpolation()
@@ -40,8 +41,8 @@ class PerformNEB():
     def do_interpolation(self):
         struct_init = None
         struct_fin = None
-        struct_init = BaseIngredient.get_structure_from_parent(self.keywords['parent_init'])
-        struct_fin = BaseIngredient.get_structure_from_parent(self.keywords['parent_final'])
+        struct_init = BaseIngredient.get_structure_from_parent(self, self.keywords['parent_init'])
+        struct_fin = BaseIngredient.get_structure_from_parent(self, self.keywords['parent_final'])
         if (struct_init == None) or (struct_fin == None):
             print "Error getting initial or final parent structure."
             return
@@ -95,13 +96,13 @@ class PerformNEB():
         self.set_up_vasp_folders(image_structures)
         dir_name = self.keywords['dir_name']
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
-        topkpoints.write_file(dirname + "/KPOINTS")
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PAW-GGA', sym_potcar_map=None)
-        toppotcar.write_file(dirname + "/POTCAR")
+        topkpoints.write_file(dir_name + "/KPOINTS")
+        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PW91', sym_potcar_map=None)
+        toppotcar.write_file(dir_name + "/POTCAR")
         topincar = pymatgen.io.vaspio.Incar()
         incar_dict = self.set_up_vasp_incar_dict(image_structures[0], toppotcar)
         topincar.from_dict(incar_dict)
-        topincar.write_file(dirname + "/INCAR")
+        topincar.write_file(dir_name + "/INCAR")
         return
 
 

@@ -7,12 +7,12 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
-from MAST.utility import MASTObj
-from MAST.utility import MAST2Structure
-from MAST.utility import MASTError
+from MAST.MAST.utility import MASTObj
+from MAST.MAST.utility import MAST2Structure
+from MAST.MAST.utility import MASTError
 
-from MAST.parsers import InputParser
-from MAST.parsers.recipeparsers import RecipeParser
+from MAST.MAST.parsers import InputParser
+from MAST.MAST.parsers.recipeparsers import RecipeParser
 
 
 #testing
