@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+#20130201 TTM add Control option
+
+import os
+import optparse # Allows for some command line option parsing
+
+from MAST import MAST
+from MAST.parsers import InputParser
+
+parser = optparse.OptionParser()
+parser.add_option('-m', '--mode', dest='mode', default='interface',
+                  help='Determines which mode is used (see README for more info)')
+parser.add_option('-i', '--input', dest='input', default=None,
+                  help='Input file to use to run MAST with (sets mode to input)')
+parser.add_option('-o', '--output', dest='output', default=None,
+                  help='Output file to print MAST information about run to')
+
+(mastopt, mastarg) = parser.parse_args()
+
+print 'Welcome to Material and Simulation Toolkit (MAST), November 2012 revision.'
+
+# Set mode to input if an input file is given
+if (mastopt.input is not None):
+    mastopt.mode = 'input'
+
+# Set a default file name
+if (mastopt.mode == 'input') and (mastopt.input is None):
+    mastopt.input = 'mast.inp'
+
+if (mastopt.mode == 'input') and (mastopt.output is None):
+    mastopt.output = 'mast.out'
+
+# Gather some path information
+
+scriptpath = os.environ['SCRIPTPATH']
+potcar_path = os.environ['POTCARPATH']
+
+if (mastopt.mode == 'input'):
+# Small hack to test InputParser until we get a new interface setup to include this class
+    mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
+    mast.start()
+elif (mastopt.mode == 'input'):
+    inputparse = InputParser(inputfile=mastopt.input, outputfile=mastopt.output)
+    inputparse.parse_input()
