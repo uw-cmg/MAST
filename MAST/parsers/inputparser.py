@@ -230,5 +230,4 @@ class InputParser(MASTObj):
                 opt = opt.split('=')
                 temp_dict[opt[0]] = opt[1]
 
-
             options.set_item(section_name, line[0].lower(), temp_dict)
