@@ -1,7 +1,7 @@
 from pymatgen.io.vaspio import *
 import numpy as np
 
-def get_max_enmax_from_Potcar(mypotcar):
+def get_max_enmax_from_potcar(mypotcar):
     """Get maximum enmax value (float) from Potcar (combined list)"""
     enmax_list=list()
     potcarct=0

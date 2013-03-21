@@ -1,4 +1,4 @@
-from MAST.MAST.utility.mastobj import MASTObj
+from MAST.utility.mastobj import MASTObj
 
 class BaseIngredient(MASTObj): 
     def __init__(self, allowed_keys, **kwargs):
@@ -10,7 +10,7 @@ class BaseIngredient(MASTObj):
     
     def get_structure_from_parent(self, parentpath):
         if self.keywords['program'] == 'vasp':
-            from MAST.MAST.ingredients.checker import vasp_checker
+            from MAST.ingredients.checker import vasp_checker
             return vasp_checker.get_structure_from_parent(parentpath)
         else:
             print "Program not recognized (in get_structure_from_parent)"
@@ -25,7 +25,7 @@ class BaseIngredient(MASTObj):
     def images_complete(self):
         '''Checks if all images in an NEB calculation are complete.'''
         if self.keywords['program'] == 'vasp':
-            from MAST.MAST.ingredients.checker import vasp_checker
+            from MAST.ingredients.checker import vasp_checker
             return vasp_checker.images_complete(self.keywords['dir_name'],self.keywords['images'])
         else:
             print "Program not recognized (in images_complete)"

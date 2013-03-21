@@ -12,7 +12,7 @@
 
 #import os
 #import warnings
-from MAST.MAST.utility.masterror import MASTError
+from MAST.utility.masterror import MASTError
 
 
 class MASTObj(object):

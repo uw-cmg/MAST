@@ -16,11 +16,12 @@ def get_structure_from_parent(parentpath):
 
 def images_complete(dirname, numim):
     """Check if all images in a VASP NEB calculation are complete.
-        dirname = directory housing /00.../0N files
+        dirname = directory housing /00.../0N+1 files; 
+                  only checks directories /01.../0N where N is # images
         numim = number of images
     """
     imct=1
-    while imct < numim:
+    while imct <= numim:
         num_str = str(imct).zfill(2)
         impath = os.path.join(dirname, num_str)
         try:

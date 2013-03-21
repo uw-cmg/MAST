@@ -1,13 +1,9 @@
 import pymatgen
 import os
-os.chdir("//home/tam/bin/git")
-from MAST.MAST.ingredients.performneb import PerformNEB
-os.chdir("//home/tam/bin/git/MAST4pymatgen/MAST/devtools/functional_tests/test_PerformNEB")
-#contcar_initial=pymatgen.io.vaspio.Poscar.from_file("//home/tam/test_PerformNEB/ep1FCC",False)
-#contcar_final=pymatgen.io.vaspio.Poscar.from_file("//home/tam/test_PerformNEB/ep2FCC",False)
-#NEBing=PerformNEB(dir_name="my_test_neb", structure_init=contcar_initial.structure, structure_final=contcar_final.structure, images=4)
-NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="no program", images=4)
-NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="vasp", images=4)
+from MAST.ingredients.performneb import PerformNEB
+os.chdir("//home/tam/bin/git/MAST4pymatgen/test/nebtest")
+NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="no program", images=3)
+NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="vasp", images=3)
 image_list=NEBing.generate_files()
 
 print "Complete? :", NEBing.is_complete()

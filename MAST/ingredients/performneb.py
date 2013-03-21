@@ -5,14 +5,14 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.MAST.utility.mastobj import MASTObj
-from MAST.MAST.ingredients.libingredients import BaseIngredient
+from MAST.utility.mastobj import MASTObj
+from MAST.ingredients.libingredients import BaseIngredient
+from MAST.ingredients.pmgextend import vasp_extensions
 
 import os
 import shutil
 #import pdb
-
-
+#TTM
 
 class PerformNEB(BaseIngredient):
     def __init__(self, **kwargs):
@@ -21,10 +21,11 @@ class PerformNEB(BaseIngredient):
                 'dir_name' : (str, str(), 'Name of NEB directory'),
                 'parent_init': (str, str(), 'Directory of initial state'),
                 'parent_final': (str, str(), 'Directory of final state'),
+                'images': (int, 0, 'Number of images'),
                 'program': (str, str(), 'DFT program, e.g. "vasp"')
                 }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        prog_kwarg_dict = options.get_item('vasp',ingredient_name)
+        #prog_kwarg_dict = options.get_item('vasp',ingredient_name)
 
     def is_complete(self):
         return BaseIngredient.images_complete(self)
@@ -46,7 +47,7 @@ class PerformNEB(BaseIngredient):
         if (struct_init == None) or (struct_fin == None):
             print "Error getting initial or final parent structure."
             return
-        structure_list = struct_init.interpolate(struct_fin, self.keywords['images'])
+        structure_list = struct_init.interpolate(struct_fin, self.keywords['images'] + 1 )
         return structure_list
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
@@ -67,7 +68,7 @@ class PerformNEB(BaseIngredient):
         myd['LWAVE']="False"
         myd['NSW']=191
         myd['MAGMOM']="5*" + str(len(rep_structure.sites))
-        myd['ENCUT']=MAST.ingredients.pmgextend.vasp_extend.get_max_enmax_from_potcar(rep_potcar)*1.5
+        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
 
     def set_up_vasp_folders(self, image_structures):
@@ -77,7 +78,7 @@ class PerformNEB(BaseIngredient):
             return
         os.makedirs(dir_name)
         imct=0
-        while imct <= self.keywords['images']:
+        while imct <= self.keywords['images'] + 1:
             imposcar = Poscar(image_structures[imct])
             num_str = str(imct).zfill(2)
             impath = os.path.join(dir_name, num_str)
@@ -87,7 +88,7 @@ class PerformNEB(BaseIngredient):
             imposcar.write_file(os.path.join(impath, "POSCAR"))
             if imct == 0:
                 shutil.copy(os.path.join(self.keywords['parent_init'],"OSZICAR"),impath)
-            elif imct == self.keywords['images']:
+            elif imct == self.keywords['images'] + 1:
                 shutil.copy(os.path.join(self.keywords['parent_final'],"OSZICAR"),impath)
             imct = imct + 1
         return
@@ -98,11 +99,10 @@ class PerformNEB(BaseIngredient):
         dir_name = self.keywords['dir_name']
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(dir_name + "/KPOINTS")
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PW91', sym_potcar_map=None)
+        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PBE', sym_potcar_map=None)
         toppotcar.write_file(dir_name + "/POTCAR")
-        topincar = pymatgen.io.vaspio.Incar()
         incar_dict = self.set_up_vasp_incar_dict(image_structures[0], toppotcar)
-        topincar.from_dict(incar_dict)
+        topincar = pymatgen.io.vaspio.Incar(incar_dict)
         topincar.write_file(dir_name + "/INCAR")
         return
 
