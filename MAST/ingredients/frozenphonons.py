@@ -5,8 +5,9 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.MAST.utility.mastobj import MASTObj
-from MAST.MAST.ingredients.libingredients import BaseIngredient
+from MAST.utility.mastobj import MASTObj
+from MAST.ingredients.libingredients import BaseIngredient
+from MAST.ingredients.pmgextend import vasp_extensions
 
 import os
 import shutil
@@ -18,17 +19,17 @@ class FrozenPhonons(BaseIngredient):
         #pdb.set_trace()
         allowed_keys = {
                 'dir_name' : (str, str(), 'Name of NEB directory'),
-                'parent_path': (str, str(), 'Relaxed CONTCAR path')
+                'parent_path': (str, str(), 'Relaxed CONTCAR path'),
                 'program': (str, str(), 'DFT program, e.g. "vasp"')
                 }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        prog_kwarg_dict = options.get_item('vasp',ingredient_name)
+        #prog_kwarg_dict = options.get_item('vasp',ingredient_name)
 
     def is_complete(self):
         return BaseIngredient.images_complete(self)
 
     def generate_files(self):
-        struct_init = BaseIngredient.get_structure_from_parent(self, self.keywords['parent_path']
+        struct_init = BaseIngredient.get_structure_from_parent(self, self.keywords['parent_path'])
         if (struct_init == None):
             print "Error getting initial parent structure."
             return
@@ -40,10 +41,9 @@ class FrozenPhonons(BaseIngredient):
         return
    
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
-
         myd=dict()
         myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
-        myd['ENCUT']=MAST.ingredients.pmgextend.vasp_extend.get_max_enmax_from_potcar(rep_potcar)*1.5
+        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         myd['LCHARG']="False"
         myd['LWAVE']="False"
         myd['PREC']="Accurate"
@@ -68,12 +68,11 @@ class FrozenPhonons(BaseIngredient):
         mypos = Poscar(struct_init)
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         toppotcar = pymatgen.io.vaspio.Potcar(symbols=mypos.site_symbols, functional='PBE', sym_potcar_map=None)
-        topincar = pymatgen.io.vaspio.Incar()
         incar_dict = self.set_up_vasp_incar_dict(struct_init, toppotcar)
-        topincar.from_dict(incar_dict)
+        topincar = pymatgen.io.vaspio.Incar(incar_dict)
         totatoms = sum(mypos.natoms)
         while imct <= totatoms:
-            imposcar = make_one_unfrozen_atom_poscar(mypos, imct)
+            imposcar = vasp_extensions.make_one_unfrozen_atom_poscar(mypos, imct)
             num_str = str(imct).zfill(2)
             impath = os.path.join(dir_name, num_str)
             impospath = os.path.join(dir_name, "POSCAR_" + num_str)
