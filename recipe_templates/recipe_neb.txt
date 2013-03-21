@@ -1,0 +1,22 @@
+Recipe NEB
+
+Ingredient <sys>_perfect_opt1 LowMeshOptimize
+Ingredient <sys>_perfect_opt2 Optimize
+Ingredient <sys>_perfect_stat Static
+Ingredient <sys>_induce_defect<N> InduceDefect
+Ingredient <sys>_defect<N>_opt1 LowMeshOptimizeDefect
+Ingredient <sys>_defect<N>_opt2 OptimizeDefect
+Ingredient <sys>_defect<N>_stat Static
+Ingredient <sys>_neb<N-N>_opt1 PerformLowMeshNEB
+Ingredient <sys>_neb<N-N>_opt2 PerformNEB
+Ingredient <sys>_neb<N-N>_image<N>_stat Static
+
+Parent <sys>_perfect_opt1 Child <sys>_perfect_opt2
+Parent <sys>_perfect_opt2 Child <sys>_perfect_stat
+Parent <sys>_perfect_opt2 Child <sys>_induce_defect<N>
+Parent <sys>_induce_defect<N> Child <sys>_defect<N>_opt1
+Parent <sys>_defect<N>_opt1 Child <sys>_defect<N>_opt2
+Parent <sys>_defect<N>_opt2 Child <sys>_defect<N>_stat
+Parent <sys>_defect<N>_stat Child <sys>_neb<N-N>_opt1
+Parent <sys>_neb<N-N>_opt1 Child <sys>_neb<N-N>_opt2
+Parent <sys>_neb<N-N>_opt2 Child <sys>_neb<N-N>_image<N>_stat
