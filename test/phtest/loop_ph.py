@@ -6,14 +6,14 @@ import os
 import sys
 
 topdir = "//home/tam/cuset_from_dlx/phposcars"
-phdir="//home/tam/cuset_from_dlx/phfolders"
+phdir="//home/tam/cuset_from_dlx/phdirs"
 myfiles=os.listdir(topdir)
 for onefile in myfiles:
     parentpath=os.path.join(phdir, onefile)
     os.makedirs(parentpath)
     mypos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(topdir, onefile))
     mypos.write_file(parentpath + "/CONTCAR")
-    myph = FrozenPhonons(parent_path=parentpath, dir_name=parentpath + "/frozen", program="vasp")
+    myph = FrozenPhonons(parent_path=parentpath, dir_name=parentpath + "/frozendirs", program="vasp")
     myph.generate_files()
 sys.exit()
 

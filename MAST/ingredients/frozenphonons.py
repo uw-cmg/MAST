@@ -72,15 +72,16 @@ class FrozenPhonons(BaseIngredient):
         topincar = pymatgen.io.vaspio.Incar(incar_dict)
         totatoms = sum(mypos.natoms)
         while imct <= totatoms:
-            imposcar = vasp_extensions.make_one_unfrozen_atom_poscar(mypos, imct)
-            num_str = str(imct).zfill(2)
-            impath = os.path.join(dir_name, num_str)
-            impospath = os.path.join(dir_name, "POSCAR_" + num_str)
-            imposcar.write_file(impospath)
-            os.makedirs(impath)
-            imposcar.write_file(os.path.join(impath, "POSCAR"))
-            topkpoints.write_file(impath + "/KPOINTS")
-            toppotcar.write_file(impath + "/POTCAR")
-            topincar.write_file(impath + "/INCAR")
+            for ndir in [0,1,2]:
+                imposcar = vasp_extensions.make_one_unfrozen_direction_poscar(mypos, imct, ndir)
+                num_str = str(imct).zfill(2)+ "_d" + str(ndir)
+                impath = os.path.join(dir_name, num_str)
+                impospath = os.path.join(dir_name, "POSCAR_" + num_str)
+                imposcar.write_file(impospath)
+                os.makedirs(impath)
+                imposcar.write_file(os.path.join(impath, "POSCAR"))
+                topkpoints.write_file(impath + "/KPOINTS")
+                toppotcar.write_file(impath + "/POTCAR")
+                topincar.write_file(impath + "/INCAR")
             imct = imct + 1
         return

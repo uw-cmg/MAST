@@ -25,3 +25,14 @@ def make_one_unfrozen_atom_poscar(myposcar, natom):
     myposcar.selective_dynamics = mysd
     return myposcar
 
+def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
+    """Use selective dynamics to make a poscar with one unfrozen atom.
+        myposcar = Poscar
+        natom = the number of the atom to unfreeze
+        ndir = the direction to freeze (0, 1, 2 for x, y, z)
+        Returns: Poscar (use write_file function on it).
+    """
+    mysd=np.zeros([sum(myposcar.natoms),3],bool)
+    mysd[natom-1][ndir]=True #indexing starts at 0
+    myposcar.selective_dynamics = mysd
+    return myposcar
