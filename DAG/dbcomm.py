@@ -30,15 +30,15 @@ posts.find_one({'_id':post_id})
 # start mastdb in mangodb
 mastdb = connection['mast-database']
 connection = MongoClient('localhost',27017)
-dishes = mastdb.dishes
+sessions = mastdb.sessions
 
-dish={"dish_id":"d_1",
+session={"session_id":"d_1",
       "jobs_id":["j_1","j_2","j_3"],
       "submit":now(),
       "end_time":"NULL"}
-dishes.insert(dish)
+sessions.insert(session)
 
-#find all jobs which are in a dish
+#find all jobs which are in a session
 
 
 
