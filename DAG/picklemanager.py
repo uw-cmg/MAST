@@ -30,7 +30,7 @@ class PickleManager:
         
         return vardict
 
-    def load_variables_to_ws(self, filename=None, gdict=globals()):
+    def load_variables_to_ws(self, filename=None, gdict):
         ''' Load variables to workspace from a pickle file.
         Usage 1 : load_variables_to_ws(self, gdict = globals())
         Usage 2 : load_variables_to_ws(self, filename = 'savefile.pkl',gdict = globals())
