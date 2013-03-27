@@ -40,6 +40,9 @@ class PerformNEB(BaseIngredient):
     def write_files(self):
         parentpaths = self.get_parent_paths()
         image_structures = self.do_interpolation(parentpaths)
+        if image_structures == None:
+            print "Bad number of images."
+            return None
         if self.keywords['program'] == 'vasp':
             self.set_up_vasp_neb(image_structures, parentpaths)
         else:
@@ -54,15 +57,21 @@ class PerformNEB(BaseIngredient):
         """
         tempname = self.keywords['name'].lower()
         numstr = tempname[tempname.find("neb")+3:]
+        if numstr.find("neb") == -1:
+            pass
+        else:
+            numstr = numstr[numstr.find("neb")+3:] #allow 'neb' to be in sys name
         numpaths = numstr.split('-')
         myfiles=os.listdir(self.keywords['name'])
         parentpaths=[]
         pfile=""
+        print numpaths
         for onenum in numpaths:
-            pfpath="parent_path_" + onenum
-            if os.path.isdir(pfpath):
-                pfile = open("parent_path_" + onenum, 'rb')
-                parentpaths.append(pfile.readlines().strip())
+            pfpath=os.path.join(self.keywords['name'], "parent_path_" + onenum)
+            if os.path.isfile(pfpath):
+                pfile = open(pfpath, 'rb')
+                parentpaths.append(pfile.readlines()[0].strip())
+                pfile.close()
         print parentpaths
         return parentpaths
 
@@ -105,15 +114,19 @@ class PerformNEB(BaseIngredient):
         while imct <= self.keywords['program_keys']['images'] + 1:
             imposcar = Poscar(image_structures[imct])
             num_str = str(imct).zfill(2)
-            impath = os.path.join(dir_name, num_str)
-            impospath = os.path.join(dir_name, "POSCAR_" + num_str)
+            impath = os.path.join(self.keywords['name'], num_str)
+            impospath = os.path.join(self.keywords['name'], "POSCAR_" + num_str)
             imposcar.write_file(impospath)
-            os.makedirs(impath)
+            try:
+                os.makedirs(impath)
+            except OSError:
+                print "Directory at", impath, "already exists."
+                return None
             imposcar.write_file(os.path.join(impath, "POSCAR"))
             if imct == 0:
-                shutil.copy(os.path.join(self.parentpaths[0],"OSZICAR"),impath)
-            elif imct == self.keywords['images'] + 1:
-                shutil.copy(os.path.join(self.parentpaths[1],"OSZICAR"),impath)
+                shutil.copy(os.path.join(parentpaths[0],"OSZICAR"),impath)
+            elif imct == self.keywords['program_keys']['images'] + 1:
+                shutil.copy(os.path.join(parentpaths[1],"OSZICAR"),impath)
             imct = imct + 1
         return
         
