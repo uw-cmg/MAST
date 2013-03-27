@@ -106,6 +106,6 @@ class MAST(MASTObj):
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
 #        print recipe_file
 
-        parser_obj = RecipeParser()
-        parser_obj.parse(recipe_file, self.input_options, 'test-recipe.txt')
+        parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
+        parser_obj.parse()
 
