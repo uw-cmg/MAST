@@ -22,7 +22,7 @@ MAST_KEYWORDS = ['program',
                  'system_name',
                 ]
 
-GEOMETRY_KEYWORDS = ['posfile', # str
+structure_KEYWORDS = ['posfile', # str
                      'atom_list', # str
                      'spacegroup', # int
                      'symmetry_only', # bool
@@ -61,7 +61,7 @@ class InputParser(MASTObj):
         self.delimeter = ' ' # how we're breaking up each line
         self.section_parsers = {\
                                     'mast'     : self.parse_mast_section,
-                                    'geometry' : self.parse_geometry_section,
+                                    'structure' : self.parse_structure_section,
                                     'unitcell' : self.parse_unitcell_section,
                                     'ingredients'  : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
@@ -115,8 +115,8 @@ class InputParser(MASTObj):
 
         print 'In parse_mast_section:', options.get_item(section_name, 'system_name')
 
-    def parse_geometry_section(self, section_name, section_content, options):
-        """Parse the geometry section and populate the options
+    def parse_structure_section(self, section_name, section_content, options):
+        """Parse the structure section and populate the options
 
             Format is:
                 atom_symbol x y z
