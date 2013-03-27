@@ -19,7 +19,6 @@ ALLOWED_KEYS = {\
 class RecipeParser(MASTObj):
     """Parses the input file and produces the personalized recipe file
     """
-
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options   = self.keywords['inputOptions']
@@ -28,11 +27,10 @@ class RecipeParser(MASTObj):
         ''' Parses the template recipe file and creates
             the personalized recipe file
         '''
-        print 'template_file =', template_file
-        f_ptr           = open(template_file, "r")
-        o_ptr           = open(personal_recipe_file, "w")
-        system_name = input_options.get_item('mast', 'system_name')
-        n_param = input_options.get_item('defects', 'num_defects')
+        f_ptr           = open(self.keywords['templateFile'], "r")
+        o_ptr           = open(self.keywords['personalRecipe'], "w")
+        system_name     = self.input_options.get_item("mast", "system_name", "sys_")
+        n_param         = self.input_options.get_item("defects", "num_defects", 0)
 
         for line in f_ptr.readlines():
             line = line.strip()
