@@ -14,6 +14,8 @@ from MAST.utility import MASTError
 from MAST.parsers import InputParser
 from MAST.parsers.recipeparsers import RecipeParser
 
+from MAST.ingredients import *
+
 
 #testing
 
@@ -39,12 +41,14 @@ class MAST(MASTObj):
         self.structure = None
     
     def start(self):
-        """Starts the calculation group from interface.
-
-        This function parses the various input files and fetches the options.
+        """Calls all the neccessary functions required to run MAST.
+            Calls the following functions:
+                _parse_input(): parses the various input files and fetches the options.
+                _parse_recipe(): parses the recipe template file
         """
         self._parse_input()
         self._parse_recipe()
+        self._initialize_ingredients()
 
     def _parse_input(self):
         """Parses the input file"""
@@ -56,19 +60,19 @@ class MAST(MASTObj):
         print self.input_options.get_item('defects', 'num_defects')
 
 # Begin DEBUG section
-        from MAST.ingredients.inducedefect import InduceDefect as ID
-        for i in range(self.input_options.get_item('defects', 'num_defects')):
-            key = 'defect' + str(i)
-            print self.input_options.get_item('defects', 'defects')[key]
-
-            defect = self.input_options.get_item('defects', 'defects')[key]
-            print defect['coordinates'][None, :]
-            induced_defect = ID(atom=defect['symbol'],
-                                defecttype=defect['type'],
-                                position=tuple(defect['coordinates']),
-                                coordtype='fractional',
-                                structure=self.structure)
-            print induced_defect.induce_defect(), '\n'
+#        from MAST.ingredients.inducedefect import InduceDefect as ID
+#        for i in range(self.input_options.get_item('defects', 'num_defects')):
+#            key = 'defect' + str(i)
+#            print self.input_options.get_item('defects', 'defects')[key]
+#
+#            defect = self.input_options.get_item('defects', 'defects')[key]
+#            print defect['coordinates'][None, :]
+#            induced_defect = ID(atom=defect['symbol'],
+#                                defecttype=defect['type'],
+#                                position=tuple(defect['coordinates']),
+#                                coordtype='fractional',
+#                                structure=self.structure)
+#            print induced_defect.induce_defect(), '\n'
 # End DEBUG section
 
     def _build_structure(self):
@@ -104,8 +108,12 @@ class MAST(MASTObj):
         """Parses the generic recipe file"""
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-#        print recipe_file
+        print 'recipe_file =', recipe_file
 
         parser_obj = RecipeParser()
         parser_obj.parse(recipe_file, self.input_options, 'test-recipe.txt')
+
+    def _initialize_ingredients(self):
+        print 'Initializing...'
+        from MAST.ingredients import ingredient_dict as ID
 
