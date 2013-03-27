@@ -7,6 +7,8 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
+import os
+
 import numpy as np
 import pymatgen as pmg
 
@@ -141,7 +143,7 @@ class InputParser(MASTObj):
                 atom_list.append(line[0])
                 coordinates.append(line[1:])
 
-        print coordinates
+#        print coordinates
         coordinates = np.array(coordinates, dtype='float')
 
         options.set_item(section_name, 'coord_type', coord_type)
@@ -216,7 +218,9 @@ class InputParser(MASTObj):
         for line in section_content:
             line = line.split(self.delimeter)
             if (line[0] == 'recipe'):
-                options.set_item(section_name, 'recipe_file', line[1])
+                recipe_path = os.environ['MAST_RECIPE_PATH']
+                recipe_file = '%s/%s' % (recipe_path, line[1])
+                options.set_item(section_name, 'recipe_file', recipe_file)
 
     def parse_ingredients_section(self, section_name, section_content, options):
         """Parse the ingredients section and populate the options"""
