@@ -18,7 +18,7 @@ ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
 
-MAST_KEYWORDS = ['program',
+MAST_KEYWORDS = ['ingredients',
                  'system_name',
                 ]
 
@@ -63,7 +63,7 @@ class InputParser(MASTObj):
                                     'mast'     : self.parse_mast_section,
                                     'geometry' : self.parse_geometry_section,
                                     'unitcell' : self.parse_unitcell_section,
-                                    'program'  : self.parse_program_section,
+                                    'ingredients'  : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
                                     'recipe'   : self.parse_recipe_section,
 #                                    'neb'      : self.parse_neb_section,
@@ -215,8 +215,8 @@ class InputParser(MASTObj):
             if (line[0] == 'recipe'):
                 options.set_item(section_name, 'recipe_file', line[1])
 
-    def parse_program_section(self, section_name, section_content, options):
-        """Parse the program section and populate the options"""
+    def parse_ingredients_section(self, section_name, section_content, options):
+        """Parse the ingredients section and populate the options"""
 
         section_content = section_content.split('\n')
 

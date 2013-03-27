@@ -1,3 +1,5 @@
+#OFFICIAL MAST TEST FILE - 2013-03-27
+
 $unitcell
 2.0 0.0 0.0
 0.0 2.0 0.0
@@ -27,7 +29,11 @@ vacancy 0.0 0.0 0.0 Ga
 interstitial 0.25 0.25 0.25 As
 $end
 
-$program
-SinplePoint(kpoints=3x3x3, encut=400, nelm=2000)
+$ingredients
+SinglePoint(kpoints=3x3x3, encut=400, nelm=2000)
 Optimize(encut=300)
+$end
+
+$recipe
+recipe_defects.txt
 $end
