@@ -82,13 +82,13 @@ class MAST(MASTObj):
             For POSCAR and CIF files, code taken from the pymatget tutorial.
             Need to add flexibility for other file formats
         """
-        posfile = self.input_options.get_item('geometry', 'posfile')
+        posfile = self.input_options.get_item('structure', 'posfile')
 
         if (posfile is None):
             self.structure = MAST2Structure(lattice=self.input_options.get_item('unitcell', 'lattice'),
-                                            coordinates=self.input_options.get_item('geometry', 'coordinates'),
-                                            atom_list=self.input_options.get_item('geometry', 'atom_list'),
-                                            coord_type=self.input_options.get_item('geometry', 'coord_type'))
+                                            coordinates=self.input_options.get_item('structure', 'coordinates'),
+                                            atom_list=self.input_options.get_item('structure', 'atom_list'),
+                                            coord_type=self.input_options.get_item('structure', 'coord_type'))
         elif ('poscar' in posfile.lower()):
             from pymatgen.io.vaspio import Poscar
             self.structure = Poscar.from_file(posfile).struct
