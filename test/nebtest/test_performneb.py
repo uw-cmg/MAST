@@ -2,9 +2,9 @@ import pymatgen
 import os
 from MAST.ingredients.performneb import PerformNEB
 os.chdir("//home/tam/bin/git/MAST4pymatgen/test/nebtest")
-NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="no program", images=3)
-NEBing=PerformNEB(dir_name="my_test_neb", parent_init="ep1", parent_final="ep2", program="vasp", images=3)
-image_list=NEBing.generate_files()
+NEBing=PerformNEB(name="nebtest_neb10-11", program="no program", program_keys={'images':3})
+NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
+image_list=NEBing.write_files()
 
 print "Complete? :", NEBing.is_complete()
 import shutil

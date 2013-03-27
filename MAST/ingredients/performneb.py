@@ -55,13 +55,15 @@ class PerformNEB(BaseIngredient):
         tempname = self.keywords['name'].lower()
         numstr = tempname[tempname.find("neb")+3:]
         numpaths = numstr.split('-')
-        myfiles=os.listdir(name)
+        myfiles=os.listdir(self.keywords['name'])
         parentpaths=[]
         pfile=""
         for onenum in numpaths:
-            try:
+            pfpath="parent_path_" + onenum
+            if os.path.isdir(pfpath):
                 pfile = open("parent_path_" + onenum, 'rb')
                 parentpaths.append(pfile.readlines().strip())
+        print parentpaths
         return parentpaths
 
     def do_interpolation(self, parentpaths):
