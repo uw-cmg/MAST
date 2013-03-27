@@ -92,7 +92,7 @@ class InputParser(MASTObj):
             index = len(section_name) + 1
             self.section_parsers[section_name](section_name, section_content[index:].strip(), options)
 
-        print options
+#        print options
         return options
 
     def parse_mast_section(self, section_name, section_content, options):

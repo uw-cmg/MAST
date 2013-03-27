@@ -8,12 +8,13 @@ class RecipeParser:
         ''' Parses the template recipe file and creates
             the personalized recipe file
         '''
+        print 'template_file =', template_file
         f_ptr           = open(template_file, "r")
         o_ptr           = open(personal_recipe_file, "w")
-        system_name     = input_options.get_item("mast","system_name") #TTM debug
-        n_param         = input_options.get_item("defects","num_defects") #TTM debug
-        #system_name     = input_options.get_item("mast", dict()).get("system_name", "sys_")
-        #n_param         = len(input_options.get_item("defects", dict()).get("num_defects", 0))
+#        system_name     = input_options.get("mast", dict()).get("system_name", "sys_")
+#        n_param         = len(input_options.get("defects", dict()).get("num_defects", 0))
+        system_name = input_options.get_item('mast', 'system_name')
+        n_param = input_options.get_item('defects', 'num_defects')
 
         for line in f_ptr.readlines():
             line = line.strip()
