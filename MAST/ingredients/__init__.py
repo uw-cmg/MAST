@@ -8,3 +8,8 @@ from MAST.ingredients.performneb import PerformNEB
 
 __all__ = ['InduceDefect', 'Optimize', 'PerformNEB']
 
+ingredient_dict = {'optimize': Optimize,
+                   'inducedefect': InduceDefect,
+                   'performneb': PerformNEB,
+                  }
+

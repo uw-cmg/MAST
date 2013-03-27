@@ -10,9 +10,9 @@
 import numpy as np
 import pymatgen as pmg
 
-from MAST.MAST.utility import InputOptions
-from MAST.MAST.utility import MASTObj
-from MAST.MAST.utility import MASTError
+from MAST.utility import InputOptions
+from MAST.utility import MASTObj
+from MAST.utility import MASTError
 
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
