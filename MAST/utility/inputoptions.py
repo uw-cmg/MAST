@@ -36,10 +36,10 @@ class InputOptions:
         else:
 	    section_dict.setdefault(key, value)
 
-    def get_item(self, section, key):
+    def get_item(self, section, key, default_value=None):
         """Returns the value of the key under this section
         """
-        return self.options.get(section, dict()).get(key)
+        return self.options.get(section, dict()).get(key, None)
 
     def reset(self):
         """Option to reset the dict values

@@ -138,11 +138,23 @@ class Poscar(MSONable):
 
     def __setattr__(self, name, value):
         if name in ("selective_dynamics", "velocities"):
-            if value:
-                dim = np.array(value).shape
-                if dim[1] != 3 or dim[0] != len(self.structure):
-                    raise ValueError(name + " array must be same length as" +
-                                     " the structure.")
+            #TTM 2013-03-19 "if value:" statement returns ValueError: The truth 
+            #value of an array with more than one element is ambiguous.
+            #when attempt to set selective_dynamics with a matrix.
+            #enclosing within a "try" statement:
+            try:
+                if value:
+                    dim = np.array(value).shape
+                    if dim[1] != 3 or dim[0] != len(self.structure):
+                        raise ValueError(name + " array must be same length as" +
+                                         " the structure.")
+            except (ValueError):
+                if not (value == None):
+                    dim = np.array(value).shape
+                    if dim[1] != 3 or dim[0] != len(self.structure):
+                        raise ValueError(name + " array must be same length as" +
+                                         " the structure.")
+
         elif name == "structure":
             #If we set a new structure, we should discard the velocities and
             #predictor_corrector and selective dynamics.
@@ -357,7 +369,7 @@ class Poscar(MSONable):
         if self.true_names and not vasp4_compatible:
             lines.append(" ".join(self.site_symbols))
         lines.append(" ".join([str(x) for x in self.natoms]))
-        if self.selective_dynamics:
+        if not (self.selective_dynamics == None): #TTM 2013-03-19 "not none"
             lines.append("Selective dynamics")
         lines.append("direct" if direct else "cartesian")
 
@@ -366,7 +378,7 @@ class Poscar(MSONable):
         for (i, site) in enumerate(self.structure):
             coords = site.frac_coords if direct else site.coords
             line = " ".join([format_str.format(c) for c in coords])
-            if self.selective_dynamics:
+            if not (self.selective_dynamics == None): #TTM 2013-03-19 "not none"
                 sd = ["T" if j else "F" for j in self.selective_dynamics[i]]
                 line += " %s %s %s" % (sd[0], sd[1], sd[2])
             line += " " + site.species_string

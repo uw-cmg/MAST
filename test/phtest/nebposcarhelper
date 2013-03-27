@@ -1,0 +1,17 @@
+#!/bin/bash
+ndirlist=`find  ./ -name '*static01'`
+for i in $ndirlist
+do
+    echo $i
+    titel=`grep "TITEL" $i"/POTCAR"`
+    myt=""
+    titels=`echo "$titel"`
+    els=`echo -E "$titels"|awk '{print $4}'`
+    echo $els
+    prefix1=`dirname $i`
+    prefix=`basename $prefix1`
+    echo $prefix
+    newname=$prefix"_CONTCAR"
+    sed "6s/.*/`echo $els`/" < $i"/CONTCAR" > phposcars/$newname
+done
+
