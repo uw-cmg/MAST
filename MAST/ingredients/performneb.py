@@ -7,8 +7,8 @@ from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.utility.mastobj import MASTObj
-from MAST.ingredients.libingredients import BaseIngredient
+from MAST.utility import MASTObj
+from MAST.ingredients import BaseIngredient
 
 import os
 import shutil
@@ -16,7 +16,7 @@ import pdb
 
 
 
-class PerformNEB():
+class PerformNEB(BaseIngredient):
     def __init__(self, **kwargs):
         #pdb.set_trace()
         allowed_keys = {

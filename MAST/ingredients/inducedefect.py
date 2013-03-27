@@ -5,7 +5,10 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 
-from MAST.utility.mastobj import MASTObj
+from MAST.utility import MASTObj
+
+from MAST.ingredients import BaseIngredient
+
 
 allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
                 'position': (tuple, tuple(), 'Position of the defect'),
@@ -14,7 +17,7 @@ allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
                 'structure': (Structure, None, 'Pymatgen Structure object'),
                }
 
-class InduceDefect():
+class InduceDefect(BaseIngredient):
     def __init__(self, **kwargs):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 

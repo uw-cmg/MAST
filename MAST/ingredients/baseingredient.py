@@ -1,3 +1,5 @@
+from MAST.utility import MASTObj
+
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
