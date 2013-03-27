@@ -18,7 +18,7 @@ ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
 
-MAST_KEYWORDS = ['ingredients',
+MAST_KEYWORDS = ['program',
                  'system_name',
                 ]
 
@@ -71,6 +71,7 @@ class InputParser(MASTObj):
 
     def parse(self):
         """Parses information from the input file"""
+        print 'Calling current InputParser'
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
         contents  = infile.read()
@@ -111,6 +112,8 @@ class InputParser(MASTObj):
             else:
                 section_options[line[0]] = line[1]
                 options.set_item(section_name, line[0], line[1])
+
+        print 'In parse_mast_section:', options.get_item(section_name, 'system_name')
 
     def parse_geometry_section(self, section_name, section_content, options):
         """Parse the geometry section and populate the options
