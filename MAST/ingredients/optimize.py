@@ -6,15 +6,15 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.utility.mastobj import MASTObj
-from MAST.ingredients.libingredients import BaseIngredient
+from MAST.utility import MASTObj
+from MAST.ingredients import BaseIngredient
 
 import os
 import shutil
 #TA
 
 
-class Optimize():
+class Optimize(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
                 'dir_name' : (str, str(), 'Name of optimization directory'),

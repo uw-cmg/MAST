@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 from MAST.utility.mastobj import MASTObj
 
 class BaseIngredient(MASTObj): 
+=======
+from MAST.utility import MASTObj
+
+class BaseIngredient(MASTObj):
+>>>>>>> 77ab11270449857f04e0f9a4a0fed5de18ae4470
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 

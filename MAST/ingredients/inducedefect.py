@@ -5,8 +5,10 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 
-from MAST.MAST.ingredients.libingredients import BaseIngredient
-from MAST.MAST.utility.mastobj import MASTObj
+from MAST.utility import MASTObj
+
+from MAST.ingredients import BaseIngredient
+
 
 allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
                 'position': (tuple, tuple(), 'Position of the defect'),

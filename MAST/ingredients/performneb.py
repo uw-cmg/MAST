@@ -5,9 +5,9 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
-from MAST.utility.mastobj import MASTObj
-from MAST.ingredients.libingredients import BaseIngredient
 from MAST.ingredients.pmgextend import vasp_extensions
+from MAST.utility import MASTObj
+from MAST.ingredients import BaseIngredient
 
 import os
 import shutil
