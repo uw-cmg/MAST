@@ -8,9 +8,13 @@ class PickleManager:
         else:
             self.fn = filename
 
-    def save_variables(self, varlist,gdict):
+    def save_variables(self, varlist, gdict, filename=None):
         '''gdict = globals()'''
-        fh = open(self.fn,'wb')
+        if filename is None:
+            fh = open(self.fn,'wb')
+        else:
+            fh = open(filename=None,'wb')
+
         pickle.dump(varlist,fh)
         for key in varlist:
             pickle.dump(gdict[key],fh, self._protocol)
