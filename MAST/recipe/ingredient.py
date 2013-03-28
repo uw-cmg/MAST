@@ -1,3 +1,6 @@
+from MAST.utility import MASTObj
+from MAST.utility import MASTError
+
 class Ingredient:
     def __init__(self, name, ingredient_type, input_options):
         self.name            = name
