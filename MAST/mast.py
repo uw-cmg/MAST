@@ -57,9 +57,8 @@ class MAST(MASTObj):
 
         self._build_structure()
 
-        print self.input_options.get_item('defects', 'num_defects')
-
 # Begin DEBUG section
+#        print self.input_options.get_item('defects', 'num_defects')
 #        from MAST.ingredients.inducedefect import InduceDefect as ID
 #        for i in range(self.input_options.get_item('defects', 'num_defects')):
 #            key = 'defect' + str(i)
@@ -73,6 +72,7 @@ class MAST(MASTObj):
 #                                coordtype='fractional',
 #                                structure=self.structure)
 #            print induced_defect.induce_defect(), '\n'
+#        print self.input_options
 # End DEBUG section
 
     def _build_structure(self):
@@ -108,7 +108,7 @@ class MAST(MASTObj):
         """Parses the generic recipe file"""
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-        print 'recipe_file =', recipe_file
+#        print 'recipe_file =', recipe_file
 
         parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
         parser_obj.parse()
