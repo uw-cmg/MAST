@@ -223,7 +223,10 @@ class InputParser(MASTObj):
                 options.set_item(section_name, 'recipe_file', recipe_file)
 
     def parse_ingredients_section_old(self, section_name, section_content, options):
-        """Parse the ingredients section and populate the options"""
+        """Parse the ingredients section and populate the options
+
+            THIS IS NOW DEPECATED, DO NOT USE.  WILL GET REMOVED LATER.
+        """
 
         section_content = section_content.split('\n')
 
@@ -240,7 +243,30 @@ class InputParser(MASTObj):
             options.set_item(section_name, line[0].lower(), temp_dict)
 
     def parse_ingredients_section(self, section_name, section_content, options):
-        """Parse the ingredients section and populate the options"""
+        """Parse the ingredients section and populate the options
+            Section takes the form of:
+                $ingredients
+                begin ingredients_global
+                kpoints 3x3x3
+                xc pbe
+                end
+
+                begin singlepoint
+                encut 400
+                end
+
+                begin optimize
+                encut 300
+                ibrion 2
+                end
+
+                $end
+
+            kpoints are parsed out as a 3 index list of integers, everything else is parsed out
+            as a string.
+
+            Anything in ingredients_global are then appended onto each individual ingredient.
+        """
 
         section_content = section_content.split('end')[:-1]
         global_dict = dict()
