@@ -26,15 +26,11 @@ class TestPerformNEB(unittest.TestCase):
             shutil.rmtree('nebtest_neb10-11_image03_stat')
         except OSError:
             pass
-
+    
     def test_unsupported_program(self):
+        from MAST.ingredients.baseingredient import BaseIngredient
         NEBing=PerformNEB(name="nebtest_neb10-11", program="no program", program_keys={'images':3})
-        self.assertRaises(MASTError, NEBing.get_parent_structures())
-
-    def test_supported_program(self):
-        NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
-        image_list=NEBing.do_interpolation(NEBing.get_parent_structures())
-        self.assertNotEqual(image_list, None)
+        self.assertRaises(MASTError, NEBing.write_files)
 
     def test_get_parent_structures(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
