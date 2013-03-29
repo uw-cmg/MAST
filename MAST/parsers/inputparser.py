@@ -115,7 +115,7 @@ class InputParser(MASTObj):
                 section_options[line[0]] = line[1]
                 options.set_item(section_name, line[0], line[1])
 
-        print 'In parse_mast_section:', options.get_item(section_name, 'system_name')
+#        print 'In parse_mast_section:', options.get_item(section_name, 'system_name')
 
     def parse_structure_section(self, section_name, section_content, options):
         """Parse the structure section and populate the options
