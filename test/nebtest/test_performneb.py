@@ -52,9 +52,8 @@ class TestPerformNEB(unittest.TestCase):
     def test_is_partially_complete(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
         NEBing.write_files()
-        shutil.copy(os.getcwd() + "/copyoutcar1", "nebtest_neb10-11/01/OUTCAR")
-        time.sleep(1)
-        shutil.copy(os.getcwd() + "/copyoutcar2", "nebtest_neb10-11/02/OUTCAR")
+        shutil.copy(os.getcwd() + "/copyoutcar01", "nebtest_neb10-11/01/OUTCAR")
+        shutil.copy(os.getcwd() + "/copyoutcar02", "nebtest_neb10-11/02/OUTCAR")
         time.sleep(1)
         self.assertEqual(NEBing.is_complete(),False)
 
@@ -68,7 +67,6 @@ class TestPerformNEB(unittest.TestCase):
         shutil.copy(os.getcwd() + "/copyoutcar01", "nebtest_neb10-11/01/OUTCAR")
         shutil.copy(os.getcwd() + "/copyoutcar02", "nebtest_neb10-11/02/OUTCAR")
         shutil.copy(os.getcwd() + "/copyoutcar03", "nebtest_neb10-11/03/OUTCAR")
-        time.sleep(1)
         shutil.copy(os.getcwd() + "/copycontcar01", "nebtest_neb10-11/01/CONTCAR")
         shutil.copy(os.getcwd() + "/copycontcar02", "nebtest_neb10-11/02/CONTCAR")
         shutil.copy(os.getcwd() + "/copycontcar03", "nebtest_neb10-11/03/CONTCAR")
