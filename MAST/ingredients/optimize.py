@@ -1,14 +1,13 @@
 import numpy as np
 
 from pymatgen.core.structure import Structure
-#from pymatgen.core.structure_modifier import StructureEditor
-#from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Kpoints
 from pymatgen.io.vaspio import Potcar
 from pymatgen.io.vaspio import Incar
 
+from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
 from MAST.utility import MASTError
@@ -30,11 +29,11 @@ class Optimize(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
-        return BaseIngredient.is_complete() #instead call base ingredient complete check
+        return BaseIngredient.is_complete(self) #instead call base ingredient complete check
 
     def update_children(self):
-        pass 
-
+        for childname in self.keywords['child_dict'].iterkeys():
+            self.forward_parent_structure(self.keywords['name'], childname)       
     def write_files(self):
         if self.keywords['program'] == 'vasp':
             self.set_up_vasp_optimize()
@@ -55,7 +54,7 @@ class Optimize(BaseIngredient):
         myd['LWAVE']="False"
         myd['NSW']=191
         myd['MAGMOM']=5*len(rep_structure.sites)
-        myd['ENCUT']=MAST.ingredients.pmgextend.vasp_extend.get_max_enmax_from_potcar(rep_potcar)*1.5
+        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
 
     
@@ -70,11 +69,10 @@ class Optimize(BaseIngredient):
             opt_poscar.write_file(pospath)
         topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(name + "/KPOINTS")
-        toppotcar = Potcar(symbols=opt_poscar.site_symbols, functional='PAW-GGA', sym_potcar_map=None)
+        toppotcar = Potcar(symbols=opt_poscar.site_symbols, functional='PBE', sym_potcar_map=None)
         toppotcar.write_file(name + "/POTCAR")
-        topincar = Incar()
         incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
-        topincar.from_dict(incar_dict)
+        topincar = Incar(incar_dict)
         topincar.write_file(name + "/INCAR")
         return
 

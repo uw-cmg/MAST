@@ -34,3 +34,19 @@ def images_complete(dirname, numim):
     return True
 
 
+def is_complete(dirname):
+    """Check if all images in a VASP NEB calculation are complete.
+        dirname = directory housing /00.../0N+1 files; 
+                  only checks directories /01.../0N where N is # images
+        numim = number of images
+    """
+    try:
+        myoutcar = Outcar(os.path.join(dirname, "OUTCAR"))
+    except (IOError):
+        return False
+    if myoutcar.run_stats['User time (sec)'] > 0:
+        return True
+    else:
+        return False
+
+

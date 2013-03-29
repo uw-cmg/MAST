@@ -39,6 +39,12 @@ class BaseIngredient(MASTObj):
 
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.is_complete(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in is_complete)")
 
     def images_complete(self):
         '''Checks if all images in an NEB calculation are complete.'''
