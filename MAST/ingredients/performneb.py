@@ -1,9 +1,10 @@
-import numpy as np
 
-import pymatgen
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from pymatgen.io.vaspio import Kpoints
+from pymatgen.io.vaspio import Potcar
+from pymatgen.io.vaspio import Incar
 
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
@@ -153,12 +154,12 @@ class PerformNEB(BaseIngredient):
     def set_up_vasp_neb(self, image_structures):
         self.set_up_vasp_folders(image_structures)
         dir_name = self.keywords['name']
-        topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
+        topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(dir_name + "/KPOINTS")
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PBE', sym_potcar_map=None)
+        toppotcar = Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PBE', sym_potcar_map=None)
         toppotcar.write_file(dir_name + "/POTCAR")
         incar_dict = self.set_up_vasp_incar_dict(image_structures[0], toppotcar)
-        topincar = pymatgen.io.vaspio.Incar(incar_dict)
+        topincar = Incar(incar_dict)
         topincar.write_file(dir_name + "/INCAR")
         return
 

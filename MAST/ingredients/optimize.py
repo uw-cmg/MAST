@@ -5,6 +5,9 @@ from pymatgen.core.structure import Structure
 #from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from pymatgen.io.vaspio import Kpoints
+from pymatgen.io.vaspio import Potcar
+from pymatgen.io.vaspio import Incar
 
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
@@ -18,11 +21,12 @@ import shutil
 class Optimize(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
-                'name' : (str, str(), 'Name of optimization directory'),
-                'structure': (Structure, None, 'Pymatgen Structure object'),
-                'program': (str, str(), 'DFT program, e.g. "vasp"'),
-                'child_dict': (dict, dict(), 'Dictionary of children')
-                }
+            'name' : (str, str(), 'Name of optimization directory'),
+            'program': (str, str(), 'DFT program, e.g. "vasp"'),
+            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
+            'child_dict': (dict, dict(), 'Dictionary of children'),
+            'structure': (Structure, None, 'Pymatgen Structure object')
+            }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
@@ -57,17 +61,18 @@ class Optimize(BaseIngredient):
     
     def set_up_vasp_optimize(self):
         name = self.keywords['name']
-        if not (self.keywords['structure'] == None):
-            pospath = os.path.join(name, "POSCAR")
+        pospath = os.path.join(name, "POSCAR")
+        if self.keywords['structure'] == None:
+            opt_poscar = Poscar.from_file(pospath) 
+            #parent should have given a structure
+        else: #this is an originating run; mast should give it a structure
             opt_poscar = Poscar(self.keywords['structure'])
             opt_poscar.write_file(pospath)
-        else:
-            opt_poscar = Poscar.from_file(name, "POSCAR")
-        topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
+        topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(name + "/KPOINTS")
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=opt_poscar.site_symbols, functional='PAW-GGA', sym_potcar_map=None)
+        toppotcar = Potcar(symbols=opt_poscar.site_symbols, functional='PAW-GGA', sym_potcar_map=None)
         toppotcar.write_file(name + "/POTCAR")
-        topincar = pymatgen.io.vaspio.Incar()
+        topincar = Incar()
         incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
         topincar.from_dict(incar_dict)
         topincar.write_file(name + "/INCAR")
