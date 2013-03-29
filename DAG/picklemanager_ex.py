@@ -11,7 +11,7 @@ class dummy:
         self.id = id
 C =  dummy(123)
 
-pm.save_variables(['A','B','C'],globals())
+pm.save_variables(varlist=['A','B','C'], gdict=globals())
 
 del A, B, C
 # Before loading variables, the definition of class should be known.
