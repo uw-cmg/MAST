@@ -32,7 +32,7 @@ class PerformNEB(BaseIngredient):
     def update_children(self):
         myct=1
         impath=""
-        for childname in child_dict:
+        for childname in sorted(self.keywords['child_dict'].iterkeys()):
             impath = os.path.join(self.keywords['name'], str(myct).zfill(2))
             self.forward_parent_structure(impath, childname)       
             myct = myct + 1
