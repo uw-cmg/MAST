@@ -73,7 +73,7 @@ class InputParser(MASTObj):
 
     def parse(self):
         """Parses information from the input file"""
-        print 'Calling current InputParser'
+#        print 'Calling current InputParser'
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
         contents  = infile.read()
@@ -222,7 +222,7 @@ class InputParser(MASTObj):
                 recipe_file = '%s/%s' % (recipe_path, line[1])
                 options.set_item(section_name, 'recipe_file', recipe_file)
 
-    def parse_ingredients_section(self, section_name, section_content, options):
+    def parse_ingredients_section_old(self, section_name, section_content, options):
         """Parse the ingredients section and populate the options"""
 
         section_content = section_content.split('\n')
@@ -238,3 +238,38 @@ class InputParser(MASTObj):
                 temp_dict[opt[0]] = opt[1]
 
             options.set_item(section_name, line[0].lower(), temp_dict)
+
+    def parse_ingredients_section(self, section_name, section_content, options):
+        """Parse the ingredients section and populate the options"""
+
+        section_content = section_content.split('end')[:-1]
+        global_dict = dict()
+        ingredients_dict = dict()
+
+        for line in section_content:
+            line = line.strip().split('\n')
+            ingredient_name = line[0].split()[1]
+            ingredient_options = line[1:]
+#            print 'Ingredient name =', ingredient_name
+#            print 'Options =', ingredient_options
+
+            ingredient_dict = dict()
+            for ingredient_option in ingredient_options:
+                opt = ingredient_option.split()
+                if opt[0] == 'kpoints':
+                    kpts = map(int, opt[1].split('x'))
+                    ingredient_dict[opt[0]] = kpts
+                else:
+                    ingredient_dict[opt[0]] = opt[1]
+
+            if (ingredient_name == 'ingredients_global'):
+                global_dict = ingredient_dict
+            else:
+                ingredients_dict[ingredient_name] = ingredient_dict
+
+#        print global_dict
+#        print ingredients_dict
+        for key, value in ingredients_dict.items():
+            value.update(global_dict)
+            options.set_item(section_name, key, value)
+
