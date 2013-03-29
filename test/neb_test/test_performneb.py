@@ -11,7 +11,8 @@ from MAST.utility import MASTError
 
 class TestPerformNEB(unittest.TestCase):
     def setUp(self):
-        os.chdir("//home/tam/bin/git/MAST4pymatgen/test/nebtest")
+        scripts=os.getenv('SCRIPTPATH')
+        os.chdir(os.path.join(scripts,'test','neb_test'))
         os.mkdir('nebtest_neb10-11')
         shutil.copy('nebtest_defect10_stat/CONTCAR','nebtest_neb10-11/parent_structure_10')
         shutil.copy('nebtest_defect11_stat/CONTCAR','nebtest_neb10-11/parent_structure_11')
@@ -28,7 +29,6 @@ class TestPerformNEB(unittest.TestCase):
             pass
     
     def test_unsupported_program(self):
-        from MAST.ingredients.baseingredient import BaseIngredient
         NEBing=PerformNEB(name="nebtest_neb10-11", program="no program", program_keys={'images':3})
         self.assertRaises(MASTError, NEBing.write_files)
 

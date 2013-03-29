@@ -8,6 +8,7 @@ from pymatgen.io.vaspio import Outcar
 
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
+from MAST.utility import MASTError
 
 import os
 import shutil
@@ -27,16 +28,14 @@ class Optimize(BaseIngredient):
     def is_complete(self):
         return BaseIngredient.is_complete() #instead call base ingredient complete check
 
-    def generate_files(self):
-        if not self.keywords['parent_init'] == None: #TA could be empty for optimize
-            struct_init = self.get_structure_from_parent()
-        else: #TA if empty then use the keyword structure
-            struct_init = self.keywords['structure_init']
-        self.set_up_vasp_optimize(struct_init)
-        return
-
     def update_children(self):
         pass 
+
+    def write_files(self):
+        if self.keywords['program'] == 'vasp':
+            self.set_up_vasp_optimize()
+        else:
+            raise MASTError(self.__class__.__name__, "Program not supported.")
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
         myd=dict()
@@ -56,22 +55,21 @@ class Optimize(BaseIngredient):
         return myd
 
     
-    def set_up_vasp_optimize(self, struct_init):
+    def set_up_vasp_optimize(self):
         name = self.keywords['name']
-        if os.path.exists(name):
-            print "Directory exists."
-            return
-        os.makedir(name)
+        if not (self.keywords['structure'] == None):
+            pospath = os.path.join(name, "POSCAR")
+            opt_poscar = Poscar(self.keywords['structure'])
+            opt_poscar.write_file(pospath)
+        else:
+            opt_poscar = Poscar.from_file(name, "POSCAR")
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(name + "/KPOINTS")
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(struct_init).site_symbols, functional='PAW-GGA', sym_potcar_map=None)
+        toppotcar = pymatgen.io.vaspio.Potcar(symbols=opt_poscar.site_symbols, functional='PAW-GGA', sym_potcar_map=None)
         toppotcar.write_file(name + "/POTCAR")
         topincar = pymatgen.io.vaspio.Incar()
-        incar_dict = self.set_up_vasp_incar_dict(struct_init, toppotcar)
+        incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
         topincar.from_dict(incar_dict)
         topincar.write_file(name + "/INCAR")
-        opt_poscar = Poscar(struct_init)
-        pospath = os.path.join(name, "POSCAR")
-        opt_poscar.write_file(pospath)
         return
 
