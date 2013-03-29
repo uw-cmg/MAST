@@ -7,12 +7,16 @@ import time
 from filecmp import dircmp
 
 from MAST.ingredients.performneb import PerformNEB
+from MAST.utility import MASTError
+
 class TestPerformNEB(unittest.TestCase):
     def setUp(self):
         os.chdir("//home/tam/bin/git/MAST4pymatgen/test/nebtest")
         os.mkdir('nebtest_neb10-11')
-        shutil.copy('parent_path_10','nebtest_neb10-11')
-        shutil.copy('parent_path_11','nebtest_neb10-11')
+        shutil.copy('nebtest_defect10_stat/CONTCAR','nebtest_neb10-11/parent_structure_10')
+        shutil.copy('nebtest_defect11_stat/CONTCAR','nebtest_neb10-11/parent_structure_11')
+        shutil.copy('nebtest_defect10_stat/OSZICAR','nebtest_neb10-11/parent_energy_10')
+        shutil.copy('nebtest_defect11_stat/OSZICAR','nebtest_neb10-11/parent_energy_11')
 
     def tearDown(self):
         shutil.rmtree('nebtest_neb10-11')
@@ -25,17 +29,21 @@ class TestPerformNEB(unittest.TestCase):
 
     def test_unsupported_program(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="no program", program_keys={'images':3})
-        image_list=NEBing.do_interpolation(NEBing.get_parent_paths())
-        self.assertEqual(image_list, None)
+        self.assertRaises(MASTError, NEBing.get_parent_structures())
 
     def test_supported_program(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
-        image_list=NEBing.do_interpolation(NEBing.get_parent_paths())
+        image_list=NEBing.do_interpolation(NEBing.get_parent_structures())
         self.assertNotEqual(image_list, None)
 
-    def test_get_parent_paths(self):
+    def test_get_parent_structures(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})
-        self.assertEqual(NEBing.get_parent_paths(),['nebtest_defect10_stat','nebtest_defect11_stat'])
+        structures=NEBing.get_parent_structures()
+        from pymatgen.io.vaspio import Poscar
+        manstr=[]
+        manstr.append(Poscar.from_file('nebtest_defect10_stat/CONTCAR').structure)
+        manstr.append(Poscar.from_file('nebtest_defect11_stat/CONTCAR').structure)
+        self.assertEqual(NEBing.get_parent_structures(),manstr)
 
     def test_interpolated_images(self):
         NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3})

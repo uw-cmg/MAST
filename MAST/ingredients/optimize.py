@@ -17,32 +17,15 @@ import shutil
 class Optimize(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
-                'dir_name' : (str, str(), 'Name of optimization directory'),
-                'ibrion': (str, str(), 'IBRION for optimization (default 2)'),
-                'structure_init': (Structure, None, 'Pymatgen Structure object'),
-                #'structure_final': (Structure, None, 'Pymatgen Structure object'),#TA never need for opt, right?
-                'parent_init': (str, str(), 'Directory of initial state'),
-                #'parent_final': (str, str(), 'Directory of final state'), #TA also don't need
-                'program': (str, str(), 'DFT program, e.g. "vasp"')
+                'name' : (str, str(), 'Name of optimization directory'),
+                'structure': (Structure, None, 'Pymatgen Structure object'),
+                'program': (str, str(), 'DFT program, e.g. "vasp"'),
+                'child_dict': (dict, dict(), 'Dictionary of children')
                 }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
         return BaseIngredient.is_complete() #instead call base ingredient complete check
-        #if self.keywords['program'] == "vasp":
-        #    try:
-        #        myoutcar = Outcar(os.path.join(dir_name, "OUTCAR"))
-        #    except (IOError):
-        #        return False
-                
-
-        #    if not myoutcar.run_stats['User time (sec)'] > 0:
-        #        return False
-        #    else:
-        #        return True
-        #else:
-        #    print "Program " + self.keywords['program'] + " not yet supported for optimize."
-        #    return None
     
     def get_structure_from_parent(self):
         return BaseIngredient.get_structure_from_parent(self.keywords['parent_init'])
@@ -71,9 +54,12 @@ class Optimize(BaseIngredient):
         self.set_up_vasp_optimize(struct_init)
         return
 
+    def update_children(self):
+        pass 
+
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
         myd=dict()
-        myd['IBRION']=self.keywords['ibrion']
+        myd['IBRION']=self.keywords['program_keys']['ibrion']
         myd['ISIF']=3
         myd['NSW']=191
         myd['NPAR']=4 #hardcoded - needs fixing
@@ -90,21 +76,21 @@ class Optimize(BaseIngredient):
 
     
     def set_up_vasp_optimize(self, struct_init):
-        dir_name = self.keywords['dir_name']
-        if os.path.exists(dir_name):
+        name = self.keywords['name']
+        if os.path.exists(name):
             print "Directory exists."
             return
-        os.makedir(dir_name)
+        os.makedir(name)
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
-        topkpoints.write_file(dirname + "/KPOINTS")
+        topkpoints.write_file(name + "/KPOINTS")
         toppotcar = pymatgen.io.vaspio.Potcar(symbols=Poscar(struct_init).site_symbols, functional='PAW-GGA', sym_potcar_map=None)
-        toppotcar.write_file(dirname + "/POTCAR")
+        toppotcar.write_file(name + "/POTCAR")
         topincar = pymatgen.io.vaspio.Incar()
         incar_dict = self.set_up_vasp_incar_dict(struct_init, toppotcar)
         topincar.from_dict(incar_dict)
-        topincar.write_file(dirname + "/INCAR")
+        topincar.write_file(name + "/INCAR")
         opt_poscar = Poscar(struct_init)
-        pospath = os.path.join(dir_name, "POSCAR")
+        pospath = os.path.join(name, "POSCAR")
         opt_poscar.write_file(pospath)
         return
 

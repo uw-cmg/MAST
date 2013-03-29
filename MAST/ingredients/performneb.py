@@ -8,6 +8,7 @@ from pymatgen.io.vaspio import Outcar
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
+from MAST.utility import MASTError
 
 import os
 import shutil
@@ -38,54 +39,57 @@ class PerformNEB(BaseIngredient):
             myct = myct + 1
 
     def write_files(self):
-        parentpaths = self.get_parent_paths()
-        image_structures = self.do_interpolation(parentpaths)
+        parentstructures = self.get_parent_structures()
+        image_structures = self.do_interpolation(parentstructures)
         if image_structures == None:
-            print "Bad number of images."
-            return None
+            raise MASTError(self.__class__.__name__,"Bad number of images")
         if self.keywords['program'] == 'vasp':
-            self.set_up_vasp_neb(image_structures, parentpaths)
+            self.set_up_vasp_neb(image_structures)
         else:
-            print "Program not supported. No setup accomplished."
-            return
+            raise MASTError(self.__class__.__name__,"Program not supported. No setup accomplished.")
         return
    
-
-    def get_parent_paths(self):
-        """Assumes the NEB is named <sys>_NEB<N>-<N> and that the
-            parents have written their pathnames into parent_path_<N>.
+    def get_my_numbers(self):
+        """For neb in the format <sys>_neb<N>-<N> return the two
+            key numbers identifying the defect sites.
         """
         tempname = self.keywords['name'].lower()
         numstr = tempname[tempname.find("neb")+3:]
         if numstr.find("neb") == -1:
             pass
         else:
-            numstr = numstr[numstr.find("neb")+3:] #allow 'neb' to be in sys name
-        numpaths = numstr.split('-')
-        myfiles=os.listdir(self.keywords['name'])
-        parentpaths=[]
-        pfile=""
-        print numpaths
-        for onenum in numpaths:
-            pfpath=os.path.join(self.keywords['name'], "parent_path_" + onenum)
-            if os.path.isfile(pfpath):
-                pfile = open(pfpath, 'rb')
-                parentpaths.append(pfile.readlines()[0].strip())
-                pfile.close()
-        print parentpaths
-        return parentpaths
+            numstr = numstr[numstr.find("neb")+3:] #allow 'neb' to be in <sys>
+        numparents = numstr.split('-')
+        if not(len(numparents) == 2):
+            raise MASTError(self.__class__.__name__,"Error: number of parents is not two for NEB in " + self.keywords['name'])
+            return None
+        return numparents
 
-    def do_interpolation(self, parentpaths):
-        struct_init = None
-        struct_fin = None
-        if not (len(parentpaths) == 2):
-            print "Bad number of parent paths."
-            return 
-        struct_init = BaseIngredient.get_structure_from_parent(self, parentpaths[0])
-        struct_fin = BaseIngredient.get_structure_from_parent(self, parentpaths[1])
-        if (struct_init == None) or (struct_fin == None):
-            print "Error getting initial or final parent structure."
-            return
+
+    def get_parent_structures(self):
+        """Assume that parents have written two files,
+            named 'parent_structure_<N>'. 
+            For VASP these are CONTCAR-type files.
+            Returns:
+                [struct_init, struct_fin]: pymatgen Structure objects
+        """
+        numparents = self.get_my_numbers()
+        pfpath1=os.path.join(self.keywords['name'], "parent_structure_" + numparents[0])
+        if not os.path.isfile(pfpath1):
+            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath1)
+        struct_init = BaseIngredient.get_structure_from_file(self, pfpath1)
+        pfpath2=os.path.join(self.keywords['name'], "parent_structure_" + numparents[1])
+        if not os.path.isfile(pfpath2):
+            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath2)
+        struct_fin = BaseIngredient.get_structure_from_file(self, pfpath2)
+        return [struct_init, struct_fin]
+
+    def do_interpolation(self, parentstructures):
+        """Do interpolation."""
+        if parentstructures == None:
+            raise MASTError(self.__class__.__name__,"Bad number of parent paths.")
+        struct_init = parentstructures[0]
+        struct_fin = parentstructures[1]
         structure_list = struct_init.interpolate(struct_fin, self.keywords['program_keys']['images'] + 1 )
         return structure_list
 
@@ -108,8 +112,26 @@ class PerformNEB(BaseIngredient):
         myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
         myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
+    
 
-    def set_up_vasp_folders(self, image_structures, parentpaths):
+    def place_parent_energy_files_vasp(self):
+        """Assume parents have written files parent_energy_<N>.
+            Copy these files into the 00 and 0N directories.
+        """
+        numparents = self.get_my_numbers()
+        if numparents == None:
+            return
+        pfpath1=os.path.join(self.keywords['name'], "parent_energy_" + numparents[0])
+        if not os.path.isfile(pfpath1):
+            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath1)
+        shutil.copy(pfpath1, os.path.join(self.keywords['name'],"00","OSZICAR"))
+        pfpath2=os.path.join(self.keywords['name'], "parent_energy_" + numparents[1])
+        if not os.path.isfile(pfpath2):
+            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath2)
+        shutil.copy(pfpath2, os.path.join(self.keywords['name'],str(self.keywords['program_keys']['images']+1).zfill(2),"OSZICAR"))
+        return
+
+    def set_up_vasp_folders(self, image_structures):
         imct=0
         while imct <= self.keywords['program_keys']['images'] + 1:
             imposcar = Poscar(image_structures[imct])
@@ -123,16 +145,13 @@ class PerformNEB(BaseIngredient):
                 print "Directory at", impath, "already exists."
                 return None
             imposcar.write_file(os.path.join(impath, "POSCAR"))
-            if imct == 0:
-                shutil.copy(os.path.join(parentpaths[0],"OSZICAR"),impath)
-            elif imct == self.keywords['program_keys']['images'] + 1:
-                shutil.copy(os.path.join(parentpaths[1],"OSZICAR"),impath)
             imct = imct + 1
+        self.place_parent_energy_files_vasp()
         return
         
 
-    def set_up_vasp_neb(self, image_structures, parentpaths):
-        self.set_up_vasp_folders(image_structures, parentpaths)
+    def set_up_vasp_neb(self, image_structures):
+        self.set_up_vasp_folders(image_structures)
         dir_name = self.keywords['name']
         topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
         topkpoints.write_file(dir_name + "/KPOINTS")
