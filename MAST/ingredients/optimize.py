@@ -26,25 +26,6 @@ class Optimize(BaseIngredient):
 
     def is_complete(self):
         return BaseIngredient.is_complete() #instead call base ingredient complete check
-    
-    def get_structure_from_parent(self):
-        return BaseIngredient.get_structure_from_parent(self.keywords['parent_init'])
-        #if self.keywords['program'] == "vasp":
-        #    structpath = os.path.join(parentpath, "CONTCAR")
-        #    parent_structure = Poscar.from_file(structpath, False).structure
-        #    return parent_structure
-        #else:
-        #    print "Could not get structure."
-        #    return None
-
-    def get_energy_file_from_parent(self, parentpath, program=""): #TA I think program param should default to using keywrd
-        if program == "":
-            program = self.keywords['program']
-        if program == "vasp":
-            return os.path.join(parentpath, "OSZICAR")
-        else:
-            print "Could not get energy file."
-            return None
 
     def generate_files(self):
         if not self.keywords['parent_init'] == None: #TA could be empty for optimize
