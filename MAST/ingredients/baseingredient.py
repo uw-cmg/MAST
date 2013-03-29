@@ -1,4 +1,5 @@
 from MAST.utility import MASTObj
+from MAST.utility import MASTError
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
@@ -14,29 +15,36 @@ class BaseIngredient(MASTObj):
             return
         os.makedirs(self.keywords['name'])
         return
-    
-    def get_structure_from_parent(self, parentpath):
+   
+    def get_structure_from_file(self, filepath):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_structure_from_parent(parentpath)
+            return vasp_checker.get_structure_from_file(filepath)
         else:
-            print "Program not recognized (in get_structure_from_parent)"
-            return None
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_structure_from_file)")
 
-    def forward_parent_structure(self, parentpath, childpath):
+    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_structure(parentpath, childpath)
+            vasp_checker.forward_parent_structure(parentpath, childpath, newname)
             return None
         else:
-            print "Program not recognized (in forward_parent_structure)"
-            return None
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in forward_parent_structure)")
+
 
     def write_files(self):
         '''writes the files needed as input for the jobs'''
 
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.is_complete(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in is_complete)")
 
     def images_complete(self):
         '''Checks if all images in an NEB calculation are complete.'''
@@ -44,5 +52,5 @@ class BaseIngredient(MASTObj):
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.images_complete(self.keywords['name'],self.keywords['program_keys']['images'])
         else:
-            print "Program not recognized (in images_complete)"
-            return None
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in images_complete)")
