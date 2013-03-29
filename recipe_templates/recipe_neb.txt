@@ -11,12 +11,12 @@ Ingredient <sys>_neb<N-N>_opt1 PerformLowMeshNEB
 Ingredient <sys>_neb<N-N>_opt2 PerformNEB
 Ingredient <sys>_neb<N-N>_image<N>_stat Static
 
-Parent <sys>_perfect_opt1 Child <sys>_perfect_opt2 Pass structure
-Parent <sys>_perfect_opt2 Child <sys>_perfect_stat Pass structure
-Parent <sys>_perfect_opt2 Child <sys>_induce_defect<N> Pass structure
-Parent <sys>_induce_defect<N> Child <sys>_defect<N>_opt1 Pass structure
-Parent <sys>_defect<N>_opt1 Child <sys>_defect<N>_opt2 Pass structure
-Parent <sys>_defect<N>_opt2 Child <sys>_defect<N>_stat Pass structure
-Parent <sys>_defect<N>_stat Child <sys>_neb<N-N>_opt1 Pass structure
-Parent <sys>_neb<N-N>_opt1 Child <sys>_neb<N-N>_opt2 Pass structure
-Parent <sys>_neb<N-N>_opt2 Child <sys>_neb<N-N>_image<N>_stat Pass structure
+Parent <sys>_perfect_opt1 Child <sys>_perfect_opt2::structure
+Parent <sys>_perfect_opt2 Child <sys>_perfect_stat::structure
+Parent <sys>_perfect_opt2 Child <sys>_induce_defect<N>::structure
+Parent <sys>_induce_defect<N> Child <sys>_defect<N>_opt1::structure
+Parent <sys>_defect<N>_opt1 Child <sys>_defect<N>_opt2::structure
+Parent <sys>_defect<N>_opt2 Child <sys>_defect<N>_stat::structure
+Parent <sys>_defect<N>_stat Child <sys>_neb<N-N>_opt1::structure
+Parent <sys>_neb<N-N>_opt1 Child <sys>_neb<N-N>_opt2::structure
+Parent <sys>_neb<N-N>_opt2 Child <sys>_neb<N-N>_image<N>_stat::structure
