@@ -213,6 +213,7 @@ class InputParser(MASTObj):
         options.set_item(section_name, 'defects', defect_types)
 
     def parse_recipe_section(self, section_name, section_content, options):
+        """Parse the recipe section and populate the options"""
         section_content = section_content.split('\n')
 
         for line in section_content:
