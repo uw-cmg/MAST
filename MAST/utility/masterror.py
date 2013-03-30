@@ -9,23 +9,11 @@ import sys
         MASTerror(self.__class__.__name__, error)
 """
 
-#def MASTError(classname, errormsg):
-#    try:
-#        raise RuntimeError('%s' % errormsg)
-#        return 0
-#    except Exception, err:
-#        message = '\n\nError detected in MAST class %s!\n' % classname
-#        message += 'Please fix the error and rerun mast.\n'
-#        message += 'Error message:\n'
-#        message += '    %s\n' % errormsg
-#        message += '\n\n'
-#
-#        sys.stderr.write(message)
-#        return 1
-
-class MASTError(Exception):
-    """Base class for exceptions in MAST."""
-    def __init__(self, classname, errormsg):
+def MASTError(classname, errormsg):
+    try:
+        raise RuntimeError('%s' % errormsg)
+        return 0
+    except Exception, err:
         message = '\n\nError detected in MAST class %s!\n' % classname
         message += 'Please fix the error and rerun mast.\n'
         message += 'Error message:\n'
@@ -33,11 +21,5 @@ class MASTError(Exception):
         message += '\n\n'
 
         sys.stderr.write(message)
-
-class FileNotFoundError(MASTError):
-    """Exception raised for file not found in MAST."""
-
-    def __init__(self, classname, filepath):
-        errormsg = "File not found at " + filepath
-        MASTError.__init__(self, classname, errormsg)
+        return 1
 
