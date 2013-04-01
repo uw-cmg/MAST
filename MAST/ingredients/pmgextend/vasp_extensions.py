@@ -69,9 +69,9 @@ def combine_dynmats(myposcar, mydir):
             littlemat = dynlines[mycount+1:mycount+datoms]
             act = 0
             while act < datoms:
-                dactx=int(littlemat[act].split()[0])
-                dacty=int(littlemat[act].split()[1])
-                dactz=int(littlemat[act].split()[2])
+                dactx=float(littlemat[act].split()[0])
+                dacty=float(littlemat[act].split()[1])
+                dactz=float(littlemat[act].split()[2])
                 colidx = (topatom-1)*3 + (whichdir-1)
                 #so 2  3  on first line means atom 2's z direction
                 #then with atom 1x, 1y, 1z; 2x, 2y, 2z, etc.
