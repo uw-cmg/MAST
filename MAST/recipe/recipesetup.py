@@ -1,18 +1,20 @@
-from ingredient.inducedefect import InduceDefect
-from ingredient.optimize import Optimize
-from ingredient.singlepoint import SinglePoint
-from ingredient.optimizedefect import optimizeDefect
-from pymatgen.core.structure import Structure
+from MAST.ingredients.inducedefect import InduceDefect
+from MAST.ingredients.optimize import Optimize
+#from MAST.ingredients.singlepoint import SinglePoint
+#from MAST.ingredients.optimizedefect import optimizeDefect
 
+from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+
+from pymatgen.core.structure import Structure
 
 
 INGREDIENTS_LIBRARY = {\
                          'inducedefect'       : InduceDefect,\
                          'optimize'           : Optimize,\
-                         'singlepoint'        : SinglePoint,\
-                         'optimizedefect'     : OptimizeDefect,\
+#                         'singlepoint'        : SinglePoint,\
+#                         'optimizedefect'     : OptimizeDefect,\
                       }
 
 ALLOWED_KEYS = {

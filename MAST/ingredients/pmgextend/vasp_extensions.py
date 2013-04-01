@@ -45,8 +45,7 @@ def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
     #arrange as x1 y1 z1 x2 y2 z2 x3 y3 z3...
     dirlist = os.listdir(mydir)
     dynlist=[]
-    for entry in dirlist:
-
+#    for entry in dirlist:
 
 def combine_dynmats(myposcar, mydir):
     """Combine DYNMATs into one hessian.
