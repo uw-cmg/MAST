@@ -136,3 +136,4 @@ def combine_dynmats(myposcar, mydir):
     myfreqThzsorted = myfreqThz
     myfreqThzsorted.sort()
     print myfreqThzsorted
+    return myfreqThzsorted

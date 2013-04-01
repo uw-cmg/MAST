@@ -23,5 +23,10 @@ class TestDynmat(unittest.TestCase):
     def test_dynmat(self):
         myPos=Poscar.from_file("dynPOSCAR")
         mydir = os.getcwd()
-        hess = vasp_extensions.combine_dynmats(myPos, mydir)
-        self.assertRaises(MASTError, echo, "hello")
+        freqs = vasp_extensions.combine_dynmats(myPos, mydir)
+        myfreqs=[]
+        for freq in freqs:
+            myfreqs.append(str(freq))
+        print myfreqs
+        testfreqs=['5.41762305941e-08', '8.78201163933e-08', '4.0288407072', '4.29528709031', '5.51344211515', '7.23134055466', '7.74865476988', '7.89305465977', '9.36609281415', '10.6187089182', '10.6301691736', 'nan']
+        self.assertEqual(myfreqs, testfreqs)
