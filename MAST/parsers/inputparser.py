@@ -232,6 +232,8 @@ class InputParser(MASTObj):
  
                 recipe_file = '%s/%s' % (recipe_path, line[1])
                 options.set_item(section_name, 'recipe_file', recipe_file)
+#        print 'DEBUG: recipe_path =', recipe_path
+#        print 'DEBUG: recipe_file =', recipe_file
 
     def parse_ingredients_section_old(self, section_name, section_content, options):
         """Parse the ingredients section and populate the options
@@ -293,7 +295,7 @@ class InputParser(MASTObj):
                 ingredient_dict = dict()
             elif ('end' not in line):
                 opt = line.split()
-                print opt
+#                print opt
                 if (opt[0] == 'kpoints'):
                     kpts = map(int, opt[1].split('x'))
                     ingredient_dict[opt[0]] = kpts
