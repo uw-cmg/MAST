@@ -224,7 +224,12 @@ class InputParser(MASTObj):
         for line in section_content:
             line = line.split(self.delimeter)
             if (line[0] == 'recipe'):
-                recipe_path = os.environ['MAST_RECIPE_PATH']
+                try:
+                    recipe_path = os.environ['MAST_RECIPE_PATH']
+                except KeyError:
+                    error = 'MAST_RECIPE_PATH environment variable not set'
+                    MASTError(self.__class__.__name__, error)
+ 
                 recipe_file = '%s/%s' % (recipe_path, line[1])
                 options.set_item(section_name, 'recipe_file', recipe_file)
 
