@@ -36,3 +36,14 @@ def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
     mysd[natom-1][ndir]=True #indexing starts at 0
     myposcar.selective_dynamics = mysd
     return myposcar
+
+def recombine_dynmats_in_folder(myposcar, mydir):
+    """Recombine DYNMAT files from one unfrozen atom in folder."""
+    natoms = sum(myposcar.natoms)
+    myhess=np.zeros([natoms*3, natoms*3])
+    #arrange as x1 y1 z1 x2 y2 z2 x3 y3 z3...
+    dirlist = os.listdir(mydir)
+    dynlist=[]
+    for entry in dirlist:
+
+
