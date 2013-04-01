@@ -13,6 +13,7 @@ from MAST.utility import MASTError
 
 from MAST.parsers import InputParser
 from MAST.parsers.recipeparsers import RecipeParser
+from MAST.recipe.recipesetup import RecipeSetup
 
 from MAST.ingredients import *
 
@@ -48,7 +49,7 @@ class MAST(MASTObj):
         """
         self._parse_input()
         self._parse_recipe()
-        self._initialize_ingredients()
+        recipe_obj = self._initialize_ingredients()
 
     def _parse_input(self):
         """Parses the input file"""
@@ -117,3 +118,6 @@ class MAST(MASTObj):
         print 'Initializing...'
         from MAST.ingredients import ingredient_dict as ID
 
+        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options, structure=self.structure)
+        recipe_obj = setup_obj.start()
+        return recipe_obj
