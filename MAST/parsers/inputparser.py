@@ -82,18 +82,23 @@ class InputParser(MASTObj):
         sections  = contents.strip().split(self.section_end)[:-1]
         for section_content in sections:
             section_content = section_content.strip()
-            if not section_content:
-                continue
+#            print '\n\nDEBUG: section_content:', section_content
+#            if not section_content:
+#                continue
 
-            section_name = section_content.split()[0][1:]
+            section_content = section_content.split('\n')
+            section_content = [line for line in section_content if not (line.startswith('#') or \
+                                                                           line.startswith('!'))]
+            section_name = section_content[0][1:]
+
             print 'section name:', section_name # For testing
             if section_name not in self.section_parsers:
                 error = 'Section %s not recognized' % section_name
                 MASTError(self.__class__.__name__, error)
                 return
 
-            index = len(section_name) + 1
-            self.section_parsers[section_name](section_name, section_content[index:].strip(), options)
+#            index = len(section_name) + 1
+            self.section_parsers[section_name](section_name, section_content[1:], options)
 
 #        print options
         return options
@@ -102,7 +107,7 @@ class InputParser(MASTObj):
         """Parse the mast section and populate the options"""
         section_options = dict()
 
-        section_content = section_content.split('\n')
+#        section_content = section_content.split('\n')
 
         for line in section_content:
             line = line.split(self.delimeter)
@@ -130,7 +135,7 @@ class InputParser(MASTObj):
         coord_type = 'cartesian'
         posfile = None
 
-        section_content = section_content.split('\n')
+#        section_content = section_content.split('\n')
 
         for line in section_content:
             line = line.split(self.delimeter)
@@ -170,7 +175,7 @@ class InputParser(MASTObj):
         """
         cell = list()
 
-        section_content = section_content.split('\n')
+#        section_content = section_content.split('\n')
 
         for line in section_content:
             line = line.split(self.delimeter)
@@ -185,7 +190,7 @@ class InputParser(MASTObj):
 
         """
         defect_types = dict()
-        section_content = section_content.split('\n')
+#        section_content = section_content.split('\n')
 
         count = 0
         for line in section_content:
@@ -214,7 +219,7 @@ class InputParser(MASTObj):
 
     def parse_recipe_section(self, section_name, section_content, options):
         """Parse the recipe section and populate the options"""
-        section_content = section_content.split('\n')
+#        section_content = section_content.split('\n')
 
         for line in section_content:
             line = line.split(self.delimeter)
@@ -269,34 +274,37 @@ class InputParser(MASTObj):
             Anything in ingredients_global are then appended onto each individual ingredient.
         """
 
-        section_content = section_content.split('end')[:-1]
         global_dict = dict()
         ingredients_dict = dict()
 
         for line in section_content:
-            line = line.strip().split('\n')
-            ingredient_name = line[0].split()[1]
-            ingredient_options = line[1:]
-#            print 'Ingredient name =', ingredient_name
-#            print 'Options =', ingredient_options
-
-            ingredient_dict = dict()
-            for ingredient_option in ingredient_options:
-                opt = ingredient_option.split()
-                if opt[0] == 'kpoints':
+            if (line.startswith('#') or line.startswith('!') or (not line)):
+# Check for comments starting with a # or a !, or just a good ol' fashioned blank line
+                continue
+            elif (line.startswith('begin')):
+# Each ingredient section starts with "begin", check for this line, and initialize the individual
+# ingredient dictionary
+                ingredient_name = line.split()[1]
+                ingredient_dict = dict()
+            elif ('end' not in line):
+                opt = line.split()
+                print opt
+                if (opt[0] == 'kpoints'):
                     kpts = map(int, opt[1].split('x'))
                     ingredient_dict[opt[0]] = kpts
                 else:
                     ingredient_dict[opt[0]] = opt[1]
+            elif ('end' in line):
+# Each ingredient section ends with "end", if present finish that current section and assign
+# the neccessary element in the ingredients dictionary and create the global dictionary
+                if (ingredient_name == 'ingredients_global'):
+                    global_dict = ingredient_dict
+                else:
+                    ingredients_dict[ingredient_name] = ingredient_dict
 
-            if (ingredient_name == 'ingredients_global'):
-                global_dict = ingredient_dict
-            else:
-                ingredients_dict[ingredient_name] = ingredient_dict
-
-#        print global_dict
-#        print ingredients_dict
+# Here we append the global dictionary that has been defined from above
         for key, value in ingredients_dict.items():
             value.update(global_dict)
             options.set_item(section_name, key, value)
 
+#        print 'DEBUG: ingredients_dict =', ingredients_dict
