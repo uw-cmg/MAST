@@ -1,10 +1,11 @@
-from ingredient.inducedefect import InduceDefect
-from ingredient.optimize import Optimize
-from ingredient.singlepoint import SinglePoint
-from ingredient.optimizedefect import optimizeDefect
+from MAST.ingredients.inducedefect import InduceDefect
+from MAST.ingredients.optimize import Optimize
+from MAST.ingredients.singlepoint import SinglePoint
+from MAST.ingredients.optimizedefect import optimizeDefect
 from pymatgen.core.structure import Structure
 
 from MAST.utility import MASTObj
+from MAST.utility import InputOptions
 from MAST.utility import MASTError
 
 
@@ -89,7 +90,7 @@ class RecipeSetup(MASTObj):
                         is_parent = False
                         continue
                     if is_parent:
-                        parent_objs.append(parent)
+                        parent_objs.append(elt)
                     else:
                         child_info      = elt.split(self.delimiter)
                         for parent in parent_objs:
