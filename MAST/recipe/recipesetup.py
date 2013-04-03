@@ -5,6 +5,7 @@ from MAST.ingredients.optimize import Optimize
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
+from MAST.utility import InputOptions
 from MAST.utility import MASTError
 
 from pymatgen.core.structure import Structure
@@ -91,7 +92,7 @@ class RecipeSetup(MASTObj):
                         is_parent = False
                         continue
                     if is_parent:
-                        parent_objs.append(parent)
+                        parent_objs.append(elt)
                     else:
                         child_info      = elt.split(self.delimiter)
                         for parent in parent_objs:
@@ -121,10 +122,7 @@ class RecipeSetup(MASTObj):
     def prepare_ingredients(self, recipe_plan):
         '''Prepare the ingredients'''
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
-            ingredient_path = os.path.join(DATA_PATH, ingredient_name)
-            os.mkdir(ingredient_path)
-            ingredient_obj.write_directories(ingredient_path)
-            ingredient_obj.write_files(ingredient_path)
+            ingredient_obj.write_directories()
              
 
     def start(self):
