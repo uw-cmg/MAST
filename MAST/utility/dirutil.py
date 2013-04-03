@@ -85,3 +85,9 @@ def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
         return matchfilelist
     else:
         return paredfilelist
+
+def get_mast_install_path():
+    getpath = os.getenv('MAST_INSTALL_PATH')
+    if getpath == None:
+        raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
+    return getpath
