@@ -40,6 +40,7 @@ class MAST(MASTObj):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options = None
         self.structure = None
+        self.unique_ingredients = None
     
     def start(self):
         """Calls all the neccessary functions required to run MAST.
@@ -114,9 +115,20 @@ class MAST(MASTObj):
         parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
         parser_obj.parse()
 
+        self.unique_ingredients = parser_obj.get_unique_ingredients()
+
     def _initialize_ingredients(self):
-        print 'Initializing...'
+        print 'Initializing ingredients...'
         from MAST.ingredients import ingredient_dict as ID
+
+        ingredient_global = self.input_options.get_item('ingredients', 'global')
+        for ingredient in self.unique_ingredients:
+            if (not self.input_options.get_item('ingredients', ingredient)) and \
+               (ingredient not in ['inducedefect']):
+                self.input_options.set_item('ingredients', ingredient, ingredient_global)
+
+        for ingredient in self.unique_ingredients:
+            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
 
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options, structure=self.structure)
         recipe_obj = setup_obj.start()

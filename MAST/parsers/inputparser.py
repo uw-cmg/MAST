@@ -320,4 +320,6 @@ class InputParser(MASTObj):
             value.update(global_dict)
             options.set_item(section_name, key, value)
 
+        options.set_item(section_name, 'global', global_dict)
+
 #        print 'DEBUG: ingredients_dict =', ingredients_dict
