@@ -22,4 +22,4 @@ cat $PBS_NODEFILE
 
 #Type in commands to run. Replace a.out with the program name
 #to run.
-~/bin/vasp5.2_CNEB
+~/bin/vasp5.2_cNEB

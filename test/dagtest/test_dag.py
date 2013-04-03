@@ -1,5 +1,9 @@
-from DAG import DAGScheduler as ds
+from MAST.DAG.dagscheduler import DAGScheduler as ds
+from MAST.DAG.dagscheduler import Job
+from MAST.DAG.dagscheduler import Session
+from MAST.DAG.dagscheduler import DAGParser
 myds = ds.DAGScheduler()
 
-task_list = myds.schedule("//home/tam/bin/git/MAST4pymatgen/MAST/test/nebtest/test-recipe.txt")
-print task_list
+#myds.
+#task_list = myds.schedule("../recipetest/recipe_template.txt")
+

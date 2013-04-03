@@ -86,7 +86,9 @@ class DAGParser:
     def parse(jobs_file):
         '''Parses the jobs file and creates a dictionary, 
            with parent job as key and the dependent jobs as
-           children
+           children.
+           JOBS_FILE is input file name. This should be modified later for recipe template or
+           something else.
         '''
         dependency_dict = {}
         jobs_dict       = {}
@@ -105,7 +107,7 @@ class DAGParser:
             init_keyword = elts[0].lower()
 
             #Job Keyword
-            if init_keyword == "ingredient": #TTM 2013-03-19 change init_keyword "job" to "ingredient"
+            if init_keyword == "ingredient": 
                 job_obj   = Job(elts[1])
                 jobs_dict.setdefault(elts[1], job_obj)
                 dependency_dict.setdefault(job_obj, set())
@@ -199,7 +201,7 @@ class DAGScheduler:
     def __init__(self):
         self.dag_parser    = DAGParser()
         pass
-
+    
     def schedule(self, jobs_file):
         '''Parses the input file and applies topological sorting
            to find the set of jobs in topological order
