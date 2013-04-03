@@ -22,6 +22,7 @@ ALLOWED_KEYS = {\
 
 MAST_KEYWORDS = ['program',
                  'system_name',
+                 'scratch_directory',
                 ]
 
 structure_KEYWORDS = ['posfile', # str
@@ -88,7 +89,7 @@ class InputParser(MASTObj):
 
             section_content = section_content.split('\n')
             section_content = [line for line in section_content if not (line.startswith('#') or \
-                                                                           line.startswith('!'))]
+                                                                        line.startswith('!'))]
             section_name = section_content[0][1:]
 
             print 'section name:', section_name # For testing
