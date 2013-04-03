@@ -121,6 +121,11 @@ class InputParser(MASTObj):
                 section_options[line[0]] = line[1]
                 options.set_item(section_name, line[0], line[1])
 
+# if the scratch_directory has not been set, set it to the current working directory
+        if (not options.get_item(section_name, 'scratch_directory')):
+            options.set_item(section_name, 'scratch_directory', os.getcwd())
+
+#        print 'In parse_mast_section:', options.get_item(section_name, 'scratch_directory')
 #        print 'In parse_mast_section:', options.get_item(section_name, 'system_name')
 
     def parse_structure_section(self, section_name, section_content, options):
