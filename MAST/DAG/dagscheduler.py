@@ -1,6 +1,66 @@
 import datetime
 now = datetime.datetime.utcnow()
+def enum(**enums):
+    return type('Enum',(),enums)
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
 
+Jobstatus = enum('PreQ','InQ','Complete')
+JOB = Jobstatus
+
+class JobEntry(object):
+    def __init__(self, sid, jid, jobname, indir, outdir, type):
+        self.sid = sid # session id
+        self.jid = jid # job id which is unique in a session.
+        self.name = jobname # job name may or may not be unique.
+        self.indir = indir # input directory
+        self.outdir = outdir # output directory
+        self.status = JOB.PreQ
+        self.type = type
+        self.parents = set()
+        self.completeparents = set()
+        
+    def addparent(jid):
+        self.parents.add(jid)
+        
+    def completeparent(jid):
+        self.completeparents.add(jid)
+
+    def isready():
+        return len(self.parents) == len(self.completeparents)
+    
+class SessionEntry(object):
+
+    def __init__(self, sid, totaljobs):
+        self.sid =  sid
+        self.totaljobs = totaljobs
+        self.preq_jobs = totaljobs
+        self.inq_jobs = 0
+        self.completejobs = 0
+        
+    def submitjobs(njobs):
+        self.preq_jobs -= njobs
+        self.inq_jobs += njobs
+
+    def completejobs(njobs):
+        self.inq_jobs -= njobs
+        self.complete_jobs += njobs
+
+    def addnewjobs(njobs):
+        self.totaljobs += njobs
+        self.preq_jobs += njobs
+    def iscomplete():
+        return self.completejobs == self.totaljobs
+    
+class JobTable(object):
+    def __init__(self):
+        self.jobs = []
+        
+class SessionTable(object):
+    def __init__(self):
+        self.sessions = []
+        
 class Job(object):
     '''If previous version of dag scheduler or graph
         are not used, I will remove dictionary.
@@ -9,7 +69,7 @@ class Job(object):
     '''
     def __init__(self, name):
         self.name = name
-        self.id = '' #for speed ?
+        self.jid = '' #Some jobs may have same name.
         self.pre_scripts = [] 
         self.post_scripts = [] #let's discuss about post and pre script
         self.parents_name = [] #potentially deprecated
@@ -46,7 +106,7 @@ class Job(object):
                 "end": None,
                 "session_id": None
             }
-        return 
+        return info
 
 class Session(object):
     '''This is a set of job. Jobs will be scheduled in a session.
