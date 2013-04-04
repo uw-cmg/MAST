@@ -1,14 +1,34 @@
 import datetime
 now = datetime.datetime.utcnow()
+
 def enum(**enums):
     return type('Enum',(),enums)
+
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
 
+def set2str(A,maxlen=20):
+
+    if type(A) is not set:
+        print 'INPUT IS NOT A SET.'
+        return ""
+    
+    out = "{"
+    lA = list(A)
+    elements = ""
+    for j in range(len(lA)):
+        if j < len(lA)-1:
+            elements += '{}, '.format(lA[j])
+    elements += '{}'.format(lA[j])
+    if len(elements) > maxlen-2:
+        elements = elements[0:maxlen-5]+"..."
+    out="{"+elements+"}"
+    return out
+
 Jobstatus = enum('PreQ','InQ','Complete')
 JOB = Jobstatus
-
+    
 class JobEntry(object):
     def __init__(self, sid, jid, jobname, indir, outdir, type):
         self.sid = sid # session id
@@ -36,7 +56,8 @@ class JobEntry(object):
         strdonepar = str(self.completeparents)
         return '\t%d\t%d\t%s\t%d\t%s\t%s\t%s' % (self.sid, self.jid, self.name,
                                          self.status, self.type, strpar, strdonepar)
-
+    def getinfo(self):
+        return 
                                    
 class SessionEntry(object):
 
@@ -58,8 +79,20 @@ class SessionEntry(object):
     def addnewjobs(njobs):
         self.totaljobs += njobs
         self.preq_jobs += njobs
+        
     def iscomplete():
         return self.completejobs == self.totaljobs
+    
+    def __str__(self):
+        return '\t%d\t%d\t%d\t%d\t%d' % (self.sid, self.totaljobs, self.preq_jobs,
+                                         self.inq_jobs, self.completejobs)
+    def getinfo(self):
+        return [self.sid, self.totaljobs, self.preq_jobs,
+                self.inq_jobs, self.completejobs]
+
+    def getheader(self):
+        return ['sid','total','preq','inq','complete']
+        
     
 class JobTable(object):
 
@@ -75,16 +108,36 @@ class JobTable(object):
         if jid not in self.jobs:
             raise Exception("JOB ID (jid=%d) DOESN'T EXIST" % jid)
         self.jobs.pop(jid)
-
-
-
-        
         
 class SessionTable(object):
     def __init__(self):
-        self.sessions = []
-        self.sidset = set()
+        self.sessions = {}
         
+    def addsession(self, session):
+        if session.sid in self.sessions:
+            raise Exception('SESSION ID (sid=%d) CONFLICTED' % session.sid)
+        self.sessions[session.sid] = session
+        
+    def delsession(self, sid):
+        if sid not in self.session:
+            raise Exception("SESSION ID (sid=%d) DOESN'T EXIST" % sid)
+        self.sessions.pop(sid)
+
+    def __str__(self):
+        import numpy as np
+        lists = []
+        for s in self.sessions.itervalues():
+            lists.append(s.getinfo())
+        data = np.array(lists)
+        header = s.getheader()
+        row_format ="{:>5}{:>6}{:>5}{:>5}{:>9}"
+        out = row_format.format(*header)+"\n"
+        for row in data:
+            out += row_format.format(*row)+"\n"
+        return out
+
+        
+
 class Job(object):
     '''If previous version of dag scheduler or graph
         are not used, I will remove dictionary.
@@ -132,35 +185,6 @@ class Job(object):
             }
         return info
 
-class Session(object):
-    '''This is a set of job. Jobs will be scheduled in a session.
-        All jobs out of a session are independent.
-    '''
-    def __init__(self,name,id):
-        self.name = name
-        self.id = id #unique
-        self.jobs = {} #list of jobs
-        self.start = None #datetime
-        self.end = None #datetime
-        
-    def addjob(job):
-        self.jobs.append(job)
-        
-    def getjobsid():
-        jids = []
-        for job in self.jobs:
-            jids.append(job.id)
-        return jids
-    
-    def getinfo():
-        jids = self.jobs.getjobsid()
-        info = {"session_id":"d_1",
-                "jobs_id":jids,
-                "start":now(),
-                "end":None
-            }
-        return info
-    
 class IDManager(object):
     def __init__(self, jobtable, sessiontable):
         self.nextjid = 0
@@ -179,8 +203,6 @@ class IDManager(object):
         while self.nextsid in self.jobtable.sidset:
             self.nextsid = self.nextsid+1
         return self.nextsid
-
-        
     
 class DAGParser:
     ''' DAGPARSER has no member. So you don't need to make instance of this class.
@@ -366,4 +388,3 @@ def get_parent_child_sets(tokens):
         if ischild:
             childset.add(item)
     return (parentset, childset)
-

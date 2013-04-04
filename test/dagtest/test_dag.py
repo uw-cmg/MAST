@@ -1,11 +1,21 @@
 from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.DAG.dagscheduler import JobEntry
-from MAST.DAG.dagscheduler import Session
 from MAST.DAG.dagscheduler import DAGParser
 from MAST.DAG.dagscheduler import SessionEntry
 from MAST.DAG.dagscheduler import JobEntry
 from MAST.DAG.dagscheduler import JobTable
 from MAST.DAG.dagscheduler import SessionTable
+from MAST.DAG.dagscheduler import set2str
+from sys import exit
+
+A = set()
+A.add('dog')
+A.add('cat')
+A.add('pig')
+A.add('rabbit')
+out = set2str(A)
+print out
+
 
 #from MAST.DAG.dagscheulder import Jobstatus
 #from MAST.DAG.dagscheulder import Jobstatus
@@ -43,8 +53,18 @@ except Exception as ex:
 # clear jobs by jid    
 for id in range(4):
     jt.deljob(id+1)
+s1 = SessionEntry(1,4)
+s2 = SessionEntry(2,3)
+st.addsession(s1)
+st.addsession(s2)
 
-    
+# To print out table
+print st
+
+#row_format ="{:>15}" * (len(teams_list) + 1)
+#print row_format.format("", *teams_list)
+#for team, row in zip(teams_list, data):
+#        print row_format.format(team, *row)
     
 
     
@@ -57,3 +77,6 @@ for id in range(4):
 #myds.
 #task_list = myds.schedule("../recipetest/recipe_template.txt")
 
+#TODO LIST for DAG Scheduler
+# Make a class manage tables and submit jobs via PBS for something
+# Make a class or module to communicate with MASTMon or Daemon.
