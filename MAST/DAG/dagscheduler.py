@@ -16,20 +16,28 @@ class JobEntry(object):
         self.name = jobname # job name may or may not be unique.
         self.indir = indir # input directory
         self.outdir = outdir # output directory
-        self.status = JOB.PreQ
-        self.type = type
+        self.status = JOB.PreQ # enum or integer
+        self.type = type # string
         self.parents = set()
         self.completeparents = set()
         
-    def addparent(jid):
+    def addparent(self, jid):
         self.parents.add(jid)
         
-    def completeparent(jid):
+    def completeparent(self, jid):
         self.completeparents.add(jid)
 
-    def isready():
+    def isready(self):
         return len(self.parents) == len(self.completeparents)
     
+    def __str__(self):
+        '''Let me make this prettier later '''
+        strpar = str(self.parents)
+        strdonepar = str(self.completeparents)
+        return '\t%d\t%d\t%s\t%d\t%s\t%s\t%s' % (self.sid, self.jid, self.name,
+                                         self.status, self.type, strpar, strdonepar)
+
+                                   
 class SessionEntry(object):
 
     def __init__(self, sid, totaljobs):
@@ -54,12 +62,28 @@ class SessionEntry(object):
         return self.completejobs == self.totaljobs
     
 class JobTable(object):
+
     def __init__(self):
-        self.jobs = []
+        self.jobs = {}
+        
+    def addjob(self, job):
+        if job.jid in self.jobs:
+            raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
+        self.jobs[job.jid] = job
+        
+    def deljob(self, jid):
+        if jid not in self.jobs:
+            raise Exception("JOB ID (jid=%d) DOESN'T EXIST" % jid)
+        self.jobs.pop(jid)
+
+
+
+        
         
 class SessionTable(object):
     def __init__(self):
         self.sessions = []
+        self.sidset = set()
         
 class Job(object):
     '''If previous version of dag scheduler or graph
@@ -136,9 +160,31 @@ class Session(object):
                 "end":None
             }
         return info
+    
+class IDManager(object):
+    def __init__(self, jobtable, sessiontable):
+        self.nextjid = 0
+        self.nexsid = 0
+        self.jobtable = jobtable
+        self.sessiontable = sessiontable
+        
+    def get_jid(self):
+        self.nextjid = self.nextjid+1
+        while self.nextjid in self.jobtable.jidset:
+            self.nextjid = self.nextjid+1
+        return self.nextjid
+    
+    def get_sid(self):
+        self.nextsid = self.nextsid+1
+        while self.nextsid in self.jobtable.sidset:
+            self.nextsid = self.nextsid+1
+        return self.nextsid
 
+        
+    
 class DAGParser:
-    ''' DAGPARSER has no member. So you don't need to make instance of this class. '''
+    ''' DAGPARSER has no member. So you don't need to make instance of this class.
+    '''
     def __init__(self):
         pass
 

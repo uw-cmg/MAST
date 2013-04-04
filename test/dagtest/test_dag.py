@@ -17,6 +17,37 @@ depdict = DAGParser.parse('jobs_input.txt')
 
 jt = JobTable()
 st = SessionTable()
+
+j1 = JobEntry(1,1,'job1','./','./','A')
+j2 = JobEntry(1,2,'job2','./','./','B')
+j3 = JobEntry(1,3,'job3','./','./','C')
+j4 = JobEntry(1,4,'job4','./','./','D')
+
+jt.addjob(j1)
+jt.addjob(j2)
+jt.addjob(j3)
+jt.addjob(j4)
+
+# jid confliction raises exception
+try:
+    jt.addjob(j1)
+except Exception as ex:
+    print ex.message
+
+#try to delete a job which is not in jobtable
+try:
+    jt.deljob(5)
+except Exception as ex:
+    print ex.message
+
+# clear jobs by jid    
+for id in range(4):
+    jt.deljob(id+1)
+
+    
+    
+
+    
 '''
     S1 = {J1, J2, J3, J4}
     Type = A  B   C   B        
