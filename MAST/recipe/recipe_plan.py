@@ -23,7 +23,7 @@ class RecipePlan:
         """
         self.ingredients[ingredient_name] = ingredient
 
-    def get_ingredient(self, ingredient_name, ingredient):
+    def get_ingredient(self, ingredient_name):
         """Used to get an ingredient_object corresponding to an ingredient name
         """
         return self.ingredients.get(ingredient_name)

@@ -1,6 +1,178 @@
 import datetime
 now = datetime.datetime.utcnow()
 
+def enum(**enums):
+    return type('Enum',(),enums)
+
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
+
+def set2str(A,maxlen=20):
+
+    if type(A) is not set:
+        print 'INPUT IS NOT A SET.'
+        return ""
+    
+    out = "{"
+    lA = list(A)
+    elements = ""
+    nelem = len(lA)
+    for j in range(nelem):
+        if j < len(lA)-1:
+            elements += '{}, '.format(lA[j])
+
+    if nelem >0:
+        elements += '{}'.format(lA[nelem-1])
+        
+    if len(elements) > maxlen-2:
+        elements = elements[0:maxlen-5]+"..."
+    out="{"+elements+"}"
+    return out
+
+Jobstatus = enum('PreQ','InQ','Complete')
+JOB = Jobstatus
+    
+class JobEntry(object):
+    def __init__(self, sid, jid, jobname, indir, outdir, type):
+        self.sid = sid # session id
+        self.jid = jid # job id which is unique in a session.
+        self.name = jobname # job name may or may not be unique.
+        self.indir = indir # input directory
+        self.outdir = outdir # output directory
+        self.status = JOB.PreQ # enum or integer
+        self.type = type # string
+        self.parents = set()
+        self.completeparents = set()
+        
+    def addparent(self, jid):
+        self.parents.add(jid)
+        
+    def completeparent(self, jid):
+        self.completeparents.add(jid)
+
+    def isready(self):
+        return len(self.parents) == len(self.completeparents)
+    
+    def __str__(self):
+        '''Let me make this prettier later '''
+        strpar = set2str(self.parents)
+        strdonepar = set2str(self.completeparents)
+        return '\t%d\t%d\t%s\t%d\t%s\t%s\t%s' % (self.sid, self.jid, self.name,
+                                         self.status, self.type, strpar, strdonepar)
+    def getinfo(self):
+        strpar = set2str(self.parents)
+        strdonepar = set2str(self.completeparents)
+        return [self.sid, self.jid, self.name,
+                                         self.status, self.type, strpar, strdonepar]
+    @classmethod
+    def getheader(cls):
+        return ['sid','jid','jobname','status','type','parents','completeparents']
+
+    @classmethod
+    def getformat(cls):
+        return "{:>5}{:>6}{:>8}{:>5}{:>5}{:>15}{:>20}"
+
+    
+class SessionEntry(object):
+
+    def __init__(self, sid, totaljobs):
+        self.sid =  sid
+        self.totaljobs = totaljobs
+        self.preq_jobs = totaljobs
+        self.inq_jobs = 0
+        self.completejobs = 0
+        
+    def submitjobs(njobs):
+        self.preq_jobs -= njobs
+        self.inq_jobs += njobs
+
+    def completejobs(njobs):
+        self.inq_jobs -= njobs
+        self.complete_jobs += njobs
+
+    def addnewjobs(njobs):
+        self.totaljobs += njobs
+        self.preq_jobs += njobs
+        
+    def iscomplete():
+        return self.completejobs == self.totaljobs
+    
+    def __str__(self):
+        return '\t%d\t%d\t%d\t%d\t%d' % (self.sid, self.totaljobs, self.preq_jobs,
+                                         self.inq_jobs, self.completejobs)
+    def getinfo(self):
+        return [self.sid, self.totaljobs, self.preq_jobs,
+                self.inq_jobs, self.completejobs]
+
+    @classmethod
+    def getheader(cls):
+        return ['sid','total','preq','inq','complete']
+    
+    @classmethod
+    def getformat(cls):
+        return "{:>5}{:>6}{:>5}{:>5}{:>9}"
+    
+class JobTable(object):
+
+    def __init__(self):
+        self.jobs = {}
+        
+    def addjob(self, job):
+        if job.jid in self.jobs:
+            raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
+        self.jobs[job.jid] = job
+        
+    def deljob(self, jid):
+        if jid not in self.jobs:
+            raise Exception("JOB ID (jid=%d) DOESN'T EXIST" % jid)
+        self.jobs.pop(jid)
+
+    def __str__(self):
+        import numpy as np
+        lists = []
+        for j in self.jobs.itervalues():
+            lists.append(j.getinfo())
+        data = np.array(lists)
+
+        header = JobEntry.getheader()
+        row_format = JobEntry.getformat()
+        out = row_format.format(*header)+"\n"
+        for row in data:
+            out += row_format.format(*row)+"\n"
+        return out
+
+        
+        
+class SessionTable(object):
+    def __init__(self):
+        self.sessions = {}
+        
+    def addsession(self, session):
+        if session.sid in self.sessions:
+            raise Exception('SESSION ID (sid=%d) CONFLICTED' % session.sid)
+        self.sessions[session.sid] = session
+        
+    def delsession(self, sid):
+        if sid not in self.session:
+            raise Exception("SESSION ID (sid=%d) DOESN'T EXIST" % sid)
+        self.sessions.pop(sid)
+
+    def __str__(self):
+        import numpy as np
+        lists = []
+        for s in self.sessions.itervalues():
+            lists.append(s.getinfo())
+        data = np.array(lists)
+        header = SessionEntry.getheader()
+        row_format = SessionEntry.getformat()
+        out = row_format.format(*header)+"\n"
+        for row in data:
+            out += row_format.format(*row)+"\n"
+        return out
+
+        
+
 class Job(object):
     '''If previous version of dag scheduler or graph
         are not used, I will remove dictionary.
@@ -9,7 +181,7 @@ class Job(object):
     '''
     def __init__(self, name):
         self.name = name
-        self.id = '' #for speed ?
+        self.jid = '' #Some jobs may have same name.
         self.pre_scripts = [] 
         self.post_scripts = [] #let's discuss about post and pre script
         self.parents_name = [] #potentially deprecated
@@ -46,47 +218,40 @@ class Job(object):
                 "end": None,
                 "session_id": None
             }
-        return 
-
-class Session(object):
-    '''This is a set of job. Jobs will be scheduled in a session.
-        All jobs out of a session are independent.
-    '''
-    def __init__(self,name,id):
-        self.name = name
-        self.id = id #unique
-        self.jobs = {} #list of jobs
-        self.start = None #datetime
-        self.end = None #datetime
-        
-    def addjob(job):
-        self.jobs.append(job)
-        
-    def getjobsid():
-        jids = []
-        for job in self.jobs:
-            jids.append(job.id)
-        return jids
-    
-    def getinfo():
-        jids = self.jobs.getjobsid()
-        info = {"session_id":"d_1",
-                "jobs_id":jids,
-                "start":now(),
-                "end":None
-            }
         return info
 
+class IDManager(object):
+    def __init__(self, jobtable, sessiontable):
+        self.nextjid = 0
+        self.nexsid = 0
+        self.jobtable = jobtable
+        self.sessiontable = sessiontable
+        
+    def get_jid(self):
+        self.nextjid = self.nextjid+1
+        while self.nextjid in self.jobtable.jidset:
+            self.nextjid = self.nextjid+1
+        return self.nextjid
+    
+    def get_sid(self):
+        self.nextsid = self.nextsid+1
+        while self.nextsid in self.jobtable.sidset:
+            self.nextsid = self.nextsid+1
+        return self.nextsid
+    
 class DAGParser:
-    ''' DAGPARSER has no member. So you don't need to make instance of this class. '''
+    ''' DAGPARSER has no member. So you don't need to make instance of this class.
+    '''
     def __init__(self):
         pass
 
-    @staticmethod
-    def parse(jobs_file):
+    @classmethod
+    def parse(cls, jobs_file):
         '''Parses the jobs file and creates a dictionary, 
            with parent job as key and the dependent jobs as
-           children
+           children.
+           JOBS_FILE is input file name. This should be modified later for recipe template or
+           something else.
         '''
         dependency_dict = {}
         jobs_dict       = {}
@@ -105,7 +270,7 @@ class DAGParser:
             init_keyword = elts[0].lower()
 
             #Job Keyword
-            if init_keyword == "ingredient": #TTM 2013-03-19 change init_keyword "job" to "ingredient"
+            if init_keyword == "ingredient": 
                 job_obj   = Job(elts[1])
                 jobs_dict.setdefault(elts[1], job_obj)
                 dependency_dict.setdefault(job_obj, set())
@@ -143,7 +308,7 @@ class DAGParser:
         f_ptr.close()
         return dependency_dict
    
-    @staticmethod
+    @classmethod
     def get_jobinfo(jobs_file):
 	'''GET_JOBINFO reads input files and returns dictionary of jobs; jobs_dict. 
 	    Each job has dependency, job name. This assumes that everything is a job. 
@@ -199,7 +364,7 @@ class DAGScheduler:
     def __init__(self):
         self.dag_parser    = DAGParser()
         pass
-
+    
     def schedule(self, jobs_file):
         '''Parses the input file and applies topological sorting
            to find the set of jobs in topological order
@@ -258,4 +423,3 @@ def get_parent_child_sets(tokens):
         if ischild:
             childset.add(item)
     return (parentset, childset)
-

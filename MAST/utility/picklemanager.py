@@ -1,4 +1,5 @@
 import pickle
+''' This file operation should be nested by try and except'''
 
 class PickleManager:
     def __init__(self, filename=None):
@@ -7,6 +8,30 @@ class PickleManager:
             self.fn = 'mast.pkl'
         else:
             self.fn = filename
+            
+    def save_variable(self,variable, filename=None):
+        if filename is None:
+            fh = open(self.fn,'wb')
+        else:
+            fh = open(filename,'wb')
+            
+        pickle.dump(variable,fh, self._protocol)
+        fh.close()
+        
+    def load_variable(self,filename=None):
+        ''' Load variables to workspace from a pickle file.
+        Usage 1 : load_variables_to_ws(self, gdict=globals())
+        Usage 2 : load_variables_to_ws(self, filename='savefile.pkl', gdict=globals())
+        '''
+        if filename is None:
+            fn = self.fn
+        else:
+            fn = filename
+        fh = open(fn,'rb')
+        var = pickle.load(fh)
+        fh.close()
+        return var
+        
 
     def save_variables(self, gdict, varlist=None, filename=None):
         '''gdict = globals() or gdict = vardict
