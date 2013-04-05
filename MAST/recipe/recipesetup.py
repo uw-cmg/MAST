@@ -131,7 +131,7 @@ class RecipeSetup(MASTObj):
         """Prepare the ingredients
         """
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
-            ingredient_obj.write_directories()
+            ingredient_obj.write_directory()
              
 
     def start(self):
