@@ -107,7 +107,8 @@ class RecipeSetup(MASTObj):
             MASTError(self.__class__.__name__, "Ingredient %s not found !!!")
         return INGREDIENTS_LIBRARY[ingredient_type](name=name, structure= self.structure, \
                                                     program=self.program,\
-                                                    program_keys=self.input_options.get_item('ingredients', ingredient_type), child_dict=child_dict)
+                                                    program_keys=self.input_options.get_item('ingredients',\
+                                                    ingredient_type), child_dict=child_dict)
 
     def create_recipe_plan(self, ingredients_info, recipe_name):
         '''Creates a recipe object which has the ingredients and dependency information'''
