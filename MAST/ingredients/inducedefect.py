@@ -15,6 +15,11 @@ allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
                 'coordtype': (str, 'fractional', 'Coordinate type (cartesian or fractional'),
                 'defecttype': (str, str(), 'Intersitial or vacancy'),
                 'structure': (Structure, None, 'Pymatgen Structure object'),
+# Next few keywords are a hack to make this work, need to fix!
+                'program': (str, str(), 'Program name'),
+                'child_dict': (dict, dict(), 'Children for this ingredient'),
+                'name': (str, str(), '???'),
+                'program_keys': (dict, dict(), 'program keywords'),
                }
 
 class InduceDefect(BaseIngredient):

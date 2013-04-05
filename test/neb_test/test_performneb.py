@@ -8,10 +8,11 @@ from filecmp import dircmp
 
 from MAST.ingredients.performneb import PerformNEB
 from MAST.utility import MASTError
+from MAST.utility.dirutil import *
 
 class TestPerformNEB(unittest.TestCase):
     def setUp(self):
-        scripts=os.getenv('SCRIPTPATH')
+        scripts=get_mast_install_path()
         os.chdir(os.path.join(scripts,'test','neb_test'))
         os.mkdir('nebtest_neb10-11')
         shutil.copy('nebtest_defect10_stat/CONTCAR','nebtest_neb10-11/parent_structure_10')

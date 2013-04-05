@@ -11,10 +11,11 @@ from MAST.ingredients.frozenphonons import FrozenPhonons
 from MAST.utility import MASTError
 from pymatgen.io.vaspio import Poscar
 from MAST.ingredients.pmgextend import vasp_extensions
+from MAST.utility.dirutil import *
 
 class TestDynmat(unittest.TestCase):
     def setUp(self):
-        scripts = os.getenv("SCRIPTPATH")
+        scripts = get_mast_install_path()
         os.chdir(os.path.join(scripts, 'test','phonon_test'))
 
     def tearDown(self):

@@ -113,7 +113,8 @@ class RecipeSetup(MASTObj):
         ingredient_name = os.path.join(self.scratch_dir, name)
         return INGREDIENTS_LIBRARY[ingredient_type](name=ingredient_name, structure= self.structure, \
                                                     program=self.program,\
-                                                    program_keys=self.input_options.get_item('ingredients', ingredient_type), child_dict=child_dict)
+                                                    program_keys=self.input_options.get_item('ingredients',\
+                                                    ingredient_type), child_dict=child_dict)
 
     def create_recipe_plan(self, ingredients_info, recipe_name):
         """Creates a recipe object which has the ingredients and dependency information

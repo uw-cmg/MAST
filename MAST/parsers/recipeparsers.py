@@ -22,6 +22,7 @@ class RecipeParser(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options   = self.keywords['inputOptions']
+        self.ingredient_list = list()
 
     def parse(self):
         ''' Parses the template recipe file and creates
@@ -32,6 +33,7 @@ class RecipeParser(MASTObj):
         system_name     = self.input_options.get_item("mast", "system_name", "sys_")
         n_param         = self.input_options.get_item("defects", "num_defects", 0)
 
+        print system_name, self.input_options.get_item('mast', 'system_name')
         for line in f_ptr.readlines():
             line = line.strip()
             #validate the input line
@@ -48,19 +50,13 @@ class RecipeParser(MASTObj):
             else:
                 o_ptr.write("%s\n" % line)
 
+            line2 = line.split()
+            if (line2[0].lower() == 'ingredient'):
+                self.ingredient_list.append(line2[2])
+
         f_ptr.close()
         o_ptr.close()
+#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
 
-
-def main(template_file, personal_recipe_file):
-    input_options = InputOptions()
-    input_options.set_item("mast", "system_name", "SiC")
-    input_options.set_item("defects", "num_defects", 2)
-    rp_obj        = RecipeParser(templateFile=template_file, inputOptions=input_options, personalRecipe=personal_recipe_file)
-    rp_obj.parse()
-
-
-if __name__ == "__main__":
-    template_file          = "test/recipetest/recipe_template.txt"
-    personal_recipe_file   = "test/recipetest/sic_recipe.txt"
-    main(template_file, personal_recipe_file)
+    def get_unique_ingredients(self):
+        return list(set(self.ingredient_list))

@@ -10,10 +10,11 @@ from filecmp import dircmp
 from MAST.ingredients.optimize import Optimize
 from MAST.utility import MASTError
 from pymatgen.io.vaspio import Poscar
+from MAST.utility.dirutil import *
 
 class TestOptimize(unittest.TestCase):
     def setUp(self):
-        scripts = os.getenv("SCRIPTPATH")
+        scripts = get_mast_install_path()
         os.chdir(os.path.join(scripts, 'test','optimize_test'))
         os.mkdir('test_opt1')
 
