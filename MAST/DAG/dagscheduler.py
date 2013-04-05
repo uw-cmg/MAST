@@ -17,10 +17,14 @@ def set2str(A,maxlen=20):
     out = "{"
     lA = list(A)
     elements = ""
-    for j in range(len(lA)):
+    nelem = len(lA)
+    for j in range(nelem):
         if j < len(lA)-1:
             elements += '{}, '.format(lA[j])
-    elements += '{}'.format(lA[j])
+
+    if nelem >0:
+        elements += '{}'.format(lA[nelem-1])
+        
     if len(elements) > maxlen-2:
         elements = elements[0:maxlen-5]+"..."
     out="{"+elements+"}"
@@ -52,13 +56,24 @@ class JobEntry(object):
     
     def __str__(self):
         '''Let me make this prettier later '''
-        strpar = str(self.parents)
-        strdonepar = str(self.completeparents)
+        strpar = set2str(self.parents)
+        strdonepar = set2str(self.completeparents)
         return '\t%d\t%d\t%s\t%d\t%s\t%s\t%s' % (self.sid, self.jid, self.name,
                                          self.status, self.type, strpar, strdonepar)
     def getinfo(self):
-        return 
-                                   
+        strpar = set2str(self.parents)
+        strdonepar = set2str(self.completeparents)
+        return [self.sid, self.jid, self.name,
+                                         self.status, self.type, strpar, strdonepar]
+    @classmethod
+    def getheader(cls):
+        return ['sid','jid','jobname','status','type','parents','completeparents']
+
+    @classmethod
+    def getformat(cls):
+        return "{:>5}{:>6}{:>8}{:>5}{:>5}{:>15}{:>20}"
+
+    
 class SessionEntry(object):
 
     def __init__(self, sid, totaljobs):
@@ -90,9 +105,13 @@ class SessionEntry(object):
         return [self.sid, self.totaljobs, self.preq_jobs,
                 self.inq_jobs, self.completejobs]
 
-    def getheader(self):
+    @classmethod
+    def getheader(cls):
         return ['sid','total','preq','inq','complete']
-        
+    
+    @classmethod
+    def getformat(cls):
+        return "{:>5}{:>6}{:>5}{:>5}{:>9}"
     
 class JobTable(object):
 
@@ -108,6 +127,22 @@ class JobTable(object):
         if jid not in self.jobs:
             raise Exception("JOB ID (jid=%d) DOESN'T EXIST" % jid)
         self.jobs.pop(jid)
+
+    def __str__(self):
+        import numpy as np
+        lists = []
+        for j in self.jobs.itervalues():
+            lists.append(j.getinfo())
+        data = np.array(lists)
+
+        header = JobEntry.getheader()
+        row_format = JobEntry.getformat()
+        out = row_format.format(*header)+"\n"
+        for row in data:
+            out += row_format.format(*row)+"\n"
+        return out
+
+        
         
 class SessionTable(object):
     def __init__(self):
@@ -129,8 +164,8 @@ class SessionTable(object):
         for s in self.sessions.itervalues():
             lists.append(s.getinfo())
         data = np.array(lists)
-        header = s.getheader()
-        row_format ="{:>5}{:>6}{:>5}{:>5}{:>9}"
+        header = SessionEntry.getheader()
+        row_format = SessionEntry.getformat()
         out = row_format.format(*header)+"\n"
         for row in data:
             out += row_format.format(*row)+"\n"
@@ -210,8 +245,8 @@ class DAGParser:
     def __init__(self):
         pass
 
-    @staticmethod
-    def parse(jobs_file):
+    @classmethod
+    def parse(cls, jobs_file):
         '''Parses the jobs file and creates a dictionary, 
            with parent job as key and the dependent jobs as
            children.
@@ -273,7 +308,7 @@ class DAGParser:
         f_ptr.close()
         return dependency_dict
    
-    @staticmethod
+    @classmethod
     def get_jobinfo(jobs_file):
 	'''GET_JOBINFO reads input files and returns dictionary of jobs; jobs_dict. 
 	    Each job has dependency, job name. This assumes that everything is a job. 

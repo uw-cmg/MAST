@@ -50,22 +50,25 @@ try:
 except Exception as ex:
     print ex.message
 
+print 'Job table print test'
+print jt
+
 # clear jobs by jid    
 for id in range(4):
     jt.deljob(id+1)
+
+print 'Session table print test'
 s1 = SessionEntry(1,4)
 s2 = SessionEntry(2,3)
 st.addsession(s1)
 st.addsession(s2)
 
+print 'After deletion'
+print jt
+
 # To print out table
 print st
 
-#row_format ="{:>15}" * (len(teams_list) + 1)
-#print row_format.format("", *teams_list)
-#for team, row in zip(teams_list, data):
-#        print row_format.format(team, *row)
-    
 
     
 '''
