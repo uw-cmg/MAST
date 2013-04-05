@@ -10,10 +10,11 @@ class BaseIngredient(MASTObj):
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
     
     def write_directory(self):
-        if os.path.exists(self.keywords['name']):
+        try:
+            os.makedirs(self.keywords['name'])
+        except OSError:
             print "Directory exists."
             return
-        os.makedirs(self.keywords['name'])
         return
    
     def get_structure_from_file(self, filepath):
