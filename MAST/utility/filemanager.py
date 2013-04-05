@@ -49,6 +49,9 @@ class FileManager(PickleManager):
             else:
                 print ex.strerror
                 return False
+        except:
+            print ex.strerror #unexpected error
+            return False
         return True
 
     def save_vars(self, sid, jid, gdict, varlist=None):

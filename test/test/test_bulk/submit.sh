@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export USERNAME=`eval whoami`
 # declare a name for this job to be sample_job
 #PBS -N 1
 
@@ -27,4 +27,4 @@ cat $PBS_NODEFILE
 
 #Type in commands to run. Replace a.out with the program name
 #to run.
-/opt/mpiexec/bin/mpiexec /home/tam/bin/vasp5.2_CNEB
+/opt/mpiexec/bin/mpiexec /home/$USERNAME/bin/vasp5.2_CNEB
