@@ -56,7 +56,7 @@ class RecipeParser(MASTObj):
 
         f_ptr.close()
         o_ptr.close()
-        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
+#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
 
     def get_unique_ingredients(self):
         return list(set(self.ingredient_list))
