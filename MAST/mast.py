@@ -7,9 +7,12 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
+import os
+
 from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
+from MAST.utility.picklemanager import PickleManager
 
 from MAST.parsers import InputParser
 from MAST.parsers.recipeparsers import RecipeParser
@@ -50,7 +53,17 @@ class MAST(MASTObj):
         """
         self._parse_input()
         self._parse_recipe()
-        recipe_obj = self._initialize_ingredients()
+        recipe_plan_obj = self._initialize_ingredients()
+        self.pickle_plan(recipe_plan_obj)
+
+    def pickle_plan(self, recipe_plan_obj):
+        """Pickles the reciple plan object to the respective file
+           in the scratch directory
+        """
+        pickle_file = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), 'mast.pickle')
+        pm = PickleManager(pickle_file)
+        pm.save_variable(recipe_plan_obj) 
+   
 
     def _parse_input(self):
         """Parses the input file"""
@@ -139,5 +152,5 @@ class MAST(MASTObj):
 
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
                                 structure=self.structure)
-        recipe_obj = setup_obj.start()
-        return recipe_obj
+        recipe_plan_obj = setup_obj.start()
+        return recipe_plan_obj
