@@ -1,5 +1,6 @@
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+import os
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
