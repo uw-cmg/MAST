@@ -134,9 +134,10 @@ class MAST(MASTObj):
                (ingredient not in ['inducedefect']):
                 self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
-        for ingredient in self.unique_ingredients:
+#        for ingredient in self.unique_ingredients:
 #            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
 
-        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options, structure=self.structure)
+        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
+                                structure=self.structure)
         recipe_obj = setup_obj.start()
         return recipe_obj
