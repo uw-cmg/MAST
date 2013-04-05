@@ -87,10 +87,16 @@ class MAST(MASTObj):
         posfile = self.input_options.get_item('structure', 'posfile')
 
         if (posfile is None):
-            self.structure = MAST2Structure(lattice=self.input_options.get_item('unitcell', 'lattice'),
-                                            coordinates=self.input_options.get_item('structure', 'coordinates'),
-                                            atom_list=self.input_options.get_item('structure', 'atom_list'),
-                                            coord_type=self.input_options.get_item('structure', 'coord_type'))
+            lattice = self.input_options.get_item('unitcell', 'lattice')
+            coordinates = self.input_options.get_item('structure', 'coordinates')
+            atom_list = self.input_options.get_item('structure', 'atom_list')
+            coord_type = self.input_options.get_item('structure', 'coord_type')
+
+            self.structure = MAST2Structure(lattice=lattice,
+                                            coordinates=coordinates,
+                                            atom_list=atom_list,
+                                            coord_type=coord_type)
+#            print 'In %s:' % self.__class__.__name__, coord_type
         elif ('poscar' in posfile.lower()):
             from pymatgen.io.vaspio import Poscar
             self.structure = Poscar.from_file(posfile).struct
@@ -112,7 +118,8 @@ class MAST(MASTObj):
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
 #        print 'recipe_file =', recipe_file
 
-        parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
+        parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options,
+                                  personalRecipe='test-recipe.txt')
         parser_obj.parse()
 
         self.unique_ingredients = parser_obj.get_unique_ingredients()
@@ -128,7 +135,7 @@ class MAST(MASTObj):
                 self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
         for ingredient in self.unique_ingredients:
-            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
+#            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
 
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options, structure=self.structure)
         recipe_obj = setup_obj.start()
