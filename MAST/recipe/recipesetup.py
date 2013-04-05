@@ -89,7 +89,7 @@ class RecipeSetup(MASTObj):
             if init_keyword == self.parent_keyword:
                 parent_objs = []
                 is_parent   = True
-                for elt in elts:
+                for elt in elts[1:]:
                     if elt.lower() == self.child_keyword:
                         is_parent = False
                         continue
@@ -109,7 +109,7 @@ class RecipeSetup(MASTObj):
         """Creates the ingredient based on the ingredient type
         """
         if ingredient_type not in INGREDIENTS_LIBRARY:
-            MASTError(self.__class__.__name__, "Ingredient %s not found !!!")
+            MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
         ingredient_name = os.path.join(self.scratch_dir, name)
         return INGREDIENTS_LIBRARY[ingredient_type](name=ingredient_name, structure= self.structure, \
                                                     program=self.program,\
@@ -139,6 +139,7 @@ class RecipeSetup(MASTObj):
            create directories and classes required
         """
         ingredients_info, recipe_name = self.parse_recipe()
+        print ingredients_info
         recipe_plan                   = self.create_recipe_plan(ingredients_info, recipe_name)
         self.prepare_ingredients(recipe_plan)
         return recipe_plan
