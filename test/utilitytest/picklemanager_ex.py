@@ -1,8 +1,11 @@
 # PickleManger example
 
-from picklemanager import PickleManager
+from MAST.utility.picklemanager import PickleManager
+
 pm = PickleManager()
 A = 1
+pm.save_variable(A)
+A_loaded = pm.load_variable()
 B = 'string'
 class dummy:
     def __init__(self, id = None):
@@ -19,7 +22,7 @@ del A, B, C
 vardict = pm.load_variables()
 
 # restore all variables from pickle to workspace.
-pm.load_variables_ws(gdict=globals())
+pm.load_variables_to_ws(gdict=globals())
 
 
 
