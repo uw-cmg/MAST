@@ -130,8 +130,9 @@ class MAST(MASTObj):
 
         ingredient_global = self.input_options.get_item('ingredients', 'global')
         for ingredient in self.unique_ingredients:
-            if (not self.input_options.get_item('ingredients', ingredient)) and \
-               (ingredient not in ['inducedefect']):
+            if (not self.input_options.get_item('ingredients', ingredient)):
+#            if (not self.input_options.get_item('ingredients', ingredient)) and \
+#               (ingredient not in ['inducedefect']):
                 self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
 #        for ingredient in self.unique_ingredients:
