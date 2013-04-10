@@ -70,6 +70,7 @@ class InputParser(MASTObj):
                                     'ingredients'  : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
                                     'recipe'   : self.parse_recipe_section,
+                                    'neb'      : self.parse_neb_section,
                                }
 
     def parse(self):
@@ -292,4 +293,44 @@ class InputParser(MASTObj):
 
 #        print 'DEBUG: ingredients_dict =', ingredients_dict
 
+
+    def parse_neb_section(self, section_name, section_content, options):
+        """Parse the neb section and populate the options.
+            Format example:
+            hops 1-2 1-3 3-4
+            images 3
+            The hops correspond to the defects listed in the defects
+            section, e.g. defects 1 through 4 are:
+            vacancy 0 0 0
+            vacancy 0.5 0.5 0.5 
+            interstitial 0.25 0.25 0
+            interstitial 0.25 0.75 0
+        """
+        hoplist=list()
+        hopfrom = dict()
+        images=0
+
+        count = 0
+        for line in section_content:
+            type_dict = dict()
+
+            line = line.split(self.delimeter)
+
+            if (line[0] == 'hops'):
+                hoplist = line[1:] #this is a list
+            elif (line[0] == 'images'):
+                images = int(line[1])
+        hop=""
+        hfrom=0
+        hto=0
+        for hop in hoplist:
+            hfrom = int(hop.split('-')[0])
+            hto = int(hop.split('-')[1])
+            if not hfrom in hopfrom.keys():
+                hopfrom[hfrom]=list()
+            hopfrom[hfrom].append(hto)
+        print "images: ", images
+        print "hopfrom_dict: ", hopfrom
+        options.set_item(section_name, 'images', images)
+        options.set_item(section_name, 'hopfrom_dict', hopfrom)
 
