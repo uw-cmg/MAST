@@ -84,7 +84,8 @@ class RecipeParser(MASTObj):
 
     def process_hop_combinations(self, processing_lines, n_hops_dict):
         '''replace <n-n> with valid combinations mentioned in the
-           hopfrom_dict  of the input options
+           hopfrom_dict  of the input options. Also replace <n>
+           in these lines with corresponding hop numbers only
         '''
         new_lines = []
         if not n_hops_dict:
@@ -93,8 +94,13 @@ class RecipeParser(MASTObj):
             if "<n-n>" in line:
                 for hop_start, hop_end_list in n_hops_dict.iteritems():
                     for hop_end in hop_end_list:
-                        r_str = "%d-%d" % (hop_start, hop_end)
-                        new_lines.append(line.replace('<n-n>', r_str))
+                        r_str  = "%d-%d" % (hop_start, hop_end)
+                        n_line = line.replace('<n-n>', r_str)
+                        if '<n>' in n_line:
+                            new_lines.append(n_line.replace('<n>', str(hop_start)))
+                            new_lines.append(n_line.replace('<n>', str(hop_end)))
+                        else:
+                            new_lines.append(n_line)
             else:
                 new_lines.append(line)
         return new_lines
