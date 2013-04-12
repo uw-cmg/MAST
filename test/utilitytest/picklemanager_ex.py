@@ -1,11 +1,13 @@
 # PickleManger example
 
 from MAST.utility.picklemanager import PickleManager
-
 pm = PickleManager()
+
+# Pickle/Unpickle a single object
 A = 1
 pm.save_variable(A)
 A_loaded = pm.load_variable()
+
 B = 'string'
 class dummy:
     def __init__(self, id = None):
