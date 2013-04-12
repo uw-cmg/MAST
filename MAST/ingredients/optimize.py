@@ -42,17 +42,19 @@ class Optimize(BaseIngredient):
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
         myd=dict()
-        myd['IBRION']=self.keywords['program_keys']['ibrion']
-        myd['ISIF']=3
-        myd['NSW']=191
-        myd['NPAR']=4 #hardcoded - needs fixing
-        myd['PREC']="Accurate"
-        myd['ISMEAR']=1
-        myd['SIGMA']=0.2
-        myd['ISPIN']=2
-        myd['LCHARG']="False"
-        myd['LWAVE']="False"
-        myd['NSW']=191
+        for key, value in self.keywords['program_keys'].iteritems():
+            myd[key.upper()]=value
+        #myd['IBRION']=self.keywords['program_keys']['ibrion']
+        #myd['ISIF']=3
+        #myd['NSW']=191
+        #myd['NPAR']=4 #hardcoded - needs fixing
+        #myd['PREC']="Accurate"
+        #myd['ISMEAR']=1
+        #myd['SIGMA']=0.2
+        #myd['ISPIN']=2
+        #myd['LCHARG']="False"
+        #myd['LWAVE']="False"
+        #myd['NSW']=191
         myd['MAGMOM']=5*len(rep_structure.sites)
         myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
