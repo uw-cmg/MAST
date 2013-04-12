@@ -117,7 +117,7 @@ class JobTable(object):
 
     def __init__(self):
         self.jobs = {}
-        
+
     def addjob(self, job):
         if job.jid in self.jobs:
             raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
