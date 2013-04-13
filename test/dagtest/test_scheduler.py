@@ -7,8 +7,8 @@ import subprocess
 import os
 # this script location /home/hwkim/MAST4pymatgen/test/dagtest
 print "=============================================================="
-print "Let me assume that this script is run in that script location"
-print "Right now I do not know how to set the directory for output"
+print "Let me assume that this script is run in that script location "
+print "Right now I do not know how to set the directory for output   " 
 print "=============================================================="
 
 # The
@@ -31,7 +31,6 @@ subprocess.call([sys.executable, binpath, argv[0],argv[1]])
 
 pm = PickleManager()
 mastobj = pm.load_variable('mast.pickle')
-mastobj.ingreidient
 depdict = mastobj.dependency_dict
 ingredients = mastobj.ingredients
 njobs = len(ingredients)
@@ -44,6 +43,7 @@ from MAST.DAG.dagscheduler import JobEntry
 from MAST.DAG.dagscheduler import JobTable
 from MAST.DAG.dagscheduler import SessionTable
 from MAST.DAG.dagscheduler import set2str
+from MAST.DAG.dagscheduler import JOB
 # seession id
 jt = JobTable()
 st = SessionTable()
@@ -55,10 +55,16 @@ jobnames = ingredients.keys()
 jobname_id = {}
 resultrootdir = '/home/hwkim/MAST4pymatgen/test/dagtest/'
 sessiondir = os.path.join(resultrootdir,str(sid))
-for jid in range(njobs):
+
+# Refactoring with iter
+#for key, item in ingredients.iteritems():
+#    print key, item
+    
+for jid in range(njobs): 
     jobdir=os.path.join(sessiondir,jobnames[jid])
     jtype = type(ingredients[jobnames[jid]])
-    ajob = JobEntry(sid=sid, jid=jid+1, jobname=jobnames[jid],indir=jobdir,outdir=jobdir,type=jtype)
+    ajob = JobEntry(sid=sid, jid=jid+1, jobname=jobnames[jid],indir=jobdir,
+                    outdir=jobdir,type=jtype,ingredient=ingredients[jobnames[jid]])
     jt.addjob(ajob)
     jobname_id[jobnames[jid]]=jid+1
 
@@ -67,8 +73,13 @@ for child, parent in depdict.iteritems():
         print child +"<="+ aparent
         print str(jobname_id[child])+"<="+ str(jobname_id[aparent])
         jt.jobs[jobname_id[child]].addparent(jobname_id[aparent])
-    
 
+njobs = len(jt)
+for jid in range(1,njobs+1):
+    if jt.jobs[jid].isready() and jt.jobs[jid].status == JOB.PreQ:
+        print 'submit job %d' % jid
+        jt.jobs[jid].ingredient_obj.write_files()
+        
 # is_complete
 # update_children
 # write_files
