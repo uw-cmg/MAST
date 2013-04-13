@@ -69,7 +69,10 @@ for child, parent in depdict.iteritems():
         jt.jobs[jobname_id[child]].addparent(jobname_id[aparent])
     
 
-                  
+# is_complete
+# update_children
+# write_files
+
 #pm = Picklemanager()
 #rp = pm.load_variable('mast.pickle')
 
