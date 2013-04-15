@@ -55,7 +55,7 @@ class Optimize(BaseIngredient):
         #myd['LCHARG']="False"
         #myd['LWAVE']="False"
         #myd['NSW']=191
-        myd['MAGMOM']=5*len(rep_structure.sites)
+        myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
         myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
 
