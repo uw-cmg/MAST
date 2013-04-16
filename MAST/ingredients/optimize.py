@@ -116,7 +116,7 @@ class Optimize(BaseIngredient):
         else:
             return True
 
-    def run(self):
+    def run(self, mode='serial', curdir=os.getcwd()):
         if not (self.is_ready_to_run()):
             # we need a MAST Warning class
             return
@@ -124,4 +124,9 @@ class Optimize(BaseIngredient):
         runme = subprocess.Popen('qsub submit.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         runme.wait()
         return
-
+    
+    # hw 04/15/13 This will be used by scheduler
+    def getpath(self):
+        '''getpath returns the directory of the ingredient'''
+        return self.keywords['name']
+        

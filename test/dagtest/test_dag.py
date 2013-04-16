@@ -58,7 +58,7 @@ for id in range(4):
     jt.deljob(id+1)
 
 print 'Session table print test'
-s1 = SessionEntry(1,4)
+s1 = SessionEntry(sid=1,totaljobs=4)
 s2 = SessionEntry(2,3)
 st.addsession(s1)
 st.addsession(s2)

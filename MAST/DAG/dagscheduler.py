@@ -30,11 +30,24 @@ def set2str(A,maxlen=20):
     out="{"+elements+"}"
     return out
 
-Jobstatus = enum('PreQ','InQ','Complete')
+Jobstatus = enum('PreQ','InQ','Complete','Error')
 JOB = Jobstatus
     
 class JobEntry(object):
-    def __init__(self, sid, jid, jobname, indir, outdir, type):
+    '''JobEntry is an entry in class JobTable.
+        isready : method to check if this job is ready or not
+        sid : session id
+        jid : job id
+        name : jobname
+        indir : input directory
+        outdir : output directory
+        status : job status
+        type : job type
+        parents : set of parent jobs id
+        completeparents : set of complete parent jobs
+        ingredient_obj : ingredient obj
+    '''
+    def __init__(self, sid, jid, jobname, indir, outdir, type, ingredient=None):
         self.sid = sid # session id
         self.jid = jid # job id which is unique in a session.
         self.name = jobname # job name may or may not be unique.
@@ -42,16 +55,22 @@ class JobEntry(object):
         self.outdir = outdir # output directory
         self.status = JOB.PreQ # enum or integer
         self.type = type # string
-        self.parents = set()
-        self.completeparents = set()
+        self.parents = set() # jid of parents
+        self.completeparents = set() #jid of complete parents
+        self.ingredient_obj = ingredient #ingredient object
+        self.children = set() # jid of children
         
     def addparent(self, jid):
         self.parents.add(jid)
+
+    def addchild(self,jid):
+        self.children.add(jid)
         
     def completeparent(self, jid):
         self.completeparents.add(jid)
 
-    def isready(self):
+    def is_ready(self):
+        '''isready returns whether this is ready or not'''
         return len(self.parents) == len(self.completeparents)
     
     def __str__(self):
@@ -117,7 +136,7 @@ class JobTable(object):
 
     def __init__(self):
         self.jobs = {}
-        
+
     def addjob(self, job):
         if job.jid in self.jobs:
             raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
@@ -141,7 +160,10 @@ class JobTable(object):
         for row in data:
             out += row_format.format(*row)+"\n"
         return out
-
+    
+    def __len__(self):
+        '''len(jobtableobj) = number of jobs'''
+        return len(self.jobs)
         
         
 class SessionTable(object):
@@ -176,7 +198,7 @@ class SessionTable(object):
 class Job(object):
     '''If previous version of dag scheduler or graph
         are not used, I will remove dictionary.
-        I don't think we need dictionary for this if database
+        I donot think we need dictionary for this if database
         is used for scheduling. hwkim
     '''
     def __init__(self, name):
