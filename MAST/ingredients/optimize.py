@@ -11,9 +11,11 @@ from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 
 import os
 import shutil
+import subprocess
 #TA
 
 
@@ -35,6 +37,8 @@ class Optimize(BaseIngredient):
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_structure(self.keywords['name'], childname)       
     def write_files(self):
+        if self.is_ready_to_run():
+            return
         if self.keywords['program'] == 'vasp':
             self.set_up_vasp_optimize()
         else:
@@ -76,5 +80,48 @@ class Optimize(BaseIngredient):
         incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
         topincar = Incar(incar_dict)
         topincar.write_file(name + "/INCAR")
+        self.write_submit_script()
+        return
+    
+    def write_submit_script(self):
+        myfile = open(dirutil.get_mast_install_path() + '/submit/node1.sh','rb')
+        mylines=myfile.readlines()
+        myfile.close()
+        bname = os.path.basename(self.keywords['name'])
+        myct=0
+        while myct < len(mylines):
+            if "#PBS -N" in mylines[myct]:
+                mylines[myct] = "#PBS -N " + bname + '\n'
+            myct=myct+1
+        mywrite = open(self.keywords['name']+'/submit.sh','wb')
+        mywrite.writelines(mylines)
+        mywrite.close()
+        return
+
+    def is_ready_to_run(self):
+        name = self.keywords['name']
+        notready=0
+        if not(os.path.isfile(name + "/KPOINTS")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/POTCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/INCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/POSCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/submit.sh")):
+            notready = notready + 1
+        if notready > 0:
+            return False
+        else:
+            return True
+
+    def run(self):
+        if not (self.is_ready_to_run()):
+            # we need a MAST Warning class
+            return
+        os.chdir(self.keywords['name'])
+        runme = subprocess.Popen('qsub submit.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        runme.wait()
         return
 
