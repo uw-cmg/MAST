@@ -76,3 +76,13 @@ class Optimize(BaseIngredient):
         topincar.write_file(name + "/INCAR")
         return
 
+    # hw 04/15/13 This will be used by scheduler
+    # I don't know what is RUN going to be now.
+    def run(self, mode='serial',curdir = os.getcwd()):
+        raise NotImplementedError('Run method is not implemented!')
+    
+    # hw 04/15/13 This will be used by scheduler
+    def getpath(self):
+        '''getpath returns the directory of the ingredient'''
+        return self.keywords['name']
+        

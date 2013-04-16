@@ -11,6 +11,9 @@ print "Let me assume that this script is run in that script location "
 print "Right now I do not know how to set the directory for output   " 
 print "=============================================================="
 
+#save current directory like pushd .
+curdir = os.getcwd()
+
 # The
 argv=[]
 mastrootdir = os.environ['SCRIPTPATH']
@@ -24,7 +27,7 @@ inputfile = os.path.join(mastrootdir,'test/full_workflow_test/test.inp')
 print 'input directory : ' + inputfile
 argv.append('-i')
 argv.append(inputfile)
-#sys.path.append(bindir)
+sys.path.append(bindir)
 #import mast_test
 #mast_test.main(argv[0],argv[1])
 subprocess.call([sys.executable, binpath, argv[0],argv[1]])
@@ -34,7 +37,8 @@ mastobj = pm.load_variable('mast.pickle')
 depdict = mastobj.dependency_dict
 ingredients = mastobj.ingredients
 njobs = len(ingredients)
-
+#import pdb
+#pdb.set_trace()
 from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.DAG.dagscheduler import JobEntry
 from MAST.DAG.dagscheduler import DAGParser
@@ -73,13 +77,51 @@ for child, parent in depdict.iteritems():
         print child +"<="+ aparent
         print str(jobname_id[child])+"<="+ str(jobname_id[aparent])
         jt.jobs[jobname_id[child]].addparent(jobname_id[aparent])
-
-njobs = len(jt)
-for jid in range(1,njobs+1):
-    if jt.jobs[jid].isready() and jt.jobs[jid].status == JOB.PreQ:
-        print 'submit job %d' % jid
-        jt.jobs[jid].ingredient_obj.write_files()
+        jt.jobs[jobname_id[aparent]].addchild(jobname_id[child])
         
+
+# Write files
+for jid in jt.jobs.keys():
+    if jt.jobs[jid].is_ready() and jt.jobs[jid].status == JOB.PreQ:
+        print 'write files for job %d' % jid
+        jt.jobs[jid].ingredient_obj.write_files()
+# Run 
+#for jid in jt.jobs.keys():
+#    if jt.jobs[jid].stats is JOB.InQ and jt.jobs[jid].is_ready():
+#        #run it TO DO:
+        
+ling = ingredients.values()
+ling[0].is_complete()
+# check the jobs status
+for jid in jt.jobs.keys():
+    if jt.jobs[jid].status == JOB.InQ and jt.jobs[jid].ingredient_obj.is_complte():
+        jt.jobs[jid].status = JOB.Complete
+        jt.jobs[jid].ingredient_obj.udpate_children()
+        
+    for cjid in list(jt.jobs[jid].children):
+        jt.jobs[cjid].completeparent(jid)
+
+
+# Each job should has run() method.
+# Session Table should be updated.
+'''
+submitjob
+Session Table
+PreQ => InQ
+compltejob
+InQ => Complete
+Error
+'''
+
+# We need new method to check whether all files are ready to run before submitting the job.
+
+# update table
+#for jid in jt.jobs.keys():
+#    if jt.jobs[jid].ingredient_obj.
+
+        
+#ling[0].update_children()
+
 # is_complete
 # update_children
 # write_files

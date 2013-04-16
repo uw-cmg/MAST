@@ -30,7 +30,7 @@ def set2str(A,maxlen=20):
     out="{"+elements+"}"
     return out
 
-Jobstatus = enum('PreQ','InQ','Complete')
+Jobstatus = enum('PreQ','InQ','Complete','Error')
 JOB = Jobstatus
     
 class JobEntry(object):
@@ -55,17 +55,21 @@ class JobEntry(object):
         self.outdir = outdir # output directory
         self.status = JOB.PreQ # enum or integer
         self.type = type # string
-        self.parents = set()
-        self.completeparents = set()
+        self.parents = set() # jid of parents
+        self.completeparents = set() #jid of complete parents
         self.ingredient_obj = ingredient #ingredient object
+        self.children = set() # jid of children
         
     def addparent(self, jid):
         self.parents.add(jid)
+
+    def addchild(self,jid):
+        self.children.add(jid)
         
     def completeparent(self, jid):
         self.completeparents.add(jid)
 
-    def isready(self):
+    def is_ready(self):
         '''isready returns whether this is ready or not'''
         return len(self.parents) == len(self.completeparents)
     
