@@ -96,20 +96,22 @@ class PerformNEB(BaseIngredient):
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
         myd=dict()
-        myd['IBRION']=1
-        myd['POTIM']=0.5
-        myd['ISIF']=2
-        myd['LCLIMB']=True
-        myd['NSW']=191
-        myd['NPAR']=4
-        myd['PREC']="Accurate"
-        myd['ISMEAR']=0
-        myd['SIGMA']=0.05
-        myd['ISPIN']=2
-        myd['IMAGES']=self.keywords['program_keys']['images']
-        myd['LCHARG']="False"
-        myd['LWAVE']="False"
-        myd['NSW']=191
+        for key, value in self.keywords['program_keys'].iteritems():
+            myd[key.upper()]=value
+        #myd['IBRION']=1
+        #myd['POTIM']=0.5
+        #myd['ISIF']=2
+        #myd['LCLIMB']=True
+        #myd['NSW']=191
+        #myd['NPAR']=4
+        #myd['PREC']="Accurate"
+        #myd['ISMEAR']=0
+        #myd['SIGMA']=0.05
+        #myd['ISPIN']=2
+        #myd['IMAGES']=self.keywords['program_keys']['images']
+        #myd['LCHARG']="False"
+        #myd['LWAVE']="False"
+        #myd['NSW']=191
         myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
         myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
