@@ -5,6 +5,11 @@ from MAST.recipe.recipe_plan import RecipePlan
 import sys
 import subprocess
 import os
+
+def myrun(cmd):
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    return p
+
 # this script location /home/hwkim/MAST4pymatgen/test/dagtest
 print "=============================================================="
 print "Let me assume that this script is run in that script location "
@@ -37,6 +42,7 @@ mastobj = pm.load_variable('mast.pickle')
 depdict = mastobj.dependency_dict
 ingredients = mastobj.ingredients
 njobs = len(ingredients)
+
 #import pdb
 #pdb.set_trace()
 from MAST.DAG.dagscheduler import DAGScheduler
@@ -78,7 +84,6 @@ for child, parent in depdict.iteritems():
         print str(jobname_id[child])+"<="+ str(jobname_id[aparent])
         jt.jobs[jobname_id[child]].addparent(jobname_id[aparent])
         jt.jobs[jobname_id[aparent]].addchild(jobname_id[child])
-        
 
 # Write files
 for jid in jt.jobs.keys():
@@ -101,9 +106,17 @@ for jid in jt.jobs.keys():
     for cjid in list(jt.jobs[jid].children):
         jt.jobs[cjid].completeparent(jid)
 
+# overwrite correct INCAR file
+dstpath = jt.jobs[1].ingredient_obj.getpath()
+srcpath = os.getcwd()
+os.system('cp %s/INCAR %s/' %(srcpath,dstpath))
 
+#os.system('INCAR'
+#os.system('/home/hwkim/bin/vasp5.2_cNEB')
+#p = myrun('/home/hwkim/bin/vasp5.2_cNEB')
 # Each job should has run() method.
 # Session Table should be updated.
+
 '''
 submitjob
 Session Table

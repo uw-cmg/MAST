@@ -14,6 +14,7 @@ from MAST.utility import MASTError
 
 import os
 import shutil
+import subprocess
 #TA
 
 
@@ -79,7 +80,16 @@ class Optimize(BaseIngredient):
     # hw 04/15/13 This will be used by scheduler
     # I don't know what is RUN going to be now.
     def run(self, mode='serial',curdir = os.getcwd()):
-        raise NotImplementedError('Run method is not implemented!')
+        '''Check this part'''
+        if self.is_ready_to_run():
+        #Adhoc for correcting wrong INCAR
+        dstpath = self.keywords['name']
+        os.system('cp %s/INCAR %s/' %(curdir, dstpath))
+        os.system('cd %d' % dstpath)
+        
+        # Run program
+        programpath = os.path.expanduser('~/bin/vasp5.2_cNEB')
+        p = subprocess.call([programpath])
     
     # hw 04/15/13 This will be used by scheduler
     def getpath(self):
