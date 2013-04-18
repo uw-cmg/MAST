@@ -1,0 +1,3 @@
+pathtorun
+pathofvasp
+
