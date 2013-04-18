@@ -1,8 +1,10 @@
 import datetime
+import time
 
 now = datetime.datetime.utcnow()
 MAXSID = 10000
 MAXJID = 100000
+SCHEDULING_INTERVAL = 10
 
 def enum(**enums):
     return type('Enum',(),enums)
@@ -63,7 +65,7 @@ class JobEntry(object):
 
         if jobname is not None:
             self.name = jobname
-        else if ingredient is not None:
+        elif ingredient is not None:
             self.name = ingredient.keywords['name'].split('/')[-1]
         else:
             self.name = 'noname'
@@ -112,15 +114,15 @@ class SessionEntry(object):
         self.inq_jobs = 0
         self.completejobs = 0
         
-    def submitjobs(njobs):
+    def set_jobs_to_submitted(self, njobs):
         self.preq_jobs -= njobs
         self.inq_jobs += njobs
 
-    def completejobs(njobs):
+    def set_jobs_to_complete(self, njobs):
         self.inq_jobs -= njobs
-        self.complete_jobs += njobs
+        self.completejobs += njobs
 
-    def addnewjobs(njobs, status = JOB.PreQ):
+    def add_newjobs(self, njobs, status = JOB.PreQ):
         self.totaljobs += njobs
         if status is JOB.PreQ:
             self.preq_jobs += njobs
@@ -129,7 +131,7 @@ class SessionEntry(object):
         elif status is JOB.Complete:
             self.completejobs += njobs
         
-    def iscomplete():
+    def is_complete(self):
         return self.completejobs == self.totaljobs
     
     def __str__(self):
@@ -154,7 +156,7 @@ class JobTable(object):
         self._nextjid = 1
         self._name2jid = {}
 
-    def add_depdency(parent, child):
+    def add_dependency(self, parent, child):
         self.jobs[self._name2jid[child]].addparent(self._name2jid[parent])
         self.jobs[self._name2jid[parent]].addchild(self._name2jid[child])
 
@@ -187,16 +189,16 @@ class JobTable(object):
         '''len(jobtableobj) = number of jobs'''
         return len(self.jobs)
 
-    def getjid(self):
+    def get_jid(self):
         '''get_sid returns unique session id in a session table object.'''
         while (self._nextjid in self.jobs):
-            self._nextsid = (self._nextjid + 1) % MAXJID + 1
+            self._nextjid = (self._nextjid ) % MAXJID + 1
         return self._nextjid
     
-    def update_complete_parent_set(children_jids, complete_parent_jid):
+    def update_complete_parent_set(self, children_jids, complete_parent_jid):
         if type(children_jids) is not list:
             children_jids = list(children_jids)
-        for cjid in chlidren_jids:
+        for cjid in children_jids:
             self.jobs[cjid].completeparent(complete_parent_jid)
             
 class SessionTable(object):
@@ -205,13 +207,13 @@ class SessionTable(object):
         self._nextsid = 1
         
     def completejobs(self, sid, njobs):
-        self.sessions[sid].completejobs(njobs)
-
-    def runjobs(self, sid, njobs):
-        submitjobs(sid, njobs)
+        self.sessions[sid].set_jobs_to_complete(njobs)
         
     def submitjobs(self, sid, njobs):
-        self.sessions[sid].submitjobs(njobs)
+        self.sessions[sid].set_jobs_to_submitted(njobs)
+
+    def runjobs(self, sid, njobs):
+        self.submitjobs(sid, njobs)
         
     def addsession(self, session):
         if session.sid in self.sessions:
@@ -239,7 +241,7 @@ class SessionTable(object):
     def get_sid(self):
         '''get_sid returns unique session id in a session table object.'''
         while (self._nextsid in self.sessions):
-            self._nextsid = (self._nextsid + 1) % MAXSID + 1
+            self._nextsid = (self._nextsid ) % MAXSID + 1
         return self._nextsid
 
     def addnewjobs(self, sid, njobs, status = JOB.PreQ):
@@ -433,54 +435,80 @@ class DAGParser:
         return jobs_dict 
 
 class DAGScheduler:
-    '''In a session, the maximum number of jobs is 100,000 at once.'''
+    '''In a session, the maximum number of jobs is MAXJID at once.'''
     def __init__(self):
         self.jobtable = JobTable()
         self.sessiontable = SessionTable()
-        self._MAXJOBS_IN_A_SESSION = 100,000
-        self._name2jid={} # jobname->jid
+        self._run_mode = 'noqsub' # noqsub, serial (by qsub), parallel
+
+    def set_mode(self,mode):
+        self._run_mode = mode
         
+    def has_complete_session(self):
+        '''check all sessions in session table and returns number of complete session'''
+        ncomplete_sessions=0
+        for assession in self.sessiontable.sessions.itervalues():
+            if assession.is_complete():
+                ncomplete_sessions = ncomplete_sessions +1
+        return ncomplete_sessions
+    
+    def has_incomplete_session(self):
+        return not len(self.sessiontable.sessions) == self.has_complete_session()
+        
+    def has_session(self, sid):
+        return sid in self.sessiontable.sessions
+
     def addjobs(self, ingredients_dict, dependency_dict, sid=None):
         '''If sid is not specified, then new unique sid will be assigned.'''
 
         if sid is None:
             sid = self.sessiontable.get_sid()
-            
+
+        njobs = len(ingredients_dict)
         # Add a new session 
-        if sid in not sessiontable:
-            assesion = SessionEntry(sid,0)
+        if not self.has_session(sid):
+            asession = SessionEntry(sid,njobs)
             self.sessiontable.addsession(asession)
+        else:
+            self.sessiontable[sid].addnewjobs(njobs)
             
         # Insert jobs
         for name, ingredient in ingredients_dict.iteritems():
-            jid = jobtable.getjid()
+            jid = self.jobtable.get_jid()
             ajob = JobEntry(sid=sid, jid=jid, jobname=name, ingredient=ingredient)
+            print jid, name
             self.jobtable.addjob(ajob)
-
+            
         # Update depdict
-        for child, parent in depdict.iteritems():
+        for child, parent in dependency_dict.iteritems():
             for aparent in parent:
                 # For DEBUGGING
                 print child +"<="+ aparent
-                print str(self._name2jid[child])+"<="+ str(self._name2jid[aparent])
                 self.jobtable.add_dependency(aparent,child)
 
-    def update_job_status():
+    def update_job_status(self):
         '''udpate session table and update children'''
-        for jid, job in self.jobtable.iteritems():
+        for jid, job in self.jobtable.jobs.iteritems():
             if job.status == JOB.InQ and job.ingredient_obj.is_complete():
                 job.status = JOB.Complete
+                print '\njob [%s] is complete' % job.name
                 self.sessiontable.completejobs(job.sid, njobs=1)
-                job.ingredient_obj.udpate_children()
+                job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
                 
-    def run_jobs():
-        for jid, job in self.jobtable.iteritems():
-            if job.status is JOB.PreQ and job.is_ready():
-                job.ingredient_obj.run()
+    def run_jobs(self):
+        for jid, job in self.jobtable.jobs.iteritems():
+            if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
+                print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
+                job.ingredient_obj.run(mode=self._run_mode)
                 job.status = JOB.InQ
                 sid = job.sid
-                self.sessiontable.runjobs(sid=sid, njobs=1)
+                self.sessiontable.runjobs(sid=sid, njobs=1) # update session table
+                
+            if job.status is JOB.PreQ and job.is_ready():
+                print 'write files [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
+                job.ingredient_obj.write_files()
+
         
     def schedule(self, jobs_file):
         '''Parses the input file and applies topological sorting
@@ -507,6 +535,22 @@ class DAGScheduler:
              return []
         return tasks_list
 
+    def show_session_table(self):
+        print ' '
+        print self.sessiontable
+
+    def run(self):
+        while self.has_incomplete_session():
+            self._run()
+            time.sleep(SCHEDULING_INTERVAL)
+            
+    def _run(self):
+        print ':: run jobs ::'
+        self.run_jobs()
+        print ':: update job status ::'
+        self.update_job_status()
+        
+        
 # This part is for developing job and parser
 def get_parent_child_sets(tokens):
     '''This function returns two sets as a tuple.
