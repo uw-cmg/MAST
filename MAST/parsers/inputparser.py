@@ -169,6 +169,8 @@ class InputParser(MASTObj):
                 0.0 0.0 2.0
                 end
 
+            Note that coord_type will default to "cartesian" if not specified.
+
         """
         structure_dict = STRUCTURE_KEYWORDS.copy() # Initialize with default values
         subsection_dict = dict()
