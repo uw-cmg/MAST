@@ -1,10 +1,4 @@
 # Test file
-$unitcell
-2.0 0.0 0.0
-0.0 2.0 0.0
-0.0 0.0 2.0
-$end
-
 $MaSt
 program VASP
 system_name GaAsBi
@@ -12,6 +6,8 @@ $end
 
 $structure
 coord_type fractional
+
+begin coordinates
 Ga 0.000000 0.000000 0.000000
 Ga 0.500000 0.500000 0.000000
 Ga 0.000000 0.500000 0.500000
@@ -20,6 +16,13 @@ As 0.250000 0.250000 0.250000
 As 0.750000 0.750000 0.250000
 As 0.250000 0.750000 0.750000
 As 0.750000 0.250000 0.750000
+end
+
+begin lattice
+2.0 0.0 0.0
+0.0 2.0 0.0
+0.0 0.0 2.0
+end
 $end
 
 $defects

@@ -100,10 +100,16 @@ class MAST(MASTObj):
         posfile = self.input_options.get_item('structure', 'posfile')
 
         if (posfile is None):
-            lattice = self.input_options.get_item('unitcell', 'lattice')
+            lattice = self.input_options.get_item('structure', 'lattice')
             coordinates = self.input_options.get_item('structure', 'coordinates')
             atom_list = self.input_options.get_item('structure', 'atom_list')
             coord_type = self.input_options.get_item('structure', 'coord_type')
+
+            print 'In MAST._build_structure():'
+            print 'lattice =', lattice
+            print 'coordinates =', coordinates
+            print 'atom_list =', atom_list
+            print 'coord_type =', coord_type
 
             self.structure = MAST2Structure(lattice=lattice,
                                             coordinates=coordinates,
