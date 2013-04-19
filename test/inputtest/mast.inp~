@@ -1,16 +1,19 @@
+# Test file
 $unitcell
 2.0 0.0 0.0
 0.0 2.0 0.0
 0.0 0.0 2.0
 $end
 
-$mast
-program vasp
+$MaSt
+program VASP
 system_name GaAsBi
 $end
 
-$geometry
+$structure
 coord_type fractional
+
+begin coordinates
 Ga 0.000000 0.000000 0.000000
 Ga 0.500000 0.500000 0.000000
 Ga 0.000000 0.500000 0.500000
@@ -19,6 +22,7 @@ As 0.250000 0.250000 0.250000
 As 0.750000 0.750000 0.250000
 As 0.250000 0.750000 0.750000
 As 0.750000 0.250000 0.750000
+end
 $end
 
 $defects
@@ -27,7 +31,22 @@ vacancy 0.0 0.0 0.0 Ga
 interstitial 0.25 0.25 0.25 As
 $end
 
-$program
-SinplePoint(kpoints=(3,3,3), encut=400, nelm=2000)
-Optimize(encut=300)
+$ingredients
+begin ingredients_global
+kpoints 3x3x3
+xc pbe
+end
+
+begin singlepoint
+encut 400
+end
+
+begin optimize
+encut 300
+ibrion 2
+end
+$end
+
+$recipe
+recipe_file recipe_defects.txt
 $end
