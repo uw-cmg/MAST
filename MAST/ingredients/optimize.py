@@ -11,9 +11,12 @@ from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
 from MAST.ingredients import BaseIngredient
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 
 import os
 import shutil
+import subprocess
+import time
 #TA
 
 
@@ -33,27 +36,37 @@ class Optimize(BaseIngredient):
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_structure(self.keywords['name'], childname)       
+            self.forward_parent_structure(self.keywords['name'], childname)
+            
     def write_files(self):
+        if self.is_ready_to_run():
+            return
         if self.keywords['program'] == 'vasp':
             self.set_up_vasp_optimize()
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
 
+        while not self.is_ready_to_run():
+            print 'writing files...'
+            time.sleep(CHECKPERIOD)
+            
+
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
         myd=dict()
-        myd['IBRION']=self.keywords['program_keys']['ibrion']
-        myd['ISIF']=3
-        myd['NSW']=191
-        myd['NPAR']=4 #hardcoded - needs fixing
-        myd['PREC']="Accurate"
-        myd['ISMEAR']=1
-        myd['SIGMA']=0.2
-        myd['ISPIN']=2
-        myd['LCHARG']="False"
-        myd['LWAVE']="False"
-        myd['NSW']=191
-        myd['MAGMOM']=5*len(rep_structure.sites)
+        for key, value in self.keywords['program_keys'].iteritems():
+            myd[key.upper()]=value
+        #myd['IBRION']=self.keywords['program_keys']['ibrion']
+        #myd['ISIF']=3
+        #myd['NSW']=191
+        #myd['NPAR']=4 #hardcoded - needs fixing
+        #myd['PREC']="Accurate"
+        #myd['ISMEAR']=1
+        #myd['SIGMA']=0.2
+        #myd['ISPIN']=2
+        #myd['LCHARG']="False"
+        #myd['LWAVE']="False"
+        #myd['NSW']=191
+        myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
         myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
         return myd
 
@@ -74,5 +87,66 @@ class Optimize(BaseIngredient):
         incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
         topincar = Incar(incar_dict)
         topincar.write_file(name + "/INCAR")
+        self.write_submit_script()
+        return
+    
+    def write_submit_script(self):
+        myfile = open(dirutil.get_mast_install_path() + '/submit/node1.sh','rb')
+        mylines=myfile.readlines()
+        myfile.close()
+        bname = os.path.basename(self.keywords['name'])
+        myct=0
+        while myct < len(mylines):
+            if "#PBS -N" in mylines[myct]:
+                mylines[myct] = "#PBS -N " + bname + '\n'
+            myct=myct+1
+        mywrite = open(self.keywords['name']+'/submit.sh','wb')
+        mywrite.writelines(mylines)
+        mywrite.close()
         return
 
+    def is_ready_to_run(self):
+        name = self.keywords['name']
+        notready=0
+        if not(os.path.isfile(name + "/KPOINTS")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/POTCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/INCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/POSCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(name + "/submit.sh")):
+            notready = notready + 1
+        if notready > 0:
+            return False
+        else:
+            return True
+
+    def run(self, mode='noqsub', curdir=os.getcwd()):
+        if not (self.is_ready_to_run()):
+            # we need a MAST Warning class
+            raise
+ 
+        if mode is 'noqsub':
+            curdir = os.getcwd()
+            os.chdir(self.keywords['name'])
+            programpath = '//share/apps/vasp5.2_cNEB' # This should be replaced by more general way.
+            p = subprocess.call([programpath])
+            os.chdir(curdir)
+            
+        elif mode is 'serial':
+            curdir = os.getcwd()
+            os.chdir(self.keywords['name'])
+            runme = subprocess.Popen('qsub submit.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            os.chdir(curdir)
+            # for scheduling other jobs
+            #runme.wait()
+            return
+
+    
+    # hw 04/15/13 This will be used by scheduler
+    def getpath(self):
+        '''getpath returns the directory of the ingredient'''
+        return self.keywords['name']
+        

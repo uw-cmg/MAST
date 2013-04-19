@@ -1,5 +1,10 @@
 import datetime
+import time
+
 now = datetime.datetime.utcnow()
+MAXSID = 10000
+MAXJID = 100000
+SCHEDULING_INTERVAL = 10
 
 def enum(**enums):
     return type('Enum',(),enums)
@@ -30,28 +35,55 @@ def set2str(A,maxlen=20):
     out="{"+elements+"}"
     return out
 
-Jobstatus = enum('PreQ','InQ','Complete')
+Jobstatus = enum('PreQ','InQ','Complete','Error')
 JOB = Jobstatus
     
 class JobEntry(object):
-    def __init__(self, sid, jid, jobname, indir, outdir, type):
+    '''JobEntry is an entry in class JobTable.
+        isready : method to check if this job is ready or not
+        sid : session id
+        jid : job id
+        name : jobname
+        status : job status
+        parents : set of parent jobs id
+        completeparents : set of complete parent jobs
+        ingredient_obj : ingredient obj
+    '''
+    def __init__(self, sid, jid, jobname=None, type=None, ingredient=None):
         self.sid = sid # session id
         self.jid = jid # job id which is unique in a session.
         self.name = jobname # job name may or may not be unique.
-        self.indir = indir # input directory
-        self.outdir = outdir # output directory
         self.status = JOB.PreQ # enum or integer
-        self.type = type # string
-        self.parents = set()
-        self.completeparents = set()
+        self.parents = set() # jid of parents
+        self.completeparents = set() #jid of complete parents
+        self.children = set() # jid of children
+        
+        if ingredient is not None:
+            self.type = gettype(ingredient)
+        else:
+            self.type = type # string
+
+        if jobname is not None:
+            self.name = jobname
+        elif ingredient is not None:
+            self.name = ingredient.keywords['name'].split('/')[-1]
+        else:
+            self.name = 'noname'
+
+        self.ingredient_obj = ingredient #ingredient object
+
         
     def addparent(self, jid):
         self.parents.add(jid)
+
+    def addchild(self,jid):
+        self.children.add(jid)
         
     def completeparent(self, jid):
         self.completeparents.add(jid)
 
-    def isready(self):
+    def is_ready(self):
+        '''isready returns whether this is ready or not'''
         return len(self.parents) == len(self.completeparents)
     
     def __str__(self):
@@ -72,7 +104,6 @@ class JobEntry(object):
     @classmethod
     def getformat(cls):
         return "{:>5}{:>6}{:>8}{:>5}{:>5}{:>15}{:>20}"
-
     
 class SessionEntry(object):
 
@@ -83,19 +114,24 @@ class SessionEntry(object):
         self.inq_jobs = 0
         self.completejobs = 0
         
-    def submitjobs(njobs):
+    def set_jobs_to_submitted(self, njobs):
         self.preq_jobs -= njobs
         self.inq_jobs += njobs
 
-    def completejobs(njobs):
+    def set_jobs_to_complete(self, njobs):
         self.inq_jobs -= njobs
-        self.complete_jobs += njobs
+        self.completejobs += njobs
 
-    def addnewjobs(njobs):
+    def add_newjobs(self, njobs, status = JOB.PreQ):
         self.totaljobs += njobs
-        self.preq_jobs += njobs
+        if status is JOB.PreQ:
+            self.preq_jobs += njobs
+        elif status is JOB.InQ:
+            self.inq_jobs += njobs
+        elif status is JOB.Complete:
+            self.completejobs += njobs
         
-    def iscomplete():
+    def is_complete(self):
         return self.completejobs == self.totaljobs
     
     def __str__(self):
@@ -117,12 +153,19 @@ class JobTable(object):
 
     def __init__(self):
         self.jobs = {}
-        
+        self._nextjid = 1
+        self._name2jid = {}
+
+    def add_dependency(self, parent, child):
+        self.jobs[self._name2jid[child]].addparent(self._name2jid[parent])
+        self.jobs[self._name2jid[parent]].addchild(self._name2jid[child])
+
     def addjob(self, job):
         if job.jid in self.jobs:
             raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
         self.jobs[job.jid] = job
-        
+        self._name2jid[job.name] = job.jid
+
     def deljob(self, jid):
         if jid not in self.jobs:
             raise Exception("JOB ID (jid=%d) DOESN'T EXIST" % jid)
@@ -141,12 +184,36 @@ class JobTable(object):
         for row in data:
             out += row_format.format(*row)+"\n"
         return out
+    
+    def __len__(self):
+        '''len(jobtableobj) = number of jobs'''
+        return len(self.jobs)
 
-        
-        
+    def get_jid(self):
+        '''get_sid returns unique session id in a session table object.'''
+        while (self._nextjid in self.jobs):
+            self._nextjid = (self._nextjid ) % MAXJID + 1
+        return self._nextjid
+    
+    def update_complete_parent_set(self, children_jids, complete_parent_jid):
+        if type(children_jids) is not list:
+            children_jids = list(children_jids)
+        for cjid in children_jids:
+            self.jobs[cjid].completeparent(complete_parent_jid)
+            
 class SessionTable(object):
     def __init__(self):
         self.sessions = {}
+        self._nextsid = 1
+        
+    def completejobs(self, sid, njobs):
+        self.sessions[sid].set_jobs_to_complete(njobs)
+        
+    def submitjobs(self, sid, njobs):
+        self.sessions[sid].set_jobs_to_submitted(njobs)
+
+    def runjobs(self, sid, njobs):
+        self.submitjobs(sid, njobs)
         
     def addsession(self, session):
         if session.sid in self.sessions:
@@ -170,13 +237,20 @@ class SessionTable(object):
         for row in data:
             out += row_format.format(*row)+"\n"
         return out
+    
+    def get_sid(self):
+        '''get_sid returns unique session id in a session table object.'''
+        while (self._nextsid in self.sessions):
+            self._nextsid = (self._nextsid ) % MAXSID + 1
+        return self._nextsid
 
+    def addnewjobs(self, sid, njobs, status = JOB.PreQ):
+        self.sessions[sid].addnewjobs(njobs,status)
         
-
 class Job(object):
     '''If previous version of dag scheduler or graph
         are not used, I will remove dictionary.
-        I don't think we need dictionary for this if database
+        I donot think we need dictionary for this if database
         is used for scheduling. hwkim
     '''
     def __init__(self, name):
@@ -240,7 +314,7 @@ class IDManager(object):
         return self.nextsid
     
 class DAGParser:
-    ''' DAGPARSER has no member. So you don't need to make instance of this class.
+    ''' DAGPARSER has no member. So you do not need to make instance of this class.
     '''
     def __init__(self):
         pass
@@ -361,10 +435,81 @@ class DAGParser:
         return jobs_dict 
 
 class DAGScheduler:
+    '''In a session, the maximum number of jobs is MAXJID at once.'''
     def __init__(self):
-        self.dag_parser    = DAGParser()
-        pass
+        self.jobtable = JobTable()
+        self.sessiontable = SessionTable()
+        self._run_mode = 'noqsub' # noqsub, serial (by qsub), parallel
+
+    def set_mode(self,mode):
+        self._run_mode = mode
+        
+    def has_complete_session(self):
+        '''check all sessions in session table and returns number of complete session'''
+        ncomplete_sessions=0
+        for assession in self.sessiontable.sessions.itervalues():
+            if assession.is_complete():
+                ncomplete_sessions = ncomplete_sessions +1
+        return ncomplete_sessions
     
+    def has_incomplete_session(self):
+        return not len(self.sessiontable.sessions) == self.has_complete_session()
+        
+    def has_session(self, sid):
+        return sid in self.sessiontable.sessions
+
+    def addjobs(self, ingredients_dict, dependency_dict, sid=None):
+        '''If sid is not specified, then new unique sid will be assigned.'''
+
+        if sid is None:
+            sid = self.sessiontable.get_sid()
+
+        njobs = len(ingredients_dict)
+        # Add a new session 
+        if not self.has_session(sid):
+            asession = SessionEntry(sid,njobs)
+            self.sessiontable.addsession(asession)
+        else:
+            self.sessiontable[sid].addnewjobs(njobs)
+            
+        # Insert jobs
+        for name, ingredient in ingredients_dict.iteritems():
+            jid = self.jobtable.get_jid()
+            ajob = JobEntry(sid=sid, jid=jid, jobname=name, ingredient=ingredient)
+            print jid, name
+            self.jobtable.addjob(ajob)
+            
+        # Update depdict
+        for child, parent in dependency_dict.iteritems():
+            for aparent in parent:
+                # For DEBUGGING
+                print child +"<="+ aparent
+                self.jobtable.add_dependency(aparent,child)
+
+    def update_job_status(self):
+        '''udpate session table and update children'''
+        for jid, job in self.jobtable.jobs.iteritems():
+            if job.status == JOB.InQ and job.ingredient_obj.is_complete():
+                job.status = JOB.Complete
+                print '\njob [%s] is complete' % job.name
+                self.sessiontable.completejobs(job.sid, njobs=1)
+                job.ingredient_obj.update_children()
+                self.jobtable.update_complete_parent_set(job.children,jid)
+                
+    def run_jobs(self):
+        for jid, job in self.jobtable.jobs.iteritems():
+            if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
+                print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
+                job.ingredient_obj.run(mode=self._run_mode)
+                job.status = JOB.InQ
+                sid = job.sid
+                self.sessiontable.runjobs(sid=sid, njobs=1) # update session table
+                
+            if job.status is JOB.PreQ and job.is_ready():
+                print 'write files [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
+                job.ingredient_obj.write_files()
+
+        
     def schedule(self, jobs_file):
         '''Parses the input file and applies topological sorting
            to find the set of jobs in topological order
@@ -390,15 +535,22 @@ class DAGScheduler:
              return []
         return tasks_list
 
-def main(jobs_file):
-    sch_obj    = DAGScheduler()
-    tasks_list = sch_obj.schedule(jobs_file)
-    for index, tasks in enumerate(tasks_list):
-        print "%d ==> %s\n" % (index + 1, ", ".join([job.plan() for job in tasks]))
+    def show_session_table(self):
+        print ' '
+        print self.sessiontable
 
-if __name__ == "__main__":
-    main("jobs_input1.txt")
-
+    def run(self):
+        while self.has_incomplete_session():
+            self._run()
+            time.sleep(SCHEDULING_INTERVAL)
+            
+    def _run(self):
+        print ':: run jobs ::'
+        self.run_jobs()
+        print ':: update job status ::'
+        self.update_job_status()
+        
+        
 # This part is for developing job and parser
 def get_parent_child_sets(tokens):
     '''This function returns two sets as a tuple.
@@ -423,3 +575,9 @@ def get_parent_child_sets(tokens):
         if ischild:
             childset.add(item)
     return (parentset, childset)
+
+def gettype(ingredientobj):
+    stype=str(type(ingredientobj))
+    stype = stype[1:-1]
+    tokens = stype.replace("'","").split('.')
+    return tokens[-1]

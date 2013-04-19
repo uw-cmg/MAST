@@ -34,6 +34,7 @@ class TestOptimize(unittest.TestCase):
         myOpt.keywords['structure'] = Poscar.from_file('expected_opt1/POSCAR').structure 
         myOpt.write_files()
         difflist = dircmp("test_opt1","expected_write").diff_files
+        #shutil.copytree("test_opt1","test_opt1_save")
         print difflist
         self.assertEqual(len(difflist), 0)
 
@@ -46,6 +47,13 @@ class TestOptimize(unittest.TestCase):
         shutil.copy("expected_opt1/OUTCAR","test_opt1")
         time.sleep(1)
         self.assertEqual(myOpt.is_complete(),True)
+
+    def test_is_ready(self):
+        myOpt=Optimize(name="test_opt1", program="vasp", program_keys={'ibrion':2})
+        self.assertEqual(myOpt.is_ready_to_run(),False)
+        myOpt.keywords['structure'] = Poscar.from_file('expected_opt1/POSCAR').structure 
+        myOpt.write_files()
+        self.assertEqual(myOpt.is_ready_to_run(),True)
 
     def test_update_children(self):
         os.mkdir("test_opt2")

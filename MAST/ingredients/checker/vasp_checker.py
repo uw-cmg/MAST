@@ -44,9 +44,14 @@ def is_complete(dirname):
         myoutcar = Outcar(os.path.join(dirname, "OUTCAR"))
     except (IOError):
         return False
-    if myoutcar.run_stats['User time (sec)'] > 0:
-        return True
-    else:
+
+    #hw 04/19/13
+    try:
+        if myoutcar.run_stats['User time (sec)'] > 0:
+            return True
+        else:
+            return False
+    except KeyError:
         return False
 
 

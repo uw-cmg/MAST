@@ -8,34 +8,36 @@ import optparse # Allows for some command line option parsing
 from MAST.mast import MAST
 from MAST.parsers import InputParser
 
-parser = optparse.OptionParser()
-parser.add_option('-m', '--mode', dest='mode', default='interface',
-                  help='Determines which mode is used (see README for more info)')
-parser.add_option('-i', '--input', dest='input', default=None,
-                  help='Input file to use to run MAST with (sets mode to input)')
-parser.add_option('-o', '--output', dest='output', default=None,
-                  help='Output file to print MAST information about run to')
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option('-m', '--mode', dest='mode', default='interface',
+                      help='Determines which mode is used (see README for more info)')
+    parser.add_option('-i', '--input', dest='input', default=None,
+                      help='Input file to use to run MAST with (sets mode to input)')
+    parser.add_option('-o', '--output', dest='output', default=None,
+                      help='Output file to print MAST information about run to')
 
-(mastopt, mastarg) = parser.parse_args()
+    (mastopt, mastarg) = parser.parse_args()
 
-print 'Welcome to Material and Simulation Toolkit (MAST), November 2012 revision.'
+    print 'Welcome to Material and Simulation Toolkit (MAST), November 2012 revision.'
 
-# Set mode to input if an input file is given
-if (mastopt.input is not None):
-    mastopt.mode = 'input'
+    # Set mode to input if an input file is given
+    if (mastopt.input is not None):
+        mastopt.mode = 'input'
 
-# Set a default file name
-if (mastopt.mode == 'input') and (mastopt.input is None):
-    mastopt.input = 'mast.inp'
+    # Set a default file name
+    if (mastopt.mode == 'input') and (mastopt.input is None):
+        mastopt.input = 'mast.inp'
 
-if (mastopt.mode == 'input') and (mastopt.output is None):
-    mastopt.output = 'mast.out'
+    if (mastopt.mode == 'input') and (mastopt.output is None):
+        mastopt.output = 'mast.out'
 
-# Gather some path information
+    # Gather some path information
 
-#scriptpath = os.environ['SCRIPTPATH']
-#potcar_path = os.environ['POTCARPATH']
+    #scriptpath = os.environ['SCRIPTPATH']
+    #potcar_path = os.environ['POTCARPATH']
 
+<<<<<<< HEAD
 if (mastopt.mode == 'input'):
 # Small hack to test InputParser until we get a new interface setup to include this class
     mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
@@ -43,3 +45,15 @@ if (mastopt.mode == 'input'):
 #elif (mastopt.mode == 'input'):
 #    inputparse = InputParser(inputfile=mastopt.input, outputfile=mastopt.output)
 #    inputparse.parse_input() 
+=======
+    if (mastopt.mode == 'input'):
+    # Small hack to test InputParser until we get a new interface setup to include this class
+        mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
+        mast.start()
+    #elif (mastopt.mode == 'input'):
+    #    inputparse = InputParser(inputfile=mastopt.input, outputfile=mastopt.output)
+    #    inputparse.parse_input()
+
+if __name__ == '__main__':
+    main()
+>>>>>>> 5c68bb23edec6bc7a2c24787f1a3eddccbbcc9fc
