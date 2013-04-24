@@ -10,6 +10,7 @@
 import os
 import glob
 import inspect
+
 from MAST import ingredients
 
 class IngredientsLoader:
@@ -22,11 +23,15 @@ class IngredientsLoader:
            and returns the ingredients dict
         '''
         ingredients_dir = ingredients.__path__[0]
-        cand_ingredients = map(lambda x: os.path.basename(x).replace(".py", ""), glob.glob("%s/*.py" % ingredients_dir))
+        cand_ingredients = map(lambda x: os.path.basename(x).replace(".py", ""),
+                               glob.glob("%s/*.py" % ingredients_dir))
+
         for ingredient in cand_ingredients:
             if ingredient.startswith('_'):
                 continue
+
             mod = __import__("MAST.ingredients.%s" % ingredient, globals(), locals(), [ingredient])
+
             for attr_name, attr in inspect.getmembers(mod):
                 if attr_name.startswith('_'):
                     continue
