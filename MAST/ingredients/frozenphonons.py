@@ -6,7 +6,7 @@ from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 
 from MAST.utility.mastobj import MASTObj
-from MAST.ingredients import BaseIngredient
+from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend import vasp_extensions
 
 import os

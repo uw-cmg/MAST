@@ -7,7 +7,7 @@ from pymatgen.util.coord_utils import find_in_coord_list
 
 from MAST.utility import MASTObj
 
-from MAST.ingredients import BaseIngredient
+from MAST.ingredients.baseingredient import BaseIngredient
 
 
 allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
