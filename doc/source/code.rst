@@ -6,10 +6,8 @@ Documentation for the code
 
 API Reference
 =============
-.. module:: Param
-.. autoclass:: Param
+.. module:: DAG. dagscheduler
+.. autoclass:: DAGScheduler
    :members:
 
-.. module:: Counter
-.. autoclass:: Counter
-   :members:
+
