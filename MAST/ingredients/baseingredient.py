@@ -66,7 +66,7 @@ class BaseIngredient(MASTObj):
         return dirutil.lock_directory(self.keywords['name'])
 
     def unlock_directory(self):
-        return dirutil.lock_directory(self.keywords['name'])
+        return dirutil.unlock_directory(self.keywords['name'])
 
     def wait_to_write(self):
         return dirutil.wait_to_write(self.keywords['name'])
@@ -92,6 +92,8 @@ class BaseIngredient(MASTObj):
             templatename = self.keywords['program_keys']['script']
         templatepath = os.path.join(dirutil.get_mast_install_path(),
                         'submit',templatename)
+        if not os.path.isfile(templatepath):
+            raise MASTError(self.__class__.__name__, "Could not find script template at " + templatepath)
         myfile = open(templatepath, 'rb')
         mylines=myfile.readlines()
         myfile.close()

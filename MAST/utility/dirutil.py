@@ -108,10 +108,12 @@ def lock_directory(dirname):
     lockfile.close()
 
 def unlock_directory(dirname):
-    if not directory_is_locked(dirname):
+    try:
+        os.remove(dirname + "/mast.write_files.lock")
+    except OSError:
         raise MASTError("utility unlock_directory",
             "Tried to unlock a directory which was not locked.")
-    os.remove(dirname + "/mast.write_files.lock")
+
 
 def wait_to_write(dirname):
     import time
