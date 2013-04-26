@@ -6,7 +6,7 @@ Documentation for the code
 
 API Reference
 =============
-.. module::dagscheduler
+.. module:: MAST.DAG.dagscheduler
 .. autoclass:: DAGScheduler
     :members:
 
