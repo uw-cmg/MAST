@@ -22,7 +22,7 @@ print "Right now I do not know how to set the directory for output   "
 print "=============================================================="
 
 argv=[]
-mastrootdir = os.environ['SCRIPTPATH']
+mastrootdir = os.environ['MAST_INSTALL_PATH']
 print 'mast root directory : '+mastrootdir
 binpath = os.path.join(mastrootdir,'bin/mast')
 bindir= os.path.join(mastrootdir,'bin')

@@ -1,5 +1,6 @@
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 import os
 
 class BaseIngredient(MASTObj):
@@ -54,9 +55,67 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in images_complete)")
 
+    def directory_is_locked(self):
+        return dirutil.directory_is_locked(self.keywords['name'])
+
+    def lock_directory(self):
+        return dirutil.lock_directory(self.keywords['name'])
+
+    def unlock_directory(self):
+        return dirutil.unlock_directory(self.keywords['name'])
+
+    def wait_to_write(self):
+        return dirutil.wait_to_write(self.keywords['name'])
+   
+    def is_ready_to_run(self):
+        if self.directory_is_locked():
+            return False
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.is_ready_to_run(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in is_complete)")
+        
+    def getpath(self):
+        '''getpath returns the directory of the ingredient'''
+        return self.keywords['name']
+    
+    def write_submit_script(self):
+        if not ('script' in self.keywords['program_keys'].keys()):
+            templatename = 'submitscript.sh'
+        else:
+            templatename = self.keywords['program_keys']['script']
+        templatepath = os.path.join(dirutil.get_mast_install_path(),
+                        'submit',templatename)
+        bname = os.path.basename(self.keywords['name'])
+        wpath = self.keywords['name'] + '/submit.sh'
+        #print wpath
+        #print bname
+        from submit import script_commands
+        script_commands.modify_jobname(templatepath, wpath, bname)
+        return
+    
+    def run(self, mode='noqsub', curdir=os.getcwd()):
+        from submit import queue_commands 
+        
+        curdir = os.getcwd()
+        os.chdir(self.keywords['name'])
+
+        if mode is 'noqsub':
+            programpath = queue_commands.direct_shell_command()
+            p = subprocess.call([programpath])
+            
+        elif mode is 'serial':
+            queuesub = queue_commands.queue_submission_command()
+            runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # for scheduling other jobs
+            #runme.wait()
+        os.chdir(curdir)
+        return
+
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
         raise NotImplementedError
-
 

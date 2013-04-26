@@ -32,7 +32,7 @@ class Optimize(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
-        return BaseIngredient.is_complete(self) #instead call base ingredient complete check
+        return BaseIngredient.is_complete(self) 
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():
@@ -46,9 +46,9 @@ class Optimize(BaseIngredient):
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
 
-        while not self.is_ready_to_run():
-            print 'writing files...'
-            time.sleep(CHECKPERIOD)
+        #while not self.is_ready_to_run():
+        #    print 'writing files...'
+        #    time.sleep(CHECKPERIOD)
             
 
     def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
@@ -79,74 +79,37 @@ class Optimize(BaseIngredient):
             #parent should have given a structure
         else: #this is an originating run; mast should give it a structure
             opt_poscar = Poscar(self.keywords['structure'])
+            self.lock_directory()
             opt_poscar.write_file(pospath)
+            self.unlock_directory()
         topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
+        self.lock_directory()
         topkpoints.write_file(name + "/KPOINTS")
+        self.unlock_directory()
         toppotcar = Potcar(symbols=opt_poscar.site_symbols, functional='PBE', sym_potcar_map=None)
+        self.lock_directory()
         toppotcar.write_file(name + "/POTCAR")
+        self.unlock_directory()
         incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
         topincar = Incar(incar_dict)
+        self.lock_directory()
         topincar.write_file(name + "/INCAR")
-        self.write_submit_script()
+        self.unlock_directory()
+        self.write_submit_script() #MASTFile types already lock/unlock
         return
     
     def write_submit_script(self):
-        myfile = open(dirutil.get_mast_install_path() + '/submit/node1.sh','rb')
-        mylines=myfile.readlines()
-        myfile.close()
-        bname = os.path.basename(self.keywords['name'])
-        myct=0
-        while myct < len(mylines):
-            if "#PBS -N" in mylines[myct]:
-                mylines[myct] = "#PBS -N " + bname + '\n'
-            myct=myct+1
-        mywrite = open(self.keywords['name']+'/submit.sh','wb')
-        mywrite.writelines(mylines)
-        mywrite.close()
-        return
+        return BaseIngredient.write_submit_script(self)
 
     def is_ready_to_run(self):
-        name = self.keywords['name']
-        notready=0
-        if not(os.path.isfile(name + "/KPOINTS")):
-            notready = notready + 1
-        if not(os.path.isfile(name + "/POTCAR")):
-            notready = notready + 1
-        if not(os.path.isfile(name + "/INCAR")):
-            notready = notready + 1
-        if not(os.path.isfile(name + "/POSCAR")):
-            notready = notready + 1
-        if not(os.path.isfile(name + "/submit.sh")):
-            notready = notready + 1
-        if notready > 0:
-            return False
-        else:
-            return True
+        return BaseIngredient.is_ready_to_run(self) 
 
     def run(self, mode='noqsub', curdir=os.getcwd()):
-        if not (self.is_ready_to_run()):
-            # we need a MAST Warning class
-            raise
- 
-        if mode is 'noqsub':
-            curdir = os.getcwd()
-            os.chdir(self.keywords['name'])
-            programpath = '//share/apps/vasp5.2_cNEB' # This should be replaced by more general way.
-            p = subprocess.call([programpath])
-            os.chdir(curdir)
-            
-        elif mode is 'serial':
-            curdir = os.getcwd()
-            os.chdir(self.keywords['name'])
-            runme = subprocess.Popen('qsub submit.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            os.chdir(curdir)
-            # for scheduling other jobs
-            #runme.wait()
-            return
-
+        if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
+            raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
+        return BaseIngredient.run(self, mode)
     
     # hw 04/15/13 This will be used by scheduler
     def getpath(self):
-        '''getpath returns the directory of the ingredient'''
-        return self.keywords['name']
+        return BaseIngredient.getpath(self)
         

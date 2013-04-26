@@ -1,5 +1,7 @@
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from MAST.utility import dirutil
+from MAST.utility.mastfile import MASTFile
 import os
 import shutil
 
@@ -9,7 +11,9 @@ def get_structure_from_file(filepath):
 
 def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     """Copy CONTCAR to new POSCAR"""
+    dirutil.lock_directory(childpath)
     shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
     return
 
 def images_complete(dirname, numim):
@@ -35,11 +39,7 @@ def images_complete(dirname, numim):
 
 
 def is_complete(dirname):
-    """Check if all images in a VASP NEB calculation are complete.
-        dirname = directory housing /00.../0N+1 files; 
-                  only checks directories /01.../0N where N is # images
-        numim = number of images
-    """
+    """Check if single VASP non-NEB calculation is complete."""
     try:
         myoutcar = Outcar(os.path.join(dirname, "OUTCAR"))
     except (IOError):
@@ -54,4 +54,33 @@ def is_complete(dirname):
     except KeyError:
         return False
 
-
+def is_ready_to_run(dirname):
+    """Check if vasp is ready to run."""
+    notready=0
+    if not(os.path.isfile(dirname + "/KPOINTS")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/POTCAR")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/INCAR")):
+        notready = notready + 1
+    else: #INCAR exists. Now check POSCARs.
+        myincar = MASTFile(dirname + "/INCAR")
+        if myincar.get_line_match("IMAGES") == None: 
+            if not(os.path.isfile(dirname + "/POSCAR")):
+                notready = notready + 1
+        else:
+            subdirs = dirutil.walkdirs(dirname)
+            subdirs.sort()
+            for subdir in subdirs:
+                if not (os.path.isfile(subdir + "/POSCAR")):
+                    notready = notready + 1
+            if not os.path.isfile(subdirs[0] + "/OSZICAR"):
+                notready = notready + 1
+            if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
+                notready = notready + 1
+    if not(os.path.isfile(dirname + "/submit.sh")):
+        notready = notready + 1
+    if notready > 0:
+        return False
+    else:
+        return True

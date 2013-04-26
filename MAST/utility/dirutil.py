@@ -91,3 +91,37 @@ def get_mast_install_path():
     if getpath == None:
         raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
     return getpath
+
+
+def directory_is_locked(dirname):
+    if os.path.isfile(dirname + "/mast.write_files.lock"):
+        return True
+    else:
+        return False
+
+def lock_directory(dirname):
+    import time
+    if directory_is_locked(dirname):
+        wait_to_write(dirname)
+    lockfile = open(dirname + "/mast.write_files.lock", 'wb')
+    lockfile.writelines(time.ctime())
+    lockfile.close()
+
+def unlock_directory(dirname):
+    try:
+        os.remove(dirname + "/mast.write_files.lock")
+    except OSError:
+        raise MASTError("utility unlock_directory",
+            "Tried to unlock a directory which was not locked.")
+
+
+def wait_to_write(dirname):
+    import time
+    waitmax = 1000
+    waitcount = 1
+    while directory_is_locked(dirname) and (waitcount < waitmax):
+        time.sleep(5)
+        waitcount = waitcount + 1
+    if directory_is_locked(dirname):
+        raise MASTError("utility wait_to_write", 
+            "Timed out waiting to obtain lock on directory.")
