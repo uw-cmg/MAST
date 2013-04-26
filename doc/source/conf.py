@@ -17,7 +17,11 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../../MAST/classes_dev'))
+sys.path.insert(0, os.path.abspath('../../MAST/DAG'))
+print 'This is the location of your document.'
+print os.path.abspath('.')
+print 'This is where your python source code is.'
+print os.path.abspath('../../MAST/DAG')
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

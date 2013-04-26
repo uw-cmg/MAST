@@ -1,3 +1,7 @@
+"""
+This is for schedulring.
+@author: Hyunwoo Kim
+"""
 import datetime
 import time
 
@@ -39,7 +43,7 @@ Jobstatus = enum('PreQ','InQ','Complete','Error')
 JOB = Jobstatus
     
 class JobEntry(object):
-    '''JobEntry is an entry in class JobTable.
+    """JobEntry is an entry in class JobTable.
         isready : method to check if this job is ready or not
         sid : session id
         jid : job id
@@ -48,7 +52,7 @@ class JobEntry(object):
         parents : set of parent jobs id
         completeparents : set of complete parent jobs
         ingredient_obj : ingredient obj
-    '''
+    """
     def __init__(self, sid, jid, jobname=None, type=None, ingredient=None):
         self.sid = sid # session id
         self.jid = jid # job id which is unique in a session.
@@ -435,7 +439,7 @@ class DAGParser:
         return jobs_dict 
 
 class DAGScheduler:
-    '''In a session, the maximum number of jobs is MAXJID at once.'''
+    """In a session, the maximum number of jobs is MAXJID at once."""
     def __init__(self):
         self.jobtable = JobTable()
         self.sessiontable = SessionTable()

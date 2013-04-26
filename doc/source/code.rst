@@ -6,8 +6,8 @@ Documentation for the code
 
 API Reference
 =============
-.. module:: DAG. dagscheduler
+.. module::dagscheduler
 .. autoclass:: DAGScheduler
-   :members:
+    :members:
 
 
