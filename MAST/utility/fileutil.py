@@ -1,4 +1,6 @@
 import os
+import time
+from MAST.utility import dirutil
 
 class MASTFile:
     """Controls MAST file IO and manipulation"""
@@ -41,10 +43,12 @@ class MASTFile:
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
             return
+        dirutil.lock_directory(os.path.dirname(file_path))
         writef = open(file_path,'wb')
         for line in self.data:
             writef.write(line)
         writef.close()
+        dirutil.unlock_directory(os.path.dirname(file_path))
 
     #TTM 11/10/11 created to solve archiving problems
     def to_unique_file(self, parent_path="", try_name="", suffix="", max=10):
@@ -220,7 +224,7 @@ class MASTFile:
 
     #TTM 052112 added
     def copy_data_to(self, other_file):
-        other_file.data = line()
+        other_file.data = list()
         for line in self.data:
             other_file.data.append(line)
         return
