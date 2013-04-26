@@ -1,5 +1,6 @@
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from MAST.utility import dirutil
 import os
 import shutil
 
@@ -9,7 +10,9 @@ def get_structure_from_file(filepath):
 
 def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     """Copy CONTCAR to new POSCAR"""
+    dirutil.lock_directory(childpath)
     shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
     return
 
 def images_complete(dirname, numim):

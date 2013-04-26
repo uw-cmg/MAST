@@ -94,8 +94,8 @@ class BaseIngredient(MASTObj):
                         'submit',templatename)
         bname = os.path.basename(self.keywords['name'])
         wpath = self.keywords['name'] + '/submit.sh'
-        print wpath
-        print bname
+        #print wpath
+        #print bname
         from submit import script_commands
         script_commands.modify_jobname(templatepath, wpath, bname)
         return
