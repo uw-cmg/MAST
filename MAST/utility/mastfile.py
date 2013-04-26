@@ -1,6 +1,7 @@
 import os
 import time
 from MAST.utility import dirutil
+from MAST.utility import MASTError
 
 class MASTFile:
     """Controls MAST file IO and manipulation"""
@@ -20,7 +21,8 @@ class MASTFile:
         self.data = []
         #TTM+2 10/7/11 add error checking in case of no file
         if not os.path.isfile(file_path):
-            return
+            raise MASTError(self.__class__.__name__,
+                "No such file at " + file_path)
         readf = open(file_path,'rb')
         lines = readf.readlines()
         for line in lines:
@@ -42,7 +44,11 @@ class MASTFile:
         """Writes data to a file"""
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
-            return
+            raise MASTError(self.__class__.__name__,
+                "Refusing to copy to empty path.")
+        if self.data == []:
+            raise MASTError(self.__class__.__name__,
+                "Empty file not copied to " + file_path)
         dirutil.lock_directory(os.path.dirname(file_path))
         writef = open(file_path,'wb')
         for line in self.data:

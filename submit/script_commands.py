@@ -5,7 +5,7 @@
 import os
 import sys
 import math #TA to calc num_nodes
-from MAST.utility import fileutil
+from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 
 """
@@ -19,7 +19,7 @@ def get_script(templatepath):
     if not templatepath[-3:] == '.sh':
         raise MASTError("submit script_commands", 
         "Script name does not end with .sh to signify a submission script.")
-    script=fileutil.MASTFile(templatepath)
+    script=MASTFile(templatepath)
     if script.data == []:
         raise MASTError("submit script_commands",
         "Script empty at " + templatepath)

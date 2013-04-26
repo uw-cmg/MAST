@@ -107,7 +107,7 @@ class Optimize(BaseIngredient):
     def run(self, mode='noqsub', curdir=os.getcwd()):
         if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
             raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
-        return BaseIngredient.run(self)
+        return BaseIngredient.run(self, mode)
     
     # hw 04/15/13 This will be used by scheduler
     def getpath(self):

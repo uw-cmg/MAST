@@ -10,7 +10,7 @@ from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.utility import MASTError
-
+from MAST.utility.mastfile import MASTFile
 import os
 import shutil
 #import pdb
@@ -123,15 +123,13 @@ class PerformNEB(BaseIngredient):
         """
         numparents = self.get_my_numbers()
         if numparents == None:
-            return
+            raise MASTError(self.__class__.__name__,"No parents given!")
         pfpath1=os.path.join(self.keywords['name'], "parent_energy_" + numparents[0])
-        if not os.path.isfile(pfpath1):
-            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath1)
-        shutil.copy(pfpath1, os.path.join(self.keywords['name'],"00","OSZICAR"))
         pfpath2=os.path.join(self.keywords['name'], "parent_energy_" + numparents[1])
-        if not os.path.isfile(pfpath2):
-            raise MASTError(self.__class__.__name__,"Error: no parent file at" + pfpath2)
-        shutil.copy(pfpath2, os.path.join(self.keywords['name'],str(self.keywords['program_keys']['images']+1).zfill(2),"OSZICAR"))
+        pffile1=MASTFile(pfpath1)
+        pffile2=MASTFile(pfpath2)
+        pffile1.to_file(os.path.join(self.keywords['name'],"00","OSZICAR"))
+        pffile2.to_file(os.path.join(self.keywords['name'],str(self.keywords['program_keys']['images']+1).zfill(2),"OSZICAR"))
         return
 
     def set_up_vasp_folders(self, image_structures):
@@ -141,13 +139,17 @@ class PerformNEB(BaseIngredient):
             num_str = str(imct).zfill(2)
             impath = os.path.join(self.keywords['name'], num_str)
             impospath = os.path.join(self.keywords['name'], "POSCAR_" + num_str)
+            self.lock_directory()
             imposcar.write_file(impospath)
+            self.unlock_directory()
             try:
                 os.makedirs(impath)
             except OSError:
                 print "Directory at", impath, "already exists."
                 return None
+            self.lock_directory()
             imposcar.write_file(os.path.join(impath, "POSCAR"))
+            self.unlock_directory()
             imct = imct + 1
         self.place_parent_energy_files_vasp()
         return
@@ -157,12 +159,19 @@ class PerformNEB(BaseIngredient):
         self.set_up_vasp_folders(image_structures)
         dir_name = self.keywords['name']
         topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
+        self.lock_directory()
         topkpoints.write_file(dir_name + "/KPOINTS")
+        self.unlock_directory()
         toppotcar = Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PBE', sym_potcar_map=None)
+        self.lock_directory()
         toppotcar.write_file(dir_name + "/POTCAR")
+        self.unlock_directory()
         incar_dict = self.set_up_vasp_incar_dict(image_structures[0], toppotcar)
         topincar = Incar(incar_dict)
+        self.lock_directory()
         topincar.write_file(dir_name + "/INCAR")
+        self.unlock_directory()
+        self.write_submit_script()
         return
 
 
