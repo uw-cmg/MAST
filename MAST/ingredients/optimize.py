@@ -105,26 +105,9 @@ class Optimize(BaseIngredient):
         return BaseIngredient.is_ready_to_run(self) 
 
     def run(self, mode='noqsub', curdir=os.getcwd()):
-        if not (self.is_ready_to_run()):
-            # we need a MAST Warning class
+        if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
             raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
- 
-        if mode is 'noqsub':
-            curdir = os.getcwd()
-            os.chdir(self.keywords['name'])
-            programpath = '//share/apps/vasp5.2_cNEB' # This should be replaced by more general way.
-            p = subprocess.call([programpath])
-            os.chdir(curdir)
-            
-        elif mode is 'serial':
-            curdir = os.getcwd()
-            os.chdir(self.keywords['name'])
-            runme = subprocess.Popen('qsub submit.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            os.chdir(curdir)
-            # for scheduling other jobs
-            #runme.wait()
-            return
-
+        return BaseIngredient.run(self)
     
     # hw 04/15/13 This will be used by scheduler
     def getpath(self):

@@ -99,3 +99,21 @@ class BaseIngredient(MASTObj):
         from submit import script_commands
         script_commands.modify_jobname(templatepath, wpath, bname)
         return
+    
+    def run(self, mode='noqsub', curdir=os.getcwd()):
+        from submit import queue_commands 
+        
+        curdir = os.getcwd()
+        os.chdir(self.keywords['name'])
+
+        if mode is 'noqsub':
+            programpath = queue_commands.direct_shell_command()
+            p = subprocess.call([programpath])
+            
+        elif mode is 'serial':
+            queuesub = queue_commands.queue_submission_command()
+            runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # for scheduling other jobs
+            #runme.wait()
+        os.chdir(curdir)
+        return
