@@ -30,7 +30,8 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'symmetry_only': False,
                       'coord_type': 'cartesian',
                       'atom_list': list(),
-                      'coordinates': list()
+                      'coordinates': list(),
+                      'lattice': list(),
                      }
 
 UNITCELL_KEYWORDS = ['lattice_constant',
@@ -118,12 +119,10 @@ class InputParser(MASTObj):
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
 
-    def parse_structure_section(self, section_name, section_content, options):
+    def parse_structure_section_old(self, section_name, section_content, options):
         """Parse the structure section and populate the options
 
-            Format is:
-                atom_symbol x y z
-
+            Section is now deprecated            
             For now, assume positions are in Cartesian
         """
         structure_dict = STRUCTURE_KEYWORDS.copy() # Initialize with default values
@@ -143,6 +142,68 @@ class InputParser(MASTObj):
                     structure_dict['coordinates'].append(line[1:])
 
         structure_dict['coordinates'] = np.array(structure_dict['coordinates'], dtype='float')
+
+        for key, value in structure_dict.items():
+            options.set_item(section_name, key, value)
+
+    def parse_structure_section(self, section_name, section_content, options):
+        """Parse the structure section and populate the options
+
+            Format is along the lines of:
+                coord_type fractional
+
+                begin coordinates
+                Ga 0.000000 0.000000 0.000000
+                Ga 0.500000 0.500000 0.000000
+                Ga 0.000000 0.500000 0.500000
+                Ga 0.500000 0.000000 0.500000
+                As 0.250000 0.250000 0.250000
+                As 0.750000 0.750000 0.250000
+                As 0.250000 0.750000 0.750000
+                As 0.750000 0.250000 0.750000
+                end
+
+                begin lattice
+                2.0 0.0 0.0
+                0.0 2.0 0.0
+                0.0 0.0 2.0
+                end
+
+            Note that coord_type will default to "cartesian" if not specified.
+
+        """
+        structure_dict = STRUCTURE_KEYWORDS.copy() # Initialize with default values
+        subsection_dict = dict()
+
+        for line in section_content:
+            if (line.startswith('#') or line.startswith('!') or (not line)):
+                continue
+            else:
+                line = line.split(self.delimeter)
+
+                if (line[0] in structure_dict):
+                    structure_dict[line[0]] = line[1]
+                elif ('begin' in line[0]):
+                    subsection = line[1]
+                    subsection_list = list()
+                elif ('end' not in line):
+                    subsection_list.append(line)
+                elif ('end' in line):
+                    subsection_dict[subsection] = subsection_list
+
+# Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
+# pymatgen needs
+#                    structure_dict['atom_list'].append(line[0].title())
+#                    structure_dict['coordinates'].append(line[1:])
+
+        print 'in InputParser.parse_structure_section:', subsection_dict
+        for key, value in subsection_dict.items():
+            if (key == 'coordinates'):
+                value = np.array(value)
+                structure_dict['atom_list'] = [val.title() for val in value[:, 0]]
+                structure_dict['coordinates'] = np.array(value[:, 1:], dtype='float')
+            if (key == 'lattice'):
+                structure_dict['lattice'] = np.array(value, dtype='float')
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
@@ -293,7 +354,6 @@ class InputParser(MASTObj):
 
 #        print 'DEBUG: ingredients_dict =', ingredients_dict
 
-
     def parse_neb_section(self, section_name, section_content, options):
         """Parse the neb section and populate the options.
             Format example:
@@ -306,9 +366,9 @@ class InputParser(MASTObj):
             interstitial 0.25 0.25 0
             interstitial 0.25 0.75 0
         """
-        hoplist=list()
+        hoplist = list()
         hopfrom = dict()
-        images=0
+        images = 0
 
         count = 0
         for line in section_content:

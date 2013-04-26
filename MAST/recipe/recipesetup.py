@@ -8,11 +8,10 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import glob
+import inspect
 
-from MAST.ingredients.inducedefect import InduceDefect
-from MAST.ingredients.optimize import Optimize
-#from MAST.ingredients.singlepoint import SinglePoint
-#from MAST.ingredients.optimizedefect import optimizeDefect
+from MAST import ingredients
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
@@ -22,18 +21,11 @@ from MAST.utility import MASTError
 from recipe_plan import RecipePlan
 from pymatgen.core.structure import Structure
 
-
-INGREDIENTS_LIBRARY = {\
-                         'inducedefect'       : InduceDefect,\
-                         'optimize'           : Optimize,\
-#                         'singlepoint'        : SinglePoint,\
-#                         'optimizedefect'     : OptimizeDefect,\
-                      }
-
 ALLOWED_KEYS = {
                   'recipeFile'     : (str, 'sic.recipe', 'Personalized recipe file'),\
                   'inputOptions'   : (InputOptions, None, 'Input options parsed using input parser'),\
                   'structure'      : (Structure, None, 'Structure to be used to create the ingredient objects'),\
+                  'ingredientsDict': (dict, dict(), 'Dcitionary of ingredients'),\
                } 
 
 DATA_PATH = "~/test_dir/"
@@ -46,6 +38,7 @@ class RecipeSetup(MASTObj):
         self.recipe_file    = self.keywords['recipeFile']
         self.input_options  = self.keywords['inputOptions']
         self.structure      = self.keywords['structure']
+        self.ingredients_dict = self.keywords['ingredientsDict']
         self.program        = self.input_options.get_item('mast', 'program')
         self.scratch_dir    = self.input_options.get_item('mast', 'scratch_directory')
         self.delimiter      = '::'
@@ -56,6 +49,7 @@ class RecipeSetup(MASTObj):
         self.ingredient_keyword  = "ingredient"
         self.parent_keyword      = "parent"
         self.child_keyword       = "child"
+
 
     def parse_recipe(self):
         """Parses the input personalized recipe file and takes 
@@ -108,10 +102,10 @@ class RecipeSetup(MASTObj):
     def create_ingredient(self, name, ingredient_type, child_dict):
         """Creates the ingredient based on the ingredient type
         """
-        if ingredient_type not in INGREDIENTS_LIBRARY:
+        if ingredient_type not in self.ingredients_dict:
             MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
         ingredient_name = os.path.join(self.scratch_dir, name)
-        return INGREDIENTS_LIBRARY[ingredient_type](name=ingredient_name, structure= self.structure, \
+        return self.ingredients_dict[ingredient_type](name=ingredient_name, structure= self.structure, \
                                                     program=self.program,\
                                                     program_keys=self.input_options.get_item('ingredients',\
                                                     ingredient_type), child_dict=child_dict)

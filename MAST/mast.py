@@ -14,6 +14,8 @@ from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
 from MAST.utility.picklemanager import PickleManager
 
+from MAST.ingredients.ingredients_loader import IngredientsLoader
+
 from MAST.parsers import InputParser
 from MAST.parsers.recipeparsers import RecipeParser
 from MAST.recipe.recipesetup import RecipeSetup
@@ -51,15 +53,23 @@ class MAST(MASTObj):
                 _parse_input(): parses the various input files and fetches the options.
                 _parse_recipe(): parses the recipe template file
         """
+
+        ing_loader = IngredientsLoader()
+        ing_loader.load_ingredients()
+        ingredients_dict = ing_loader.ingredients_dict
+        print "Ingredients Dict : ", ingredients_dict
+
         self._parse_input()
         self._parse_recipe()
-        recipe_plan_obj = self._initialize_ingredients()
+
+        recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
         self.pickle_plan(recipe_plan_obj)
 
     def pickle_plan(self, recipe_plan_obj):
         """Pickles the reciple plan object to the respective file
            in the scratch directory
         """
+        system_name = self.input_options.get_item("mast", "system_name", "sys")
         pickle_file = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), 'mast.pickle')
         pm = PickleManager(pickle_file)
         pm.save_variable(recipe_plan_obj) 
@@ -100,10 +110,16 @@ class MAST(MASTObj):
         posfile = self.input_options.get_item('structure', 'posfile')
 
         if (posfile is None):
-            lattice = self.input_options.get_item('unitcell', 'lattice')
+            lattice = self.input_options.get_item('structure', 'lattice')
             coordinates = self.input_options.get_item('structure', 'coordinates')
             atom_list = self.input_options.get_item('structure', 'atom_list')
             coord_type = self.input_options.get_item('structure', 'coord_type')
+
+            print 'In MAST._build_structure():'
+            print 'lattice =', lattice
+            print 'coordinates =', coordinates
+            print 'atom_list =', atom_list
+            print 'coord_type =', coord_type
 
             self.structure = MAST2Structure(lattice=lattice,
                                             coordinates=coordinates,
@@ -137,20 +153,19 @@ class MAST(MASTObj):
 
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
-    def _initialize_ingredients(self):
-        print 'Initializing ingredients...'
-        from MAST.ingredients import ingredient_dict as ID
+    def _initialize_ingredients(self, ingredients_dict):
 
         ingredient_global = self.input_options.get_item('ingredients', 'global')
         for ingredient in self.unique_ingredients:
-            if (not self.input_options.get_item('ingredients', ingredient)) and \
-               (ingredient not in ['inducedefect']):
+            if (not self.input_options.get_item('ingredients', ingredient)):
+#            if (not self.input_options.get_item('ingredients', ingredient)) and \
+#               (ingredient not in ['inducedefect']):
                 self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
 #        for ingredient in self.unique_ingredients:
 #            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
 
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
-                                structure=self.structure)
+                                structure=self.structure, ingredientsDict=ingredients_dict)
         recipe_plan_obj = setup_obj.start()
         return recipe_plan_obj

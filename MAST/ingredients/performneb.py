@@ -8,7 +8,7 @@ from pymatgen.io.vaspio import Incar
 
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import MASTObj
-from MAST.ingredients import BaseIngredient
+from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.utility import MASTError
 
 import os
