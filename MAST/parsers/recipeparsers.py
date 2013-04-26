@@ -35,6 +35,7 @@ class RecipeParser(MASTObj):
         n_param         = self.input_options.get_item("defects", "num_defects", 0)
         n_images        = self.input_options.get_item("neb", "images", 0)
         n_hops_dict     = self.input_options.get_item("neb", "hopfrom_dict", {})
+        recipe_name     = None
 
         print system_name, self.input_options.get_item('mast', 'system_name')
 
@@ -45,6 +46,11 @@ class RecipeParser(MASTObj):
             #validate the input line
             if not line or line.startswith('#'):
                 continue
+
+            #collect recipe name
+            line2 = line.split()
+            if (line2[0].lower() == 'recipe'):
+                recipe_name = line2[1] 
 
             #collect ingredents
             line2 = line.split()
@@ -74,6 +80,7 @@ class RecipeParser(MASTObj):
         f_ptr.close()
         o_ptr.close()
 #        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
+        return recipe_name
 
     def process_system_name(self, processing_lines, system_name):
         '''replace <sys> with the system name from the input options

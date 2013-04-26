@@ -25,7 +25,7 @@ ALLOWED_KEYS = {
                   'recipeFile'     : (str, 'sic.recipe', 'Personalized recipe file'),\
                   'inputOptions'   : (InputOptions, None, 'Input options parsed using input parser'),\
                   'structure'      : (Structure, None, 'Structure to be used to create the ingredient objects'),\
-                  'ingredientsDict': (dict, dict(), 'Dcitionary of ingredients'),\
+                  'ingredientsDict': (dict, dict(), 'Dictionary of ingredients'),\
                } 
 
 DATA_PATH = "~/test_dir/"
@@ -40,7 +40,7 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.ingredients_dict = self.keywords['ingredientsDict']
         self.program        = self.input_options.get_item('mast', 'program')
-        self.scratch_dir    = self.input_options.get_item('mast', 'scratch_directory')
+        self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
         self.delimiter      = '::'
 
         """Special keywords used in the recipe templates
