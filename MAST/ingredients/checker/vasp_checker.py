@@ -54,4 +54,20 @@ def is_complete(dirname):
     except KeyError:
         return False
 
-
+def is_ready_to_run(dirname):
+    """Check if vasp is ready to run."""
+    notready=0
+    if not(os.path.isfile(dirname + "/KPOINTS")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/POTCAR")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/INCAR")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/POSCAR")):
+        notready = notready + 1
+    if not(os.path.isfile(dirname + "/submit.sh")):
+        notready = notready + 1
+    if notready > 0:
+        return False
+    else:
+        return True

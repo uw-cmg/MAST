@@ -10,3 +10,4 @@ print "MAST Environment Variables:"
 print "MAST_INSTALL_PATH: ",os.getenv("MAST_INSTALL_PATH")
 print "MAST_RECIPE_PATH: ",os.getenv("MAST_RECIPE_PATH")
 print "VASP_PSP_DIR: ",os.getenv("VASP_PSP_DIR")
+print "MAST_SCRATCH: ",os.getenv("MAST_SCRATCH")

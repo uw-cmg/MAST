@@ -1,5 +1,6 @@
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 import os
 
 class BaseIngredient(MASTObj):
@@ -56,3 +57,51 @@ class BaseIngredient(MASTObj):
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in images_complete)")
+    
+
+    def directory_is_locked(self):
+        return dirutil.directory_is_locked(self.keywords['name'])
+
+    def lock_directory(self):
+        return dirutil.lock_directory(self.keywords['name'])
+
+    def unlock_directory(self):
+        return dirutil.lock_directory(self.keywords['name'])
+
+    def wait_to_write(self):
+        return dirutil.wait_to_write(self.keywords['name'])
+   
+    def is_ready_to_run(self):
+        if self.directory_is_locked():
+            return False
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.is_ready_to_run(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in is_complete)")
+        
+    def getpath(self):
+        '''getpath returns the directory of the ingredient'''
+        return self.keywords['name']
+    
+    def write_submit_script(self):
+        if not ('script' in self.keywords['program_keys'].keys()):
+            templatename = 'submitscript.sh'
+        else:
+            templatename = self.keywords['program_keys']['script']
+        templatepath = os.path.join(dirutil.get_mast_install_path(),
+                        'submit',templatename)
+        myfile = open(templatepath, 'rb')
+        mylines=myfile.readlines()
+        myfile.close()
+        bname = os.path.basename(self.keywords['name'])
+        myct=0
+        while myct < len(mylines):
+            if "#PBS -N" in mylines[myct]:
+                mylines[myct] = "#PBS -N " + bname + '\n'
+            myct=myct+1
+        mywrite = open(self.keywords['name']+'/submit.sh','wb')
+        mywrite.writelines(mylines)
+        mywrite.close()
+        return
