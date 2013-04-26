@@ -35,10 +35,6 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in forward_parent_structure)")
 
-
-    def write_files(self):
-        '''writes the files needed as input for the jobs'''
-
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
@@ -52,7 +48,15 @@ class BaseIngredient(MASTObj):
         '''Checks if all images in an NEB calculation are complete.'''
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.images_complete(self.keywords['name'],self.keywords['program_keys']['images'])
+            return vasp_checker.images_complete(self.keywords['name'],\
+                   self.keywords['program_keys']['images'])
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in images_complete)")
+
+# The following functions need to be defined by the child class:
+    def write_files(self):
+        '''writes the files needed as input for the jobs'''
+        raise NotImplementedError
+
+
