@@ -92,18 +92,10 @@ class BaseIngredient(MASTObj):
             templatename = self.keywords['program_keys']['script']
         templatepath = os.path.join(dirutil.get_mast_install_path(),
                         'submit',templatename)
-        if not os.path.isfile(templatepath):
-            raise MASTError(self.__class__.__name__, "Could not find script template at " + templatepath)
-        myfile = open(templatepath, 'rb')
-        mylines=myfile.readlines()
-        myfile.close()
         bname = os.path.basename(self.keywords['name'])
-        myct=0
-        while myct < len(mylines):
-            if "#PBS -N" in mylines[myct]:
-                mylines[myct] = "#PBS -N " + bname + '\n'
-            myct=myct+1
-        mywrite = open(self.keywords['name']+'/submit.sh','wb')
-        mywrite.writelines(mylines)
-        mywrite.close()
+        wpath = self.keywords['name'] + '/submit.sh'
+        print wpath
+        print bname
+        from submit import script_commands
+        script_commands.modify_jobname(templatepath, wpath, bname)
         return

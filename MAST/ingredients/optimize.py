@@ -95,9 +95,7 @@ class Optimize(BaseIngredient):
         self.lock_directory()
         topincar.write_file(name + "/INCAR")
         self.unlock_directory()
-        self.lock_directory()
-        self.write_submit_script()
-        self.unlock_directory()
+        self.write_submit_script() #MASTFile types already lock/unlock
         return
     
     def write_submit_script(self):
