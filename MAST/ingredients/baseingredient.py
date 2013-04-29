@@ -83,18 +83,8 @@ class BaseIngredient(MASTObj):
         return self.keywords['name']
     
     def write_submit_script(self):
-        if not ('script' in self.keywords['program_keys'].keys()):
-            templatename = 'submitscript.sh'
-        else:
-            templatename = self.keywords['program_keys']['script']
-        templatepath = os.path.join(dirutil.get_mast_install_path(),
-                        'submit',templatename)
-        bname = os.path.basename(self.keywords['name'])
-        wpath = self.keywords['name'] + '/submit.sh'
-        #print wpath
-        #print bname
         from submit import script_commands
-        script_commands.modify_jobname(templatepath, wpath, bname)
+        script_commands.write_submit_script(self.keywords)
         return
     
     def run(self, mode='noqsub', curdir=os.getcwd()):

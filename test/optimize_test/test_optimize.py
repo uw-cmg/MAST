@@ -34,7 +34,7 @@ class TestOptimize(unittest.TestCase):
         self.myOpt.keywords['structure'] = Poscar.from_file('expected_opt1/POSCAR').structure 
         self.myOpt.write_files()
         difflist = dircmp("test_opt1","expected_write").diff_files
-        shutil.copytree("test_opt1","test_opt1_save")
+        #shutil.copytree("test_opt1","test_opt1_save")
         print difflist
         self.assertEqual(len(difflist), 0)
 

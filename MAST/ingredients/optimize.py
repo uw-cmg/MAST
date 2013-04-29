@@ -43,6 +43,7 @@ class Optimize(BaseIngredient):
             return
         if self.keywords['program'] == 'vasp':
             self.set_up_program_input()
+            self.write_submit_script()
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
 
@@ -50,9 +51,6 @@ class Optimize(BaseIngredient):
         #    print 'writing files...'
         #    time.sleep(CHECKPERIOD)
             
-    def write_submit_script(self):
-        return BaseIngredient.write_submit_script(self)
-
     def run(self, mode='noqsub', curdir=os.getcwd()):
         if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
             raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")

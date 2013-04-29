@@ -47,6 +47,7 @@ class PerformNEB(BaseIngredient):
         if self.keywords['program'] == 'vasp':
             BaseIngredient.set_up_neb(self, image_structures)
             self.place_parent_energy_files()
+            self.write_submit_script()
         else:
             raise MASTError(self.__class__.__name__,"Program not supported. No setup accomplished.")
         return
