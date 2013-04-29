@@ -42,7 +42,7 @@ class Optimize(BaseIngredient):
         if self.is_ready_to_run():
             return
         if self.keywords['program'] == 'vasp':
-            self.set_up_vasp_optimize()
+            self.set_up_program_input()
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
 
@@ -50,54 +50,6 @@ class Optimize(BaseIngredient):
         #    print 'writing files...'
         #    time.sleep(CHECKPERIOD)
             
-
-    def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
-        myd=dict()
-        for key, value in self.keywords['program_keys'].iteritems():
-            myd[key.upper()]=value
-        #myd['IBRION']=self.keywords['program_keys']['ibrion']
-        #myd['ISIF']=3
-        #myd['NSW']=191
-        #myd['NPAR']=4 #hardcoded - needs fixing
-        #myd['PREC']="Accurate"
-        #myd['ISMEAR']=1
-        #myd['SIGMA']=0.2
-        #myd['ISPIN']=2
-        #myd['LCHARG']="False"
-        #myd['LWAVE']="False"
-        #myd['NSW']=191
-        myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
-        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
-        return myd
-
-    
-    def set_up_vasp_optimize(self):
-        name = self.keywords['name']
-        pospath = os.path.join(name, "POSCAR")
-        if self.keywords['structure'] == None:
-            opt_poscar = Poscar.from_file(pospath) 
-            #parent should have given a structure
-        else: #this is an originating run; mast should give it a structure
-            opt_poscar = Poscar(self.keywords['structure'])
-            self.lock_directory()
-            opt_poscar.write_file(pospath)
-            self.unlock_directory()
-        topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
-        self.lock_directory()
-        topkpoints.write_file(name + "/KPOINTS")
-        self.unlock_directory()
-        toppotcar = Potcar(symbols=opt_poscar.site_symbols, functional='PBE', sym_potcar_map=None)
-        self.lock_directory()
-        toppotcar.write_file(name + "/POTCAR")
-        self.unlock_directory()
-        incar_dict = self.set_up_vasp_incar_dict(opt_poscar.structure, toppotcar)
-        topincar = Incar(incar_dict)
-        self.lock_directory()
-        topincar.write_file(name + "/INCAR")
-        self.unlock_directory()
-        self.write_submit_script() #MASTFile types already lock/unlock
-        return
-    
     def write_submit_script(self):
         return BaseIngredient.write_submit_script(self)
 

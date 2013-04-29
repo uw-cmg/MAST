@@ -2,6 +2,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 import os
+import subprocess
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
@@ -102,17 +103,47 @@ class BaseIngredient(MASTObj):
         curdir = os.getcwd()
         os.chdir(self.keywords['name'])
 
-        if mode is 'noqsub':
+        if mode == 'noqsub':
             programpath = queue_commands.direct_shell_command()
             p = subprocess.call([programpath])
+            p.wait()
             
-        elif mode is 'serial':
+        elif mode == 'serial':
             queuesub = queue_commands.queue_submission_command()
             runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            runme.wait()
             # for scheduling other jobs
             #runme.wait()
         os.chdir(curdir)
         return
+
+    def set_up_program_input(self):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.set_up_program_input(self.keywords)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in set_up_program_input)")
+
+    def get_path_to_write_neb_parent_energy(self, parent):
+        """Get path to write the NEB's parent energy file.
+            parent = 1 for initial, 2 for final
+        """
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.get_path_to_write_neb_parent_energy(self.keywords['name'], self.keywords['program_keys']['images'],parent)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_path_to_write_neb_parent_energy)")
+
+    def set_up_neb(self, image_structures):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.set_up_neb(self.keywords['name'], image_structures)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in set_up_neb)")
+
 
 # The following functions need to be defined by the child class:
     def write_files(self):

@@ -85,7 +85,7 @@ class MASTObj(object):
 
     def help(self, keyword):
         """Prints a help message listing all the allowed keywords and any relevant information"""
-        if (keyword is 'all'):
+        if (keyword == 'all'):
             string = ('%-20s%-20s%-20s%s\n' % ('Keyword', 'Type', 'Default', 'Comment'))
             for key, value in self.allowed_keys.items():
                 string += ('%-20s%-20s%-20s%s\n' % (key, str(value[0]), str(value[1]), value[2]))
