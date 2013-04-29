@@ -14,6 +14,7 @@ Contents:
    howtobuild
    reference
    code
+   tutorial
 
 Indices and tables
 ==================
