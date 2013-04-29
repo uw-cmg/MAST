@@ -67,7 +67,7 @@
 <div class="highlight-python"><pre>export MAST_RECIPE_PATH=//home/user/topmast/recipe_templates</pre>
 </div>
 </li>
-<li><p class="first">MAST_SCRATCH: This variable may be set to any directory. If it is not set, the variable will default to the current working directory from which the mast executable is called.</p>
+<li><p class="first">MAST_SCRATCH: This variable may be set to any directory. Default behavior is to generate ingredients under this MAST_SCRATCH directory, unless the match_scratch keyword is specified with an overriding path in the input file.</p>
 </li>
 <li><p class="first">PYTHONPATH: If this environment variable already exists, the installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value  (use <tt class="docutils literal"><span class="pre">env</span></tt> to see a list of environment variables):</p>
 <div class="highlight-python"><pre>export PYTHONPATH=$PYTHONPATH://home/user/topmast</pre>
@@ -83,6 +83,7 @@
 </div></blockquote>
 </li>
 </ol>
+<p>The script <tt class="docutils literal"><span class="pre">initialize.py</span></tt> in <tt class="docutils literal"><span class="pre">//home/user/topmast</span></tt> will give a set of default values to paste into your terminal window or ~/.bashrc file.</p>
 </div>
 <div class="section" id="sequence-of-events">
 <h2>Sequence of events<a class="headerlink" href="#sequence-of-events" title="Permalink to this headline">¶</a></h2>
@@ -134,7 +135,7 @@ $recipe
 recipe_file recipe_test.txt
 $end</pre>
 </div>
-<p>The <tt class="docutils literal"><span class="pre">$mast</span></tt> section contains the program and system name.</p>
+<p>The <tt class="docutils literal"><span class="pre">$mast</span></tt> section contains the program and system name. An optional mast_scratch keyword and path to a directory may be given to write the recipe and ingredients under this directory rather than under the directory given in $MAST_SCRATCH.</p>
 <p>The <tt class="docutils literal"><span class="pre">$structure</span></tt> section contains the coordinate type, coordinates, and lattice. Optionally, the name of a VASP POSCAR-type file can be inserted here using the keyword posfile, e.g. <tt class="docutils literal"><span class="pre">posfile</span> <span class="pre">fcc_POSCAR</span></tt>. The coordinates are given with element name and then three fractional coordinates along the lattice vectors.</p>
 <p>The <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section contains a section for global ingredient keywords and then a section for each separate ingredient. VASP INCAR keywords are included in these sections. All other keywords are prefaced with <tt class="docutils literal"><span class="pre">mast_</span></tt>. A listing of available keywords is in <a class="reference internal" href="#ingredient-keys"><em>Ingredient Keywords</em></a>.</p>
 <p>The <tt class="docutils literal"><span class="pre">$recipe</span></tt> section contains a section for the recipe template to be used.</p>

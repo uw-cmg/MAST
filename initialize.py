@@ -9,6 +9,13 @@ print "MAST_SCRATCH: ",os.getenv("MAST_SCRATCH")
 print "PYTHONPATH: ",os.getenv("PYTHONPATH")
 print "PATH: ",os.getenv("PATH")
 
+
+print "==============================================="
+print "Copy and paste the following lines into your terminal, or add them"
+print "to your //home/user/.bashrc file."
+print "See the tutorial for more information."
+print "==============================================="
+
 print "export MAST_INSTALL_PATH=" + mycwd
 print "export MAST_RECIPE_PATH=" + mycwd + "/recipe_templates"
 pypath = os.getenv("PYTHONPATH")
@@ -22,6 +29,3 @@ if mypath == None:
 else:
     print "export PATH=$PATH:" + mycwd + "/bin"
 print "export MAST_SCRATCH=" + mycwd + "/SCRATCH"
-
-print "env | grep MAST"
-print "env | grep VASP"

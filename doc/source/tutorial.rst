@@ -28,6 +28,8 @@ Installation
     
         export PATH=$PATH://home/user/topmast/bin
 
+The script ``initialize.py`` in ``//home/user/topmast`` will give a set of default values to paste into your terminal window or ~/.bashrc file.
+
 ==================
 Sequence of events
 ==================
