@@ -22,7 +22,7 @@ print "Right now I do not know how to set the directory for output   "
 print "=============================================================="
 
 argv=[]
-mastrootdir = os.environ['MAST_INSTALL_PATH']
+mastrootdir = os.environ['SCRIPTPATH']
 print 'mast root directory : '+mastrootdir
 binpath = os.path.join(mastrootdir,'bin/mast')
 bindir= os.path.join(mastrootdir,'bin')
@@ -66,6 +66,7 @@ print 'start scheduling'
 
 scheduler.run()
 scheduler.show_session_table()
+
 
 """
 os.system('ls')
