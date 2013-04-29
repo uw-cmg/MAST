@@ -165,3 +165,40 @@ Ingredient Keywords
 VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the ``$ingredients`` section of the input file.
 
 Any keyword prepended by ``mast_`` is considered a special keyword and will not be written into the VASP INCAR.
+
+
+* mast_kpoints: specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. ``mast_kpoints = 3x3x3 G``
+    * required for VASP
+
+* mast_xc: specify an exchange correlation functional; for VASP, follow the convetions of pymatgen.
+    * required for VASP
+
+* mast_multiplyencut: specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP take 1.5; otherwise 1.25 is sufficient.
+    * defaults to 1.5
+
+* mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.
+
+The following queue-submission keywords are discussed more in :ref:`platforms`. 
+* mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.
+* mast_nodes: the number of nodes requested.
+* mast_ppn: the number of processors per node requested.
+* mast_queue: the queue requested.
+* mast_exec: the full executable line, including any mpi commands.
+* mast_walltime: the walltime requested.
+* mast_memory: the memory per processor requested.
+
+.. _platforms
+
+================
+Platform Support
+================
+Queue and submission script commands are in ``//home/user/topmast/submit`` and may need to be heavily modified depending on the platform used. 
+To customize the queue submission behavior, copy the two _example.py files into new .py files, removing "_example" and overwriting the default files.
+ 
+The out-of-the-box PBS submission script is built using
+* mast_processors or a combination of mast_ppn and mast_nodes
+* mast_queue
+* mast_exec
+* mast_walltime
+* mast_memory
+* the ingredient name
