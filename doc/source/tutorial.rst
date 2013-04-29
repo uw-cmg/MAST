@@ -17,7 +17,8 @@ Installation
         
         export MAST_RECIPE_PATH=//home/user/topmast/recipe_templates
 
-    #. MAST_SCRATCH: This variable may be set to any directory. If it is not set, the variable will default to the current working directory from which the mast executable is called.
+    #. MAST_SCRATCH: This variable may be set to any directory. Default behavior is to generate ingredients under this MAST_SCRATCH directory, unless the match_scratch keyword is specified with an overriding path in the input file.
+
     #. PYTHONPATH: If this environment variable already exists, the installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value  (use ``env`` to see a list of environment variables):: 
         
         export PYTHONPATH=$PYTHONPATH://home/user/topmast
@@ -82,7 +83,7 @@ Here is a sample input file, ``test.inp``::
     recipe_file recipe_test.txt
     $end
 
-The ``$mast`` section contains the program and system name.
+The ``$mast`` section contains the program and system name. An optional mast_scratch keyword and path to a directory may be given to write the recipe and ingredients under this directory rather than under the directory given in $MAST_SCRATCH.
 
 The ``$structure`` section contains the coordinate type, coordinates, and lattice. Optionally, the name of a VASP POSCAR-type file can be inserted here using the keyword posfile, e.g. ``posfile fcc_POSCAR``. The coordinates are given with element name and then three fractional coordinates along the lattice vectors.
 
