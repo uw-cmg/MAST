@@ -1,6 +1,8 @@
 from MAST.ingredients.optimize import Optimize
+from MAST.ingredients.baseingredient import BaseIngredient
+from pymatgen.core.structure import Structure
 
-class StaticEndpoint(Optimize):
+class StaticEndpoint(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of optimization directory'),
@@ -29,3 +31,8 @@ class StaticEndpoint(Optimize):
         defectstr = numstr[:numstr.find("_")]
         return defectstr
 
+    def write_files(self):
+        return Optimize.write_files(self)
+
+    def is_complete(self):
+        return Optimize.is_complete(self)
