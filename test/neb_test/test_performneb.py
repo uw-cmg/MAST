@@ -45,7 +45,7 @@ class TestPerformNEB(unittest.TestCase):
     def test_interpolated_images(self):
         self.NEBing.write_files()
         difflist = dircmp("nebtest_neb10-11","expected_interpolation_write").diff_files
-        shutil.copytree("nebtest_neb10-11","nebtest_neb10-11_save")
+        #shutil.copytree("nebtest_neb10-11","nebtest_neb10-11_save")
         print difflist
         self.assertEqual(len(difflist), 0)
 
