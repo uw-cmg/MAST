@@ -199,6 +199,58 @@ Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
 <span id="ingredient-keys"></span><h2>Ingredient Keywords<a class="headerlink" href="#ingredient-keywords" title="Permalink to this headline">¶</a></h2>
 <p>VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file.</p>
 <p>Any keyword prepended by <tt class="docutils literal"><span class="pre">mast_</span></tt> is considered a special keyword and will not be written into the VASP INCAR.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>mast_kpoints: specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. <tt class="docutils literal"><span class="pre">mast_kpoints</span> <span class="pre">=</span> <span class="pre">3x3x3</span> <span class="pre">G</span></tt></dt>
+<dd><ul class="first last simple">
+<li>required for VASP</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>mast_xc: specify an exchange correlation functional; for VASP, follow the convetions of pymatgen.</dt>
+<dd><ul class="first last simple">
+<li>required for VASP</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>mast_multiplyencut: specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP take 1.5; otherwise 1.25 is sufficient.</dt>
+<dd><ul class="first last simple">
+<li>defaults to 1.5</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.</p>
+</li>
+</ul>
+<p>The following queue-submission keywords are discussed more in <a class="reference internal" href="#platforms"><em>Platform Support</em></a>.</p>
+<ul class="simple">
+<li>mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.</li>
+<li>mast_nodes: the number of nodes requested.</li>
+<li>mast_ppn: the number of processors per node requested.</li>
+<li>mast_queue: the queue requested.</li>
+<li>mast_exec: the full executable line, including any mpi commands.</li>
+<li>mast_walltime: the walltime requested.</li>
+<li>mast_memory: the memory per processor requested.</li>
+</ul>
+</div>
+<div class="section" id="platform-support">
+<span id="platforms"></span><h2>Platform Support<a class="headerlink" href="#platform-support" title="Permalink to this headline">¶</a></h2>
+<p>Queue and submission script commands are in <tt class="docutils literal"><span class="pre">//home/user/topmast/submit</span></tt> and may need to be heavily modified depending on the platform used.
+To customize the queue submission behavior, copy the two _example.py files into new .py files, removing &#8220;_example&#8221; and overwriting the default files.</p>
+<p>The out-of-the-box PBS submission script is built using</p>
+<ul class="simple">
+<li>mast_processors or a combination of mast_ppn and mast_nodes</li>
+<li>mast_queue</li>
+<li>mast_exec</li>
+<li>mast_walltime</li>
+<li>mast_memory</li>
+<li>the ingredient name</li>
+</ul>
 </div>
 </div>
 
@@ -221,6 +273,7 @@ Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
 <li><a class="reference internal" href="#the-ingredients">The Ingredients</a></li>
 <li><a class="reference internal" href="#the-scheduler">The Scheduler</a></li>
 <li><a class="reference internal" href="#ingredient-keywords">Ingredient Keywords</a></li>
+<li><a class="reference internal" href="#platform-support">Platform Support</a></li>
 </ul>
 </li>
 </ul>

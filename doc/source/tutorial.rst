@@ -179,6 +179,7 @@ Any keyword prepended by ``mast_`` is considered a special keyword and will not 
 * mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.
 
 The following queue-submission keywords are discussed more in :ref:`platforms`. 
+
 * mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.
 * mast_nodes: the number of nodes requested.
 * mast_ppn: the number of processors per node requested.
@@ -187,7 +188,7 @@ The following queue-submission keywords are discussed more in :ref:`platforms`.
 * mast_walltime: the walltime requested.
 * mast_memory: the memory per processor requested.
 
-.. _platforms
+.. _platforms:
 
 ================
 Platform Support
@@ -196,6 +197,7 @@ Queue and submission script commands are in ``//home/user/topmast/submit`` and m
 To customize the queue submission behavior, copy the two _example.py files into new .py files, removing "_example" and overwriting the default files.
  
 The out-of-the-box PBS submission script is built using
+
 * mast_processors or a combination of mast_ppn and mast_nodes
 * mast_queue
 * mast_exec
