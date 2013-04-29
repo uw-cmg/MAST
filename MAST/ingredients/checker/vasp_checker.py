@@ -98,15 +98,15 @@ def _vasp_poscar_setup(keywords):
         #parent should have given a structure
     else: #this is an originating run; mast should give it a structure
         my_poscar = Poscar(keywords['structure'])
-        dirutil.lock_directory()
+        dirutil.lock_directory(name)
         my_poscar.write_file(pospath)
-        dirutil.unlock_directory()
+        dirutil.unlock_directory(name)
     return my_poscar
 
 def _vasp_kpoints_setup(keywords):
     """Parse mast_kpoints string, which should take the format:
         number, number, number designation
-        examples: "3,3,3 M", "1,1,1 G". If no designation is given,
+        examples: "3x3x3 M", "1x1x1 G". If no designation is given,
         Monkhorst-Pack is assumed.
     """
     name = keywords['name']
@@ -119,27 +119,28 @@ def _vasp_kpoints_setup(keywords):
         desig = "M"
     else:
         desig = kptlist[1]
-    kptslist = kptlist[0].split(',')
+    kptslist = kptlist[0].split('x')
     if desig == "M":
         my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptslist[0]),int(kptslist[1]),int(kptslist[2])),shift=(0,0,0))
     elif desig == "G":
         my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptslist[0]),int(kptslist[1]),int(kptslist[2])),shift=(0,0,0))
     else:
         raise MASTError("vasp_checker, _vasp_kpoint_setup","kpoint designation " + desig + " not recognized.")
-    dirutil.lock_directory()
+    dirutil.lock_directory(name)
     my_kpoints.write_file(name + "/KPOINTS")
-    dirutil.unlock_directory()
+    dirutil.unlock_directory(name)
     return my_kpoints
 
 def _vasp_potcar_setup(keywords, my_poscar):
+    name=keywords['name']
     if 'mast_xc' in keywords['program_keys'].keys():
         myxc = keywords['program_keys']['mast_xc']
     else:
         raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
     my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
-    dirutil.lock_directory()
-    my_potcar.write_file(keywords['name'] + "/POTCAR")
-    dirutil.unlock_directory()
+    dirutil.lock_directory(name)
+    my_potcar.write_file(name + "/POTCAR")
+    dirutil.unlock_directory(name)
     return my_potcar
 
 def _vasp_incar_get_non_mast_keywords(program_keys_dict):
@@ -152,6 +153,7 @@ def _vasp_incar_get_non_mast_keywords(program_keys_dict):
 
 def _vasp_incar_setup(keywords, my_potcar, my_poscar):
     """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
+    name=keywords['name']
     myd = dict()
     myd = _vasp_incar_get_non_mast_keywords(keywords['program_keys'])
     if 'mast_multiplyencut' in keywords['program_keys'].keys():
@@ -160,7 +162,7 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
         mymult = 1.5
     myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
     if 'mast_setmagmom' in keywords['program_keys'].keys():
-        magstr = keywords['program_keys']['mast_setmagmom']
+        magstr = str(keywords['program_keys']['mast_setmagmom'])
         magmomstr=""
         maglist = magstr.split()
         numatoms = sum(my_poscar.natoms)
@@ -173,9 +175,9 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
             magmomstr = magstr
         myd['MAGMOM']=magmomstr
     my_incar = Incar(myd)
-    dirutil.lock_directory()
-    my_incar.write_file(keywords['name'] + "/INCAR")
-    dirutil.unlock_directory()
+    dirutil.lock_directory(name)
+    my_incar.write_file(name + "/INCAR")
+    dirutil.unlock_directory(name)
     return my_incar
 
 def set_up_program_input(keywords):
@@ -200,17 +202,17 @@ def set_up_neb_folders(myname, image_structures):
         num_str = str(imct).zfill(2)
         impath = os.path.join(myname, num_str)
         impospath = os.path.join(myname, "POSCAR_" + num_str)
-        dirutil.lock_directory()
+        dirutil.lock_directory(myname)
         imposcar.write_file(impospath)
-        dirutil.unlock_directory()
+        dirutil.unlock_directory(myname)
         try:
             os.makedirs(impath)
         except OSError:
             print "Directory at", impath, "already exists."
             return None
-        dirutil.lock_directory()
+        dirutil.lock_directory(impath)
         imposcar.write_file(os.path.join(impath, "POSCAR"))
-        dirutil.unlock_directory()
+        dirutil.unlock_directory(impath)
         imct = imct + 1
     return
     

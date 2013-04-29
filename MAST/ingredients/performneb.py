@@ -45,7 +45,7 @@ class PerformNEB(BaseIngredient):
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
         if self.keywords['program'] == 'vasp':
-            self.set_up_neb(image_structures)
+            BaseIngredient.set_up_neb(self, image_structures)
             self.place_parent_energy_files()
         else:
             raise MASTError(self.__class__.__name__,"Program not supported. No setup accomplished.")
@@ -106,8 +106,8 @@ class PerformNEB(BaseIngredient):
         pfpath2=os.path.join(self.keywords['name'], "parent_energy_" + numparents[1])
         pffile1=MASTFile(pfpath1)
         pffile2=MASTFile(pfpath2)
-        pffile1.to_file(self.get_path_to_write_neb_parent_energy(1)) #MASTFile contains directory locking.
-        pffile2.to_file(self.get_path_to_write_neb_parent_energy(2))
+        pffile1.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self,1)) #MASTFile contains directory locking.
+        pffile2.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self, 2))
         return
 
 

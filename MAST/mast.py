@@ -148,7 +148,7 @@ class MAST(MASTObj):
 #            print 'In %s:' % self.__class__.__name__, coord_type
         elif ('poscar' in posfile.lower()):
             from pymatgen.io.vaspio import Poscar
-            self.structure = Poscar.from_file(posfile).struct
+            self.structure = Poscar.from_file(posfile).structure
         elif ('cif' in posfile.lower()):
             from pymatgen.io.cifio import CifParser
             self.structure = CifParser(posfile).get_structures()[0]

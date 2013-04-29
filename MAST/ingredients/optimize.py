@@ -30,9 +30,9 @@ class Optimize(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-
+    
     def is_complete(self):
-        return BaseIngredient.is_complete(self) 
+        return BaseIngredient.is_complete(self)
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():
@@ -53,15 +53,7 @@ class Optimize(BaseIngredient):
     def write_submit_script(self):
         return BaseIngredient.write_submit_script(self)
 
-    def is_ready_to_run(self):
-        return BaseIngredient.is_ready_to_run(self) 
-
     def run(self, mode='noqsub', curdir=os.getcwd()):
         if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
             raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
         return BaseIngredient.run(self, mode)
-    
-    # hw 04/15/13 This will be used by scheduler
-    def getpath(self):
-        return BaseIngredient.getpath(self)
-        
