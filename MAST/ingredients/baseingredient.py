@@ -126,10 +126,10 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in get_path_to_write_neb_parent_energy)")
 
-    def set_up_neb(self, image_structures):
+    def set_up_program_input_neb(self, image_structures):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.set_up_neb(self.keywords['name'], image_structures)
+            return vasp_checker.set_up_program_input_neb(self.keywords, image_structures)
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_neb)")

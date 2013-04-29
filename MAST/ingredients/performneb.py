@@ -45,7 +45,7 @@ class PerformNEB(BaseIngredient):
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
         if self.keywords['program'] == 'vasp':
-            BaseIngredient.set_up_neb(self, image_structures)
+            BaseIngredient.set_up_program_input_neb(self, image_structures)
             self.place_parent_energy_files()
             self.write_submit_script()
         else:

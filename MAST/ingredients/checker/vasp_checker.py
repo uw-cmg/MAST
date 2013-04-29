@@ -197,7 +197,7 @@ def get_path_to_write_neb_parent_energy(myname, myimages, parent):
 
 def set_up_neb_folders(myname, image_structures):
     imct=0
-    while imct <= len(image_structures) + 1:
+    while imct < len(image_structures):
         imposcar = Poscar(image_structures[imct])
         num_str = str(imct).zfill(2)
         impath = os.path.join(myname, num_str)
