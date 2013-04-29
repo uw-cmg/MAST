@@ -21,6 +21,13 @@ def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     dirutil.unlock_directory(childpath)
     return
 
+def forward_parent_energy(parentpath, childpath, newname="OSZICAR"):
+    """Copy OSZICAR"""
+    dirutil.lock_directory(childpath)
+    shutil.copy(os.path.join(parentpath, "OSZICAR"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
+    return
+
 def images_complete(dirname, numim):
     """Check if all images in a VASP NEB calculation are complete.
         dirname = directory housing /00.../0N+1 files; 

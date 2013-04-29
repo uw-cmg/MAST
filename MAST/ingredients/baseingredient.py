@@ -36,6 +36,15 @@ class BaseIngredient(MASTObj):
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in forward_parent_structure)")
+    
+    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            vasp_checker.forward_parent_energy(parentpath, childpath, newname)
+            return None
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in forward_parent_structure)")
 
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
