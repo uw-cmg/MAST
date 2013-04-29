@@ -40,8 +40,9 @@ This is the sequence of events in the MAST program:
 
 .. _input-file:
 
+===============
 Input File
-================
+===============
 The input file contains several sections denoted by ``$sectionname`` and ``$end``
 Here is a sample input file, ``test.inp``::
     
@@ -109,6 +110,7 @@ Other sections include:
 
 .. _recipe:
 
+=============
 The Recipe
 =============
 Here is an example recipe template::
@@ -130,6 +132,7 @@ The recipe contains:
 
 .. _ingredients:
 
+===============
 The Ingredients
 ===============
 Each ingredient is a separate calculation. Ingredients make up recipes.
@@ -146,12 +149,14 @@ Each ingredient is given:
 
 .. _scheduler:
 
+===============
 The Scheduler
 ===============
 The scheduler ensures that ingredients run in the correct order.
 
 .. _ingredient-keys:
 
+===================
 Ingredient Keywords
 ===================
 VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the ``$ingredients`` section of the input file.

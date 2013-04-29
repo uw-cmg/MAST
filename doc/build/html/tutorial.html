@@ -94,9 +94,8 @@
 <li>The MAST scheduling arm is run separately, e.g. from a timer. See <a class="reference internal" href="#scheduler"><em>The Scheduler</em></a>. It runs the ingredients in logical order. When all ingredients in a recipe are complete, the system_recipe_timestamp directory is moved into a $MAST_SCRATCH/complete directory.</li>
 </ol>
 </div>
-</div>
 <div class="section" id="input-file">
-<span id="id1"></span><h1>Input File<a class="headerlink" href="#input-file" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h2>Input File<a class="headerlink" href="#input-file" title="Permalink to this headline">¶</a></h2>
 <p>The input file contains several sections denoted by <tt class="docutils literal"><span class="pre">$sectionname</span></tt> and <tt class="docutils literal"><span class="pre">$end</span></tt>
 Here is a sample input file, <tt class="docutils literal"><span class="pre">test.inp</span></tt>:</p>
 <div class="highlight-python"><pre># Test file
@@ -160,7 +159,7 @@ $end</pre>
 </ul>
 </div>
 <div class="section" id="the-recipe">
-<span id="recipe"></span><h1>The Recipe<a class="headerlink" href="#the-recipe" title="Permalink to this headline">¶</a></h1>
+<span id="recipe"></span><h2>The Recipe<a class="headerlink" href="#the-recipe" title="Permalink to this headline">¶</a></h2>
 <p>Here is an example recipe template:</p>
 <div class="highlight-python"><pre>Recipe TEST
 
@@ -179,7 +178,7 @@ Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
 </ul>
 </div>
 <div class="section" id="the-ingredients">
-<span id="ingredients"></span><h1>The Ingredients<a class="headerlink" href="#the-ingredients" title="Permalink to this headline">¶</a></h1>
+<span id="ingredients"></span><h2>The Ingredients<a class="headerlink" href="#the-ingredients" title="Permalink to this headline">¶</a></h2>
 <p>Each ingredient is a separate calculation. Ingredients make up recipes.</p>
 <p>Each ingredient is responsible for updating its child ingredients through an <tt class="docutils literal"><span class="pre">update_children</span></tt> method.</p>
 <p>Each ingredient is given:</p>
@@ -192,13 +191,14 @@ Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
 </ul>
 </div>
 <div class="section" id="the-scheduler">
-<span id="scheduler"></span><h1>The Scheduler<a class="headerlink" href="#the-scheduler" title="Permalink to this headline">¶</a></h1>
+<span id="scheduler"></span><h2>The Scheduler<a class="headerlink" href="#the-scheduler" title="Permalink to this headline">¶</a></h2>
 <p>The scheduler ensures that ingredients run in the correct order.</p>
 </div>
 <div class="section" id="ingredient-keywords">
-<span id="ingredient-keys"></span><h1>Ingredient Keywords<a class="headerlink" href="#ingredient-keywords" title="Permalink to this headline">¶</a></h1>
+<span id="ingredient-keys"></span><h2>Ingredient Keywords<a class="headerlink" href="#ingredient-keywords" title="Permalink to this headline">¶</a></h2>
 <p>VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file.</p>
 <p>Any keyword prepended by <tt class="docutils literal"><span class="pre">mast_</span></tt> is considered a special keyword and will not be written into the VASP INCAR.</p>
+</div>
 </div>
 
 
@@ -215,13 +215,13 @@ Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#sequence-of-events">Sequence of events</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#input-file">Input File</a></li>
 <li><a class="reference internal" href="#the-recipe">The Recipe</a></li>
 <li><a class="reference internal" href="#the-ingredients">The Ingredients</a></li>
 <li><a class="reference internal" href="#the-scheduler">The Scheduler</a></li>
 <li><a class="reference internal" href="#ingredient-keywords">Ingredient Keywords</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Previous topic</h4>
