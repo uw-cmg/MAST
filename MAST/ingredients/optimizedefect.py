@@ -2,7 +2,7 @@ from MAST.ingredients.optimize import Optimize
 from MAST.ingredients.baseingredient import BaseIngredient
 from pymatgen.core.structure import Structure
 
-class SinglePoint(BaseIngredient):
+class OptimizeDefect(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of optimization directory'),

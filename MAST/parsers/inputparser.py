@@ -63,7 +63,7 @@ class InputParser(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.section_end = '$end'
-        self.delimeter = ' ' # how we're breaking up each line
+        self.delimiter = ' ' # how we're breaking up each line
         self.section_parsers = {\
                                     'mast'     : self.parse_mast_section,
                                     'structure' : self.parse_structure_section,
@@ -108,7 +108,7 @@ class InputParser(MASTObj):
             if (line.startswith('#') or line.startswith('!') or (not line)):
                 continue
             else:
-                line = line.split(self.delimeter)
+                line = line.split(self.delimiter)
                 if (line[0] not in mast_dict):
                     error = 'Section keyword %s not recognized' % line[0]
                     MASTError(self.__class__.__name__, error)
@@ -131,7 +131,7 @@ class InputParser(MASTObj):
             if (line.startswith('#') or line.startswith('!') or (not line)):
                 continue
             else:
-                line = line.split(self.delimeter)
+                line = line.split(self.delimiter)
 
                 if (line[0] in structure_dict):
                     structure_dict[line[0]] = line[1]
@@ -179,7 +179,7 @@ class InputParser(MASTObj):
             if (line.startswith('#') or line.startswith('!') or (not line)):
                 continue
             else:
-                line = line.split(self.delimeter)
+                line = line.split(self.delimiter)
 
                 if (line[0] in structure_dict):
                     structure_dict[line[0]] = line[1]
@@ -228,7 +228,7 @@ class InputParser(MASTObj):
         cell = list()
 
         for line in section_content:
-            line = line.split(self.delimeter)
+            line = line.split(self.delimiter)
             cell.append(line)
 
         cell = np.array(cell, dtype='float')
@@ -245,7 +245,7 @@ class InputParser(MASTObj):
         for line in section_content:
             type_dict = dict()
 
-            line = line.split(self.delimeter)
+            line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
                 defect_types['coord_type'] = line[1]
@@ -274,7 +274,7 @@ class InputParser(MASTObj):
             if (line.startswith('#') or line.startswith('!') or (not line)):
                 continue
             else:
-                line = line.split(self.delimeter)
+                line = line.split(self.delimiter)
                 if (line[0] not in recipe_dict):
                     error = 'Section keyword %s not recognized' % line[0]
                     MASTError(self.__class__.__name__, error)
@@ -373,8 +373,8 @@ class InputParser(MASTObj):
         count = 0
         for line in section_content:
             type_dict = dict()
-
-            line = line.split(self.delimeter)
+            line = line.strip()
+            line = line.split(self.delimiter)
 
             if (line[0] == 'hops'):
                 hoplist = line[1:] #this is a list

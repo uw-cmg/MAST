@@ -2,6 +2,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 import os
+import subprocess
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
@@ -31,6 +32,15 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             vasp_checker.forward_parent_structure(parentpath, childpath, newname)
+            return None
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in forward_parent_structure)")
+    
+    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            vasp_checker.forward_parent_energy(parentpath, childpath, newname)
             return None
         else:
             raise MASTError(self.__class__.__name__, 
@@ -82,18 +92,8 @@ class BaseIngredient(MASTObj):
         return self.keywords['name']
     
     def write_submit_script(self):
-        if not ('script' in self.keywords['program_keys'].keys()):
-            templatename = 'submitscript.sh'
-        else:
-            templatename = self.keywords['program_keys']['script']
-        templatepath = os.path.join(dirutil.get_mast_install_path(),
-                        'submit',templatename)
-        bname = os.path.basename(self.keywords['name'])
-        wpath = self.keywords['name'] + '/submit.sh'
-        #print wpath
-        #print bname
         from submit import script_commands
-        script_commands.modify_jobname(templatepath, wpath, bname)
+        script_commands.write_submit_script(self.keywords)
         return
     
     def run(self, mode='noqsub', curdir=os.getcwd()):
@@ -102,17 +102,47 @@ class BaseIngredient(MASTObj):
         curdir = os.getcwd()
         os.chdir(self.keywords['name'])
 
-        if mode is 'noqsub':
+        if mode == 'noqsub':
             programpath = queue_commands.direct_shell_command()
             p = subprocess.call([programpath])
+            p.wait()
             
-        elif mode is 'serial':
+        elif mode == 'serial':
             queuesub = queue_commands.queue_submission_command()
             runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            runme.wait()
             # for scheduling other jobs
             #runme.wait()
         os.chdir(curdir)
         return
+
+    def set_up_program_input(self):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.set_up_program_input(self.keywords)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in set_up_program_input)")
+
+    def get_path_to_write_neb_parent_energy(self, parent):
+        """Get path to write the NEB's parent energy file.
+            parent = 1 for initial, 2 for final
+        """
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.get_path_to_write_neb_parent_energy(self.keywords['name'], self.keywords['program_keys']['images'],parent)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_path_to_write_neb_parent_energy)")
+
+    def set_up_program_input_neb(self, image_structures):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.set_up_program_input_neb(self.keywords, image_structures)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in set_up_neb)")
+
 
 # The following functions need to be defined by the child class:
     def write_files(self):

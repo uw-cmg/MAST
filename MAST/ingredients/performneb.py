@@ -45,7 +45,9 @@ class PerformNEB(BaseIngredient):
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
         if self.keywords['program'] == 'vasp':
-            self.set_up_vasp_neb(image_structures)
+            BaseIngredient.set_up_program_input_neb(self, image_structures)
+            self.place_parent_energy_files()
+            self.write_submit_script()
         else:
             raise MASTError(self.__class__.__name__,"Program not supported. No setup accomplished.")
         return
@@ -94,30 +96,7 @@ class PerformNEB(BaseIngredient):
         structure_list = struct_init.interpolate(struct_fin, self.keywords['program_keys']['images'] + 1 )
         return structure_list
 
-    def set_up_vasp_incar_dict(self, rep_structure, rep_potcar):
-        myd=dict()
-        for key, value in self.keywords['program_keys'].iteritems():
-            myd[key.upper()]=value
-        #myd['IBRION']=1
-        #myd['POTIM']=0.5
-        #myd['ISIF']=2
-        #myd['LCLIMB']=True
-        #myd['NSW']=191
-        #myd['NPAR']=4
-        #myd['PREC']="Accurate"
-        #myd['ISMEAR']=0
-        #myd['SIGMA']=0.05
-        #myd['ISPIN']=2
-        #myd['IMAGES']=self.keywords['program_keys']['images']
-        #myd['LCHARG']="False"
-        #myd['LWAVE']="False"
-        #myd['NSW']=191
-        myd['MAGMOM']=str(len(rep_structure.sites)) + "*5"
-        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(rep_potcar)*1.5
-        return myd
-    
-
-    def place_parent_energy_files_vasp(self):
+    def place_parent_energy_files(self):
         """Assume parents have written files parent_energy_<N>.
             Copy these files into the 00 and 0N directories.
         """
@@ -128,50 +107,8 @@ class PerformNEB(BaseIngredient):
         pfpath2=os.path.join(self.keywords['name'], "parent_energy_" + numparents[1])
         pffile1=MASTFile(pfpath1)
         pffile2=MASTFile(pfpath2)
-        pffile1.to_file(os.path.join(self.keywords['name'],"00","OSZICAR"))
-        pffile2.to_file(os.path.join(self.keywords['name'],str(self.keywords['program_keys']['images']+1).zfill(2),"OSZICAR"))
-        return
-
-    def set_up_vasp_folders(self, image_structures):
-        imct=0
-        while imct <= self.keywords['program_keys']['images'] + 1:
-            imposcar = Poscar(image_structures[imct])
-            num_str = str(imct).zfill(2)
-            impath = os.path.join(self.keywords['name'], num_str)
-            impospath = os.path.join(self.keywords['name'], "POSCAR_" + num_str)
-            self.lock_directory()
-            imposcar.write_file(impospath)
-            self.unlock_directory()
-            try:
-                os.makedirs(impath)
-            except OSError:
-                print "Directory at", impath, "already exists."
-                return None
-            self.lock_directory()
-            imposcar.write_file(os.path.join(impath, "POSCAR"))
-            self.unlock_directory()
-            imct = imct + 1
-        self.place_parent_energy_files_vasp()
-        return
-        
-
-    def set_up_vasp_neb(self, image_structures):
-        self.set_up_vasp_folders(image_structures)
-        dir_name = self.keywords['name']
-        topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
-        self.lock_directory()
-        topkpoints.write_file(dir_name + "/KPOINTS")
-        self.unlock_directory()
-        toppotcar = Potcar(symbols=Poscar(image_structures[0]).site_symbols, functional='PBE', sym_potcar_map=None)
-        self.lock_directory()
-        toppotcar.write_file(dir_name + "/POTCAR")
-        self.unlock_directory()
-        incar_dict = self.set_up_vasp_incar_dict(image_structures[0], toppotcar)
-        topincar = Incar(incar_dict)
-        self.lock_directory()
-        topincar.write_file(dir_name + "/INCAR")
-        self.unlock_directory()
-        self.write_submit_script()
+        pffile1.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self,1)) #MASTFile contains directory locking.
+        pffile2.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self, 2))
         return
 
 
