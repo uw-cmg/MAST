@@ -155,7 +155,7 @@ def _vasp_incar_get_non_mast_keywords(program_keys_dict):
     incar_dict=dict()
     for key, value in program_keys_dict.iteritems():
         if not key[0:5] == "mast_":
-            if value.isalpha():
+            if type(value)==str and value.isalpha():
                 incar_dict[key.upper()]=value.capitalize() #First letter cap
             else:
                 incar_dict[key.upper()]=value
