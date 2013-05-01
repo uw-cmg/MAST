@@ -37,6 +37,7 @@ class InduceDefect(BaseIngredient):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
+        print "SELF.KEYWORDS: ",self.keywords
         myidx = "defect" + str(self.get_my_number())
         mydict = self.keywords['program_keys']['mast_defects'][myidx]
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
