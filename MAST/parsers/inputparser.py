@@ -273,7 +273,7 @@ class InputParser(MASTObj):
             elif ('end' not in line):
                 opt = line.split()
 #                print opt
-                if (opt[0] == 'kpoints'):
+                if (opt[0] == 'mast_kpoints'):
                     kpts = map(int, opt[1].split('x'))
                     ingredient_dict[opt[0]] = kpts
                 else:
@@ -286,9 +286,16 @@ class InputParser(MASTObj):
                 else:
                     ingredients_dict[ingredient_name] = ingredient_dict
 
-        for key, value in ingredients_dict.items():
-            value.update(global_dict)
-            options.set_item(section_name, key, value)
+# Each value in ingredients_dict is a dictionary containing the relevant
+# ingredient and option(s).  We append the global_dict (containing global
+# ingredients options here, after checking to make sure the ingredient in
+# question does not contain the option/value.
+        for ing_key, ing_value in ingredients_dict.items():
+            for glob_key, glob_value in global_dict.items():
+                if glob_key not in ing_value:
+                    ing_value[glob_key] = glob_value
+            options.set_item(section_name, ing_key, ing_value)
+
         options.set_item(section_name, 'global', global_dict)
 
 #        print 'DEBUG: ingredients_dict =', ingredients_dict
