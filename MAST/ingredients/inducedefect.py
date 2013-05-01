@@ -71,6 +71,7 @@ class InduceDefect(BaseIngredient):
 
     def write_input(self):
         """Writes the defected geometry to a file"""
+        raise NotImplementedError
 
     def _make_directory(self, directory):
         if os.path.exists(directory):
