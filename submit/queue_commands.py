@@ -10,7 +10,7 @@ system = "bardeen" #dlx, curie, bardeen, nersc, ranger
 compute_node = True
 
 def direct_shell_command():
-    return "//share/apps/vasp5.2_CNEB"
+    return "//share/apps/vasp5.2_cNEB"
 
 def queue_submission_command():
     return "qsub submit.sh"

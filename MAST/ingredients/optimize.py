@@ -51,7 +51,7 @@ class Optimize(BaseIngredient):
         #    print 'writing files...'
         #    time.sleep(CHECKPERIOD)
             
-    def run(self, mode='noqsub', curdir=os.getcwd()):
+    def run(self, mode='serial', curdir=os.getcwd()):
         if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
             raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
         return BaseIngredient.run(self, mode)
