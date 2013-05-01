@@ -67,11 +67,11 @@ class InputParser(MASTObj):
         self.section_parsers = {\
                                     'mast'     : self.parse_mast_section,
                                     'structure' : self.parse_structure_section,
-#                                    'unitcell' : self.parse_unitcell_section,
-                                    'ingredients'  : self.parse_ingredients_section,
+                                    'ingredients' : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
                                     'recipe'   : self.parse_recipe_section,
                                     'neb'      : self.parse_neb_section,
+                                    'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
 
     def parse(self):
@@ -366,4 +366,54 @@ class InputParser(MASTObj):
         print "hopfrom_dict: ", hopfrom
         options.set_item(section_name, 'images', images)
         options.set_item(section_name, 'hopfrom_dict', hopfrom)
+
+    def parse_chemical_potentials_section(self, section_name, section_content,
+                                          options):
+        """Parse the chemical_potentials section and populate the options.
+            Section uses the standard begin...end subsection structure, but with
+            a modification:  instead of strict subsection titles (i.e. structure,
+            lattice etc.), subsection titles are the conditions under which the
+            chemical potentials are for.  Any combination of white spacing is
+            allowed, however note that all conditions will be converted to lower
+            case first!
+
+            Using a GaAs example, hypothetically we could have a chemical_potential
+            section like the following:
+                $chemical_potentials
+                begin As rich
+                Ga 4.5
+                As 3.5
+                end
+
+                begin Ga rich
+                Ga 3.5
+                As 4.5
+                end
+                $end
+
+            For charged defects, note that the chemical potential of the
+            electron will be calculated automatically from the Fermi level and
+            appropiate potential shift correction.  However, if one desires to
+            manually give an electron chemical potential (for whatever reason!)
+            this can be done by specifiying \'electron\' in the appropiate
+            condition.
+        """
+        chempot_dict = dict()
+
+        for line in section_content:
+            if (line.startswith('#') or line.startswith('!') or (not line)):
+                continue
+            elif (line.startswith('begin')):
+                condition_name = ' '.join(line.split()[1:])
+                condition_dict = dict()
+            elif ('end' not in line):
+                opt = line.split()
+                condition_dict[opt[0]] = float(opt[1])
+            elif ('end' in line):
+                chempot_dict[condition_name] = condition_dict
+
+        for key, value in chempot_dict.items():
+            options.set_item(section_name, key, value)
+
+#        print 'DEBUG: chempot_dict =', chempot_dict
 
