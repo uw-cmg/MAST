@@ -178,6 +178,8 @@ Any keyword prepended by ``mast_`` is considered a special keyword and will not 
 
 * mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.
 
+* mast_adjustnelect: specify an adjustment to the total number of electrons. For example, -2 to remove two electrons, and +2 to add two electrons
+
 The following queue-submission keywords are discussed more in :ref:`platforms`. 
 
 * mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.
