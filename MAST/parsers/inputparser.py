@@ -90,13 +90,14 @@ class InputParser(MASTObj):
                                                                         line.startswith('!'))]
             section_name = section_content[0][1:]
 
-            print 'section name:', section_name # For testing
+            print '\nFound section %s.  Reading in options.' % section_name
             if section_name not in self.section_parsers:
                 error = 'Section %s not recognized' % section_name
                 MASTError(self.__class__.__name__, error)
                 return
 
             self.section_parsers[section_name](section_name, section_content[1:], options)
+            print 'Finished parsing section %s.' % section_name
 
         return options
 

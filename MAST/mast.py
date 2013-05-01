@@ -157,8 +157,8 @@ class MAST(MASTObj):
             error = 'Cannot build structure from file %s' % posfile
             MASTError(self.__class__.__name__, error)
 
-        print "\nStructure:"
-        print self.structure, '\n'
+#        print "\nStructure:"
+        print '\n', self.structure, '\n'
 
     def _parse_recipe(self):
         """Parses the generic recipe file"""
