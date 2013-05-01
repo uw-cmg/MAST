@@ -78,16 +78,20 @@ class InputParser(MASTObj):
         """Parses information from the input file"""
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
-        contents  = infile.read().lower() # read in the input file and convert everything to lower case
+# read in the input file and convert everything to lower case
+        contents  = infile.read().lower()
         infile.close()
 
         sections  = contents.strip().split(self.section_end)[:-1]
         for section_content in sections:
-            section_content = section_content.strip()
-
-            section_content = section_content.split('\n')
+# First we strip off any whitespace from each line, then split it according to
+# newline.  We then filter out any blank lines, then any lines that would be a comment,
+# i.e. starts with a \'#\' or a \'!\' symbol.
+            section_content = section_content.strip().split('\n')
+            section_content = [line for line in section_content if line]
             section_content = [line for line in section_content if not (line.startswith('#') or \
                                                                         line.startswith('!'))]
+            print 'After:', section_content
             section_name = section_content[0][1:]
 
             print '\nFound section %s.  Reading in options.' % section_name
