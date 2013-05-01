@@ -32,6 +32,7 @@ class InduceDefect(BaseIngredient):
     def induce_defect(self):
         """Creates a defect, and returns the modified structure
         """
+        print self.keywords
         struct_ed = StructureEditor(self.keywords['structure'])
 
         if (self.keywords['coordtype'] == 'cartesian'):
@@ -69,12 +70,37 @@ class InduceDefect(BaseIngredient):
         """Converts between cartesian coordinates and fractional coordinates"""
         return self.keywords['structure'].lattice.get_fractional_coords(self.keywords['position'])
 
-    def write_input(self):
-        """Writes the defected geometry to a file"""
+    #def write_input(self):
+    #    """Writes the defected geometry to a file"""
 
-    def _make_directory(self, directory):
-        if os.path.exists(directory):
-            print 'Directory %s exists!' % directory
+    #def _make_directory(self, directory):
+    #    if os.path.exists(directory):
+    #        print 'Directory %s exists!' % directory
+    #    else:
+    #        os.path.makedirs(directory)
+    
+    def write_files(self):
+        name=self.keywords['name']
+        self.get_new_structure()
+        modified_structure = self.induce_defect()
+        if self.keywords['program'] == 'vasp':
+            myposcar = Poscar(modified_structure)
+            self.lock_directory(name)
+            myposcar.to_file(name + '/CONTCAR')
+            self.unlock_directory(name)
         else:
-            os.path.makedirs(directory)
+            raise MASTError(self.__class__.__name__, "Program not supported.")
+        return
 
+    def update_children(self):
+        for childname in self.keywords['child_dict'].iterkeys():
+            self.forward_parent_structure(self.keywords['name'], childname)
+
+    def get_new_structure(self):
+        if self.keywords['program'] == 'vasp':
+            myposcar = Poscar.from_file(self.keywords['name'] + "/POSCAR")
+            self.keywords['structure'] = myposcar.structure
+        else:
+            raise MASTError(self.__class__.__name__, "Program not supported.")
+        return
+        
