@@ -79,9 +79,9 @@ def write_submit_script(keywords):
     except KeyError:
         mast_exec = "mpiexec vasp"
     try:
-        mast_walltime = str(keywords['program_keys']['mast_walltime'])
+        mast_walltime = str(keywords['program_keys']['mast_walltime']) + ":00:00"
     except KeyError:
-        mast_walltime = "24"
+        mast_walltime = "24:00:00"
     try:
         mast_memory = str(keywords['program_keys']['mast_memory'])
     except KeyError:

@@ -187,7 +187,7 @@ The following queue-submission keywords are discussed more in :ref:`platforms`.
 * mast_ppn: the number of processors per node requested.
 * mast_queue: the queue requested.
 * mast_exec: the full executable line, including any mpi commands. Remember that all input file options are turned into lowercase, with the exception of mast_xc, which is turned into all uppercase in the INCAR file.
-* mast_walltime: the walltime requested.
+* mast_walltime: the walltime requested, in whole number of hours
 * mast_memory: the memory per processor requested.
 
 .. _platforms:
