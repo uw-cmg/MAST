@@ -196,7 +196,7 @@ class InputParser(MASTObj):
 #                    structure_dict['atom_list'].append(line[0].title())
 #                    structure_dict['coordinates'].append(line[1:])
 
-        print 'in InputParser.parse_structure_section:', subsection_dict
+#        print 'in InputParser.parse_structure_section:', subsection_dict
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
