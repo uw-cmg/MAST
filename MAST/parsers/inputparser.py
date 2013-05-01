@@ -67,7 +67,7 @@ class InputParser(MASTObj):
         self.section_parsers = {\
                                     'mast'     : self.parse_mast_section,
                                     'structure' : self.parse_structure_section,
-                                    'unitcell' : self.parse_unitcell_section,
+#                                    'unitcell' : self.parse_unitcell_section,
                                     'ingredients'  : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
                                     'recipe'   : self.parse_recipe_section,
@@ -207,33 +207,6 @@ class InputParser(MASTObj):
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
-
-    def parse_unitcell_section(self, section_name, section_content, options):
-        """Parse the unit cell section and populate the options
-
-            By default this will assume that the cell is given as:
-                a11 a12 a13
-                a21 a22 a23
-                a31 a32 a33
-           However, it can also read in the following format (TO BE DONE!):
-               a = xxx
-               b = yyy
-               c = zzz
-               alpha = xx 
-               beta = yy
-               gamma = zz
-
-           Based off of this information, this section will construct a pymatgen Lattice object
-        """
-        cell = list()
-
-        for line in section_content:
-            line = line.split(self.delimiter)
-            cell.append(line)
-
-        cell = np.array(cell, dtype='float')
-
-        options.set_item(section_name, 'lattice', pmg.Lattice(cell))
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
