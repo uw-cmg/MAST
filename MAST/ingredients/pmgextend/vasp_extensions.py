@@ -145,3 +145,29 @@ def combine_dynmats(myposcar, mydir):
     myfreqThzsorted.sort()
     print myfreqThzsorted
     return myfreqThzsorted
+
+def get_total_electrons(myposcar, mypotcar):
+    """Get the total number of considered electrons in the system."""
+    atomlist = myposcar.natoms
+    zvallist = get_zval_list(mypotcar)
+    totzval = 0.0
+    atomct = 0
+    if not (len(zvallist) == len(atomlist)):
+        raise MASTError("pmgextend, get_total_electrons",
+            "Number of species and number of POTCARs do not match.")
+    while atomct < len(atomlist):
+        totzval = totzval + (atomlist[atomct] * zvallist[atomct])
+        atomct = atomct + 1
+    return totzval
+
+def get_zval_list(mypotcar):
+    """Get zvals from POTCAR"""
+    zval_list=list()
+    potcarct=0
+    onepotcar=None
+    while potcarct < len(mypotcar):
+        onepotcar = mypotcar[potcarct] #A PotcarSingle object
+        zval_list.append(onepotcar.zval)
+        potcarct = potcarct + 1
+    return zval_list
+

@@ -96,7 +96,7 @@ class BaseIngredient(MASTObj):
         script_commands.write_submit_script(self.keywords)
         return
     
-    def run(self, mode='noqsub', curdir=os.getcwd()):
+    def run(self, mode='serial', curdir=os.getcwd()):
         from submit import queue_commands 
         
         curdir = os.getcwd()
@@ -104,7 +104,7 @@ class BaseIngredient(MASTObj):
 
         if mode == 'noqsub':
             programpath = queue_commands.direct_shell_command()
-            p = subprocess.call([programpath])
+            p = subprocess.Popen(programpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             p.wait()
             
         elif mode == 'serial':

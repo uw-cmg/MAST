@@ -141,7 +141,7 @@ def _vasp_kpoints_setup(keywords):
 def _vasp_potcar_setup(keywords, my_poscar):
     name=keywords['name']
     if 'mast_xc' in keywords['program_keys'].keys():
-        myxc = keywords['program_keys']['mast_xc']
+        myxc = keywords['program_keys']['mast_xc'].upper() #Uppercase
     else:
         raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
     my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
@@ -155,7 +155,10 @@ def _vasp_incar_get_non_mast_keywords(program_keys_dict):
     incar_dict=dict()
     for key, value in program_keys_dict.iteritems():
         if not key[0:5] == "mast_":
-            incar_dict[key.upper()]=value
+            if type(value)==str and value.isalpha():
+                incar_dict[key.upper()]=value.capitalize() #First letter cap
+            else:
+                incar_dict[key.upper()]=value
     return incar_dict
 
 def _vasp_incar_setup(keywords, my_potcar, my_poscar):
@@ -181,6 +184,15 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
         else:
             magmomstr = magstr
         myd['MAGMOM']=magmomstr
+    if 'mast_adjustnelect' in keywords['program_keys'].keys():
+        myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
+        newelectrons=0.0
+        try:
+            adjustment = float(keywords['program_keys']['mast_adjustnelect'])
+        except (ValueError, TypeError):
+            raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
+        newelectrons = myelectrons + adjustment
+        myd['NELECT']=str(newelectrons)
     my_incar = Incar(myd)
     dirutil.lock_directory(name)
     my_incar.write_file(name + "/INCAR")

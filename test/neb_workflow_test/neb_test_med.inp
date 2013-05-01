@@ -25,11 +25,10 @@ $end
 $ingredients
 begin ingredients_global
 mast_nodes 1
-mast_multiplyencut 1.25
 mast_ppn 1
 mast_queue default
 mast_exec //share/apps/vasp5.2_CNEB
-mast_kpoints 1x1x1 G
+mast_kpoints 4x4x4 M
 mast_xc PW91
 isif 2
 ibrion 2
@@ -42,7 +41,7 @@ prec Accurate
 end
 
 begin optimizelowmesh
-mast_kpoints 1x1x1 G
+mast_kpoints 2x2x2 M
 isif 3
 end
 
@@ -54,11 +53,11 @@ begin static
 ibrion -1
 nsw 0
 ismear -5
-mast_multiplyencut 1
+mast_multiplyencut 1.25
 end
 
 begin optimizelowmeshdefect
-mast_kpoints 1x1x1 G
+mast_kpoints 2x2x2 M
 end
 
 begin optimizedefect
@@ -69,7 +68,7 @@ begin staticendpoint
 ibrion -1
 nsw 0
 ismear -5
-mast_multiplyencut 1
+mast_multiplyencut 1.25
 end
 
 begin performneblowmesh

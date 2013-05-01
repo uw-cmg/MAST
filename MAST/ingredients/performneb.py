@@ -111,4 +111,8 @@ class PerformNEB(BaseIngredient):
         pffile2.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self, 2))
         return
 
+    def run(self, mode='serial', curdir=os.getcwd()):
+        if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
+            raise MASTError(self.__class__.__name__, "Asked to run job before job was ready.")
+        return BaseIngredient.run(self, mode)
 
