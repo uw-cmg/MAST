@@ -22,7 +22,7 @@ ALLOWED_KEYS = {\
 
 MAST_KEYWORDS = {'program': 'vasp',
                  'system_name': 'mast',
-                 'scratch_directory': os.environ['MAST_SCRATCH'],
+                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
