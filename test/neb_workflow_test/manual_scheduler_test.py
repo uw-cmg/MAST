@@ -75,7 +75,7 @@ scheduler.addjobs(ingredients_dict=ingredients, dependency_dict = depdict)
 print 'start scheduling'
 
 TEST_CHECK_INTERVAL=10
-
+scheduler._run_mode='serial'
 while scheduler.has_incomplete_session():
     scheduler.run_jobs()
     time.sleep(TEST_CHECK_INTERVAL)
