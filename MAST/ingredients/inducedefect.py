@@ -9,24 +9,20 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.ingredients.baseingredient import BaseIngredient
 
-allowed_keys = {'atom': (str, str(), 'Atom for the defect'),
-                'position': (tuple, tuple(), 'Position of the defect'),
-                'coordtype': (str, 'fractional', 'Coordinate type (cartesian or fractional'),
-                'defecttype': (str, str(), 'Intersitial or vacancy'),
-                'structure': (Structure, None, 'Pymatgen Structure object'),
-# Next few keywords are a hack to make this work, need to fix!
-                'program': (str, str(), 'Program name'),
-                'child_dict': (dict, dict(), 'Children for this ingredient'),
-                'name': (str, str(), '???'),
-                'program_keys': (dict, dict(), 'program keywords'),
-               }
-
 class InduceDefect(BaseIngredient):
     def __init__(self, **kwargs):
+        #TTM move allowed_keys into __init__ and match order of other sections
+        allowed_keys = {
+            'name' : (str, str(), 'Name of optimization directory'),
+            'program': (str, str(), 'DFT program, e.g. "vasp"'),
+            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
+            'child_dict': (dict, dict(), 'Dictionary of children'),
+            'structure': (Structure, None, 'Pymatgen Structure object')
+            }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
-        if (self.keywords['coordtype'] == 'cartesian'):
-            self.keywords['position'] = self._cart2frac(self.keywords['position'])
+        #if (self.keywords['coordtype'] == 'cartesian'):
+        #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
     def induce_defect(self):
         """Creates a defect, and returns the modified structure
@@ -37,8 +33,10 @@ class InduceDefect(BaseIngredient):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
+        #TTM change to use mast_defects passed in from inputparser
         print "SELF.KEYWORDS: ",self.keywords
-        myidx = "defect" + str(self.get_my_number())
+        print "SELF.KEYWORDS PROGRAM_KEYS: ",self.keywords['program_keys']
+        myidx = "defect" + str(self.get_my_number()-1) #ex: if you are defect1, index to ['mast_defects']['defect0']
         mydict = self.keywords['program_keys']['mast_defects'][myidx]
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
 

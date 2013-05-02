@@ -89,7 +89,7 @@ The ``$mast`` section contains the program and system name. An optional mast_scr
 
 The ``$structure`` section contains the coordinate type, coordinates, and lattice. Optionally, the name of a VASP POSCAR-type file can be inserted here using the keyword posfile, e.g. ``posfile fcc_POSCAR``. The coordinates are given with element name and then three fractional coordinates along the lattice vectors.
 
-The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each separate ingredient. VASP INCAR keywords are included in these sections. All other keywords are prefaced with ``mast_``. A listing of available keywords is in :ref:`ingredient-keys`.
+The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each separate ingredient. VASP INCAR keywords are included in these sections. All other keywords are prefaced with ``mast_``. A listing of available keywords is in :ref:`ingredient-keys`. Each ingredient in the recipe should have a begin <ingredientname> end section, even if there are no keywords within that section.
 
 The ``$recipe`` section contains a section for the recipe template to be used.
 

@@ -354,11 +354,13 @@ class InputParser(MASTObj):
 
         #TTM add defects section
         if options.get_item('defects','num_defects') == None:
+            print "TTM DEBUG: PASS IN DEFECTS"
             pass
         else:
             for ingname in ingredients_dict.keys():
+                print "TTM DEBUG: SETTING mast_defects for", ingname
                 ingredients_dict[ingname]['mast_defects'] = options.get_item('defects','defects')
-        print "OPTIONS DEBUG TTM: ", options
+        #print "OPTIONS DEBUG TTM: ", options
 #        print 'DEBUG: ingredients_dict =', ingredients_dict
 
     def parse_neb_section(self, section_name, section_content, options):
