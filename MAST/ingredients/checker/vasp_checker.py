@@ -100,7 +100,7 @@ def is_ready_to_run(dirname):
 def _vasp_poscar_setup(keywords):
     name = keywords['name']
     pospath = os.path.join(name, "POSCAR")
-    if keywords['structure'] == None:
+    if os.path.isfile(pospath):
         my_poscar = Poscar.from_file(pospath) 
         #parent should have given a structure
     else: #this is an originating run; mast should give it a structure

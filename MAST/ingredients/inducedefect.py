@@ -40,7 +40,8 @@ class InduceDefect(BaseIngredient):
         myidx = "defect" + str(self.get_my_number()-1) #ex: if you are defect1, index to ['mast_defects']['defect0']
         mydict = self.keywords['program_keys']['mast_defects'][myidx]
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
-
+        
+        mydict['symbol'] = mydict['symbol'].capitalize() #Cap first letter
         if (self.keywords['program_keys']['mast_defects']['coord_type'] == 'cartesian'):
             mydict['coordinates'] = self._cart2frac(mydict['coordinates'])
 
@@ -91,17 +92,31 @@ class InduceDefect(BaseIngredient):
         modified_structure = self.induce_defect()
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
+            print "poscar OK"
             self.lock_directory()
+            print "lock OK"
             myposcar.write_file(name + '/CONTCAR')
+            print "write OK"
             self.unlock_directory()
+            print "unlock OK"
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
         return
     
     def is_ready_to_run(self):
-        return True
+        if self.directory_is_locked():
+            return False
+        if self.keywords['program'] == 'vasp':
+            if os.path.exists(self.keywords['name'] +'/POSCAR'):
+                return True
+            else:
+                return False
+        else:
+            raise MASTError(self.__class__.__name__, "Program not supported.")
 
     def run(self, mode='noqsub'):
+        if self.is_ready_to_run():
+            self.write_files()
         return True
 
     def is_complete(self):
