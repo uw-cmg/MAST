@@ -22,7 +22,7 @@ ALLOWED_KEYS = {\
 
 MAST_KEYWORDS = {'program': 'vasp',
                  'system_name': 'mast',
-                 'scratch_directory': os.environ['MAST_SCRATCH'],
+                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
@@ -67,36 +67,40 @@ class InputParser(MASTObj):
         self.section_parsers = {\
                                     'mast'     : self.parse_mast_section,
                                     'structure' : self.parse_structure_section,
-                                    'unitcell' : self.parse_unitcell_section,
-                                    'ingredients'  : self.parse_ingredients_section,
+                                    'ingredients' : self.parse_ingredients_section,
                                     'defects'  : self.parse_defects_section,
                                     'recipe'   : self.parse_recipe_section,
                                     'neb'      : self.parse_neb_section,
+                                    'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
 
     def parse(self):
         """Parses information from the input file"""
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
-        contents  = infile.read().lower() # read in the input file and convert everything to lower case
+# read in the input file and convert everything to lower case
+        contents  = infile.read().lower()
         infile.close()
 
         sections  = contents.strip().split(self.section_end)[:-1]
         for section_content in sections:
-            section_content = section_content.strip()
-
-            section_content = section_content.split('\n')
+# First we strip off any whitespace from each line, then split it according to
+# newline.  We then filter out any blank lines, then any lines that would be a comment,
+# i.e. starts with a \'#\' or a \'!\' symbol.
+            section_content = section_content.strip().split('\n')
+            section_content = [line for line in section_content if line]
             section_content = [line for line in section_content if not (line.startswith('#') or \
                                                                         line.startswith('!'))]
             section_name = section_content[0][1:]
 
-            print 'section name:', section_name # For testing
+            print '\nFound section %s.  Reading in options.' % section_name
             if section_name not in self.section_parsers:
                 error = 'Section %s not recognized' % section_name
                 MASTError(self.__class__.__name__, error)
                 return
 
             self.section_parsers[section_name](section_name, section_content[1:], options)
+            print 'Finished parsing section %s.' % section_name
 
         return options
 
@@ -105,46 +109,17 @@ class InputParser(MASTObj):
         mast_dict = MAST_KEYWORDS.copy()
 
         for line in section_content:
-            if (line.startswith('#') or line.startswith('!') or (not line)):
-                continue
+            line = line.split(self.delimiter)
+            if (line[0] not in mast_dict):
+                error = 'Section keyword %s not recognized' % line[0]
+                MASTError(self.__class__.__name__, error)
+                return
             else:
-                line = line.split(self.delimiter)
-                if (line[0] not in mast_dict):
-                    error = 'Section keyword %s not recognized' % line[0]
-                    MASTError(self.__class__.__name__, error)
-                    return
-                else:
-                    mast_dict[line[0]] = line[1]
+                mast_dict[line[0]] = line[1]
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
-
-    def parse_structure_section_old(self, section_name, section_content, options):
-        """Parse the structure section and populate the options
-
-            Section is now deprecated            
-            For now, assume positions are in Cartesian
-        """
-        structure_dict = STRUCTURE_KEYWORDS.copy() # Initialize with default values
-
-        for line in section_content:
-            if (line.startswith('#') or line.startswith('!') or (not line)):
-                continue
-            else:
-                line = line.split(self.delimiter)
-
-                if (line[0] in structure_dict):
-                    structure_dict[line[0]] = line[1]
-                else:
-# Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
-# pymatgen needs
-                    structure_dict['atom_list'].append(line[0].title())
-                    structure_dict['coordinates'].append(line[1:])
-
-        structure_dict['coordinates'] = np.array(structure_dict['coordinates'], dtype='float')
-
-        for key, value in structure_dict.items():
-            options.set_item(section_name, key, value)
+        print mast_dict
 
     def parse_structure_section(self, section_name, section_content, options):
         """Parse the structure section and populate the options
@@ -176,27 +151,24 @@ class InputParser(MASTObj):
         subsection_dict = dict()
 
         for line in section_content:
-            if (line.startswith('#') or line.startswith('!') or (not line)):
-                continue
-            else:
-                line = line.split(self.delimiter)
+            line = line.split(self.delimiter)
 
-                if (line[0] in structure_dict):
-                    structure_dict[line[0]] = line[1]
-                elif ('begin' in line[0]):
-                    subsection = line[1]
-                    subsection_list = list()
-                elif ('end' not in line):
-                    subsection_list.append(line)
-                elif ('end' in line):
-                    subsection_dict[subsection] = subsection_list
+            if (line[0] in structure_dict):
+                structure_dict[line[0]] = line[1]
+            elif ('begin' in line[0]):
+                subsection = line[1]
+                subsection_list = list()
+            elif ('end' not in line):
+                subsection_list.append(line)
+            elif ('end' in line):
+                subsection_dict[subsection] = subsection_list
 
 # Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
 # pymatgen needs
 #                    structure_dict['atom_list'].append(line[0].title())
 #                    structure_dict['coordinates'].append(line[1:])
 
-        print 'in InputParser.parse_structure_section:', subsection_dict
+#        print 'in InputParser.parse_structure_section:', subsection_dict
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -207,33 +179,6 @@ class InputParser(MASTObj):
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
-
-    def parse_unitcell_section(self, section_name, section_content, options):
-        """Parse the unit cell section and populate the options
-
-            By default this will assume that the cell is given as:
-                a11 a12 a13
-                a21 a22 a23
-                a31 a32 a33
-           However, it can also read in the following format (TO BE DONE!):
-               a = xxx
-               b = yyy
-               c = zzz
-               alpha = xx 
-               beta = yy
-               gamma = zz
-
-           Based off of this information, this section will construct a pymatgen Lattice object
-        """
-        cell = list()
-
-        for line in section_content:
-            line = line.split(self.delimiter)
-            cell.append(line)
-
-        cell = np.array(cell, dtype='float')
-
-        options.set_item(section_name, 'lattice', pmg.Lattice(cell))
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
@@ -271,24 +216,21 @@ class InputParser(MASTObj):
         recipe_dict = RECIPE_KEYWORDS.copy()
 
         for line in section_content:
-            if (line.startswith('#') or line.startswith('!') or (not line)):
-                continue
-            else:
-                line = line.split(self.delimiter)
-                if (line[0] not in recipe_dict):
-                    error = 'Section keyword %s not recognized' % line[0]
+            line = line.split(self.delimiter)
+            if (line[0] not in recipe_dict):
+                error = 'Section keyword %s not recognized' % line[0]
+                MASTError(self.__class__.__name__, error)
+                return
+            elif (line[0] == 'recipe_file'):
+                try:
+                    recipe_path = os.environ['MAST_RECIPE_PATH']
+                except KeyError:
+                    error = 'MAST_RECIPE_PATH environment variable not set'
                     MASTError(self.__class__.__name__, error)
-                    return
-                elif (line[0] == 'recipe_file'):
-                    try:
-                        recipe_path = os.environ['MAST_RECIPE_PATH']
-                    except KeyError:
-                        error = 'MAST_RECIPE_PATH environment variable not set'
-                        MASTError(self.__class__.__name__, error)
  
-                    recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
-                else:
-                    recipe_dict[line[0]] = line[1]
+                recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
+            else:
+                recipe_dict[line[0]] = line[1]
 
         for key, value in recipe_dict.items():
             options.set_item(section_name, key, value)
@@ -323,10 +265,7 @@ class InputParser(MASTObj):
         ingredients_dict = dict()
 
         for line in section_content:
-            if (line.startswith('#') or line.startswith('!') or (not line)):
-# Check for comments starting with a # or a !, or just a good ol' fashioned blank line
-                continue
-            elif (line.startswith('begin')):
+            if (line.startswith('begin')):
 # Each ingredient section starts with "begin", check for this line, and initialize the individual
 # ingredient dictionary
                 ingredient_name = line.split()[1]
@@ -334,7 +273,7 @@ class InputParser(MASTObj):
             elif ('end' not in line):
                 opt = line.split()
 #                print opt
-                if (opt[0] == 'kpoints'):
+                if (opt[0] == 'mast_kpoints'):
                     kpts = map(int, opt[1].split('x'))
                     ingredient_dict[opt[0]] = kpts
                 else:
@@ -347,9 +286,16 @@ class InputParser(MASTObj):
                 else:
                     ingredients_dict[ingredient_name] = ingredient_dict
 
-        for key, value in ingredients_dict.items():
-            value.update(global_dict)
-            options.set_item(section_name, key, value)
+# Each value in ingredients_dict is a dictionary containing the relevant
+# ingredient and option(s).  We append the global_dict (containing global
+# ingredients options here, after checking to make sure the ingredient in
+# question does not contain the option/value.
+        for ing_key, ing_value in ingredients_dict.items():
+            for glob_key, glob_value in global_dict.items():
+                if glob_key not in ing_value:
+                    ing_value[glob_key] = glob_value
+            options.set_item(section_name, ing_key, ing_value)
+
         options.set_item(section_name, 'global', global_dict)
 
         #TTM add defects section
@@ -402,4 +348,52 @@ class InputParser(MASTObj):
         print "hopfrom_dict: ", hopfrom
         options.set_item(section_name, 'images', images)
         options.set_item(section_name, 'hopfrom_dict', hopfrom)
+
+    def parse_chemical_potentials_section(self, section_name, section_content,
+                                          options):
+        """Parse the chemical_potentials section and populate the options.
+            Section uses the standard begin...end subsection structure, but with
+            a modification:  instead of strict subsection titles (i.e. structure,
+            lattice etc.), subsection titles are the conditions under which the
+            chemical potentials are for.  Any combination of white spacing is
+            allowed, however note that all conditions will be converted to lower
+            case first!
+
+            Using a GaAs example, hypothetically we could have a chemical_potential
+            section like the following:
+                $chemical_potentials
+                begin As rich
+                Ga 4.5
+                As 3.5
+                end
+
+                begin Ga rich
+                Ga 3.5
+                As 4.5
+                end
+                $end
+
+            For charged defects, note that the chemical potential of the
+            electron will be calculated automatically from the Fermi level and
+            appropiate potential shift correction.  However, if one desires to
+            manually give an electron chemical potential (for whatever reason!)
+            this can be done by specifiying \'electron\' in the appropiate
+            condition.
+        """
+        chempot_dict = dict()
+
+        for line in section_content:
+            if (line.startswith('begin')):
+                condition_name = ' '.join(line.split()[1:])
+                condition_dict = dict()
+            elif ('end' not in line):
+                opt = line.split()
+                condition_dict[opt[0]] = float(opt[1])
+            elif ('end' in line):
+                chempot_dict[condition_name] = condition_dict
+
+        for key, value in chempot_dict.items():
+            options.set_item(section_name, key, value)
+
+#        print 'DEBUG: chempot_dict =', chempot_dict
 
