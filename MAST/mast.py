@@ -59,7 +59,7 @@ class MAST(MASTObj):
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
-        print "Ingredients Dict : ", ingredients_dict
+#        print "Ingredients Dict : ", ingredients_dict
 
         self._parse_input()
         self._parse_recipe()
@@ -94,7 +94,6 @@ class MAST(MASTObj):
         pm = PickleManager(pickle_file)
         pm.save_variable(recipe_plan_obj) 
    
-
     def _parse_input(self):
         """Parses the input file"""
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
@@ -135,11 +134,13 @@ class MAST(MASTObj):
             atom_list = self.input_options.get_item('structure', 'atom_list')
             coord_type = self.input_options.get_item('structure', 'coord_type')
 
-            print 'In MAST._build_structure():'
-            print 'lattice =', lattice
-            print 'coordinates =', coordinates
-            print 'atom_list =', atom_list
-            print 'coord_type =', coord_type
+# begin DEBUG section
+#            print 'In MAST._build_structure():'
+#            print 'lattice =', lattice
+#            print 'coordinates =', coordinates
+#            print 'atom_list =', atom_list
+#            print 'coord_type =', coord_type
+# end DEBUG section
 
             self.structure = MAST2Structure(lattice=lattice,
                                             coordinates=coordinates,
@@ -148,7 +149,7 @@ class MAST(MASTObj):
 #            print 'In %s:' % self.__class__.__name__, coord_type
         elif ('poscar' in posfile.lower()):
             from pymatgen.io.vaspio import Poscar
-            self.structure = Poscar.from_file(posfile).struct
+            self.structure = Poscar.from_file(posfile).structure
         elif ('cif' in posfile.lower()):
             from pymatgen.io.cifio import CifParser
             self.structure = CifParser(posfile).get_structures()[0]
@@ -156,10 +157,8 @@ class MAST(MASTObj):
             error = 'Cannot build structure from file %s' % posfile
             MASTError(self.__class__.__name__, error)
 
-# Begin DEBUG section
-        print "\nPymatgen structure object:"
-        print self.structure, '\n'
-# End DEBUG section
+#        print "\nStructure:"
+        print '\n', self.structure, '\n'
 
     def _parse_recipe(self):
         """Parses the generic recipe file"""

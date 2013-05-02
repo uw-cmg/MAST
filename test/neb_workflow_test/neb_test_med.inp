@@ -1,0 +1,92 @@
+# Test file
+$MAST
+program VASP
+system_name zirconia
+$end
+
+$structure
+posfile zirconia_poscar
+$end
+
+$defects
+coord_type fractional
+interstitial 0.5 0.0 0.0 Cr
+interstitial 0.0 0.5 0.0 Cr
+vacancy 0.25 0.25 0.25 O
+vacancy 0.75 0.25 0.25 O
+$end
+
+$neb
+hops 1-2 3-4 
+images 3
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_nodes 1
+mast_ppn 1
+mast_queue default
+mast_exec //share/apps/vasp5.2_CNEB
+mast_kpoints 4x4x4 M
+mast_xc PW91
+isif 2
+ibrion 2
+nsw 191
+ismear 0
+sigma 0.05
+lwave False
+lcharg False
+prec Accurate
+end
+
+begin optimizelowmesh
+mast_kpoints 2x2x2 M
+isif 3
+end
+
+begin optimize
+isif 3
+end
+
+begin static 
+ibrion -1
+nsw 0
+ismear -5
+mast_multiplyencut 1.25
+end
+
+begin optimizelowmeshdefect
+mast_kpoints 2x2x2 M
+end
+
+begin optimizedefect
+isif 2
+end
+
+begin staticendpoint
+ibrion -1
+nsw 0
+ismear -5
+mast_multiplyencut 1.25
+end
+
+begin performneblowmesh
+mast_kpoints 2x2x2 M
+ibrion 1
+potim 0.5
+lclimb True
+spring -5
+end
+
+begin performneb
+ibrion 1
+potim 0.5
+lclimb True
+spring -5
+end
+$end
+
+$recipe
+recipe_file recipe_neb.txt
+$end

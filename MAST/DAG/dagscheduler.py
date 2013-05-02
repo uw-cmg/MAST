@@ -76,7 +76,7 @@ class DAGScheduler:
         for jid, job in self.jobtable.jobs.iteritems():
             if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
                 print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
-                job.ingredient_obj.run(mode=self._run_mode)
+                job.ingredient_obj.run() #TTM do not default mode in dag scheduler; make ingredients default. mode=self._run_mode)
                 job.status = JOB.InQ
                 sid = job.sid
                 self.sessiontable.runjobs(sid=sid, njobs=1) # update session table
