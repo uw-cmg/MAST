@@ -8,6 +8,7 @@ from pymatgen.io.vaspio import Poscar
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.ingredients.baseingredient import BaseIngredient
+import os
 
 class InduceDefect(BaseIngredient):
     def __init__(self, **kwargs):
@@ -90,12 +91,30 @@ class InduceDefect(BaseIngredient):
         modified_structure = self.induce_defect()
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
-            self.lock_directory(name)
+            self.lock_directory()
             myposcar.to_file(name + '/CONTCAR')
-            self.unlock_directory(name)
+            self.unlock_directory()
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
         return
+    
+    def is_ready_to_run(self):
+        return True
+
+    def run(self, mode='noqsub'):
+        return True
+
+    def is_complete(self):
+        if self.directory_is_locked():
+            return False
+        if self.keywords['program'] == 'vasp':
+            if os.path.exists(self.keywords['name'] +'/CONTCAR'):
+                return True
+            else:
+                return False
+        else:
+            raise MASTError(self.__class__.__name__, "Program not supported.")
+
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():
@@ -118,6 +137,6 @@ class InduceDefect(BaseIngredient):
             pass
         else:
             numstr = numstr[numstr.find("defect")+6:] #allow 'defect' to be in <sys>
-        defectstr = numstr
-        return defectstr
+        defectnum = int(numstr)
+        return defectnum
 
