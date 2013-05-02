@@ -118,19 +118,17 @@ def _vasp_kpoints_setup(keywords):
     """
     name = keywords['name']
     if 'mast_kpoints' in keywords['program_keys'].keys():
-        kptstr = keywords['program_keys']['mast_kpoints']
+        kptlist = keywords['program_keys']['mast_kpoints']
     else:
         raise MASTError("vasp_checker, _vasp_kpoint_setup","k-point instructions need to be set in ingredients keyword mast_kpoints")
-    kptlist = kptstr.split()
-    if len(kptlist) == 1:
+    if len(kptlist) == 3:
         desig = "M"
     else:
-        desig = kptlist[1]
-    kptslist = kptlist[0].split('x')
+        desig = kptlist[3].upper()
     if desig == "M":
-        my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptslist[0]),int(kptslist[1]),int(kptslist[2])),shift=(0,0,0))
+        my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
     elif desig == "G":
-        my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptslist[0]),int(kptslist[1]),int(kptslist[2])),shift=(0,0,0))
+        my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
     else:
         raise MASTError("vasp_checker, _vasp_kpoint_setup","kpoint designation " + desig + " not recognized.")
     dirutil.lock_directory(name)

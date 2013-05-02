@@ -275,6 +275,8 @@ class InputParser(MASTObj):
 #                print opt
                 if (opt[0] == 'mast_kpoints'):
                     kpts = map(int, opt[1].split('x'))
+                    if len(opt) > 2:
+                        kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
                 else:
                     ingredient_dict[opt[0]] = opt[1]
