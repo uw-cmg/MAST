@@ -92,7 +92,7 @@ class InduceDefect(BaseIngredient):
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
             self.lock_directory()
-            myposcar.to_file(name + '/CONTCAR')
+            myposcar.write_file(name + '/CONTCAR')
             self.unlock_directory()
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
