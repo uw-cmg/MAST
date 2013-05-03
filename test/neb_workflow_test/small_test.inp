@@ -1,0 +1,42 @@
+# Test file
+$MAST
+program VASP
+system_name smalltestfcc
+$end
+
+$structure
+posfile smallfcc_poscar
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes 1
+mast_multiplyencut 1.25
+mast_ppn 1
+mast_queue default
+mast_exec //share/apps/vasp5.2_CNEB
+mast_kpoints 1x1x1 G
+mast_xc PW91
+isif 2
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+end
+
+begin optimizelowmesh
+mast_kpoints 1x1x1 G
+isif 3
+end
+
+begin optimize
+isif 3
+end
+$end
+
+$recipe
+recipe_file recipe_test.txt
+$end

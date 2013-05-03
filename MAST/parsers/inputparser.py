@@ -15,6 +15,8 @@ import pymatgen as pmg
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+from MAST.utility import MAST2Structure
+
 
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
@@ -32,22 +34,15 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'atom_list': list(),
                       'coordinates': list(),
                       'lattice': list(),
+                      'primitive': False,
                      }
 
-UNITCELL_KEYWORDS = ['lattice_constant',
-                     'a',
-                     'b',
-                     'c',
-                     'alpha',
-                     'beta',
-                     'gamma',
-                    ]
-
-DEFECTS_KEYWORDS = ['coord_type',
-                    'vacancy',
-                    'interstial',
-                    'antisite',
-                   ]
+DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
+                    'vacancy': list(),
+                    'interstial': list(),
+                    'antisite': list(),
+                    'substitution': list(),
+                   }
 
 INGREDIENTS_KEYWORDS = ['singlepoint',
                         'optimization',
@@ -100,7 +95,7 @@ class InputParser(MASTObj):
                 return
 
             self.section_parsers[section_name](section_name, section_content[1:], options)
-            print 'Finished parsing section %s.' % section_name
+            print 'Finished parsing the %s section.' % section_name
 
         return options
 
@@ -119,7 +114,7 @@ class InputParser(MASTObj):
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
-        print mast_dict
+#        print mast_dict
 
     def parse_structure_section(self, section_name, section_content, options):
         """Parse the structure section and populate the options
@@ -163,22 +158,39 @@ class InputParser(MASTObj):
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
-# Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
-# pymatgen needs
-#                    structure_dict['atom_list'].append(line[0].title())
-#                    structure_dict['coordinates'].append(line[1:])
-
 #        print 'in InputParser.parse_structure_section:', subsection_dict
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
-                structure_dict['atom_list'] = [val.title() for val in value[:, 0]]
-                structure_dict['coordinates'] = np.array(value[:, 1:], dtype='float')
+# Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
+# pymatgen needs
+                atom_list = [val.title() for val in value[:, 0]]
+                coordinates = np.array(value[:, 1:], dtype='float')
             if (key == 'lattice'):
-                structure_dict['lattice'] = np.array(value, dtype='float')
+                lattice = np.array(value, dtype='float')
+
+        if (structure_dict['posfile'] is None):
+            structure = MAST2Structure(lattice=lattice,
+                                       coordinates=coordinates,
+                                       atom_list=atom_list,
+                                       coord_type=structure_dict['coord_type'])
+#            print 'In %s:' % self.__class__.__name__, coord_type
+        elif ('poscar' in posfile.lower()):
+            from pymatgen.io.vaspio import Poscar
+            structure = Poscar.from_file(posfile).structure
+        elif ('cif' in posfile.lower()):
+            from pymatgen.io.cifio import CifParser
+            structure = CifParser(posfile).get_structures()[0]
+        else:
+            error = 'Cannot build structure from file %s' % posfile
+            MASTError(self.__class__.__name__, error)
+
+        print structure
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
+
+        options.set_item(section_name, 'structure', structure)
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
@@ -275,6 +287,8 @@ class InputParser(MASTObj):
 #                print opt
                 if (opt[0] == 'mast_kpoints'):
                     kpts = map(int, opt[1].split('x'))
+# Second option after mast_kpoints tells where to center the k-point mesh.
+# If it's there, we append it onto the k-point grid list.
                     if len(opt) > 2:
                         kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts

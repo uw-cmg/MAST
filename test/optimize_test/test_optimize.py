@@ -17,7 +17,7 @@ class TestOptimize(unittest.TestCase):
         scripts = get_mast_install_path()
         os.chdir(os.path.join(scripts, 'test','optimize_test'))
         os.mkdir('test_opt1')
-        self.myOpt=Optimize(name="test_opt1", program="vasp", program_keys={'ibrion':2, 'mast_kpoints':"4x4x4 M", 'mast_xc':"PBE", 'mast_setmagmom':"5 1", 'mast_adjustnelect':"-1"})
+        self.myOpt=Optimize(name="test_opt1", program="vasp", program_keys={'ibrion':2, 'mast_kpoints':[4,4,4,"M"], 'mast_xc':"PBE", 'mast_setmagmom':"5 1", 'mast_adjustnelect':"-1"})
 
     def tearDown(self):
         shutil.rmtree('test_opt1')
