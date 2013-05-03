@@ -28,8 +28,9 @@ binpath = os.path.join(mastrootdir,'bin/mast')
 bindir= os.path.join(mastrootdir,'bin')
 print 'bindir : '+bindir
 print 'binpath : '+binpath
-inputfile = os.path.join(mastrootdir,'test/full_workflow_test/test.inp')
-
+#inputfile = os.path.join(mastrootdir,'test/full_workflow_test/test.inp')
+#inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/neb_test_use.inp')
+inputfile = os.path.join(mastrootdir, 'test/neb_workflow_test/small_test.inp')
 print 'input directory : ' + inputfile
 argv.append('-i')
 argv.append(inputfile)
@@ -66,6 +67,7 @@ print 'start scheduling'
 
 scheduler.run()
 scheduler.show_session_table()
+
 
 """
 os.system('ls')

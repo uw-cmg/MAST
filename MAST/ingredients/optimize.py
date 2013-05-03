@@ -39,8 +39,6 @@ class Optimize(BaseIngredient):
             self.forward_parent_structure(self.keywords['name'], childname)
             
     def write_files(self):
-        if self.is_ready_to_run():
-            return
         if self.keywords['program'] == 'vasp':
             self.set_up_program_input()
             self.write_submit_script()

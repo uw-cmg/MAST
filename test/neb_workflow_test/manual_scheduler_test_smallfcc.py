@@ -26,7 +26,7 @@ def myrun(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     return p
 
-mastclear()
+#mastclear()
 mastrootdir = dirutil.get_mast_install_path()
 inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/small_test.inp')
 argv=[]
