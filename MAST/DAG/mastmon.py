@@ -54,7 +54,7 @@ class MASTmon(object):
         var_dict = {}
         var_dict['registered_dir'] = self.registered_dir
         var_dict['scheduler'] = self.scheduler
-        pm.save_variables(var_dict,self.pn_mastmon)
+        self.pm.save_variables(var_dict,self.pn_mastmon)
         print 'save variables of mastmon'
         
     def _load(self):
