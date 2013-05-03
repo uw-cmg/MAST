@@ -1,0 +1,11 @@
+Recipe NEB
+
+Ingredient <sys>_perfect_opt1 LowMeshOptimize
+Ingredient <sys>_induce_defect<N> InduceDefect
+Ingredient <sys>_defect<N>_opt1 LowMeshOptimizeDefect
+Ingredient <sys>_neb<N-N>_opt1 PerformLowMeshNEB
+Ingredient <sys>_neb<N-N>_image<img-N>_stat Static
+
+Parent <sys>_induce_defect<N> Child <sys>_defect<N>_opt1::structure
+Parent <sys>_defect<N>_opt1 Child <sys>_neb<N-N>_opt1::structure
+Parent <sys>_neb<N-N>_opt1 Child <sys>_neb<N-N>_image<img-N>_stat::structure

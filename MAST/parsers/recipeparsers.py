@@ -7,13 +7,16 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
+import os
+
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
+from MAST.utility import MASTError
 
 ALLOWED_KEYS = {\
-                 'templateFile'    : (str, 'recipe.template', 'template file name'),\
-                 'inputOptions'    : (InputOptions, InputOptions(), 'input options parsed using input parser'),\
-                 'personalRecipe'  : (str, 'sic.recipe', 'personalized recipe file'),\
+                 'templateFile'    : (str, None, 'template file name'),\
+                 'inputOptions'    : (InputOptions, None, 'input options parsed using input parser'),\
+                 'personalRecipe'  : (str, None, 'personalized recipe file'),\
                }
 
 class RecipeParser(MASTObj):
@@ -22,16 +25,30 @@ class RecipeParser(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options   = self.keywords['inputOptions']
+        self.template_file   = self.keywords['templateFile']
+        self.personal_recipe = self.keywords['personalRecipe']
         self.ingredient_list = list()
 
     def parse(self):
         ''' Parses the template recipe file and creates
             the personalized recipe file
         '''
+        if self.template_file is None:
+            raise MASTError(self.__class__.__name__, "Template file not provided !!!")
+
+        if not os.path.exists(self.template_file):
+            raise MASTError(self.__class__.__name__, "Template file not found !!!")
+
+        if self.input_options is None:
+            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+
+        if self.personal_recipe is None:
+            raise MASTError(self.__class__.__name__, "Personal recipe file not provided !!!")
+
         #fetch required paramaters
-        f_ptr           = open(self.keywords['templateFile'], "r")
-        o_ptr           = open(self.keywords['personalRecipe'], "w")
-        system_name     = self.input_options.get_item("mast", "system_name", "sys_")
+        f_ptr           = open(self.template_file, "r")
+        o_ptr           = open(self.personal_recipe, "w")
+        system_name     = self.input_options.get_item("mast", "system_name", "sys")
         n_param         = self.input_options.get_item("defects", "num_defects", 0)
         n_images        = self.input_options.get_item("neb", "images", 0)
         n_hops_dict     = self.input_options.get_item("neb", "hopfrom_dict", {})
