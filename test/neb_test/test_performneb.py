@@ -19,7 +19,7 @@ class TestPerformNEB(unittest.TestCase):
         shutil.copy('nebtest_defect11_stat/CONTCAR','nebtest_neb10-11/parent_structure_11')
         shutil.copy('nebtest_defect10_stat/OSZICAR','nebtest_neb10-11/parent_energy_10')
         shutil.copy('nebtest_defect11_stat/OSZICAR','nebtest_neb10-11/parent_energy_11')
-        self.NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3,'mast_kpoints':"2x2x2 M",'mast_xc':"PBE",'mast_setmagmom':"5 1 5"})
+        self.NEBing=PerformNEB(name="nebtest_neb10-11", program="vasp", program_keys={'images':3,'mast_kpoints':[2,2,2,"M"],'mast_xc':"PBE",'mast_setmagmom':"5 1 5"})
 
     def tearDown(self):
         shutil.rmtree('nebtest_neb10-11')
