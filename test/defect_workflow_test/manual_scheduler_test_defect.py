@@ -18,7 +18,7 @@ def mastclear():
 def listscratch():
     scratchdir = os.getenv("MAST_SCRATCH")
     time.sleep(1)
-    dirlist=dirutil.walkdirs(scratchdir, 1, 1, "*smalltestfcc*")
+    dirlist=dirutil.walkdirs(scratchdir, 1, 1, "*defecttest*")
     print "SCRATCH DIRECTORY: ",dirlist
     return dirlist
 
@@ -28,7 +28,7 @@ def myrun(cmd):
 
 mastclear()
 mastrootdir = dirutil.get_mast_install_path()
-inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/small_test.inp')
+inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/defect_test.inp')
 argv=[]
 binpath = os.path.join(mastrootdir,'bin/mast')
 bindir= os.path.join(mastrootdir,'bin')
