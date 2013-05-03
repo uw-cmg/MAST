@@ -99,67 +99,6 @@ class MAST(MASTObj):
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
 
-        self._build_structure()
-
-# Begin DEBUG section
-#        print self.input_options.get_item('defects', 'num_defects')
-#        from MAST.ingredients.inducedefect import InduceDefect as ID
-#        for i in range(self.input_options.get_item('defects', 'num_defects')):
-#            key = 'defect' + str(i)
-#            print self.input_options.get_item('defects', 'defects')[key]
-#
-#            defect = self.input_options.get_item('defects', 'defects')[key]
-#            print defect['coordinates'][None, :]
-#            induced_defect = ID(atom=defect['symbol'],
-#                                defecttype=defect['type'],
-#                                position=tuple(defect['coordinates']),
-#                                coordtype='fractional',
-#                                structure=self.structure)
-#            print induced_defect.induce_defect(), '\n'
-#        print self.input_options
-# End DEBUG section
-
-    def _build_structure(self):
-        """Builds the structure object from input options
-            For now we'll use the readers in pymatgen to generate the appropiate Structure object.
-
-            For POSCAR and CIF files, code taken from the pymatget tutorial.
-            Need to add flexibility for other file formats
-        """
-        posfile = self.input_options.get_item('structure', 'posfile')
-
-        if (posfile is None):
-            lattice = self.input_options.get_item('structure', 'lattice')
-            coordinates = self.input_options.get_item('structure', 'coordinates')
-            atom_list = self.input_options.get_item('structure', 'atom_list')
-            coord_type = self.input_options.get_item('structure', 'coord_type')
-
-# begin DEBUG section
-#            print 'In MAST._build_structure():'
-#            print 'lattice =', lattice
-#            print 'coordinates =', coordinates
-#            print 'atom_list =', atom_list
-#            print 'coord_type =', coord_type
-# end DEBUG section
-
-            self.structure = MAST2Structure(lattice=lattice,
-                                            coordinates=coordinates,
-                                            atom_list=atom_list,
-                                            coord_type=coord_type)
-#            print 'In %s:' % self.__class__.__name__, coord_type
-        elif ('poscar' in posfile.lower()):
-            from pymatgen.io.vaspio import Poscar
-            self.structure = Poscar.from_file(posfile).structure
-        elif ('cif' in posfile.lower()):
-            from pymatgen.io.cifio import CifParser
-            self.structure = CifParser(posfile).get_structures()[0]
-        else:
-            error = 'Cannot build structure from file %s' % posfile
-            MASTError(self.__class__.__name__, error)
-
-#        print "\nStructure:"
-        print '\n', self.structure, '\n'
-
     def _parse_recipe(self):
         """Parses the generic recipe file"""
 
@@ -173,18 +112,21 @@ class MAST(MASTObj):
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
     def _initialize_ingredients(self, ingredients_dict):
+        print '\nInitializing ingredients.'
 
+        print 'Extracting default ingredient options.'
         ingredient_global = self.input_options.get_item('ingredients', 'global')
+
+        print 'Extracting base structure.'
+        structure = self.input_options.get_item('structure', 'structure')
+        print structure, '\n'
+
         for ingredient in self.unique_ingredients:
+            print 'Initializing ingredient %s.' % ingredient
             if (not self.input_options.get_item('ingredients', ingredient)):
-#            if (not self.input_options.get_item('ingredients', ingredient)) and \
-#               (ingredient not in ['inducedefect']):
                 self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
-#        for ingredient in self.unique_ingredients:
-#            print 'DEBUG:', ingredient, self.input_options.get_item('ingredients', ingredient)
-
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
-                                structure=self.structure, ingredientsDict=ingredients_dict)
+                                structure=structure, ingredientsDict=ingredients_dict)
         recipe_plan_obj = setup_obj.start()
         return recipe_plan_obj
