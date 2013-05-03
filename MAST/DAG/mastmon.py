@@ -106,7 +106,7 @@ class MASTmon(object):
         # run it one time                          
         self.scheduler.run()
 
-        self.show_session_table()
+        self.scheduler.show_session_table()
         # save scheduler object
         self._save()
                           
