@@ -1,7 +1,12 @@
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from pymatgen.io.vaspio import Potcar
+from pymatgen.io.vaspio import Incar
+from pymatgen.io.vaspio import Kpoints
+from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
+from MAST.utility import MASTError
 import os
 import shutil
 
@@ -13,6 +18,13 @@ def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     """Copy CONTCAR to new POSCAR"""
     dirutil.lock_directory(childpath)
     shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
+    return
+
+def forward_parent_energy(parentpath, childpath, newname="OSZICAR"):
+    """Copy OSZICAR"""
+    dirutil.lock_directory(childpath)
+    shutil.copy(os.path.join(parentpath, "OSZICAR"),os.path.join(childpath, newname))
     dirutil.unlock_directory(childpath)
     return
 
@@ -84,3 +96,149 @@ def is_ready_to_run(dirname):
         return False
     else:
         return True
+
+def _vasp_poscar_setup(keywords):
+    name = keywords['name']
+    pospath = os.path.join(name, "POSCAR")
+    if os.path.isfile(pospath):
+        my_poscar = Poscar.from_file(pospath) 
+        #parent should have given a structure
+    else: #this is an originating run; mast should give it a structure
+        my_poscar = Poscar(keywords['structure'])
+        dirutil.lock_directory(name)
+        my_poscar.write_file(pospath)
+        dirutil.unlock_directory(name)
+    return my_poscar
+
+def _vasp_kpoints_setup(keywords):
+    """Parse mast_kpoints string, which should take the format:
+        number, number, number designation
+        examples: "3x3x3 M", "1x1x1 G". If no designation is given,
+        Monkhorst-Pack is assumed.
+    """
+    name = keywords['name']
+    if 'mast_kpoints' in keywords['program_keys'].keys():
+        kptlist = keywords['program_keys']['mast_kpoints']
+    else:
+        raise MASTError("vasp_checker, _vasp_kpoint_setup","k-point instructions need to be set in ingredients keyword mast_kpoints")
+    if len(kptlist) == 3:
+        desig = "M"
+    else:
+        desig = kptlist[3].upper()
+    if desig == "M":
+        my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
+    elif desig == "G":
+        my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
+    else:
+        raise MASTError("vasp_checker, _vasp_kpoint_setup","kpoint designation " + desig + " not recognized.")
+    dirutil.lock_directory(name)
+    my_kpoints.write_file(name + "/KPOINTS")
+    dirutil.unlock_directory(name)
+    return my_kpoints
+
+def _vasp_potcar_setup(keywords, my_poscar):
+    name=keywords['name']
+    if 'mast_xc' in keywords['program_keys'].keys():
+        myxc = keywords['program_keys']['mast_xc'].upper() #Uppercase
+    else:
+        raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
+    my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
+    dirutil.lock_directory(name)
+    my_potcar.write_file(name + "/POTCAR")
+    dirutil.unlock_directory(name)
+    return my_potcar
+
+def _vasp_incar_get_non_mast_keywords(program_keys_dict):
+    """Get the non-VASP keywords and make a dictionary."""
+    incar_dict=dict()
+    for key, value in program_keys_dict.iteritems():
+        if not key[0:5] == "mast_":
+            if type(value)==str and value.isalpha():
+                incar_dict[key.upper()]=value.capitalize() #First letter cap
+            else:
+                incar_dict[key.upper()]=value
+    return incar_dict
+
+def _vasp_incar_setup(keywords, my_potcar, my_poscar):
+    """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
+    name=keywords['name']
+    myd = dict()
+    myd = _vasp_incar_get_non_mast_keywords(keywords['program_keys'])
+    if 'mast_multiplyencut' in keywords['program_keys'].keys():
+        mymult = float(keywords['program_keys']['mast_multiplyencut'])
+    else:
+        mymult = 1.5
+    myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
+    if 'mast_setmagmom' in keywords['program_keys'].keys():
+        magstr = str(keywords['program_keys']['mast_setmagmom'])
+        magmomstr=""
+        maglist = magstr.split()
+        numatoms = sum(my_poscar.natoms)
+        if len(maglist) < numatoms:
+            magct=0
+            while magct < len(maglist):
+                magmomstr = magmomstr + str(my_poscar.natoms[magct]) + "*" + maglist[magct] + " " 
+                magct = magct + 1
+        else:
+            magmomstr = magstr
+        myd['MAGMOM']=magmomstr
+    if 'mast_adjustnelect' in keywords['program_keys'].keys():
+        myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
+        newelectrons=0.0
+        try:
+            adjustment = float(keywords['program_keys']['mast_adjustnelect'])
+        except (ValueError, TypeError):
+            raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
+        newelectrons = myelectrons + adjustment
+        myd['NELECT']=str(newelectrons)
+    my_incar = Incar(myd)
+    dirutil.lock_directory(name)
+    my_incar.write_file(name + "/INCAR")
+    dirutil.unlock_directory(name)
+    return my_incar
+
+def set_up_program_input(keywords):
+    myposcar = _vasp_poscar_setup(keywords)
+    mykpoints = _vasp_kpoints_setup(keywords)
+    mypotcar = _vasp_potcar_setup(keywords, myposcar)
+    myincar = _vasp_incar_setup(keywords, mypotcar, myposcar)
+    return
+
+def get_path_to_write_neb_parent_energy(myname, myimages, parent):
+    if parent == 1:
+        return os.path.join(myname, "00", "OSZICAR")
+    elif parent == 2:
+        return os.path.join(myname, str(int(myimages)+1).zfill(2),"OSZICAR")
+    else:
+        raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
+
+def set_up_neb_folders(myname, image_structures):
+    imct=0
+    while imct < len(image_structures):
+        imposcar = Poscar(image_structures[imct])
+        num_str = str(imct).zfill(2)
+        impath = os.path.join(myname, num_str)
+        impospath = os.path.join(myname, "POSCAR_" + num_str)
+        dirutil.lock_directory(myname)
+        imposcar.write_file(impospath)
+        dirutil.unlock_directory(myname)
+        try:
+            os.makedirs(impath)
+        except OSError:
+            print "Directory at", impath, "already exists."
+            return None
+        dirutil.lock_directory(impath)
+        imposcar.write_file(os.path.join(impath, "POSCAR"))
+        dirutil.unlock_directory(impath)
+        imct = imct + 1
+    return
+    
+
+def set_up_program_input_neb(keywords, image_structures):
+    set_up_neb_folders(keywords['name'], image_structures)
+    mykpoints = _vasp_kpoints_setup(keywords)
+    mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
+    myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
+    return
+
+

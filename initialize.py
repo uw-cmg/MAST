@@ -1,13 +1,31 @@
 #!/usr/bin/env python
 import os
 mycwd = os.getcwd()
-os.environ["MAST_INSTALL_PATH"]=mycwd
-os.environ["MAST_RECIPE_PATH"]=os.path.join(mycwd, "recipe_templates")
-vasppsp = os.getenv("VASP_PSP_DIR")
-if vasppsp == None:
-    print "Please set VASP_PSP_DIR to a pseudopotential directory."
-print "MAST Environment Variables:"
+print "Current MAST Environment Variables:"
 print "MAST_INSTALL_PATH: ",os.getenv("MAST_INSTALL_PATH")
 print "MAST_RECIPE_PATH: ",os.getenv("MAST_RECIPE_PATH")
 print "VASP_PSP_DIR: ",os.getenv("VASP_PSP_DIR")
 print "MAST_SCRATCH: ",os.getenv("MAST_SCRATCH")
+print "PYTHONPATH: ",os.getenv("PYTHONPATH")
+print "PATH: ",os.getenv("PATH")
+
+
+print "==============================================="
+print "Copy and paste the following lines into your terminal, or add them"
+print "to your //home/user/.bashrc file."
+print "See the tutorial for more information."
+print "==============================================="
+
+print "export MAST_INSTALL_PATH=" + mycwd
+print "export MAST_RECIPE_PATH=" + mycwd + "/recipe_templates"
+pypath = os.getenv("PYTHONPATH")
+if pypath == None:
+    print "export PYTHONPATH=" + mycwd
+else:
+    print "export PYTHONPATH=$PYTHONPATH:" + mycwd
+mypath = os.getenv("PATH")
+if mypath == None:
+    print "export PATH=" + mycwd + "/bin"
+else:
+    print "export PATH=$PATH:" + mycwd + "/bin"
+print "export MAST_SCRATCH=" + mycwd + "/SCRATCH"
