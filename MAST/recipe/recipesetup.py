@@ -22,7 +22,7 @@ from recipe_plan import RecipePlan
 from pymatgen.core.structure import Structure
 
 ALLOWED_KEYS = {
-                  'recipeFile'     : (str, 'sic.recipe', 'Personalized recipe file'),\
+                  'recipeFile'     : (str, None, 'Personalized recipe file'),\
                   'inputOptions'   : (InputOptions, None, 'Input options parsed using input parser'),\
                   'structure'      : (Structure, None, 'Structure to be used to create the ingredient objects'),\
                   'ingredientsDict': (dict, dict(), 'Dictionary of ingredients'),\
@@ -39,8 +39,6 @@ class RecipeSetup(MASTObj):
         self.input_options  = self.keywords['inputOptions']
         self.structure      = self.keywords['structure']
         self.ingredients_dict = self.keywords['ingredientsDict']
-        self.program        = self.input_options.get_item('mast', 'program')
-        self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
         self.delimiter      = '::'
 
         """Special keywords used in the recipe templates
@@ -55,6 +53,7 @@ class RecipeSetup(MASTObj):
         """Parses the input personalized recipe file and takes 
            necessary info to setup the jobs
         """
+
         f_ptr            = open(self.recipe_file, "r")
         recipe_name      = ""
         ingredients_info = dict()
@@ -91,9 +90,11 @@ class RecipeSetup(MASTObj):
                         parent_objs.append(elt)
                     else:
                         child_info      = elt.split(self.delimiter)
+                        if child_info[0] not in ingredients_info:
+                            raise MASTError(self.__class__.__name__, "Child Ingredient %s not defined !!!" % child_info[0])
                         for parent in parent_objs:
                             if parent not in ingredients_info:
-                                MASTError(self.__class__.__name__, "Parent Ingredient %s used in relationship without definition !!!" % parent)
+                                raise MASTError(self.__class__.__name__, "Parent Ingredient %s used in relationship without definition !!!" % parent)
                             ingredients_info[parent][1][child_info[0]] = child_info[1:]
 
         f_ptr.close()
@@ -103,7 +104,11 @@ class RecipeSetup(MASTObj):
         """Creates the ingredient based on the ingredient type
         """
         if ingredient_type not in self.ingredients_dict:
-            MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
+            raise MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
+
+        self.program        = self.input_options.get_item('mast', 'program')
+        self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
+
         ingredient_name = os.path.join(self.scratch_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
         return self.ingredients_dict[ingredient_type](name=ingredient_name, structure= self.structure, \
@@ -134,6 +139,18 @@ class RecipeSetup(MASTObj):
            Use the input options and recipe info to 
            create directories and classes required
         """
+        if self.recipe_file is None:
+            raise MASTError(self.__class__.__name__, "Recipe file not provided !!!")
+            
+        if not os.path.exists(self.recipe_file):
+            raise MASTError(self.__class__.__name__, "Recipe file not Found !!!")
+
+        if not self.input_options:
+            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+
+        if not self.ingredients_dict:
+            raise MASTError(self.__class__.__name__, "Empty Ingredients Dict !!!")
+
         ingredients_info, recipe_name = self.parse_recipe()
         print ingredients_info
         recipe_plan                   = self.create_recipe_plan(ingredients_info, recipe_name)
