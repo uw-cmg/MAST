@@ -177,10 +177,10 @@ class InputParser(MASTObj):
 #            print 'In %s:' % self.__class__.__name__, coord_type
         elif ('poscar' in structure_dict['posfile'].lower()):
             from pymatgen.io.vaspio import Poscar
-            structure = Poscar.from_file(posfile).structure
+            structure = Poscar.from_file(structure_dict['posfile']).structure
         elif ('cif' in structure_dict['posfile'].lower()):
             from pymatgen.io.cifio import CifParser
-            structure = CifParser(posfile).get_structures()[0]
+            structure = CifParser(structure_dict['posfile']).get_structures()[0]
         else:
             error = 'Cannot build structure from file %s' % structure_dict['posfile']
             MASTError(self.__class__.__name__, error)
