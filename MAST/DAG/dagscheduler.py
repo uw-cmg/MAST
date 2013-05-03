@@ -4,7 +4,7 @@ from jobtable import JobTable
 from sessionentry import SessionEntry
 from sessiontable import SessionTable
 import subprocess
-
+import os
 """
 This is for schedulring.
 @author: Hyunwoo Kim
@@ -16,6 +16,7 @@ class DAGScheduler:
         self.jobtable = JobTable()
         self.sessiontable = SessionTable()
         self._run_mode = 'noqsub' # noqsub, serial (by qsub), parallel
+        self.home = os.environ['MAST_SCRATCH']
 
     def set_mode(self,mode):
         self._run_mode = mode
@@ -34,7 +35,7 @@ class DAGScheduler:
     def has_session(self, sid):
         return sid in self.sessiontable.sessions
 
-    def addjobs(self, ingredients_dict, dependency_dict, sid=None):
+    def addjobs(self, ingredients_dict, dependency_dict,sname=None, sid=None):
         '''If sid is not specified, then new unique sid will be assigned.'''
 
         if sid is None:
@@ -43,15 +44,26 @@ class DAGScheduler:
         njobs = len(ingredients_dict)
         # Add a new session 
         if not self.has_session(sid):
-            asession = SessionEntry(sid,njobs)
+            asession = SessionEntry(sid, njobs, sname)
             self.sessiontable.addsession(asession)
         else:
             self.sessiontable[sid].addnewjobs(njobs)
-            
+
+        session_dir = os.path.join(self.home, sname)
         # Insert jobs
         for name, ingredient in ingredients_dict.iteritems():
             jid = self.jobtable.get_jid()
-            ajob = JobEntry(sid=sid, jid=jid, jobname=name, ingredient=ingredient)
+            # attach session_dir to name of ingredient
+            ingredient.keywords['name'] = os.path.join(session_dir, ingredient.keywords['name'])
+            # attach session_dir to name of child ingredients
+            child_dict = ingredient.keywords['child_dict']
+            keys = child_dict.keys()
+            for oldkey in keys:
+                newkey = os.path.join(session_dir, oldkey)
+                child_dict[newkey] = child_dict[oldkey]
+                del child_dict[oldkey]
+
+            ajob = JobEntry(sid=sid, jid=jid, ingredient=ingredient)
             print jid, name
             self.jobtable.addjob(ajob)
             
@@ -60,7 +72,10 @@ class DAGScheduler:
             for aparent in parent:
                 # For DEBUGGING
                 print child +"<="+ aparent
-                self.jobtable.add_dependency(aparent,child)
+                pname = os.path.join(session_dir,aparent)
+                kidname = os.path.join(session_dir,child)
+                print kidname +"<="+ pname
+                self.jobtable.add_dependency(pname,kidname)
 
     def update_job_status(self):
         '''udpate session table and update children'''
@@ -118,6 +133,7 @@ class DAGScheduler:
     def run(self):
         while self.has_incomplete_session():
             self._run()
+            print 'I am at %s' % os.getcwd()
             time.sleep(SCHEDULING_INTERVAL)
             
     def _run(self):

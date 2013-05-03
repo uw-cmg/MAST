@@ -24,7 +24,6 @@ class MASTmon(object):
                 os.system('mkdir %s' % os.path.join(abspath(self.home), self._ARCHIVE))
         except:
             print 'Error to make directory for MASTmon and completed sessions'
-            
 
     def add_sessions(self,new_session_dirs):
         """recipe_dirs is a set of sessions in MASTmon home directory"""
@@ -40,7 +39,7 @@ class MASTmon(object):
                     self.scheduler = DAGScheduler()
                     
                 print 'step 2: add jobs'
-                self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict)
+                self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=session_dir)
                     
             except:
                 print 'Error in add_sessions'

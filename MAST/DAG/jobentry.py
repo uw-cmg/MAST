@@ -14,7 +14,7 @@ class JobEntry(object):
     def __init__(self, sid, jid, jobname=None, type=None, ingredient=None):
         self.sid = sid # session id
         self.jid = jid # job id which is unique in a session.
-        self.name = jobname # job name may or may not be unique.
+        self.name = None # job name must be unique so that each job is stored in different directory
         self.status = JOB.PreQ # enum or integer
         self.parents = set() # jid of parents
         self.completeparents = set() #jid of complete parents
@@ -28,9 +28,7 @@ class JobEntry(object):
         if jobname is not None:
             self.name = jobname
         elif ingredient is not None:
-            self.name = ingredient.keywords['name'].split('/')[-1]
-        else:
-            self.name = 'noname'
+            self.name = ingredient.keywords['name']
 
         self.ingredient_obj = ingredient #ingredient object
 
@@ -65,5 +63,5 @@ class JobEntry(object):
 
     @classmethod
     def getformat(cls):
-        return "{:>5}{:>6}{:>8}{:>5}{:>5}{:>15}{:>20}"
+        return "{:>5}{:>6}{:>40}{:>5}{:>20}{:>30}{:>20}"
     
