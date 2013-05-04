@@ -16,6 +16,8 @@ def main():
                       help='Input file to use to run MAST with (sets mode to input)')
     parser.add_option('-o', '--output', dest='output', default=None,
                       help='Output file to print MAST information about run to')
+    parser.add_option('-r', '--runmode', dest='runmode', default='run',
+                      help='Will start the DAG schedular and submit jobs to the queue')
 
     (mastopt, mastarg) = parser.parse_args()
 
@@ -31,6 +33,9 @@ def main():
 
     if (mastopt.mode == 'input') and (mastopt.output is None):
         mastopt.output = 'mast.out'
+
+    if (mastopt.runmode == 'run'):
+        print 'Will run jobs through DAG schedular'
 
     # Gather some path information
 
