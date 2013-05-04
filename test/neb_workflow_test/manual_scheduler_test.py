@@ -24,9 +24,9 @@ def myrun(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     return p
 
-mastclear()
+#mastclear()
 mastrootdir = dirutil.get_mast_install_path()
-inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/neb_test_use.inp')
+inputfile = os.path.join(mastrootdir,'test/neb_workflow_test/neb_test_small.inp')
 argv=[]
 binpath = os.path.join(mastrootdir,'bin/mast')
 bindir= os.path.join(mastrootdir,'bin')
@@ -55,14 +55,13 @@ ingredients = mastobj.ingredients
 njobs = len(ingredients)
 
 from MAST.DAG.dagscheduler import DAGScheduler
-from MAST.DAG.dagscheduler import JobEntry
-from MAST.DAG.dagscheduler import DAGParser
-from MAST.DAG.dagscheduler import SessionEntry
-from MAST.DAG.dagscheduler import JobEntry
-from MAST.DAG.dagscheduler import JobTable
-from MAST.DAG.dagscheduler import SessionTable
-from MAST.DAG.dagscheduler import set2str
-from MAST.DAG.dagscheduler import JOB
+from MAST.DAG.jobentry import JobEntry
+from MAST.DAG.sessionentry import SessionEntry
+from MAST.DAG.jobentry import JobEntry
+from MAST.DAG.jobtable import JobTable
+from MAST.DAG.sessiontable import SessionTable
+from MAST.DAG.dagutil import *
+
 import time
 # seession id
 # Basic operation in DAGScheduler
@@ -82,36 +81,3 @@ while scheduler.has_incomplete_session():
     scheduler.update_job_status()
     scheduler.show_session_table()
 
-"""
-os.system('ls')
-print '\nclear previous result\n'
-mastclear()
-os.system('ls')
-
-print '\nrestart scheduler in a different mode'
-# new sesssion with qsub and 'serial' mode
-print 'load data again'
-mastobj = pm.load_variable('mast.pickle')
-depdict = mastobj.dependency_dict
-ingredients = mastobj.ingredients
-
-print 'step 2: add jobs'
-scheduler.addjobs(ingredients_dict=ingredients, dependency_dict = depdict)
-
-scheduler.set_mode('serial')
-
-# This is the inside of scheduler.run()
-
-while scheduler.has_incomplete_session():
-
-    print 'step 3: run jobs'
-    scheduler.run_jobs()
-    print 'step 4: update job status'
-    scheduler.update_job_status()
-    time.sleep(5)
-
-
-scheduler.show_session_table()
-os.system('rm mast.pickle')
-"""
-    

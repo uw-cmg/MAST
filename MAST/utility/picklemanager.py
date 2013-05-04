@@ -9,6 +9,9 @@ class PickleManager:
         else:
             self.fn = filename
             
+    def save(self, variable, filename=None):
+        self.save_variable(variable, filename=filename)
+        
     def save_variable(self,variable, filename=None):
         if filename is None:
             fh = open(self.fn,'wb')
@@ -34,14 +37,15 @@ class PickleManager:
         
 
     def save_variables(self, gdict, varlist=None, filename=None):
-        '''gdict = globals() or gdict = vardict
+        """gdict = globals() or gdict = vardict
             Usage1:
                 >>> pm.save_variables(gdict=globals(), varlist=['What','You','Want']) # default filename is self.fn
                 >>> pm.save_variables(gdict=globals(), varlist=['What','You','Want'], filename='yourpickle.pkl')
             Usage2:
                 >>> pm.save_variables(gdict=yourvardict)
                 >>> pm.save_variables(gdict=yourvardict, filename='yourpickle.pkl')
-        '''
+        """
+        
         if filename is None:
             fh = open(self.fn,'wb')
         else:
