@@ -73,30 +73,37 @@ class InputParser(MASTObj):
         """Parses information from the input file"""
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
-# read in the input file and convert everything to lower case
-        contents  = infile.read().lower()
+
+        eof = False
+        while (not eof):
+            line = infile.readline().lower()
+# This works because the blank lines in the file are really newline (\n)!
+# This is why strip() didn't work, cause it removed that \n, creating an
+# empty string.
+            if (not line):
+                eof = True
+            elif (line.startswith('#')) or (line.startswith('!')):
+# Lines that start with a # or a ! are treated as a comment and are skipped
+                pass
+            elif (line.startswith('$')) and (self.section_end not in line):
+                section_name = line[1:].strip()
+
+                if section_name not in self.section_parsers:
+                    error = 'Section %s not recognized' % section_name
+                    MASTError(self.__class__.__name__, error)
+                    return
+
+                section_content = list()
+                print '\nFound section %s.  Reading in options.' % section_name
+            elif (self.section_end in line) and (section_name):
+                self.section_parsers[section_name](section_name, section_content, options)
+                print 'Finished parsing the %s section.' % section_name
+            else:
+                line = line.strip()
+                if (line):
+                    section_content.append(line)
+
         infile.close()
-
-        sections  = contents.strip().split(self.section_end)[:-1]
-        for section_content in sections:
-# First we strip off any whitespace from each line, then split it according to
-# newline.  We then filter out any blank lines, then any lines that would be a comment,
-# i.e. starts with a \'#\' or a \'!\' symbol.
-            section_content = section_content.strip().split('\n')
-            section_content = [line for line in section_content if line]
-            section_content = [line for line in section_content if not (line.startswith('#') or \
-                                                                        line.startswith('!'))]
-            section_name = section_content[0][1:]
-
-            print '\nFound section %s.  Reading in options.' % section_name
-            if section_name not in self.section_parsers:
-                error = 'Section %s not recognized' % section_name
-                MASTError(self.__class__.__name__, error)
-                return
-
-            self.section_parsers[section_name](section_name, section_content[1:], options)
-            print 'Finished parsing the %s section.' % section_name
-
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
