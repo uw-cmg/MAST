@@ -20,13 +20,14 @@ class SessionTable(object):
         if session.sid in self.sessions:
             raise Exception('SESSION ID (sid=%d) CONFLICTED' % session.sid)
         self.sessions[session.sid] = session
-        self._sname2sid[session.sname] = session.sid
+        self._sname2sid[session.name] = session.sid
         
     def delsession(self, sid):
-        if sid not in self.session:
+        if sid not in self.sessions:
             raise Exception("SESSION ID (sid=%d) DOESN'T EXIST" % sid)
-        self.sessions.pop(sid)
-
+        session = self.sessions.pop(sid)
+        del self._sname2sid[session.name]
+        
     def __str__(self):
         import numpy as np
         lists = []
@@ -40,7 +41,13 @@ class SessionTable(object):
             out += row_format.format(*row)+"\n"
         return out
     
-    def get_sid(self):
+    def get_sid(self, sname):
+        return self._sname2sid[sname]
+    
+    def get_sname(self,sid):
+        return self.sessions[sid].name
+    
+    def get_new_sid(self):
         '''get_sid returns unique session id in a session table object.'''
         while (self._nextsid in self.sessions):
             self._nextsid = (self._nextsid ) % MAXSID + 1

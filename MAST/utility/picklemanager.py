@@ -9,6 +9,9 @@ class PickleManager:
         else:
             self.fn = filename
             
+    def save(self, variable, filename=None):
+        self.save_variable(variable, filename=filename)
+        
     def save_variable(self,variable, filename=None):
         if filename is None:
             fh = open(self.fn,'wb')

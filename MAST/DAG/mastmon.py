@@ -16,7 +16,7 @@ class MASTmon(object):
         self.pm = PickleManager()
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
         self._ARCHIVE = 'archive'
-        self.scheduler = None
+        self.scheduler = DAGScheduler()
         
         try:
             if not os.path.exists(self.home):
@@ -54,7 +54,8 @@ class MASTmon(object):
         var_dict = {}
         var_dict['registered_dir'] = self.registered_dir
         var_dict['scheduler'] = self.scheduler
-        self.pm.save_variables(var_dict,self.pn_mastmon)
+        print var_dict
+        self.pm.save(var_dict,filename=self.pn_mastmon)
         print 'save variables of mastmon'
         
     def _load(self):
@@ -69,9 +70,10 @@ class MASTmon(object):
                 
             if 'scheduler' in var_dict:
                 self.scheduler = var_dict['scheduler']
-
-    
-    def run(self):
+        
+#    def _move_to_archive(self):
+        
+    def run(self, niter=None):
         """Goto mastmon home. Load dagscheduler"""
         # move to mastmon home
         curdir = os.getcwd()
@@ -103,16 +105,20 @@ class MASTmon(object):
         # add new sessions
         self.add_sessions(new_session_dirs)
 
-        # run it one time                          
-        self.scheduler.run()
+        # run it for n iterations or until all sessions are complete
+        csnames = self.scheduler.run(niter=niter)
+        #remove complete sessions
 
+        self.registered_dir = self.registered_dir - csnames
+        print 'csnmaes'
+        print csnames
+        print 'registered_dir'
+        print self.registered_dir
+        
         self.scheduler.show_session_table()
         # save scheduler object
         self._save()
                           
-#        except:
-#            print 'Error: Failed to load mastmon pickle'
-
         # move back to original directory
         os.chdir(curdir)
             

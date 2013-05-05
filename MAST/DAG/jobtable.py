@@ -52,4 +52,19 @@ class JobTable(object):
             children_jids = list(children_jids)
         for cjid in children_jids:
             self.jobs[cjid].completeparent(complete_parent_jid)
-            
+
+    def del_session(self,sids):
+        """sids is list or sid to be removed from jobtable"""
+        if type(sids) is list:
+            for sid in sids:
+                self._del_session(sid)
+        else:
+            self._del_session(sids)
+        
+
+    def _del_session(self, sid):
+        jids = self.jobs.keys()
+        for jid in jids:
+            if self.jobs[jid].sid == sid:
+                del self.jobs[jid]
+    

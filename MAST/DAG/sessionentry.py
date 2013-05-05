@@ -2,13 +2,13 @@ from dagutil import *
 
 class SessionEntry(object):
 
-    def __init__(self, sid, totaljobs, sname=None):
+    def __init__(self, sid, totaljobs, name=None):
         self.sid =  sid
         self.totaljobs = totaljobs
         self.preq_jobs = totaljobs
         self.inq_jobs = 0
         self.completejobs = 0
-        self.sname = sname
+        self.name = name
         
     def set_jobs_to_submitted(self, njobs):
         self.preq_jobs -= njobs

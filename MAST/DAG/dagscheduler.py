@@ -5,6 +5,7 @@ from sessionentry import SessionEntry
 from sessiontable import SessionTable
 import subprocess
 import os
+
 """
 This is for schedulring.
 @author: Hyunwoo Kim
@@ -12,6 +13,7 @@ This is for schedulring.
 
 class DAGScheduler:
     """In a session, the maximum number of jobs is MAXJID at once."""
+    
     def __init__(self):
         self.jobtable = JobTable()
         self.sessiontable = SessionTable()
@@ -24,10 +26,18 @@ class DAGScheduler:
     def has_complete_session(self):
         '''check all sessions in session table and returns number of complete session'''
         ncomplete_sessions=0
-        for assession in self.sessiontable.sessions.itervalues():
-            if assession.is_complete():
+        for asession in self.sessiontable.sessions.itervalues():
+            if asession.is_complete():
                 ncomplete_sessions = ncomplete_sessions +1
         return ncomplete_sessions
+    
+    def get_complete_session_id(self):
+        """returns complete session id (sid)"""
+        csid = []
+        for asession in self.sessiontable.sessions.itervalues():
+            if asession.is_complete():
+                csid.append(asession.sid)
+        return csid
     
     def has_incomplete_session(self):
         return not len(self.sessiontable.sessions) == self.has_complete_session()
@@ -39,7 +49,7 @@ class DAGScheduler:
         '''If sid is not specified, then new unique sid will be assigned.'''
 
         if sid is None:
-            sid = self.sessiontable.get_sid()
+            sid = self.sessiontable.get_new_sid()
 
         njobs = len(ingredients_dict)
         # Add a new session 
@@ -89,6 +99,10 @@ class DAGScheduler:
                 
     def run_jobs(self):
         for jid, job in self.jobtable.jobs.iteritems():
+            if job.ingredient_obj.is_complete():
+                job.status = JOB.InQ #Without running put jobs into InQ. In next turn, it will be got complete stuats
+                self.sessiontable.runjobs(sid=job.sid, njobs=1) # update session table
+                
             if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
                 print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
                 job.ingredient_obj.run() #TTM do not default mode in dag scheduler; make ingredients default. mode=self._run_mode)
@@ -130,11 +144,31 @@ class DAGScheduler:
         print ' '
         print self.sessiontable
 
-    def run(self):
+    def run(self, niter=None):
+        """run dag scheduler.
+            return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
+            ex) dagschedulder.run() #run until all sessions are complete
+            ex) dagscheduler.run(1) #run for 1 iteration or all sessions are complete
+        """
+        iter = 0
+        csnames = set()
         while self.has_incomplete_session():
             self._run()
             print 'I am at %s' % os.getcwd()
             time.sleep(SCHEDULING_INTERVAL)
+            print ':: move sessions to archive directory ::'
+            csnames = csnames.union(self._move_to_archive())
+            iter = iter+1
+            print self.jobtable
+            if niter is not None and iter >= niter:
+                break
+
+        print ':: move sessions to archive directory ::'
+        csnames = csnames.union(self._move_to_archive())
+        print 'csnames in run in dagscheduler'
+        print csnames
+        return csnames
+
             
     def _run(self):
         print ':: run jobs ::'
@@ -142,4 +176,30 @@ class DAGScheduler:
         print ':: update job status ::'
         self.update_job_status()
         
-        
+    def _get_session_path(self, sid):
+        return os.path.join(self.home,self.sessiontable.get_sname(sid))
+    
+    def del_session(self,sid):
+        self.sessiontable.delsession(sid)
+        self.jobtable.del_session(sid)
+
+    def _move_to_archive(self):
+        csid = self.get_complete_session_id()
+        os.chdir(self.home)
+        dst = os.path.join(self.home,'archive')
+        csnames = set()
+        if not os.path.exists(dst):
+            os.mkdir(dst)
+            
+        for sid in csid:
+            src = self._get_session_path(sid)
+            os.system("mv %s %s"% (src,dst))
+            csnames.add(self.sessiontable.get_sname(sid))
+            print "csnames in move_to_archive"
+            print csnames
+            print "session %s is complete and moved to archive." %  self.sessiontable.get_sname(sid)
+            self.del_session(sid)
+            
+        return csnames
+
+            
