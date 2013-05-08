@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-#20130201 TTM add Control option
-
 import os
 import optparse # Allows for some command line option parsing
+import glob
 
 from MAST.mast import MAST
 from MAST.parsers import InputParser
+from MAST.DAG.mastmon import MASTmon
+
 
 def main():
     parser = optparse.OptionParser()
@@ -35,7 +36,9 @@ def main():
         mastopt.output = 'mast.out'
 
     if (mastopt.runmode == 'run'):
-        print 'Will run jobs through DAG scheduler'
+        mastmon = MASTmon()
+        mastmon.run() 
+        #print 'Will run jobs through DAG scheduler'
 
     # Gather some path information
 

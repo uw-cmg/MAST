@@ -152,14 +152,18 @@ class DAGScheduler:
         """
         iter = 0
         csnames = set()
+        print "niter == NONE:",niter == None #TTM DEBUG
         while self.has_incomplete_session():
             self._run()
             print 'I am at %s' % os.getcwd()
             time.sleep(SCHEDULING_INTERVAL)
-            print ':: move sessions to archive directory ::'
-            csnames = csnames.union(self._move_to_archive())
+            #TTM DEBUG: do not move sessions to archive directory within loop
+            #print ':: move sessions to archive directory ::'
+            #csnames = csnames.union(self._move_to_archive())
             iter = iter+1
             print self.jobtable
+            print "SESSION TABLE: ",self.show_session_table() #TTM DEBUG
+            print "HAS INCOMPLETE: ",self.has_incomplete_session() #TTM DEBUG
             if niter is not None and iter >= niter:
                 break
 
