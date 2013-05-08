@@ -53,5 +53,5 @@ class SessionTable(object):
             self._nextsid = (self._nextsid ) % MAXSID + 1
         return self._nextsid
 
-    def addnewjobs(self, sid, njobs, status = JOB.PreQ):
-        self.sessions[sid].addnewjobs(njobs,status)
+    def add_newjob(self, sid, njobs, status = JOB.PreQ):
+        self.sessions[sid].add_newjob(njobs,status)

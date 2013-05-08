@@ -51,18 +51,21 @@ class DAGScheduler:
         if sid is None:
             sid = self.sessiontable.get_new_sid()
 
-        njobs = len(ingredients_dict)
+        #TTM+2 comment out
+        #njobs = ingredients_dict
         # Add a new session 
         if not self.has_session(sid):
-            asession = SessionEntry(sid, njobs, sname)
+            asession = SessionEntry(sid, 0, sname) #TTM change to 0
             self.sessiontable.addsession(asession)
-        else:
-            self.sessiontable[sid].addnewjobs(njobs)
+        #TTM+2 comment out
+        #else:
+        #    self.sessiontable[sid].addnewjobs(njobs)
 
         session_dir = os.path.join(self.home, sname)
         # Insert jobs
         for name, ingredient in ingredients_dict.iteritems():
             jid = self.jobtable.get_jid()
+            self.sessiontable.add_newjob(sid, jid) #TTM add each jobid
             # attach session_dir to name of ingredient
             ingredient.keywords['name'] = os.path.join(session_dir, ingredient.keywords['name'])
             # attach session_dir to name of child ingredients
@@ -90,10 +93,11 @@ class DAGScheduler:
     def update_job_status(self):
         '''udpate session table and update children'''
         for jid, job in self.jobtable.jobs.iteritems():
+            print "TTM DEBUG jid, status:",str(jid), str(job.status)
             if job.status == JOB.InQ and job.ingredient_obj.is_complete():
                 job.status = JOB.Complete
                 print '\njob [%s] is complete' % job.name
-                self.sessiontable.completejobs(job.sid, njobs=1)
+                self.sessiontable.completejobs(job.sid, njobs=jid)
                 job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
                 
@@ -101,14 +105,14 @@ class DAGScheduler:
         for jid, job in self.jobtable.jobs.iteritems():
             if job.ingredient_obj.is_complete():
                 job.status = JOB.InQ #Without running put jobs into InQ. In next turn, it will be got complete stuats
-                self.sessiontable.runjobs(sid=job.sid, njobs=1) # update session table
+                self.sessiontable.runjobs(sid=job.sid, njobs=jid) # update session table
                 
             if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
                 print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
                 job.ingredient_obj.run() #TTM do not default mode in dag scheduler; make ingredients default. mode=self._run_mode)
                 job.status = JOB.InQ
                 sid = job.sid
-                self.sessiontable.runjobs(sid=sid, njobs=1) # update session table
+                self.sessiontable.runjobs(sid=sid, njobs=jid) # update session table
                 
             if job.status is JOB.PreQ and job.is_ready():
                 print 'write files [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
@@ -152,7 +156,6 @@ class DAGScheduler:
         """
         iter = 0
         csnames = set()
-        print "niter == NONE:",niter == None #TTM DEBUG
         while self.has_incomplete_session():
             self._run()
             print 'I am at %s' % os.getcwd()
@@ -163,7 +166,6 @@ class DAGScheduler:
             iter = iter+1
             print self.jobtable
             print "SESSION TABLE: ",self.show_session_table() #TTM DEBUG
-            print "HAS INCOMPLETE: ",self.has_incomplete_session() #TTM DEBUG
             if niter is not None and iter >= niter:
                 break
 
