@@ -83,13 +83,16 @@ def is_ready_to_run(dirname):
         else:
             subdirs = dirutil.walkdirs(dirname)
             subdirs.sort()
-            for subdir in subdirs:
-                if not (os.path.isfile(subdir + "/POSCAR")):
+            if len(subdirs) == 0: #This is an NEB without folders yet
+                notready = notready + 1
+            else:
+                for subdir in subdirs:
+                    if not (os.path.isfile(subdir + "/POSCAR")):
+                        notready = notready + 1
+                if not os.path.isfile(subdirs[0] + "/OSZICAR"):
                     notready = notready + 1
-            if not os.path.isfile(subdirs[0] + "/OSZICAR"):
-                notready = notready + 1
-            if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
-                notready = notready + 1
+                if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
+                    notready = notready + 1
     if not(os.path.isfile(dirname + "/submit.sh")):
         notready = notready + 1
     if notready > 0:
