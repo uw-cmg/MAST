@@ -3,7 +3,7 @@ Tutorial
 ============
 #. Follow the :doc:`installation instructions <installation>`. You will also need to set the VASP_PSP_DIR environment variable to a path containing a directory POT_GGA_PAW_PBE with the unzipped or tar.gz set of pseudopotentials (e.g. POTCAR.Al.gz). This setup is required by pymatgen, which MAST uses.
 #. Create a new folder ``//home/user/mast_test``.
-#. Copy the input file below as ``//home/user/mast_test/test.inp``. For information on the sections, see the :doc:`Introduction <introduction>`.::
+#. Copy the input file below as ``//home/user/mast_test/test.inp``. For information on the sections, see :doc:`Input File <inputfile>`. Change the two keywords below in ingredients_global. For more information, see :doc:`Ingredients <ingredients>`::
 
     # Test file
     $mast
@@ -27,6 +27,8 @@ Tutorial
 
     $ingredients
     begin ingredients_global
+    mast_ppn <CHANGE TO THE NUMBER OF PROCESSORS PER NODE>
+    mast_exec <CHANGE TO THE COMMAND TO RUN VASP>
     mast_kpoints 3x3x3 M
     mast_xc pbe
     end
