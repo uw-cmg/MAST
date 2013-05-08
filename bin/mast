@@ -35,9 +35,12 @@ def main():
     if (mastopt.mode == 'input') and (mastopt.output is None):
         mastopt.output = 'mast.out'
 
-    if (mastopt.runmode == 'run'):
+    if (mastopt.mode == 'interface') and (mastopt.runmode is None):
+        mastopt.runmode = 'run'
+
+    if (mastopt.mode == 'interface') and (mastopt.runmode == 'run'):
         mastmon = MASTmon()
-        mastmon.run() 
+        mastmon.run(1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
         #print 'Will run jobs through DAG scheduler'
 
     # Gather some path information

@@ -159,7 +159,6 @@ class DAGScheduler:
         while self.has_incomplete_session():
             self._run()
             print 'I am at %s' % os.getcwd()
-            time.sleep(SCHEDULING_INTERVAL)
             #TTM DEBUG: do not move sessions to archive directory within loop
             #print ':: move sessions to archive directory ::'
             #csnames = csnames.union(self._move_to_archive())
@@ -168,6 +167,7 @@ class DAGScheduler:
             print "SESSION TABLE: ",self.show_session_table() #TTM DEBUG
             if niter is not None and iter >= niter:
                 break
+            time.sleep(SCHEDULING_INTERVAL) #TTM move sleep
 
         print ':: move sessions to archive directory ::'
         csnames = csnames.union(self._move_to_archive())
