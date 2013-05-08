@@ -205,7 +205,7 @@ class InputParser(MASTObj):
         """
         defect_types = dict()
 
-        count = 0
+        count = 1
         for line in section_content:
             type_dict = dict()
 
@@ -227,7 +227,7 @@ class InputParser(MASTObj):
         if ('coord_type' not in defect_types):
             defect_types['coord_type'] = 'cartesian'
 
-        options.set_item(section_name, 'num_defects', count)
+        options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
 
     def parse_recipe_section(self, section_name, section_content, options):
@@ -320,17 +320,6 @@ class InputParser(MASTObj):
             options.set_item(section_name, ing_key, ing_value)
 
         options.set_item(section_name, 'global', global_dict)
-
-        #TTM add defects section
-        if options.get_item('defects','num_defects') == None:
-            print "TTM DEBUG: PASS IN DEFECTS"
-            pass
-        else:
-            for ingname in ingredients_dict.keys():
-                print "TTM DEBUG: SETTING mast_defects for", ingname
-                ingredients_dict[ingname]['mast_defects'] = options.get_item('defects','defects')
-        #print "OPTIONS DEBUG TTM: ", options
-#        print 'DEBUG: ingredients_dict =', ingredients_dict
 
     def parse_neb_section(self, section_name, section_content, options):
         """Parse the neb section and populate the options.
