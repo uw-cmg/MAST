@@ -24,7 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MAST 0.1 documentation" href="index.html" />
-    <link rel="prev" title="Documentation for the code" href="code.html" /> 
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +38,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="code.html" title="Documentation for the code"
+          <a href="reference.html" title="Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">MAST 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -50,55 +54,12 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<p>Welcome to the MAterials Simulation Toolkit (MAST)!</p>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Copy the top MAST directory into your user directory. We will refer to the top MAST directory as <tt class="docutils literal"><span class="pre">//home/user/topmast</span></tt> in this documentation.</p>
+<li><p class="first">Follow the <a class="reference internal" href="installation.html"><em>installation instructions</em></a>. You will also need to set the VASP_PSP_DIR environment variable to a path containing a directory POT_GGA_PAW_PBE with the unzipped or tar.gz set of pseudopotentials (e.g. POTCAR.Al.gz). This setup is required by pymatgen, which MAST uses.</p>
 </li>
-<li><p class="first">Set the following environment variables. You may want to put the export commands in your setup profile, such as <tt class="docutils literal"><span class="pre">//home/user/.bashrc</span></tt> and then either run <tt class="docutils literal"><span class="pre">source</span> <span class="pre">~/.bashrc</span></tt> or log out and log back in to your user terminal.</p>
-<blockquote>
-<div><ol class="arabic">
-<li><p class="first">MAST_INSTALL_PATH: This variable should be set to the installation directory, for example:</p>
-<div class="highlight-python"><pre>export MAST_INSTALL_PATH=//home/user/topmast</pre>
-</div>
+<li><p class="first">Create a new folder <tt class="docutils literal"><span class="pre">//home/user/mast_test</span></tt>.</p>
 </li>
-<li><p class="first">MAST_RECIPE_PATH: Initially, this variable should be set to the existing recipe_templates folder. As you develop additional recipes, you may want to change this variable to reflect your customized organization of recipes.:</p>
-<div class="highlight-python"><pre>export MAST_RECIPE_PATH=//home/user/topmast/recipe_templates</pre>
-</div>
-</li>
-<li><p class="first">MAST_SCRATCH: This variable may be set to any directory. Default behavior is to generate ingredients under this MAST_SCRATCH directory, unless the match_scratch keyword is specified with an overriding path in the input file.</p>
-</li>
-<li><p class="first">PYTHONPATH: If this environment variable already exists, the installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value  (use <tt class="docutils literal"><span class="pre">env</span></tt> to see a list of environment variables):</p>
-<div class="highlight-python"><pre>export PYTHONPATH=$PYTHONPATH://home/user/topmast</pre>
-</div>
-</li>
-<li><p class="first">VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the Materials Project&#8217;s <strong>pymatgen</strong> code.</p>
-</li>
-<li><p class="first">PATH: This variable should be appended with the MAST bin directory, for example:</p>
-<div class="highlight-python"><pre>export PATH=$PATH://home/user/topmast/bin</pre>
-</div>
-</li>
-</ol>
-</div></blockquote>
-</li>
-</ol>
-<p>The script <tt class="docutils literal"><span class="pre">initialize.py</span></tt> in <tt class="docutils literal"><span class="pre">//home/user/topmast</span></tt> will give a set of default values to paste into your terminal window or ~/.bashrc file.</p>
-</div>
-<div class="section" id="sequence-of-events">
-<h2>Sequence of events<a class="headerlink" href="#sequence-of-events" title="Permalink to this headline">¶</a></h2>
-<p>This is the sequence of events in the MAST program:</p>
-<ol class="arabic simple">
-<li>The user generates an input file, for example, <tt class="docutils literal"><span class="pre">test.inp</span></tt>. See <a class="reference internal" href="#input-file"><em>Input File</em></a></li>
-<li>The command <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt> uses MAST to parse the input file. MAST then generates a logic tree of ingredients, based on the recipe specified in the inpput file. See <a class="reference internal" href="#recipe"><em>The Recipe</em></a> and <a class="reference internal" href="#ingredients"><em>The Ingredients</em></a>.</li>
-<li>MAST creates a system_recipe_timestamp directory for the particular system and recipe under $MAST_SCRATCH. Each ingredient gets its own directory within the system_recipe_timestamp directory. Recipe information is stored for the scheduling arm of MAST to use.</li>
-<li>The MAST scheduling arm is run separately, e.g. from a timer. See <a class="reference internal" href="#scheduler"><em>The Scheduler</em></a>. It runs the ingredients in logical order. When all ingredients in a recipe are complete, the system_recipe_timestamp directory is moved into a $MAST_SCRATCH/complete directory.</li>
-</ol>
-</div>
-<div class="section" id="input-file">
-<span id="id1"></span><h2>Input File<a class="headerlink" href="#input-file" title="Permalink to this headline">¶</a></h2>
-<p>The input file contains several sections denoted by <tt class="docutils literal"><span class="pre">$sectionname</span></tt> and <tt class="docutils literal"><span class="pre">$end</span></tt>
-Here is a sample input file, <tt class="docutils literal"><span class="pre">test.inp</span></tt>:</p>
+<li><p class="first">Copy the input file below as <tt class="docutils literal"><span class="pre">//home/user/mast_test/test.inp</span></tt>. For information on the sections, see the <a class="reference internal" href="introduction.html"><em>Introduction</em></a>.:</p>
 <div class="highlight-python"><pre># Test file
 $mast
 program VASP
@@ -121,13 +82,14 @@ $end
 
 $ingredients
 begin ingredients_global
-mast_kpoints 3x3x3
+mast_kpoints 3x3x3 M
 mast_xc pbe
 end
 
 begin optimize
 encut 300
 ibrion 2
+isif 3
 end
 $end
 
@@ -135,124 +97,23 @@ $recipe
 recipe_file recipe_test.txt
 $end</pre>
 </div>
-<p>The <tt class="docutils literal"><span class="pre">$mast</span></tt> section contains the program and system name. An optional mast_scratch keyword and path to a directory may be given to write the recipe and ingredients under this directory rather than under the directory given in $MAST_SCRATCH.</p>
-<p>The <tt class="docutils literal"><span class="pre">$structure</span></tt> section contains the coordinate type, coordinates, and lattice. Optionally, the name of a VASP POSCAR-type file can be inserted here using the keyword posfile, e.g. <tt class="docutils literal"><span class="pre">posfile</span> <span class="pre">fcc_POSCAR</span></tt>. The coordinates are given with element name and then three fractional coordinates along the lattice vectors.</p>
-<p>The <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section contains a section for global ingredient keywords and then a section for each ingredient type. VASP INCAR keywords are included in these sections. All other keywords are prefaced with <tt class="docutils literal"><span class="pre">mast_</span></tt>. A listing of available keywords is in <a class="reference internal" href="#ingredient-keys"><em>Ingredient Keywords</em></a>. Each ingredient type in the recipe should have a begin ingredienttype, end section, even if there are no keywords within that section.</p>
-<p>The <tt class="docutils literal"><span class="pre">$recipe</span></tt> section contains a section for the recipe template to be used.</p>
-<p>Other sections include:</p>
-<ul>
-<li><p class="first">The <tt class="docutils literal"><span class="pre">$defects</span></tt> section, which includes the defect type (vacancy or interstitial), the defect coordinates, and the defect element symbol:</p>
-<div class="highlight-python"><pre>$defects
-vacancy 0 0 0 Mg
-vacancy 0.5 0.5 0.5 Mg
-interstitial 0.25 0.25 0 Mg
-interstitial 0.25 0.75 0 Mg
-$end</pre>
-</div>
 </li>
-<li><p class="first">The <tt class="docutils literal"><span class="pre">$neb</span></tt> section, which includes a list of nudged-elastic-band hops, corresponding to the defects listed in the <tt class="docutils literal"><span class="pre">$defects</span></tt> section, and the number of interpolated images for each hop. For example,:</p>
-<div class="highlight-python"><pre>$neb
-hops 1-2 1-3 3-4
-images 3
-$end</pre>
-</div>
+<li><p class="first">In your new folder, run <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt> to create your test job files and add the calculation directories to your scratch directory.</p>
 </li>
-</ul>
-</div>
-<div class="section" id="the-recipe">
-<span id="recipe"></span><h2>The Recipe<a class="headerlink" href="#the-recipe" title="Permalink to this headline">¶</a></h2>
-<p>Here is an example recipe template:</p>
-<div class="highlight-python"><pre>Recipe TEST
-
-Ingredient &lt;sys&gt;_perfect_opt1 Optimize
-Ingredient &lt;sys&gt;_perfect_opt2 Optimize
-
-Parent &lt;sys&gt;_perfect_opt1 child &lt;sys&gt;_perfect_opt2::structure</pre>
-</div>
-<p>The recipe contains:
-#. The recipe name
-#. Each ingredient in order, including the desired ingredient name format, and the ingredient type
-#. Logical relationships between Parent and Children ingredients, and the information passed to the child. &lt;&lt;LAST PART DEPRECATED?&gt;&gt;</p>
-<ul class="simple">
-<li>&lt;sys&gt; will be replaced with the system name from the input file.</li>
-<li>&lt;N&gt; will be replaced with defect numbers, in order, with NEB hops, and with NEB image numbers.</li>
-</ul>
-</div>
-<div class="section" id="the-ingredients">
-<span id="ingredients"></span><h2>The Ingredients<a class="headerlink" href="#the-ingredients" title="Permalink to this headline">¶</a></h2>
-<p>Each ingredient is a separate calculation. Ingredients make up recipes.</p>
-<p>Each ingredient is responsible for updating its child ingredients through an <tt class="docutils literal"><span class="pre">update_children</span></tt> method.</p>
-<p>Each ingredient is given:</p>
-<ul class="simple">
-<li>A name, which is the full path to the ingredient&#8217;s directory and is automatically generated using the system name and the recipe template.</li>
-<li>The name of the program running (e.g. vasp)</li>
-<li>A dictionary of program_keys, which contain all program-specific keywords (see <a class="reference internal" href="#ingredient-keys"><em>Ingredient Keywords</em></a>) and come from each ingredient&#8217;s section in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file</li>
-<li>A dictionary of the names of any child ingredients.</li>
-<li>A pymatgen structure object representing the very first structure created from the <tt class="docutils literal"><span class="pre">$structure</span></tt> section in the input file.</li>
-</ul>
-</div>
-<div class="section" id="the-scheduler">
-<span id="scheduler"></span><h2>The Scheduler<a class="headerlink" href="#the-scheduler" title="Permalink to this headline">¶</a></h2>
-<p>The scheduler ensures that ingredients run in the correct order.</p>
-</div>
-<div class="section" id="ingredient-keywords">
-<span id="ingredient-keys"></span><h2>Ingredient Keywords<a class="headerlink" href="#ingredient-keywords" title="Permalink to this headline">¶</a></h2>
-<p>VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file.</p>
-<p>Any keyword prepended by <tt class="docutils literal"><span class="pre">mast_</span></tt> is considered a special keyword and will not be written into the VASP INCAR.</p>
-<ul>
-<li><dl class="first docutils">
-<dt>mast_kpoints: specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. <tt class="docutils literal"><span class="pre">mast_kpoints</span> <span class="pre">=</span> <span class="pre">3x3x3</span> <span class="pre">G</span></tt></dt>
-<dd><ul class="first last simple">
-<li>required for VASP</li>
-</ul>
-</dd>
-</dl>
+<li><p class="first">Look in your scratch directory (<tt class="docutils literal"><span class="pre">echo</span> <span class="pre">$MAST_SCRATCH</span></tt> to see where this is) and make sure that empty test folders were created.</p>
 </li>
-<li><dl class="first docutils">
-<dt>mast_xc: specify an exchange correlation functional; for VASP, follow the convetions of pymatgen.</dt>
-<dd><ul class="first last simple">
-<li>required for VASP</li>
-</ul>
-</dd>
-</dl>
+<li><p class="first">Run <tt class="docutils literal"><span class="pre">mast</span></tt> to start the scheduler and run your jobs. The first job (opt1) should complete, then forward its structure to the second job (opt2) to run.</p>
 </li>
-<li><dl class="first docutils">
-<dt>mast_multiplyencut: specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP take 1.5; otherwise 1.25 is sufficient.</dt>
-<dd><ul class="first last simple">
-<li>defaults to 1.5</li>
-</ul>
-</dd>
-</dl>
+<li><p class="first">When both jobs have completed, the main test folder should be moved into the <tt class="docutils literal"><span class="pre">archive</span></tt> folder under your scratch directory.</p>
 </li>
-<li><p class="first">mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.</p>
-</li>
-<li><p class="first">mast_adjustnelect: specify an adjustment to the total number of electrons. For example, -2 to remove two electrons, and +2 to add two electrons</p>
-</li>
-</ul>
-<p>The following queue-submission keywords are discussed more in <a class="reference internal" href="#platforms"><em>Platform Support</em></a>.</p>
-<ul class="simple">
-<li>mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.</li>
-<li>mast_nodes: the number of nodes requested.</li>
-<li>mast_ppn: the number of processors per node requested.</li>
-<li>mast_queue: the queue requested.</li>
-<li>mast_exec: the full executable line, including any mpi commands. Remember that all input file options are turned into lowercase, with the exception of mast_xc, which is turned into all uppercase in the INCAR file.</li>
-<li>mast_walltime: the walltime requested, in whole number of hours</li>
-<li>mast_memory: the memory per processor requested.</li>
-</ul>
-</div>
-<div class="section" id="platform-support">
-<span id="platforms"></span><h2>Platform Support<a class="headerlink" href="#platform-support" title="Permalink to this headline">¶</a></h2>
-<p>Queue and submission script commands are in <tt class="docutils literal"><span class="pre">//home/user/topmast/submit</span></tt> and may need to be heavily modified depending on the platform used.
-To customize the queue submission behavior, copy the two _example.py files into new .py files, removing &#8220;_example&#8221; and overwriting the default files.</p>
-<p>The out-of-the-box PBS submission script is built using</p>
-<ul class="simple">
-<li>mast_processors or a combination of mast_ppn and mast_nodes</li>
-<li>mast_queue</li>
-<li>mast_exec</li>
-<li>mast_walltime</li>
-<li>mast_memory</li>
-<li>the ingredient name</li>
-</ul>
+</ol>
+<div class="section" id="next-steps">
+<span id="nextsteps"></span><h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Sample recipe templates are provided in <tt class="docutils literal"><span class="pre">//home/user/topmast/recipe_templates</span></tt>, but you will probably need to create your own. List all the ingredients at the top, like in a cooking recipe, and then list the Parent/Child logic.  See <a class="reference internal" href="recipe.html"><em>Recipe</em></a> for more information.</li>
+<li>To run VASP several times with different parameters, use different ingredients in your recipe. Most VASP ingredients can be created by inheriting from the Optimize ingredient, just like the OptimizeLowMesh ingredient was created. Copy the optimizelowmesh.py file into a new file in the <tt class="docutils literal"><span class="pre">//home/user/topmast/MAST/ingredients</span></tt> directory. Open it up and change OptimizeLowMesh into a new class name. <strong>We need a user-editable spot to put ingredients in, and some kind of helper to help copy ingredients, like copy optimizelowmesh.py into mynewoptimize.py with a new classname.</strong> Then, in the input file, specify your different VASP parameters in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section, for each ingredient.</li>
+<li>If you want the scheduler to run automatically, set up your crontab to run the command <tt class="docutils literal"><span class="pre">mast</span></tt> at a specified interval (for VASP runs, this should probably be at least 1 or 2 hours between mast runs).</li>
+</ol>
 </div>
 </div>
 
@@ -268,21 +129,17 @@ To customize the queue submission behavior, copy the two _example.py files into 
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#sequence-of-events">Sequence of events</a></li>
-<li><a class="reference internal" href="#input-file">Input File</a></li>
-<li><a class="reference internal" href="#the-recipe">The Recipe</a></li>
-<li><a class="reference internal" href="#the-ingredients">The Ingredients</a></li>
-<li><a class="reference internal" href="#the-scheduler">The Scheduler</a></li>
-<li><a class="reference internal" href="#ingredient-keywords">Ingredient Keywords</a></li>
-<li><a class="reference internal" href="#platform-support">Platform Support</a></li>
+<li><a class="reference internal" href="#next-steps">Next Steps</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="code.html"
-                        title="previous chapter">Documentation for the code</a></p>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="next chapter">Reference</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/tutorial.txt"
@@ -315,7 +172,10 @@ To customize the queue submission behavior, copy the two _example.py files into 
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="code.html" title="Documentation for the code"
+          <a href="reference.html" title="Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
              >previous</a> |</li>
         <li><a href="index.html">MAST 0.1 documentation</a> &raquo;</li> 
       </ul>

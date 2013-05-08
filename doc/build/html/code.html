@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MAST 0.1 documentation" href="index.html" />
-    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="next" title="Introduction" href="introduction.html" />
     <link rel="prev" title="Reference" href="reference.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Tutorial"
+          <a href="introduction.html" title="Introduction"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="reference.html" title="Reference"
@@ -62,14 +62,29 @@
 <dd><p>In a session, the maximum number of jobs is MAXJID at once.</p>
 <dl class="method">
 <dt id="MAST.DAG.dagscheduler.DAGScheduler.addjobs">
-<tt class="descname">addjobs</tt><big>(</big><em>ingredients_dict</em>, <em>dependency_dict</em>, <em>sid=None</em><big>)</big><a class="reference internal" href="_modules/MAST/DAG/dagscheduler.html#DAGScheduler.addjobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.DAG.dagscheduler.DAGScheduler.addjobs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">addjobs</tt><big>(</big><em>ingredients_dict</em>, <em>dependency_dict</em>, <em>sname=None</em>, <em>sid=None</em><big>)</big><a class="reference internal" href="_modules/MAST/DAG/dagscheduler.html#DAGScheduler.addjobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.DAG.dagscheduler.DAGScheduler.addjobs" title="Permalink to this definition">¶</a></dt>
 <dd><p>If sid is not specified, then new unique sid will be assigned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.DAG.dagscheduler.DAGScheduler.get_complete_session_id">
+<tt class="descname">get_complete_session_id</tt><big>(</big><big>)</big><a class="headerlink" href="#MAST.DAG.dagscheduler.DAGScheduler.get_complete_session_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns complete session id (sid)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="MAST.DAG.dagscheduler.DAGScheduler.has_complete_session">
 <tt class="descname">has_complete_session</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/DAG/dagscheduler.html#DAGScheduler.has_complete_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.DAG.dagscheduler.DAGScheduler.has_complete_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>check all sessions in session table and returns number of complete session</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.DAG.dagscheduler.DAGScheduler.run">
+<tt class="descname">run</tt><big>(</big><em>niter=None</em><big>)</big><a class="reference internal" href="_modules/MAST/DAG/dagscheduler.html#DAGScheduler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.DAG.dagscheduler.DAGScheduler.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>run dag scheduler.
+return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
+ex) dagschedulder.run() #run until all sessions are complete
+ex) dagscheduler.run(1) #run for 1 iteration or all sessions are complete</p>
 </dd></dl>
 
 <dl class="method">
@@ -118,8 +133,8 @@ sets of tasks that can be scheduled in parallel</p>
   <p class="topless"><a href="reference.html"
                         title="previous chapter">Reference</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="tutorial.html"
-                        title="next chapter">Tutorial</a></p>
+  <p class="topless"><a href="introduction.html"
+                        title="next chapter">Introduction</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/code.txt"
@@ -152,7 +167,7 @@ sets of tasks that can be scheduled in parallel</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Tutorial"
+          <a href="introduction.html" title="Introduction"
              >next</a> |</li>
         <li class="right" >
           <a href="reference.html" title="Reference"

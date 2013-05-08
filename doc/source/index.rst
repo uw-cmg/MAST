@@ -3,23 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MAST's documentation!
-================================
+MAterials Simulation Toolkit (MAST) Documentation
+=================================================================
+Welcome to the MAST documentation site!
 
-Contents:
+.. toctree::
+   :maxdepth: 3
+
+   introduction
+   installation
+   tutorial
+
+* :ref:`Method index <genindex>`
+* :ref:`Module index <modindex>`
+* :ref:`search` 
+
+MAST team contents:
 
 .. toctree::
    :maxdepth: 2
-
-   howtobuild
+   
    reference
-   code
-   tutorial
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   howtobuild
 
