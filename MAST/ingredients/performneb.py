@@ -36,8 +36,7 @@ class PerformNEB(BaseIngredient):
         myct=1
         impath=""
         for childname in sorted(self.keywords['child_dict'].iterkeys()):
-            #impath = os.path.join(self.keywords['name'], str(myct).zfill(2))
-            impath = os.path.join(self.keywords['name'], str(myct) + "_stat")
+            impath = os.path.join(self.keywords['name'], str(myct).zfill(2))
             self.forward_parent_structure(impath, childname)       
             myct = myct + 1
 
