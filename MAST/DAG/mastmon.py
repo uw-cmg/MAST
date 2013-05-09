@@ -54,9 +54,9 @@ class MASTmon(object):
         var_dict = {}
         var_dict['registered_dir'] = self.registered_dir
         var_dict['scheduler'] = self.scheduler
-        print var_dict
+        #print var_dict
         self.pm.save(var_dict,filename=self.pn_mastmon)
-        print 'save variables of mastmon'
+        #print 'save variables of mastmon'
         
     def _load(self):
         """Load MASTmon's information pickle file"""
@@ -110,10 +110,10 @@ class MASTmon(object):
         #remove complete sessions
 
         self.registered_dir = self.registered_dir - csnames
-        print 'csnmaes'
-        print csnames
-        print 'registered_dir'
-        print self.registered_dir
+        #print 'csnmaes'
+        #print csnames
+        #print 'registered_dir'
+        #print self.registered_dir
         
         self.scheduler.show_session_table()
         # save scheduler object

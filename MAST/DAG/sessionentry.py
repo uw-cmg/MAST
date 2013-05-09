@@ -19,7 +19,7 @@ class SessionEntry(object):
         self.preq_jobs = len(self.preq_list)
         self.completejobs = len(self.complete_list)
         self.totaljobs = len(self.total_list)
-        self._print_lists()
+        #self._print_lists()
 
     def _print_lists(self):
         #pass
