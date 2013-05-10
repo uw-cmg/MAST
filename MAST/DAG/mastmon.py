@@ -1,6 +1,8 @@
 import os
 from MAST.utility.picklemanager import PickleManager
 from MAST.DAG.dagscheduler import DAGScheduler
+import time
+from MAST.DAG.dagutil import *
 abspath = os.path.abspath
 
 
@@ -17,6 +19,7 @@ class MASTmon(object):
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
         self._ARCHIVE = 'archive'
         self.scheduler = DAGScheduler()
+        self.version = 0.1
         
         try:
             if not os.path.exists(self.home):
@@ -55,16 +58,22 @@ class MASTmon(object):
         var_dict['registered_dir'] = self.registered_dir
         var_dict['scheduler'] = self.scheduler
         #print var_dict
+        var_dict['version']  = self.version
+        print var_dict
         self.pm.save(var_dict,filename=self.pn_mastmon)
         #print 'save variables of mastmon'
         
     def _load(self):
         """Load MASTmon's information pickle file"""
-        
+
         if os.path.isfile(self.pn_mastmon):
             print 'load mastmon information from %s ' % self.pn_mastmon
             var_dict = self.pm.load_variable(self.pn_mastmon)
-            
+            if 'version' in var_dict and var_dict['version'] != self.version:
+                print 'Error: mastmon_info.pickle is version %.2f' % var_dict['version']
+                print 'Error: mastmon version %.2f' % self.version
+                raise
+
             if 'registered_dir' in var_dict:
                 self.registered_dir = var_dict['registered_dir']
                 
@@ -73,8 +82,15 @@ class MASTmon(object):
         
 #    def _move_to_archive(self):
         
-    def run(self, niter=None):
-        """Goto mastmon home. Load dagscheduler"""
+    def run(self, niter=None, stopcond=None, interval=None):
+        """Run Mastmon. First of all, this makes MASTmon go to mastmon home load dagscheduler pickle.
+            In addition, there are couple of options to run mastmon.
+            ex) mastmon.run()  # run MASTmon forever as a real daemon. By default interval is 10 sec
+            ex) mastmon.run(interval=30) # run MASTmon forever as a real daemon. By default interval is 30 sec
+            ex) mastmon.run(niter=1) # run MASTmon one iteration for crontab user. By default interval is 10 sec
+            ex) mastmon.run(niter=20,stopcond='NOSESSION') # run MASTmon for 20 iterations.
+                                                             And stop it all sessions are done.
+        """
         # move to mastmon home
         curdir = os.getcwd()
         try:
@@ -84,40 +100,54 @@ class MASTmon(object):
             print 'Error: Failed to move to MASTmon home %s' % self.home
             raise
         
+        if interval is None:
+            interval = SCHEDULING_INTERVAL
+            
         #load dagscheduler pickle
         self._load()
-        
+        iter = 0;
+        while True:
+            if niter is not None and iter >= niter:
+                break
+            
+            iter = iter + 1
+            # get directories from mast home
+            session_dirs = os.walk('.').next()[1]
+
+            # remove 'archive' directory
+            if self._ARCHIVE in session_dirs:
+                session_dirs.remove(self._ARCHIVE)
+
+            else:
+                # if masthome doesn't have 'archive', then make it
+                os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
+
+            new_session_dirs = set(session_dirs) - self.registered_dir
+
+            # add new sessions
+            self.add_sessions(new_session_dirs)
+
+            # run it for n iterations or until all sessions are complete
+            csnames = self.scheduler.run(niter=1)
+            #remove complete sessions
+
+            self.registered_dir = self.registered_dir - csnames
+            print 'complete session nmaes'
+            print csnames
+            print 'registered directories'
+            print self.registered_dir
+
+            self.scheduler.show_session_table()
 
 
-        # get directories from mast home
-        session_dirs = os.walk('.').next()[1]
+            # save scheduler object
+            self._save()
 
-        # remove 'archive' directory
-        if self._ARCHIVE in session_dirs:
-            session_dirs.remove(self._ARCHIVE)
-
-        else:
-            # if masthome doesn't have 'archive', then make it
-            os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
-
-        new_session_dirs = set(session_dirs) - self.registered_dir
-
-        # add new sessions
-        self.add_sessions(new_session_dirs)
-
-        # run it for n iterations or until all sessions are complete
-        csnames = self.scheduler.run(niter=niter)
-        #remove complete sessions
-
-        self.registered_dir = self.registered_dir - csnames
-        #print 'csnmaes'
-        #print csnames
-        #print 'registered_dir'
-        #print self.registered_dir
-        
-        self.scheduler.show_session_table()
-        # save scheduler object
-        self._save()
+            if stopcond is not None:
+                if stopcond.upper() is 'NOSESSION' and len(self.registered_dir) == 0:
+                    break
+                
+            time.sleep(interval)
                           
         # move back to original directory
         os.chdir(curdir)

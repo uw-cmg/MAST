@@ -152,7 +152,7 @@ class DAGScheduler:
         """run dag scheduler.
             return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
             ex) dagschedulder.run() #run until all sessions are complete
-            ex) dagscheduler.run(1) #run for 1 iteration or all sessions are complete
+            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete
         """
         iter = 0
         csnames = set()
@@ -171,8 +171,6 @@ class DAGScheduler:
 
         print ':: move sessions to archive directory ::'
         csnames = csnames.union(self._move_to_archive())
-        #print 'csnames in run in dagscheduler'
-        #print csnames
         return csnames
 
             
