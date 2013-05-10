@@ -152,27 +152,22 @@ class DAGScheduler:
         """run dag scheduler.
             return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
             ex) dagschedulder.run() #run until all sessions are complete
-            ex) dagscheduler.run(1) #run for 1 iteration or all sessions are complete
+            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete
         """
         iter = 0
         csnames = set()
         while self.has_incomplete_session():
             self._run()
-            print 'I am at %s' % os.getcwd()
-            #TTM DEBUG: do not move sessions to archive directory within loop
-            #print ':: move sessions to archive directory ::'
-            #csnames = csnames.union(self._move_to_archive())
             iter = iter+1
             print self.jobtable
-            print "SESSION TABLE: ",self.show_session_table() #TTM DEBUG
+            print "SESSION TABLE: ",self.show_session_table() 
             if niter is not None and iter >= niter:
                 break
             time.sleep(SCHEDULING_INTERVAL) #TTM move sleep
 
         print ':: move sessions to archive directory ::'
         csnames = csnames.union(self._move_to_archive())
-        print 'csnames in run in dagscheduler'
-        print csnames
+
         return csnames
 
             
