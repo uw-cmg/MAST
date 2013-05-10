@@ -26,3 +26,4 @@ Detailed reference
     recipe
     ingredients
     scheduler
+    repetitions
