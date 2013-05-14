@@ -147,7 +147,7 @@ class MASTmon(object):
                 if stopcond.upper() is 'NOSESSION' and len(self.registered_dir) == 0:
                     break
                 
-            time.sleep(interval)
+            #time.sleep(interval) #TTM remove this sleep
                           
         # move back to original directory
         os.chdir(curdir)

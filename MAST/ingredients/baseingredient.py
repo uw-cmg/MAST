@@ -50,7 +50,17 @@ class BaseIngredient(MASTObj):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.is_complete(self.keywords['name'])
+            mycomplete = vasp_checker.is_complete(self.keywords['name'])
+            if mycomplete:
+                return mycomplete
+            else:
+                if not os.path.exists(self.keywords['name'] + '/OUTCAR'):
+                    return False #hasn't started running yet.
+                from MAST.ingredients.errorhandler import vasp_error
+                errct=vasp_error.loop_through_errors(self.keywords['name'])
+                if errct > 0:
+                    self.run() #Should try to rerun automatically or not??
+                return False
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
@@ -59,8 +69,18 @@ class BaseIngredient(MASTObj):
         '''Checks if all images in an NEB calculation are complete.'''
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.images_complete(self.keywords['name'],\
+            mycomplete = vasp_checker.images_complete(self.keywords['name'],\
                    self.keywords['program_keys']['images'])
+            if mycomplete:
+                return mycomplete
+            else:
+                if not os.path.exists(self.keywords['name'] + '/01/OUTCAR'):
+                    return False #hasn't started running yet.
+                from MAST.ingredients.errorhandler import vasp_error
+                errct=vasp_error.loop_through_errors(self.keywords['name'])
+                if errct > 0:
+                    self.run() #Should try to rerun automatically or not??
+                return False
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in images_complete)")
