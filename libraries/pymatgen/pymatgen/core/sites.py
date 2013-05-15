@@ -21,16 +21,20 @@ from pymatgen.core.periodic_table import Element, Specie, \
     smart_element_or_specie
 from pymatgen.serializers.json_coders import MSONable
 from pymatgen.util.coord_utils import pbc_diff
+from pymatgen.core.composition import Composition
 
 
 class Site(collections.Mapping, collections.Hashable, MSONable):
     """
-    A generalized *non-periodic* site. Atoms and occupancies should be a dict
-    of element:occupancy or an element, in which case the occupancy default to
-    1. Coords are given in standard cartesian coordinates.
+    A generalized *non-periodic* site. This is essentially a composition
+    at a point in space, with some optional properties associated with it. A
+    Composition is used to represent the atoms and occupancy, which allows for
+    disordered site representation. Coords are given in standard cartesian
+    coordinates.
     """
 
     supported_properties = ("magmom", "charge", "coordination_no", "forces")
+    position_atol = 1e-5
 
     def __init__(self, atoms_n_occu, coords, properties=None):
         """
@@ -52,16 +56,18 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
                 Properties associated with the site as a dict, e.g.
                 {"magmom": 5}. Defaults to None.
         """
-        if isinstance(atoms_n_occu, dict):
-            self._species = {smart_element_or_specie(k): v
-                             for k, v in atoms_n_occu.items()}
-            totaloccu = sum(self._species.values())
+        if issubclass(atoms_n_occu.__class__, collections.Mapping):
+            self._species = Composition({smart_element_or_specie(k): v
+                                         for k, v in atoms_n_occu.items()})
+            totaloccu = self._species.num_atoms
             if totaloccu > 1:
                 raise ValueError("Species occupancies sum to more than 1!")
             self._is_ordered = (totaloccu == 1 and len(self._species) == 1)
         else:
-            self._species = {smart_element_or_specie(atoms_n_occu): 1}
+            self._species = Composition(
+                {smart_element_or_specie(atoms_n_occu): 1})
             self._is_ordered = True
+
         self._coords = coords
         self._properties = properties if properties else {}
         for k in self._properties.keys():
@@ -118,16 +124,14 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
     @property
     def species_and_occu(self):
         """
-        The species at the site, i.e., a dict of element and occupancy.
+        The species at the site, i.e., a Composition mapping type of
+        element/species to occupancy.
         """
-        return self._species.copy()
+        return self._species
 
     @property
     def specie(self):
         """
-        .. deprecated:: 1.0
-            Use :func:`species_and_occu` instead.
-
         The Specie/Element at the site. Only works for ordered sites. Otherwise
         an AttributeError is raised. Use this property sparingly.  Robust
         design should make use of the property species_and_occu instead.
@@ -191,7 +195,8 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
         if other is None:
             return False
         return self._species == other._species and \
-            np.allclose(self._coords, other._coords) and \
+            np.allclose(self._coords, other._coords, 
+                        atol=Site.position_atol) and \
             self._properties == other._properties
 
     def __ne__(self, other):
@@ -227,12 +232,11 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
         automatically sorted in LiFePO4.
         """
 
-        def avg_electroneg(sps):
-            return sum((sp.X * occu for sp, occu in sps.items()))
-
-        if avg_electroneg(self._species) < avg_electroneg(other._species):
+        if self._species.average_electroneg < \
+                other._species.average_electroneg:
             return -1
-        if avg_electroneg(self._species) > avg_electroneg(other._species):
+        if self._species.average_electroneg > \
+                other._species.average_electroneg:
             return 1
         return 0
 
@@ -255,8 +259,8 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
                 "@module": self.__class__.__module__,
                 "@class": self.__class__.__name__}
 
-    @staticmethod
-    def from_dict(d):
+    @classmethod
+    def from_dict(cls, d):
         """
         Create Site from dict representation
         """
@@ -266,7 +270,7 @@ class Site(collections.Mapping, collections.Hashable, MSONable):
                 else Element(sp_occu["element"])
             atoms_n_occu[sp] = sp_occu["occu"]
         props = d.get("properties", None)
-        return Site(atoms_n_occu, d["xyz"], properties=props)
+        return cls(atoms_n_occu, d["xyz"], properties=props)
 
 
 class PeriodicSite(Site, MSONable):
@@ -384,7 +388,8 @@ class PeriodicSite(Site, MSONable):
     def __eq__(self, other):
         return self._species == other._species and \
             self._lattice == other._lattice and \
-            np.allclose(self._coords, other._coords) and \
+            np.allclose(self._coords, other._coords, 
+                        atol=Site.position_atol) and \
             self._properties == other._properties
 
     def __ne__(self, other):
@@ -512,8 +517,8 @@ class PeriodicSite(Site, MSONable):
                 "@module": self.__class__.__module__,
                 "@class": self.__class__.__name__}
 
-    @staticmethod
-    def from_dict(d, lattice=None):
+    @classmethod
+    def from_dict(cls, d, lattice=None):
         """
         Create PeriodicSite from dict representation.
 
@@ -531,4 +536,4 @@ class PeriodicSite(Site, MSONable):
             atoms_n_occu[sp] = sp_occu["occu"]
         props = d.get("properties", None)
         lattice = lattice if lattice else Lattice.from_dict(d["lattice"])
-        return PeriodicSite(atoms_n_occu, d["abc"], lattice, properties=props)
+        return cls(atoms_n_occu, d["abc"], lattice, properties=props)

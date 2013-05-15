@@ -138,23 +138,12 @@ class Poscar(MSONable):
 
     def __setattr__(self, name, value):
         if name in ("selective_dynamics", "velocities"):
-            #TTM 2013-03-19 "if value:" statement returns ValueError: The truth 
-            #value of an array with more than one element is ambiguous.
-            #when attempt to set selective_dynamics with a matrix.
-            #enclosing within a "try" statement:
-            try:
-                if value:
-                    dim = np.array(value).shape
-                    if dim[1] != 3 or dim[0] != len(self.structure):
-                        raise ValueError(name + " array must be same length as" +
-                                         " the structure.")
-            except (ValueError):
-                if not (value == None):
-                    dim = np.array(value).shape
-                    if dim[1] != 3 or dim[0] != len(self.structure):
-                        raise ValueError(name + " array must be same length as" +
-                                         " the structure.")
-
+            if value is not None and len(value) > 0:
+                value = list(value)
+                dim = np.array(value).shape
+                if dim[1] != 3 or dim[0] != len(self.structure):
+                    raise ValueError(name + " array must be same length as" +
+                                     " the structure.")
         elif name == "structure":
             #If we set a new structure, we should discard the velocities and
             #predictor_corrector and selective dynamics.
@@ -240,8 +229,10 @@ class Poscar(MSONable):
             Poscar object.
         """
 
-        chunks = re.split("^\s*$", data.strip(), flags=re.MULTILINE)
-
+        chunks = re.split("^\s*$", data.rstrip(), flags=re.MULTILINE)
+        if chunks[0] == "":
+            chunks.pop(0)
+            chunks[0] = "\n" + chunks[0]
         #Parse positions
         lines = tuple(clean_lines(chunks[0].split("\n"), False))
         comment = lines[0]
@@ -369,7 +360,7 @@ class Poscar(MSONable):
         if self.true_names and not vasp4_compatible:
             lines.append(" ".join(self.site_symbols))
         lines.append(" ".join([str(x) for x in self.natoms]))
-        if not (self.selective_dynamics == None): #TTM 2013-03-19 "not none"
+        if self.selective_dynamics:
             lines.append("Selective dynamics")
         lines.append("direct" if direct else "cartesian")
 
@@ -378,7 +369,7 @@ class Poscar(MSONable):
         for (i, site) in enumerate(self.structure):
             coords = site.frac_coords if direct else site.coords
             line = " ".join([format_str.format(c) for c in coords])
-            if not (self.selective_dynamics == None): #TTM 2013-03-19 "not none"
+            if self.selective_dynamics is not None:
                 sd = ["T" if j else "F" for j in self.selective_dynamics[i]]
                 line += " %s %s %s" % (sd[0], sd[1], sd[2])
             line += " " + site.species_string
@@ -608,8 +599,8 @@ class Incar(dict):
         list_keys = ("LDAUU", "LDAUL", "LDAUJ", "LDAUTYPE", "MAGMOM")
         bool_keys = ("LDAU", "LWAVE", "LSCALU", "LCHARG", "LPLANE", "LHFCALC")
         float_keys = ("EDIFF", "SIGMA", "TIME", "ENCUTFOCK", "HFSCREEN")
-        int_keys = ("NSW", "NELMIN", "ISIF", "IBRION", "ISPIN", "ICHARG",
-                    "NELM", "ISMEAR", "NPAR", "LDAUPRINT", "LMAXMIX",
+        int_keys = ("NSW", "NBANDS", "NELMIN", "ISIF", "IBRION", "ISPIN",
+                    "ICHARG", "NELM", "ISMEAR", "NPAR", "LDAUPRINT", "LMAXMIX",
                     "ENCUT", "NSIM", "NKRED", "NUPDOWN", "ISPIND")
 
         def smart_int_or_float(numstr):
@@ -734,13 +725,15 @@ class Kpoints(MSONable):
             kpts_shift:
                 Shift for Kpoints.
             kpts_weights:
-                Optional weights for kpoints.  For explicit kpoints.
+                Optional weights for kpoints.  Weights should be integers. For
+                explicit kpoints.
             coord_type:
                 In line-mode, this variable specifies whether the Kpoints were
                 given in Cartesian or Reciprocal coordinates.
             labels:
                 In line-mode, this should provide a list of labels for each
-                kpt.
+                kpt. It is optional in explicit kpoint mode as comments for
+                k-points.
             tet_number:
                 For explicit kpoints, specifies the number of tetrahedrons for
                 the tetrahedron method.
@@ -879,10 +872,12 @@ class Kpoints(MSONable):
                         and abs(lengths[right_angles[0]] -
                                 lengths[right_angles[1]]) < hex_length_tol)
 
-        style = Kpoints.supported_modes.Gamma
-        if not is_hexagonal:
-            num_div = [i + i % 2 for i in num_div]
-            style = Kpoints.supported_modes.Monkhorst
+        all_odd = all([i % 2 == 1 for i in num_div])
+
+        style = Kpoints.supported_modes.Monkhorst
+        if all_odd or is_hexagonal:
+            style = Kpoints.supported_modes.Gamma
+
         comment = "pymatgen generated KPOINTS with grid density = " + \
             "{} / atom".format(kppa)
         num_kpts = 0
@@ -1012,7 +1007,12 @@ class Kpoints(MSONable):
             if style == "l":
                 lines[-1] += " ! " + self.labels[i]
             elif self.num_kpts > 0:
-                lines[-1] += " %f" % (self.kpts_weights[i])
+                if self.labels is not None:
+                    lines[-1] += " %i %s" % (self.kpts_weights[i],
+                                             self.labels[i])
+                else:
+                    lines[-1] += " %i" % (self.kpts_weights[i])
+
 
         #Print tetrahedorn parameters if the number of tetrahedrons > 0
         if style not in "lagm" and self.tet_number > 0:
@@ -1123,6 +1123,7 @@ class PotcarSingle(object):
                         os.path.join(get_potcar_dir(), funcdir, symbol,
                                      "POTCAR")]
         for p in paths_to_try:
+            p = os.path.expanduser(p)
             if os.path.exists(p):
                 return PotcarSingle.from_file(p)
         raise IOError("You do not have the right POTCAR with functional " +
@@ -1187,15 +1188,13 @@ class Potcar(list):
         """
         Args:
             symbols:
-                Element symbols for POTCAR
+                Element symbols for POTCAR. This should correspond to the
+                symbols used by VASP. E.g., "Mg", "Fe_pv", etc.
             functional:
                 Functional used.
             sym_potcar_map:
-                Allows a user to specify a specific element symbol to POTCAR
-                symbol mapping. For example, you can have {"Fe":"Fe_pv"} to
-                specify that the Fe_pv psuedopotential should be used for Fe.
-                Default is None, which uses a pre-determined mapping used in
-                the Materials Project.
+                Allows a user to specify a specific element symbol to raw
+                POTCAR mapping.
         """
         super(Potcar, self).__init__()
         self.functional = functional
@@ -1219,7 +1218,7 @@ class Potcar(list):
         with zopen(filename, "r") as reader:
             fdata = reader.read()
         potcar = Potcar()
-        potcar_strings = re.compile(r"\n?\s*(.*?End of Dataset)",
+        potcar_strings = re.compile(r"\n?(\s*.*?End of Dataset)",
                                     re.S).findall(fdata)
         functionals = []
         for p in potcar_strings:
@@ -1239,7 +1238,7 @@ class Potcar(list):
         return potcar
 
     def __str__(self):
-        return "".join([str(potcar) for potcar in self])
+        return "\n".join([str(potcar).strip("\n") for potcar in self])
 
     def write_file(self, filename):
         """

@@ -13,13 +13,15 @@ __email__ = "shyue@mit.edu"
 __date__ = "Sep 23, 2011"
 
 import os
-import unittest
 import random
+import unittest
 
 from pymatgen.core.lattice import Lattice
-from pymatgen.transformations.standard_transformations import *
-from pymatgen.io.vaspio.vasp_input import Poscar
+from pymatgen.core import PeriodicSite
 from pymatgen.io.cifio import CifParser
+from pymatgen.io.vaspio.vasp_input import Poscar
+from pymatgen.transformations.standard_transformations import *
+from pymatgen.symmetry.structure import SymmetrizedStructure
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
@@ -145,8 +147,8 @@ class OxidationStateDecorationTransformationTest(unittest.TestCase):
                            [0.00, -2.2171384943, 3.1355090603]])
         struct = Structure(lattice, ["Li", "Li", "O", "O"], coords)
         s = t.apply_transformation(struct)
-        self.assertEqual(str(s[0].specie), "Li+")
-        self.assertEqual(str(s[2].specie), "O2-")
+        self.assertEqual(s[0].species_string, "Li+")
+        self.assertEqual(s[2].species_string, "O2-")
 
 
 class AutoOxiStateDecorationTransformationTest(unittest.TestCase):
@@ -182,8 +184,8 @@ class OxidationStateRemovalTransformationTest(unittest.TestCase):
                            [0.00, -2.2171384943, 3.1355090603]])
         struct = Structure(lattice, ["Li+", "Li+", "O2-", "O2-"], coords)
         s = t.apply_transformation(struct)
-        self.assertEqual(str(s[0].specie), "Li")
-        self.assertEqual(str(s[2].specie), "O")
+        self.assertEqual(s[0].species_string, "Li")
+        self.assertEqual(s[2].species_string, "O")
 
 
 class PartialRemoveSpecieTransformationTest(unittest.TestCase):
@@ -283,6 +285,27 @@ class OrderDisorderedStructureTransformationTest(unittest.TestCase):
                                      {"Si4+": 0.333}, "O2-"], coords)
         allstructs = t.apply_transformation(struct, 50)
         self.assertEqual(len(allstructs), 3)
+        
+    def test_symmetrized_structure(self):
+        t = OrderDisorderedStructureTransformation(symmetrized_structures=True)
+        c = []
+        sp = []
+        c.append([0.5, 0.5, 0.5])
+        sp.append('Si4+')
+        c.append([0.45, 0.45, 0.45])
+        sp.append({"Si4+": 0.5})
+        c.append([0.56, 0.56, 0.56])
+        sp.append({"Si4+": 0.5})
+        c.append([0.25, 0.75, 0.75])
+        sp.append({"Si4+": 0.5})
+        c.append([0.75, 0.25, 0.25])
+        sp.append({"Si4+": 0.5})
+        l = Lattice.cubic(5)
+        s = Structure(l, sp, c)
+        test_site = PeriodicSite("Si4+", c[2], l)
+        s = SymmetrizedStructure(s, 'not_real', [0,1,1,2,2])
+        output = t.apply_transformation(s)
+        self.assertTrue(test_site in output.sites)
 
     def test_too_small_cell(self):
         t = OrderDisorderedStructureTransformation()

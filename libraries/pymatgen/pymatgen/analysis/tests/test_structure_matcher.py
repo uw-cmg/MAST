@@ -2,25 +2,23 @@ import unittest
 import os
 import json
 import numpy as np
-import random
 
-from pymatgen.core.periodic_table import Element, Specie
 from pymatgen.analysis.structure_matcher import StructureMatcher, \
     ElementComparator, FrameworkComparator
 from pymatgen.serializers.json_coders import PMGJSONDecoder
 from pymatgen.core.operations import SymmOp
-from pymatgen.core.structure_modifier import StructureEditor
-from pymatgen.core.structure_modifier import SupercellMaker
 from pymatgen.io.smartio import read_structure
 from pymatgen.core.structure import Structure
+from pymatgen.core.composition import Composition
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..",
                         'test_files')
 
 
 class StructureMatcherTest(unittest.TestCase):
+
     def setUp(self):
-        with open(os.path.join(test_dir, "TiO2_entries.json"), 'rb') as fp:
+        with open(os.path.join(test_dir, "TiO2_entries.json"), 'r') as fp:
             entries = json.load(fp, cls=PMGJSONDecoder)
         self.struct_list = [e.structure for e in entries]
         self.oxi_structs = [read_structure(os.path.join(test_dir, fname))
@@ -38,23 +36,22 @@ class StructureMatcherTest(unittest.TestCase):
 
         self.assertTrue(sm.fit(self.struct_list[0], self.struct_list[1]))
 
-        """Test rotational/translational invariance"""
+        # Test rotational/translational invariance
         op = SymmOp.from_axis_angle_and_translation([0, 0, 1], 30, False,
                                                     np.array([0.4, 0.7, 0.9]))
-        editor = StructureEditor(self.struct_list[1])
-        editor.apply_operation(op)
-        self.assertTrue(sm.fit(self.struct_list[0], editor.modified_structure))
+        self.struct_list[1].apply_operation(op)
+        self.assertTrue(sm.fit(self.struct_list[0], self.struct_list[1]))
 
-        """Test failure under large atomic translation"""
-        editor.translate_sites([0], [.4, .4, .2], frac_coords=True)
-        self.assertFalse(sm.fit(self.struct_list[0],
-                                editor.modified_structure))
+        #Test failure under large atomic translation
+        self.struct_list[1].translate_sites([0], [.4, .4, .2],
+                                            frac_coords=True)
+        self.assertFalse(sm.fit(self.struct_list[0], self.struct_list[1]))
 
-        editor.translate_sites([0], [-.4, -.4, -.2], frac_coords=True)
-        """Test match under shuffling of sites"""
-        random.shuffle(editor._sites)
-        self.assertTrue(sm.fit(self.struct_list[0], editor.modified_structure))
-        """Test FrameworkComporator"""
+        self.struct_list[1].translate_sites([0], [-.4, -.4, -.2],
+                                            frac_coords=True)
+        # random.shuffle(editor._sites)
+        self.assertTrue(sm.fit(self.struct_list[0], self.struct_list[1]))
+        #Test FrameworkComporator
         sm2 = StructureMatcher(comparator=FrameworkComparator())
         lfp = read_structure(os.path.join(test_dir, "LiFePO4.cif"))
         nfp = read_structure(os.path.join(test_dir, "NaFePO4.cif"))
@@ -63,7 +60,9 @@ class StructureMatcherTest(unittest.TestCase):
 
         #Test anonymous fit.
         self.assertEqual(sm.fit_anonymous(lfp, nfp),
-                         {Element("Li"): Element("Na")})
+                         {Composition("Li"): Composition("Na")})
+        self.assertAlmostEqual(sm.get_minimax_rms_anonymous(lfp, nfp)[0],
+                               0.096084154118549828)
 
         #Test partial occupancies.
         s1 = Structure([[3, 0, 0], [0, 3, 0], [0, 0, 3]],
@@ -76,31 +75,33 @@ class StructureMatcherTest(unittest.TestCase):
                         [0.5, 0.5, 0.5], [0.75, 0.75, 0.75]])
         self.assertFalse(sm.fit(s1, s2))
         self.assertFalse(sm.fit(s2, s1))
+        s2 = Structure([[3, 0, 0], [0, 3, 0], [0, 0, 3]],
+                       [{"Fe": 0.25}, {"Fe": 0.25}, {"Fe": 0.25},
+                        {"Fe": 0.25}],
+                       [[0, 0, 0], [0.25, 0.25, 0.25],
+                        [0.5, 0.5, 0.5], [0.75, 0.75, 0.75]])
+        self.assertEqual(sm.fit_anonymous(s1, s2),
+                         {Composition("Fe0.5"): Composition("Fe0.25")})
+
+        self.assertAlmostEqual(sm.get_minimax_rms_anonymous(s1, s2)[0], 0)
 
     def test_oxi(self):
         """Test oxidation state removal matching"""
         sm = StructureMatcher()
         self.assertFalse(sm.fit(self.oxi_structs[0], self.oxi_structs[1]))
-        self.assertEqual(sm.fit_anonymous(self.oxi_structs[0],
-                                          self.oxi_structs[1]),
-                         {Specie("Li", 1): Element("Li"),
-                          Specie("O", -2): Element("O")})
         sm = StructureMatcher(comparator=ElementComparator())
         self.assertTrue(sm.fit(self.oxi_structs[0], self.oxi_structs[1]))
-
 
     def test_primitive(self):
         """Test primitive cell reduction"""
         sm = StructureMatcher(primitive_cell=True)
-        mod = SupercellMaker(self.struct_list[1],
-                             scaling_matrix=[[2, 0, 0], [0, 3, 0], [0, 0, 1]])
-        super_cell = mod.modified_structure
-        self.assertTrue(sm.fit(self.struct_list[0], super_cell))
+        self.struct_list[1].make_supercell([[2, 0, 0], [0, 3, 0], [0, 0, 1]])
+        self.assertTrue(sm.fit(self.struct_list[0], self.struct_list[1]))
 
     def test_class(self):
-        """Tests entire class as single working unit"""
+        # Tests entire class as single working unit
         sm = StructureMatcher()
-        """ Test group_structures and find_indices"""
+        # Test group_structures and find_indices
         out = sm.group_structures(self.struct_list)
 
         self.assertEqual(sm.find_indexes(self.struct_list, out),
@@ -134,6 +135,24 @@ class StructureMatcherTest(unittest.TestCase):
         sm2 = StructureMatcher.from_dict(d)
         self.assertEqual(sm2.to_dict, d)
 
+    def test_no_scaling(self):
+        sm = StructureMatcher(ltol=0.1, stol=0.1, angle_tol=2,
+                              scale=False, comparator=ElementComparator())
+        self.assertTrue(sm.fit(self.struct_list[0], self.struct_list[1]))
+
+        self.assertTrue(sm.get_rms_dist(self.struct_list[0],
+                                        self.struct_list[1])[0] < 0.0008)
+
+    def test_supercell_fit(self):
+        sm = StructureMatcher(attempt_supercell=False)
+        s1 = read_structure(os.path.join(test_dir, "Al3F9.cif"))
+        s2 = read_structure(os.path.join(test_dir, "Al3F9_distorted.cif"))
+
+        self.assertFalse(sm.fit(s1, s2))
+
+        sm = StructureMatcher(attempt_supercell=True)
+
+        self.assertTrue(sm.fit(s1, s2))
 
 if __name__ == '__main__':
     unittest.main()

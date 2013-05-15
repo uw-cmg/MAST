@@ -46,13 +46,18 @@ from pymatgen.io.vaspio.vasp_input import Poscar
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.symmetry.finder import SymmetryFinder
-from pymatgen.core.structure_modifier import SupercellMaker
 from pymatgen.core.periodic_table import DummySpecie
-
+from pymatgen.util.io_utils import which
+from pymatgen.util.decorators import requires
 
 logger = logging.getLogger(__name__)
 
 
+@requires(which('multienum.x') and which('makestr.x'),
+          "EnumlibAdaptor requires the executables 'multienum.x' and "
+          "'makestr.x' to be in the path. Please download the library at"
+          "http://enum.sourceforge.net/ and follow the instructions in "
+          "the README to compile these two executables accordingly.")
 class EnumlibAdaptor(object):
     """
     An adaptor for enumlib.
@@ -185,7 +190,7 @@ class EnumlibAdaptor(object):
             else:
                 min_disordered_sg = min(min_disordered_sg, sgnum)
                 sp_label = []
-                species = sites[0].species_and_occu
+                species = {k: v for k, v in sites[0].species_and_occu.items()}
                 if sum(species.values()) < 1 - EnumlibAdaptor.amount_tol:
                     #Let us first make add a dummy element for every single
                     #site whose total occupancies don't sum to 1.
@@ -305,9 +310,9 @@ class EnumlibAdaptor(object):
                     transformation = [[int(round(cell)) for cell in row]
                                       for row in transformation]
                     logger.debug("Supercell matrix: {}".format(transformation))
-                    maker = SupercellMaker(ordered_structure, transformation)
-                    sites.extend([site.to_unit_cell
-                                  for site in maker.modified_structure])
+                    s = Structure.from_sites(ordered_structure)
+                    s.make_supercell(transformation)
+                    sites.extend([site.to_unit_cell for site in s])
                     super_latt = sites[-1].lattice
                 else:
                     super_latt = new_latt
