@@ -50,23 +50,20 @@ class BaseIngredient(MASTObj):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            isneb = False
+            usepath = self.keywords['name']
             if 'images' in self.keywords['program_keys'].keys():
-                isneb = True
                 mycomplete = vasp_checker.images_complete(self.keywords['name'],
                                 self.keywords['program_keys']['images'])
+                usepath = usepath + '/01'
             else:
-                mycomplete = vasp_checker.is_complete(self.keywords['name'])
+                mycomplete = vasp_checker.is_complete(usepath)
             if mycomplete:
                 return mycomplete
             else:
-                if not os.path.exists(self.keywords['name'] + '/submit.sh'):
+                if not os.path.exists(usepath + '/OUTCAR'):
                     return False #hasn't started running yet.
                 from MAST.ingredients.errorhandler import vasp_error
-                if isneb:
-                    errct = vasp_error.loop_through_errors(self.keywords['name'] + "/01")
-                else:
-                    errct=vasp_error.loop_through_errors(self.keywords['name'])
+                errct = vasp_error.loop_through_errors(usepath)
                 if errct > 0:
                     self.run() #Should try to rerun automatically or not??
                 return False

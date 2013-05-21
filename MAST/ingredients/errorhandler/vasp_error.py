@@ -20,6 +20,7 @@ def set_handler_inputs():
     """We may want to override the files that are being checked, which are
         usually vasp.out or vasprun.xml.
         Use key as error handler class name (like 'VaspErrorHandler').
+        Use mast_skip to skip the error.
     """
     handler_input_d=dict()
     handler_input_d['VaspErrorHandler']="OUTCAR"
@@ -28,6 +29,7 @@ def set_handler_inputs():
     handler_input_d['PoscarErrorHandler']="OUTCAR"
     handler_input_d['TripleProductErrorHandler']="OUTCAR"
     handler_input_d['FrozenJobErrorHandler']="OUTCAR"
+    handler_input_d['NonConvergingErrorHandler']="mast_skip"
 
     return handler_input_d
 
@@ -41,15 +43,18 @@ def loop_through_errors(mydir):
     os.chdir(mydir)
     print "Checking errors for: ",mydir
     for hname in handlerdict.keys():
-        print "Checking for ",hname
+        hinputs=""
         if hname in handler_input_d.keys():
-            myerror = handlerdict[hname](handler_input_d[hname])
+            hinputs = handler_input_d[hname]
+        if hinputs == "mast_skip":
+            print "Skipping ",hname
         else:
-            myerror = handlerdict[hname]()
-        if myerror.check():
-            print hname, "Error found! Attempting to correct."
-            errct = errct + 1
-            myerror.correct()
-        else:
-            print hname,": No error found."
+            print "Checking for ",hname
+            myerror = handlerdict[hname](hinputs)
+            if myerror.check():
+                print hname, "Error found! Attempting to correct."
+                errct = errct + 1
+                myerror.correct()
+            else:
+                print hname,": No error found."
     return errct
