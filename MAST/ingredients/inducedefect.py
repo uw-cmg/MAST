@@ -24,6 +24,7 @@ class InduceDefect(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
+        print 'Initializing InduceDefect'
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
@@ -87,10 +88,16 @@ class InduceDefect(BaseIngredient):
     #        os.path.makedirs(directory)
     
     def write_files(self):
+#        print 'InduceDefect.write_files()'
         name = self.keywords['name']
+#        print 'InduceDefects.keywords', self.keywords
         print "write_files:", name
         self.get_new_structure()
-        modified_structure = self.induce_defect()
+ 
+        defect_label = name.split('/')[-1].split('_')[-1]
+        defect = self.keywords['program_keys'][name.split('/')[-1].split('_')[-1]]
+        modified_structure = self.induce_defect(defect)
+
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
             print "poscar OK"
