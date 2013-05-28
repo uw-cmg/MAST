@@ -90,7 +90,7 @@ class DAGScheduler:
         for jid, job in self.jobtable.jobs.iteritems():
              if job.status == JOB.InQ and job.ingredient_obj.is_complete():
                 job.status = JOB.Complete
-                 self.sessiontable.completejobs(job.sid, njobs=jid)
+                self.sessiontable.completejobs(job.sid, njobs=jid)
                 job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
                 
@@ -155,15 +155,12 @@ class DAGScheduler:
                 break
             time.sleep(SCHEDULING_INTERVAL) #TTM move sleep
 
-        print ':: move sessions to archive directory ::'
         csnames = csnames.union(self._move_to_archive())
         return csnames
 
             
     def _run(self):
-        print ':: run jobs ::'
         self.run_jobs()
-        print ':: update job status ::'
         self.update_job_status()
         
     def _get_session_path(self, sid):
