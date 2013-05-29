@@ -41,7 +41,6 @@ class MASTmon(object):
                     print 'stpe 1: create DAGScheduler object'
                     self.scheduler = DAGScheduler()
                     
-                print 'step 2: add jobs'
                 self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=session_dir)
                     
             except:
@@ -57,17 +56,13 @@ class MASTmon(object):
         var_dict = {}
         var_dict['registered_dir'] = self.registered_dir
         var_dict['scheduler'] = self.scheduler
-        #print var_dict
         var_dict['version']  = self.version
-        print var_dict
         self.pm.save(var_dict,filename=self.pn_mastmon)
-        #print 'save variables of mastmon'
         
     def _load(self):
         """Load MASTmon's information pickle file"""
 
         if os.path.isfile(self.pn_mastmon):
-            print 'load mastmon information from %s ' % self.pn_mastmon
             var_dict = self.pm.load_variable(self.pn_mastmon)
             if 'version' in var_dict and var_dict['version'] != self.version:
                 print 'Error: mastmon_info.pickle is version %.2f' % var_dict['version']
@@ -79,8 +74,6 @@ class MASTmon(object):
                 
             if 'scheduler' in var_dict:
                 self.scheduler = var_dict['scheduler']
-        
-#    def _move_to_archive(self):
         
     def run(self, niter=None, stopcond=None, interval=None):
         """Run Mastmon. First of all, this makes MASTmon go to mastmon home load dagscheduler pickle.
@@ -132,13 +125,6 @@ class MASTmon(object):
             #remove complete sessions
 
             self.registered_dir = self.registered_dir - csnames
-            print 'complete session nmaes'
-            print csnames
-            print 'registered directories'
-            print self.registered_dir
-
-            self.scheduler.show_session_table()
-
 
             # save scheduler object
             self._save()
