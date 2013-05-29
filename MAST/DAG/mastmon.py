@@ -130,7 +130,7 @@ class MASTmon(object):
             self._save()
 
             if stopcond is not None:
-                if stopcond.upper() is 'NOSESSION' and len(self.registered_dir) == 0:
+                if stopcond.upper() == 'NOSESSION' and len(self.registered_dir) == 0:
                     break
                 
             time.sleep(interval)
