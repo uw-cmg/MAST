@@ -208,25 +208,44 @@ class InputParser(MASTObj):
         count = 1
         for line in section_content:
             type_dict = dict()
+            label = None
 
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
                 defect_types['coord_type'] = line[1]
             else:
-                coord = line[1:-1]
+                if (len(line) < 5):
+                    error = 'Defect specification requires at least 5 arguments.'
+                    MASTError(self.__class__.__name__, error)
 
+# Check for static options
                 type_dict['type'] = line[0]
+                coord = line[1:4]
                 type_dict['coordinates'] = np.array(coord, dtype='float')
-                type_dict['symbol'] = line[-1]
+                type_dict['symbol'] = line[4]
 
-                defect_types['defect%i' % count] = type_dict
+                if (len(line) > 5):
+                    for lin in line[5:]:
+                        lin = lin.split('=')
+                        if (lin[0] == 'charge'):
+                            charge_range = lin[1].split(',')
+                            type_dict['charge'] = range(int(charge_range[0]),
+                                                        int(charge_range[1])+1)
+                        elif (lin[0] == 'label'):
+                            label = lin[1]
+
+                if (not label):
+                    defect_types['defect_%i' % count] = type_dict
+                else:
+                    defect_types['defect_%s' % label] = type_dict
 
                 count += 1
 
         if ('coord_type' not in defect_types):
             defect_types['coord_type'] = 'cartesian'
 
+        print defect_types
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
 
