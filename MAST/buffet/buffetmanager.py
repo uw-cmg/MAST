@@ -20,6 +20,7 @@ ALLOWED_KEYS = {\
                    'name'              : (str, None, 'Buffet Name'),\
                }
 
+
 class Buffet(MASTObj):
       """
          Buffet class has a list of dependent recipes and
@@ -33,10 +34,16 @@ class Buffet(MASTObj):
       def addRecipe(self, recipe_input, recipe_feeder=None):
           planner = RecipePlanner(recipe_input=recipe_input)
           recipe_plan = planner.plan()
-          self.buffet_plan.append((recipe_plan, recipe_feeder))
+          self.buffet_plan.append((recipe_plan, recipe_feeder.__name__))
 
       def getBuffetPlan(self):
-          return self.buffet_plan
+          plan = []
+          for recipe_plan, func_name in self.buffet_plan:
+              if func_name is not None:
+                  plan.append((recipe_plan, getattr(self, func_name)))
+              else:
+                  plan.append((recipe_plan, func_name))
+          return plan
 
       def cook(self):
           scratch_dir = os.environ['MAST_SCRATCH']
@@ -44,7 +51,7 @@ class Buffet(MASTObj):
           pm = PickleManager(pickle_file)
           pm.save_variable(self)
 
-      def recipe_feeder(self):
+      def recipe_feeder(self, completed_recipes, new_recipe):
           """
               User could implement their own feeder or use default ones 
               implemented here.
