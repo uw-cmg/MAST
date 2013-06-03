@@ -34,7 +34,10 @@ class Buffet(MASTObj):
       def addRecipe(self, recipe_input, recipe_feeder=None):
           planner = RecipePlanner(recipe_input=recipe_input)
           recipe_plan = planner.plan()
-          self.buffet_plan.append((recipe_plan, recipe_feeder.__name__))
+          if recipe_feeder is not None:
+              self.buffet_plan.append((recipe_plan, recipe_feeder.__name__))
+          else:
+              self.buffet_plan.append((recipe_plan, recipe_feeder))
 
       def getBuffetPlan(self):
           plan = []
