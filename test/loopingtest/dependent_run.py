@@ -1,5 +1,5 @@
 from MAST.recipe.recipeinput import RecipeInput
-from MAST.buffet.buffetmanager import Buffet
+from MAST.buffet.mybuffet import MyBuffet
 
 ####################################
 # input parameters
@@ -42,15 +42,7 @@ RECIPE_FILE = 'recipe_test.txt'
 ####################################
 
 
-def recipe_feeder(completed_recipes, new_recipe):
-    """
-       user defined feeder method which makes the necessary changes to the
-       input of the new recipe. The new recipe is a recipe plan which has the
-       ingredients objects. The variables of the ingredients could be modified here!!!
-    """
-    print "recipe feeder not defined !!!"
-
-buffet_obj = Buffet(name="dependent_recipe")
+buffet_obj = MyBuffet(name="dependent_recipe")
 
 #dependent run
 for run_idx in xrange(len(MAST_KPOINTS)):
@@ -68,7 +60,7 @@ for run_idx in xrange(len(MAST_KPOINTS)):
     recipe_input.addRecipeInfo(RECIPE_FILE)
 
     #add recipe input to buffet and cook it
-    buffet_obj.addRecipe(recipe_input, recipe_feeder)
+    buffet_obj.addRecipe(recipe_input, buffet_obj.recipe_feeder)
 
 buffet_obj.cook()
 
