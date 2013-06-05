@@ -122,7 +122,7 @@ class MAST(MASTObj):
         ingredient_global = self.input_options.get_item('ingredients', 'global')
 
         print '\nChecking status of defects.'
-        ndefects = self.input_options.get_item('defects','num_defects')
+        ndefects = self.input_options.get_item('defects', 'num_defects')
         if ndefects == None:
             defects = False
             print 'No defects found.'
@@ -136,6 +136,7 @@ class MAST(MASTObj):
 
 #        print "GRJ DEBUG:", self.unique_ingredients
 #        print "GRJ DEBUG:", ingredients_dict
+#        print "GRJ DEBUG:", defect_keys
         for ingredient in self.unique_ingredients:
             print 'Initializing ingredient %s.' % ingredient
             if (ingredient == 'inducedefect'):
@@ -149,12 +150,4 @@ class MAST(MASTObj):
                                 structure=structure, ingredientsDict=ingredients_dict)
         recipe_plan_obj = setup_obj.start()
 
-#        print '\n\n\nGRJ DEBUG:'
-#        id_test = ingredients_dict['inducedefect'](program_keys=defect_keys, structure=structure,
-#                                                   program='vasp')
-#        for key, value in defect_keys.items():
-#            if ('defect' in key):
-#                id_test.induce_defect(value)
-#        id_test.write_files()
-#        print '\n\n\n'
         return recipe_plan_obj

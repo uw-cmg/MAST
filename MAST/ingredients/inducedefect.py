@@ -88,14 +88,17 @@ class InduceDefect(BaseIngredient):
     #        os.path.makedirs(directory)
     
     def write_files(self):
-#        print 'InduceDefect.write_files()'
+        print 'InduceDefect.write_files()'
         name = self.keywords['name']
-#        print 'InduceDefects.keywords', self.keywords
+        print 'InduceDefects.keywords', self.keywords
         print "write_files:", name
         self.get_new_structure()
+
+        print 'GRJ DEBUG', name.split('/')[-1]
  
-        defect_label = name.split('/')[-1].split('_')[-1]
-        defect = self.keywords['program_keys'][name.split('/')[-1].split('_')[-1]]
+        defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
+        defect = self.keywords['program_keys'][defect_label]
+        print 'GRJ debug:', defect_label, defect
         modified_structure = self.induce_defect(defect)
 
         if self.keywords['program'] == 'vasp':
