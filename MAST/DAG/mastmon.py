@@ -107,7 +107,7 @@ class MASTmon(object):
             # get directories from mast home
             session_dirs = os.walk('.').next()[1]
 
-            # remove 'archive' directory
+            # remove 'archive' directory from the list of session directories
             if self._ARCHIVE in session_dirs:
                 session_dirs.remove(self._ARCHIVE)
 
