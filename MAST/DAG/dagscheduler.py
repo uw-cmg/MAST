@@ -51,21 +51,17 @@ class DAGScheduler:
         if sid is None:
             sid = self.sessiontable.get_new_sid()
 
-        #TTM+2 comment out
-        #njobs = ingredients_dict
-        # Add a new session 
+         # Add a new session 
         if not self.has_session(sid):
-            asession = SessionEntry(sid, 0, sname) #TTM change to 0
+            asession = SessionEntry(sid, 0, sname) 
             self.sessiontable.addsession(asession)
-        #TTM+2 comment out
-        #else:
-        #    self.sessiontable[sid].addnewjobs(njobs)
 
         session_dir = os.path.join(self.home, sname)
         # Insert jobs
         for name, ingredient in ingredients_dict.iteritems():
             jid = self.jobtable.get_jid()
-            self.sessiontable.add_newjob(sid, jid) #TTM add each jobid
+            self.sessiontable.add_newjob(sid, jid)
+
             # attach session_dir to name of ingredient
             ingredient.keywords['name'] = os.path.join(session_dir, ingredient.keywords['name'])
             # attach session_dir to name of child ingredients
@@ -77,26 +73,23 @@ class DAGScheduler:
                 del child_dict[oldkey]
 
             ajob = JobEntry(sid=sid, jid=jid, ingredient=ingredient)
-            print jid, name
             self.jobtable.addjob(ajob)
             
         # Update depdict
         for child, parent in dependency_dict.iteritems():
             for aparent in parent:
                 # For DEBUGGING
-                print child +"<="+ aparent
+                #print child +"<="+ aparent
                 pname = os.path.join(session_dir,aparent)
                 kidname = os.path.join(session_dir,child)
-                print kidname +"<="+ pname
+                #print kidname +"<="+ pname
                 self.jobtable.add_dependency(pname,kidname)
 
     def update_job_status(self):
         '''udpate session table and update children'''
         for jid, job in self.jobtable.jobs.iteritems():
-            print "TTM DEBUG jid, status:",str(jid), str(job.status)
-            if job.status == JOB.InQ and job.ingredient_obj.is_complete():
+             if job.status == JOB.InQ and job.ingredient_obj.is_complete():
                 job.status = JOB.Complete
-                print '\njob [%s] is complete' % job.name
                 self.sessiontable.completejobs(job.sid, njobs=jid)
                 job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
@@ -108,14 +101,12 @@ class DAGScheduler:
                 self.sessiontable.runjobs(sid=job.sid, njobs=jid) # update session table
                 
             if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
-                print 'run [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
                 job.ingredient_obj.run() #TTM do not default mode in dag scheduler; make ingredients default. mode=self._run_mode)
                 job.status = JOB.InQ
                 sid = job.sid
                 self.sessiontable.runjobs(sid=sid, njobs=jid) # update session table
                 
             if job.status is JOB.PreQ and job.is_ready():
-                print 'write files [sid=%d,jid=%d] %s' % (job.sid, job.jid, job.name)
                 job.ingredient_obj.write_files()
 
         
@@ -152,34 +143,24 @@ class DAGScheduler:
         """run dag scheduler.
             return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
             ex) dagschedulder.run() #run until all sessions are complete
-            ex) dagscheduler.run(1) #run for 1 iteration or all sessions are complete
+            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete
         """
         iter = 0
         csnames = set()
         while self.has_incomplete_session():
             self._run()
-            print 'I am at %s' % os.getcwd()
             #TTM DEBUG: do not move sessions to archive directory within loop
-            #print ':: move sessions to archive directory ::'
-            #csnames = csnames.union(self._move_to_archive())
             iter = iter+1
-            print self.jobtable
-            print "SESSION TABLE: ",self.show_session_table() #TTM DEBUG
             if niter is not None and iter >= niter:
                 break
             time.sleep(SCHEDULING_INTERVAL) #TTM move sleep
 
-        print ':: move sessions to archive directory ::'
         csnames = csnames.union(self._move_to_archive())
-        print 'csnames in run in dagscheduler'
-        print csnames
         return csnames
 
             
     def _run(self):
-        print ':: run jobs ::'
         self.run_jobs()
-        print ':: update job status ::'
         self.update_job_status()
         
     def _get_session_path(self, sid):
@@ -201,9 +182,6 @@ class DAGScheduler:
             src = self._get_session_path(sid)
             os.system("mv %s %s"% (src,dst))
             csnames.add(self.sessiontable.get_sname(sid))
-            print "csnames in move_to_archive"
-            print csnames
-            print "session %s is complete and moved to archive." %  self.sessiontable.get_sname(sid)
             self.del_session(sid)
             
         return csnames

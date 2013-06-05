@@ -3,13 +3,13 @@ from dagutil import *
 class SessionEntry(object):
 
     def __init__(self, sid, totaljobs, name=None):
-        self.sid =  sid
-        self.totaljobs = totaljobs
-        self.preq_jobs = totaljobs
-        self.inq_jobs = 0
-        self.completejobs = 0
-        self.name = name
-        self.preq_list=list()
+        self.sid =  sid # session id
+        self.totaljobs = totaljobs # number of total jobs
+        self.preq_jobs = totaljobs # number of jobs before queue
+        self.inq_jobs = 0 # numer of jobs running (in queue)
+        self.completejobs = 0 # numer of jobs complete jobs
+        self.name = name # name of session
+        self.preq_list=list() 
         self.inq_list=list()
         self.complete_list=list()
         self.total_list=list()
@@ -19,10 +19,9 @@ class SessionEntry(object):
         self.preq_jobs = len(self.preq_list)
         self.completejobs = len(self.complete_list)
         self.totaljobs = len(self.total_list)
-        self._print_lists()
+        #self._print_lists()
 
     def _print_lists(self):
-        #pass
         print "INQ:",self.inq_list
         print "PREQ:",self.preq_list
         print "COMP:",self.complete_list
