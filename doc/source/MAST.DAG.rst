@@ -25,14 +25,6 @@ DAG Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`job` Module
------------------
-
-.. automodule:: MAST.DAG.job
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`jobentry` Module
 ----------------------
 

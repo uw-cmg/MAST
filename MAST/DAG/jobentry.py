@@ -10,15 +10,15 @@
 from dagutil import *
 
 class JobEntry(object):
-    """JobEntry is an entry in class JobTable.
-        isready : method to check if this job is ready or not
-        sid : session id
-        jid : job id
-        name : jobname
-        status : job status
-        parents : set of parent jobs id
-        completeparents : set of complete parent jobs
-        ingredient_obj : ingredient obj
+    """JobEntry is an entry in class JobTable. \n
+        isready : method to check if this job is ready or not \n
+        sid : session id \n
+        jid : job id \n
+        name : jobname \n
+        status : job status \n
+        parents : set of parent jobs id \n
+        completeparents : set of complete parent jobs \n
+        ingredient_obj : ingredient obj \n
     """
     def __init__(self, sid, jid, jobname=None, type=None, ingredient=None):
         self.sid = sid # session id
