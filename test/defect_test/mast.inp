@@ -1,0 +1,39 @@
+# Test file
+$MAST
+program VASP
+system_name GaAs_defects
+$end
+
+$structure
+posfile POSCAR.ga4as4
+$end
+
+$defects
+vacancy 0.0 0.0 0.0 Ga charge=-3,0
+begin
+vacancy 0.0 0.0 0.0 Ga
+substitution 0.25 0.25 0.25 Bi
+end
+$end
+
+$recipe
+recipe_file defect_test.txt
+$end
+
+$ingredients
+begin ingredients_global
+mast_kpoints 8x8x8
+mast_xc lda
+ispin 2
+end
+
+begin singlepoint
+encut 313
+end
+
+begin optimize
+encut 313
+ibrion 2
+end
+$end
+

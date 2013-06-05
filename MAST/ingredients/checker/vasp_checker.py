@@ -35,6 +35,7 @@ def images_complete(dirname, numim):
         numim = number of images
     """
     imct=1
+    numim = int(numim)
     while imct <= numim:
         num_str = str(imct).zfill(2)
         impath = os.path.join(dirname, num_str)
@@ -42,7 +43,10 @@ def images_complete(dirname, numim):
             myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
         except (IOError):
             return False
+        if not 'User time (sec)' in myoutcar.run_stats.keys():
+            return False
         if myoutcar.run_stats['User time (sec)'] > 0:
+            #print "image",imct,"complete"
             pass
         else:
             return False

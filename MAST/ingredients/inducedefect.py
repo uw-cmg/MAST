@@ -1,3 +1,12 @@
+############################################################################
+# MAterials Simulation Toolbox (MAST)
+# Version: January 2013
+# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
+#              Kumaresh Visakan Murugan, Parker Sear
+# Created at the University of Wisconsin-Madison.
+# Replace this section with appropriate license text before shipping.
+# Add additional programmers and schools as necessary.
+############################################################################
 import os
 import numpy as np
 
@@ -28,17 +37,17 @@ class InduceDefect(BaseIngredient):
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
-    def induce_defect(self, defect):
+    def induce_defect(self, base_structure, defect):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
-            'defect1': {'symbol': 'cr', 'type': 'interstitial', 
+            'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
                         'coordinates': array([ 0. ,  0.5,  0. ])}}
-            'defect2': {'symbol': 'o', 'type': 'vacancy', 
+            'defect_2': {'symbol': 'o', 'type': 'vacancy', 
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
 #        base_structure = self.get_new_structure()
-        base_structure = self.keywords['structure']
+#        base_structure = self.keywords['structure']
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
@@ -88,18 +97,19 @@ class InduceDefect(BaseIngredient):
     #        os.path.makedirs(directory)
     
     def write_files(self):
-        print 'InduceDefect.write_files()'
         name = self.keywords['name']
-        print 'InduceDefects.keywords', self.keywords
         print "write_files:", name
         self.get_new_structure()
 
-        print 'GRJ DEBUG', name.split('/')[-1]
- 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
         defect = self.keywords['program_keys'][defect_label]
-        print 'GRJ debug:', defect_label, defect
-        modified_structure = self.induce_defect(defect)
+
+        base_structure = self.keywords['structure']
+        for key in defect:
+            subdefect = defect[key]
+            modified_structure = self.induce_defect(base_structure, defect)
+# For multiple defects take the new "base" as the one that just came out
+            base_structure = modified_structure
 
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
@@ -112,6 +122,7 @@ class InduceDefect(BaseIngredient):
             print "unlock OK"
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
+
         return
     
     def is_ready_to_run(self):

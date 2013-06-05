@@ -29,6 +29,7 @@ class PerformNEB(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
+        print BaseIngredient.images_complete(self)
         return BaseIngredient.images_complete(self)
 
     def update_children(self):
@@ -62,6 +63,7 @@ class PerformNEB(BaseIngredient):
             pass
         else:
             numstr = numstr[numstr.find("neb")+3:] #allow 'neb' to be in <sys>
+        numstr = numstr[:numstr.find("_")]
         numparents = numstr.split('-')
         if not(len(numparents) == 2):
             raise MASTError(self.__class__.__name__,"Error: number of parents is not two for NEB in " + self.keywords['name'])
@@ -93,7 +95,7 @@ class PerformNEB(BaseIngredient):
             raise MASTError(self.__class__.__name__,"Bad number of parent paths.")
         struct_init = parentstructures[0]
         struct_fin = parentstructures[1]
-        structure_list = struct_init.interpolate(struct_fin, self.keywords['program_keys']['images'] + 1 )
+        structure_list = struct_init.interpolate(struct_fin, int(self.keywords['program_keys']['images']) + 1 )
         return structure_list
 
     def place_parent_energy_files(self):
