@@ -1,15 +1,15 @@
 # Test file
 $MAST
 program VASP
-system_name smalltestfcc
+system_name GaAs_defects
 $end
 
 $structure
-posfile smallfcc_poscar
+posfile POSCAR.ga4as4
 $end
 
 $defects
-vacancy 0.0 0.0 0.0 Fe
+vacancy 0.0 0.0 0.0 Ga charge=-3,0 label=vac_ga_origin
 $end
 
 $recipe
@@ -18,17 +18,17 @@ $end
 
 $ingredients
 begin ingredients_global
-mast_kpoints 3x3x3
-mast_xc pbe
+mast_kpoints 8x8x8
+mast_xc lda
+ispin 2
 end
 
 begin singlepoint
-encut 400
-xc pw91
+encut 313
 end
 
 begin optimize
-encut 300
+encut 313
 ibrion 2
 end
 $end
