@@ -203,18 +203,20 @@ class InputParser(MASTObj):
         """Parse the defects section and populate the options.
             This will get removed in favor of a defects section down in ingredients
         """
+        defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
-
+        multidefect = False
         count = 1
-        for line in section_content:
-            type_dict = dict()
-            label = None
 
+        for line in section_content:
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
                 defect_types['coord_type'] = line[1]
-            else:
+            elif (line[0] in defect_list) and (not multidefect):
+                type_dict = dict()
+                label = None
+
                 if (len(line) < 5):
                     error = 'Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
@@ -230,22 +232,63 @@ class InputParser(MASTObj):
                         lin = lin.split('=')
                         if (lin[0] == 'charge'):
                             charge_range = lin[1].split(',')
-                            type_dict['charge'] = range(int(charge_range[0]),
-                                                        int(charge_range[1])+1)
+                            charge = range(int(charge_range[0]),
+                                           int(charge_range[1])+1)
                         elif (lin[0] == 'label'):
                             label = lin[1]
 
                 if (not label):
-                    defect_types['defect_%i' % count] = type_dict
-                else:
-                    defect_types['defect_%s' % label] = type_dict
+                    label = str(count)
+
+                defect = {'charge': charge,
+                          'subdefect_1': type_dict}
+
+                defect_types['defect_%s' % label] = defect
 
                 count += 1
+            elif (line[0] == 'begin'):
+                defect = dict()
+                multidefect = True
+                subcount = 1
+
+                try:
+                    label = line[1]
+                except IndexError:
+                    label = None
+            elif (line[0] == 'end'):
+                if (not label):
+                    label = str(count)
+
+                defect_types['defect_%s' % label] = defect
+                count += 1
+                multidefect = False
+            elif ('charge' in line[0]):
+                charge_range = line[0].split('=').split(',')
+                defect['charge'] = range(int(charge_range[0]),
+                                         int(charge_range[1])+1)
+            else:
+                type_dict = dict()
+
+                if (len(line) < 5):
+                    error = 'Defect specification requires at least 5 arguments.'
+                    MASTError(self.__class__.__name__, error)
+
+# Check for static options
+                type_dict['type'] = line[0]
+                coord = line[1:4]
+                type_dict['coordinates'] = np.array(coord, dtype='float')
+                type_dict['symbol'] = line[4]
+
+                defect['subdefect_%i' % subcount] = type_dict
+#                print 'Rawr!', defect
+                subcount += 1
 
         if ('coord_type' not in defect_types):
             defect_types['coord_type'] = 'cartesian'
 
-        print defect_types
+#        print 'GRJ debug:'
+#        for key in defect_types:
+#            print "Key", key, defect_types[key]
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
 

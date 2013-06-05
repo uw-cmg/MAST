@@ -37,7 +37,7 @@ class InduceDefect(BaseIngredient):
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
-    def induce_defect(self, defect):
+    def induce_defect(self, base_structure, defect):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
             'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
@@ -47,7 +47,7 @@ class InduceDefect(BaseIngredient):
             'coord_type': 'fractional' 
         """
 #        base_structure = self.get_new_structure()
-        base_structure = self.keywords['structure']
+#        base_structure = self.keywords['structure']
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
@@ -97,18 +97,19 @@ class InduceDefect(BaseIngredient):
     #        os.path.makedirs(directory)
     
     def write_files(self):
-        print 'InduceDefect.write_files()'
         name = self.keywords['name']
-        print 'InduceDefects.keywords', self.keywords
         print "write_files:", name
         self.get_new_structure()
 
-        print 'GRJ DEBUG', name.split('/')[-1]
- 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
         defect = self.keywords['program_keys'][defect_label]
-#        print 'GRJ debug:', defect_label, defect
-        modified_structure = self.induce_defect(defect)
+
+        base_structure = self.keywords['structure']
+        for key in defect:
+            subdefect = defect[key]
+            modified_structure = self.induce_defect(base_structure, defect)
+# For multiple defects take the new "base" as the one that just came out
+            base_structure = modified_structure
 
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
