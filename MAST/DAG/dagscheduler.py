@@ -141,9 +141,9 @@ class DAGScheduler:
 
     def run(self, niter=None):
         """run dag scheduler.
-            return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir
-            ex) dagschedulder.run() #run until all sessions are complete
-            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete
+            return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir \n
+            ex) dagschedulder.run() #run until all sessions are complete \n
+            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete \n
         """
         iter = 0
         csnames = set()
