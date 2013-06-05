@@ -1,3 +1,12 @@
+############################################################################
+# MAterials Simulation Toolbox (MAST)
+# Version: January 2013
+# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
+#              Kumaresh Visakan Murugan, Parker Sear
+# Created at the University of Wisconsin-Madison.
+# Replace this section with appropriate license text before shipping.
+# Add additional programmers and schools as necessary.
+############################################################################
 import os
 import numpy as np
 
@@ -31,9 +40,9 @@ class InduceDefect(BaseIngredient):
     def induce_defect(self, defect):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
-            'defect1': {'symbol': 'cr', 'type': 'interstitial', 
+            'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
                         'coordinates': array([ 0. ,  0.5,  0. ])}}
-            'defect2': {'symbol': 'o', 'type': 'vacancy', 
+            'defect_2': {'symbol': 'o', 'type': 'vacancy', 
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
@@ -98,7 +107,7 @@ class InduceDefect(BaseIngredient):
  
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
         defect = self.keywords['program_keys'][defect_label]
-        print 'GRJ debug:', defect_label, defect
+#        print 'GRJ debug:', defect_label, defect
         modified_structure = self.induce_defect(defect)
 
         if self.keywords['program'] == 'vasp':
@@ -112,6 +121,7 @@ class InduceDefect(BaseIngredient):
             print "unlock OK"
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
+
         return
     
     def is_ready_to_run(self):
