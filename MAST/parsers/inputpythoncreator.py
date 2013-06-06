@@ -50,6 +50,7 @@ class InputPythonCreator(MASTObj):
             #print secvalue
             #print "TTM DEBUG: New print:------------------------------"
             self.print_multilevel_dict(secvalue)
+        self.print_buffet_section()
         self.myfile.close()
         if self.typeerror > 0:
             raise MASTError(self.__class__.__name__,
@@ -166,4 +167,62 @@ class InputPythonCreator(MASTObj):
                 self.typeerror += 1
                 print(header,"=",val3, file=self.myfile)
 
+    def print_buffet_section(self):
+        """Print the buffet section lines. Looping is accomplished
+            through an "independent_loop_key" option key.
+        """
+        print("", file=self.myfile)
+        print("###############################################", 
+                    file=self.myfile)
+        print("#Buffet Command Section", file=self.myfile)
+        print("################################################",
+                    file=self.myfile)
+        print("", file=self.myfile)
+        print("from MAST.recipe.recipeinput import RecipeInput",
+                    file=self.myfile)
+        print("from MAST.buffet.buffetmanager import Buffet",
+                    file=self.myfile)
+        recipe_base_name = os.path.basename(self.optdict['recipe']['recipe_file'])
+        recipe_base_name = recipe_base_name.split('.')[0]
+        import time
+        timestamp = time.strftime('%Y%m%dH%M%S')
+        
+        if "independent_loop_key" in self.optdict.keys():
+            #for run_idx in xrange(len(SYSTEM_NAME)):
+            #    recipe_input = RecipeInput(recipe_name="independent_recipe%s" % run_idx)
+
+            #   #add input parameters
+            #    recipe_input.addMastInfo(PROGRAM, SYSTEM_NAME[run_idx])
+            #    recipe_input.addStructureInfoFromCoords(COORD_TYPE, COORDINATES[run_idx], LATTICE)
+            #    recipe_input.addGlobalIngredientsInfo(ING_GLOBAL_PARAM)
+            #    recipe_input.addIngredientsInfo(OPTIMIZE_ING, OPTIMIZE_INFO)
+            #    recipe_input.addRecipeInfo(RECIPE_FILE)
+
+            #    #add recipe input to buffet and cook it
+            #    buffet_obj = Buffet(name="independent_recipe_%s" % SYSTEM_NAME[run_idx])
+            #    buffet_obj.addRecipe(recipe_input)
+            #    buffet_obj.cook()
+            pass
+        
+        else:
+            sysname = self.optdict['mast']['system_name']
+            myname = recipe_base_name + "_" + sysname + "_" + timestamp
+            print("recname = '" + myname + "'", file=self.myfile)
+            print("recipe_input = RecipeInput(recipe_name=recname)",
+                    file=self.myfile)
+            print("recipe_input.addMastInfo(program, systemname)",
+                    file=self.myfile)
+            print("recipe_input.addStructureInfoFromCoords(coord_type, coordinates, lattice)", file=self.myfile) 
+            #need to append element info
+            print("recipe_input.addGlobalIngredientsInfo(global)",
+                    file = self.myfile)
+            print("recipe_input.addIngredientsInfo(optimize)",
+                    file = self.myfile) 
+            #need to be able to add all ingredients
+            print("recipe_input.addRecipeInfo(recipe_file)",
+                    file = self.myfile)
+            print("buffet_obj = Buffet(name='buffet_'+recname)",
+                    file=self.myfile)
+            print("buffet_obj.addRecipe(recipe_input)", file=self.myfile)
+            print("buffet_obj.cook()", file=self.myfile)
 
