@@ -30,6 +30,7 @@ def set_handler_inputs():
     handler_input_d['TripleProductErrorHandler']="OUTCAR"
     handler_input_d['FrozenJobErrorHandler']="OUTCAR"
     handler_input_d['NonConvergingErrorHandler']="mast_skip"
+    handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
 
     return handler_input_d
 
