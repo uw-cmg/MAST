@@ -31,9 +31,9 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'spacegroup': None,
                       'symmetry_only': False,
                       'coord_type': 'cartesian',
-                      'atom_list': list(),
-                      'coordinates': list(),
-                      'lattice': list(),
+                      'atom_list',
+                      'coordinates',
+                      'lattice',
                       'primitive': False,
                      }
 
@@ -198,6 +198,12 @@ class InputParser(MASTObj):
             options.set_item(section_name, key, value)
 
         options.set_item(section_name, 'structure', structure)
+        #TTM+3 allow the building of structure from the *.py input file
+        print "TTM DEBUG COORDINATES: ", coordinates
+        options.set_item(section_name, 'coordinates', coordinates)
+        print "TTM DEBUG COORDINATES: ", coordinates
+        options.set_item(section_name, 'lattice', lattice)
+        options.set_item(section_name, 'atom_list', atom_list)
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
@@ -427,4 +433,6 @@ class InputParser(MASTObj):
             options.set_item(section_name, key, value)
 
 #        print 'DEBUG: chempot_dict =', chempot_dict
+
+        print "TTM DEBUG OPTIONS:", options
 
