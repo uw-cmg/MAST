@@ -8,7 +8,7 @@ abspath = os.path.abspath
 
 class MASTmon(object):
     """MASTmon is a daemon to run dagscheduler class.
-        This finds newly submitted session (recipe) and manage them.
+        This finds newly submitted session (recipe) and manage them. \n
         Also completed session is moved in archive directory by MASTmon.
         For consistency, users may touch sesssions in the archive directory."""
     
@@ -77,12 +77,12 @@ class MASTmon(object):
         
     def run(self, niter=None, stopcond=None, interval=None):
         """Run Mastmon. First of all, this makes MASTmon go to mastmon home load dagscheduler pickle.
-            In addition, there are couple of options to run mastmon.
-            ex) mastmon.run()  # run MASTmon forever as a real daemon. By default interval is 10 sec
-            ex) mastmon.run(interval=30) # run MASTmon forever as a real daemon. By default interval is 30 sec
-            ex) mastmon.run(niter=1) # run MASTmon one iteration for crontab user. By default interval is 10 sec
-            ex) mastmon.run(niter=20,stopcond='NOSESSION') # run MASTmon for 20 iterations.
-                                                             And stop it all sessions are done.
+            In addition, there are couple of options to run mastmon. \n
+            ex) mastmon.run()  # run MASTmon forever as a real daemon. By default interval is 10 sec. \n
+            ex) mastmon.run(interval=30) # run MASTmon forever as a real daemon. By default interval is 30 sec. \n
+            ex) mastmon.run(niter=1) # run MASTmon one iteration for crontab user. By default interval is 10 sec. \n
+            ex) mastmon.run(niter=20,stopcond='NOSESSION') # run MASTmon for 20 iterations. \n
+            And stop it all sessions are done.
         """
         # move to mastmon home
         curdir = os.getcwd()
@@ -107,7 +107,7 @@ class MASTmon(object):
             # get directories from mast home
             session_dirs = os.walk('.').next()[1]
 
-            # remove 'archive' directory
+            # remove 'archive' directory from the list of session directories
             if self._ARCHIVE in session_dirs:
                 session_dirs.remove(self._ARCHIVE)
 
@@ -130,7 +130,7 @@ class MASTmon(object):
             self._save()
 
             if stopcond is not None:
-                if stopcond.upper() is 'NOSESSION' and len(self.registered_dir) == 0:
+                if stopcond.upper() == 'NOSESSION' and len(self.registered_dir) == 0:
                     break
                 
             #time.sleep(interval) #TTM remove this sleep

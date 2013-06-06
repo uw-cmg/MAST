@@ -95,7 +95,7 @@ class RecipePlanner(MASTObj):
         """
         system_name = self.input_options.get_item("mast", "system_name", "sys")
         #dir_name = "%s_%s_%s" % (system_name, self.recipe_name, time.strftime('%Y%m%dT%H%M%S'))
-        dir_name = "%s_%s_%s" % (system_name, self.recipe_name, self.input_options.get_item("main", "recipe_name"))
+        dir_name = "%s_%s_%s_%s" % (system_name, self.recipe_name, self.input_options.get_item("main", "recipe_name"), time.strftime('%Y%m%dT%H%M%S'))
         dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
 
         try:

@@ -1,0 +1,35 @@
+# Test file
+$MAST
+program VASP
+system_name smalltestfcc
+$end
+
+$structure
+posfile smallfcc_poscar
+$end
+
+$defects
+vacancy 0.0 0.0 0.0 Fe
+$end
+
+$recipe
+recipe_file defect_test.txt
+$end
+
+$ingredients
+begin ingredients_global
+mast_kpoints 3x3x3
+mast_xc pbe
+end
+
+begin singlepoint
+encut 400
+xc pw91
+end
+
+begin optimize
+encut 300
+ibrion 2
+end
+$end
+

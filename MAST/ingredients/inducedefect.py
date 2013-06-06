@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 from pymatgen.core.sites import PeriodicSite
@@ -5,10 +6,11 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
+
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.ingredients.baseingredient import BaseIngredient
-import os
+
 
 class InduceDefect(BaseIngredient):
     def __init__(self, **kwargs):
@@ -22,10 +24,11 @@ class InduceDefect(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
+        print 'Initializing InduceDefect'
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
-    def induce_defect(self):
+    def induce_defect(self, defect):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
             'defect1': {'symbol': 'cr', 'type': 'interstitial', 
@@ -34,42 +37,40 @@ class InduceDefect(BaseIngredient):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
-        #TTM change to use mast_defects passed in from inputparser
-        print "SELF.KEYWORDS: ",self.keywords
-        print "SELF.KEYWORDS PROGRAM_KEYS: ",self.keywords['program_keys']
-        myidx = "defect" + str(self.get_my_number()-1) #ex: if you are defect1, index to ['mast_defects']['defect0']
-        mydict = self.keywords['program_keys']['mast_defects'][myidx]
+#        base_structure = self.get_new_structure()
+        base_structure = self.keywords['structure']
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
-        
-        mydict['symbol'] = mydict['symbol'].capitalize() #Cap first letter
-        if (self.keywords['program_keys']['mast_defects']['coord_type'] == 'cartesian'):
-            mydict['coordinates'] = self._cart2frac(mydict['coordinates'])
+        symbol = defect['symbol'].title() #Cap first letter
 
-        if (mydict['type'].lower() == 'vacancy'):
-            print 'Making a vacancy!'
+# If we have cartesian coordinates, then we convert them to fractional here.
+        if ('cartesian' in defect['type']):
+            defect['coordinates'] = self._cart2frac(mydict['coordinates'])
 
-            index = find_in_coord_list(self.keywords['structure'].frac_coords,
-                                       mydict['coordinates'],
+        if (defect['type'] == 'vacancy'):
+            print 'Creating a %s vacancy at %s' % (symbol, str(defect['coordinates']))
+
+            index = find_in_coord_list(base_structure.frac_coords,
+                                       defect['coordinates'],
                                        atol=1e-04)
 
             struct_ed.delete_site(index)
-        elif (mydict['type'].lower() == 'interstitial'):
-            print 'Making an interstitial!'
+        elif (defect['type'] == 'interstitial'):
+            print 'Creating a %s interstitial at %s' % (symbol, str(defect['coordinates']))
 
-            struct_ed.append_site(mydict['symbol'],
-                                  mydict['coordinates'],
+            struct_ed.append_site(symbol,
+                                  defect['coordinates'],
                                   coords_are_cartesian=False,
-                                  validate_proximity=False) # Should be set to True!
-        elif (mydict['type'].lower() == 'antisite'):
-            print 'Making an antisite!'
+                                  validate_proximity=True)
+        elif (defect['type'] in ['antisite', 'substitution']):
+            print 'Creating a %s antisite at %s' % (symbol, str(defect['coordinates']))
 
-            index = find_in_coord_list(self.keywords['structure'].frac_coords,
-                                       mydict['coordinates'],
+            index = find_in_coord_list(base_structure.frac_coords,
+                                       defect['coordinates'],
                                        atol=1e-04)
 
-            struct_ed.replace_site(index, mydict['symbol'])
+            struct_ed.replace_site(index, symbol)
         else:
-            raise RuntimeError('Defect type %s not supported' % self.keywords['defecttype'])
+            raise RuntimeError('Defect type %s not supported' % defect['type'])
 
         return struct_ed.modified_structure
 
@@ -87,9 +88,19 @@ class InduceDefect(BaseIngredient):
     #        os.path.makedirs(directory)
     
     def write_files(self):
-        name=self.keywords['name']
+        print 'InduceDefect.write_files()'
+        name = self.keywords['name']
+        print 'InduceDefects.keywords', self.keywords
+        print "write_files:", name
         self.get_new_structure()
-        modified_structure = self.induce_defect()
+
+        print 'GRJ DEBUG', name.split('/')[-1]
+ 
+        defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
+        defect = self.keywords['program_keys'][defect_label]
+        print 'GRJ debug:', defect_label, defect
+        modified_structure = self.induce_defect(defect)
+
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
             print "poscar OK"
@@ -129,7 +140,6 @@ class InduceDefect(BaseIngredient):
                 return False
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
-
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():

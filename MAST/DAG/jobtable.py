@@ -2,7 +2,9 @@ from jobentry import JobEntry
 from dagutil import *
 
 class JobTable(object):
-
+    """ JobTable is a class for dagscheduler. This has multiple JobEntry objects.
+        This has multiple methods to deal with jobentries.
+    """
     def __init__(self):
         self.jobs = {}
         self._nextjid = 1
@@ -14,7 +16,7 @@ class JobTable(object):
 
     def addjob(self, job):
         if job.jid in self.jobs:
-            raise Exception('JOB ID (jid=%d) CONFLICTED' % job.jid)
+            raise Exception("JOB ID (jid=%d) CONFLICTED" % job.jid)
         self.jobs[job.jid] = job
         self._name2jid[job.name] = job.jid
 
@@ -38,11 +40,11 @@ class JobTable(object):
         return out
     
     def __len__(self):
-        '''len(jobtableobj) = number of jobs'''
+        """len(jobtableobj) = number of jobs"""
         return len(self.jobs)
 
     def get_jid(self):
-        '''get_sid returns unique session id in a session table object.'''
+        """get_sid returns unique session id in a session table object."""
         while (self._nextjid in self.jobs):
             self._nextjid = (self._nextjid ) % MAXJID + 1
         return self._nextjid

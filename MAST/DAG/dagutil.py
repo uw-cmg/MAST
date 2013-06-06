@@ -1,6 +1,13 @@
 import datetime
 import time
 
+def shortstr(mystr, n):
+    """ shortstr shortens mystr to length n string with padding ... """
+    if len(mystr) > n :
+        return  mystr[0:n-3] + '...'
+    else:
+        mystr
+                
 def enum(**enums):
     return type('Enum',(),enums)
 
