@@ -7,6 +7,7 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
+from __future__ import print_function
 import os
 
 import numpy as np
@@ -16,7 +17,6 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-
 
 ALLOWED_KEYS = {\
                  'optiondict'    : (InputOptions, None, 'Input file name'),\
@@ -29,22 +29,28 @@ class InputPythonCreator(MASTObj):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.optdict=dict(self.keywords['optiondict'].options) 
         self.typeerror=0
+        if not 'mydir' in self.keywords.keys():
+            mydir = os.getcwd()
+        else:
+            mydir == self.keywords['mydir']
+        self.myfile = open(os.path.join(mydir, "input.py"), "wb")
 
     def print_input_options(self, lotsofspace=1):
-        print "#MAST INPUT OPTIONS"
+        print("#MAST INPUT OPTIONS", file=self.myfile)
 
         for sectionname,secvalue in self.optdict.iteritems():
             if lotsofspace:
-                print ""
-                print "###################################"
-            print "#Section: %3s" % sectionname
+                print("", file=self.myfile)
+                print("###################################", file=self.myfile)
+            print("#Section: %3s" % sectionname, file=self.myfile)
             if lotsofspace:
-                print "####################################"
-                print ""
+                print("####################################", file=self.myfile)
+                print("", file=self.myfile)
             #print "TTM DEBUG: straight print---------------------"
             #print secvalue
             #print "TTM DEBUG: New print:------------------------------"
             self.print_multilevel_dict(secvalue)
+        self.myfile.close()
         if self.typeerror > 0:
             raise MASTError(self.__class__.__name__,
                 "Unsupported types detected in input file. Check .py file")
@@ -54,37 +60,39 @@ class InputPythonCreator(MASTObj):
         """
         for key1, val1 in mydict.iteritems():
             if key1 == 'structure':
-                print "#ignoring created structure"
+                print("#ignoring created structure", file=self.myfile)
                 continue
             if not type(key1) == str:
                 errorstr = "One of the keys in section names is not a string."
                 raise MASTError(self.__class__.__name__, errorstr)
             if type(val1) == str:
-                print key1 + " = " + "'" + val1 + "'"
-            elif type(val1) == int:
-                print key1 + " = ", val1
-            elif type(val1) == float:
-                print key1 + " = ", val1
-            elif type(val1) == bool:
-                print key1 + " = ", val1
+                mystr = key1 + " = " + "'" + val1 + "'"
+                print(mystr, file=self.myfile)
+            elif type(val1) in [int, bool, float]:
+                mystr = key1 + " = ", val1
+                print(key1,"=",val1, file=self.myfile)
             elif val1 == None:
-                print key1 + " = None"
+                mystr = key1 + " = None"
+                print(mystr, file=self.myfile)
             elif type(val1) == np.ndarray:
-                print key1 + " = " + "np.array(", val1.tolist(), ")"
+                print(key1,"=","np.array(",val1.tolist(),")",file=self.myfile)
             elif type(val1) == list:
-                print key1 + " = list()"
+                mystr = key1 + " = list()"
+                print(mystr, file=self.myfile)
                 for myitem in val1:
                     if type(myitem) == str:
-                        print key1 + ".append(" + "'" + myitem + "'" + ")"
+                        mystr = key1 + ".append(" + "'" + myitem + "'" + ")"
                     else:
-                        print key1 + ".append(" + myitem + ")"
+                        mystr = key1 + ".append(" + myitem + ")"
+                    print(mystr, file=self.myfile)
             elif type(val1) == dict:
-                print key1 + " = dict()"
+                mystr = key1 + " = dict()"
+                print(mystr, file=self.myfile)
                 self.print_secondlevel_dict(key1, val1)
             else:
-                print key1 + " UNSUPPORTED TYPE: ", type(val1)
+                print(key1,"UNSUPPORTED TYPE",type(val1), file=self.myfile)
                 self.typeerror += 1
-                print key1 + " = ", val1
+                print(key1,"=",val1, file=self.myfile)
 
     def print_secondlevel_dict(self, key1, seconddict):
         """Print a second-level dictionary. Key1 will be a string."""
@@ -95,31 +103,32 @@ class InputPythonCreator(MASTObj):
             else:
                 header = key1 + "[" + key2 + "]"
             if type(val2) == str:
-                print header + " = " + "'" + val2 + "'"
-            elif type(val2) == int:
-                print header + " = ", val2
-            elif type(val2) == float:
-                print header + " = ", val2
-            elif type(val2) == bool:
-                print header + " = ", val2
+                mystr = header + " = " + "'" + val2 + "'"
+                print(mystr, file=self.myfile)
+            elif type(val2) in [int,float,bool]:
+                print(header,"=",val2, file=self.myfile)
             elif val2 == None:
-                print header + " = None"
+                mystr = header + " = None"
+                print(mystr, file=self.myfile)
             elif type(val2) == np.ndarray:
-                print header + " = " + "np.array(", val2.tolist(), ")"
+                print(header,"=","np.array(",val2.tolist(),")",file=self.myfile)
             elif type(val2) == list:
-                print header + " = list()"
+                mystr = header + " = list()"
+                print(mystr, file=self.myfile)
                 for myitem in val2:
                     if type(myitem) == str:
-                        print header + ".append(" + "'" + myitem + "'" + ")"
+                        mystr = header + ".append(" + "'" + myitem + "'" + ")"
                     else:
-                        print header + ".append(" + myitem + ")"
+                        mystr = header + ".append(" + myitem + ")"
+                    print(mystr, file=self.myfile)
             elif type(val2) == dict:
-                print header + " = dict()"
+                mystr = header + " = dict()"
+                print(mystr, file=self.myfile)
                 self.print_thirdlevel_dict(header, key2, val2)
             else:
-                print header + "UNSUPPORTED TYPE: ", type(val2)
+                print(header,"UNSUPPORTED TYPE",type(val2), file=self.myfile)
                 self.typeerror += 1
-                print header + " = ", val2
+                print(header,"=",val2, file=self.myfile)
 
     def print_thirdlevel_dict(self, oldheader, key2, thirddict):
         """Print a second-level dictionary. Key1 will be a string."""
@@ -130,30 +139,31 @@ class InputPythonCreator(MASTObj):
             else:
                 header = header + "[" + key3 + "]"
             if type(val3) == str:
-                print header + " = " + "'" + val3 + "'"
-            elif type(val3) == int:
-                print header + " = ", val3
-            elif type(val3) == float:
-                print header + " = ", val3
-            elif type(val3) == bool:
-                print header + " = ", val3
+                mystr = header + " = " + "'" + val3 + "'"
+                print(mystr, file=self.myfile)
+            elif type(val3) in [int, float, bool]:
+                print(header,"=",val3, file=self.myfile)
             elif val3 == None:
-                print header + " = None"
+                mystr = header + " = None"
+                print(mystr, file=self.myfile)
             elif type(val3) == np.ndarray:
-                print header + " = " + "np.array(", val3.tolist(), ")"
+                print(header,"=","np.array(",val3.tolist(),")",file=self.myfile)
             elif type(val3) == list:
-                print header + " = list()"
+                mystr = header + " = list()"
+                print(mystr, file=self.myfile)
                 for myitem in val3:
                     if type(myitem) == str:
-                        print header + ".append(" + "'" + myitem + "'" + ")"
+                        mystr = header + ".append(" + "'" + myitem + "'" + ")"
                     else:
-                        print header + ".append(" + myitem + ")"
+                        mystr = header + ".append(" + myitem + ")"
+                    print(mystr, file=self.myfile)
             elif type(val3) == dict:
-                print header + " = dict()"
-                print header + " = " + val3
+                mystr = header + " = dict()"
+                print(mystr, file=self.myfile)
+                print(header,"=",val3, file=self.myfile)
             else:
-                print header + "UNSUPPORTED TYPE: ", type(val3)
+                print(header,"UNSUPPORTED TYPE",type(val3), file=self.myfile)
                 self.typeerror += 1
-                print header + " = ", val3
+                print(header,"=",val3, file=self.myfile)
 
 
