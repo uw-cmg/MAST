@@ -11,13 +11,11 @@ import os
 
 class InputOptions:
     """Stores options information in dictionary format for retrieval
-
     Dictionary is organised as sections and key, value pairs within a section
-
     Attributes:
-        options <dict of sections 
-                    which is a dict of key/values>: stores options which comprises
-                                                    of sections and key/values under it
+        options <dict of sections which is a dict of key/values>: 
+            stores options which consist of sections and key/values under the
+            sections
     """
 
     def __init__(self):
@@ -32,9 +30,9 @@ class InputOptions:
         """
         section_dict = self.options.setdefault(section, dict())
         if 'path' in key:
-	    section_dict.setdefault(key, os.path.expanduser(value))
+	        section_dict.setdefault(key, os.path.expanduser(value))
         else:
-	    section_dict.setdefault(key, value)
+	        section_dict.setdefault(key, value)
 
     def get_item(self, section, key, default_value=None):
         """Returns the value of the key under this section

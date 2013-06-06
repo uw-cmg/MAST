@@ -31,9 +31,9 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'spacegroup': None,
                       'symmetry_only': False,
                       'coord_type': 'cartesian',
-                      'atom_list',
-                      'coordinates',
-                      'lattice',
+                      'atom_list': None,
+                      'coordinates': None,
+                      'lattice': None,
                       'primitive': False,
                      }
 
