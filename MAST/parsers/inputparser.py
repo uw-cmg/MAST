@@ -31,9 +31,9 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'spacegroup': None,
                       'symmetry_only': False,
                       'coord_type': 'cartesian',
-                      'atom_list': None,
-                      'coordinates': None,
-                      'lattice': None,
+                      #'atom_list': None,
+                      #'coordinates': None,
+                      #'lattice': None,
                       'primitive': False,
                      }
 
@@ -199,9 +199,7 @@ class InputParser(MASTObj):
 
         options.set_item(section_name, 'structure', structure)
         #TTM+3 allow the building of structure from the *.py input file
-        print "TTM DEBUG COORDINATES: ", coordinates
         options.set_item(section_name, 'coordinates', coordinates)
-        print "TTM DEBUG COORDINATES: ", coordinates
         options.set_item(section_name, 'lattice', lattice)
         options.set_item(section_name, 'atom_list', atom_list)
 
