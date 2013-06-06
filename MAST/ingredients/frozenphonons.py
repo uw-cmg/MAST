@@ -1,9 +1,11 @@
 import numpy as np
 
-import pymatgen
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
+from pymatgen.io.vaspio import Kpoints
+from pymatgen.io.vaspio import Potcar
+from pymatgen.io.vaspio import Incar
 
 from MAST.utility.mastobj import MASTObj
 from MAST.ingredients.baseingredient import BaseIngredient
@@ -66,10 +68,10 @@ class FrozenPhonons(BaseIngredient):
         os.makedirs(dir_name)
         imct=1
         mypos = Poscar(struct_init)
-        topkpoints = pymatgen.io.vaspio.Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
-        toppotcar = pymatgen.io.vaspio.Potcar(symbols=mypos.site_symbols, functional='PBE', sym_potcar_map=None)
+        topkpoints = Kpoints.monkhorst_automatic(kpts=(4,4,4),shift=(0,0,0))
+        toppotcar = Potcar(symbols=mypos.site_symbols, functional='PBE', sym_potcar_map=None)
         incar_dict = self.set_up_vasp_incar_dict(struct_init, toppotcar)
-        topincar = pymatgen.io.vaspio.Incar(incar_dict)
+        topincar = Incar(incar_dict)
         totatoms = sum(mypos.natoms)
         while imct <= totatoms:
             for ndir in [0,1,2]:

@@ -50,20 +50,26 @@ class BaseIngredient(MASTObj):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.is_complete(self.keywords['name'])
+            usepath = self.keywords['name']
+            if 'images' in self.keywords['program_keys'].keys():
+                mycomplete = vasp_checker.images_complete(self.keywords['name'],
+                                self.keywords['program_keys']['images'])
+                usepath = usepath + '/01'
+            else:
+                mycomplete = vasp_checker.is_complete(usepath)
+            if mycomplete:
+                return mycomplete
+            else:
+                if not os.path.exists(usepath + '/OUTCAR'):
+                    return False #hasn't started running yet.
+                from MAST.ingredients.errorhandler import vasp_error
+                errct = vasp_error.loop_through_errors(usepath)
+                if errct > 0:
+                    self.run() #Should try to rerun automatically or not??
+                return False
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
-
-    def images_complete(self):
-        '''Checks if all images in an NEB calculation are complete.'''
-        if self.keywords['program'] == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.images_complete(self.keywords['name'],\
-                   self.keywords['program_keys']['images'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in images_complete)")
 
     def directory_is_locked(self):
         return dirutil.directory_is_locked(self.keywords['name'])

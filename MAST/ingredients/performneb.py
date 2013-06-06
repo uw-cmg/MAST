@@ -29,8 +29,7 @@ class PerformNEB(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
-        print BaseIngredient.images_complete(self)
-        return BaseIngredient.images_complete(self)
+        return BaseIngredient.is_complete(self)
 
     def update_children(self):
         myct=1
