@@ -1,6 +1,7 @@
 import os
 from MAST.utility.picklemanager import PickleManager
 from MAST.DAG.dagscheduler import DAGScheduler
+from MAST.utility import MASTError
 import time
 from MAST.DAG.dagutil import *
 abspath = os.path.abspath
@@ -26,26 +27,42 @@ class MASTmon(object):
                 os.system('mkdir %s' % abspath(self.home))
                 os.system('mkdir %s' % os.path.join(abspath(self.home), self._ARCHIVE))
         except:
-            print 'Error to make directory for MASTmon and completed sessions'
+            raise MASTError(self.__class__.__name__,
+                    "Error making directory for MASTmon and completed sessions")
 
     def add_sessions(self,new_session_dirs):
         """recipe_dirs is a set of sessions in MASTmon home directory"""
         for session_dir in  new_session_dirs:
             try:
                 os.chdir(session_dir)
-                mastobj = self.pm.load_variable('mast.pickle')
-                depdict = mastobj.dependency_dict
-                ingredients = mastobj.ingredients
-
-                if self.scheduler is None:
-                    print 'stpe 1: create DAGScheduler object'
-                    self.scheduler = DAGScheduler()
-                    
-                self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=session_dir)
-                    
             except:
-                print 'Error in add_sessions'
-                raise
+                raise MASTError(self.__class__.__name__,
+                    "Error in add_sessions, changing directory.")
+            try:
+                mastobj = self.pm.load_variable('mast.pickle')
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Error in add_sessions, loading pickle.")
+            try:
+                depdict = mastobj.dependency_dict
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Error in add_sessions, getting dependency dict.")
+            try:
+                ingredients = mastobj.ingredients
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Error in add_sessions, getting ingredients.")
+
+            if self.scheduler is None:
+                print 'step 1: create DAGScheduler object'
+                self.scheduler = DAGScheduler()
+            
+            try: 
+                self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=session_dir)    
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Error adding jobs to scheduler.")
                 
             os.chdir(self.home)
                 
@@ -65,9 +82,8 @@ class MASTmon(object):
         if os.path.isfile(self.pn_mastmon):
             var_dict = self.pm.load_variable(self.pn_mastmon)
             if 'version' in var_dict and var_dict['version'] != self.version:
-                print 'Error: mastmon_info.pickle is version %.2f' % var_dict['version']
-                print 'Error: mastmon version %.2f' % self.version
-                raise
+                errorstr = "Error: mastmon_info.pickle is version %.2f while mastmon version is %.2f" % (var_dict['version'],self.version)
+                raise MASTError(self.__class__.__name__, errorstr)
 
             if 'registered_dir' in var_dict:
                 self.registered_dir = var_dict['registered_dir']
@@ -90,8 +106,8 @@ class MASTmon(object):
             os.chdir(self.home)    
         except:
             os.chdir(curdir)
-            print 'Error: Failed to move to MASTmon home %s' % self.home
-            raise
+            errorstr = "Error: Failed to move to MASTmon home %s" % self.home
+            raise MASTError(self.__class__.__name__, errorstr)
         
         if interval is None:
             interval = SCHEDULING_INTERVAL
@@ -116,6 +132,7 @@ class MASTmon(object):
                 os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
 
             new_session_dirs = set(session_dirs) - self.registered_dir
+            #print "TTM DEBUG: ",new_session_dirs
 
             # add new sessions
             self.add_sessions(new_session_dirs)
