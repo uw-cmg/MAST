@@ -35,11 +35,11 @@ ALLOWED_KEYS     = {\
 class MAST(MASTObj):
     """User interface to set up a calculation group.
 
-    Each instance of Interface sets up one calculation group.
+        Each instance of Interface sets up one calculation group.
 
-    Attributes:
-        options <InputOptions object>: used to store the options
-                                       parsed from input file
+        Attributes:
+            options <InputOptions object>: used to store the options
+                                           parsed from input file
     """
 
     def __init__(self, **kwargs):
@@ -52,14 +52,15 @@ class MAST(MASTObj):
     def start(self):
         """Calls all the neccessary functions required to run MAST.
             Calls the following functions:
-                _parse_input(): parses the various input files and fetches the options.
+                _parse_input(): parses the various input files and 
+                                fetches the options.
                 _parse_recipe(): parses the recipe template file
         """
 
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
-#        print "Ingredients Dict : ", ingredients_dict
+        # print "Ingredients Dict : ", ingredients_dict
 
         self._parse_input()
         self._parse_recipe()
