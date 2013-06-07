@@ -59,6 +59,7 @@ class RecipeSetup(MASTObj):
         ingredients_info = dict()
 
         for line in f_ptr.readlines():
+#            print 'In parse_recipe:', line
             line = line.strip()
             #validate the line
             if not line or line.startswith('#'):
@@ -91,10 +92,12 @@ class RecipeSetup(MASTObj):
                     else:
                         child_info      = elt.split(self.delimiter)
                         if child_info[0] not in ingredients_info:
-                            raise MASTError(self.__class__.__name__, "Child Ingredient %s not defined !!!" % child_info[0])
+                            error = "Child Ingredient %s not defined!" % child_info[0]
+                            raise MASTError(self.__class__.__name__, error)
                         for parent in parent_objs:
                             if parent not in ingredients_info:
-                                raise MASTError(self.__class__.__name__, "Parent Ingredient %s used in relationship without definition !!!" % parent)
+                                error = "Parent Ingredient %s used in relationship without definition!" % parent
+                                raise MASTError(self.__class__.__name__, error)
                             ingredients_info[parent][1][child_info[0]] = child_info[1:]
 
         f_ptr.close()
