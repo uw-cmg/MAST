@@ -31,8 +31,8 @@ class TestCrowdionStructures(unittest.TestCase):
     def test_structure_sorting(self):
         def1str = pymatgen.io.smartio.read_structure("POSCAR_defectgroup1")
         def2str = pymatgen.io.smartio.read_structure("POSCAR_defectgroup2")
-        self.progkeys['neblines'].append("1-2, Cr, 0.3 0 0, 0 0 0")
-        self.progkeys['neblines'].append("1-2, Ni, 0.6 0 0, 0.3 0 0")
+        self.progkeys['neblines'].append("Cr, 0.3 0 0, 0 0 0")
+        self.progkeys['neblines'].append("Ni, 0.6 0 0, 0.3 0 0")
         myneb=PerformNEB(name="neb_1-2", program_keys = self.progkeys)
         sorted1=myneb.sort_structure_and_neb_lines(def1str,0)
         sorted2=myneb.sort_structure_and_neb_lines(def2str,1)

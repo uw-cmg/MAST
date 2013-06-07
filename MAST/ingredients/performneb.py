@@ -144,26 +144,25 @@ class PerformNEB(BaseIngredient):
         return elstart
 
     def parse_neb_line(self, nebline):
-        """Parse an NEB line with the following format:
-                    1-2, Cr, 0 0 0, 0.5 0.5 0.5
-                    label, element, init_coord, fin_coord
+        """Parse an NEB atomic movement line which has the following format:
+                    Cr, 0 0 0, 0.5 0.5 0.5
+                    element, init_coord, fin_coord
             Args:
                 line <str>: NEB atomic movement line
             Returns:
-                linedict <dict>: ['label'] <str> = label
+                linedict <dict>: 
                                  ['element'] <int> = element's atomic number
                                  ['coord'][0] <np.array> = initial coordinates
                                  ['coord'][1] <np.array> = final coordinates
         """
         nebsplit = nebline.split(',')
         nebdict=dict()
-        nebdict['label'] = str(nebsplit[0].strip())
-        nebelem = str(nebsplit[1].strip())
+        nebelem = str(nebsplit[0].strip())
         import MAST.data
         nebdict['element'] = MAST.data.atomic_number[nebelem]
         nebdict['coord'] = dict()
-        nebdict['coord'][0] = np.array(nebsplit[2].split(), dtype='float')
-        nebdict['coord'][1] = np.array(nebsplit[3].split(), dtype='float')
+        nebdict['coord'][0] = np.array(nebsplit[1].split(), dtype='float')
+        nebdict['coord'][1] = np.array(nebsplit[2].split(), dtype='float')
         return nebdict
         
     def get_parent_structures(self):
