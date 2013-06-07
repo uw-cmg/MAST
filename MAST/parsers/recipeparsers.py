@@ -54,7 +54,7 @@ class RecipeParser(MASTObj):
         n_hops_dict     = self.input_options.get_item("neb", "hopfrom_dict", {})
         recipe_name     = None
 
-        print system_name, self.input_options.get_item('mast', 'system_name')
+#        print system_name, self.input_options.get_item('mast', 'system_name')
 
         for line in f_ptr.readlines():
             line             = line.strip()
