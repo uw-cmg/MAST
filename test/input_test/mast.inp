@@ -22,9 +22,9 @@ As 0.750000 0.250000 0.750000
 end
 
 begin lattice
-2.0 0.0 0.0
-0.0 2.0 0.0
-0.0 0.0 2.0
+6.0 0.0 0.0
+0.0 6.0 0.0
+0.0 0.0 6.0
 end
 $end
 
@@ -36,13 +36,16 @@ $end
 
 $ingredients
 begin ingredients_global
-kpoints 3x3x3
-xc pbe
+mast_kpoints 3x3x3
+mast_xc pbe
+mast_exec //share/apps/vasp5.2_cNEB
+mast_walltime 4
+mast_ppn 1
 end
 
 begin singlepoint
 encut 400
-xc pw91
+mast_xc pw91
 end
 
 begin optimize

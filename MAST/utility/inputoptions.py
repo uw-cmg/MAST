@@ -98,9 +98,9 @@ class InputOptions:
                 for myitem in val1:
                     if type(myitem) == str:
                         mystr = header + ".append(" + "'" + myitem + "'" + ")"
+                        print(mystr, file=myfile)
                     else:
-                        mystr = header + ".append(" + myitem + ")"
-                    print(mystr, file=myfile)
+                        print(header + ".append(",myitem,")",file=myfile)
             elif type(val1) == dict:
                 mystr = header + " = dict()"
                 print(mystr, file=myfile)
@@ -137,9 +137,9 @@ class InputOptions:
                 for myitem in val2:
                     if type(myitem) == str:
                         mystr = header + ".append(" + "'" + myitem + "'" + ")"
+                        print(mystr, file=myfile)
                     else:
-                        mystr = header + ".append(" + myitem + ")"
-                    print(mystr, file=myfile)
+                        print(header + ".append(",myitem,")",file=myfile)
             elif type(val2) == dict:
                 mystr = header + " = dict()"
                 print(mystr, file=myfile)
@@ -176,9 +176,9 @@ class InputOptions:
                 for myitem in val3:
                     if type(myitem) == str:
                         mystr = header + ".append(" + "'" + myitem + "'" + ")"
+                        print(mystr, file=myfile)
                     else:
-                        mystr = header + ".append(" + myitem + ")"
-                    print(mystr, file=myfile)
+                        print(header + ".append(",myitem,")",file=myfile)
             elif type(val3) == dict:
                 mystr = header + " = dict()"
                 print(mystr, file=myfile)
