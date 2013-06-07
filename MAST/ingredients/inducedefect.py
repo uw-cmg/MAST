@@ -107,13 +107,20 @@ class InduceDefect(BaseIngredient):
         defect = self.keywords['program_keys'][defect_label]
         print 'Defect in write_files:', defect
 
-        base_structure = self.keywords['structure']
+        base_structure = self.keywords['structure'].copy()
+#        print 'GRJ DEBUG: BASE (unmodified)'
+#        print base_structure
+#        count = 1
         for key in defect:
             if 'subdefect' in key:
+#                print 'GRJ DEBUG: pass %i' % count
                 subdefect = defect[key]
                 modified_structure = self.induce_defect(base_structure, subdefect)
 # For multiple defects take the new "base" as the one that just came out
                 base_structure = modified_structure
+#                print 'GRJ DEBUG: BASE (modified)'
+#                print base_structure
+#                count += 1
             else:
                 pass
 
