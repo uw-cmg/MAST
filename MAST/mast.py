@@ -104,7 +104,7 @@ class MAST(MASTObj):
         """Parses the generic recipe file"""
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-#        print 'recipe_file =', recipe_file
+        # print 'recipe_file =', recipe_file
 
         parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options,
                                   personalRecipe='test-recipe.txt')

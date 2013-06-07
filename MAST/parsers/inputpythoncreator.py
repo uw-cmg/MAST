@@ -35,7 +35,8 @@ class InputPythonCreator(MASTObj):
 
     def print_input_options(self, lotsofspace=1):
         inputoptions = self.keywords['input_options']
-        print("from MAST.utility import InputOptions")
+        print("from MAST.utility import InputOptions", file=self.myfile)
+        print("import numpy as np", file=self.myfile)
         print("#MAST INPUT OPTIONS", file=self.myfile)
         print("inputoptions = InputOptions()", file=self.myfile)
 
@@ -94,24 +95,19 @@ class InputPythonCreator(MASTObj):
             pass
         
         else:
-            sysname = inputoptions.options['mast']['system_name']
-            myname = recipe_base_name + "_" + sysname + "_" + timestamp
-            print("recname = '" + myname + "'", file=self.myfile)
-            print("recipe_input = RecipeInput(recipe_name=recname)",
-                    file=self.myfile)
-            print("recipe_input.addMastInfo(program, systemname)",
-                    file=self.myfile)
-            print("recipe_input.addStructureInfoFromCoords(coord_type, coordinates, lattice)", file=self.myfile) 
-            #need to append element info
-            print("recipe_input.addGlobalIngredientsInfo(global)",
-                    file = self.myfile)
-            print("recipe_input.addIngredientsInfo(optimize)",
-                    file = self.myfile) 
-            #need to be able to add all ingredients
-            print("recipe_input.addRecipeInfo(recipe_file)",
-                    file = self.myfile)
-            print("buffet_obj = Buffet(name='buffet_'+recname)",
-                    file=self.myfile)
-            print("buffet_obj.addRecipe(recipe_input)", file=self.myfile)
-            print("buffet_obj.cook()", file=self.myfile)
+            #copy from mast.py
+            print("from MAST.mast import MAST",file=self.myfile)
+            print("from MAST.ingredients.ingredients_loader import IngredientsLoader",file=self.myfile)
+            print("mast_obj = MAST()",file=self.myfile)
+            print("mast_obj.input_options = inputoptions",file=self.myfile)
+            print("ing_loader = IngredientsLoader()",file=self.myfile)
+            print("ing_loader.load_ingredients()",file=self.myfile)
+            print("ingredients_dict = ing_loader.ingredients_dict",file=self.myfile)
+
+            #OMIT mast_obj._parse_input() here, because this is done above.
+            print("mast_obj._parse_recipe()",file=self.myfile)
+
+            print("mast_obj.initialize_environment()",file=self.myfile)
+            print("recipe_plan_obj = mast_obj._initialize_ingredients(ingredients_dict)",file=self.myfile)
+            print("mast_obj.pickle_plan(recipe_plan_obj)",file=self.myfile)
 

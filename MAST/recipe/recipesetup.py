@@ -111,10 +111,21 @@ class RecipeSetup(MASTObj):
 
         ingredient_name = os.path.join(self.scratch_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
-        return self.ingredients_dict[ingredient_type](name=ingredient_name, structure= self.structure, \
-                                                    program=self.program,\
-                                                    program_keys=self.input_options.get_item('ingredients',\
-                                                    ingredient_type), child_dict=child_dict)
+        #TTM update ingredients dict to include info from the 
+        #'neb', 'defects', and 'chemical_potentials' sections
+        pkey_d = self.input_options.get_item('ingredients', 
+                    ingredient_type).copy()
+        if 'defects' in self.input_options.keys():
+            pkey_d.update(self.input_options.get_item('defects'))
+        if 'neb' in self.input_options.keys():
+            pkey_d.update(self.input_options.get_item('neb'))
+        if 'defects' in self.input_options.keys():
+            pkey_d.update(self.input_options.get_item('chemical_potentials'))
+        return self.ingredients_dict[ingredient_type](name=ingredient_name, 
+                    structure= self.structure, \
+                    program=self.program, \
+                    program_keys=pkey_d, \
+                    child_dict=child_dict)
 
     def create_recipe_plan(self, ingredients_info, recipe_name):
         """Creates a recipe object which has the ingredients and dependency information
