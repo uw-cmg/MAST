@@ -53,8 +53,44 @@ class InputPythonCreator(MASTObj):
             #print "TTM DEBUG: New print:------------------------------"
             inputoptions.print_python_section('inputoptions.options',
                             sectionname, self.myfile)
+        self.print_create_structure_section()
         self.print_buffet_section()
         self.myfile.close()
+
+    def print_create_structure_section(self):
+        iops = self.keywords['input_options']
+        strposfile = iops.get_item('structure','posfile')
+        if strposfile is None:
+            print("iopscoords=inputoptions.get_item('structure','coordinates')",
+                    file=self.myfile)
+            print("iopslatt=inputoptions.get_item('structure','lattice')",
+                    file=self.myfile)
+            print("iopsatoms=inputoptions.get_item('structure','atom_list')",
+                    file=self.myfile)
+            print("iopsctype=inputoptions.get_item('structure','coord_type')",
+                    file=self.myfile)
+            print("from MAST.utility import MAST2Structure",file=self.myfile)
+            print("structure = MAST2Structure(lattice=iopslatt,",
+                    file=self.myfile)
+            print("    coordinates=iopscoords, atom_list=iopsatoms,",
+                    file=self.myfile)
+            print("    coord_type=iopsctype)",
+                    file=self.myfile)
+        elif ('poscar' in strposfile.lower()):
+            print("from pymatgen.io.vaspio import Poscar", file=self.myfile)
+            print("structure = Poscar.from_file(" + strposfile + ").structure",
+                        file=self.myfile)
+        elif ('cif' in strposfile.lower()):
+            from pymatgen.io.cifio import CifParser
+            structure = CifParser(strposfile).get_structures()[0]
+            print("from pymatgen.io.cifio import CifParser", file=self.myfile)
+            print("structure = CifParser(" +strposfile+ ").get_structures()[0]",
+                        file=self.myfile)
+        else:
+            error = 'Cannot build structure from file %s' % strposfile
+            raise MASTError(self.__class__.__name__, error)
+        print("inputoptions.set_item('structure','structure',structure)",
+                file=self.myfile)
 
     def print_buffet_section(self):
         """Print the buffet section lines. Looping is accomplished
