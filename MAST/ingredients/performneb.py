@@ -68,16 +68,18 @@ class PerformNEB(BaseIngredient):
         return
    
     def get_my_labels(self):
-        """For neb in the format <sys>_neb_<N>-<N> return the two
+        """For neb in the format <sys>_neb_<N>-<N>_... return the two
             labels identifying the defect sites.
         """
-        myname = self.keywords['name']
+        myname = os.path.basename(self.keywords['name'])
         tempname = myname.lower()
-        lsplit = tempname.split('_')[-1] #last underscore segment
-        llist = lsplit.split('-')
+        lsplit = tempname.split('_') #last underscore segment
+        nebidx = lsplit.index('neb')
+        lseg = lsplit[nebidx + 1] #Follows after "neb"
+        llist = lseg.split('-')
         if not(len(llist) == 2):
             raise MASTError(self.__class__.__name__, 
-                "Error: number of NEB parents <> 2 in " + myname)
+                "Error: number of NEB parents <> 2 in " + myname+":"+str(llist))
             return None
         return llist
 

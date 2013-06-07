@@ -84,7 +84,7 @@ class RecipeParser(MASTObj):
             #step 1
             processing_lines = self.process_system_name(processing_lines, system_name)
             #step 2
-            processing_lines = self.process_hop_combinations(processing_lines, n_hops_dict)
+            processing_lines = self.process_hop_combinations(processing_lines, n_neblines)
             #step 3
             processing_lines = self.process_images(processing_lines, n_images)
             #step 4

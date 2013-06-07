@@ -121,8 +121,7 @@ class RecipeSetup(MASTObj):
         if 'defects' in self.input_options.options.keys():
             pkey_d.update(self.input_options.get_item('defects','defects'))
         if 'neb' in self.input_options.options.keys():
-            pkey_d.update(self.input_options.get_item('neb','images'))
-            pkey_d.update(self.input_options.get_item('neb','neblines'))
+            pkey_d.update(self.input_options.options['neb'])
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
