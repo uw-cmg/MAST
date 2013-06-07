@@ -18,6 +18,7 @@ from MAST.utility.picklemanager import PickleManager
 from MAST.ingredients.ingredients_loader import IngredientsLoader
 
 from MAST.parsers import InputParser
+from MAST.parsers import InputPythonCreator
 from MAST.parsers.recipeparsers import RecipeParser
 from MAST.recipe.recipesetup import RecipeSetup
 
@@ -99,6 +100,8 @@ class MAST(MASTObj):
         """Parses the input file"""
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
+        myipc = InputPythonCreator(input_options=self.input_options)
+        myipc.print_input_options()
 
     def _parse_recipe(self):
         """Parses the generic recipe file"""

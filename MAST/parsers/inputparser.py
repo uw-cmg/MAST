@@ -183,21 +183,23 @@ class InputParser(MASTObj):
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
 
-        if (structure_dict['posfile'] is None):
-            structure = MAST2Structure(lattice=lattice,
-                                       coordinates=coordinates,
-                                       atom_list=atom_list,
-                                       coord_type=structure_dict['coord_type'])
+        #TTM+comment block: go through the inputpythoncreator to create
+        #structure, instead of creating it here.
+        #if (structure_dict['posfile'] is None):
+        #    structure = MAST2Structure(lattice=lattice,
+        #                               coordinates=coordinates,
+        #                               atom_list=atom_list,
+        #                               coord_type=structure_dict['coord_type'])
         #   print 'In %s:' % self.__class__.__name__, coord_type
-        elif ('poscar' in structure_dict['posfile'].lower()):
-            from pymatgen.io.vaspio import Poscar
-            structure = Poscar.from_file(structure_dict['posfile']).structure
-        elif ('cif' in structure_dict['posfile'].lower()):
-            from pymatgen.io.cifio import CifParser
-            structure = CifParser(structure_dict['posfile']).get_structures()[0]
-        else:
-            error = 'Cannot build structure from file %s' % structure_dict['posfile']
-            MASTError(self.__class__.__name__, error)
+        #elif ('poscar' in structure_dict['posfile'].lower()):
+        #    from pymatgen.io.vaspio import Poscar
+        #    structure = Poscar.from_file(structure_dict['posfile']).structure
+        #elif ('cif' in structure_dict['posfile'].lower()):
+        #    from pymatgen.io.cifio import CifParser
+        #    structure = CifParser(structure_dict['posfile']).get_structures()[0]
+        #else:
+        #    error = 'Cannot build structure from file %s' % structure_dict['posfile']
+        #    MASTError(self.__class__.__name__, error)
 
         #   print structure
 
@@ -205,7 +207,7 @@ class InputParser(MASTObj):
             options.set_item(section_name, key, value)
 
 #        print 'GRJ DEBUG:', coordinates
-        options.set_item(section_name, 'structure', structure)
+        #options.set_item(section_name, 'structure', structure)
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.

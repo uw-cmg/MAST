@@ -17,6 +17,7 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
+from MAST.utility.mastfile import MASTFile
 
 ALLOWED_KEYS = {\
                  'input_options'    : (InputOptions, None, 'Input file name'),\
@@ -24,6 +25,8 @@ ALLOWED_KEYS = {\
 
 class InputPythonCreator(MASTObj):
     """Creates a runnable python file from a *.inp file
+        Attributes:
+            self.name = name for created python file
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -31,87 +34,104 @@ class InputPythonCreator(MASTObj):
             mydir = os.getcwd()
         else:
             mydir == self.keywords['mydir']
-        self.myfile = open(os.path.join(mydir, "input.py"), "wb")
+        self.name=""
+        mylines = self.print_input_options()
+        inputpy = MASTFile()
+        inputpy.data = mylines
+        if self.name == "":
+            self.name='input.py'
+        inputpy.to_file(os.path.join(mydir, self.name))
 
-    def print_input_options(self, lotsofspace=1):
+    def addnewlines(self, linestoadd):
+        """Appending newline to each string in a list
+            Args:
+                linestoadd <list of str>: lines to add newline to.
+        """
+        newline = "\n"
+        newlist=list()
+        for myline in linestoadd:
+            try:
+                myline = myline + newline
+            except:
+                raise MASTError(self.__class__.__name__,"Error with " + str(myline))
+            newlist.append(myline)
+        return newlist
+
+    def print_input_options(self):
         inputoptions = self.keywords['input_options']
-        print("from MAST.utility import InputOptions", file=self.myfile)
-        print("import numpy as np", file=self.myfile)
-        print("#MAST INPUT OPTIONS", file=self.myfile)
-        print("inputoptions = InputOptions()", file=self.myfile)
+        pln=list()
+        pln.append("from MAST.utility import InputOptions")
+        pln.append("import numpy as np")
+        pln.append("#MAST INPUT OPTIONS")
+        pln.append("inputoptions = InputOptions()")
 
         for sectionname,secvalue in inputoptions.options.iteritems():
-            if lotsofspace:
-                print("", file=self.myfile)
-                print("###################################", file=self.myfile)
-            print("#Section: %3s" % sectionname, file=self.myfile)
-            if lotsofspace:
-                print("####################################", file=self.myfile)
-                print("", file=self.myfile)
-            #print "TTM DEBUG: straight print---------------------"
-            #print secvalue
-            #print "TTM DEBUG: New print:------------------------------"
-            inputoptions.print_python_section('inputoptions.options',
-                            sectionname, self.myfile)
-        self.print_create_structure_section()
-        self.print_buffet_section()
-        self.myfile.close()
+            pln.append(" ")
+            pln.append("###################################")
+            pln.append("#Section: %3s" % sectionname)
+            pln.append("####################################")
+            pln.append(" ")
+            pln.extend(inputoptions.print_python_section('inputoptions.options',
+                            sectionname))
+            pln.append("inputoptions.options['"+sectionname+"'] = " + sectionname)
+        pln.extend(self.print_create_structure_section())
+        pln.extend(self.print_buffet_section())
+        return self.addnewlines(pln)
 
     def print_create_structure_section(self):
+        """Print the structure creation section.
+            This is a little complex and may not belong here.
+
+            Returns:
+                pln <list of str>: list of lines to print out
+        """
+        pln=list()
         iops = self.keywords['input_options']
         strposfile = iops.get_item('structure','posfile')
         if strposfile is None:
-            print("iopscoords=inputoptions.get_item('structure','coordinates')",
-                    file=self.myfile)
-            print("iopslatt=inputoptions.get_item('structure','lattice')",
-                    file=self.myfile)
-            print("iopsatoms=inputoptions.get_item('structure','atom_list')",
-                    file=self.myfile)
-            print("iopsctype=inputoptions.get_item('structure','coord_type')",
-                    file=self.myfile)
-            print("from MAST.utility import MAST2Structure",file=self.myfile)
-            print("structure = MAST2Structure(lattice=iopslatt,",
-                    file=self.myfile)
-            print("    coordinates=iopscoords, atom_list=iopsatoms,",
-                    file=self.myfile)
-            print("    coord_type=iopsctype)",
-                    file=self.myfile)
+            pln.append("iopscoords=inputoptions.get_item('structure','coordinates')")
+            pln.append("iopslatt=inputoptions.get_item('structure','lattice')")
+            pln.append("iopsatoms=inputoptions.get_item('structure','atom_list')")
+            pln.append("iopsctype=inputoptions.get_item('structure','coord_type')")
+            pln.append("from MAST.utility import MAST2Structure")
+            pln.append("structure = MAST2Structure(lattice=iopslatt,")
+            pln.append("    coordinates=iopscoords, atom_list=iopsatoms,")
+            pln.append("    coord_type=iopsctype)")
         elif ('poscar' in strposfile.lower()):
-            print("from pymatgen.io.vaspio import Poscar", file=self.myfile)
-            print("structure = Poscar.from_file(" + strposfile + ").structure",
-                        file=self.myfile)
+            pln.append("from pymatgen.io.vaspio import Poscar")
+            pln.append("structure = Poscar.from_file('" +strposfile+ "').structure")
         elif ('cif' in strposfile.lower()):
             from pymatgen.io.cifio import CifParser
             structure = CifParser(strposfile).get_structures()[0]
-            print("from pymatgen.io.cifio import CifParser", file=self.myfile)
-            print("structure = CifParser(" +strposfile+ ").get_structures()[0]",
-                        file=self.myfile)
+            pln.append("from pymatgen.io.cifio import CifParser")
+            pln.append("structure = CifParser('"+strposfile+"').get_structures()[0]")
         else:
             error = 'Cannot build structure from file %s' % strposfile
             raise MASTError(self.__class__.__name__, error)
-        print("inputoptions.set_item('structure','structure',structure)",
-                file=self.myfile)
+        pln.append("inputoptions.set_item('structure','structure',structure)")
+        return pln
 
     def print_buffet_section(self):
         """Print the buffet section lines. Looping is accomplished
             through an "independent_loop_key" option key.
+
+            Returns:
+                pln <list of str>: list of lines to append
         """
-        print("", file=self.myfile)
-        print("###############################################", 
-                    file=self.myfile)
-        print("#Buffet Command Section", file=self.myfile)
-        print("################################################",
-                    file=self.myfile)
-        print("", file=self.myfile)
-        print("from MAST.recipe.recipeinput import RecipeInput",
-                    file=self.myfile)
-        print("from MAST.buffet.buffetmanager import Buffet",
-                    file=self.myfile)
+        pln=list()
+        pln.append(" ")
+        pln.append("###############################################")
+        pln.append("#Buffet Command Section")
+        pln.append("################################################")
+        pln.append(" ")
+        pln.append("from MAST.recipe.recipeinput import RecipeInput")
+        pln.append("from MAST.buffet.buffetmanager import Buffet")
         inputoptions = self.keywords['input_options']
         recipe_base_name = os.path.basename(inputoptions.options['recipe']['recipe_file'])
         recipe_base_name = recipe_base_name.split('.')[0]
         import time
-        timestamp = time.strftime('%Y%m%dH%M%S')
+        timestamp = time.strftime('%Y%m%d%H%M%S')
+        self.name = recipe_base_name + '_' + timestamp + '.py'
         
         if "independent_loop_key" in inputoptions.options.keys():
             #for run_idx in xrange(len(SYSTEM_NAME)):
@@ -132,18 +152,19 @@ class InputPythonCreator(MASTObj):
         
         else:
             #copy from mast.py
-            print("from MAST.mast import MAST",file=self.myfile)
-            print("from MAST.ingredients.ingredients_loader import IngredientsLoader",file=self.myfile)
-            print("mast_obj = MAST()",file=self.myfile)
-            print("mast_obj.input_options = inputoptions",file=self.myfile)
-            print("ing_loader = IngredientsLoader()",file=self.myfile)
-            print("ing_loader.load_ingredients()",file=self.myfile)
-            print("ingredients_dict = ing_loader.ingredients_dict",file=self.myfile)
+            pln.append("from MAST.mast import MAST")
+            pln.append("from MAST.ingredients.ingredients_loader import IngredientsLoader")
+            pln.append("mast_obj = MAST()")
+            pln.append("mast_obj.input_options = inputoptions")
+            pln.append("ing_loader = IngredientsLoader()")
+            pln.append("ing_loader.load_ingredients()")
+            pln.append("ingredients_dict = ing_loader.ingredients_dict")
 
             #OMIT mast_obj._parse_input() here, because this is done above.
-            print("mast_obj._parse_recipe()",file=self.myfile)
+            pln.append("mast_obj._parse_recipe()")
 
-            print("mast_obj.initialize_environment()",file=self.myfile)
-            print("recipe_plan_obj = mast_obj._initialize_ingredients(ingredients_dict)",file=self.myfile)
-            print("mast_obj.pickle_plan(recipe_plan_obj)",file=self.myfile)
+            pln.append("mast_obj.initialize_environment()")
+            pln.append("recipe_plan_obj = mast_obj._initialize_ingredients(ingredients_dict)")
+            pln.append("mast_obj.pickle_plan(recipe_plan_obj)")
+        return pln
 
