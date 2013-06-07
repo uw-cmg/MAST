@@ -197,11 +197,13 @@ class InputParser(MASTObj):
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
 
+#        print 'GRJ DEBUG:', coordinates
         options.set_item(section_name, 'structure', structure)
         #TTM+3 allow the building of structure from the *.py input file
-        options.set_item(section_name, 'coordinates', coordinates)
-        options.set_item(section_name, 'lattice', lattice)
-        options.set_item(section_name, 'atom_list', atom_list)
+        if (not structure_dict['posfile']):
+            options.set_item(section_name, 'coordinates', coordinates)
+            options.set_item(section_name, 'lattice', lattice)
+            options.set_item(section_name, 'atom_list', atom_list)
 
     def parse_defects_section(self, section_name, section_content, options):
         """Parse the defects section and populate the options.
