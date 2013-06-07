@@ -48,6 +48,7 @@ class InduceDefect(BaseIngredient):
         """
 #        base_structure = self.get_new_structure()
 #        base_structure = self.keywords['structure']
+        print 'Defect in induce_defect', defect
         struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
@@ -102,14 +103,19 @@ class InduceDefect(BaseIngredient):
         self.get_new_structure()
 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
+        print name.split('/')
         defect = self.keywords['program_keys'][defect_label]
+        print 'Defect in write_files:', defect
 
         base_structure = self.keywords['structure']
         for key in defect:
-            subdefect = defect[key]
-            modified_structure = self.induce_defect(base_structure, defect)
+            if 'subdefect' in key:
+                subdefect = defect[key]
+                modified_structure = self.induce_defect(base_structure, subdefect)
 # For multiple defects take the new "base" as the one that just came out
-            base_structure = modified_structure
+                base_structure = modified_structure
+            else:
+                pass
 
         if self.keywords['program'] == 'vasp':
             myposcar = Poscar(modified_structure)
