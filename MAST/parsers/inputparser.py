@@ -206,6 +206,7 @@ class InputParser(MASTObj):
         defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
         multidefect = False
+        charge = 0
         count = 1
 
         for line in section_content:
