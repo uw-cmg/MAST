@@ -35,6 +35,7 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'coordinates': None,
                       'lattice': None,
                       'primitive': False,
+                      'structure': None
                      }
 
 DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
@@ -205,7 +206,7 @@ class InputParser(MASTObj):
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
-
+        print 'TTM DEBUG:', options
 #        print 'GRJ DEBUG:', coordinates
         #options.set_item(section_name, 'structure', structure)
 

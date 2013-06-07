@@ -51,6 +51,32 @@ class MAST(MASTObj):
         self.unique_ingredients = None
     
     def start(self):
+        """
+            Calls all the neccessary functions required to run MAST.
+            Calls the following functions:
+                _parse_input(): parses the various input files and 
+                                fetches the options.
+                _parse_recipe(): parses the recipe template file
+        """
+        ing_loader = IngredientsLoader()
+        ing_loader.load_ingredients()
+        ingredients_dict = ing_loader.ingredients_dict
+        # print "Ingredients Dict : ", ingredients_dict
+
+        pfile = self._parse_input()
+        #self._parse_recipe() 
+
+        #self.initialize_environment()
+        #recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
+        #self.pickle_plan(recipe_plan_obj)
+        import subprocess
+        mycall = subprocess.Popen(['python ' + pfile], shell=True,
+                stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        mycall.wait()
+        return None
+
+
+    def old_start(self):
         """Calls all the neccessary functions required to run MAST.
             Calls the following functions:
                 _parse_input(): parses the various input files and 
@@ -64,7 +90,7 @@ class MAST(MASTObj):
         # print "Ingredients Dict : ", ingredients_dict
 
         self._parse_input()
-        self._parse_recipe()
+        self._parse_recipe() 
 
         self.initialize_environment()
         recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
@@ -102,6 +128,7 @@ class MAST(MASTObj):
         self.input_options = parser_obj.parse()
         myipc = InputPythonCreator(input_options=self.input_options)
         myipc.print_input_options()
+        return myipc.name
 
     def _parse_recipe(self):
         """Parses the generic recipe file"""
@@ -116,39 +143,42 @@ class MAST(MASTObj):
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
     def _initialize_ingredients(self, ingredients_dict):
-        print '\nInitializing ingredients.'
-
-        print '\nExtracting base structure.'
+        #TTM Commenting out. RecipeSetup already does this, and we
+        #don't want to do it twice. Plus this misses the neb dictionary.
+        #
+        #print '\nInitializing ingredients.'
+        #
+        #print '\nExtracting base structure.'
         structure = self.input_options.get_item('structure', 'structure')
-        print structure, '\n'
+        #print structure, '\n'
+        #
+        #print '\nExtracting default ingredient options.'
+        #ingredient_global = self.input_options.get_item('ingredients', 'global')
 
-        print '\nExtracting default ingredient options.'
-        ingredient_global = self.input_options.get_item('ingredients', 'global')
-
-        print '\nChecking status of defects.'
-        ndefects = self.input_options.get_item('defects', 'num_defects')
-        if ndefects == None:
-            defects = False
-            print 'No defects found.'
-        else:
-            defects = True
-            defect_keys = self.input_options.get_item('defects', 'defects')
-            if (ndefects == 1):
-                print 'Found %i defect.\n' % ndefects
-            else:
-                print 'Found %i defects.\n' % ndefects
+        #print '\nChecking status of defects.'
+        #ndefects = self.input_options.get_item('defects', 'num_defects')
+        #if ndefects == None:
+        #    defects = False
+        #    print 'No defects found.'
+        #else:
+        #    defects = True
+        #    defect_keys = self.input_options.get_item('defects', 'defects')
+        #    if (ndefects == 1):
+        #        print 'Found %i defect.\n' % ndefects
+        #    else:
+        #        print 'Found %i defects.\n' % ndefects
 
 #        print "GRJ DEBUG:", self.unique_ingredients
 #        print "GRJ DEBUG:", ingredients_dict
 #        print "GRJ DEBUG:", defect_keys
-        for ingredient in self.unique_ingredients:
-            print 'Initializing ingredient %s.' % ingredient
-            if (ingredient == 'inducedefect'):
-                self.input_options.set_item('ingredients', ingredient, defect_keys)              
-            elif (not self.input_options.get_item('ingredients', ingredient)):
-                self.input_options.set_item('ingredients', ingredient, ingredient_global)
+        #for ingredient in self.unique_ingredients:
+        #    print 'Initializing ingredient %s.' % ingredient
+        #    if (ingredient == 'inducedefect'):
+        #        self.input_options.set_item('ingredients', ingredient, defect_keys)              
+        #    elif (not self.input_options.get_item('ingredients', ingredient)):
+        #        self.input_options.set_item('ingredients', ingredient, ingredient_global)
 
-        print 'GRJ DEBUG:', self.input_options.get_item('ingredients', 'inducedefect')
+        #print 'GRJ DEBUG:', self.input_options.get_item('ingredients', 'inducedefect')
 
         setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
                                 structure=structure, ingredientsDict=ingredients_dict)
