@@ -51,7 +51,7 @@ class RecipeParser(MASTObj):
         system_name     = self.input_options.get_item("mast", "system_name", "sys")
         n_param         = self.input_options.get_item("defects", "num_defects", 0)
         n_images        = self.input_options.get_item("neb", "images", 0)
-        n_hops_dict     = self.input_options.get_item("neb", "hopfrom_dict", {})
+        n_neblines      = self.input_options.get_item("neb", "neblines", {})
         recipe_name     = None
 
 #        print system_name, self.input_options.get_item('mast', 'system_name')
@@ -106,25 +106,18 @@ class RecipeParser(MASTObj):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
 
-    def process_hop_combinations(self, processing_lines, n_hops_dict):
-        '''replace <n-n> with valid combinations mentioned in the
-           hopfrom_dict  of the input options. Also replace <n>
-           in these lines with corresponding hop numbers only
+    def process_hop_combinations(self, processing_lines, n_neblines):
+        '''replace <n-n> with neb labels which are keys of the
+           neblines dict  of the input options.
         '''
         new_lines = []
-        if not n_hops_dict:
+        if not n_neblines:
             return processing_lines
         for line in processing_lines:
             if "<n-n>" in line:
-                for hop_start, hop_end_list in n_hops_dict.iteritems():
-                    for hop_end in hop_end_list:
-                        r_str  = "%d-%d" % (hop_start, hop_end)
-                        n_line = line.replace('<n-n>', r_str)
-                        if '<n>' in n_line:
-                            new_lines.append(n_line.replace('<n>', str(hop_start)))
-                            new_lines.append(n_line.replace('<n>', str(hop_end)))
-                        else:
-                            new_lines.append(n_line)
+                for neblabel in n_neblines.keys():
+                    n_line = line.replace('<n-n>', neblabel)
+                    new_lines.append(n_line)
             else:
                 new_lines.append(line)
         return new_lines

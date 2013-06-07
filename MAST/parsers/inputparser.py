@@ -396,43 +396,57 @@ class InputParser(MASTObj):
 
     def parse_neb_section(self, section_name, section_content, options):
         """Parse the neb section and populate the options.
-            Format example:
-            hops 1-2 1-3 3-4
+            
+            The number of images is specified and must be the same
+            throughout the recipe.
+
+            Each neb gets a label which should correspond to a defect group
+            or defect group number.
+
+            Within each subsection, each line specifies which atom is moving,
+            giving its element name and its approximate coordinates from
+            the starting unrelaxed structure.
+
+            $neb
+
             images 3
-            The hops correspond to the defects listed in the defects
-            section, e.g. defects 1 through 4 are:
-            vacancy 0 0 0
-            vacancy 0.5 0.5 0.5 
-            interstitial 0.25 0.25 0
-            interstitial 0.25 0.75 0
+
+            begin crowdion1-crowdion2
+            Cr, 0 0.3 0, 0 0 0
+            Ni, 0 0.6 0, 0 0.3 0
+            end
+
+            begin int1-int2
+            Mg, 0 0 0.5, 0.3 0.1 2
+            end
+
+            $end
+
+            In the crowdion example, the starting undefected structure is
+            defected three times in each defect group: 1 vacancy and two
+            antisites. The neb section allows us to unambiguously match up 
+            the atoms and determine which atoms are moving, and where. 
         """
-        hoplist = list()
-        hopfrom = dict()
+        neblines = dict()
         images = 0
 
-        count = 0
+        neblabel=""
         for line in section_content:
             type_dict = dict()
             line = line.strip()
             line = line.split(self.delimiter)
-
-            if (line[0] == 'hops'):
-                hoplist = line[1:] #this is a list
-            elif (line[0] == 'images'):
+            if (line[0] == 'images'):
                 images = int(line[1])
-        hop=""
-        hfrom=0
-        hto=0
-        for hop in hoplist:
-            hfrom = int(hop.split('-')[0])
-            hto = int(hop.split('-')[1])
-            if not hfrom in hopfrom.keys():
-                hopfrom[hfrom]=list()
-            hopfrom[hfrom].append(hto)
-        print "images: ", images
-        print "hopfrom_dict: ", hopfrom
+            elif (line[0] == 'begin'):
+                neblabel = line[1].strip()
+                neblines[neblabel] = list()
+            elif (line[0] == 'end'):
+                neblabel=""
+            else:
+                neblines[neblabel].append(line)
+
         options.set_item(section_name, 'images', images)
-        options.set_item(section_name, 'hopfrom_dict', hopfrom)
+        options.set_item(section_name, 'neblines', neblines)
 
     def parse_chemical_potentials_section(self, section_name, section_content,
                                           options):
