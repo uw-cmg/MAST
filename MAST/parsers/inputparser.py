@@ -176,9 +176,12 @@ class InputParser(MASTObj):
                 # the atomic symbols to comply with what
                 # pymatgen needs
                 atom_list = [val.title() for val in value[:, 0]]
+                structure_dict['atom_list'] = atom_list
                 coordinates = np.array(value[:, 1:], dtype='float')
+                structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
                 lattice = np.array(value, dtype='float')
+                structure_dict['lattice'] = lattice
 
         if (structure_dict['posfile'] is None):
             structure = MAST2Structure(lattice=lattice,
@@ -197,10 +200,6 @@ class InputParser(MASTObj):
             MASTError(self.__class__.__name__, error)
 
         #   print structure
-        #TTM+3 allow the building of structure from the *.py input file
-        structure_dict['coordinates'] = coordinates
-        structure_dict['lattice'] = lattice
-        structure_dict['atom_list'] = atom_list
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
