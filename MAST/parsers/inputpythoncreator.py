@@ -43,7 +43,7 @@ class InputPythonCreator(MASTObj):
         inputpy.to_file(os.path.join(mydir, self.name))
 
     def addnewlines(self, linestoadd):
-        """Appending newline to each string in a list
+        """Appends newline to each string in a list
             Args:
                 linestoadd <list of str>: lines to add newline to.
         """

@@ -19,8 +19,17 @@ ALLOWED_KEYS = {\
                  'personalRecipe'  : (str, None, 'personalized recipe file'),\
                }
 
-class RecipeParser(MASTObj):
-    """Parses the input file and produces the personalized recipe file
+class RecipeTemplateParser(MASTObj):
+    """Class for parsing the template recipe file in the input file and
+        creating a "personalized" recipe file where any <sys> and <N> from
+        the recipe template have been filled in according to information
+        from the input file.
+        Attributes:
+            self.input_options <InputOptions>: Input options from input file.
+            self.template_file <str>: Path to the recipe template file
+            self.personal_recipe <str>: Path to the personalized recipe.
+            self.ingredient_list <list of str>: List of ingredients mentioned
+                                                in the recipe template file.
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)

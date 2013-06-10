@@ -12,7 +12,7 @@ import time
 
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
-from MAST.parsers.recipeparsers import RecipeParser
+from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
 from MAST.recipe.recipeinput import RecipeInput
 
@@ -75,7 +75,7 @@ class RecipePlanner(MASTObj):
            Raises:
         """
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-        parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
+        parser_obj = RecipeTemplateParser(templateFile=recipe_file, inputOptions=self.input_options, personalRecipe='test-recipe.txt')
         self.recipe_name = parser_obj.parse()
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 

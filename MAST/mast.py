@@ -19,7 +19,7 @@ from MAST.ingredients.ingredients_loader import IngredientsLoader
 
 from MAST.parsers import InputParser
 from MAST.parsers import InputPythonCreator
-from MAST.parsers.recipeparsers import RecipeParser
+from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
 
 from MAST.ingredients import *
@@ -136,7 +136,7 @@ class MAST(MASTObj):
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
         # print 'recipe_file =', recipe_file
 
-        parser_obj = RecipeParser(templateFile=recipe_file, inputOptions=self.input_options,
+        parser_obj = RecipeTemplateParser(templateFile=recipe_file, inputOptions=self.input_options,
                                   personalRecipe='test-recipe.txt')
         self.recipe_name = parser_obj.parse()
 

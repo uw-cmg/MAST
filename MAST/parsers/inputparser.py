@@ -54,7 +54,11 @@ RECIPE_KEYWORDS = {'recipe_file': None,
                   }
 
 class InputParser(MASTObj):
-    """Parses input file and returns the options.
+    """Class for parsing a *.inp format input file.
+        Attributes:
+            self.section_end <str>: delimiter for the end of a section
+            self.delimiter <str>: character(s) for breaking up each line
+            self.section_parsers <dict>: supported sections
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -71,7 +75,13 @@ class InputParser(MASTObj):
                                }
 
     def parse(self):
-        """Parses information from the input file"""
+        """Parses information from the *.inp style input file.
+            Returns:
+                options <InputOptions>: a dictionary of sections and values,
+                                        where each section is its own
+                                        dictionary:
+                                        options.options['section'] = dict()
+        """
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
 
@@ -111,7 +121,7 @@ class InputParser(MASTObj):
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
-        """Parse the mast section and populate the options"""
+        """Parses the mast section and populate the options."""
         mast_dict = MAST_KEYWORDS.copy()
 
         for line in section_content:
@@ -127,7 +137,8 @@ class InputParser(MASTObj):
             options.set_item(section_name, key, value)
 
     def parse_structure_section(self, section_name, section_content, options):
-        """Parse the structure section and populate the options
+        """Parses the structure section and populate the options.
+            Does not create the structure.
 
             Format is along the lines of:
                 coord_type fractional
@@ -184,34 +195,11 @@ class InputParser(MASTObj):
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
 
-        #TTM+comment block: go through the inputpythoncreator to create
-        #structure, instead of creating it here.
-        #if (structure_dict['posfile'] is None):
-        #    structure = MAST2Structure(lattice=lattice,
-        #                               coordinates=coordinates,
-        #                               atom_list=atom_list,
-        #                               coord_type=structure_dict['coord_type'])
-        #   print 'In %s:' % self.__class__.__name__, coord_type
-        #elif ('poscar' in structure_dict['posfile'].lower()):
-        #    from pymatgen.io.vaspio import Poscar
-        #    structure = Poscar.from_file(structure_dict['posfile']).structure
-        #elif ('cif' in structure_dict['posfile'].lower()):
-        #    from pymatgen.io.cifio import CifParser
-        #    structure = CifParser(structure_dict['posfile']).get_structures()[0]
-        #else:
-        #    error = 'Cannot build structure from file %s' % structure_dict['posfile']
-        #    MASTError(self.__class__.__name__, error)
-
-        #   print structure
-
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
-        print 'TTM DEBUG:', options
-#        print 'GRJ DEBUG:', coordinates
-        #options.set_item(section_name, 'structure', structure)
 
     def parse_defects_section(self, section_name, section_content, options):
-        """Parse the defects section and populate the options.
+        """Parses the defects section and populates the options.
         """
         defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
@@ -285,22 +273,21 @@ class InputParser(MASTObj):
                     error = 'Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
 
-# Check for static options
+                # Check for static options
                 type_dict['type'] = line[0]
                 coord = line[1:4]
                 type_dict['coordinates'] = np.array(coord, dtype='float')
                 type_dict['symbol'] = line[4]
 
                 defect['subdefect_%i' % subcount] = type_dict
-#                print 'Rawr!', defect
-                subcount += 1
-    
+                # print 'Rawr!', defect
+                subcount += 1    
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
         options.set_item(section_name, 'coord_type', coord_type)
 
     def parse_recipe_section(self, section_name, section_content, options):
-        """Parse the recipe section and populate the options"""
+        """Parses the recipe section and populates the options."""
         recipe_dict = RECIPE_KEYWORDS.copy()
 
         for line in section_content:
@@ -314,22 +301,20 @@ class InputParser(MASTObj):
                     recipe_path = os.environ['MAST_RECIPE_PATH']
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
-                    MASTError(self.__class__.__name__, error)
- 
+                    MASTError(self.__class__.__name__, error) 
                 recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
             else:
                 recipe_dict[line[0]] = line[1]
-
         for key, value in recipe_dict.items():
             options.set_item(section_name, key, value)
 
     def parse_ingredients_section(self, section_name, section_content, options):
-        """Parse the ingredients section and populate the options
+        """Parses the ingredients section and populates the options.
             Section takes the form of:
                 $ingredients
                 begin ingredients_global
-                kpoints 3x3x3
-                xc pbe
+                mast_kpoints 3x3x3
+                mast_xc pbe
                 end
 
                 begin singlepoint
@@ -343,10 +328,10 @@ class InputParser(MASTObj):
 
                 $end
 
-            kpoints are parsed out as a 3 index list of integers. 
+            mast_kpoints are parsed out as a 3 index list of integers. 
             Everything else is parsed out as a string.
 
-            Anything in ingredients_global are then appended onto each 
+            Anything in ingredients_global is then appended onto each 
             individual ingredient.
         """
 
@@ -396,7 +381,7 @@ class InputParser(MASTObj):
         options.set_item(section_name, 'global', global_dict)
 
     def parse_neb_section(self, section_name, section_content, options):
-        """Parse the neb section and populate the options.
+        """Parses the neb section and populates the options.
             
             The number of images is specified and must be the same
             throughout the recipe.
@@ -451,7 +436,7 @@ class InputParser(MASTObj):
 
     def parse_chemical_potentials_section(self, section_name, section_content,
                                           options):
-        """Parse the chemical_potentials section and populate the options.
+        """Parses the chemical_potentials section and populates the options.
             Section uses the standard begin...end subsection structure, but with
             a modification: instead of strict subsection titles (i.e. structure,
             lattice etc.), subsection titles are the conditions under which the
@@ -495,7 +480,4 @@ class InputParser(MASTObj):
         for key, value in chempot_dict.items():
             options.set_item(section_name, key, value)
 
-#        print 'DEBUG: chempot_dict =', chempot_dict
-
-        print "TTM DEBUG OPTIONS:", options
 
