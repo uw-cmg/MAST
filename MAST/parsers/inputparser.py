@@ -135,6 +135,10 @@ class InputParser(MASTObj):
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
+        
+        if options.get_item(section_name,'program') == 'vasp':
+            if os.getenv('VASP_PSP_DIR') == None:
+                raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
 
     def parse_structure_section(self, section_name, section_content, options):
         """Parses the structure section and populate the options.
