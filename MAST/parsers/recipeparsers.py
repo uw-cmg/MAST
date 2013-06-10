@@ -49,9 +49,10 @@ class RecipeParser(MASTObj):
         f_ptr           = open(self.template_file, "r")
         o_ptr           = open(self.personal_recipe, "w")
         system_name     = self.input_options.get_item("mast", "system_name", "sys")
-        n_param         = self.input_options.get_item("defects", "num_defects", 0)
+        n_defects       = self.input_options.get_item("defects", "num_defects", 0)
+        d_defects       = self.input_options.get_item("defects","defects")
         n_images        = self.input_options.get_item("neb", "images", 0)
-        n_neblines      = self.input_options.get_item("neb", "neblines", {})
+        d_neblines      = self.input_options.get_item("neb", "neblines", {})
         recipe_name     = None
 
 #        print system_name, self.input_options.get_item('mast', 'system_name')
@@ -84,11 +85,11 @@ class RecipeParser(MASTObj):
             #step 1
             processing_lines = self.process_system_name(processing_lines, system_name)
             #step 2
-            processing_lines = self.process_hop_combinations(processing_lines, n_neblines)
+            processing_lines = self.process_hop_combinations(processing_lines, d_neblines)
             #step 3
             processing_lines = self.process_images(processing_lines, n_images)
             #step 4
-            processing_lines = self.process_defects(processing_lines, n_param)
+            processing_lines = self.process_defects(processing_lines, n_defects, d_defects)
 
             #dump the processed lines to file
             output_str = "\n".join(processing_lines)
@@ -106,16 +107,20 @@ class RecipeParser(MASTObj):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
 
-    def process_hop_combinations(self, processing_lines, n_neblines):
+    def process_hop_combinations(self, processing_lines, d_neblines):
         '''replace <n-n> with neb labels which are keys of the
-           neblines dict  of the input options.
+           neblines dict of the input options.
+
+            Args:
+                processing_lines <list of str>: recipe lines to process.
+                d_neblines <dict of str>: dictionary of NEB lines.
         '''
         new_lines = []
-        if not n_neblines:
+        if not d_neblines:
             return processing_lines
         for line in processing_lines:
             if "<n-n>" in line:
-                for neblabel in n_neblines.keys():
+                for neblabel in d_neblines.keys():
                     n_line = line.replace('<n-n>', neblabel)
                     new_lines.append(n_line)
             else:
@@ -138,18 +143,26 @@ class RecipeParser(MASTObj):
                  new_lines.append(line)
         return new_lines
 
-    def process_defects(self, processing_lines, n_defects):
+    def process_defects(self, processing_lines, n_defects, d_defects):
         '''replace <N> with the equivalent number of lines
            based on the number of defects given in the
            input options
+
+           Args:
+            processing_lines <list of str>: recipe lines to proceess
+            n_defects <int>: number of defected systems
+            d_defects <dict>: dictionary of defects, including labels and 
+                                positions.
         '''
         new_lines = []
         if not n_defects:
             return processing_lines
         for line in processing_lines:
             if '<n>' in line:
-                for index in xrange(n_defects):
-                    new_lines.append(line.replace("<n>", str(index+1)))
+                for defect_key in d_defects.keys():
+                    defect_label = defect_key.split('_')[1] #defect_1, etc.
+                    new_lines.append(line.replace("<n>", 
+                        defect_label))
             else:
                 new_lines.append(line)
         return new_lines
