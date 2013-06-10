@@ -218,12 +218,13 @@ class InputParser(MASTObj):
         multidefect = False
         charge = 0
         count = 1
+        coord_type = 'cartesian'
 
         for line in section_content:
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
-                defect_types['coord_type'] = line[1]
+                coord_type = line[1]
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
@@ -293,12 +294,10 @@ class InputParser(MASTObj):
                 defect['subdefect_%i' % subcount] = type_dict
 #                print 'Rawr!', defect
                 subcount += 1
-
-        if ('coord_type' not in defect_types):
-            defect_types['coord_type'] = 'cartesian'
-
+    
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
+        options.set_item(section_name, 'coord_type', coord_type)
 
     def parse_recipe_section(self, section_name, section_content, options):
         """Parse the recipe section and populate the options"""
