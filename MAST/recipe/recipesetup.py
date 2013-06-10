@@ -107,7 +107,9 @@ class RecipeSetup(MASTObj):
         """Creates the ingredient based on the ingredient type
         """
         if ingredient_type not in self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
+            raise MASTError(self.__class__.__name__, "Ingredient '%s' requested by input file but not found in the recipe !!!" % ingredient_type)
+        if ingredient_type not in self.input_options.get_section_keys('ingredients'):
+            raise MASTError(self.__class__.__name__, "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type)
 
         self.program        = self.input_options.get_item('mast', 'program')
         self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')

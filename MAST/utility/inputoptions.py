@@ -9,6 +9,7 @@
 ############################################################################
 import os
 import numpy as np
+from MAST.utility import MASTError
 
 class InputOptions:
     """Stores options information in dictionary format for retrieval
@@ -42,6 +43,18 @@ class InputOptions:
         """Returns the value of the key under this section
         """
         return self.options.get(section, dict()).get(key, None)
+
+    def get_sections(self):
+        """Return the available sections in the input options.
+        """
+        return self.options.keys()
+
+    def get_section_keys(self, section):
+        """Return the available keys under a section."""
+        if not section in self.get_sections():
+            raise MASTError(self.__class__.__name__,
+                section + " was not parsed from the input file.")
+        return self.options[section].keys()
 
     def reset(self):
         """Option to reset the dict values
@@ -225,6 +238,6 @@ class InputOptions:
                 pln.append(mystr)
                 pln.append(header + "=" + str(val3))
             else:
-                errstr="UNSUPPORTED TYPE" + str(type(val2))
+                errstr="UNSUPPORTED TYPE" + str(type(val3))
                 raise MASTError(self.__class__.__name__, errstr)
         return pln
