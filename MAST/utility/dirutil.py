@@ -91,7 +91,11 @@ def get_mast_install_path():
     if getpath == None:
         raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
     return getpath
-
+def get_mast_scratch_path():
+    getpath = os.getenv('MAST_SCRATCH')
+    if getpath == None:
+        raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
+    return getpath
 
 def directory_is_locked(dirname):
     if os.path.isfile(dirname + "/mast.write_files.lock"):

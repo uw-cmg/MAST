@@ -14,6 +14,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
 from MAST.utility.picklemanager import PickleManager
+from MAST.utility.dirutil import *
 
 from MAST.ingredients.ingredients_loader import IngredientsLoader
 
@@ -23,9 +24,6 @@ from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
 
 from MAST.ingredients import *
-
-
-#testing
 
 ALLOWED_KEYS     = {\
                        'inputfile'    : (str, 'mast.inp', 'Input file name'),\
@@ -39,62 +37,75 @@ class MAST(MASTObj):
         Each instance of Interface sets up one calculation group.
 
         Attributes:
-            options <InputOptions object>: used to store the options
+            self.input_options <InputOptions object>: used to store the options
                                            parsed from input file
+
     """
 
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options = None
-        self.recipe_name = None
-        self.structure = None
-        self.unique_ingredients = None
+        #self.recipe_name = None
+        #self.structure = None
+        #self.unique_ingredients = None
     
-    def start(self):
+    def parse_and_run_input(self):
         """
-            Calls all the neccessary functions required to run MAST.
-            Calls the following functions:
-                _parse_input(): parses the various input files and 
-                                fetches the options.
-                _parse_recipe(): parses the recipe template file
+            Parses the *.inp input file and fetches the options.
+            Sets an input stem name.
+            Parses the recipe template file and creates a personalized recipe.
+            Creates a *.py input script from the fetched options.
+            Runs the *.py input script.
         """
-        ing_loader = IngredientsLoader()
-        ing_loader.load_ingredients()
-        ingredients_dict = ing_loader.ingredients_dict
-        # print "Ingredients Dict : ", ingredients_dict
+        
+        #parse the *.inp input file
+        parser_obj = InputParser(inputfile=self.keywords['inputfile'])
+        self.input_options = parser_obj.parse()
+        
+        #set an input stem name
+        self.input_options.set_item('mast', 'input_stem', 
+            self._initialize_input_stem())
 
-        pfile = self._parse_input()
-        #self._parse_recipe() 
+        #parse the recipe template file and create a personal file
+        self._parse_recipe_template()
 
-        #self.initialize_environment()
-        #recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
-        #self.pickle_plan(recipe_plan_obj)
+        #create the *.py input script
+        ipc_obj = InputPythonCreator(input_options=self.input_options)
+        ipc_filename = ipc_obj.write_script()
+        
+        #run the *.py input script
         import subprocess
-        mycall = subprocess.Popen(['python ' + pfile], shell=True,
-                stdout = subprocess.PIPE, stderr=subprocess.PIPE)
-        mycall.wait()
+        run_input_script = subprocess.Popen(['python ' + ipc_filename], 
+                shell=True, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        run_input_script.wait()
         return None
+   
+    def _initialize_input_stem(self):
+        inp_file = self.keywords['inputfile']
+        if not ".inp" in inp_file:
+            raise MASTError(self.__class__.__name__, "File '%s' should be named with a .inp extension and formatted correctly." % inp_file)
+        
+        timestamp = time.strftime('%Y%m%d%H%M%S')
+        stem_dir = os.path.dirname(inp_file)
+        if len(stem_dir) == 0:
+            stem_dir = get_mast_scratch_path()
+        inp_name = os.path.basename(inp_file).split('.')[0]
+        stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
+        return stem_name
 
 
-    def old_start(self):
-        """Calls all the neccessary functions required to run MAST.
-            Calls the following functions:
-                _parse_input(): parses the various input files and 
-                                fetches the options.
-                _parse_recipe(): parses the recipe template file
+    def start_from_input_options(self, input_options):
+        """Start the recipe template parsing and ingredient creation
+            once self.input_options has been set.
         """
-
+        self.input_options = input_options
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
-        # print "Ingredients Dict : ", ingredients_dict
-
-        self._parse_input()
-        self._parse_recipe() 
-
         self.initialize_environment()
         recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
         self.pickle_plan(recipe_plan_obj)
+
 
     def initialize_environment(self):
         #mast_scratch_dir = os.cur_dir
@@ -103,7 +114,7 @@ class MAST(MASTObj):
  
         system_name = self.input_options.get_item("mast", "system_name", "sys")
 
-        dir_name = "%s_%s_%s" % (system_name, self.recipe_name, time.strftime('%Y%m%dT%H%M%S'))
+        dir_name = "%s_%s_%s" % (system_name, self.input_options.get_item('recipe','recipe_name'), time.strftime('%Y%m%dT%H%M%S'))
         dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
 
         try:
@@ -122,66 +133,21 @@ class MAST(MASTObj):
         pm = PickleManager(pickle_file)
         pm.save_variable(recipe_plan_obj) 
    
-    def _parse_input(self):
-        """Parses the input file"""
-        parser_obj = InputParser(inputfile=self.keywords['inputfile'])
-        self.input_options = parser_obj.parse()
-        myipc = InputPythonCreator(input_options=self.input_options)
-        myipc.print_input_options()
-        return myipc.name
-
-    def _parse_recipe(self):
-        """Parses the generic recipe file"""
+    def _parse_recipe_template(self):
+        """Parses the recipe template file."""
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-        # print 'recipe_file =', recipe_file
 
-        parser_obj = RecipeTemplateParser(templateFile=recipe_file, inputOptions=self.input_options,
-                                  personalRecipe='test-recipe.txt')
-        self.recipe_name = parser_obj.parse()
-
+        parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
+                        inputOptions=self.input_options,
+                        personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt')
+        self.input_options.set_item('recipe','recipe_name', parser_obj.parse())
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
     def _initialize_ingredients(self, ingredients_dict):
-        #TTM Commenting out. RecipeSetup already does this, and we
-        #don't want to do it twice. Plus this misses the neb dictionary.
-        #
-        #print '\nInitializing ingredients.'
-        #
-        #print '\nExtracting base structure.'
-        structure = self.input_options.get_item('structure', 'structure')
-        #print structure, '\n'
-        #
-        #print '\nExtracting default ingredient options.'
-        #ingredient_global = self.input_options.get_item('ingredients', 'global')
-
-        #print '\nChecking status of defects.'
-        #ndefects = self.input_options.get_item('defects', 'num_defects')
-        #if ndefects == None:
-        #    defects = False
-        #    print 'No defects found.'
-        #else:
-        #    defects = True
-        #    defect_keys = self.input_options.get_item('defects', 'defects')
-        #    if (ndefects == 1):
-        #        print 'Found %i defect.\n' % ndefects
-        #    else:
-        #        print 'Found %i defects.\n' % ndefects
-
-#        print "GRJ DEBUG:", self.unique_ingredients
-#        print "GRJ DEBUG:", ingredients_dict
-#        print "GRJ DEBUG:", defect_keys
-        #for ingredient in self.unique_ingredients:
-        #    print 'Initializing ingredient %s.' % ingredient
-        #    if (ingredient == 'inducedefect'):
-        #        self.input_options.set_item('ingredients', ingredient, defect_keys)              
-        #    elif (not self.input_options.get_item('ingredients', ingredient)):
-        #        self.input_options.set_item('ingredients', ingredient, ingredient_global)
-
-        #print 'GRJ DEBUG:', self.input_options.get_item('ingredients', 'inducedefect')
-
-        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
-                                structure=structure, ingredientsDict=ingredients_dict)
+        setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
+                inputOptions=self.input_options,
+                structure=self.input_options.get_item('structure','structure'), 
+                ingredientsDict=ingredients_dict)
         recipe_plan_obj = setup_obj.start()
-
         return recipe_plan_obj

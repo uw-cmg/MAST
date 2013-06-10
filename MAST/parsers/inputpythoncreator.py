@@ -7,7 +7,6 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
-from __future__ import print_function
 import os
 
 import numpy as np
@@ -21,26 +20,28 @@ from MAST.utility.mastfile import MASTFile
 
 ALLOWED_KEYS = {\
                  'input_options'    : (InputOptions, None, 'Input file name'),\
+                 'filename'         : (str, "input.py", 'Script file name'),\
                }
 
 class InputPythonCreator(MASTObj):
     """Creates a runnable python file from a *.inp file
-        Attributes:
-            self.name = name for created python file
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
-        if not 'mydir' in self.keywords.keys():
-            mydir = os.getcwd()
-        else:
-            mydir == self.keywords['mydir']
-        self.name=""
+    
+    def write_script(self):
+        """Write the python input script, created from the *.inp input file.
+            Returns:
+                filename <str>: Full file name of the input script created.
+        """
         mylines = self.print_input_options()
+        filename = self.keywords['input_options'].get_item('mast','input_stem')
+        filename = filename + 'input.py'
         inputpy = MASTFile()
         inputpy.data = mylines
-        if self.name == "":
-            self.name='input.py'
-        inputpy.to_file(os.path.join(mydir, self.name))
+        inputpy.to_file(filename)
+        return filename
+
 
     def addnewlines(self, linestoadd):
         """Appends newline to each string in a list
@@ -155,16 +156,6 @@ class InputPythonCreator(MASTObj):
             pln.append("from MAST.mast import MAST")
             pln.append("from MAST.ingredients.ingredients_loader import IngredientsLoader")
             pln.append("mast_obj = MAST()")
-            pln.append("mast_obj.input_options = inputoptions")
-            pln.append("ing_loader = IngredientsLoader()")
-            pln.append("ing_loader.load_ingredients()")
-            pln.append("ingredients_dict = ing_loader.ingredients_dict")
-
-            #OMIT mast_obj._parse_input() here, because this is done above.
-            pln.append("mast_obj._parse_recipe()")
-
-            pln.append("mast_obj.initialize_environment()")
-            pln.append("recipe_plan_obj = mast_obj._initialize_ingredients(ingredients_dict)")
-            pln.append("mast_obj.pickle_plan(recipe_plan_obj)")
+            pln.append("mast_obj.start_from_input_options(inputoptions)")
         return pln
 
