@@ -30,7 +30,7 @@ class TestInput(unittest.TestCase):
     def test_inputpythoncreator(self):
         myip = InputParser(inputfile='mast.inp')
         myoptions=myip.parse()
-        myipc = InputPythonCreator(optiondict=myoptions) 
+        myipc = InputPythonCreator(input_options=myoptions) 
         myipc.print_input_options()
         self.assertEqual(0,0)
 

@@ -31,10 +31,11 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'spacegroup': None,
                       'symmetry_only': False,
                       'coord_type': 'cartesian',
-                      #'atom_list': None,
-                      #'coordinates': None,
-                      #'lattice': None,
+                      'atom_list': None,
+                      'coordinates': None,
+                      'lattice': None,
                       'primitive': False,
+                      'structure': None
                      }
 
 DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
@@ -53,37 +54,49 @@ RECIPE_KEYWORDS = {'recipe_file': None,
                   }
 
 class InputParser(MASTObj):
-    """Parses input file and returns the options.
+    """Class for parsing a *.inp format input file.
+        Attributes:
+            self.section_end <str>: delimiter for the end of a section
+            self.delimiter <str>: character(s) for breaking up each line
+            self.section_parsers <dict>: supported sections
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.section_end = '$end'
         self.delimiter = ' ' # how we're breaking up each line
         self.section_parsers = {\
-                                    'mast'     : self.parse_mast_section,
-                                    'structure' : self.parse_structure_section,
-                                    'ingredients' : self.parse_ingredients_section,
-                                    'defects'  : self.parse_defects_section,
-                                    'recipe'   : self.parse_recipe_section,
-                                    'neb'      : self.parse_neb_section,
-                                    'chemical_potentials' : self.parse_chemical_potentials_section,
+                'mast'     : self.parse_mast_section,
+                'structure' : self.parse_structure_section,
+                'ingredients' : self.parse_ingredients_section,
+                'defects'  : self.parse_defects_section,
+                'recipe'   : self.parse_recipe_section,
+                'neb'      : self.parse_neb_section,
+                'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
 
     def parse(self):
-        """Parses information from the input file"""
+        """Parses information from the *.inp style input file.
+            Returns:
+                options <InputOptions>: a dictionary of sections and values,
+                                        where each section is its own
+                                        dictionary:
+                                        options.options['section'] = dict()
+        """
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
 
         eof = False
         while (not eof):
             line = infile.readline().lower()
-# This works because the blank lines in the file are really newline (\n)!
-# This is why strip() didn't work, cause it removed that \n, creating an
-# empty string.
+            # This works because the blank lines in the file are really 
+            # newline (\n)!
+            # This is why strip() didn't work, cause it removed that \n, 
+            # creating an empty string.
             if (not line):
                 eof = True
             elif (line.startswith('#')) or (line.startswith('!')):
-# Lines that start with a # or a ! are treated as a comment and are skipped
+            # Lines that start with a # or a ! are treated as a comment and 
+            # are skipped
                 pass
             elif (line.startswith('$')) and (self.section_end not in line):
                 section_name = line[1:].strip()
@@ -96,7 +109,8 @@ class InputParser(MASTObj):
                 section_content = list()
                 print '\nFound section %s.  Reading in options.' % section_name
             elif (self.section_end in line) and (section_name):
-                self.section_parsers[section_name](section_name, section_content, options)
+                self.section_parsers[section_name](section_name, 
+                        section_content, options)
                 print 'Finished parsing the %s section.' % section_name
             else:
                 line = line.strip()
@@ -107,7 +121,7 @@ class InputParser(MASTObj):
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
-        """Parse the mast section and populate the options"""
+        """Parses the mast section and populate the options."""
         mast_dict = MAST_KEYWORDS.copy()
 
         for line in section_content:
@@ -121,10 +135,14 @@ class InputParser(MASTObj):
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
-#        print mast_dict
+        
+        if options.get_item(section_name,'program') == 'vasp':
+            if os.getenv('VASP_PSP_DIR') == None:
+                raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
 
     def parse_structure_section(self, section_name, section_content, options):
-        """Parse the structure section and populate the options
+        """Parses the structure section and populate the options.
+            Does not create the structure.
 
             Format is along the lines of:
                 coord_type fractional
@@ -149,7 +167,8 @@ class InputParser(MASTObj):
             Note that coord_type will default to "cartesian" if not specified.
 
         """
-        structure_dict = STRUCTURE_KEYWORDS.copy() # Initialize with default values
+        structure_dict = STRUCTURE_KEYWORDS.copy() 
+        # Initialize with default values
         subsection_dict = dict()
 
         for line in section_content:
@@ -165,70 +184,48 @@ class InputParser(MASTObj):
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
-#        print 'in InputParser.parse_structure_section:', subsection_dict
+        # print 'in InputParser.parse_structure_section:', subsection_dict
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
-# Here we the .title() to re-capitalize the first letter of all the atomic symbols to comply with what
-# pymatgen needs
+                # Here we use .title() to re-capitalize the first letter of all 
+                # the atomic symbols to comply with what
+                # pymatgen needs
                 atom_list = [val.title() for val in value[:, 0]]
+                structure_dict['atom_list'] = atom_list
                 coordinates = np.array(value[:, 1:], dtype='float')
+                structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
                 lattice = np.array(value, dtype='float')
-
-        if (structure_dict['posfile'] is None):
-            structure = MAST2Structure(lattice=lattice,
-                                       coordinates=coordinates,
-                                       atom_list=atom_list,
-                                       coord_type=structure_dict['coord_type'])
-#            print 'In %s:' % self.__class__.__name__, coord_type
-        elif ('poscar' in structure_dict['posfile'].lower()):
-            from pymatgen.io.vaspio import Poscar
-            structure = Poscar.from_file(structure_dict['posfile']).structure
-        elif ('cif' in structure_dict['posfile'].lower()):
-            from pymatgen.io.cifio import CifParser
-            structure = CifParser(structure_dict['posfile']).get_structures()[0]
-        else:
-            error = 'Cannot build structure from file %s' % structure_dict['posfile']
-            MASTError(self.__class__.__name__, error)
-
-#        print structure
+                structure_dict['lattice'] = lattice
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
 
-#        print 'GRJ DEBUG:', coordinates
-        options.set_item(section_name, 'structure', structure)
-        #TTM+3 allow the building of structure from the *.py input file
-        if (not structure_dict['posfile']):
-            options.set_item(section_name, 'coordinates', coordinates)
-            options.set_item(section_name, 'lattice', lattice)
-            options.set_item(section_name, 'atom_list', atom_list)
-
     def parse_defects_section(self, section_name, section_content, options):
-        """Parse the defects section and populate the options.
-            This will get removed in favor of a defects section down in ingredients
+        """Parses the defects section and populates the options.
         """
         defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
         multidefect = False
         charge = 0
         count = 1
+        coord_type = 'cartesian'
 
         for line in section_content:
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
-                defect_types['coord_type'] = line[1]
+                coord_type = line[1]
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
 
                 if (len(line) < 5):
-                    error = 'Defect specification requires at least 5 arguments.'
+                    error ='Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
 
-# Check for static options
+                # Check for static options
                 type_dict['type'] = line[0]
                 coord = line[1:4]
                 type_dict['coordinates'] = np.array(coord, dtype='float')
@@ -280,27 +277,21 @@ class InputParser(MASTObj):
                     error = 'Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
 
-# Check for static options
+                # Check for static options
                 type_dict['type'] = line[0]
                 coord = line[1:4]
                 type_dict['coordinates'] = np.array(coord, dtype='float')
                 type_dict['symbol'] = line[4]
 
                 defect['subdefect_%i' % subcount] = type_dict
-#                print 'Rawr!', defect
-                subcount += 1
-
-        if ('coord_type' not in defect_types):
-            defect_types['coord_type'] = 'cartesian'
-
-#        print 'GRJ debug:'
-#        for key in defect_types:
-#            print "Key", key, defect_types[key]
+                # print 'Rawr!', defect
+                subcount += 1    
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
+        options.set_item(section_name, 'coord_type', coord_type)
 
     def parse_recipe_section(self, section_name, section_content, options):
-        """Parse the recipe section and populate the options"""
+        """Parses the recipe section and populates the options."""
         recipe_dict = RECIPE_KEYWORDS.copy()
 
         for line in section_content:
@@ -314,22 +305,20 @@ class InputParser(MASTObj):
                     recipe_path = os.environ['MAST_RECIPE_PATH']
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
-                    MASTError(self.__class__.__name__, error)
- 
+                    MASTError(self.__class__.__name__, error) 
                 recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
             else:
                 recipe_dict[line[0]] = line[1]
-
         for key, value in recipe_dict.items():
             options.set_item(section_name, key, value)
 
     def parse_ingredients_section(self, section_name, section_content, options):
-        """Parse the ingredients section and populate the options
+        """Parses the ingredients section and populates the options.
             Section takes the form of:
                 $ingredients
                 begin ingredients_global
-                kpoints 3x3x3
-                xc pbe
+                mast_kpoints 3x3x3
+                mast_xc pbe
                 end
 
                 begin singlepoint
@@ -343,10 +332,11 @@ class InputParser(MASTObj):
 
                 $end
 
-            kpoints are parsed out as a 3 index list of integers, everything else is parsed out
-            as a string.
+            mast_kpoints are parsed out as a 3 index list of integers. 
+            Everything else is parsed out as a string.
 
-            Anything in ingredients_global are then appended onto each individual ingredient.
+            Anything in ingredients_global is then appended onto each 
+            individual ingredient.
         """
 
         global_dict = dict()
@@ -354,34 +344,38 @@ class InputParser(MASTObj):
 
         for line in section_content:
             if (line.startswith('begin')):
-# Each ingredient section starts with "begin", check for this line, and initialize the individual
-# ingredient dictionary
+                # Each ingredient section starts with "begin".
+                # Check for this line, and initialize the individual
+                # ingredient dictionary
                 ingredient_name = line.split()[1]
                 ingredient_dict = dict()
             elif ('end' not in line):
                 opt = line.split()
-#                print opt
+                # print opt
                 if (opt[0] == 'mast_kpoints'):
                     kpts = map(int, opt[1].split('x'))
-# Second option after mast_kpoints tells where to center the k-point mesh.
-# If it's there, we append it onto the k-point grid list.
+                    # Second option after mast_kpoints tells where to 
+                    # center the k-point mesh.
+                    # If it's there, we append it onto the k-point grid list.
                     if len(opt) > 2:
                         kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
                 else:
                     ingredient_dict[opt[0]] = opt[1]
             elif ('end' in line):
-# Each ingredient section ends with "end", if present finish that current section and assign
-# the neccessary element in the ingredients dictionary and create the global dictionary
+                # Each ingredient section ends with "end", if present finish 
+                # that current section and assign
+                # the neccessary element in the ingredients dictionary and 
+                # create the global dictionary
                 if (ingredient_name == 'ingredients_global'):
                     global_dict = ingredient_dict
                 else:
                     ingredients_dict[ingredient_name] = ingredient_dict
 
-# Each value in ingredients_dict is a dictionary containing the relevant
-# ingredient and option(s).  We append the global_dict (containing global
-# ingredients options here, after checking to make sure the ingredient in
-# question does not contain the option/value.
+        # Each value in ingredients_dict is a dictionary containing the relevant
+        # ingredient and option(s). We append the global_dict (containing global
+        # ingredient options here, after checking to make sure the ingredient in
+        # question does not contain the option/value.
         for ing_key, ing_value in ingredients_dict.items():
             for glob_key, glob_value in global_dict.items():
                 if glob_key not in ing_value:
@@ -391,57 +385,71 @@ class InputParser(MASTObj):
         options.set_item(section_name, 'global', global_dict)
 
     def parse_neb_section(self, section_name, section_content, options):
-        """Parse the neb section and populate the options.
-            Format example:
-            hops 1-2 1-3 3-4
+        """Parses the neb section and populates the options.
+            
+            The number of images is specified and must be the same
+            throughout the recipe.
+
+            Each neb gets a label which should correspond to a defect group
+            or defect group number.
+
+            Within each subsection, each line specifies which atom is moving,
+            giving its element name and its approximate coordinates from
+            the starting unrelaxed structure.
+
+            $neb
+
             images 3
-            The hops correspond to the defects listed in the defects
-            section, e.g. defects 1 through 4 are:
-            vacancy 0 0 0
-            vacancy 0.5 0.5 0.5 
-            interstitial 0.25 0.25 0
-            interstitial 0.25 0.75 0
+
+            begin crowdion1-crowdion2
+            Cr, 0 0.3 0, 0 0 0
+            Ni, 0 0.6 0, 0 0.3 0
+            end
+
+            begin int1-int2
+            Mg, 0 0 0.5, 0.3 0.1 2
+            end
+
+            $end
+
+            In the crowdion example, the starting undefected structure is
+            defected three times in each defect group: 1 vacancy and two
+            antisites. The neb section allows us to unambiguously match up 
+            the atoms and determine which atoms are moving, and where. 
         """
-        hoplist = list()
-        hopfrom = dict()
+        neblines = dict()
         images = 0
 
-        count = 0
+        neblabel=""
         for line in section_content:
             type_dict = dict()
             line = line.strip()
             line = line.split(self.delimiter)
-
-            if (line[0] == 'hops'):
-                hoplist = line[1:] #this is a list
-            elif (line[0] == 'images'):
+            if (line[0] == 'images'):
                 images = int(line[1])
-        hop=""
-        hfrom=0
-        hto=0
-        for hop in hoplist:
-            hfrom = int(hop.split('-')[0])
-            hto = int(hop.split('-')[1])
-            if not hfrom in hopfrom.keys():
-                hopfrom[hfrom]=list()
-            hopfrom[hfrom].append(hto)
-        print "images: ", images
-        print "hopfrom_dict: ", hopfrom
+            elif (line[0] == 'begin'):
+                neblabel = line[1].strip()
+                neblines[neblabel] = list()
+            elif (line[0] == 'end'):
+                neblabel=""
+            else:
+                neblines[neblabel].append(line)
+
         options.set_item(section_name, 'images', images)
-        options.set_item(section_name, 'hopfrom_dict', hopfrom)
+        options.set_item(section_name, 'neblines', neblines)
 
     def parse_chemical_potentials_section(self, section_name, section_content,
                                           options):
-        """Parse the chemical_potentials section and populate the options.
+        """Parses the chemical_potentials section and populates the options.
             Section uses the standard begin...end subsection structure, but with
-            a modification:  instead of strict subsection titles (i.e. structure,
+            a modification: instead of strict subsection titles (i.e. structure,
             lattice etc.), subsection titles are the conditions under which the
             chemical potentials are for.  Any combination of white spacing is
             allowed, however note that all conditions will be converted to lower
             case first!
 
-            Using a GaAs example, hypothetically we could have a chemical_potential
-            section like the following:
+            Using a GaAs example, hypothetically we could have a 
+            chemical_potential section like the following:
                 $chemical_potentials
                 begin As rich
                 Ga 4.5
@@ -476,7 +484,4 @@ class InputParser(MASTObj):
         for key, value in chempot_dict.items():
             options.set_item(section_name, key, value)
 
-#        print 'DEBUG: chempot_dict =', chempot_dict
-
-        print "TTM DEBUG OPTIONS:", options
 

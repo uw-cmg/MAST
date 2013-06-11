@@ -107,17 +107,31 @@ class RecipeSetup(MASTObj):
         """Creates the ingredient based on the ingredient type
         """
         if ingredient_type not in self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Ingredient %s not found !!!" % ingredient_type)
+            raise MASTError(self.__class__.__name__, "Ingredient '%s' requested by input file but not found in the recipe !!!" % ingredient_type)
+        if ingredient_type not in self.input_options.get_section_keys('ingredients'):
+            raise MASTError(self.__class__.__name__, "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type)
 
         self.program        = self.input_options.get_item('mast', 'program')
         self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
 
         ingredient_name = os.path.join(self.scratch_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
-        return self.ingredients_dict[ingredient_type](name=ingredient_name, structure= self.structure, \
-                                                    program=self.program,\
-                                                    program_keys=self.input_options.get_item('ingredients',\
-                                                    ingredient_type), child_dict=child_dict)
+        #TTM update ingredients dict to include info from the 
+        #'neb', 'defects', and 'chemical_potentials' sections
+        pkey_d = self.input_options.get_item('ingredients', 
+                    ingredient_type).copy()
+        if 'defects' in self.input_options.options.keys():
+            pkey_d.update(self.input_options.get_item('defects','defects'))
+        if 'neb' in self.input_options.options.keys():
+            if 'neb' in name.lower():
+                pkey_d.update(self.input_options.options['neb'])
+        if 'chemical_potentials' in self.input_options.options.keys():
+            pkey_d.update(self.input_options.options['chemical_potentials'])
+        return self.ingredients_dict[ingredient_type](name=ingredient_name, 
+                    structure= self.structure, \
+                    program=self.program, \
+                    program_keys=pkey_d, \
+                    child_dict=child_dict)
 
     def create_recipe_plan(self, ingredients_info, recipe_name):
         """Creates a recipe object which has the ingredients and dependency information

@@ -139,6 +139,7 @@ class MASTmon(object):
 
             # run it for n iterations or until all sessions are complete
             csnames = self.scheduler.run(niter=1)
+            self.scheduler.show_session_table()
             #remove complete sessions
 
             self.registered_dir = self.registered_dir - csnames

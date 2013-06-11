@@ -171,8 +171,9 @@ class InduceDefect(BaseIngredient):
 
     def get_new_structure(self):
         if self.keywords['program'] == 'vasp':
-            myposcar = Poscar.from_file(self.keywords['name'] + "/POSCAR")
-            self.keywords['structure'] = myposcar.structure
+            if os.path.isfile(self.keywords['name'] + "/POSCAR"):
+                myposcar = Poscar.from_file(self.keywords['name'] + "/POSCAR")
+                self.keywords['structure'] = myposcar.structure
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
         return
