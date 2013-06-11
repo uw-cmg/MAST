@@ -134,9 +134,9 @@ class MAST(MASTObj):
             else:
                 print 'Found %i defects.\n' % ndefects
 
-#        print "GRJ DEBUG:", self.unique_ingredients
-#        print "GRJ DEBUG:", ingredients_dict
-#        print "GRJ DEBUG:", defect_keys
+        print "GRJ DEBUG:", self.unique_ingredients
+        print "GRJ DEBUG:", ingredients_dict
+        print "GRJ DEBUG:", defect_keys
         for ingredient in self.unique_ingredients:
             print 'Initializing ingredient %s.' % ingredient
             if (ingredient == 'inducedefect'):
