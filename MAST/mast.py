@@ -19,6 +19,7 @@ from MAST.utility.dirutil import *
 from MAST.ingredients.ingredients_loader import IngredientsLoader
 
 from MAST.parsers import InputParser
+from MAST.parsers import IndepLoopInputParser
 from MAST.parsers import InputPythonCreator
 from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
@@ -48,7 +49,25 @@ class MAST(MASTObj):
         #self.recipe_name = None
         #self.structure = None
         #self.unique_ingredients = None
-    
+   
+    def check_independent_loops(self):
+        """Checks for independent loops. If no independent loops are found,
+            parse and run the input file. Otherwise, parse and run the
+            generated set of input files.
+        """
+        ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
+        loopdict=ipl_obj.scan_for_indep_loop()
+        if len(loopdict) == 0:
+            self.parse_and_run_input()
+        else:
+            looplines=ipl_obj.prepare_looped_lines(loopdict)
+            loopdata=ipl_obj.prepare_looped_datasets(looplines)
+            loopfiles=ipl_obj.create_input_files(loopdata)
+            for ipfile in loopfiles:
+                self.keywords['inputfile']=ipfile
+                self.parse_and_run_input()
+
+
     def parse_and_run_input(self):
         """
             Parses the *.inp input file and fetches the options.
@@ -56,8 +75,7 @@ class MAST(MASTObj):
             Parses the recipe template file and creates a personalized recipe.
             Creates a *.py input script from the fetched options.
             Runs the *.py input script.
-        """
-        
+        """ 
         #parse the *.inp input file
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()

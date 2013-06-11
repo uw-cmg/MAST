@@ -165,15 +165,23 @@ class IndepLoopInputParser(MASTObj):
             Args:
                 datasets_dict <dict of list>
 
+            Returns:
+                createdfiles <list of str>: list of newly-created file names
             Creates an input file for each entry.
+
+
         """
         ifname = self.keywords['inputfile']
         dirstem = os.path.dirname(ifname)
         basename = os.path.basename(ifname).split('.')[0]
+        createdfiles=list()
         if dirstem == "":
             dirstem = os.getcwd()
         for didx in datasets_dict.keys():
             newfile = MASTFile()
             newfile.data = list(datasets_dict[didx])
-            newfile.to_unique_file(dirstem, basename + '_loop', '.inp', 100)
+            newname = newfile.to_unique_file(dirstem, 
+                        basename + '_loop', '.inp', 10000)
+            createdfiles.append(newname)
+        return createdfiles
 

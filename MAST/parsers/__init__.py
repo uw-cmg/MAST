@@ -2,3 +2,4 @@
 
 from MAST.parsers.inputparser import InputParser
 from MAST.parsers.inputpythoncreator import InputPythonCreator
+from MAST.parsers.indeploopinputparser import IndepLoopInputParser
