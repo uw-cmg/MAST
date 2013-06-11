@@ -124,7 +124,7 @@ class IndepLoopInputParser(MASTObj):
             loopline_dict[lidx] = dict()
             lct=0
             for loopitem in loopdict[lidx]['looplist'].split(self.loop_delim):
-                newline = loopdict[lidx]['prepend'] + loopitem + loopdict[lidx]['append'] + '\n'
+                newline = loopdict[lidx]['prepend'] + loopitem.strip() + loopdict[lidx]['append'] + '\n'
                 loopline_dict[lidx][str(lidx) + '-' + str(lct)] = newline
                 lct = lct + 1
         return loopline_dict
