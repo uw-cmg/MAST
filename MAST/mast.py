@@ -129,10 +129,12 @@ class MAST(MASTObj):
         #mast_scratch_dir = os.cur_dir
         #if "MAST_SCRATCH_DIR" in os.environ:
         #    mast_scratch_dir = os.environ["MAST_SCRATCH_DIR"]
- 
+        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1])
+              
         system_name = self.input_options.get_item("mast", "system_name", "sys")
 
-        dir_name = "%s_%s_%s" % (system_name, self.input_options.get_item('recipe','recipe_name'), time.strftime('%Y%m%dT%H%M%S'))
+
+        dir_name = "%s_%s_%s_%s" % (system_name, self.input_options.get_item('recipe','recipe_name'), ipf_name, time.strftime('%Y%m%dT%H%M%S'))
         dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
 
         try:
