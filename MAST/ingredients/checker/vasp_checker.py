@@ -158,13 +158,31 @@ def _vasp_potcar_setup(keywords, my_poscar):
 def _vasp_incar_get_non_mast_keywords(program_keys_dict):
     """Get the non-VASP keywords and make a dictionary."""
     incar_dict=dict()
+    allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
+                    'ingredients','programkeys','vasp_allowed_keywords.py')
+    allowed_list = _vasp_incar_get_allowed_keywords(allowedpath)
     for key, value in program_keys_dict.iteritems():
         if not key[0:5] == "mast_":
-            if type(value)==str and value.isalpha():
-                incar_dict[key.upper()]=value.capitalize() #First letter cap
+            keytry = key.upper()
+            if not (keytry in allowed_list):
+                print "Ignoring program key %s for INCAR. To allow this keyword, add it to %s" % (keytry, allowedpath)
             else:
-                incar_dict[key.upper()]=value
+                if type(value)==str and value.isalpha():
+                    incar_dict[keytry]=value.capitalize() #First letter cap
+                else:
+                    incar_dict[keytry]=value
     return incar_dict
+
+def _vasp_incar_get_allowed_keywords(allowedpath):
+    """Get allowed vasp keywords.
+        Args:
+            allowedpath <str>: file path for allowed vasp keywords
+    """
+    allowed = MASTFile(allowedpath)
+    allowed_list=list()
+    for entry in allowed.data:
+        allowed_list.append(entry.strip())
+    return allowed_list
 
 def _vasp_incar_setup(keywords, my_potcar, my_poscar):
     """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
