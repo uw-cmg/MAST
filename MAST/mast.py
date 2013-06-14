@@ -133,10 +133,10 @@ class MAST(MASTObj):
         #parse the recipe template file and create a personal file
         self._parse_recipe_template()
         
+        self.initialize_environment()
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
-        self.initialize_environment()
         recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
         self.pickle_plan(recipe_plan_obj)
 
@@ -160,8 +160,9 @@ class MAST(MASTObj):
             MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
         self.input_options.set_item('mast', 'working_directory', dir_path)
-        self.input_options.set_item('mast', 'system_name', 
-                        system_name + '_' + element_str)
+        system_name = system_name + '_' + element_str
+        self.input_options.update_item('mast', 'system_name', system_name)
+
 
     def pickle_plan(self, recipe_plan_obj):
         """Pickles the reciple plan object to the respective file
