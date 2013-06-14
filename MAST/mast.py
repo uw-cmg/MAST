@@ -15,6 +15,7 @@ from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
 from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
+from MAST.utility import InputOptions
 
 from MAST.ingredients.ingredients_loader import IngredientsLoader
 
@@ -84,8 +85,6 @@ class MAST(MASTObj):
         self.input_options.set_item('mast', 'input_stem', 
             self._initialize_input_stem())
 
-        #parse the recipe template file and create a personal file
-        self._parse_recipe_template()
 
         #create the *.py input script
         ipc_obj = InputPythonCreator(input_options=self.input_options)
@@ -103,7 +102,7 @@ class MAST(MASTObj):
         if not ".inp" in inp_file:
             raise MASTError(self.__class__.__name__, "File '%s' should be named with a .inp extension and formatted correctly." % inp_file)
         
-        timestamp = time.strftime('%Y%m%d%H%M%S')
+        timestamp = time.strftime('%Y%m%dT%H%M%S')
         stem_dir = os.path.dirname(inp_file)
         if len(stem_dir) == 0:
             stem_dir = get_mast_scratch_path()
@@ -111,12 +110,29 @@ class MAST(MASTObj):
         stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
         return stem_name
 
+    def _get_element_string(self):
+        """Get the element string from the structure."""
+        mystruc = self.input_options.get_item('structure','structure')
+        elemset = set(mystruc.species)
+        elemstr=""
+        elemok=1
+        while elemok == 1:
+            try:
+                elempop = elemset.pop()
+                elemstr = elemstr + elempop.symbol
+            except KeyError:
+                elemok = 0
+        return elemstr
 
     def start_from_input_options(self, input_options):
         """Start the recipe template parsing and ingredient creation
             once self.input_options has been set.
         """
         self.input_options = input_options
+        
+        #parse the recipe template file and create a personal file
+        self._parse_recipe_template()
+        
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
@@ -126,15 +142,16 @@ class MAST(MASTObj):
 
 
     def initialize_environment(self):
-        #mast_scratch_dir = os.cur_dir
-        #if "MAST_SCRATCH_DIR" in os.environ:
-        #    mast_scratch_dir = os.environ["MAST_SCRATCH_DIR"]
-        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1])
+        """Initialize the directory information for writing the 
+            recipe and ingredient folders.
+        """
+        element_str = self._get_element_string()
+        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
               
         system_name = self.input_options.get_item("mast", "system_name", "sys")
 
 
-        dir_name = "%s_%s_%s_%s" % (system_name, self.input_options.get_item('recipe','recipe_name'), ipf_name, time.strftime('%Y%m%dT%H%M%S'))
+        dir_name = "%s_%s_%s_%s" % (system_name, element_str, self.input_options.get_item('recipe','recipe_name'), ipf_name)
         dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
 
         try:
@@ -143,6 +160,8 @@ class MAST(MASTObj):
             MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
         self.input_options.set_item('mast', 'working_directory', dir_path)
+        self.input_options.set_item('mast', 'system_name', 
+                        system_name + '_' + element_str)
 
     def pickle_plan(self, recipe_plan_obj):
         """Pickles the reciple plan object to the respective file
