@@ -46,14 +46,14 @@ class InduceDefect(BaseIngredient):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
-#        base_structure = self.get_new_structure()
-#        base_structure = self.keywords['structure']
-        print 'Defect in induce_defect', defect
-        print 'base_structure in induce_defect', base_structure
+        #base_structure = self.get_new_structure()
+        #base_structure = self.keywords['structure']
+        #print 'Defect in induce_defect', defect
+        #print 'base_structure in induce_defect', base_structure
         struct_ed = StructureEditor(base_structure) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
-# If we have cartesian coordinates, then we convert them to fractional here.
+        # If we have cartesian coordinates, then we convert them to fractional here.
         if ('cartesian' in defect['type']):
             defect['coordinates'] = self._cart2frac(mydict['coordinates'])
 
