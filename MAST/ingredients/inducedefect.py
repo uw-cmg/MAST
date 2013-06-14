@@ -49,7 +49,8 @@ class InduceDefect(BaseIngredient):
 #        base_structure = self.get_new_structure()
 #        base_structure = self.keywords['structure']
         print 'Defect in induce_defect', defect
-        struct_ed = StructureEditor(self.keywords['structure']) #should be updated using get_new_structure)
+        print 'base_structure in induce_defect', base_structure
+        struct_ed = StructureEditor(base_structure) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
 # If we have cartesian coordinates, then we convert them to fractional here.
@@ -88,51 +89,35 @@ class InduceDefect(BaseIngredient):
         """Converts between cartesian coordinates and fractional coordinates"""
         return self.keywords['structure'].lattice.get_fractional_coords(self.keywords['position'])
 
-    #def write_input(self):
-    #    """Writes the defected geometry to a file"""
-
-    #def _make_directory(self, directory):
-    #    if os.path.exists(directory):
-    #        print 'Directory %s exists!' % directory
-    #    else:
-    #        os.path.makedirs(directory)
-    
     def write_files(self):
         name = self.keywords['name']
         print "write_files:", name
         self.get_new_structure()
 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-        print name.split('/')
+#        print name.split('/')
         defect = self.keywords['program_keys'][defect_label]
-        print 'Defect in write_files:', defect
+#        print 'Defect in write_files:', defect
 
         base_structure = self.keywords['structure'].copy()
-#        print 'GRJ DEBUG: BASE (unmodified)'
-#        print base_structure
-#        count = 1
         for key in defect:
             if 'subdefect' in key:
-#                print 'GRJ DEBUG: pass %i' % count
                 subdefect = defect[key]
-                modified_structure = self.induce_defect(base_structure, subdefect)
-# For multiple defects take the new "base" as the one that just came out
-                base_structure = modified_structure
-#                print 'GRJ DEBUG: BASE (modified)'
-#                print base_structure
-#                count += 1
+                base_structure = self.induce_defect(base_structure, subdefect)
+#                base_structure = modified_structure
             else:
                 pass
 
         if self.keywords['program'] == 'vasp':
-            myposcar = Poscar(modified_structure)
-            print "poscar OK"
+            #myposcar = Poscar(modified_structure)
+            myposcar = Poscar(base_structure)
+            #print "poscar OK"
             self.lock_directory()
-            print "lock OK"
+            #print "lock OK"
             myposcar.write_file(name + '/CONTCAR')
-            print "write OK"
+            #print "Write sucessful"
             self.unlock_directory()
-            print "unlock OK"
+            #print "Unlock sucessful"
         else:
             raise MASTError(self.__class__.__name__, "Program not supported.")
 
