@@ -8,6 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import fnmatch
 
 import numpy as np
 import pymatgen as pmg
@@ -167,10 +168,10 @@ class InputParser(MASTObj):
             Note that coord_type will default to "cartesian" if not specified.
 
         """
-        structure_dict = STRUCTURE_KEYWORDS.copy() 
         # Initialize with default values
-        subsection_dict = dict()
+        structure_dict = STRUCTURE_KEYWORDS.copy() 
 
+        subsection_dict = dict()
         for line in section_content:
             line = line.split(self.delimiter)
 
@@ -184,9 +185,28 @@ class InputParser(MASTObj):
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
+        # GRJ: Since we lowercase the whole input file, and filenames may not
+        # conform to this, we examine the current directory for any files that
+        # may match and use that.  If there are multiple matches, we'll throw
+        # an error.
+        if (structure_dict['posfile'] is not None): # Do we have a geometry file?
+            # First build a list of likely files
+            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file.lower(), structure_dict['posfile'])]
+            if (len(file_list) > 1):
+                # If we have multiple files with the same name, but different capitalization, throw an error here
+                print 'Found mutliple files with the name %s' % structure_dict['posfile']
+                print 'Found the files:'
+                for file in file_list:
+                    print file
+                error = 'Found ambiguous file names'
+                MASTError(self.__class__.__name__, error)
+            else:
+                structure_dict['posfile'] = file_list[0]
+
         # print 'in InputParser.parse_structure_section:', subsection_dict
-        element_map=dict()
-        atom_list=list()
+        # TM
+        element_map = dict()
+        atom_list = list()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -204,10 +224,10 @@ class InputParser(MASTObj):
                 for elline in value:
                     elkey = elline[0].strip().upper() #all caps
                     elname = elline[1].strip().title() #Title case
-                    element_map[elkey]=elname
+                    element_map[elkey] = elname
 
         if len(element_map) > 0 and len(atom_list) > 0:
-            new_atom_list=list()
+            new_atom_list = list()
             for atomval in atom_list:
                 if atomval.upper() in element_map.keys():
                     new_atom_list.append(element_map[atomval])
@@ -238,7 +258,7 @@ class InputParser(MASTObj):
                 label = None
 
                 if (len(line) < 5):
-                    error ='Defect specification requires at least 5 arguments.'
+                    error = 'Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
 
                 # Check for static options
