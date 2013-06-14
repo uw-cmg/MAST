@@ -31,7 +31,8 @@ class InputOptions:
 
     def set_item(self, section, key, value):
         """Adds the key/value dict item into the option under the 
-        respective section
+        respective section.
+            NO CHANGE if the key was already in the section.
         """
         section_dict = self.options.setdefault(section, dict())
         if 'path' in key:
@@ -43,6 +44,17 @@ class InputOptions:
         """Returns the value of the key under this section
         """
         return self.options.get(section, dict()).get(key, None)
+
+    def update_item(self, section, key, value):
+        """Updates the key/value dict item in the option."""
+        section_dict = self.options.setdefault(section, dict())
+        if key in section_dict.keys():
+            print "Changing value of %s, %s." % (section, key)
+        if 'path' in key:
+            section_dict.__setitem__(key, os.path.expanduser(value))
+        else:
+            section_dict.__setitem__(key, value)
+
 
     def get_sections(self):
         """Return the available sections in the input options.

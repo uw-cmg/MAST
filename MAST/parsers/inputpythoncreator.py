@@ -87,6 +87,11 @@ class InputPythonCreator(MASTObj):
                 pln <list of str>: list of lines to print out
         """
         pln=list()
+        pln.append(" ")
+        pln.append("###############################################")
+        pln.append("#Structure Creation Section")
+        pln.append("################################################")
+        pln.append(" ")
         iops = self.keywords['input_options']
         strposfile = iops.get_item('structure','posfile')
         if strposfile is None:
@@ -154,7 +159,6 @@ class InputPythonCreator(MASTObj):
         else:
             #copy from mast.py
             pln.append("from MAST.mast import MAST")
-            pln.append("from MAST.ingredients.ingredients_loader import IngredientsLoader")
             pln.append("mast_obj = MAST()")
             pln.append("mast_obj.start_from_input_options(inputoptions)")
         return pln

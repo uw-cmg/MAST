@@ -185,6 +185,8 @@ class InputParser(MASTObj):
                 subsection_dict[subsection] = subsection_list
 
         # print 'in InputParser.parse_structure_section:', subsection_dict
+        element_map=dict()
+        atom_list=list()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -198,6 +200,20 @@ class InputParser(MASTObj):
             if (key == 'lattice'):
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
+            if (key == 'elementmap'):
+                for elline in value:
+                    elkey = elline[0].strip().upper() #all caps
+                    elname = elline[1].strip().title() #Title case
+                    element_map[elkey]=elname
+
+        if len(element_map) > 0 and len(atom_list) > 0:
+            new_atom_list=list()
+            for atomval in atom_list:
+                if atomval.upper() in element_map.keys():
+                    new_atom_list.append(element_map[atomval])
+                else:
+                    new_atom_list.append(atomval)
+            structure_dict['atom_list'] = new_atom_list
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
