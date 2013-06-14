@@ -33,26 +33,14 @@ class MASTmon(object):
     def add_sessions(self,new_session_dirs):
         """recipe_dirs is a set of sessions in MASTmon home directory"""
         for session_dir in  new_session_dirs:
-            try:
-                os.chdir(session_dir)
-            except:
-                raise MASTError(self.__class__.__name__,
-                    "Error in add_sessions, changing directory.")
-            try:
-                mastobj = self.pm.load_variable('mast.pickle')
-            except:
-                raise MASTError(self.__class__.__name__,
-                    "Error in add_sessions, loading pickle.")
-            try:
-                depdict = mastobj.dependency_dict
-            except:
-                raise MASTError(self.__class__.__name__,
-                    "Error in add_sessions, getting dependency dict.")
-            try:
-                ingredients = mastobj.ingredients
-            except:
-                raise MASTError(self.__class__.__name__,
-                    "Error in add_sessions, getting ingredients.")
+            if not os.path.exists(session_dir):
+                raise MASTError("mastmon, add_sessions", "No session_dir at %s" % session_dir)
+            os.chdir(session_dir)
+            if not os.path.isfile('mast.pickle'):
+                raise MASTError("mastmon, add_sessions", "No pickle file at %s/%s" % (session_dir, 'mast.pickle'))
+            mastobj = self.pm.load_variable('mast.pickle')
+            depdict = mastobj.dependency_dict
+            ingredients = mastobj.ingredients
 
             if self.scheduler is None:
                 print 'step 1: create DAGScheduler object'

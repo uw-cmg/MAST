@@ -82,8 +82,8 @@ class MAST(MASTObj):
         self.input_options = parser_obj.parse()
         
         #set an input stem name
-        self.input_options.set_item('mast', 'input_stem', 
-            self._initialize_input_stem())
+        ipstem = self._initialize_input_stem()
+        self.input_options.set_item('mast', 'input_stem', ipstem)
 
 
         #create the *.py input script
@@ -92,9 +92,13 @@ class MAST(MASTObj):
         
         #run the *.py input script
         import subprocess
+        from MAST.utility import dirutil
+        oppath=ipstem + 'output'
+        opfile = open(oppath, 'ab')
         run_input_script = subprocess.Popen(['python ' + ipc_filename], 
-                shell=True, stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+                shell=True, stdout=opfile, stderr=opfile)
         run_input_script.wait()
+        opfile.close()
         return None
    
     def _initialize_input_stem(self):

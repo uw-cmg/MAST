@@ -48,14 +48,16 @@ def loop_through_errors(mydir):
         if hname in handler_input_d.keys():
             hinputs = handler_input_d[hname]
         if hinputs == "mast_skip":
-            print "Skipping ",hname
+            pass
+            #print "Skipping ",hname
         else:
-            print "Checking for ",hname
+            #print "Checking for ",hname
             myerror = handlerdict[hname](hinputs)
             if myerror.check():
                 print hname, "Error found! Attempting to correct."
                 errct = errct + 1
                 myerror.correct()
             else:
-                print hname,": No error found."
+                pass
+                #print hname,": No error found."
     return errct
