@@ -189,6 +189,43 @@ class MAST(MASTObj):
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
     def _initialize_ingredients(self, ingredients_dict):
+
+#        print '\nInitializing ingredients.'
+#
+#        print '\nExtracting base structure.'
+#        structure = self.input_options.get_item('structure', 'structure')
+#        print structure, '\n'
+#
+#        print '\nExtracting default ingredient options.'
+#        ingredient_global = self.input_options.get_item('ingredients', 'global')
+#
+#        print '\nChecking status of defects.'
+#        ndefects = self.input_options.get_item('defects', 'num_defects')
+#        if ndefects == None:
+#            defects = False
+#            print 'No defects found.'
+#        else:
+#            defects = True
+#            defect_keys = self.input_options.get_item('defects', 'defects')
+#            if (ndefects == 1):
+#                print 'Found %i defect.\n' % ndefects
+#            else:
+#                print 'Found %i defects.\n' % ndefects
+#
+#        print "GRJ DEBUG:", self.unique_ingredients
+#        print "GRJ DEBUG:", ingredients_dict
+#        print "GRJ DEBUG:", defect_keys
+#        for ingredient in self.unique_ingredients:
+#            print 'Initializing ingredient %s.' % ingredient
+#            if (ingredient == 'inducedefect'):
+#                self.input_options.set_item('ingredients', ingredient, defect_keys)              
+#            elif (not self.input_options.get_item('ingredients', ingredient)):
+#                self.input_options.set_item('ingredients', ingredient, ingredient_global)
+#
+#        print 'GRJ DEBUG:', self.input_options.get_item('ingredients', 'inducedefect')
+#
+#        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
+#                                structure=structure, ingredientsDict=ingredients_dict)
         setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
                 inputOptions=self.input_options,
                 structure=self.input_options.get_item('structure','structure'), 
