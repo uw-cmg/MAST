@@ -34,14 +34,17 @@ def set_handler_inputs():
 
     return handler_input_d
 
-def loop_through_errors(mydir):
+def loop_through_errors(mydir, neb=0):
     """Loop through all errors in the error handlers.
     """
     errct = 0
     handlerdict = get_error_handlers() 
     handler_input_d = set_handler_inputs()
     myerror = ""
-    os.chdir(mydir)
+    if neb == 1:
+        os.chdir(os.path.basename(mydir))
+    else:
+        os.chdir(mydir)
     print "Checking errors for: ",mydir
     for hname in handlerdict.keys():
         hinputs=""

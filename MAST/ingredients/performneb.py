@@ -141,7 +141,7 @@ class PerformNEB(BaseIngredient):
                 struct_ed_base.insert_site(elemstarts[myelem], mysite.specie,
                                         mysite.frac_coords)
 
-        if not len(nebidx) == len(self.neblines):
+        if not len(nebidx) == len(self.neblines[mylabel]):
             raise MASTError(self.__class__.__name__, "Not all NEB lines found.")
         return struct_ed.modified_structure        
 
