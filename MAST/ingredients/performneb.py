@@ -102,24 +102,45 @@ class PerformNEB(BaseIngredient):
         import MAST.data
         atol = 0.1 # Need fairly large tolerance to account for relaxation.
         sortedstruc = mystruc.get_sorted_structure()
+        sortedstruc_base = self.keywords['structure'].get_sorted_structure()
         struct_ed = StructureEditor(sortedstruc)
+        struct_ed_base = StructureEditor(sortedstruc_base)
         # We are not actually translating the sites; just get them into unit
         # cell
         struct_ed.translate_sites(range(0,len(sortedstruc.sites)),np.zeros(3),True)
         nebidx = list()
 
         elemstarts = self.get_element_indices(sortedstruc)
-
-        for nebline in self.neblines:
+        mylabels = self.get_my_labels()
+        mylabel = '-'.join(mylabels)
+        #print "TTM DEBUG: my neb lines", self.neblines[mylabel]
+        for nebline in self.neblines[mylabel]:
+            usebase=0
             nebdict = self.parse_neb_line(nebline)
-            index = find_in_coord_list(sortedstruc.frac_coords,
-                    nebdict['coord'][initorfin],atol)
-            nebidx.append(index)
-            mysite = sortedstruc.sites[index]
-            myelem = MAST.data.atomic_number[mysite.species_string]
-            struct_ed.delete_site(index)
-            struct_ed.insert_site(elemstarts[myelem], mysite.specie,
-                                    mysite.frac_coords)
+            mycoord = nebdict['coord'][initorfin]
+            index = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
+            print 'TTM DEBUG: index: ', index
+            if len(index) == 0: #try the base structure, for vacancies
+                usebase=1
+                index = find_in_coord_list(sortedstruc_base.frac_coords,
+                    mycoord, atol)
+            if len(index) == 0:
+                raise MASTError(self.__class__.__name__, "No coordinate found matching %s" % mycoord)
+            if usebase==0:
+                nebidx.append(index[0]) #only take first site?
+                mysite = sortedstruc.sites[index[0]]
+                myelem = MAST.data.atomic_number[mysite.species_string]
+                struct_ed.delete_site(index)
+                struct_ed.insert_site(elemstarts[myelem], mysite.specie,
+                                        mysite.frac_coords)
+            else:
+                nebidx.append(index[0]) #only take first site?
+                mysite = sortedstruc_base.sites[index[0]]
+                myelem = MAST.data.atomic_number[mysite.species_string]
+                struct_ed_base.delete_site(index)
+                struct_ed_base.insert_site(elemstarts[myelem], mysite.specie,
+                                        mysite.frac_coords)
+
         if not len(nebidx) == len(self.neblines):
             raise MASTError(self.__class__.__name__, "Not all NEB lines found.")
         return struct_ed.modified_structure        
@@ -147,24 +168,25 @@ class PerformNEB(BaseIngredient):
 
     def parse_neb_line(self, nebline):
         """Parse an NEB atomic movement line which has the following format:
-                    Cr, 0 0 0, 0.5 0.5 0.5
+                    Cr, 0 0 0, 0.5 0.5 0.5 in the input file, and
+                    ['Cr','0 0 0','0.5 0.5 0.5'] here as nebline
                     element, init_coord, fin_coord
             Args:
-                line <str>: NEB atomic movement line
+                line <list of str>: NEB atomic movement line
             Returns:
                 linedict <dict>: 
                                  ['element'] <int> = element's atomic number
                                  ['coord'][0] <np.array> = initial coordinates
                                  ['coord'][1] <np.array> = final coordinates
         """
-        nebsplit = nebline.split(',')
         nebdict=dict()
-        nebelem = str(nebsplit[0].strip())
+        #print "TTM DEBUG: nebline", nebline
+        nebelem = str(nebline[0].strip()).title()
         import MAST.data
         nebdict['element'] = MAST.data.atomic_number[nebelem]
         nebdict['coord'] = dict()
-        nebdict['coord'][0] = np.array(nebsplit[1].split(), dtype='float')
-        nebdict['coord'][1] = np.array(nebsplit[2].split(), dtype='float')
+        nebdict['coord'][0] = np.array(nebline[1].split(), dtype='float')
+        nebdict['coord'][1] = np.array(nebline[2].split(), dtype='float')
         return nebdict
         
     def get_parent_structures(self):

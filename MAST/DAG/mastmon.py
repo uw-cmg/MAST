@@ -79,7 +79,7 @@ class MASTmon(object):
             if 'scheduler' in var_dict:
                 self.scheduler = var_dict['scheduler']
         
-    def run(self, niter=None, stopcond=None, interval=None):
+    def run(self, niter=None, verbose=0, stopcond=None, interval=None):
         """Run Mastmon. First of all, this makes MASTmon go to mastmon home load dagscheduler pickle.
             In addition, there are couple of options to run mastmon. \n
             ex) mastmon.run()  # run MASTmon forever as a real daemon. By default interval is 10 sec. \n
@@ -110,6 +110,8 @@ class MASTmon(object):
             iter = iter + 1
             # get directories from mast home
             session_dirs = os.walk('.').next()[1]
+            if verbose == 1:
+                print "Session dirs: ", session_dirs
 
             # remove 'archive' directory from the list of session directories
             if self._ARCHIVE in session_dirs:
@@ -120,13 +122,14 @@ class MASTmon(object):
                 os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
 
             new_session_dirs = set(session_dirs) - self.registered_dir
-            #print "TTM DEBUG: ",new_session_dirs
+            if verbose == 1:
+                print "new session dirs: ",new_session_dirs
 
             # add new sessions
             self.add_sessions(new_session_dirs)
 
             # run it for n iterations or until all sessions are complete
-            csnames = self.scheduler.run(niter=1)
+            csnames = self.scheduler.run(niter=1, verbose=verbose)
             self.scheduler.show_session_table()
             #remove complete sessions
 

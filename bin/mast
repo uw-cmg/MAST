@@ -19,6 +19,8 @@ def main():
                       help='Output file to print MAST information about run to')
     parser.add_option('-r', '--runmode', dest='runmode', default='run',
                       help='Will start the DAG scheduler and submit jobs to the queue')
+    parser.add_option('-v', '--verbose', dest='verbose', default='0',
+                      help="Run with verbose messages.")
 
     (mastopt, mastarg) = parser.parse_args()
 
@@ -40,7 +42,10 @@ def main():
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'run'):
         mastmon = MASTmon()
-        mastmon.run(1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
+        if int(mastopt.verbose) == 1:
+            mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
+        else:
+            mastmon.run(1,0)
 
     if (mastopt.mode == 'input'):
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)

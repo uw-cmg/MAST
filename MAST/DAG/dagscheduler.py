@@ -94,8 +94,14 @@ class DAGScheduler:
                 job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
                 
-    def run_jobs(self):
+    def run_jobs(self, verbose=0):
         for jid, job in self.jobtable.jobs.iteritems():
+            if verbose == 1:
+                print "job.name: ",job.name
+                print "    job.ingredient_obj.is_complete(): ",job.ingredient_obj.is_complete()
+                print "    job.status: ",job.status
+                print "    job.is_ready():",job.is_ready()
+                print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
             if job.ingredient_obj.is_complete():
                 job.status = JOB.InQ #Without running put jobs into InQ. In next turn, it will be got complete stuats
                 self.sessiontable.runjobs(sid=job.sid, njobs=jid) # update session table
@@ -139,16 +145,22 @@ class DAGScheduler:
         print ' '
         print self.sessiontable
 
-    def run(self, niter=None):
-        """run dag scheduler.
-            return csnames # complete session names / relative path of complete sessions from MAST_SCRATCH dir \n
-            ex) dagschedulder.run() #run until all sessions are complete \n
-            ex) dagscheduler.run(niter=1) #run for 1 iteration or all sessions are complete \n
+    def run(self, niter=None, verbose=0):
+        """Run DAG scheduler.
+            Args:
+                niter <int>: number of iterations to run
+                            None (default) = run until all sessions are complete
+                            Otherwise, run scheduler niter number of times
+                verbose <int>: 0 (defult) = not verbose
+                               1 = include extra notification messages
+            Returns:
+                csnames <set of str>: set of completed session names; path of
+                    complete sessions relative to MAST_SCRATCH directory
         """
         iter = 0
         csnames = set()
         while self.has_incomplete_session():
-            self._run()
+            self._run(verbose)
             #TTM DEBUG: do not move sessions to archive directory within loop
             iter = iter+1
             if niter is not None and iter >= niter:
@@ -159,8 +171,8 @@ class DAGScheduler:
         return csnames
 
             
-    def _run(self):
-        self.run_jobs()
+    def _run(self, verbose=0):
+        self.run_jobs(verbose)
         self.update_job_status()
         
     def _get_session_path(self, sid):

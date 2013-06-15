@@ -440,15 +440,17 @@ class InputParser(MASTObj):
         for line in section_content:
             type_dict = dict()
             line = line.strip()
-            line = line.split(self.delimiter)
-            if (line[0] == 'images'):
+            if 'images' in line:
+                line = line.split(self.delimiter)
                 images = int(line[1])
-            elif (line[0] == 'begin'):
+            elif 'begin' in line:
+                line = line.split(self.delimiter)
                 neblabel = line[1].strip()
-                neblines[neblabel] = list()
-            elif (line[0] == 'end'):
-                neblabel=""
+                neblines[neblabel]=list()
+            elif 'end' in line:
+                neblabel = ""
             else:
+                line = line.split(',') #use commas for elementl ines
                 neblines[neblabel].append(line)
 
         options.set_item(section_name, 'images', images)
