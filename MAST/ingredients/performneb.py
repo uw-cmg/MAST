@@ -56,7 +56,14 @@ class PerformNEB(BaseIngredient):
             Write images to the appropriate folders.
         """
         parentstructures = self.get_parent_structures()
-        image_structures = self.do_interpolation(parentstructures)
+        parentimagestructures = self.get_parent_image_structures()
+        if len(parentimagestructures) == 0:
+            image_structures = self.do_interpolation(parentstructures)
+        else:
+            image_structures = list()
+            image_structures.append(parentstructures[0])
+            image_structures.extend(parentimagestructures)
+            image_structures.append(parentstructures[1])
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
         if self.keywords['program'] == 'vasp':
@@ -190,7 +197,7 @@ class PerformNEB(BaseIngredient):
         return nebdict
         
     def get_parent_structures(self):
-        """Assume that parents have written two files,
+        """Assume that parents have written files
             named 'parent_structure_<N>'. 
             For VASP these are CONTCAR-type files.
             Returns:
@@ -211,6 +218,29 @@ class PerformNEB(BaseIngredient):
         sorted_fin = self.sort_structure_and_neb_lines(struct_fin, 1)
         return [sorted_init, sorted_fin]
 
+    def get_parent_image_structures(self):
+        """A low-mesh NEB may have written files
+            named 'parent_structure_<N-N>_0N'. 
+            For VASP these are CONTCAR-type files.
+            Returns:
+                list of <Structure>: list of pymatgen Structure objects
+        """
+        header = os.path.join(self.keywords['name'], "parent_structure_")
+        numim = self.keywords['program_keys']['images']
+        imct = 1
+        imstrs=list()
+        while imct <= numim:
+            pfpath = header + str(imct).zfill(2)
+            if not os.path.isfile(pfpath):
+                pass
+            else:
+                struct_im = BaseIngredient.get_structure_from_file(self, pfpath)
+                sorted_im = self.sort_structure_and_neb_lines(struct_im, 0) 
+                imstrs.append(sorted_im)
+            imct = imct + 1
+        if len(imstrs) > 0 and not (len(imstrs) == numim):
+            raise MASTError(self.__class__.__name__, "Incomplete number of forwared images found!")
+        return imstrs
     def do_interpolation(self, parentstructures):
         """Do interpolation."""
         if parentstructures == None:

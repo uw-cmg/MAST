@@ -42,14 +42,17 @@ def loop_through_errors(mydir, neb=0):
     handler_input_d = set_handler_inputs()
     myerror = ""
     if neb == 1:
-        os.chdir(os.path.basename(mydir))
+        os.chdir(os.path.dirname(mydir))
     else:
         os.chdir(mydir)
     print "Checking errors for: ",mydir
     for hname in handlerdict.keys():
         hinputs=""
         if hname in handler_input_d.keys():
-            hinputs = handler_input_d[hname]
+            if neb == 1 and handler_input_d[hname] == 'OUTCAR':
+                hinputs = os.path.join(os.path.basename(mydir),handler_input_d[hname])
+            else:
+                hinputs = handler_input_d[hname]
         if hinputs == "mast_skip":
             pass
             #print "Skipping ",hname
