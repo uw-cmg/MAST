@@ -65,7 +65,7 @@ class BaseIngredient(MASTObj):
                 from MAST.ingredients.errorhandler import vasp_error
                 errct = vasp_error.loop_through_errors(usepath)
                 if errct > 0:
-                    self.run() #Should try to rerun automatically or not??
+                    pass #self.run() #Should try to rerun automatically or not?? NO.
                 return False
         else:
             raise MASTError(self.__class__.__name__, 

@@ -88,7 +88,7 @@ class DAGScheduler:
     def update_job_status(self):
         '''udpate session table and update children'''
         for jid, job in self.jobtable.jobs.iteritems():
-             if job.status == JOB.InQ and job.ingredient_obj.is_complete():
+             if job.status == JOB.CompWait:
                 job.status = JOB.Complete
                 self.sessiontable.completejobs(job.sid, njobs=jid)
                 job.ingredient_obj.update_children()
@@ -98,12 +98,14 @@ class DAGScheduler:
         for jid, job in self.jobtable.jobs.iteritems():
             if verbose == 1:
                 print "job.name: ",job.name
-                print "    job.ingredient_obj.is_complete(): ",job.ingredient_obj.is_complete()
                 print "    job.status: ",job.status
                 print "    job.is_ready():",job.is_ready()
                 print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
             if job.ingredient_obj.is_complete():
-                job.status = JOB.InQ #Without running put jobs into InQ. In next turn, it will be got complete stuats
+                if verbose == 1:
+                    print "    job.ingredient_obj.is_complete(): True"
+                job.status = JOB.CompWait #Without running put jobs into InQ. In next turn, it will be got complete status
+                
                 self.sessiontable.runjobs(sid=job.sid, njobs=jid) # update session table
                 
             if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
@@ -160,10 +162,11 @@ class DAGScheduler:
         iter = 0
         csnames = set()
         while self.has_incomplete_session():
-            self._run(verbose)
+            self._run(verbose=verbose)
             #TTM DEBUG: do not move sessions to archive directory within loop
             iter = iter+1
             if niter is not None and iter >= niter:
+                #print "TTM DEBUG: break"
                 break
             time.sleep(SCHEDULING_INTERVAL) #TTM move sleep
 
