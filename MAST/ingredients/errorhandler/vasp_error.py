@@ -34,28 +34,36 @@ def set_handler_inputs():
 
     return handler_input_d
 
-def loop_through_errors(mydir):
+def loop_through_errors(mydir, neb=0):
     """Loop through all errors in the error handlers.
     """
     errct = 0
     handlerdict = get_error_handlers() 
     handler_input_d = set_handler_inputs()
     myerror = ""
-    os.chdir(mydir)
+    if neb == 1:
+        os.chdir(os.path.dirname(mydir))
+    else:
+        os.chdir(mydir)
     print "Checking errors for: ",mydir
     for hname in handlerdict.keys():
         hinputs=""
         if hname in handler_input_d.keys():
-            hinputs = handler_input_d[hname]
+            if neb == 1 and handler_input_d[hname] == 'OUTCAR':
+                hinputs = os.path.join(os.path.basename(mydir),handler_input_d[hname])
+            else:
+                hinputs = handler_input_d[hname]
         if hinputs == "mast_skip":
-            print "Skipping ",hname
+            pass
+            #print "Skipping ",hname
         else:
-            print "Checking for ",hname
+            #print "Checking for ",hname
             myerror = handlerdict[hname](hinputs)
             if myerror.check():
                 print hname, "Error found! Attempting to correct."
                 errct = errct + 1
                 myerror.correct()
             else:
-                print hname,": No error found."
+                pass
+                #print hname,": No error found."
     return errct
