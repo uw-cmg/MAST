@@ -40,10 +40,13 @@ class InputOptions:
         else:
 	        section_dict.setdefault(key, value)
 
-    def get_item(self, section, key, default_value=None):
+    def get_item(self, section, key=None, default_value=None):
         """Returns the value of the key under this section
         """
-        return self.options.get(section, dict()).get(key, None)
+        if key is None:
+            return self.options.get(section, dict())
+        else:
+            return self.options.get(section, dict()).get(key, None)
 
     def update_item(self, section, key, value):
         """Updates the key/value dict item in the option."""
