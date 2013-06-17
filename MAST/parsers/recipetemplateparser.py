@@ -93,12 +93,12 @@ class RecipeTemplateParser(MASTObj):
             processing_lines.append(line)
             #step 1
             processing_lines = self.process_system_name(processing_lines, system_name)
+            #step 4
+            processing_lines = self.process_defects(processing_lines, n_defects, d_defects)
             #step 2
             processing_lines = self.process_hop_combinations(processing_lines, d_neblines)
             #step 3
             processing_lines = self.process_images(processing_lines, n_images)
-            #step 4
-            processing_lines = self.process_defects(processing_lines, n_defects, d_defects)
 
             #dump the processed lines to file
             output_str = "\n".join(processing_lines)
@@ -125,15 +125,43 @@ class RecipeTemplateParser(MASTObj):
                 d_neblines <dict of str>: dictionary of NEB lines.
         '''
         new_lines = []
+        eval_lines = []
         if not d_neblines:
             return processing_lines
+        line=""
         for line in processing_lines:
             if "<n-n>" in line:
                 for neblabel in d_neblines.keys():
                     n_line = line.replace('<n-n>', neblabel)
-                    new_lines.append(n_line)
+                    eval_lines.append(n_line)
             else:
+                eval_lines.append(line)
+        line=""
+        for line in eval_lines:
+            #print "TTM DEBUG line: ", line
+            if not 'neb' in line.split('_'):
+                #print "TTM DEBUG line safe"
                 new_lines.append(line)
+            else:
+                evalsplit = line.split('child')
+                if len(evalsplit) == 1:
+                    new_lines.append(line)
+                else:
+                    childsplit=evalsplit[1].split('_')
+                    parsplit=evalsplit[0].split('_')
+                    okay=1
+                    for neblabel in d_neblines.keys():
+                        if okay == 1 and (neblabel in childsplit):
+                            parlabels = neblabel.split('-')
+                            #print "TTM DEBUG: parlabels: ",parlabels
+                            #print "TTM DEBUG: parsplit: ",parsplit
+                            if not parlabels[0] in parsplit and not (parlabels[1] in parsplit):
+                                if not neblabel in parsplit: #image static
+                                    okay=0
+                    if okay == 0:
+                        pass
+                    else:
+                        new_lines.append(line)
         return new_lines
 
     def process_images(self, processing_lines, n_images):

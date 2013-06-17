@@ -63,9 +63,12 @@ class BaseIngredient(MASTObj):
                 if not os.path.exists(usepath + '/OUTCAR'):
                     return False #hasn't started running yet.
                 from MAST.ingredients.errorhandler import vasp_error
-                errct = vasp_error.loop_through_errors(usepath)
+                if 'images' in self.keywords['program_keys'].keys():
+                    errct = vasp_error.loop_through_errors(usepath, 1)
+                else:
+                    errct = vasp_error.loop_through_errors(usepath)
                 if errct > 0:
-                    self.run() #Should try to rerun automatically or not??
+                    pass #self.run() #Should try to rerun automatically or not?? NO.
                 return False
         else:
             raise MASTError(self.__class__.__name__, 

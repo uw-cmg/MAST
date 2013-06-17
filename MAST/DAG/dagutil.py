@@ -71,7 +71,7 @@ def gettype(ingredientobj):
     return tokens[-1]
 
 
-Jobstatus = enum('PreQ','InQ','Complete','Error')
+Jobstatus = enum('PreQ','InQ','Complete','Error','CompWait')
 JOB = Jobstatus
 
 now = datetime.datetime.utcnow()
