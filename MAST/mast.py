@@ -129,6 +129,7 @@ class MAST(MASTObj):
             once self.input_options has been set.
         """
         self.input_options = input_options
+        print 'In MAST.start_from_input_options(): input_options =', input_options
         
         #parse the recipe template file and create a personal file
         self._parse_recipe_template()
