@@ -17,7 +17,7 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-
+from MAST.utility import PickleManager
 
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
@@ -117,8 +117,8 @@ class InputParser(MASTObj):
                 line = line.strip()
                 if (line):
                     section_content.append(line)
-
         infile.close()
+
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
