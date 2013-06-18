@@ -80,6 +80,7 @@ class MAST(MASTObj):
         #parse the *.inp input file
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
+        self.perform_element_mapping()
         
         #set an input stem name
         ipstem = self._initialize_input_stem()
@@ -101,6 +102,32 @@ class MAST(MASTObj):
         opfile.close()
         return None
    
+    def perform_element_mapping(self):
+        """Perform element mapping if there is an element map specified,
+            so that defects and NEB lines get the correct element name.
+        """
+        #print self.input_options.get_section_keys('structure')
+        if 'element_map' in self.input_options.get_section_keys('structure'):
+            eldict = self.input_options.get_item('structure','element_map')
+        if 'defects' in self.input_options.get_sections():
+            defdict = self.input_options.get_item('defects','defects')
+            for dkey in defdict.keys():
+                for sdkey in defdict[dkey].keys():
+                    symbol = defdict[dkey][sdkey]['symbol'].upper()
+                    if symbol in eldict.keys():
+                        defdict[dkey][sdkey]['symbol'] = eldict[symbol]
+        if 'neb' in self.input_options.get_sections():
+            neblinedict = self.input_options.get_item('neb','neblines')
+            for nlabelkey in neblinedict.keys():
+                nlinenum = len(neblinedict[nlabelkey])
+                nlinect=0
+                while nlinect < nlinenum:
+                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
+                    if symbol in eldict.keys():
+                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
+                    nlinect = nlinect + 1
+        return
+
     def _initialize_input_stem(self):
         inp_file = self.keywords['inputfile']
         if not ".inp" in inp_file:
