@@ -100,13 +100,3 @@ class DefectFormationEnergy:
         """Returns the final structure from an optimization"""
         if ('vasprun.xml' in os.listdir(directory)):
             return Vasprun('%s/vasprun.xml' % directory).final_structure
-
-def main():
-    directory = os.path.expandvars(sys.argv[1])
-
-    print 'Looking at defect formation energies in %s' % directory
-    DFE = DefectFormationEnergy(directory)
-    print DFE.calculate_defect_formation_energies()
-
-if __name__ == '__main__':
-    main()
