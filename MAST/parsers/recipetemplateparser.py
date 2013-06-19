@@ -191,19 +191,22 @@ class RecipeTemplateParser(MASTObj):
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
         """
-        new_lines = []
+        import inspect
+        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+
+        new_lines = list()
+
         if not n_defects:
             return processing_lines
+
         for line in processing_lines:
             if '<n>' in line:
                 for defect_key in d_defects.keys():
                     defect_label = defect_key.split('_')[1] #defect_1, etc.
-                    new_lines.append(line.replace("<n>", 
-                        defect_label))
+                    new_lines.append(line.replace("<n>", defect_label))
             else:
                 new_lines.append(line)
         return new_lines
-
 
     def get_unique_ingredients(self):
         """fetches the ingredients names"""
