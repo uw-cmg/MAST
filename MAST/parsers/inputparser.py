@@ -410,13 +410,8 @@ class InputParser(MASTObj):
                     ingredients_dict[ingredient_name] = ingredient_dict
 
         # Each value in ingredients_dict is a dictionary containing the relevant
-        # ingredient and option(s). We append the global_dict (containing global
-        # ingredient options here, after checking to make sure the ingredient in
-        # question does not contain the option/value.
+        # ingredient and option(s).
         for ing_key, ing_value in ingredients_dict.items():
-            for glob_key, glob_value in global_dict.items():
-                if glob_key not in ing_value:
-                    ing_value[glob_key] = glob_value
             options.set_item(section_name, ing_key, ing_value)
 
         options.set_item(section_name, 'global', global_dict)

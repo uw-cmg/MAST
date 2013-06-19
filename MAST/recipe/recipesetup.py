@@ -104,16 +104,33 @@ class RecipeSetup(MASTObj):
         return ingredients_info, recipe_name
 
     def create_ingredient(self, name, ingredient_type, child_dict):
-        """Creates the ingredient based on the ingredient type
+        """Creates the ingredient based on the ingredient type.
+            Notes:
+
+            GRJ 6/19/2013: If the ingredient has not be specified in the input
+                           file we create it here, and append on the defaults.
+                           In addition, the defaults are appended on here, rather
+                           than in InputParser (since each ingredient is made here
+                           this makes more sense).
         """
         if ingredient_type not in self.ingredients_dict:
             error = "Ingredient '%s' requested by input file but not found in the recipe!" % ingredient_type
             raise MASTError(self.__class__.__name__, error)
 
-        if ingredient_type not in self.input_options.get_section_keys('ingredients'):
-            # This shouldn't throw an error, it should just append the ingredient to the list of ingredients
-            error = "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type
-            raise MASTError(self.__class__.__name__, error)
+        print '\nInitializing ingredient %s of type %s' % (name, ingredient_type)
+        global_defaults = self.input_options.get_item('ingredients', 'global')
+
+        if (ingredient_type not in self.input_options.get_section_keys('ingredients')):
+            print 'Ingredient type %s has not be specified in the input file.' % ingredient_type
+            print 'Using defaults from ingredients_global.'
+            self.input_options.set_item('ingredients', ingredient_type, global_defaults)
+        else:
+            print 'Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type
+            ing_opt = self.input_options.get_item('ingredients', ingredient_type)
+            for glob_key, glob_value in global_defaults.items():
+                if glob_key not in ing_opt:
+                    ing_opt[glob_key] = glob_value
+            self.input_options.set_item('ingredients', ingredient_type, ing_opt)
 
         self.program = self.input_options.get_item('mast', 'program')
         self.scratch_dir = self.input_options.get_item('mast', 'working_directory')
@@ -122,11 +139,10 @@ class RecipeSetup(MASTObj):
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
         #TTM update ingredients dict to include info from the 
         #'neb', 'defects', and 'chemical_potentials' sections
-        pkey_d = self.input_options.get_item('ingredients', 
-                    ingredient_type).copy()
+        pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
 
-        print 'Initializing %s' % ingredient_name
-        print 'GRJ DEBUG:', pkey_d
+        #print 'GRJ DEBUG: %s ingredient options %s' % (ingredient_type, pkey_d)
+        #print 'GRJ DEBUG: Global ingredient options', self.input_options.get_item('ingredients', 'global')
 
         if 'defects' in self.input_options.options.keys():
             pkey_d.update(self.input_options.get_item('defects','defects'))
@@ -164,8 +180,8 @@ class RecipeSetup(MASTObj):
     def prepare_ingredients(self, recipe_plan):
         """Prepare the ingredients --- called after create_ingredients
         """
-        import inspect
-        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
 
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
             ingredient_obj.write_directory()
@@ -188,9 +204,9 @@ class RecipeSetup(MASTObj):
             raise MASTError(self.__class__.__name__, "Empty Ingredients Dict!")
 
         ingredients_info, recipe_name = self.parse_recipe()
-        print 'DEBUG:, ingredients info =', 
-        for ingredient, value in ingredients_info.items():
-            print ingredient, value
+        #print 'DEBUG:, ingredients info =', 
+        #for ingredient, value in ingredients_info.items():
+        #    print ingredient, value
         recipe_plan = self.create_recipe_plan(ingredients_info, recipe_name)
         self.prepare_ingredients(recipe_plan)
         return recipe_plan
