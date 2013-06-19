@@ -33,7 +33,7 @@ class InduceDefect(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
-        print 'Initializing InduceDefect'
+        #print 'Initializing InduceDefect'
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
