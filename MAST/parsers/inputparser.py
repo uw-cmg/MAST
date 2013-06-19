@@ -244,7 +244,7 @@ class InputParser(MASTObj):
         defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
         multidefect = False
-        charge = 0
+        charge = [0]
         count = 1
         coord_type = 'cartesian'
 
@@ -290,6 +290,7 @@ class InputParser(MASTObj):
                 defect = dict()
                 multidefect = True
                 subcount = 1
+                defect['charge'] = charge
 
                 try:
                     label = line[1]
