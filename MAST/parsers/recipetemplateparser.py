@@ -39,9 +39,9 @@ class RecipeTemplateParser(MASTObj):
         self.ingredient_list = list()
 
     def parse(self):
-        ''' Parses the template recipe file and creates
+        """ Parses the template recipe file and creates
             the personalized recipe file
-        '''
+        """
         if self.template_file is None:
             raise MASTError(self.__class__.__name__, "Template file not provided!")
 
@@ -110,20 +110,20 @@ class RecipeTemplateParser(MASTObj):
         return recipe_name
 
     def process_system_name(self, processing_lines, system_name):
-        '''replace <sys> with the system name from the input options
-        '''
+        """replace <sys> with the system name from the input options
+        """
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
 
     def process_hop_combinations(self, processing_lines, d_neblines):
-        '''replace <n-n> with neb labels which are keys of the
+        """replace <n-n> with neb labels which are keys of the
            neblines dict of the input options.
 
             Args:
                 processing_lines <list of str>: recipe lines to process.
                 d_neblines <dict of str>: dictionary of NEB lines.
-        '''
+        """
         new_lines = []
         eval_lines = []
         if not d_neblines:
@@ -165,10 +165,10 @@ class RecipeTemplateParser(MASTObj):
         return new_lines
 
     def process_images(self, processing_lines, n_images):
-        '''replace <img-n> with the equivalent number of 
+        """replace <img-n> with the equivalent number of 
            lines based on the number of images found in the
            input_options
-        '''
+        """
         new_lines = []
         if not n_images:
             return processing_lines
@@ -181,7 +181,7 @@ class RecipeTemplateParser(MASTObj):
         return new_lines
 
     def process_defects(self, processing_lines, n_defects, d_defects):
-        '''replace <N> with the equivalent number of lines
+        """replace <N> with the equivalent number of lines
            based on the number of defects given in the
            input options
 
@@ -190,7 +190,7 @@ class RecipeTemplateParser(MASTObj):
             n_defects <int>: number of defected systems
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
-        '''
+        """
         new_lines = []
         if not n_defects:
             return processing_lines
@@ -206,5 +206,5 @@ class RecipeTemplateParser(MASTObj):
 
 
     def get_unique_ingredients(self):
-        '''fetches the ingredients names'''
+        """fetches the ingredients names"""
         return list(set(self.ingredient_list))
