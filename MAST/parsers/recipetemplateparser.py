@@ -193,6 +193,7 @@ class RecipeTemplateParser(MASTObj):
         """
         import inspect
         print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        print d_defects
 
         new_lines = list()
 
@@ -200,10 +201,16 @@ class RecipeTemplateParser(MASTObj):
             return processing_lines
 
         for line in processing_lines:
-            if '<n>' in line:
+            if ('<n>' in line) or ('<q>' in line):
                 for defect_key in d_defects.keys():
+                    #print 'GRJ DEBUG: defect_key =', defect_key
                     defect_label = defect_key.split('_')[1] #defect_1, etc.
-                    new_lines.append(line.replace("<n>", defect_label))
+                    def_line = line.replace("<n>", defect_label)
+
+                    charge_list = d_defects[defect_key]['charge']
+                    #print 'GRJ DEBUG: charge_list =', charge_list
+                    for charge in charge_list:
+                        new_lines.append(def_line.replace('<q>', str(charge)))
             else:
                 new_lines.append(line)
         return new_lines
