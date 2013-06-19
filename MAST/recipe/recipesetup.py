@@ -122,13 +122,17 @@ class RecipeSetup(MASTObj):
         #'neb', 'defects', and 'chemical_potentials' sections
         pkey_d = self.input_options.get_item('ingredients', 
                     ingredient_type).copy()
+
         if 'defects' in self.input_options.options.keys():
             pkey_d.update(self.input_options.get_item('defects','defects'))
+
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
                 pkey_d.update(self.input_options.options['neb'])
+
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
+
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
                     structure= self.structure, \
                     program=self.program, \
