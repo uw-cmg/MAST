@@ -43,16 +43,16 @@ class RecipeTemplateParser(MASTObj):
             the personalized recipe file
         '''
         if self.template_file is None:
-            raise MASTError(self.__class__.__name__, "Template file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Template file not provided!")
 
         if not os.path.exists(self.template_file):
-            raise MASTError(self.__class__.__name__, "Template file not found !!!")
+            raise MASTError(self.__class__.__name__, "Template file not found!")
 
         if self.input_options is None:
-            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+            raise MASTError(self.__class__.__name__, "Input Options not provided!")
 
         if self.personal_recipe is None:
-            raise MASTError(self.__class__.__name__, "Personal recipe file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
 
         #fetch required paramaters
         f_ptr           = open(self.template_file, "r")
