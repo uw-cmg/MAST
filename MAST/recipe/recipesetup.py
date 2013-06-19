@@ -47,7 +47,7 @@ class RecipeSetup(MASTObj):
         self.ingredient_keyword  = "ingredient"
         self.parent_keyword      = "parent"
         self.child_keyword       = "child"
-        print 'GRJ DEBUG: Initializing RecipeSetup'
+        print 'Setting up the recipe based on %s' % (self.recipe_file)
 
     def parse_recipe(self):
         """Parses the input personalized recipe file and takes 
@@ -59,7 +59,7 @@ class RecipeSetup(MASTObj):
         ingredients_info = dict()
 
         for line in f_ptr.readlines():
-#            print 'In parse_recipe:', line
+            #print 'In parse_recipe:', line
             line = line.strip()
             #validate the line
             if not line or line.startswith('#'):
@@ -109,6 +109,7 @@ class RecipeSetup(MASTObj):
         if ingredient_type not in self.ingredients_dict:
             error = "Ingredient '%s' requested by input file but not found in the recipe!" % ingredient_type
             raise MASTError(self.__class__.__name__, error)
+
         if ingredient_type not in self.input_options.get_section_keys('ingredients'):
             error = "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type
             raise MASTError(self.__class__.__name__, error)
@@ -122,6 +123,9 @@ class RecipeSetup(MASTObj):
         #'neb', 'defects', and 'chemical_potentials' sections
         pkey_d = self.input_options.get_item('ingredients', 
                     ingredient_type).copy()
+
+        print 'Initializing %s' % ingredient_name
+        print 'GRJ DEBUG:', pkey_d
 
         if 'defects' in self.input_options.options.keys():
             pkey_d.update(self.input_options.get_item('defects','defects'))
@@ -143,11 +147,14 @@ class RecipeSetup(MASTObj):
         """Creates a recipe object which has the ingredients and dependency information
         """
         recipe_obj = RecipePlan(recipe_name)
+
         for name, (ingredient_type, child_dict) in ingredients_info.iteritems():
              ingredient_obj = self.create_ingredient(name, ingredient_type, child_dict)
              recipe_obj.add_ingredient(name, ingredient_obj)
+
              for child in child_dict.iterkeys():
                  recipe_obj.add_parent(child, name)
+
         return recipe_obj
 
     def prepare_ingredients(self, recipe_plan):
@@ -155,7 +162,6 @@ class RecipeSetup(MASTObj):
         """
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
             ingredient_obj.write_directory()
-             
 
     def start(self):
         """Starts the setup process, parse the recipe file
@@ -163,20 +169,22 @@ class RecipeSetup(MASTObj):
            create directories and classes required
         """
         if self.recipe_file is None:
-            raise MASTError(self.__class__.__name__, "Recipe file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Recipe file not provided!")
             
         if not os.path.exists(self.recipe_file):
-            raise MASTError(self.__class__.__name__, "Recipe file not Found !!!")
+            raise MASTError(self.__class__.__name__, "Recipe file not Found!")
 
         if not self.input_options:
-            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+            raise MASTError(self.__class__.__name__, "Input Options not provided!")
 
         if not self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Empty Ingredients Dict !!!")
+            raise MASTError(self.__class__.__name__, "Empty Ingredients Dict!")
 
         ingredients_info, recipe_name = self.parse_recipe()
-        print ingredients_info
-        recipe_plan                   = self.create_recipe_plan(ingredients_info, recipe_name)
+        print 'DEBUG:, ingredients info =', 
+        for ingredient, value in ingredients_info.items():
+            print ingredient, value
+        recipe_plan = self.create_recipe_plan(ingredients_info, recipe_name)
         self.prepare_ingredients(recipe_plan)
         return recipe_plan
 
