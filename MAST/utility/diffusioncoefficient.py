@@ -6,7 +6,7 @@ from MAST.utility import MASTError
 
 kboltz = 8.6173325E-5
 
-def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc, lattparam):
+def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0):
     """Wrapper to dilute solute diffusion coefficient calculations.
         DOES NOT SUPPORT CHARGED SUPERCELLS YET.
         Args:
@@ -54,20 +54,20 @@ def neb_barrier(stem, label):
 def get_labeled_energy(stem, label, append="stat"):
     """Get an energy from a directory."""
     dirname = os.path.dirname(stem)
-    dirlist = os.path.listdir(dirname)
+    dirlist = os.listdir(dirname)
     dirlist.sort()
     mydir=""
     myenergy=0
     for mydir in dirname:
         if (label in mydir) and (append in mydir):
-            myenergy = get_total_energy(mydir)
+            myenergy = get_total_energy(os.path.join(dirname,mydir))
             break
     return myenergy
 
 def get_max_energy(stem, tstlabel, imageflag="image"):
     """Get maximum image energy from an NEB directory."""
     dirname = os.path.dirname(stem)
-    dirlist = os.path.listdir(dirname)
+    dirlist = os.listdir(dirname)
     dirlist.sort()
     mydir=""
     imdirs=list()
@@ -77,7 +77,7 @@ def get_max_energy(stem, tstlabel, imageflag="image"):
     imenergs=dict()
     mydir=""
     for mydir in imdirs:
-        imenergs[get_total_energy(mydir)] = mydir
+        imenergs[get_total_energy(os.path.join(dirname,mydir))] = mydir
     maxenerg = max(imenergs)
     maxdir = imenergs[maxenerg]
     return maxenerg
@@ -199,12 +199,12 @@ def get_formdict(stem, freqdict, ecohpure):
     """Get formation energy dictionary.
     """
     formdict=dict()
-    pure_def = #TTM DEBUG NEED TO SWITCH TO USE GLEN'S FUNCTION
+    #pure_def = #TTM DEBUG NEED TO SWITCH TO USE GLEN'S FUNCTION
     for freq in freqdict.keys():
         formdict[freq] = get_defect_energy_simple(stem, freqdict[freq], ecohpure)
     return formdict
 
-def get_defect_energy_simple(stem, label, append="stat", perf="perf", ecohpure):
+def get_defect_energy_simple(stem, label, append="stat", perf="perf", ecohpure=0):
     """Need to replace with Glen's function"""
     [startlabel, tstlabel] = find_start_and_tst_labels(stem, freqdict[freq])
     dirname = os.path.dirname(stem)
@@ -215,9 +215,9 @@ def get_defect_energy_simple(stem, label, append="stat", perf="perf", ecohpure):
     perfectenergy=None
     for mydir in dirlist:
         if (startlabel in mydir) and (append in mydir):
-            defectedenergy = get_total_energy(mydir)
+            defectedenergy = get_total_energy(os.path.join(dirname,mydir))
         elif (perf in mydir) and (append in mydir):
-            perfectenergy = get_total_energy(mydir) 
+            perfectenergy = get_total_energy(os.path.join(dirname,mydir))
     if defectedenergy==None or perfectenergy==None:
         raise MASTError("utility diffusioncoefficient","No defected energy found.")
     delta = defectedenergy - perfectenergy
