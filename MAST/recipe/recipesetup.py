@@ -111,11 +111,12 @@ class RecipeSetup(MASTObj):
             raise MASTError(self.__class__.__name__, error)
 
         if ingredient_type not in self.input_options.get_section_keys('ingredients'):
+            # This shouldn't throw an error, it should just append the ingredient to the list of ingredients
             error = "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type
             raise MASTError(self.__class__.__name__, error)
 
-        self.program        = self.input_options.get_item('mast', 'program')
-        self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
+        self.program = self.input_options.get_item('mast', 'program')
+        self.scratch_dir = self.input_options.get_item('mast', 'working_directory')
 
         ingredient_name = os.path.join(self.scratch_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
@@ -146,6 +147,9 @@ class RecipeSetup(MASTObj):
     def create_recipe_plan(self, ingredients_info, recipe_name):
         """Creates a recipe object which has the ingredients and dependency information
         """
+        import inspect
+        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+
         recipe_obj = RecipePlan(recipe_name)
 
         for name, (ingredient_type, child_dict) in ingredients_info.iteritems():
@@ -158,8 +162,11 @@ class RecipeSetup(MASTObj):
         return recipe_obj
 
     def prepare_ingredients(self, recipe_plan):
-        """Prepare the ingredients
+        """Prepare the ingredients --- called after create_ingredients
         """
+        import inspect
+        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
             ingredient_obj.write_directory()
 
