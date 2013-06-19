@@ -146,6 +146,7 @@ class RecipeSetup(MASTObj):
 
         if 'defects' in self.input_options.options.keys():
             pkey_d.update(self.input_options.get_item('defects','defects'))
+            #print 'Defect found, pkey_d =', pkey_d
 
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
