@@ -47,7 +47,7 @@ class RecipeSetup(MASTObj):
         self.ingredient_keyword  = "ingredient"
         self.parent_keyword      = "parent"
         self.child_keyword       = "child"
-
+        print 'GRJ DEBUG: Initializing RecipeSetup'
 
     def parse_recipe(self):
         """Parses the input personalized recipe file and takes 
@@ -107,9 +107,11 @@ class RecipeSetup(MASTObj):
         """Creates the ingredient based on the ingredient type
         """
         if ingredient_type not in self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Ingredient '%s' requested by input file but not found in the recipe !!!" % ingredient_type)
+            error = "Ingredient '%s' requested by input file but not found in the recipe!" % ingredient_type
+            raise MASTError(self.__class__.__name__, error)
         if ingredient_type not in self.input_options.get_section_keys('ingredients'):
-            raise MASTError(self.__class__.__name__, "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type)
+            error = "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type
+            raise MASTError(self.__class__.__name__, error)
 
         self.program        = self.input_options.get_item('mast', 'program')
         self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
