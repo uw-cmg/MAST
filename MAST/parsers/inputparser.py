@@ -321,7 +321,8 @@ class InputParser(MASTObj):
 
                 defect['subdefect_%i' % subcount] = type_dict
                 # print 'Rawr!', defect
-                subcount += 1    
+                subcount += 1
+
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
         options.set_item(section_name, 'coord_type', coord_type)
