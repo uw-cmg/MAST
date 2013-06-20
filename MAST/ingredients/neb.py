@@ -17,7 +17,7 @@ import shutil
 #import pdb
 #TTM
 
-class PerformNEB(BaseIngredient):
+class NEB(BaseIngredient):
     """
         Attributes:
         self.labels <list of str>: list of labels labeling the NEB.
