@@ -18,12 +18,42 @@ import shutil
 #TTM
 
 class PhononSingle(Optimize):
+    """
+        Attributes:
+            self.phonon_center_site <np.array of float>: coords of center site
+            self.phonon_center_radius <float>: radius around center site
+            self.label <str>: label of this calculation
+    """
     def __init__(self, **kwargs):
         Optimize.__init__(self, **kwargs)
+
+    def get_my_label(self, signal="phonon"):
+        """Get the calculation label.
+            There should be nothing after the label (e.g. _phonon_label, 
+            with nothing after it.)
+            Args:
+                signal <str>: string to signal the beginning of the label.
+            Returns:
+                The next "_"-delimited piece after the first occurrence of
+                signal.
+        """
+        bname = os.path.basename(self.keywords['name'])
+        namesplit = bname.split('_')
+        if not (signal in namesplit):
+            raise MASTError(self.__class__.__name__, "Phonon label could not be found after signal '%s_'" % signal)
+        sidx = namesplit.index(signal)
+        label = '_'.join(namesplit[sidx+1:])
+        if label == "":
+            raise MASTError(self.__class__.__name__, "No label found after signal '%s_' in ingredient name %s" % (signal, bname)) 
+        self.label = label
+        return label
+
 
     def write_files(self):
         """Write the single phonon files. 
         """
+        self.get_my_label()
+        self.get_my_phonon_params()
         self.set_up_program_input()
         self.write_submit_script()
         mystructure = self.get_structure_from_directory(self.keywords['name'])
@@ -32,17 +62,40 @@ class PhononSingle(Optimize):
             return
         self.add_selective_dynamics_to_structure(sdarr)
 
+    def get_my_phonon_params(self):
+        """Get phonon parameters from 
+            ['program_keys']['phonon'][label]['phonon_center_site'] and
+            ['program_keys']['phonon'][label]['phonon_center_radius'] 
+            and set them into class attributes.
+        """
+        if not 'phonon' in self.keywords['program_keys'].keys():
+            self.phonon_center_site = None
+            self.phonon_center_radius = None
+            return
+        if not self.label in self.keywords['program_keys']['phonon'].keys():
+            raise MASTError(self.__class__.__name__, "Label %s for phonons not found in phonon input dict." % self.label)
+
+        myphdict = dict(self.keywords['program_keys']['phonon'][self.label])
+        if not 'phonon_center_site' in myphdict.keys():
+            self.phonon_center_site = None
+            self.phonon_center_radius = None
+            return
+        self.phonon_center_site = myphdict['phonon_center_site']
+        if not 'phonon_center_radius' in myphdict.keys():
+            self.phonon_center_radius = None
+        else:
+            self.phonon_center_radius = myphdict['phonon_center_radius']
+        return
+
     def get_neighbor_array(self, mystruc, tol=1e-1):
         """
             Get a neighbor-index array.
             Use program_keywords 'phonon_center_site' and 
             'phonon_center_radius' to limit the number of phonons calculated.
-            ['program_keys']['phonon_center_site'] should be a list of 
-                coordinates.
+            ['program_keys']['phonon'][label]['phonon_center_site'] 
+                    should be a coordinate
                     If the key is missing, all atoms will be taken into account.
-                    If there is more than one atom in the list, all of these
-                        atoms which are found will be taken into account.
-            ['program_keys']['phonon_center_radius'] 
+            ['program_keys']['phonon'][label]['phonon_center_radius'] 
                     should be a positive float in ANGSTROMS (Not fractional.)
                     If the key is missing or 0, nothing extra happens.
                     If the key is present and nonzero, then all atoms in a
@@ -52,27 +105,20 @@ class PhononSingle(Optimize):
                 mystruc <Structure>: pymatgen Structure
                 tol <float>: Tolerance for match-searching.
         """
-        if not 'phonon_center_site' in self.keywords['program_keys'].keys():
+        if self.phonon_center_site == None:
             return None
-        pcstotarr=None
-        pcsarr=None
-        for pcs in self.keywords['program_keys']['phonon_center_site']:
-            pcscoord = np.array(pcs.strip().split(), float)
-            pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
-            if pcstotarr == None:
-                pcstotarr = pcsarr
-            else:
-                pcstotarr = np.concatenate([pcstotarr, pcsarr])
         
-        uniqsites = np.unique(pcstotarr)
+        pcscoord = np.array(self.phonon_center_site.strip().split(), float)
+        pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
+        uniqsites = np.unique(pcsarr)
         
         if len(uniqsites) == 0:
             raise MASTError(self.__class__.__name__, "No sites found for phonon centering.")
 
-        if not 'phonon_center_radius' in self.keywords['program_keys'].keys():
+        if self.phonon_center_radius == None:
             return uniqsites
         
-        nrad = float(self.keywords['program_keys']['phonon_center_radius'])
+        nrad = float(self.phonon_center_radius)
         if nrad == 0:
             return uniqsites
         if nrad < 0:
@@ -98,7 +144,7 @@ class PhononSingle(Optimize):
             Args:
                 mystruc <Structure>: pymatgen Structure
         """
-        if not 'phonon_center_site' in self.keywords['program_keys'].keys():
+        if self.phonon_center_site == None:
             return None
         mynbarr = self.get_neighbor_array(mystruc)
         mysd = np.zeros([mystruc.num_sites,3],bool)

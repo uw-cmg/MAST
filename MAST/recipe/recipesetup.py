@@ -125,6 +125,8 @@ class RecipeSetup(MASTObj):
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
                 pkey_d.update(self.input_options.options['neb'])
+        if 'phonon' in self.input_options.options.keys():
+            pkey_d.update(self.input_options.options['phonon'])
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
