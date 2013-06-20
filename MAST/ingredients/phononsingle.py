@@ -30,7 +30,6 @@ class PhononSingle(Optimize):
         sdarr = self.get_sd_array(mystructure)
         if sdarr == None:
             return
-        print "TTM DEBUG: sdarr:", sdarr
         self.add_selective_dynamics_to_structure(sdarr)
 
     def get_neighbor_array(self, mystruc, tol=1e-1):
@@ -88,7 +87,6 @@ class PhononSingle(Optimize):
                 np.concatenate([nbtotarr, neighbors])
         alltotarr = np.concatenate([uniqsites, nbtotarr])
         allsites = np.unique(alltotarr)
-        print "TTM DEBUG: allsites", allsites
         return allsites
 
     def get_sd_array(self, mystruc):

@@ -134,18 +134,18 @@ class DAGScheduler:
             elif job.status is JOB.PreQ and job.is_ready():
                 job.ingredient_obj.write_files()
             
-            elif self.jobtable.jobs[jid].status == JOB.CompWait:
-                if verbose == 1:
-                    print "COMPWAIT job.name: ",job.name
-                    print "    job.status: ",job.status
-                    print "    job.is_ready():",job.is_ready()
-                    print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
-                self.jobtable.jobs[jid].status = JOB.Complete
-                if verbose == 1:
-                    print "    new job.status: ", self.jobtable.jobs[jid].status
-                self.sessiontable.completejobs(job.sid, njobs=jid)
-                job.ingredient_obj.update_children()
-                self.jobtable.update_complete_parent_set(job.children,jid)
+            #elif self.jobtable.jobs[jid].status == JOB.CompWait:
+            #    if verbose == 1:
+            #        print "COMPWAIT job.name: ",job.name
+            #        print "    job.status: ",job.status
+            #        print "    job.is_ready():",job.is_ready()
+            #        print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
+            #    self.jobtable.jobs[jid].status = JOB.Complete
+            #    if verbose == 1:
+            #        print "    new job.status: ", self.jobtable.jobs[jid].status
+            #    self.sessiontable.completejobs(job.sid, njobs=jid)
+            #    job.ingredient_obj.update_children()
+            #    self.jobtable.update_complete_parent_set(job.children,jid)
 
         
     def schedule(self, jobs_file):
