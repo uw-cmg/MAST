@@ -14,7 +14,7 @@ import inspect
 from MAST import ingredients
 from MAST.ingredients import baseingredient
 from MAST.ingredients import optimize
-from MAST.ingredients import performneb
+from MAST.ingredients import neb
 
 class IngredientsLoader:
     def __init__(self):

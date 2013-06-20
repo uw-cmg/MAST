@@ -107,8 +107,11 @@ class MAST(MASTObj):
             so that defects and NEB lines get the correct element name.
         """
         #print self.input_options.get_section_keys('structure')
+        eldict=dict()
         if 'element_map' in self.input_options.get_section_keys('structure'):
             eldict = self.input_options.get_item('structure','element_map')
+        if len(eldict) == 0:
+            return
         if 'defects' in self.input_options.get_sections():
             defdict = self.input_options.get_item('defects','defects')
             for dkey in defdict.keys():

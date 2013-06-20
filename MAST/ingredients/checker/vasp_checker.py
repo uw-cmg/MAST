@@ -234,6 +234,8 @@ def get_path_to_write_neb_parent_energy(myname, myimages, parent):
         return os.path.join(myname, "00", "OSZICAR")
     elif parent == 2:
         return os.path.join(myname, str(int(myimages)+1).zfill(2),"OSZICAR")
+    elif len(parent) > 1:
+        return os.path.join(myname, parent, "OSZICAR")
     else:
         raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
 

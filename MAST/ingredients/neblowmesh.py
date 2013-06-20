@@ -2,7 +2,7 @@ from MAST.ingredients.neb import NEB
 
 class NEBLowMesh(NEB):
     def __init__(self, **kwargs):
-        PerformNEB.__init__(self, **kwargs)
+        NEB.__init__(self, **kwargs)
     
     def update_children(self):
         """Update to ANOTHER NEB."""
