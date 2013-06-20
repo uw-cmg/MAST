@@ -43,7 +43,7 @@ class PhononSingle(Optimize):
                     If there is more than one atom in the list, all of these
                         atoms which are found will be taken into account.
             ['program_keys']['phonon_center_radius'] 
-                    should be a positive float.
+                    should be a positive float in ANGSTROMS (Not fractional.)
                     If the key is missing or 0, nothing extra happens.
                     If the key is present and nonzero, then all atoms in a
                         radius around EACH site found in phonon_center_site
@@ -85,7 +85,11 @@ class PhononSingle(Optimize):
                 nbtotarr = neighbors
             else:
                 np.concatenate([nbtotarr, neighbors])
-        alltotarr = np.concatenate([uniqsites, nbtotarr])
+        nbsitelist=list()
+        for nbr in nbtotarr:
+            nbsitelist.append(nbr[-1])
+        nbsitelist = np.array(nbsitelist)
+        alltotarr = np.concatenate([uniqsites, nbsitelist])
         allsites = np.unique(alltotarr)
         return allsites
 
