@@ -85,37 +85,67 @@ class DAGScheduler:
                 #print kidname +"<="+ pname
                 self.jobtable.add_dependency(pname,kidname)
 
-    def update_job_status(self):
+    def update_job_status(self, verbose=0):
         '''udpate session table and update children'''
         for jid, job in self.jobtable.jobs.iteritems():
-             if job.status == JOB.CompWait:
-                job.status = JOB.Complete
+            if job.status == JOB.CompWait:
+                if verbose == 1:
+                    print "COMPWAIT job.name: ",job.name
+                    print "    job.status: ",job.status
+                    print "    job.is_ready():",job.is_ready()
+                    print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
+                self.jobtable.jobs[jid].status = JOB.Complete
+                if verbose == 1:
+                    print "    new job.status: ", self.jobtable.jobs[jid].status
                 self.sessiontable.completejobs(job.sid, njobs=jid)
                 job.ingredient_obj.update_children()
                 self.jobtable.update_complete_parent_set(job.children,jid)
                 
     def run_jobs(self, verbose=0):
         for jid, job in self.jobtable.jobs.iteritems():
+
             if verbose == 1:
                 print "job.name: ",job.name
                 print "    job.status: ",job.status
                 print "    job.is_ready():",job.is_ready()
                 print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
-            if job.ingredient_obj.is_complete():
+            
+            if job.status == JOB.Complete:
+                pass
+            
+            elif job.ingredient_obj.is_complete():
                 if verbose == 1:
                     print "    job.ingredient_obj.is_complete(): True"
-                job.status = JOB.CompWait #Without running put jobs into InQ. In next turn, it will be got complete status
+                job.status = JOB.Complete #TTM go straight to complete? Without running put jobs into InQ. In next turn, it will be got complete status
                 
                 self.sessiontable.runjobs(sid=job.sid, njobs=jid) # update session table
+                if verbose == 1:
+                    print "    new job.status: ", self.jobtable.jobs[jid].status
+                self.sessiontable.completejobs(job.sid, njobs=jid)
+                job.ingredient_obj.update_children()
+                self.jobtable.update_complete_parent_set(job.children,jid)
                 
-            if job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
+            elif job.status is JOB.PreQ and job.is_ready() and job.ingredient_obj.is_ready_to_run():
                 job.ingredient_obj.run() #TTM do not default mode in dag scheduler; make ingredients default. mode=self._run_mode)
                 job.status = JOB.InQ
                 sid = job.sid
                 self.sessiontable.runjobs(sid=sid, njobs=jid) # update session table
                 
-            if job.status is JOB.PreQ and job.is_ready():
+            elif job.status is JOB.PreQ and job.is_ready():
                 job.ingredient_obj.write_files()
+            
+            elif self.jobtable.jobs[jid].status == JOB.CompWait:
+                if verbose == 1:
+                    print "COMPWAIT job.name: ",job.name
+                    print "    job.status: ",job.status
+                    print "    job.is_ready():",job.is_ready()
+                    print "    job.ingredient_obj.is_ready_to_run():",job.ingredient_obj.is_ready_to_run()
+                self.jobtable.jobs[jid].status = JOB.Complete
+                if verbose == 1:
+                    print "    new job.status: ", self.jobtable.jobs[jid].status
+                self.sessiontable.completejobs(job.sid, njobs=jid)
+                job.ingredient_obj.update_children()
+                self.jobtable.update_complete_parent_set(job.children,jid)
 
         
     def schedule(self, jobs_file):
@@ -176,7 +206,7 @@ class DAGScheduler:
             
     def _run(self, verbose=0):
         self.run_jobs(verbose)
-        self.update_job_status()
+        #self.update_job_status(verbose)
         
     def _get_session_path(self, sid):
         return os.path.join(self.home,self.sessiontable.get_sname(sid))

@@ -280,7 +280,12 @@ def set_up_program_input_neb(keywords, image_structures):
     return
 
 def add_selective_dynamics_to_structure(keywords, sdarray):
-    myposcar = Poscar.from_file(os.path.join(keywords['name'],"POSCAR"))
-    myposcar.selective_dynamics = sdarray
-    myposcar.write_file(os.path.join(keywords['name'],"POSCAR"))
+    name = keywords['name']
+    pname = os.path.join(name,"POSCAR")
+    phposcar = Poscar.from_file(pname)
+    phposcar.selective_dynamics = sdarray
+    dirutil.lock_directory(name)
+    os.rename(pname, pname + "_no_sd")
+    phposcar.write_file(pname)
+    dirutil.unlock_directory(name)
     return
