@@ -19,7 +19,15 @@ class BaseIngredient(MASTObj):
             print "Directory exists."
             return
         return
-   
+  
+    def get_structure_from_directory(self, dirname):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.get_structure_from_directory(dirname)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_structure_from_directory)")
+
     def get_structure_from_file(self, filepath):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
@@ -152,9 +160,19 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_neb)")
 
+    def add_selective_dynamics_to_structure(self, sdarray):
+        """Adds selective dynamics to a structure."""
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.add_selective_dynamics_to_structure(self.keywords, sdarray)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in add_selective_dynamics_to_structure)")
 
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
         raise NotImplementedError
+    
+
 

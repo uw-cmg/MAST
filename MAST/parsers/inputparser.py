@@ -377,6 +377,10 @@ class InputParser(MASTObj):
                     if len(opt) > 2:
                         kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
+                elif (opt[0] == 'phonon_center_site'):
+                    siteline = line.split(' ',1)[1]
+                    sitecoords = siteline.split(',')
+                    ingredient_dict[opt[0]] = sitecoords
                 else:
                     ingredient_dict[opt[0]] = opt[1]
             elif ('end' in line):
