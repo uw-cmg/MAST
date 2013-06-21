@@ -214,7 +214,8 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
             adjustment = float(keywords['program_keys']['mast_charge'])
         except (ValueError, TypeError):
             raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
-        newelectrons = myelectrons + adjustment
+        #newelectrons = myelectrons + adjustment
+        newelectrons = myelectrons - adjustment
         myd['NELECT']=str(newelectrons)
     my_incar = Incar(myd)
     dirutil.lock_directory(name)
