@@ -31,9 +31,9 @@ class Optimize(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
-        import inspect
-        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
-        print 'Program_keys =', self.keywords['program_keys']
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        #print 'Program_keys =', self.keywords['program_keys']
 
     def is_complete(self):
         return BaseIngredient.is_complete(self)
