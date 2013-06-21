@@ -15,17 +15,20 @@ class MASTmon(object):
     
     def __init__(self):
         self.registered_dir = set()
-        self.home = os.environ['MAST_SCRATCH']
+
+        self.home = os.path.expandvars(os.environ['MAST_SCRATCH'])
+        self._ARCHIVE = os.path.expandvars(os.environ['MAST_ARCHIVE'])
+
         self.pm = PickleManager()
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
-        self._ARCHIVE = os.environ['MAST_ARCHIVE']
         self.scheduler = DAGScheduler()
         self.version = 0.1
         
         try:
             if not os.path.exists(self.home):
-                os.system('mkdir %s' % abspath(self.home))
-                os.system('mkdir %s' % os.path.join(abspath(self.home), self._ARCHIVE))
+                os.makedirs(self.home)
+            if not os.path.exists(self._ARCHIVE):
+                os.makedirs(self._ARCHIVE)
         except:
             raise MASTError(self.__class__.__name__,
                     "Error making directory for MASTmon and completed sessions")
