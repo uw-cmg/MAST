@@ -207,11 +207,11 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
         else:
             magmomstr = magstr
         myd['MAGMOM']=magmomstr
-    if 'mast_adjustnelect' in keywords['program_keys'].keys():
+    if 'mast_charge' in keywords['program_keys'].keys():
         myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
         newelectrons=0.0
         try:
-            adjustment = float(keywords['program_keys']['mast_adjustnelect'])
+            adjustment = float(keywords['program_keys']['mast_charge'])
         except (ValueError, TypeError):
             raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
         newelectrons = myelectrons + adjustment
