@@ -211,9 +211,9 @@ class RecipeTemplateParser(MASTObj):
                     #print 'GRJ DEBUG: charge_list =', charge_list
                     for charge in charge_list:
                         if (charge < 0):
-                            clabel = 'n' + str(abs(charge))
+                            clabel = 'q=n' + str(abs(charge))
                         else:
-                            clabel = 'p' + str(charge)
+                            clabel = 'q=p' + str(charge)
                         new_lines.append(def_line.replace('<q>', clabel))
             else:
                 new_lines.append(line)
