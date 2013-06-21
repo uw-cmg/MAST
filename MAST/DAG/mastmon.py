@@ -18,7 +18,7 @@ class MASTmon(object):
         self.home = os.environ['MAST_SCRATCH']
         self.pm = PickleManager()
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
-        self._ARCHIVE = 'archive'
+        self._ARCHIVE = os.environ['MAST_ARCHIVE']
         self.scheduler = DAGScheduler()
         self.version = 0.1
         
