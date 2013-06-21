@@ -30,15 +30,16 @@ class MASTmon(object):
             raise MASTError(self.__class__.__name__,
                     "Error making directory for MASTmon and completed sessions")
 
-    def add_sessions(self,new_session_dirs):
+    def add_sessions(self, new_session_dirs):
         """recipe_dirs is a set of sessions in MASTmon home directory"""
         for session_dir in  new_session_dirs:
+            print 'session_dir =', session_dir
             if not os.path.exists(session_dir):
                 raise MASTError("mastmon, add_sessions", "No session_dir at %s" % session_dir)
             os.chdir(session_dir)
             if not os.path.isfile('mast.pickle'):
                 raise MASTError("mastmon, add_sessions", "No pickle file at %s/%s" % (session_dir, 'mast.pickle'))
-            mastobj = self.pm.load_variable('mast.pickle')
+            mastobj = self.pm.load_variable('mast.pickle')	
             depdict = mastobj.dependency_dict
             ingredients = mastobj.ingredients
 
@@ -119,7 +120,9 @@ class MASTmon(object):
 
             else:
                 # if masthome doesn't have 'archive', then make it
-                os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
+                #os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
+                if not os.path.exists(self._ARCHIVE):
+                    os.makedirs(self._ARCHIVE)
 
             new_session_dirs = set(session_dirs) - self.registered_dir
             if verbose == 1:
