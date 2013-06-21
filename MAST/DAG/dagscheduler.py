@@ -19,6 +19,7 @@ class DAGScheduler:
         self.sessiontable = SessionTable()
         self._run_mode = 'noqsub' # noqsub, serial (by qsub), parallel
         self.home = os.environ['MAST_SCRATCH']
+        self._ARCHIVE = os.environ['MAST_ARCHIVE']
 
     def set_mode(self,mode):
         self._run_mode = mode
@@ -188,7 +189,7 @@ class DAGScheduler:
     def _move_to_archive(self):
         csid = self.get_complete_session_id()
         os.chdir(self.home)
-        dst = os.path.join(self.home,'archive')
+        dst = os.path.join(self.home, self._ARCHIVE)
         csnames = set()
         if not os.path.exists(dst):
             os.mkdir(dst)
