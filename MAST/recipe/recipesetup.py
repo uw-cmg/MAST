@@ -142,11 +142,23 @@ class RecipeSetup(MASTObj):
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
 
         #print 'GRJ DEBUG: %s ingredient options %s' % (ingredient_type, pkey_d)
+        #print 'GRJ DEBUG: %s ingredient' % ingredient_name
         #print 'GRJ DEBUG: Global ingredient options', self.input_options.get_item('ingredients', 'global')
+        #print 'GRJ DEBUG: %s', self.input_options.options.keys()
 
         if 'defects' in self.input_options.options.keys():
-            pkey_d.update(self.input_options.get_item('defects','defects'))
-            #print 'Defect found, pkey_d =', pkey_d
+            if 'defect_' in name.lower():
+                pkey_d.update(self.input_options.get_item('defects','defects'))
+                if 'inducedefect' not in ingredient_type:
+                    clabel = [label for label in ingredient_name.split('_') if 'q=' in label][0].split('=')[1]
+                    if 'n' in clabel[0]:
+                        sign = -1
+                    else:
+                        sign = 1
+                    charge = sign * int(clabel[1:])
+                    #print 'GRJ DEBUG: Charge =', charge
+                    pkey_d['charge'] = charge
+                    #print 'Defect found, pkey_d =', pkey_d
 
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
@@ -155,6 +167,7 @@ class RecipeSetup(MASTObj):
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
 
+        print 'Final pkey_d =', pkey_d
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
                     structure= self.structure, \
                     program=self.program, \
