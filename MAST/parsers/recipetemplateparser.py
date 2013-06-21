@@ -7,7 +7,7 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
-import os
+import os, math
 
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
@@ -191,9 +191,9 @@ class RecipeTemplateParser(MASTObj):
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
         """
-        import inspect
-        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
-        print d_defects
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        #print d_defects
 
         new_lines = list()
 
@@ -210,7 +210,11 @@ class RecipeTemplateParser(MASTObj):
                     charge_list = d_defects[defect_key]['charge']
                     #print 'GRJ DEBUG: charge_list =', charge_list
                     for charge in charge_list:
-                        new_lines.append(def_line.replace('<q>', str(charge)))
+                        if (charge < 0):
+                            clabel = 'n' + str(abs(charge))
+                        else:
+                            clabel = 'p' + str(charge)
+                        new_lines.append(def_line.replace('<q>', clabel))
             else:
                 new_lines.append(line)
         return new_lines
