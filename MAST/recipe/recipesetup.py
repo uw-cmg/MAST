@@ -157,7 +157,7 @@ class RecipeSetup(MASTObj):
                         sign = 1
                     charge = sign * int(clabel[1:])
                     #print 'GRJ DEBUG: Charge =', charge
-                    pkey_d['charge'] = charge
+                    pkey_d['mast_charge'] = charge
                     #print 'Defect found, pkey_d =', pkey_d
 
         if 'neb' in self.input_options.options.keys():
