@@ -53,17 +53,23 @@ def neb_barrier(stem, label):
         print "Attention! Maximum energy is from an endpoint, not an image!"
     return (maxenergy - startenergy)
 
-def get_labeled_energy(stem, label, append="stat"):
-    """Get an energy from a directory."""
+def get_labeled_dir(stem, label, append="stat"):
+    """Get a labeled directory."""
     dirname = os.path.dirname(stem)
     dirlist = os.listdir(dirname)
     dirlist.sort()
     mydir=""
-    myenergy=0
     for mydir in dirname:
         if (label in mydir) and (append in mydir):
-            myenergy = get_total_energy(os.path.join(dirname,mydir))
+            mypath=os.path.join(dirname, mydir)
             break
+    return mypath
+
+def get_labeled_energy(stem, label, append="stat"):
+    """Get an energy from a directory."""
+    mypath = get_labeled_dir(stem, label, append)
+    myenergy=0
+    myenergy = get_total_energy(mypath)
     return myenergy
 
 def get_max_energy(stem, tstlabel, imageflag="image"):
@@ -209,20 +215,20 @@ def get_formdict(stem, freqdict, ecohpure):
 def get_defect_energy_simple(stem, label, append="stat", perf="perf", ecohpure=0):
     """Need to replace with Glen's function"""
     [startlabel, tstlabel] = find_start_and_tst_labels(stem, freqdict[freq])
-    dirname = os.path.dirname(stem)
-    dirlist = os.listdir(dirname)
-    dirlist.sort()
-    mydir=""
-    defectedenergy=None
-    perfectenergy=None
-    for mydir in dirlist:
-        if (startlabel in mydir) and (append in mydir):
-            defectedenergy = get_total_energy(os.path.join(dirname,mydir))
-        elif (perf in mydir) and (append in mydir):
-            perfectenergy = get_total_energy(os.path.join(dirname,mydir))
+    defpath=get_labeled_dir(stem, startlabel, append)
+    perfpath=get_labeled_dir(stem, perf, append)
+    defectedenergy = get_total_energy(defpath)
+    perfectenergy = get_total_energy(perfpath)
     if defectedenergy==None or perfectenergy==None:
         raise MASTError("utility diffusioncoefficient","No defected energy found.")
     delta = defectedenergy - perfectenergy
+    if ecohpure==0:
+        mypos=pymatgen.io.vaspio.Poscar.from_file(os.path.join(perfpath, "POSCAR"))
+        totatoms=sum(mypos.natoms)
+        echopure=perfectenergy/totatoms
+        myfile=MASTFile()
+        myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % dirname)
+        myfile.to_file(os.path.join(dirname,"WARNING"))
     eform = delta + ecohpure #Add on reference atom
     return eform
 
@@ -243,6 +249,10 @@ def get_entrodict_approx(stem, freqdict, hopdict, formdict, tmeltpurehost):
     entrodict=dict()
     S_v=2.07e-4
     beta=0.4
+    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
+    hostelem = pymatgen.core.periodic_table.Element(hoststr)
+    if tmeltpurehost==0:
+        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
     for freq in freqdict.keys():
         if not (freq == 'w2'):
             entroform_d[freq] = S_v #Shewmon, Sv/R approx 2.4?? =2.07e-4
@@ -258,9 +268,22 @@ def get_entrodict_approx(stem, freqdict, hopdict, formdict, tmeltpurehost):
 def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost, masssolute):
     """Get approximate vibrational dictionary, using Adams approximations:
         v_0=v_1=v_3=v_4 and (v2/v0) = sqrt(mass0*Tmeltpure2/(mass2*Tmeltpure0)
+        Temperatures are in KELVIN.
+        Masses are in AMU.
     """
     stock_v=1e13
     vibdict=dict()
+    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
+    hostelem = pymatgen.core.periodic_table.Element(hoststr)
+    solelem = pymatgen.core.periodic_table.Element(solstr)
+    if masshost==0:
+        masshost = hostelem.atomic_mass
+    if masssolute==0:
+        masssolute = solelem.atomic_mass
+    if tmeltpurehost==0:
+        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
+    if tmeltpuresolute==0:
+        tmeltpuresolute = float(str(solelem.melting_point).split()[0])
     for freq in freqdict.keys():
         if not (freq == 'w2'):
             vibdict[freq] = stock_v
@@ -269,8 +292,33 @@ def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost,
     return vibdict
     
 def get_host_and_solute(stem, freqdict):
-    """Return the host and the solute."""
-    pass
+    """Find the host and the solute based on relative numbers in POSCAR,
+        for a BINARY, DILUTE system. (One host element type, 
+        one solute element type.)
+        Returns:
+            [host,solute] <str>: element symbols, like "Fe"
+
+    """
+    if 'w2' in freqdict.keys():
+        label=freqdict['w2']
+    else:
+        raise MASTError("utility/diffusioncoefficient","Cannot see how to determine solute and host")
+    [startlabel, tstlabel]=find_start_and_tst_labels(stem, label)
+    mydir = get_labeled_dir(stem, startlabel)
+    pospath = os.path.join(mydir, "POSCAR")
+    if os.path.isfile(pospath):
+        mypos = pymatgen.io.vaspio.Poscar.from_file(pospath)
+        sitesym = mypos.site_symbols
+        natoms = mypos.natoms
+        hostidx=natoms.index(max(natoms))
+        solidx=natoms.index(min(natoms))
+        host=sitesym[hostidx]
+        solute=sitesym[solidx]
+        return [host, solute]
+    else:
+        raise MASTError("utility/diffusioncoefficient","No POSCAR in %s." % pospath)
+
+
 
 
 def phonons():
