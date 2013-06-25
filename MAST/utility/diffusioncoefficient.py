@@ -6,6 +6,177 @@ from MAST.utility import MASTError
 
 kboltz = 8.6173325E-5
 
+class DiffusionCoefficient():
+    """Dilute solute vacancy diffusion coefficient calculations.
+        DOES NOT SUPPORT CHARGED SUPERCELLS until DefectFormationEnergy does
+        Args:
+            self.directory <str>: directory of the recipe to calculate
+            self.freqmodel <int>: frequency model   
+                                5 : five-frequency model
+                                1 : one frequency; pure system
+            self.freqdict <dict of str>: frequency-to-label dictionary:
+                        freqdict['w0']=['vac1-vac2']
+                        freqdict['w4']=['vac10-vac9']
+                            If a label is backwards from what is in the 
+                            neb ingredient's actual name, then
+                            the backwards hop will be taken.
+                            Initial state for phonons will be the first
+                            label in the label pair as listed in this dict.
+            self.host <str>: string with the host element's symbol (e.g. "Fe")
+            self.solute <str>: string with the solute element's symbol
+            self.input_options <InputOptions>: input options of the recipe
+            self.dirlist <list of str>: list of directories underneath 
+                                        self.directory
+    """
+    def __init__(self, directory):
+        self.directory = directory
+        dirlist = os.listdir(self.directory)
+        dirlist.sort()
+        self.dirlist = dirlist
+        self.freqmodel=None
+        self.freqdict=None
+        self.host=None
+        self.solute=None
+        self.input_options=None
+        try:
+            pm = PickleManager(self.directory + 'input_options.pickle')
+            self.input_options = pm.load_variable()
+        except OSError:
+            pass
+        return
+
+
+
+    def set_freqmodel(self, freqmodel=1)        
+        """Set the frequency model to use.
+            Args:
+                freqmodel <int>: Frequency model; this is overriden by any
+                            'freqmodel' entry in the input options program keys
+                                1 (default): pure vacancy
+                                5 : five-frequency model
+        """
+        trymodel=None
+        if not (self.input_options == None):
+            if "freqmodel" in self.input_options['program_keys'].keys():
+                trymodel = self.input_options['program_keys']['freqmodel']
+        if trymodel == None: #was not set in input options
+            try:
+                trymodel=int(freqmodel)
+            except (TypeError, ValueError):
+                raise MASTError(self.__class__.__name__, "Bad type for frequency model integer.")
+        if not (trymodel in [1, 5]):
+            raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % trymodel)
+        self.freqmodel = trymodel
+        return self.freqmodel
+            
+    def set_frequency_dict(self, freqdict=""):
+        """Set up the frequency dictionary.
+            Args:
+                freqdict <dict of str>: Frequency dictionary. Overridden by
+                    any 'freqdict' key in input options program keys.
+                    This is a frequency-to-label dictionary with the format:
+                        freqdict['w0']=['vac1-vac2']
+                        freqdict['w4']=['vac10-vac9']
+                            If a label is backwards from what is in the 
+                            neb ingredient's actual name, then
+                            the backwards hop will be taken.
+                            Initial state for phonons will be the first
+                            label in the label pair as listed in this dict.
+        """
+        trydict=None
+        if not (self.input_options == None):
+            if "freqdict" in self.input_options['program_keys'].keys():
+                trydict = dict(self.input_options['program_keys']['freqdict'])
+        if trydict==None: #was not set in input options
+            trydict = dict(freqdict)
+        for (key, value) in trydict.iteritems(): #validate
+            if not 'w' in key:
+                raise MASTError(self.__class__.__name__, "Frequency dict does not have the correct format, e.g. freqdict['w0']=['vac1-vac2']")
+            if not '-' in value:
+                raise MASTError(self.__class__.__name__, "Frequency dict does not have the correct format, e.g. freqdict['w0']=['vac1-vac2']")
+        self.freqdict = trydict
+        return self.freqdict
+
+
+    def set_host_and_solute(self):
+        """Find the host and the solute based on relative numbers in POSCAR,
+            for a BINARY, DILUTE system. (One host element type, 
+            one solute element type.)
+        """
+        label=""
+        if self.freqmodel == 1:
+            self.solute=None
+            if not 'w0' in self.freqdict.keys():
+                raise MASTError(self.__class__.__name__, "Need a label for frequency w0 for one-frequency model.")
+            label = self.freqdict['w0']
+        else:
+            if not 'w2' in self.freqdict.keys():
+                raise MASTError(self.__class__.__name__, "Not enough frequencies to determine solute and host.")
+            label = self.freqdict['w2']       
+        [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
+        mydir = self.get_labeled_dir(startlabel)
+        pospath = os.path.join(mydir, "POSCAR")
+        if not os.path.isfile(pospath):
+            raise MASTError(self.__class__.__name__, "No POSCAR in %s." % pospath)
+        mypos = pymatgen.io.vaspio.Poscar.from_file(pospath)
+        sitesym = mypos.site_symbols
+        natoms = mypos.natoms
+        hostidx=natoms.index(max(natoms))
+        self.host=sitesym[hostidx]
+        if self.freqmodel > 1:
+            solidx=natoms.index(min(natoms))
+            self.solute=sitesym[solidx]
+        return 
+
+    def find_start_and_tst_labels(self, label, app1="neb", app2="stat"):
+        """Finds the start label and transition state labels for ingredients.
+            Args:
+                label <str>: neb label, like "vac1-vac2" 
+                app1 <str>: additional string which should be in the label
+                app2 <str>: additional string which should be in the label
+            Returns:
+                [startlabel, tstlabel]
+                startlabel <str>: label for start directory (e.g. "vac1" or "vac2")
+                tstlabel <str>: actual directory label for neb (e.g. "vac1-vac2" or "vac2-vac1")
+        """
+        startlabel=""
+        tstlabel=""
+        lsplit = label.split('-')
+        backlab = '-'.join([lsplit[1],lsplit[0]])
+        for myname in self.dirlist:
+            if (label in myname) and (app1 in myname) and (app2 in myname):
+                tstlabel = label
+                startlabel = label.split('-')[0]
+                break
+            elif (backlab in myname) and (app1 in myname) and (app2 in myname):
+                tstlabel = label
+                startlabel = label.split('-')[1]
+                break
+        if tstlabel == "":
+            raise MASTError(self.__class__.__name__, 
+                "No directory found for hop label %s." % label)
+        return [startlabel, tstlabel]
+
+    def get_labeled_dir(self, label, append="stat"):
+        """Get a labeled directory.
+            Args:
+                label <str>: label for the directory, like "vac1"
+                append <str>: extra piece which should appear in the 
+                                directory name
+            Returns:
+                mypath <str>: The FIRST matching directory found, from a 
+                                sorted list
+        """
+        dirlist = os.listdir(self.directory)
+        dirlist.sort()
+        mydir=""
+        for mydir in dirlist:
+            if (label in mydir) and (append in mydir):
+                mypath=os.path.join(self.directory, mydir)
+                break
+        return mypath
+
+
 def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0, tmeltpurehost=0, tmeltpuresolute=0, masshost=0, masssolute=0, ecohpure=0):
     """Wrapper to dilute solute diffusion coefficient calculations.
         DOES NOT SUPPORT CHARGED SUPERCELLS YET.
@@ -130,8 +301,6 @@ def find_start_and_tst_labels(stem, label):
 
 def reverse_label(label):
     """Reverse a label"""
-    lsplit = label.split('-')
-    backlabel = '-'.join([lsplit[1],lsplit[0]])
     return backlabel
 
 def neb_profile():
@@ -325,6 +494,28 @@ def phonons():
     """Get phonon info???"""
     pass
 
+def main():
+    stem=sys.argv[1]
+    freqmodel=sys.argv[2]
+    freqdict=dict()
+    temp=sys.argv[3]
+    vacconc=sys.argv[4]
+    lattparam=sys.argv[5]
+    #tmeltpurehost=sys.argv[6]
+    #tmeltpuresolute=sys.argv[7]
+    #masshost=sys.argv[8]
+    #masssolute=sys.argv[9]
+    ecohpure=sys.argv[10]
+    directory = os.path.expandvars(sys.argv[1])
+
+    print 'Looking at defect formation energies in %s' % directory
+    DFE = DefectFormationEnergy(directory)
+    print DFE.calculate_defect_formation_energies()
+
+if __name__ == '__main__':
+    main()
+
+#
 def no_routine():
     """
             # Process NEB runs. The energy and magnetic moments for each image are listed.
