@@ -39,15 +39,8 @@ class Optimize(BaseIngredient):
             self.forward_parent_structure(self.keywords['name'], childname)
             
     def write_files(self):
-        if self.keywords['program'] == 'vasp':
-            self.set_up_program_input()
-            self.write_submit_script()
-        else:
-            raise MASTError(self.__class__.__name__, "Program not supported.")
-
-        #while not self.is_ready_to_run():
-        #    print 'writing files...'
-        #    time.sleep(CHECKPERIOD)
+        self.set_up_program_input()
+        self.write_submit_script()
             
     def run(self, mode='serial', curdir=os.getcwd()):
         if not (self.is_ready_to_run()): #This check must occur here in case is_ready_to_run is ever overridden directly in the class.
