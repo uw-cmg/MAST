@@ -54,6 +54,14 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in forward_parent_structure)")
 
+    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            vasp_checker.forward_parent_dynmat(parentpath, childpath, newname)
+            return None
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in forward_parent_structure)")
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
@@ -78,6 +86,11 @@ class BaseIngredient(MASTObj):
                 if errct > 0:
                     pass #self.run() #Should try to rerun automatically or not?? NO.
                 return False
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            usepath = self.keywords['name']
+            mycomplete = phon_checker.is_complete(usepath)
+            return mycomplete
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
@@ -100,6 +113,9 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.is_ready_to_run(self.keywords['name'])
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            return phon_checker.is_ready_to_run(self.keywords['name'])
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
@@ -137,6 +153,9 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.set_up_program_input(self.keywords)
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            return phon_checker.set_up_program_input(self.keywords)
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_program_input)")

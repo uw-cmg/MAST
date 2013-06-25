@@ -12,10 +12,12 @@ import shutil
 
 def get_structure_from_file(filepath):
     """Get structure from file."""
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     return Poscar.from_file(filepath, False).structure
 
 def get_structure_from_directory(dirname):
     """Get structure from directory. Preferentially gets CONTCAR first."""
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     cpath = os.path.join(dirname, "CONTCAR")
     ppath = os.path.join(dirname, "POSCAR")
     if os.path.isfile(cpath):
@@ -25,16 +27,9 @@ def get_structure_from_directory(dirname):
     else:
         raise MASTError("vasp_checker, get_structure_from_directory", "No valid structure in %s" % dirname)
 
-def forward_parent_dynmat(parentpath, childpath, newname="DYNMAT"):
-    """Forward the DYNMAT."""
-    dirutil.lock_directory(childpath)
-    shutil.copy(os.path.join(parentpath, "DYNMAT"),os.path.join(childpath, newname))
-    dirutil.unlock_directory(childpath)
-    return
-
-
 def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     """Copy CONTCAR to new POSCAR"""
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     dirutil.lock_directory(childpath)
     shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
     dirutil.unlock_directory(childpath)
@@ -42,6 +37,7 @@ def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
 
 def forward_parent_energy(parentpath, childpath, newname="OSZICAR"):
     """Copy OSZICAR"""
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     dirutil.lock_directory(childpath)
     shutil.copy(os.path.join(parentpath, "OSZICAR"),os.path.join(childpath, newname))
     dirutil.unlock_directory(childpath)
@@ -53,6 +49,7 @@ def images_complete(dirname, numim):
                   only checks directories /01.../0N where N is # images
         numim = number of images
     """
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     imct=1
     numim = int(numim)
     while imct <= numim:
@@ -74,48 +71,19 @@ def images_complete(dirname, numim):
 
 
 def is_complete(dirname):
-    """Check if single VASP non-NEB calculation is complete."""
-    try:
-        myoutcar = Outcar(os.path.join(dirname, "OUTCAR"))
-    except (IOError):
-        return False
-
-    #hw 04/19/13
-    try:
-        if myoutcar.run_stats['User time (sec)'] > 0:
-            return True
-        else:
-            return False
-    except KeyError:
-        return False
+    """Check if PHON thermo run is complete."""
+    if os.path.isfile(os.path.join(dirname, "THERMO"))
+        return True
 
 def is_ready_to_run(dirname):
-    """Check if vasp is ready to run."""
+    """Check if PHON is ready to run."""
     notready=0
-    if not(os.path.isfile(dirname + "/KPOINTS")):
+    if not(os.path.isfile(dirname + "/FORCES")):
         notready = notready + 1
     if not(os.path.isfile(dirname + "/POTCAR")):
         notready = notready + 1
-    if not(os.path.isfile(dirname + "/INCAR")):
+    if not(os.path.isfile(dirname + "/INPHON")):
         notready = notready + 1
-    else: #INCAR exists. Now check POSCARs.
-        myincar = MASTFile(dirname + "/INCAR")
-        if myincar.get_line_match("IMAGES") == None: 
-            if not(os.path.isfile(dirname + "/POSCAR")):
-                notready = notready + 1
-        else:
-            subdirs = dirutil.walkdirs(dirname)
-            subdirs.sort()
-            if len(subdirs) == 0: #This is an NEB without folders yet
-                notready = notready + 1
-            else:
-                for subdir in subdirs:
-                    if not (os.path.isfile(subdir + "/POSCAR")):
-                        notready = notready + 1
-                if not os.path.isfile(subdirs[0] + "/OSZICAR"):
-                    notready = notready + 1
-                if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
-                    notready = notready + 1
     if not(os.path.isfile(dirname + "/submit.sh")):
         notready = notready + 1
     if notready > 0:
@@ -123,7 +91,10 @@ def is_ready_to_run(dirname):
     else:
         return True
 
-def _vasp_poscar_setup(keywords):
+def _phon_poscar_setup(keywords):
+    """Set up a PHON POSCAR file. Strip out the "elements" line (that is,
+        use VASP version 4 format.
+    """
     name = keywords['name']
     pospath = os.path.join(name, "POSCAR")
     if os.path.isfile(pospath):
@@ -133,8 +104,14 @@ def _vasp_poscar_setup(keywords):
         my_poscar = Poscar(keywords['structure'])
         dirutil.lock_directory(name)
         my_poscar.write_file(pospath)
+        my_poscar.write_file(pospath + "_prePHON")
         dirutil.unlock_directory(name)
-    return my_poscar
+    mypfile = MASTFile(pospath)
+    myline6=mypfile.get_line_number(6)
+    if myline6.strip().split()[0].isalpha:
+        mypfile.modify_file_by_line_number(6,"D")
+    mypfile.to_file(pospath)
+    return
 
 def _vasp_kpoints_setup(keywords):
     """Parse mast_kpoints string, which should take the format:
@@ -142,6 +119,7 @@ def _vasp_kpoints_setup(keywords):
         examples: "3x3x3 M", "1x1x1 G". If no designation is given,
         Monkhorst-Pack is assumed.
     """
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     name = keywords['name']
     if 'mast_kpoints' in keywords['program_keys'].keys():
         kptlist = keywords['program_keys']['mast_kpoints']
@@ -163,6 +141,7 @@ def _vasp_kpoints_setup(keywords):
     return my_kpoints
 
 def _vasp_potcar_setup(keywords, my_poscar):
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     name=keywords['name']
     if 'mast_xc' in keywords['program_keys'].keys():
         myxc = keywords['program_keys']['mast_xc'].upper() #Uppercase
@@ -174,28 +153,28 @@ def _vasp_potcar_setup(keywords, my_poscar):
     dirutil.unlock_directory(name)
     return my_potcar
 
-def _vasp_incar_get_non_mast_keywords(program_keys_dict):
-    """Get the non-VASP keywords and make a dictionary."""
-    incar_dict=dict()
+def _phon_inphon_get_non_mast_keywords(program_keys_dict):
+    """Sort out the non-PHON keywords and make a dictionary."""
+    inphon_dict=dict()
     allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
-                    'ingredients','programkeys','vasp_allowed_keywords.py')
-    allowed_list = _vasp_incar_get_allowed_keywords(allowedpath)
+                    'ingredients','programkeys','phon_allowed_keywords.py')
+    allowed_list = _vasp_inphon_get_allowed_keywords(allowedpath)
     for key, value in program_keys_dict.iteritems():
         if not key[0:5] == "mast_":
             keytry = key.upper()
             if not (keytry in allowed_list):
-                print "Ignoring program key %s for INCAR. To allow this keyword, add it to %s" % (keytry, allowedpath)
+                print "Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath)
             else:
                 if type(value)==str and value.isalpha():
-                    incar_dict[keytry]=value.capitalize() #First letter cap
+                    inphon_dict[keytry]=value.capitalize() #First letter cap
                 else:
-                    incar_dict[keytry]=value
-    return incar_dict
+                    inphon_dict[keytry]=value
+    return inphon_dict
 
-def _vasp_incar_get_allowed_keywords(allowedpath):
-    """Get allowed vasp keywords.
+def _phon_inphon_get_allowed_keywords(allowedpath):
+    """Get allowed PHON keywords.
         Args:
-            allowedpath <str>: file path for allowed vasp keywords
+            allowedpath <str>: file path for allowed PHON keywords
     """
     allowed = MASTFile(allowedpath)
     allowed_list=list()
@@ -203,52 +182,74 @@ def _vasp_incar_get_allowed_keywords(allowedpath):
         allowed_list.append(entry.strip())
     return allowed_list
 
-def _vasp_incar_setup(keywords, my_potcar, my_poscar):
-    """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
+def _phon_inphon_setup(keywords):
+    """Set up the INPHON file."""
     name=keywords['name']
     myd = dict()
-    myd = _vasp_incar_get_non_mast_keywords(keywords['program_keys'])
-    if 'mast_multiplyencut' in keywords['program_keys'].keys():
-        mymult = float(keywords['program_keys']['mast_multiplyencut'])
-    else:
-        mymult = 1.5
-    myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
-    if 'mast_setmagmom' in keywords['program_keys'].keys():
-        magstr = str(keywords['program_keys']['mast_setmagmom'])
-        magmomstr=""
-        maglist = magstr.split()
-        numatoms = sum(my_poscar.natoms)
-        if len(maglist) < numatoms:
-            magct=0
-            while magct < len(maglist):
-                magmomstr = magmomstr + str(my_poscar.natoms[magct]) + "*" + maglist[magct] + " " 
-                magct = magct + 1
-        else:
-            magmomstr = magstr
-        myd['MAGMOM']=magmomstr
-    if 'mast_adjustnelect' in keywords['program_keys'].keys():
-        myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
-        newelectrons=0.0
-        try:
-            adjustment = float(keywords['program_keys']['mast_adjustnelect'])
-        except (ValueError, TypeError):
-            raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
-        newelectrons = myelectrons + adjustment
-        myd['NELECT']=str(newelectrons)
-    my_incar = Incar(myd)
-    dirutil.lock_directory(name)
-    my_incar.write_file(name + "/INCAR")
-    dirutil.unlock_directory(name)
-    return my_incar
+    myd = _phon_inphon_get_non_mast_keywords(keywords['program_keys'])
+    my_inphon = MASTFile()
+    for key, value in myd.iteritems():
+        my_inphon.data.append(str(key) + "=" + str(value) + "\n")
+    if not ("NTYPES" in myd.keys()) and not ("MASS" in myd.keys()):
+        [nline,massline] = _phon_inphon_get_masses(keywords)
+        my_inphon.data.append(nline + "\n")
+        my_inphon.data.append(massline + "\n")
+    my_inphon.to_file(name + "/INPHON")
+    return 
+
+def _phon_inphon_get_masses(keywords):
+    """Get the ntypes and masses line for INPHON.
+        Returns:
+            nline, massline
+            nline <str>: NYTPES = <number of atomic types in POSCAR>
+            massline <str>: MASS = <mass1> <mass2> ...
+    """
+    name=keywords['name']
+    if os.path.isfile(name + "/POSCAR_prePHON"):
+        mypos = Poscar.from_file(name + "/POSCAR_prePHON")
+    else: #not yet modified to strip out the species line.
+        mypos = Poscar.from_file(name + "/POSCAR")
+    sitesym = mypos.site_symbols
+    nline="NTYPES=" + str(len(sitesym))
+    massline="MASS="
+    for sym in sitesym:
+        el = pymatgen.core.periodic_table.Element(sym)
+        massline = massline + str(el.atomic_mass) + " "
+    return [nline, massline]
+
+def _phon_forces_setup(keywords):
+    """Set up the FORCES file. This is like the DYNMAT but with the mass
+        line stripped out."""
+    name=keywords['name']
+    if not os.path.isfile(name + "/DYNMAT"):
+        raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
+    myforces=MASTFile(DYNMAT)
+    infosplit = myforces.get_line_number(1).strip().split()
+    numdisp = int(infosplit[2])  #number of dynmat chunks
+    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
+    idxrg=list()
+    for nct in range(0,numdisp):
+        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
+    for idx in idxrg: #strip out the 'direction' indicator 1, 2, 3
+        mysplit = myforces.get_line_number(idx).strip().split()
+        mynewlist = list()
+        mynewlist.append(mysplit[0])
+        mynewlist.extend(mysplit[2:])
+        mynewline = ' '.join(mynewlist) + "\n"
+        myforces.modify_file_by_line_number(idx, "R", mynewline)
+    myforces.modify_file_by_line_number(1, "R", str(numdisp)) #modify info line
+    myforces.modify_file_by_line_number(2, "D") #remove masses line
+    myforces.to_file(name + "/FORCES")
+    return
 
 def set_up_program_input(keywords):
-    myposcar = _vasp_poscar_setup(keywords)
-    mykpoints = _vasp_kpoints_setup(keywords)
-    mypotcar = _vasp_potcar_setup(keywords, myposcar)
-    myincar = _vasp_incar_setup(keywords, mypotcar, myposcar)
+    _phon_poscar_setup(keywords)
+    _phon_inphon_setup(keywords)
+    _phon_forces_setup(keywords)
     return
 
 def get_path_to_write_neb_parent_energy(myname, myimages, parent):
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     if parent == 1:
         return os.path.join(myname, "00", "OSZICAR")
     elif parent == 2:
@@ -259,6 +260,7 @@ def get_path_to_write_neb_parent_energy(myname, myimages, parent):
         raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
 
 def set_up_neb_folders(myname, image_structures):
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     imct=0
     while imct < len(image_structures):
         imposcar = Poscar(image_structures[imct])
@@ -281,6 +283,7 @@ def set_up_neb_folders(myname, image_structures):
     
 
 def set_up_program_input_neb(keywords, image_structures):
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     set_up_neb_folders(keywords['name'], image_structures)
     mykpoints = _vasp_kpoints_setup(keywords)
     mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
@@ -288,6 +291,7 @@ def set_up_program_input_neb(keywords, image_structures):
     return
 
 def add_selective_dynamics_to_structure(keywords, sdarray):
+    raise MASTError("checker/phon_checker","Not implemented for PHON!")
     name = keywords['name']
     pname = os.path.join(name,"POSCAR")
     phposcar = Poscar.from_file(pname)
