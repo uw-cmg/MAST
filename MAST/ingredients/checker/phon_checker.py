@@ -9,6 +9,7 @@ from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 import os
 import shutil
+import pymatgen
 
 def get_structure_from_file(filepath):
     """Get structure from file."""
@@ -72,8 +73,10 @@ def images_complete(dirname, numim):
 
 def is_complete(dirname):
     """Check if PHON thermo run is complete."""
-    if os.path.isfile(os.path.join(dirname, "THERMO"))
+    if os.path.isfile(os.path.join(dirname, "THERMO")):
         return True
+    else:
+        return False
 
 def is_ready_to_run(dirname):
     """Check if PHON is ready to run."""
@@ -97,15 +100,21 @@ def _phon_poscar_setup(keywords):
     """
     name = keywords['name']
     pospath = os.path.join(name, "POSCAR")
+    if os.path.isfile(pospath + "_prePHON"): #Already done. Return.
+        return
     if os.path.isfile(pospath):
         my_poscar = Poscar.from_file(pospath) 
         #parent should have given a structure
     else: #this is an originating run; mast should give it a structure
         my_poscar = Poscar(keywords['structure'])
-        dirutil.lock_directory(name)
-        my_poscar.write_file(pospath)
-        my_poscar.write_file(pospath + "_prePHON")
-        dirutil.unlock_directory(name)
+    my_poscar.selective_dynamics=None #unset SD if it is set
+    my_poscar.velocities=None #unset velocities
+    #write two copies
+    dirutil.lock_directory(name)
+    my_poscar.write_file(pospath)
+    my_poscar.write_file(pospath + "_prePHON")
+    dirutil.unlock_directory(name)
+    #pick up a copy and strip out the elements line.
     mypfile = MASTFile(pospath)
     myline6=mypfile.get_line_number(6)
     if myline6.strip().split()[0].isalpha:
@@ -158,7 +167,7 @@ def _phon_inphon_get_non_mast_keywords(program_keys_dict):
     inphon_dict=dict()
     allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
                     'ingredients','programkeys','phon_allowed_keywords.py')
-    allowed_list = _vasp_inphon_get_allowed_keywords(allowedpath)
+    allowed_list = _phon_inphon_get_allowed_keywords(allowedpath)
     for key, value in program_keys_dict.iteritems():
         if not key[0:5] == "mast_":
             keytry = key.upper()
@@ -189,7 +198,7 @@ def _phon_inphon_setup(keywords):
     myd = _phon_inphon_get_non_mast_keywords(keywords['program_keys'])
     my_inphon = MASTFile()
     for key, value in myd.iteritems():
-        my_inphon.data.append(str(key) + "=" + str(value) + "\n")
+        my_inphon.data.append(str(key) + "=" + str(value).upper() + "\n")
     if not ("NTYPES" in myd.keys()) and not ("MASS" in myd.keys()):
         [nline,massline] = _phon_inphon_get_masses(keywords)
         my_inphon.data.append(nline + "\n")
@@ -223,7 +232,7 @@ def _phon_forces_setup(keywords):
     name=keywords['name']
     if not os.path.isfile(name + "/DYNMAT"):
         raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-    myforces=MASTFile(DYNMAT)
+    myforces=MASTFile(name + "/DYNMAT")
     infosplit = myforces.get_line_number(1).strip().split()
     numdisp = int(infosplit[2])  #number of dynmat chunks
     numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
@@ -237,7 +246,7 @@ def _phon_forces_setup(keywords):
         mynewlist.extend(mysplit[2:])
         mynewline = ' '.join(mynewlist) + "\n"
         myforces.modify_file_by_line_number(idx, "R", mynewline)
-    myforces.modify_file_by_line_number(1, "R", str(numdisp)) #modify info line
+    myforces.modify_file_by_line_number(1, "R", str(numdisp) + "\n") #modify info line
     myforces.modify_file_by_line_number(2, "D") #remove masses line
     myforces.to_file(name + "/FORCES")
     return

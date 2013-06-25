@@ -6,7 +6,7 @@ from MAST.utility import MASTError
 
 kboltz = 8.6173325E-5
 
-def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0):
+def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0, tmeltpurehost=0, tmeltpuresolute=0, masshost=0, masssolute=0, ecohpure=0):
     """Wrapper to dilute solute diffusion coefficient calculations.
         DOES NOT SUPPORT CHARGED SUPERCELLS YET.
         Args:
@@ -33,7 +33,9 @@ def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacc
             "Recipe stem was not given. Erroring out.")
         
     if freqmodel == 5:
-        [myD0,myQ]=five_freq(stem, freqdict)
+        [myD0,myQ]=five_freq(stem, freqdict, temp, vacconc, lattparam,
+            tmeltpurehost, tmeltpuresolute, masshost, masssolute,
+            ecohpure)
     elif freqmodel == 1:
         [myD0,myQ]=one_freq(stem, freqdict)
     else:
@@ -266,6 +268,10 @@ def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost,
             vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
     return vibdict
     
+def get_host_and_solute(stem, freqdict):
+    """Return the host and the solute."""
+    pass
+
 
 def phonons():
     """Get phonon info???"""

@@ -27,8 +27,9 @@ class PhononSingle(Optimize):
     def __init__(self, **kwargs):
         Optimize.__init__(self, **kwargs)
     def update_children(self):
-        Optimize.update_children()
-        BaseIngredient.forward_parent_dynmat(self)
+        Optimize.update_children(self)
+        for childname in self.keywords['child_dict'].iterkeys():
+            self.forward_parent_dynmat(self.keywords['name'], childname)
 
     def get_my_label(self, signal="phonon"):
         """Get the calculation label.
