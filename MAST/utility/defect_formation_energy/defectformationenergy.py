@@ -6,10 +6,14 @@ from pymatgen.io.smartio import read_structure
 from MAST.utility import PickleManager
 
 class DefectFormationEnergy:
+    """Class for calculating the defect formation energy for a completed MAST
+        run.
+    """
+
     def __init__(self, directory):
         self.directory = directory
 
-        pm = PickleManager(self.directory + 'input_options.pickle')
+        pm = PickleManager(self.directory + '/input_options.pickle')
         self.input_options = pm.load_variable()
 
     def calculate_defect_formation_energies(self):
@@ -29,7 +33,6 @@ class DefectFormationEnergy:
         print defects
         print chempot
         print name
-
 
         e_perf = self.get_total_energy(perf_dir)
         struct_perf = self.get_structure(perf_dir)

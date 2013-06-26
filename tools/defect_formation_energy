@@ -1,13 +1,43 @@
 #!/usr/bin/env python
 
 import sys, os
+
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
 
-def main():
-    directory = os.path.expandvars(sys.argv[1])
+def get_label_timestamp(name):
+    tmp = name.split('mast_')
+    label = tmp[0][:-1]
+    time = tmp[1]
 
-    print 'Looking at defect formation energies in %s' % directory
-    DFE = DefectFormationEnergy(directory)
+    year = time[0:4]
+    month = time[4:6]
+    day = time[6:8]
+    hour = time[9:11]
+    minute = time[11:13]
+    second = time[13:]
+
+    return (label, year, month, day, hour, minute, second)
+
+def main():
+    archive = os.path.expandvars(os.environ['MAST_ARCHIVE'])
+
+    dir_list = os.listdir(archive)
+    print 'Found %i completed jobs in %s:\n' % (len(dir_list), archive)
+
+    for ndir, directory in enumerate(dir_list):
+        label, year, month, day, hour, minute, second = get_label_timestamp(directory)
+        print '%i) %s ran on %s/%s/%s at %s:%s and %ss.' % (ndir, label, month, day, year, hour, minute, second)
+
+    print '\nPlease select a run from the above list to calculate the defect formation energies for:'
+    index = int(sys.stdin.readline())
+    print 'Index selected:', index
+
+    directory = dir_list[index]
+    label, year, month, day, hour, minute, second = get_label_timestamp(directory)
+    print 'You have selected %s ran on %s/%s/%s at %s:%s and %ss.' % (label, month, day, year, hour, minute, second)
+    print 'Calculating defect formation energies now.'
+
+    DFE = DefectFormationEnergy('%s/%s/' % (archive, directory))
     print DFE.calculate_defect_formation_energies()
 
 if __name__ == '__main__':
