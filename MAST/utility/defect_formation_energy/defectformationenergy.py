@@ -30,9 +30,9 @@ class DefectFormationEnergy:
             name += ('_' + string)
 
         #print perf_dir
-        print defects
-        print chempot
-        print name
+        #print defects
+        #print chempot
+        #print name
 
         e_perf = self.get_total_energy(perf_dir)
         struct_perf = self.get_structure(perf_dir)
@@ -43,11 +43,13 @@ class DefectFormationEnergy:
             else:
                 perf_species[str(site.specie)] += 1
 
-        print 'Perfect composition: ', perf_species
+        #print 'Perfect composition: ', perf_species
         e_defects = dict() # dict of defect energies
 
+        # I want this to be the other way around (i.e. loop through conditions then defects
+        # For now I will leave it like this.
         for label, defect in defects.items():
-            def_dir = '%s/%s_%s_sp' % (self.directory, name, label)
+            def_dir = '%s/%s_%s_q=p0_sp' % (self.directory, name, label)
             defect_info = dict()
 
             energy = self.get_total_energy(def_dir)
