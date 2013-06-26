@@ -11,7 +11,7 @@ class BaseIngredient(MASTObj):
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
-    
+
     def write_directory(self):
         try:
             os.makedirs(self.keywords['name'])
@@ -152,6 +152,13 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_neb)")
 
+    def get_children(self):
+        """Returns the children of this ingredient"""
+        return self.keywords['child_dict']
+
+    @property
+    def children(self):
+        return self.get_children()
 
 # The following functions need to be defined by the child class:
     def write_files(self):
