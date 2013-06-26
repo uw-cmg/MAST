@@ -1,10 +1,16 @@
+#!/usr/bin/env python
 import os
+import sys
 import pymatgen
 import numpy as np
 from MAST.utility import MASTError
-
+from MAST.utility import MASTFile
+from MAST.utility import PickleManager
 
 kboltz = 8.6173325E-5
+stock_v=1e13
+stock_S_v=2.07e-4 #Shewmon, Sv/R approx 2.4?? =2.07e-4
+stock_S_m=2.07e-4
 
 class DiffusionCoefficient():
     """Dilute solute vacancy diffusion coefficient calculations.
@@ -35,7 +41,7 @@ class DiffusionCoefficient():
             self.formdict <dict of float>: freq-labeled dict of formation
             self.tempdict <dict of float>: temperature list of diffusion coeffs
     """
-    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100, freqmodel=0, freqdict=None):
+    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100, freqmodel=0, freqdict=None, verbose=0):
         """
             Args:
                 directory <str>: directory to start in
@@ -44,6 +50,7 @@ class DiffusionCoefficient():
                 tempstep <float>: step in K for temp. range (default 100)
                 freqmodel <int>: Integer for frequency model
                 freqdict <dict>: Dictionary for frequency-to-hop-labels
+                verbose <int>: 0 for not verbose (default), 1 for verbose
         """
         self.directory = directory
         dirlist = os.listdir(self.directory)
@@ -59,15 +66,21 @@ class DiffusionCoefficient():
         self.entrodict=None
         self.formdict=None
         self.tempdict=None
+        self.verbose=verbose
+        if self.verbose == 1:
+            print "verbose mode is on"
         try:
-            pm = PickleManager(self.directory + 'input_options.pickle')
+            pm = PickleManager(os.path.join(self.directory,
+                                        'input_options.pickle'))
             self.input_options = pm.load_variable()
-        except OSError:
+        except IOError:
             pass
-        return
         self.set_up_temp_dict(tempstart, tempend, tempstep)
         self.set_freqmodel(freqmodel)
         self.set_frequency_dict(freqdict)
+        self.set_host_and_solute()
+
+        return
 
     def set_up_temp_dict(self, tempstart=73, tempend=1273, tempstep=100):
         """Set up temperature dict.
@@ -89,9 +102,11 @@ class DiffusionCoefficient():
             tidx = tidx + tempstep
             tct = tct + 1
         self.tempdict = tdict
+        if self.verbose == 1:
+            print "Temp dict: ", self.tempdict
         return self.tempdict
 
-    def set_freqmodel(self, freqmodel=0)        
+    def set_freqmodel(self, freqmodel=0):        
         """Set the frequency model to use.
             Args:
                 freqmodel <int>:
@@ -111,6 +126,8 @@ class DiffusionCoefficient():
         if not (trymodel in [1, 5]):
             raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % str(trymodel))
         self.freqmodel = trymodel
+        if self.verbose == 1:
+            print "Freq model: ", self.freqmodel
         return self.freqmodel
             
     def set_frequency_dict(self, freqdict=None):
@@ -141,6 +158,8 @@ class DiffusionCoefficient():
             if not '-' in value:
                 raise MASTError(self.__class__.__name__, "Frequency dict does not have the correct format, e.g. freqdict['w0']=['vac1-vac2']")
         self.freqdict = trydict
+        if self.verbose == 1:
+            print "Freq dict: ", self.freqdict
         return self.freqdict
 
 
@@ -172,6 +191,9 @@ class DiffusionCoefficient():
         if self.freqmodel > 1:
             solidx=natoms.index(min(natoms))
             self.solute=sitesym[solidx]
+        if self.verbose == 1:
+            print "host: ", self.host
+            print "solute: ", self.solute
         return 
 
     def find_start_and_tst_labels(self, label, app1="neb", app2="stat"):
@@ -201,14 +223,17 @@ class DiffusionCoefficient():
         if tstlabel == "":
             raise MASTError(self.__class__.__name__, 
                 "No directory found for hop label %s." % label)
+        if self.verbose == 1:
+            print "Transition start and transition state: ", [startlabel, tstlabel]
         return [startlabel, tstlabel]
 
-    def get_labeled_dir(self, label, append="stat"):
+    def get_labeled_dir(self, label, append="stat", append2=""):
         """Get a labeled directory.
             Args:
                 label <str>: label for the directory, like "vac1"
                 append <str>: extra piece which should appear in the 
                                 directory name
+                append2 <str>: additional extra piece which should appear
             Returns:
                 mypath <str>: The FIRST matching directory found, from a 
                                 sorted list. Returns a full path.
@@ -217,9 +242,11 @@ class DiffusionCoefficient():
         dirlist.sort()
         mydir=""
         for mydir in dirlist:
-            if (label in mydir) and (append in mydir):
+            if (label in mydir) and (append in mydir) and (append2 in mydir):
                 mypath=os.path.join(self.directory, mydir)
                 break
+        if self.verbose == 1:
+            print "mypath: ", mypath
         return mypath
 
     def neb_barrier(self, label):
@@ -231,27 +258,33 @@ class DiffusionCoefficient():
             Args:
                 label <str>: label for the NEB folder, like "vac1-vac2"
             Returns:
-                <float>: transition state energy - starting state energy
+                nebenergy <float>: transition state energy-starting state energy
         """
-        [startlabel, tstlabel] = find_start_and_tst_labels(stem, label)
-        startenergy = self.get_labeled_energy(stem, startlabel)
-        maxenergy = self.get_max_energy(stem, tstlabel)
+        [startlabel, tstlabel] = self.find_start_and_tst_labels(label)
+        startenergy = self.get_labeled_energy(startlabel)
+        maxenergy = self.get_max_energy(tstlabel)
         if (startenergy > maxenergy):
             print "Attention! Maximum energy is from an endpoint, not an image!"
-        return (maxenergy - startenergy)
+        nebenergy = maxenergy - startenergy
+        if self.verbose == 1:
+            print "NEB energy: ", nebenergy
+        return nebenergy
 
-    def get_labeled_energy(self, label, append="stat"):
+    def get_labeled_energy(self, label, append="stat", append2=""):
         """Get an energy from a directory.
             Args:
                 label <str>: label for directory
                 append <str>: additional tag for the directory
+                append2 <str>: additional tag for the directory
         """
-        mypath = self.get_labeled_dir(label, append)
+        mypath = self.get_labeled_dir(label, append, append2)
         myenergy=0
         myenergy = self.get_total_energy(mypath)
+        if self.verbose == 1:
+            print "Myenergy: ", myenergy
         return myenergy
 
-    def get_total_energy(directory): #synchronize this call with Glen's 
+    def get_total_energy(self, directory): #synchronize this call with Glen's 
         """Returns the total energy from a directory.
             Args:
                 directory <str>: directory (full path)
@@ -259,28 +292,40 @@ class DiffusionCoefficient():
                 <float>: Total energy (E0 from VASP)
             SHOULD BE REPLACED WITH PROGRAM-INDEPENDENT SWITCH.
         """
-        from pymatgen.io.vaspio.vasp_output import Vasprun
-        # Are we dealing with VASP?
-        if ('vasprun.xml' in os.listdir(directory)):
-        # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
-            return Vasprun('%s/vasprun.xml' % directory).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
+        if 'OSZICAR' in os.listdir(directory):
+            ozfile = MASTFile(os.path.join(directory, "OSZICAR"))
+            ezeroenergy = float(ozfile.get_segment_from_last_line_match("E0",
+                    "E0= ","  d E"))
+            if self.verbose == 1:
+                print "E0 energy: ", ezeroenergy
+            return ezeroenergy
 
-    def get_max_energy(self, tstlabel):
+    def get_max_energy(self, tstlabel, app1="neb", app2="stat"):
         """Get maximum image energy from an NEB directory.
             Args:
                 tstlabel <str>: label for the NEB directory
+                app1 <str>: label which must be in the name.
+                app2 <str>: label which  must be in the name
             Returns:
                 <float>: Maximum energy among the images.
         """
-        mypath = self.get_labeled_dir(tstlabel)
+        mypath = self.get_labeled_dir(tstlabel, app1, app2)
         imdirs = os.listdir(mypath)
         imdirs.sort()
         mydir=""
-        imenergs=list()
+        imenergs=dict()
+        if self.verbose == 1:
+            print "imdirs: ", imdirs
         for mydir in imdirs:
-            imenergs[self.get_total_energy(os.path.join(mypath,mydir))] = mydir
+            fulldir = os.path.join(mypath, mydir)
+            if os.path.isdir(fulldir):
+                if self.verbose == 1:
+                    print "using dir: ", fulldir
+                imenergs[self.get_total_energy(fulldir)] = mydir
         maxenerg = max(imenergs)
-        maxdir = imenergs[maxenerg]
+        #maxdir = imenergs[maxenerg]
+        if self.verbose == 1:
+            print "max energy: ", maxenerg
         return maxenerg
    
 
@@ -289,9 +334,11 @@ class DiffusionCoefficient():
         freqs = self.freqdict.keys()
         hopdict=dict()
         for freq in freqs:
-            neblabel = freqdict[freq]
+            neblabel = self.freqdict[freq]
             hopdict[freq] = self.neb_barrier(neblabel)
         self.hopdict = hopdict
+        if self.verbose == 1:
+            print "Hopdict: ", self.hopdict
         return self.hopdict
 
     def get_formdict(self):
@@ -300,8 +347,10 @@ class DiffusionCoefficient():
         formdict=dict()
         #pure_def = #TTM DEBUG NEED TO SWITCH TO USE GLEN'S FUNCTION
         for freq in self.freqdict.keys():
-            formdict[freq] = self.get_defect_energy_simple(freqdict[freq])
+            formdict[freq] = self.get_defect_energy_simple(self.freqdict[freq])
         self.formdict = formdict
+        if self.verbose == 1:
+            print "Formdict: ", self.formdict
         return self.formdict
 
     def get_defect_energy_simple(self, label, append="stat", perf="perf"):
@@ -314,8 +363,7 @@ class DiffusionCoefficient():
             Return:
                 <float>: defect formation energy
         """
-        [startlabel, tstlabel] = self.find_start_and_tst_labels(label)
-        defpath=self.get_labeled_dir(startlabel, append)
+        defpath=self.get_labeled_dir(label, append)
         perfpath=self.get_labeled_dir(perf, append)
         defectedenergy = self.get_total_energy(defpath)
         perfectenergy = self.get_total_energy(perfpath)
@@ -326,11 +374,13 @@ class DiffusionCoefficient():
         if ecohpure==0:
             mypos=pymatgen.io.vaspio.Poscar.from_file(os.path.join(perfpath, "POSCAR"))
             totatoms=sum(mypos.natoms)
-            echopure=perfectenergy/totatoms
+            ecohpure=perfectenergy/totatoms
             myfile=MASTFile()
-            myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % dirname)
-            myfile.to_file(os.path.join(dirname,"WARNING"))
+            myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % perfpath)
+            myfile.to_file(os.path.join(self.directory,"WARNING"))
         eform = delta + ecohpure #Add on reference atom
+        if self.verbose == 1:
+            print "Eform: ", eform
         return eform
 
     def get_attemptdict(self):
@@ -340,22 +390,23 @@ class DiffusionCoefficient():
             Temperatures are in KELVIN.
             Masses are in AMU.
         """
-        stock_v=1e13
         vibdict=dict()
-        hostelem = pymatgen.core.periodic_table.Element(self.host)
-        solelem = pymatgen.core.periodic_table.Element(self.solute)
-        masshost = hostelem.atomic_mass
-        masssolute = solelem.atomic_mass
-        tmeltpurehost = self.parse_melting_point(hostelem)
-        tmeltpuresolute = self.parse_melting_point(solelem)
-        freqs = freqdict.keys()
+        freqs = self.freqdict.keys()
         freqs.sort()
         for freq in freqs:
             if not (freq == 'w2'):
                 vibdict[freq] = stock_v
             else:
+                hostelem = pymatgen.core.periodic_table.Element(self.host)
+                solelem = pymatgen.core.periodic_table.Element(self.solute)
+                masshost = hostelem.atomic_mass
+                masssolute = solelem.atomic_mass
+                tmeltpurehost = self.parse_melting_point(hostelem)
+                tmeltpuresolute = self.parse_melting_point(solelem)
                 vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
         self.attemptdict=vibdict
+        if self.verbose == 1:
+            print "attemptdict: ", self.attemptdict
         return self.attemptdict
     
 
@@ -374,12 +425,10 @@ class DiffusionCoefficient():
             LATER, REPLACE WITH EXTRACTION of "THERMO" from PHON by Dario Alfe
         """
         entrodict=dict()
-        stock_S_v=2.07e-4 #Shewmon, Sv/R approx 2.4?? =2.07e-4
-        stock_S_m=2.07e-4
         beta=0.4
         hostelem = pymatgen.core.periodic_table.Element(self.host)
         tmeltpurehost = self.parse_melting_point(hostelem)
-        for freq in freqdict.keys():
+        for freq in self.freqdict.keys():
             if not (freq == 'w2'):
                 entrodict[freq] = stock_S_v + stock_S_m
             else:
@@ -388,6 +437,8 @@ class DiffusionCoefficient():
                 delta_act_s = beta*(eact2-eact1)/tmeltpurehost
                 entrodict['w2'] = entrodict['w0'] + delta_act_s
         self.entrodict = entrodict
+        if self.verbose == 1:
+            print "Entrodict: ", self.entrodict
         return self.entrodict
 
     def parse_melting_point(self, elem):
@@ -399,7 +450,10 @@ class DiffusionCoefficient():
         """
         meltstr = str(elem.melting_point) #str(<unicode>)
         meltval = meltstr.split()[0]
-        return float(meltval)
+        meltval = float(meltval)
+        if self.verbose == 1:
+            print "Melting point: ", meltval
+        return meltval
 
 
     def five_freq(self, temp):
@@ -418,11 +472,11 @@ class DiffusionCoefficient():
         self.get_hopdict()
         self.get_formdict()
         self.get_entrodict_approx()
-        self.get_vibdict_approx() #Adams approximations
+        self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
         for freq in freqs:
-            jumpfreqdict[freq] = self.estimate_jump_freq(self.vibdict[freq],
+            jumpfreqdict[freq] = self.estimate_jump_freq(self.attemptdict[freq],
                 self.entrodict[freq],
                 self.hopdict[freq]+self.formdict[freq], temp)
         jfw0 = jumpfreqdict['w0']
@@ -434,20 +488,23 @@ class DiffusionCoefficient():
         myx = jfw4/jfw0
         bigf_num = 10*np.power(myx,4) + 180.5*np.power(myx,3) + 927*np.power(myx,2) + 1341
         bigf_denom = 2*np.power(myx,4) + 40.2*np.power(myx,3) + 254*np.power(myx,2) + 597*myx + 435
-        bigf_x = 1-(1/7)*(bigf_num/bigf_denom)
+        bigf_x = 1-(1.0/7.0)*(bigf_num/bigf_denom)
         f_2_num = 1+3.5*bigf_x *(jfw3/jfw1)
         f_2_denom = 1+(jfw2/jfw1) + 3.5*bigf_x*(jfw3/jfw1)
-        f_2 = f2_num / f_2_denom
-        vacconc = self.get_vac_conc()
+        f_2 = f_2_num / f_2_denom
+        vacconc = self.get_vac_conc(temp)
         lattparam = self.get_latt_param()
-        Dself = vacconc*lattparam^2*jfw0
+        Dself = vacconc*np.power(lattparam,2)*jfw0
         Dsol_num = Dself * f_2 * jfw2 * jfw4 * jfw1
         Dsol_denom = f_0 * jfw1 * jfw0 * jfw3
         Dsolute = Dsol_num / Dsol_denom
+        if self.verbose == 1:
+            print "Dself, Dsolute: ", [Dself, Dsolute]
         return [Dself, Dsolute]
 
-    def get_vac_conc(self, perf="perf"):
-        """Get vacancy concentration.
+    def get_vac_conc_cell(self, perf="perf"):
+        """Get vacancy concentration of SUPERCELL. SHOULD WE USE EQUILIBRIUM VACANCY CONC.
+            INSTEAD OF CELL VACANCY CONC?
             Args:
                 perf <str>: designation string for perfect cell
                             (default) "perf"
@@ -469,8 +526,26 @@ class DiffusionCoefficient():
         perfpos = pymatgen.io.vaspio.Poscar.from_file(perfpospath)
         perfnatoms = perfpos.natoms
         vacconc = (perfnatoms - defnatoms) / perfnatoms #e.g. (32-31)/32
+        if self.verbose == 1:
+            print "Cell vac conc: ", vacconc
         return vacconc
 
+    def get_vac_conc(self, temp):
+        """Get vacancy concentration in equilibrium.
+            Shewmon 2nd Edition p. 70# N_v_eq = exp(Sv/R)exp(-Hv/RT)
+            Here we use N_v_eq = exp(Sv/k)exp(-Hv/kT) with Sv in eV/K, Hv in eV
+            Args:
+                temp <float>: temp in K
+            Returns:
+                <float> vacancy concentration (UNITLESS)
+        """
+        label = self.freqdict['w0']       
+        [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
+        defenergy=self.get_defect_energy_simple(startlabel)
+        nveq = np.exp(stock_S_v/kboltz)*np.exp(-1*defenergy/(kboltz*temp))
+        if self.verbose == 1:
+            print "Equilib vac conc: ", nveq
+        return nveq
 
     def get_latt_param(self, perf="perf"):
         """Get lattice parameter
@@ -487,6 +562,8 @@ class DiffusionCoefficient():
         perfpos = pymatgen.io.vaspio.Poscar.from_file(perfpospath)
         perfstr = perfpos.structure
         mylatt = perfstr.lattice.a
+        if self.verbose == 1:
+            print "Latt param: ", mylatt
         return mylatt
     
     def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
@@ -494,6 +571,8 @@ class DiffusionCoefficient():
             w_i = v_i exp(S_i/k) exp(-E_i/kT)
         """
         jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
+        if self.verbose == 1:
+            print "Jump freq: ", jumpfreq
         return jumpfreq
 
     def diffusion_coefficient(self):
@@ -506,6 +585,8 @@ class DiffusionCoefficient():
                 self.tempdict[tkey] = self.five_freq(tkey)
             else:
                 raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % int(self.freqmodel))
+        if self.verbose == 1:
+            print "temp dict of diff coeffs: ", self.tempdict
         return self.tempdict
 
 
@@ -520,25 +601,29 @@ class DiffusionCoefficient():
         self.get_hopdict()
         self.get_formdict()
         self.get_entrodict_approx()
-        self.get_vibdict_approx() #Adams approximations
+        self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
         for freq in freqs:
-            jumpfreqdict[freq] = self.estimate_jump_freq(self.vibdict[freq],
+            jumpfreqdict[freq] = self.estimate_jump_freq(self.attemptdict[freq],
                 self.entrodict[freq],
                 self.hopdict[freq]+self.formdict[freq], temp)
         jfw0 = jumpfreqdict['w0']
-        f_0 = 0.715
-        vacconc = self.get_vac_conc()
+        #f_0 = 0.715
+        vacconc = self.get_vac_conc(temp)
         lattparam = self.get_latt_param()
-        Dself = vacconc*lattparam^2*jfw0
+        Dself = vacconc*np.power(lattparam,2)*jfw0
+        if self.verbose == 1:
+            print "Dself: ", Dself
         return Dself
 
     def print_temp_dict(self):
         """Print the self.tempdict dictionary of coefficients."""
         print "TEMP (K)     Dself     Dsolute(if applicable)"   
-        for (tkey, tval) in self.tempdict:
-            print "%8s %20s" % (tkey, str(tval))
+        tkeys = self.tempdict.keys()
+        tkeys.sort()
+        for (tkey) in tkeys:
+            print "%8s %20s" % (tkey, str(self.tempdict[tkey]))
 
         return
 def main():
@@ -552,45 +637,54 @@ def main():
             freqdict <str>: string to be converted into a frequency dict, of
                 format "w0=vac1-vac2,w1=vac1-vac9,w2=vac1-vac3,w3=vac4-vac5..."
     """
-    directory=os.path.expandvars(sys.argv[1])
+    print "Arguments: ", sys.argv
+    try:
+        directory=os.path.expandvars(sys.argv[1])
+    except IndexError:
+        print sys.argv
     tstart=73
     tend=1273
     tstep=100
     freqmodel=1
     try:
         trytstart=sys.argv[2]
-        tstart=trytstart
+        tstart=float(trytstart)
     except IndexError:
         pass
     try:
         trytend=sys.argv[3]
-        tend=trytend
+        tend=float(trytend)
     except IndexError:
         pass
     try:
         trytstep=sys.argv[4]
-        tstep=trytstep
+        tstep=float(trytstep)
     except IndexError:
         pass
     try:
         tryfreqmodel=sys.argv[5]
-        freqmodel=tryfreqmodel
+        freqmodel=int(tryfreqmodel)
     except IndexError:
         pass
     freqdict=None
     try:
         fdstr = sys.argv[6]
         freqdict=dict()
-        fdlist=fdstr.strip()split(",")
+        fdlist=fdstr.strip().split(",")
         for fditem in fdlist:
             mykey = fditem.split("=")[0]
             myval = fditem.split("=")[1]
             freqdict[mykey]=myval
     except IndexError:
         pass
+    verbose=0
+    try:
+        verbose=int(sys.argv[7])
+    except IndexError:
+        pass
 
     print 'Looking at diffusion coefficient for %s' % directory
-    DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict)
+    DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict, verbose)
     DC.diffusion_coefficient()
     DC.print_temp_dict()
 
