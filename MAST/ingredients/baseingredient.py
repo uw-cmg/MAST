@@ -157,13 +157,20 @@ class BaseIngredient(MASTObj):
             If there are no children, it will return None instead.
         """
         if (self.keywords['child_dict']):
-            return self.keywords['child_dict']
+            return self.keywords['child_dict'].copy()
         else:
             return None
 
     @property
     def children(self):
         return self.get_children()
+
+    def get_name(self):
+        return self.keywords['name'].split('/')[-1]
+
+    @property
+    def name(self):
+        return self.get_name()
 
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
