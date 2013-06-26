@@ -160,6 +160,9 @@ class BaseIngredient(MASTObj):
     def children(self):
         return self.get_children()
 
+    def __repr__(self):
+        return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
+ 
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
