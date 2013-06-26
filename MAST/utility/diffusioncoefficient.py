@@ -109,7 +109,7 @@ class DiffusionCoefficient():
             except (TypeError, ValueError):
                 raise MASTError(self.__class__.__name__, "Bad type for frequency model integer.")
         if not (trymodel in [1, 5]):
-            raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % trymodel)
+            raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % str(trymodel))
         self.freqmodel = trymodel
         return self.freqmodel
             
@@ -505,7 +505,7 @@ class DiffusionCoefficient():
             elif self.freqmodel == 5:
                 self.tempdict[tkey] = self.five_freq(tkey)
             else:
-                raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % self.freqmodel)
+                raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % int(self.freqmodel))
         return self.tempdict
 
 
@@ -534,6 +534,13 @@ class DiffusionCoefficient():
         Dself = vacconc*lattparam^2*jfw0
         return Dself
 
+    def print_temp_dict(self):
+        """Print the self.tempdict dictionary of coefficients."""
+        print "TEMP (K)     Dself     Dsolute(if applicable)"   
+        for (tkey, tval) in self.tempdict:
+            print "%8s %20s" % (tkey, str(tval))
+
+        return
 def main():
     """Run diffusion coefficient calculator from the prompt.
         Args (sys.argv):
@@ -584,7 +591,8 @@ def main():
 
     print 'Looking at diffusion coefficient for %s' % directory
     DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict)
-    print DC.diffusion_coefficient()
+    DC.diffusion_coefficient()
+    DC.print_temp_dict()
 
 if __name__ == '__main__':
     main()
