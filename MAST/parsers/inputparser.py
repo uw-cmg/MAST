@@ -281,7 +281,8 @@ class InputParser(MASTObj):
                     label = str(count)
 
                 defect = {'charge': charge,
-                          'subdefect_1': type_dict}
+                          'subdefect_1': type_dict,
+                          'coord_type': coord_type}
 
                 defect_types['defect_%s' % label] = defect
 
@@ -291,6 +292,7 @@ class InputParser(MASTObj):
                 multidefect = True
                 subcount = 1
                 defect['charge'] = charge
+                defect['coord_type'] = coord_type
 
                 try:
                     label = line[1]
