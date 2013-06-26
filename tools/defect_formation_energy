@@ -5,6 +5,9 @@ import sys, os
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
 
 def get_label_timestamp(name):
+    """Helper function to reconstitute the system label, date, and time from
+        a directory name.
+    """
     tmp = name.split('mast_')
     label = tmp[0][:-1]
     time = tmp[1]
@@ -38,7 +41,8 @@ def main():
     print 'Calculating defect formation energies now.'
 
     DFE = DefectFormationEnergy('%s/%s/' % (archive, directory))
-    defect_energies = DFE.calculate_defect_formation_energies()
+    #defect_energies = DFE.calculate_defect_formation_energies()
+    DFE.print_table()
 
 if __name__ == '__main__':
     main()
