@@ -153,8 +153,13 @@ class BaseIngredient(MASTObj):
                 "Program not recognized (in set_up_neb)")
 
     def get_children(self):
-        """Returns the children of this ingredient"""
-        return self.keywords['child_dict']
+        """Returns the children of this ingredient.
+            If there are no children, it will return None instead.
+        """
+        if (self.keywords['child_dict']):
+            return self.keywords['child_dict']
+        else:
+            return None
 
     @property
     def children(self):
@@ -162,7 +167,7 @@ class BaseIngredient(MASTObj):
 
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
- 
+
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
