@@ -304,7 +304,7 @@ class InputParser(MASTObj):
                 count += 1
                 multidefect = False
             elif ('charge' in line[0]):
-                charge_range = line[0].split('=').split(',')
+                charge_range = line[0].split('=')[-1].split(',')
                 defect['charge'] = range(int(charge_range[0]),
                                          int(charge_range[1])+1)
             else:
