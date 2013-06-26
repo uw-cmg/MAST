@@ -172,6 +172,13 @@ class BaseIngredient(MASTObj):
     def name(self):
         return self.get_name()
 
+    def get_keywords(self):
+        return self.keywords.copy()
+
+    @property
+    def keywords(self):
+        return self.get_keywords()
+
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
