@@ -27,8 +27,21 @@ class DiffusionCoefficient():
             self.input_options <InputOptions>: input options of the recipe
             self.dirlist <list of str>: list of directories underneath 
                                         self.directory
+            self.hopdict <dict of float>: freq-labeled dict of NEB barriers
+                                        (right now this is ENERGIES, NOT
+                                        ENTHALPIES)
+            self.attemptdict <dict of float>: freq-labeled dict of attempt freqs
+            self.entrodict <dict of float>: freq-labeled dict of entropies
+            self.formdict <dict of float>: freq-labeled dict of formation
     """
-    def __init__(self, directory):
+    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100):
+        """
+            Args:
+                directory <str>: directory to start in
+                tempstart <float>: Temp in K to start range (default 73)
+                tempend <float>: Temp in K to end range (default 1273)
+                tempstep <float>: step in K for temp. range (default 100)
+        """
         self.directory = directory
         dirlist = os.listdir(self.directory)
         dirlist.sort()
@@ -38,13 +51,16 @@ class DiffusionCoefficient():
         self.host=None
         self.solute=None
         self.input_options=None
+        self.hopdict=None
+        self.attemptdict=None
+        self.entrodict=None
+        self.formdict=None
         try:
             pm = PickleManager(self.directory + 'input_options.pickle')
             self.input_options = pm.load_variable()
         except OSError:
             pass
         return
-
 
 
     def set_freqmodel(self, freqmodel=1)        
@@ -165,7 +181,7 @@ class DiffusionCoefficient():
                                 directory name
             Returns:
                 mypath <str>: The FIRST matching directory found, from a 
-                                sorted list
+                                sorted list. Returns a full path.
         """
         dirlist = os.listdir(self.directory)
         dirlist.sort()
@@ -176,6 +192,158 @@ class DiffusionCoefficient():
                 break
         return mypath
 
+    def neb_barrier(self, label):
+        """Get the NEB barrier for one label.
+            If the label is reversed from the folder name, the "start"
+            directory will be the endpoint whose label comes first.
+            The transition state is the maximum energy.
+            Performs NO CHECKS for the state of the energy contour.
+            Args:
+                label <str>: label for the NEB folder, like "vac1-vac2"
+            Returns:
+                <float>: transition state energy - starting state energy
+        """
+        [startlabel, tstlabel] = find_start_and_tst_labels(stem, label)
+        startenergy = self.get_labeled_energy(stem, startlabel)
+        maxenergy = self.get_max_energy(stem, tstlabel)
+        if (startenergy > maxenergy):
+            print "Attention! Maximum energy is from an endpoint, not an image!"
+        return (maxenergy - startenergy)
+
+    def get_labeled_energy(self, label, append="stat"):
+        """Get an energy from a directory.
+            Args:
+                label <str>: label for directory
+                append <str>: additional tag for the directory
+        """
+        mypath = self.get_labeled_dir(label, append)
+        myenergy=0
+        myenergy = self.get_total_energy(mypath)
+        return myenergy
+
+    def get_total_energy(directory): #synchronize this call with Glen's 
+        """Returns the total energy from a directory.
+            Args:
+                directory <str>: directory (full path)
+            Returns:
+                <float>: Total energy (E0 from VASP)
+            SHOULD BE REPLACED WITH PROGRAM-INDEPENDENT SWITCH.
+        """
+        from pymatgen.io.vaspio.vasp_output import Vasprun
+        # Are we dealing with VASP?
+        if ('vasprun.xml' in os.listdir(directory)):
+        # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
+            return Vasprun('%s/vasprun.xml' % directory).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
+
+    def get_max_energy(self, tstlabel):
+        """Get maximum image energy from an NEB directory.
+            Args:
+                tstlabel <str>: label for the NEB directory
+            Returns:
+                <float>: Maximum energy among the images.
+        """
+        mypath = self.get_labeled_dir(tstlabel)
+        imdirs = os.listdir(mypath)
+        imdirs.sort()
+        mydir=""
+        imenergs=list()
+        for mydir in imdirs:
+            imenergs[self.get_total_energy(os.path.join(mypath,mydir))] = mydir
+        maxenerg = max(imenergs)
+        maxdir = imenergs[maxenerg]
+        return maxenerg
+   
+
+    def get_hopdict(self):
+        """Get dictionary of hops."""
+        freqs = self.freqdict.keys()
+        hopdict=dict()
+        for freq in freqs:
+            neblabel = freqdict[freq]
+            hopdict[freq] = self.neb_barrier(neblabel)
+        self.hopdict = hopdict
+        return self.hopdict
+
+    def get_formdict(self):
+        """Get formation energy dictionary.
+        """
+        formdict=dict()
+        #pure_def = #TTM DEBUG NEED TO SWITCH TO USE GLEN'S FUNCTION
+        for freq in self.freqdict.keys():
+            formdict[freq] = self.get_defect_energy_simple(freqdict[freq])
+        self.formdict = formdict
+        return self.formdict
+
+    def get_defect_energy_simple(self, label, append="stat", perf="perf"):
+        """Need to replace with Glen's function.
+            Get simplified defect formation energy. NO CHARGED CELLS.
+            Args:
+                label <str>: label for hop
+                append <str>: append for name 
+                perf <str>: perfect-cell designation
+            Return:
+                <float>: defect formation energy
+        """
+        [startlabel, tstlabel] = self.find_start_and_tst_labels(label)
+        defpath=self.get_labeled_dir(startlabel, append)
+        perfpath=self.get_labeled_dir(perf, append)
+        defectedenergy = self.get_total_energy(defpath)
+        perfectenergy = self.get_total_energy(perfpath)
+        if defectedenergy==None or perfectenergy==None:
+            raise MASTError(self.__class__.__name__,"No defected energy found.")
+        delta = defectedenergy - perfectenergy
+        ecohpure=0 # Need to get this from a calc??
+        if ecohpure==0:
+            mypos=pymatgen.io.vaspio.Poscar.from_file(os.path.join(perfpath, "POSCAR"))
+            totatoms=sum(mypos.natoms)
+            echopure=perfectenergy/totatoms
+            myfile=MASTFile()
+            myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % dirname)
+            myfile.to_file(os.path.join(dirname,"WARNING"))
+        eform = delta + ecohpure #Add on reference atom
+        return eform
+
+    def get_attemptdict(self):
+        """Get approximate attempt vibrational frequency dictionary, 
+            using Adams approximations:
+            v_0=v_1=v_3=v_4 and (v2/v0)=sqrt(mass0*Tmeltpure2/(mass2*Tmeltpure0)
+            Temperatures are in KELVIN.
+            Masses are in AMU.
+        """
+        stock_v=1e13
+        vibdict=dict()
+        [hoststr,solstr]=get_host_and_solute(stem, freqdict)
+        hostelem = pymatgen.core.periodic_table.Element(hoststr)
+        solelem = pymatgen.core.periodic_table.Element(solstr)
+        if masshost==0:
+            masshost = hostelem.atomic_mass
+        if masssolute==0:
+            masssolute = solelem.atomic_mass
+        if tmeltpurehost==0:
+            tmeltpurehost = float(str(hostelem.melting_point).split()[0])
+        if tmeltpuresolute==0:
+            tmeltpuresolute = float(str(solelem.melting_point).split()[0])
+        for freq in freqdict.keys():
+            if not (freq == 'w2'):
+                vibdict[freq] = stock_v
+            else:
+                vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
+        return vibdict
+    
+
+
+
+
+
+
+
+
+    def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
+        """Estimate jump frequency (Adams, Foiles, Wolfer)
+            w_i = v_i exp(S_i/k) exp(-E_i/kT)
+        """
+        jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
+        return jumpfreq
 
 def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0, tmeltpurehost=0, tmeltpuresolute=0, masshost=0, masssolute=0, ecohpure=0):
     """Wrapper to dilute solute diffusion coefficient calculations.
@@ -215,97 +383,35 @@ def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacc
     myD = myD0 * np.exp(-1*myQ/(kboltz*temp))
     return myD
 
-def neb_barrier(stem, label):
-    """Get the NEB barrier."""
-    [startlabel, tstlabel] = find_start_and_tst_labels(stem, label)
-    startenergy = get_labeled_energy(stem, startlabel)
-    maxenergy = get_max_energy(stem, tstlabel)
-    if (startenergy > maxenergy):
-        print "Attention! Maximum energy is from an endpoint, not an image!"
-    return (maxenergy - startenergy)
 
-def get_labeled_dir(stem, label, append="stat"):
-    """Get a labeled directory."""
-    dirname = os.path.dirname(stem)
-    dirlist = os.listdir(dirname)
-    dirlist.sort()
-    mydir=""
-    for mydir in dirname:
-        if (label in mydir) and (append in mydir):
-            mypath=os.path.join(dirname, mydir)
-            break
-    return mypath
-
-def get_labeled_energy(stem, label, append="stat"):
-    """Get an energy from a directory."""
-    mypath = get_labeled_dir(stem, label, append)
-    myenergy=0
-    myenergy = get_total_energy(mypath)
-    return myenergy
-
-def get_max_energy(stem, tstlabel, imageflag="image"):
-    """Get maximum image energy from an NEB directory."""
-    dirname = os.path.dirname(stem)
-    dirlist = os.listdir(dirname)
-    dirlist.sort()
-    mydir=""
-    imdirs=list()
-    for mydir in dirlist:
-        if (imageflag in mydir) and (tstlabel) in mydir:
-            imdirs.append(mydir)
-    imenergs=dict()
-    mydir=""
-    for mydir in imdirs:
-        imenergs[get_total_energy(os.path.join(dirname,mydir))] = mydir
-    maxenerg = max(imenergs)
-    maxdir = imenergs[maxenerg]
-    return maxenerg
+def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost, masssolute):
+    """Get approximate vibrational dictionary, using Adams approximations:
+        v_0=v_1=v_3=v_4 and (v2/v0) = sqrt(mass0*Tmeltpure2/(mass2*Tmeltpure0)
+        Temperatures are in KELVIN.
+        Masses are in AMU.
+    """
+    stock_v=1e13
+    vibdict=dict()
+    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
+    hostelem = pymatgen.core.periodic_table.Element(hoststr)
+    solelem = pymatgen.core.periodic_table.Element(solstr)
+    if masshost==0:
+        masshost = hostelem.atomic_mass
+    if masssolute==0:
+        masssolute = solelem.atomic_mass
+    if tmeltpurehost==0:
+        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
+    if tmeltpuresolute==0:
+        tmeltpuresolute = float(str(solelem.melting_point).split()[0])
+    for freq in freqdict.keys():
+        if not (freq == 'w2'):
+            vibdict[freq] = stock_v
+        else:
+            vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
+    return vibdict
     
 
-def get_total_energy(directory): #synchronize this call with Glen's 
-    """Returns the total energy from a directory"""
-    from pymatgen.io.vaspio.vasp_output import Vasprun
-    # Are we dealing with VASP?
-    if ('vasprun.xml' in os.listdir(directory)):
-    # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
-        return Vasprun('%s/vasprun.xml' % directory).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
-def find_start_and_tst_labels(stem, label):
-    """Finds the start label and transition state labels for ingredients.
-        Args:
-            stem <str>: stem name
-            label <str>: neb label 
-        Returns:
-            [startlabel, tstlabel]
-            startlabel <str>: label for start directory (e.g. "vac1" or "vac2")
-            tstlabel <str>: label for neb (e.g. "vac1-vac2" or "vac2-vac1")
-    """
-    startlabel=""
-    tstlabel=""
-    mydir = os.path.dirname(stem)
-    mybase = os.path.basename(stem)
-    backlabel = reverse_label(label)
-    for myname in os.listdir(mydir):
-        if (label in myname) and (mybase in myname):
-            tstlabel = label
-            startlabel = label.split('-')[0]
-            break
-        elif (backlabel in myname) and (mybase in myname):
-            tstlabel = label
-            startlabel = label.split('-')[1]
-            break
-    if tstlabel == "":
-        raise MASTError("utility, diffusioncoefficient", 
-            "No directory found for hop label %s." % label)
-    return [startlabel, tstlabel]
-
-def reverse_label(label):
-    """Reverse a label"""
-    return backlabel
-
-def neb_profile():
-    """Get the NEB profile."""
-    pass
 
 def one_freq(stem, freqdict):
     """Pure diffusion, one frequency
@@ -363,43 +469,8 @@ def estimate_jump_freq(vibfreq, actentropy, actenergy, temp):
     return jumpfreq
     
 
-def get_hopdict(stem, freqdict):
-    """Get dictionary of hops."""
-    freqs = freqdict.keys()
-    hopdict=dict()
-    for freq in freqs:
-        neblabel = freqdict[freq]
-        hopdict[freq] = neb_barrier(stem, neblabel)
-    return hopdict
 
-def get_formdict(stem, freqdict, ecohpure):
-    """Get formation energy dictionary.
-    """
-    formdict=dict()
-    #pure_def = #TTM DEBUG NEED TO SWITCH TO USE GLEN'S FUNCTION
-    for freq in freqdict.keys():
-        formdict[freq] = get_defect_energy_simple(stem, freqdict[freq], ecohpure)
-    return formdict
 
-def get_defect_energy_simple(stem, label, append="stat", perf="perf", ecohpure=0):
-    """Need to replace with Glen's function"""
-    [startlabel, tstlabel] = find_start_and_tst_labels(stem, freqdict[freq])
-    defpath=get_labeled_dir(stem, startlabel, append)
-    perfpath=get_labeled_dir(stem, perf, append)
-    defectedenergy = get_total_energy(defpath)
-    perfectenergy = get_total_energy(perfpath)
-    if defectedenergy==None or perfectenergy==None:
-        raise MASTError("utility diffusioncoefficient","No defected energy found.")
-    delta = defectedenergy - perfectenergy
-    if ecohpure==0:
-        mypos=pymatgen.io.vaspio.Poscar.from_file(os.path.join(perfpath, "POSCAR"))
-        totatoms=sum(mypos.natoms)
-        echopure=perfectenergy/totatoms
-        myfile=MASTFile()
-        myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % dirname)
-        myfile.to_file(os.path.join(dirname,"WARNING"))
-    eform = delta + ecohpure #Add on reference atom
-    return eform
 
 def get_entrodict_approx(stem, freqdict, hopdict, formdict, tmeltpurehost):
     """Get approximate entropy.
@@ -460,34 +531,6 @@ def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost,
             vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
     return vibdict
     
-def get_host_and_solute(stem, freqdict):
-    """Find the host and the solute based on relative numbers in POSCAR,
-        for a BINARY, DILUTE system. (One host element type, 
-        one solute element type.)
-        Returns:
-            [host,solute] <str>: element symbols, like "Fe"
-
-    """
-    if 'w2' in freqdict.keys():
-        label=freqdict['w2']
-    else:
-        raise MASTError("utility/diffusioncoefficient","Cannot see how to determine solute and host")
-    [startlabel, tstlabel]=find_start_and_tst_labels(stem, label)
-    mydir = get_labeled_dir(stem, startlabel)
-    pospath = os.path.join(mydir, "POSCAR")
-    if os.path.isfile(pospath):
-        mypos = pymatgen.io.vaspio.Poscar.from_file(pospath)
-        sitesym = mypos.site_symbols
-        natoms = mypos.natoms
-        hostidx=natoms.index(max(natoms))
-        solidx=natoms.index(min(natoms))
-        host=sitesym[hostidx]
-        solute=sitesym[solidx]
-        return [host, solute]
-    else:
-        raise MASTError("utility/diffusioncoefficient","No POSCAR in %s." % pospath)
-
-
 
 
 def phonons():
