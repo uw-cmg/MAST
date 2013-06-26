@@ -4,6 +4,7 @@ from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.smartio import read_structure
 
 from MAST.utility import PickleManager
+from MAST.ingredients.inducedefect import InduceDefect
 
 class DefectFormationEnergy:
     """Class for calculating the defect formation energy for a completed MAST
@@ -15,6 +16,14 @@ class DefectFormationEnergy:
 
         pm = PickleManager(self.directory + '/input_options.pickle')
         self.input_options = pm.load_variable()
+        self.recipe_plan = PickleManager(self.directory + '/mast.pickle').load_variable()
+
+        self.final_ingredients = list()
+        for ingredient in self.recipe_plan:
+            if (ingredient.children is None):
+                self.final_ingredients.append(ingredient.name)
+
+        print self.final_ingredients
 
     def calculate_defect_formation_energies(self):
         perf_dir = self.get_perfect_directory()[0]
@@ -75,8 +84,8 @@ class DefectFormationEnergy:
             defect_info = dict()
             for conditions, potentials in chempot.items():
                 print 'DFE for defect %s under %s conditions' % (label, conditions.upper())
-                print '%-20s = %18.6f' % ('Energy defected', energy)
-                print '%-20s = %18.6f' % ('Energy perfect', e_perf)
+                #print '%-20s = %18.6f' % ('Energy defected', energy)
+                #print '%-20s = %18.6f' % ('Energy perfect', e_perf)
                 e_def = base
                 for specie, number in struct_diff.items():
                     mu = potentials[str(specie).lower()]
