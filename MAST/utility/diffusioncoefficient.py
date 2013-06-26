@@ -33,14 +33,17 @@ class DiffusionCoefficient():
             self.attemptdict <dict of float>: freq-labeled dict of attempt freqs
             self.entrodict <dict of float>: freq-labeled dict of entropies
             self.formdict <dict of float>: freq-labeled dict of formation
+            self.tempdict <dict of float>: temperature list of diffusion coeffs
     """
-    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100):
+    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100, freqmodel=0, freqdict=None):
         """
             Args:
                 directory <str>: directory to start in
                 tempstart <float>: Temp in K to start range (default 73)
                 tempend <float>: Temp in K to end range (default 1273)
                 tempstep <float>: step in K for temp. range (default 100)
+                freqmodel <int>: Integer for frequency model
+                freqdict <dict>: Dictionary for frequency-to-hop-labels
         """
         self.directory = directory
         dirlist = os.listdir(self.directory)
@@ -55,24 +58,49 @@ class DiffusionCoefficient():
         self.attemptdict=None
         self.entrodict=None
         self.formdict=None
+        self.tempdict=None
         try:
             pm = PickleManager(self.directory + 'input_options.pickle')
             self.input_options = pm.load_variable()
         except OSError:
             pass
         return
+        self.set_up_temp_dict(tempstart, tempend, tempstep)
+        self.set_freqmodel(freqmodel)
+        self.set_frequency_dict(freqdict)
 
+    def set_up_temp_dict(self, tempstart=73, tempend=1273, tempstep=100):
+        """Set up temperature dict.
+            Args:
+                tempstart <float>: starting temp in K (default 73 K)
+                tempend <float>: ending temp in K (default 1273 K)
+                tempstep <float>: step in K (default 100 K)
+        """
+        if tempend < tempstart:
+            tempend = tempstart #Do not allow bad temp range.
+        if tempstart <= 0:
+            tempstart = 0.000001 #Do not allow negative or zero temperature.
+        tidx = tempstart
+        tdict=dict()
+        tct=0
+        maxidx=10000 #arbitrary stop at 10000 in case of errors
+        while (tidx <= tempend) and (tct < maxidx):
+            tdict[tidx] = 0.
+            tidx = tidx + tempstep
+            tct = tct + 1
+        self.tempdict = tdict
+        return self.tempdict
 
-    def set_freqmodel(self, freqmodel=1)        
+    def set_freqmodel(self, freqmodel=0)        
         """Set the frequency model to use.
             Args:
-                freqmodel <int>: Frequency model; this is overriden by any
-                            'freqmodel' entry in the input options program keys
-                                1 (default): pure vacancy
+                freqmodel <int>:
+                                1 : pure vacancy
                                 5 : five-frequency model
+                                0 : set from input options if possible.
         """
         trymodel=None
-        if not (self.input_options == None):
+        if (freqmodel == 0) and not (self.input_options == None):
             if "freqmodel" in self.input_options['program_keys'].keys():
                 trymodel = self.input_options['program_keys']['freqmodel']
         if trymodel == None: #was not set in input options
@@ -85,11 +113,10 @@ class DiffusionCoefficient():
         self.freqmodel = trymodel
         return self.freqmodel
             
-    def set_frequency_dict(self, freqdict=""):
+    def set_frequency_dict(self, freqdict=None):
         """Set up the frequency dictionary.
             Args:
-                freqdict <dict of str>: Frequency dictionary. Overridden by
-                    any 'freqdict' key in input options program keys.
+                freqdict <dict of str>: Frequency dictionary. 
                     This is a frequency-to-label dictionary with the format:
                         freqdict['w0']=['vac1-vac2']
                         freqdict['w4']=['vac10-vac9']
@@ -98,13 +125,16 @@ class DiffusionCoefficient():
                             the backwards hop will be taken.
                             Initial state for phonons will be the first
                             label in the label pair as listed in this dict.
+                    If None, try to set from input options
         """
         trydict=None
-        if not (self.input_options == None):
+        if (freqdict == None) and not (self.input_options == None):
             if "freqdict" in self.input_options['program_keys'].keys():
                 trydict = dict(self.input_options['program_keys']['freqdict'])
         if trydict==None: #was not set in input options
             trydict = dict(freqdict)
+        if trydict==None:
+            raise MASTError(self.__class__.__name__, "No frequency dictionary.")
         for (key, value) in trydict.iteritems(): #validate
             if not 'w' in key:
                 raise MASTError(self.__class__.__name__, "Frequency dict does not have the correct format, e.g. freqdict['w0']=['vac1-vac2']")
@@ -312,141 +342,94 @@ class DiffusionCoefficient():
         """
         stock_v=1e13
         vibdict=dict()
-        [hoststr,solstr]=get_host_and_solute(stem, freqdict)
-        hostelem = pymatgen.core.periodic_table.Element(hoststr)
-        solelem = pymatgen.core.periodic_table.Element(solstr)
-        if masshost==0:
-            masshost = hostelem.atomic_mass
-        if masssolute==0:
-            masssolute = solelem.atomic_mass
-        if tmeltpurehost==0:
-            tmeltpurehost = float(str(hostelem.melting_point).split()[0])
-        if tmeltpuresolute==0:
-            tmeltpuresolute = float(str(solelem.melting_point).split()[0])
-        for freq in freqdict.keys():
+        hostelem = pymatgen.core.periodic_table.Element(self.host)
+        solelem = pymatgen.core.periodic_table.Element(self.solute)
+        masshost = hostelem.atomic_mass
+        masssolute = solelem.atomic_mass
+        tmeltpurehost = self.parse_melting_point(hostelem)
+        tmeltpuresolute = self.parse_melting_point(solelem)
+        freqs = freqdict.keys()
+        freqs.sort()
+        for freq in freqs:
             if not (freq == 'w2'):
                 vibdict[freq] = stock_v
             else:
                 vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
-        return vibdict
+        self.attemptdict=vibdict
+        return self.attemptdict
     
 
+    def get_entrodict_approx(self):
+        """Get approximate entropy.
+            Use Adams approximations for now, Wert-Zener, 
+            where S_0=S_1=S_3=S_4 and
+            S_2 - S_0 = beta(E_2 - E_1)/Tmelt, pure,
+            where S are activation entropies and
+            E are activation energies and beta is assumed to be 0.4
 
-
-
-
-
-
-
-    def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
-        """Estimate jump frequency (Adams, Foiles, Wolfer)
-            w_i = v_i exp(S_i/k) exp(-E_i/kT)
+            Dobson et al, S/k approx 10?            
+            Shewmon, Sm approx beta*Q/Tm, Sv/R = 2.4
+            http://www.tf.uni-kiel.de/matwis/amat/
+                def_en/kap_3/backbone/r3_1_1.html, Sform ~ Smig ~ 1k?         
+            LATER, REPLACE WITH EXTRACTION of "THERMO" from PHON by Dario Alfe
         """
-        jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
-        return jumpfreq
+        entrodict=dict()
+        stock_S_v=2.07e-4 #Shewmon, Sv/R approx 2.4?? =2.07e-4
+        stock_S_m=2.07e-4
+        beta=0.4
+        hostelem = pymatgen.core.periodic_table.Element(self.host)
+        tmeltpurehost = self.parse_melting_point(hostelem)
+        for freq in freqdict.keys():
+            if not (freq == 'w2'):
+                entrodict[freq] = stock_S_v + stock_S_m
+            else:
+                eact2 = self.hopdict['w2'] + self.formdict['w2']
+                eact1 = self.hopdict['w1'] + self.formdict['w1']
+                delta_act_s = beta*(eact2-eact1)/tmeltpurehost
+                entrodict['w2'] = entrodict['w0'] + delta_act_s
+        self.entrodict = entrodict
+        return self.entrodict
 
-def diffusion_coefficient(stem="", freqmodel=5, freqdict=dict(), temp=1173, vacconc=0, lattparam=0, tmeltpurehost=0, tmeltpuresolute=0, masshost=0, masssolute=0, ecohpure=0):
-    """Wrapper to dilute solute diffusion coefficient calculations.
-        DOES NOT SUPPORT CHARGED SUPERCELLS YET.
-        Args:
-            stem <str>: stem of system/recipe to calculate (relative to mydir)
-            freqmodel <int>: frequency model   
-                                5 (default)
-                                1 (one frequency; pure system)
-            freqdict <dict of str>: frequency-to-label dictionary:
-                        freqdict['w0']=['vac1-vac2']
-                        freqdict['w4']=['vac10-vac9']
-                            If a label is backwards from what is in the 
-                            neb ingredient's actual name, then
-                            the backwards hop will be taken.
-                            Initial state for phonons will be the first
-                            label in the label pair.
-            temp <int>: temperature in Kelvin
-                            1173 (K, default)
-        Returns:
-            D_0 and Q, and D at the temperature specified
-            for D* = D_0 * exp(-Q/kT)
-    """
-    if stem == "":
-        raise MASTError("postprocessing, diffusion_coefficient",
-            "Recipe stem was not given. Erroring out.")
-        
-    if freqmodel == 5:
-        [myD0,myQ]=five_freq(stem, freqdict, temp, vacconc, lattparam,
-            tmeltpurehost, tmeltpuresolute, masshost, masssolute,
-            ecohpure)
-    elif freqmodel == 1:
-        [myD0,myQ]=one_freq(stem, freqdict)
-    else:
-        raise MASTError("postprocessing, diffusion_coefficient",
-            "Frequency model %s is not supported." % freqmodel)
-    myD = myD0 * np.exp(-1*myQ/(kboltz*temp))
-    return myD
+    def parse_melting_point(self, elem):
+        """Parse the melting point.
+            Args:
+                elem <Element>: pymatgen Element class object
+            Return:
+                <float>: melting point in Kelvin
+        """
+        meltstr = str(elem.melting_point) #str(<unicode>)
+        meltval = meltstr.split()[0]
+        return float(meltval)
 
 
-def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost, masssolute):
-    """Get approximate vibrational dictionary, using Adams approximations:
-        v_0=v_1=v_3=v_4 and (v2/v0) = sqrt(mass0*Tmeltpure2/(mass2*Tmeltpure0)
-        Temperatures are in KELVIN.
-        Masses are in AMU.
-    """
-    stock_v=1e13
-    vibdict=dict()
-    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
-    hostelem = pymatgen.core.periodic_table.Element(hoststr)
-    solelem = pymatgen.core.periodic_table.Element(solstr)
-    if masshost==0:
-        masshost = hostelem.atomic_mass
-    if masssolute==0:
-        masssolute = solelem.atomic_mass
-    if tmeltpurehost==0:
-        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
-    if tmeltpuresolute==0:
-        tmeltpuresolute = float(str(solelem.melting_point).split()[0])
-    for freq in freqdict.keys():
-        if not (freq == 'w2'):
-            vibdict[freq] = stock_v
-        else:
-            vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
-    return vibdict
-    
-
-
-
-def one_freq(stem, freqdict):
-    """Pure diffusion, one frequency
-        Args:
-            (see diffusion_coefficient)
-    """
-    pass
-
-def five_freq(stem, freqdict, temp, vacconc, lattparam, tmeltpurehost, tmeltpuresolute, masshost, masssolute, ecohpure, sys="FCC"):
-    """Five-frequency model.
-        Args:
-            (see diffusion_coefficient)
-    Adams, J. B., Foiles, S. M. & Wolfer, W. G. 
-    Self-diffusion and impurity diffusion of fcc metals 
-    using the five-frequency model and the Embedded Atom Method. 
-    Journal of Materials Research 4, 102.112 (2011)
-    """
-    hopdict = get_hopdict(stem, freqdict)
-    formdict = get_formdict(stem, freqdict, ecohpure)
-    entrodict = get_entrodict_approx(stem, freqdict, hopdict, formdict, tmeltpurehost) #Adams approximations
-    vibdict = get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost, masssolute) #Adams approximations
-    freqs = freqdict.keys()
-    jumpfreqdict=dict()
-    for freq in freqs:
-        jumpfreqdict[freq] = estimate_jump_freq(vibdict[freq],entrodict[freq],
-                hopdict[freq]+formdict[freq], temp)
-    jfw0 = jumpfreqdict['w0']
-    jfw1 = jumpfreqdict['w1']
-    jfw2 = jumpfreqdict['w2']
-    jfw3 = jumpfreqdict['w3']
-    jfw4 = jumpfreqdict['w4']
-    if not sys=="FCC":
-        raise MASTError("utility, diffusioncoefficient", "Only calculates five-frequency model for FCC.")
-    if sys=="FCC":
-        print "FCC:"
+    def five_freq(self, temp):
+        """Five-frequency model for FCC SYSTEMS ONLY.
+            Args:
+                temp <float>: Temperature in K
+            Returns:
+                [Dself <float>, Dsolute <float>]
+                    Self-diffusion coefficient
+                    Dilute solute vacancy diffusion coefficient (tracer?)
+        Adams, J. B., Foiles, S. M. & Wolfer, W. G. 
+        Self-diffusion and impurity diffusion of fcc metals 
+        using the five-frequency model and the Embedded Atom Method. 
+        Journal of Materials Research 4, 102.112 (2011)
+        """
+        self.get_hopdict()
+        self.get_formdict()
+        self.get_entrodict_approx()
+        self.get_vibdict_approx() #Adams approximations
+        freqs = self.freqdict.keys()
+        jumpfreqdict=dict()
+        for freq in freqs:
+            jumpfreqdict[freq] = self.estimate_jump_freq(self.vibdict[freq],
+                self.entrodict[freq],
+                self.hopdict[freq]+self.formdict[freq], temp)
+        jfw0 = jumpfreqdict['w0']
+        jfw1 = jumpfreqdict['w1']
+        jfw2 = jumpfreqdict['w2']
+        jfw3 = jumpfreqdict['w3']
+        jfw4 = jumpfreqdict['w4']
         f_0 = 0.715
         myx = jfw4/jfw0
         bigf_num = 10*np.power(myx,4) + 180.5*np.power(myx,3) + 927*np.power(myx,2) + 1341
@@ -455,105 +438,153 @@ def five_freq(stem, freqdict, temp, vacconc, lattparam, tmeltpurehost, tmeltpure
         f_2_num = 1+3.5*bigf_x *(jfw3/jfw1)
         f_2_denom = 1+(jfw2/jfw1) + 3.5*bigf_x*(jfw3/jfw1)
         f_2 = f2_num / f_2_denom
+        vacconc = self.get_vac_conc()
+        lattparam = self.get_latt_param()
         Dself = vacconc*lattparam^2*jfw0
         Dsol_num = Dself * f_2 * jfw2 * jfw4 * jfw1
         Dsol_denom = f_0 * jfw1 * jfw0 * jfw3
         Dsolute = Dsol_num / Dsol_denom
-    return [Dself, Dsolute]
+        return [Dself, Dsolute]
 
-def estimate_jump_freq(vibfreq, actentropy, actenergy, temp):
-    """Estimate jump frequency (Adams, Foiles, Wolfer)
-        w_i = v_i exp(S_i/k) exp(-E_i/kT)
-    """
-    jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
-    return jumpfreq
+    def get_vac_conc(self, perf="perf"):
+        """Get vacancy concentration.
+            Args:
+                perf <str>: designation string for perfect cell
+                            (default) "perf"
+            Returns:
+                <float> vacancy concentration (UNITLESS)
+        """
+        label = self.freqdict['w0']       
+        [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
+        defpath=self.get_labeled_dir(startlabel)
+        defpospath = os.path.join(defpath, "POSCAR")
+        if not os.path.isfile(defpospath):
+            raise MASTError(self.__class__.__name__, "No POSCAR in %s." % defpospath)
+        defpos = pymatgen.io.vaspio.Poscar.from_file(defpospath)
+        defnatoms = defpos.natoms
+        perfpath=self.get_labeled_dir(perf)
+        perfpospath = os.path.join(perfpath, "POSCAR")
+        if not os.path.isfile(perfpospath):
+            raise MASTError(self.__class__.__name__, "No POSCAR in %s." % perfpospath)
+        perfpos = pymatgen.io.vaspio.Poscar.from_file(perfpospath)
+        perfnatoms = perfpos.natoms
+        vacconc = (perfnatoms - defnatoms) / perfnatoms #e.g. (32-31)/32
+        return vacconc
+
+
+    def get_latt_param(self, perf="perf"):
+        """Get lattice parameter
+            Args:
+                perf <str>: designation string for perfect cell
+                            (default) "perf"
+            Returns:
+                <float>: lattice parameter in Angstroms.
+        """
+        perfpath=self.get_labeled_dir(perf)
+        perfpospath = os.path.join(perfpath, "POSCAR")
+        if not os.path.isfile(perfpospath):
+            raise MASTError(self.__class__.__name__, "No POSCAR in %s." % perfpospath)
+        perfpos = pymatgen.io.vaspio.Poscar.from_file(perfpospath)
+        perfstr = perfpos.structure
+        mylatt = perfstr.lattice.a
+        return mylatt
     
+    def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
+        """Estimate jump frequency (Adams, Foiles, Wolfer)
+            w_i = v_i exp(S_i/k) exp(-E_i/kT)
+        """
+        jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
+        return jumpfreq
+
+    def diffusion_coefficient(self):
+        """Diffusion coefficient switcher and temperature looper."""
+        tkeys = self.tempdict.keys()
+        for tkey in tkeys:
+            if self.freqmodel == 1:
+                self.tempdict[tkey] = self.one_freq(tkey)
+            elif self.freqmodel == 5:
+                self.tempdict[tkey] = self.five_freq(tkey)
+            else:
+                raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % self.freqmodel)
+        return self.tempdict
 
 
-
-
-def get_entrodict_approx(stem, freqdict, hopdict, formdict, tmeltpurehost):
-    """Get approximate entropy.
-        Use Adams approximations for now, Wert-Zener, where S_0=S_1=S_3=S_4 and
-        S_2 - S_0 = beta(E_2 - E_1)/Tmelt, pure,
-        where S are activation entropies and
-        E are activation energies and beta is assumed to be 0.4
-
-        Dobson et al, S/k approx 10?            
-        Shewmon, Sm approx beta*Q/Tm, Sv/R = 2.4
-        http://www.tf.uni-kiel.de/matwis/amat/
-            def_en/kap_3/backbone/r3_1_1.html, Sform ~ Smig ~ 1k?         
-    """
-    entroform_d=dict()
-    entromig_d=dict()
-    entrodict=dict()
-    S_v=2.07e-4
-    beta=0.4
-    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
-    hostelem = pymatgen.core.periodic_table.Element(hoststr)
-    if tmeltpurehost==0:
-        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
-    for freq in freqdict.keys():
-        if not (freq == 'w2'):
-            entroform_d[freq] = S_v #Shewmon, Sv/R approx 2.4?? =2.07e-4
-            entromig_d[freq] = S_v
-            entrodict[freq] = entroform_d[freq] + entromig_d[freq]
-        else:
-            eact2 = hopdict['w2'] + formdict['w2']
-            eact1 = hopdict['w1'] + formdict['w1']
-            delta_act_s = beta*(eact2-eact1)/tmeltpurehost
-            entrodict['w2'] = entrodict['w0'] + delta_act_s
-    return entrodict
-
-def get_vibdict_approx(stem, freqdict, tmeltpurehost, tmeltpuresolute, masshost, masssolute):
-    """Get approximate vibrational dictionary, using Adams approximations:
-        v_0=v_1=v_3=v_4 and (v2/v0) = sqrt(mass0*Tmeltpure2/(mass2*Tmeltpure0)
-        Temperatures are in KELVIN.
-        Masses are in AMU.
-    """
-    stock_v=1e13
-    vibdict=dict()
-    [hoststr,solstr]=get_host_and_solute(stem, freqdict)
-    hostelem = pymatgen.core.periodic_table.Element(hoststr)
-    solelem = pymatgen.core.periodic_table.Element(solstr)
-    if masshost==0:
-        masshost = hostelem.atomic_mass
-    if masssolute==0:
-        masssolute = solelem.atomic_mass
-    if tmeltpurehost==0:
-        tmeltpurehost = float(str(hostelem.melting_point).split()[0])
-    if tmeltpuresolute==0:
-        tmeltpuresolute = float(str(solelem.melting_point).split()[0])
-    for freq in freqdict.keys():
-        if not (freq == 'w2'):
-            vibdict[freq] = stock_v
-        else:
-            vibdict[freq] = vibdict['w0'] * np.sqrt(masshost*tmeltpuresolute/(masssolute*tmeltpurehost))
-    return vibdict
-    
-
-
-def phonons():
-    """Get phonon info???"""
-    pass
+    def one_freq(self, temp):
+        """One-frequency (pure) model for FCC SYSTEMS ONLY.
+            Args:
+                temp <float>: Temperature in K
+            Returns:
+                Dself <float>
+                    Self-vacancy-diffusion coefficient
+        """
+        self.get_hopdict()
+        self.get_formdict()
+        self.get_entrodict_approx()
+        self.get_vibdict_approx() #Adams approximations
+        freqs = self.freqdict.keys()
+        jumpfreqdict=dict()
+        for freq in freqs:
+            jumpfreqdict[freq] = self.estimate_jump_freq(self.vibdict[freq],
+                self.entrodict[freq],
+                self.hopdict[freq]+self.formdict[freq], temp)
+        jfw0 = jumpfreqdict['w0']
+        f_0 = 0.715
+        vacconc = self.get_vac_conc()
+        lattparam = self.get_latt_param()
+        Dself = vacconc*lattparam^2*jfw0
+        return Dself
 
 def main():
-    stem=sys.argv[1]
-    freqmodel=sys.argv[2]
-    freqdict=dict()
-    temp=sys.argv[3]
-    vacconc=sys.argv[4]
-    lattparam=sys.argv[5]
-    #tmeltpurehost=sys.argv[6]
-    #tmeltpuresolute=sys.argv[7]
-    #masshost=sys.argv[8]
-    #masssolute=sys.argv[9]
-    ecohpure=sys.argv[10]
-    directory = os.path.expandvars(sys.argv[1])
+    """Run diffusion coefficient calculator from the prompt.
+        Args (sys.argv):
+            directory <str>: path to recipe
+            tstart <float>: start temp
+            tend <float>: end temp
+            tstep <float>: temp step
+            freqmodel <int>: frequency model
+            freqdict <str>: string to be converted into a frequency dict, of
+                format "w0=vac1-vac2,w1=vac1-vac9,w2=vac1-vac3,w3=vac4-vac5..."
+    """
+    directory=os.path.expandvars(sys.argv[1])
+    tstart=73
+    tend=1273
+    tstep=100
+    freqmodel=1
+    try:
+        trytstart=sys.argv[2]
+        tstart=trytstart
+    except IndexError:
+        pass
+    try:
+        trytend=sys.argv[3]
+        tend=trytend
+    except IndexError:
+        pass
+    try:
+        trytstep=sys.argv[4]
+        tstep=trytstep
+    except IndexError:
+        pass
+    try:
+        tryfreqmodel=sys.argv[5]
+        freqmodel=tryfreqmodel
+    except IndexError:
+        pass
+    freqdict=None
+    try:
+        fdstr = sys.argv[6]
+        freqdict=dict()
+        fdlist=fdstr.strip()split(",")
+        for fditem in fdlist:
+            mykey = fditem.split("=")[0]
+            myval = fditem.split("=")[1]
+            freqdict[mykey]=myval
+    except IndexError:
+        pass
 
-    print 'Looking at defect formation energies in %s' % directory
-    DFE = DefectFormationEnergy(directory)
-    print DFE.calculate_defect_formation_energies()
+    print 'Looking at diffusion coefficient for %s' % directory
+    DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict)
+    print DC.diffusion_coefficient()
 
 if __name__ == '__main__':
     main()
