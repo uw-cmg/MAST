@@ -227,7 +227,6 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
-                    element_map[elkey] = elname
 
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()

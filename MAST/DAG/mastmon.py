@@ -16,14 +16,10 @@ class MASTmon(object):
     
     def __init__(self):
         self.registered_dir = set()
-<<<<<<< HEAD
-        self.home = dirutil.get_mast_scratch_path()
-=======
 
         self.home = os.path.expandvars(os.environ['MAST_SCRATCH'])
         self._ARCHIVE = os.path.expandvars(os.environ['MAST_ARCHIVE'])
 
->>>>>>> ab5186994e47735efcdd5e653cec43fb07f98984
         self.pm = PickleManager()
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
         self.scheduler = DAGScheduler()
