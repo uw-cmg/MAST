@@ -9,14 +9,14 @@ posfile POSCAR.ga4as4
 $end
 
 $defects
-vacancy 0.0 0.0 0.0 Ga
+vacancy 0.0 0.0 0.0 Ga charge=-3,0
 
 begin
 substitution 0.25 0.25 0.25 Bi
 vacancy 0.0 0.0 0.0 Ga
 end
 
-antisite 0.0 0.0 0.0 As
+antisite 0.0 0.0 0.0 As charge=0,2
 $end
 
 $recipe
@@ -32,11 +32,13 @@ mast_ppn 1
 mast_queue default
 mast_exec //share/apps/vasp5.2_CNEB > vasp.out
 ispin 2
-end
-
-begin static
+lwave False
+lcharg False
 encut 313
 end
+
+#begin static
+#end
 
 begin optimize
 encut 313
@@ -44,7 +46,21 @@ ibrion 2
 nsw 100
 end
 
-begin inducedefect
+#begin inducedefect
+#end
+$end
+
+$chemical_potentials
+begin Ga rich
+Ga -3.6080
+As -6.0383
+Bi -4.5650
+end
+
+begin As rich
+Ga -4.2543
+As -5.3920
+Bi -4.5650
 end
 $end
 

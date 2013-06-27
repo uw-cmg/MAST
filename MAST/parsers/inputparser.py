@@ -8,6 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import fnmatch
 
 import numpy as np
 import pymatgen as pmg
@@ -16,7 +17,7 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-
+from MAST.utility import PickleManager
 
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
@@ -117,8 +118,8 @@ class InputParser(MASTObj):
                 line = line.strip()
                 if (line):
                     section_content.append(line)
-
         infile.close()
+
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
@@ -168,10 +169,10 @@ class InputParser(MASTObj):
             Note that coord_type will default to "cartesian" if not specified.
 
         """
-        structure_dict = STRUCTURE_KEYWORDS.copy() 
         # Initialize with default values
-        subsection_dict = dict()
+        structure_dict = STRUCTURE_KEYWORDS.copy() 
 
+        subsection_dict = dict()
         for line in section_content:
             line = line.split(self.delimiter)
 
@@ -185,9 +186,28 @@ class InputParser(MASTObj):
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
+        # GRJ: Since we lowercase the whole input file, and filenames may not
+        # conform to this, we examine the current directory for any files that
+        # may match and use that.  If there are multiple matches, we'll throw
+        # an error.
+        if (structure_dict['posfile'] is not None): # Do we have a geometry file?
+            # First build a list of likely files
+            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file.lower(), structure_dict['posfile'])]
+            if (len(file_list) > 1):
+                # If we have multiple files with the same name, but different capitalization, throw an error here
+                print 'Found mutliple files with the name %s' % structure_dict['posfile']
+                print 'Found the files:'
+                for file in file_list:
+                    print file
+                error = 'Found ambiguous file names'
+                MASTError(self.__class__.__name__, error)
+            else:
+                structure_dict['posfile'] = file_list[0]
+
         # print 'in InputParser.parse_structure_section:', subsection_dict
-        element_map=dict()
-        atom_list=list()
+        # TM
+        element_map = dict()
+        atom_list = list()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -207,9 +227,10 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
+                    element_map[elkey] = elname
 
         if len(element_map) > 0 and len(atom_list) > 0:
-            new_atom_list=list()
+            new_atom_list = list()
             for atomval in atom_list:
                 if atomval.upper() in element_map.keys():
                     new_atom_list.append(element_map[atomval])
@@ -226,7 +247,7 @@ class InputParser(MASTObj):
         defect_list = ['antisite', 'vacancy', 'substitution', 'interstitial']
         defect_types = dict()
         multidefect = False
-        charge = 0
+        charge = [0]
         count = 1
         coord_type = 'cartesian'
 
@@ -240,7 +261,7 @@ class InputParser(MASTObj):
                 label = None
 
                 if (len(line) < 5):
-                    error ='Defect specification requires at least 5 arguments.'
+                    error = 'Defect specification requires at least 5 arguments.'
                     MASTError(self.__class__.__name__, error)
 
                 # Check for static options
@@ -272,6 +293,7 @@ class InputParser(MASTObj):
                 defect = dict()
                 multidefect = True
                 subcount = 1
+                defect['charge'] = charge
 
                 try:
                     label = line[1]
@@ -303,7 +325,8 @@ class InputParser(MASTObj):
 
                 defect['subdefect_%i' % subcount] = type_dict
                 # print 'Rawr!', defect
-                subcount += 1    
+                subcount += 1
+
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
         options.set_item(section_name, 'coord_type', coord_type)
@@ -391,13 +414,8 @@ class InputParser(MASTObj):
                     ingredients_dict[ingredient_name] = ingredient_dict
 
         # Each value in ingredients_dict is a dictionary containing the relevant
-        # ingredient and option(s). We append the global_dict (containing global
-        # ingredient options here, after checking to make sure the ingredient in
-        # question does not contain the option/value.
+        # ingredient and option(s).
         for ing_key, ing_value in ingredients_dict.items():
-            for glob_key, glob_value in global_dict.items():
-                if glob_key not in ing_value:
-                    ing_value[glob_key] = glob_value
             options.set_item(section_name, ing_key, ing_value)
 
         options.set_item(section_name, 'global', global_dict)

@@ -7,7 +7,7 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
-import os
+import os, math
 
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
@@ -39,20 +39,20 @@ class RecipeTemplateParser(MASTObj):
         self.ingredient_list = list()
 
     def parse(self):
-        ''' Parses the template recipe file and creates
+        """ Parses the template recipe file and creates
             the personalized recipe file
-        '''
+        """
         if self.template_file is None:
-            raise MASTError(self.__class__.__name__, "Template file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Template file not provided!")
 
         if not os.path.exists(self.template_file):
-            raise MASTError(self.__class__.__name__, "Template file not found !!!")
+            raise MASTError(self.__class__.__name__, "Template file not found!")
 
         if self.input_options is None:
-            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+            raise MASTError(self.__class__.__name__, "Input Options not provided!")
 
         if self.personal_recipe is None:
-            raise MASTError(self.__class__.__name__, "Personal recipe file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
 
         #fetch required paramaters
         f_ptr           = open(self.template_file, "r")
@@ -110,20 +110,20 @@ class RecipeTemplateParser(MASTObj):
         return recipe_name
 
     def process_system_name(self, processing_lines, system_name):
-        '''replace <sys> with the system name from the input options
-        '''
+        """replace <sys> with the system name from the input options
+        """
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
 
     def process_hop_combinations(self, processing_lines, d_neblines):
-        '''replace <n-n> with neb labels which are keys of the
+        """replace <n-n> with neb labels which are keys of the
            neblines dict of the input options.
 
             Args:
                 processing_lines <list of str>: recipe lines to process.
                 d_neblines <dict of str>: dictionary of NEB lines.
-        '''
+        """
         new_lines = []
         eval_lines = []
         if not d_neblines:
@@ -165,10 +165,10 @@ class RecipeTemplateParser(MASTObj):
         return new_lines
 
     def process_images(self, processing_lines, n_images):
-        '''replace <img-n> with the equivalent number of 
+        """replace <img-n> with the equivalent number of 
            lines based on the number of images found in the
            input_options
-        '''
+        """
         new_lines = []
         if not n_images:
             return processing_lines
@@ -181,7 +181,7 @@ class RecipeTemplateParser(MASTObj):
         return new_lines
 
     def process_defects(self, processing_lines, n_defects, d_defects):
-        '''replace <N> with the equivalent number of lines
+        """replace <N> with the equivalent number of lines
            based on the number of defects given in the
            input options
 
@@ -190,21 +190,35 @@ class RecipeTemplateParser(MASTObj):
             n_defects <int>: number of defected systems
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
-        '''
-        new_lines = []
+        """
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        #print d_defects
+
+        new_lines = list()
+
         if not n_defects:
             return processing_lines
+
         for line in processing_lines:
-            if '<n>' in line:
+            if ('<n>' in line) or ('<q>' in line):
                 for defect_key in d_defects.keys():
+                    #print 'GRJ DEBUG: defect_key =', defect_key
                     defect_label = defect_key.split('_')[1] #defect_1, etc.
-                    new_lines.append(line.replace("<n>", 
-                        defect_label))
+                    def_line = line.replace("<n>", defect_label)
+
+                    charge_list = d_defects[defect_key]['charge']
+                    #print 'GRJ DEBUG: charge_list =', charge_list
+                    for charge in charge_list:
+                        if (charge < 0):
+                            clabel = 'q=n' + str(abs(charge))
+                        else:
+                            clabel = 'q=p' + str(charge)
+                        new_lines.append(def_line.replace('<q>', clabel))
             else:
                 new_lines.append(line)
         return new_lines
 
-
     def get_unique_ingredients(self):
-        '''fetches the ingredients names'''
+        """fetches the ingredients names"""
         return list(set(self.ingredient_list))

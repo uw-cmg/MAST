@@ -50,7 +50,7 @@ class MAST(MASTObj):
         #self.recipe_name = None
         #self.structure = None
         #self.unique_ingredients = None
-   
+
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,
             parse and run the input file. Otherwise, parse and run the
@@ -85,7 +85,6 @@ class MAST(MASTObj):
         #set an input stem name
         ipstem = self._initialize_input_stem()
         self.input_options.set_item('mast', 'input_stem', ipstem)
-
 
         #create the *.py input script
         ipc_obj = InputPythonCreator(input_options=self.input_options)
@@ -162,6 +161,7 @@ class MAST(MASTObj):
         """Start the recipe template parsing and ingredient creation
             once self.input_options has been set.
         """
+        print 'in start_from_input_options'
         self.input_options = input_options
         
         #parse the recipe template file and create a personal file
@@ -172,18 +172,19 @@ class MAST(MASTObj):
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
         recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
-        self.pickle_plan(recipe_plan_obj)
 
+        self.pickle_plan(recipe_plan_obj)
+        self.pickle_input_options()
 
     def initialize_environment(self):
         """Initialize the directory information for writing the 
             recipe and ingredient folders.
         """
+
         element_str = self._get_element_string()
         ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
               
         system_name = self.input_options.get_item("mast", "system_name", "sys")
-
 
         dir_name = "%s_%s_%s_%s" % (system_name, element_str, self.input_options.get_item('recipe','recipe_name'), ipf_name)
         dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
@@ -207,6 +208,13 @@ class MAST(MASTObj):
         pm = PickleManager(pickle_file)
         pm.save_variable(recipe_plan_obj) 
    
+    def pickle_input_options(self):
+        """Temporary solution to input_options not being saved to the pickle correctly"""
+
+        pickle_file = os.path.join(self.input_options.get_item('mast', 'working_directory'), 'input_options.pickle')
+        pm = PickleManager(pickle_file)
+        pm.save_variable(self.input_options)
+
     def _parse_recipe_template(self):
         """Parses the recipe template file."""
 

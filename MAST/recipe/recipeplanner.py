@@ -31,6 +31,7 @@ class RecipePlanner(MASTObj):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs) 
         self.recipe_input = self.keywords['recipe_input']
         self.input_options = self.recipe_input.options
+        #print 'GRJ DEBUG: Initializing RecipePlanner'
 
     def plan(self):
         """
@@ -120,6 +121,8 @@ class RecipePlanner(MASTObj):
            Raises:
                None
         """
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         ingredient_global = self.input_options.get_item('ingredients', 'global')
 
         structure = self.input_options.get_item('structure', 'structure')

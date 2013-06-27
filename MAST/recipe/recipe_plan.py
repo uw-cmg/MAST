@@ -17,6 +17,7 @@ class RecipePlan:
         self.name            = name
         self.ingredients     = dict()
         self.dependency_dict = dict()
+        #print 'GRJ DEBUG: Initializing RecipePlan'
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name

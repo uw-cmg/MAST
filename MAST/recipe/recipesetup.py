@@ -47,7 +47,7 @@ class RecipeSetup(MASTObj):
         self.ingredient_keyword  = "ingredient"
         self.parent_keyword      = "parent"
         self.child_keyword       = "child"
-
+        print 'Setting up the recipe based on %s' % (self.recipe_file)
 
     def parse_recipe(self):
         """Parses the input personalized recipe file and takes 
@@ -59,7 +59,7 @@ class RecipeSetup(MASTObj):
         ingredients_info = dict()
 
         for line in f_ptr.readlines():
-#            print 'In parse_recipe:', line
+            #print 'In parse_recipe:', line
             line = line.strip()
             #validate the line
             if not line or line.startswith('#'):
@@ -104,24 +104,62 @@ class RecipeSetup(MASTObj):
         return ingredients_info, recipe_name
 
     def create_ingredient(self, name, ingredient_type, child_dict):
-        """Creates the ingredient based on the ingredient type
+        """Creates the ingredient based on the ingredient type.
+            Notes:
+
+            GRJ 6/19/2013: If the ingredient has not be specified in the input
+                           file we create it here, and append on the defaults.
+                           In addition, the defaults are appended on here, rather
+                           than in InputParser (since each ingredient is made here
+                           this makes more sense).
         """
         if ingredient_type not in self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Ingredient '%s' requested by input file but not found in the recipe !!!" % ingredient_type)
-        if ingredient_type not in self.input_options.get_section_keys('ingredients'):
-            raise MASTError(self.__class__.__name__, "Ingredient '%s' is listed in the recipe but not found in the input file." % ingredient_type)
+            error = "Ingredient '%s' requested by input file but not found in the recipe!" % ingredient_type
+            raise MASTError(self.__class__.__name__, error)
 
-        self.program        = self.input_options.get_item('mast', 'program')
-        self.scratch_dir    = self.input_options.get_item('mast', 'working_directory')
+        print '\nInitializing ingredient %s of type %s' % (name, ingredient_type)
+        global_defaults = self.input_options.get_item('ingredients', 'global')
+
+        if (ingredient_type not in self.input_options.get_section_keys('ingredients')):
+            print 'Ingredient type %s has not be specified in the input file.' % ingredient_type
+            print 'Using defaults from ingredients_global.'
+            self.input_options.set_item('ingredients', ingredient_type, global_defaults)
+        else:
+            print 'Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type
+            ing_opt = self.input_options.get_item('ingredients', ingredient_type)
+            for glob_key, glob_value in global_defaults.items():
+                if glob_key not in ing_opt:
+                    ing_opt[glob_key] = glob_value
+            self.input_options.set_item('ingredients', ingredient_type, ing_opt)
+
+        self.program = self.input_options.get_item('mast', 'program')
+        self.scratch_dir = self.input_options.get_item('mast', 'working_directory')
 
         ingredient_name = os.path.join(self.scratch_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
         #TTM update ingredients dict to include info from the 
         #'neb', 'defects', and 'chemical_potentials' sections
-        pkey_d = self.input_options.get_item('ingredients', 
-                    ingredient_type).copy()
+        pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
+
+        #print 'GRJ DEBUG: %s ingredient options %s' % (ingredient_type, pkey_d)
+        #print 'GRJ DEBUG: %s ingredient' % ingredient_name
+        #print 'GRJ DEBUG: Global ingredient options', self.input_options.get_item('ingredients', 'global')
+        #print 'GRJ DEBUG: %s', self.input_options.options.keys()
+
         if 'defects' in self.input_options.options.keys():
-            pkey_d.update(self.input_options.get_item('defects','defects'))
+            if 'defect_' in name.lower():
+                pkey_d.update(self.input_options.get_item('defects','defects'))
+                if 'inducedefect' not in ingredient_type:
+                    clabel = [label for label in ingredient_name.split('_') if 'q=' in label][0].split('=')[1]
+                    if 'n' in clabel[0]:
+                        sign = -1
+                    else:
+                        sign = 1
+                    charge = sign * int(clabel[1:])
+                    #print 'GRJ DEBUG: Charge =', charge
+                    pkey_d['mast_charge'] = charge
+                    #print 'Defect found, pkey_d =', pkey_d
+
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
                 pkey_d.update(self.input_options.options['neb'])
@@ -129,6 +167,8 @@ class RecipeSetup(MASTObj):
             pkey_d.update(self.input_options.options['phonon'])
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
+
+        print 'Final pkey_d =', pkey_d
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
                     structure= self.structure, \
                     program=self.program, \
@@ -138,20 +178,28 @@ class RecipeSetup(MASTObj):
     def create_recipe_plan(self, ingredients_info, recipe_name):
         """Creates a recipe object which has the ingredients and dependency information
         """
+        import inspect
+        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+
         recipe_obj = RecipePlan(recipe_name)
+
         for name, (ingredient_type, child_dict) in ingredients_info.iteritems():
              ingredient_obj = self.create_ingredient(name, ingredient_type, child_dict)
              recipe_obj.add_ingredient(name, ingredient_obj)
+
              for child in child_dict.iterkeys():
                  recipe_obj.add_parent(child, name)
+
         return recipe_obj
 
     def prepare_ingredients(self, recipe_plan):
-        """Prepare the ingredients
+        """Prepare the ingredients --- called after create_ingredients
         """
+        #import inspect
+        #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+
         for ingredient_name, ingredient_obj in recipe_plan.ingredient_iterator():
             ingredient_obj.write_directory()
-             
 
     def start(self):
         """Starts the setup process, parse the recipe file
@@ -159,20 +207,22 @@ class RecipeSetup(MASTObj):
            create directories and classes required
         """
         if self.recipe_file is None:
-            raise MASTError(self.__class__.__name__, "Recipe file not provided !!!")
+            raise MASTError(self.__class__.__name__, "Recipe file not provided!")
             
         if not os.path.exists(self.recipe_file):
-            raise MASTError(self.__class__.__name__, "Recipe file not Found !!!")
+            raise MASTError(self.__class__.__name__, "Recipe file not Found!")
 
         if not self.input_options:
-            raise MASTError(self.__class__.__name__, "Input Options not provided !!!")
+            raise MASTError(self.__class__.__name__, "Input Options not provided!")
 
         if not self.ingredients_dict:
-            raise MASTError(self.__class__.__name__, "Empty Ingredients Dict !!!")
+            raise MASTError(self.__class__.__name__, "Empty Ingredients Dict!")
 
         ingredients_info, recipe_name = self.parse_recipe()
-        print ingredients_info
-        recipe_plan                   = self.create_recipe_plan(ingredients_info, recipe_name)
+        #print 'DEBUG:, ingredients info =', 
+        #for ingredient, value in ingredients_info.items():
+        #    print ingredient, value
+        recipe_plan = self.create_recipe_plan(ingredients_info, recipe_name)
         self.prepare_ingredients(recipe_plan)
         return recipe_plan
 
