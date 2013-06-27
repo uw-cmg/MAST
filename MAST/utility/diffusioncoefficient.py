@@ -170,7 +170,6 @@ class DiffusionCoefficient():
         """
         label=""
         if self.freqmodel == 1:
-            self.solute=None
             if not 'w0' in self.freqdict.keys():
                 raise MASTError(self.__class__.__name__, "Need a label for frequency w0 for one-frequency model.")
             label = self.freqdict['w0']
@@ -188,7 +187,7 @@ class DiffusionCoefficient():
         natoms = mypos.natoms
         hostidx=natoms.index(max(natoms))
         self.host=sitesym[hostidx]
-        if self.freqmodel > 1:
+        if len(natoms) > 1:
             solidx=natoms.index(min(natoms))
             self.solute=sitesym[solidx]
         if self.verbose == 1:
@@ -212,13 +211,13 @@ class DiffusionCoefficient():
         lsplit = label.split('-')
         backlab = '-'.join([lsplit[1],lsplit[0]])
         for myname in self.dirlist:
-            if (label in myname) and (app1 in myname) and (app2 in myname):
-                tstlabel = label
+            if (backlab in myname) and (app1 in myname) and (app2 in myname):
+                tstlabel = backlab
                 startlabel = label.split('-')[0]
                 break
-            elif (backlab in myname) and (app1 in myname) and (app2 in myname):
+            elif (label in myname) and (app1 in myname) and (app2 in myname):
                 tstlabel = label
-                startlabel = label.split('-')[1]
+                startlabel = label.split('-')[0]
                 break
         if tstlabel == "":
             raise MASTError(self.__class__.__name__, 
@@ -241,12 +240,15 @@ class DiffusionCoefficient():
         dirlist = os.listdir(self.directory)
         dirlist.sort()
         mydir=""
+        mypath=""
         for mydir in dirlist:
             if (label in mydir) and (append in mydir) and (append2 in mydir):
                 mypath=os.path.join(self.directory, mydir)
                 break
         if self.verbose == 1:
             print "mypath: ", mypath
+        if mypath=="":
+            raise MASTError(self.__class__.__name__, "No path found for label %s with append %s %s" % (label,append,append2))
         return mypath
 
     def neb_barrier(self, label):
@@ -357,28 +359,30 @@ class DiffusionCoefficient():
         """Need to replace with Glen's function.
             Get simplified defect formation energy. NO CHARGED CELLS.
             Args:
-                label <str>: label for hop
+                label <str>: label for hop (starting label will be determined
+                            and then compared against the pure).
                 append <str>: append for name 
                 perf <str>: perfect-cell designation
             Return:
                 <float>: defect formation energy
         """
-        defpath=self.get_labeled_dir(label, append)
+        [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
+        defpath=self.get_labeled_dir(startlabel, append)
         perfpath=self.get_labeled_dir(perf, append)
         defectedenergy = self.get_total_energy(defpath)
         perfectenergy = self.get_total_energy(perfpath)
         if defectedenergy==None or perfectenergy==None:
             raise MASTError(self.__class__.__name__,"No defected energy found.")
         delta = defectedenergy - perfectenergy
-        ecohpure=0 # Need to get this from a calc??
-        if ecohpure==0:
+        refpure=0 # Need to get this from a calc??
+        if refpure==0:
             mypos=pymatgen.io.vaspio.Poscar.from_file(os.path.join(perfpath, "POSCAR"))
             totatoms=sum(mypos.natoms)
-            ecohpure=perfectenergy/totatoms
-            myfile=MASTFile()
-            myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % perfpath)
-            myfile.to_file(os.path.join(self.directory,"WARNING"))
-        eform = delta + ecohpure #Add on reference atom
+            refpure=perfectenergy/totatoms
+            #myfile=MASTFile()
+            #myfile.data.append("WARNING: Cohesive energy has not been properly calculated in %s because a pseudopotential reference has not been taken into account." % perfpath)
+            #myfile.to_file(os.path.join(self.directory,"WARNING"))
+        eform = delta + refpure #Add on reference atom
         if self.verbose == 1:
             print "Eform: ", eform
         return eform
@@ -428,7 +432,9 @@ class DiffusionCoefficient():
         beta=0.4
         hostelem = pymatgen.core.periodic_table.Element(self.host)
         tmeltpurehost = self.parse_melting_point(hostelem)
-        for freq in self.freqdict.keys():
+        freqs = self.freqdict.keys()
+        freqs.sort() #do w0 before w2
+        for freq in freqs:
             if not (freq == 'w2'):
                 entrodict[freq] = stock_S_v + stock_S_m
             else:
@@ -540,8 +546,7 @@ class DiffusionCoefficient():
                 <float> vacancy concentration (UNITLESS)
         """
         label = self.freqdict['w0']       
-        [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
-        defenergy=self.get_defect_energy_simple(startlabel)
+        defenergy=self.get_defect_energy_simple(label)
         nveq = np.exp(stock_S_v/kboltz)*np.exp(-1*defenergy/(kboltz*temp))
         if self.verbose == 1:
             print "Equilib vac conc: ", nveq
@@ -553,17 +558,33 @@ class DiffusionCoefficient():
                 perf <str>: designation string for perfect cell
                             (default) "perf"
             Returns:
-                <float>: lattice parameter in Angstroms.
+                <float>: lattice parameter in ***centimeters*** (not Angstroms).
         """
         perfpath=self.get_labeled_dir(perf)
         perfpospath = os.path.join(perfpath, "POSCAR")
         if not os.path.isfile(perfpospath):
             raise MASTError(self.__class__.__name__, "No POSCAR in %s." % perfpospath)
         perfpos = pymatgen.io.vaspio.Poscar.from_file(perfpospath)
+        numatoms = sum(perfpos.natoms)
+        divisor=0
+        try:
+            closediv = np.power(numatoms/4, 0.33333333)
+        except ValueError, TypeError:
+            raise MASTError(self.__class__.__name__, "Number of atoms could not be determined..")
+        if np.abs(np.round(closediv) - closediv) > 0.001:
+            raise MASTError(self.__class__.__name__, "This is apparently not a cubic lattice-vectored FCC cell and the divisor cannot be determined.")
+        divisor = np.round(closediv) 
+        #if numatoms == 108:
+        #    divisor = 3 #This is a 3x3x3 unit cell
+        #elif numatoms == 32:
+        #    divisor = 2 #This is a 2x2x2 unit cell
+        #elif numatoms == 4: 
+        #    divisor = 1 #This is a single 'cubic-vectored' atom
         perfstr = perfpos.structure
-        mylatt = perfstr.lattice.a
+        mylatt = float(perfstr.lattice.a)/float(divisor)
+        mylatt = mylatt*np.power(10.0,-8)
         if self.verbose == 1:
-            print "Latt param: ", mylatt
+            print "Latt param in centimeters: ", mylatt
         return mylatt
     
     def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
@@ -619,11 +640,23 @@ class DiffusionCoefficient():
 
     def print_temp_dict(self):
         """Print the self.tempdict dictionary of coefficients."""
-        print "TEMP (K)     Dself     Dsolute(if applicable)"   
+        print "-----------------------------------------------"
+        if self.freqmodel > 1:
+            print "Host: ", self.host
+            print "Solute: ", self.solute
+            print "%8s %20s %20s" % ("TEMP (K)","Dself cm2/sec","Dsolute cm2/sec")   
+        else:
+            print "Pure: ", self.host
+            print "%8s %20s" % ("TEMP (K)","D cm2/sec")   
         tkeys = self.tempdict.keys()
         tkeys.sort()
         for (tkey) in tkeys:
-            print "%8s %20s" % (tkey, str(self.tempdict[tkey]))
+            tval = self.tempdict[tkey]
+            if self.freqmodel > 1:
+                print "%8s %17.2e %17.2e" % (tkey, tval[0], tval[1])
+            else:
+                print "%8s %17.2e" % (tkey, tval)
+        print "-----------------------------------------------"
 
         return
 def main():
