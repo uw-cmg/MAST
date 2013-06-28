@@ -99,6 +99,7 @@ class MAST(MASTObj):
                 shell=True, stdout=opfile, stderr=opfile)
         run_input_script.wait()
         opfile.close()
+        self.pickle_input_options() 
         return None
    
     def perform_element_mapping(self):
@@ -175,7 +176,6 @@ class MAST(MASTObj):
         recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
 
         self.pickle_plan(recipe_plan_obj)
-        self.pickle_input_options()
 
     def initialize_environment(self):
         """Initialize the directory information for writing the 
