@@ -41,6 +41,7 @@ class MASTmon(object):
             if not os.path.exists(session_dir):
                 raise MASTError("mastmon, add_sessions", "No session_dir at %s" % session_dir)
             os.chdir(session_dir)
+            self.move_extra_files(session_dir)
             if not os.path.isfile('mast.pickle'):
                 raise MASTError("mastmon, add_sessions", "No pickle file at %s/%s" % (session_dir, 'mast.pickle'))
             mastobj = self.pm.load_variable('mast.pickle')	
@@ -157,7 +158,28 @@ class MASTmon(object):
         os.chdir(curdir)
             
                          
-
+    def move_extra_files(self, recipedir):
+        """Move extra files like input.py, output, and personalized recipe
+            into the recipe directory.
+            Args:
+                recipedir <str>: Recipe directory
+        """
+        mypm = PickleManager(os.path.join(self.home, recipedir, 'input_options.pickle'))
+        myinputoptions = mypm.load_variable()
+        workdir = myinputoptions.get_item("mast","working_directory")
+        inpstem = myinputoptions.get_item("mast","input_stem")
+        inpstembase = os.path.basename(inpstem)
+                                     
+        listdir = os.listdir(self.home)
+        listdir.sort()
+        for mystr in listdir:
+            if inpstembase in mystr:
+                os.rename(os.path.join(self.home, mystr), 
+                    os.path.join(workdir, mystr))
+            else:
+                pass
+                                     
+        return
 
 
 
