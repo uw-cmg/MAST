@@ -175,7 +175,7 @@ class RecipeTemplateParser(MASTObj):
         for line in processing_lines:
             if '<img-n>' in line:
                 for index in xrange(n_images):
-                    new_lines.append(line.replace('<img-n>', str(index+1)))
+                    new_lines.append(line.replace('<img-n>', str(index+1).zfill(2)))
             else:
                  new_lines.append(line)
         return new_lines

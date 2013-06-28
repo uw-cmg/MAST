@@ -14,7 +14,7 @@ import inspect
 from MAST import ingredients
 from MAST.ingredients import baseingredient
 from MAST.ingredients import optimize
-from MAST.ingredients import performneb
+from MAST.ingredients import neb
 
 class IngredientsLoader:
     def __init__(self):
@@ -40,7 +40,7 @@ class IngredientsLoader:
                     continue
                 if inspect.isclass(attr):
                     for base_class in attr.__bases__:
-                        if (base_class == baseingredient.BaseIngredient) or (base_class == optimize.Optimize) or (base_class == performneb.PerformNEB):
+                        if (base_class == baseingredient.BaseIngredient) or (base_class == optimize.Optimize) or (base_class == neb.NEB):
                         #if (base_class == ingredients.baseingredient.BaseIngredient) or (base_class == ingredients.optimize.Optimize) or (base_class == ingredients.performneb.PerformNEB):
                             self.ingredients_dict[attr_name.lower()] = attr
 

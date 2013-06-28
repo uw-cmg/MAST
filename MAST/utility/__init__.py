@@ -6,6 +6,7 @@ import pymatgen as pmg
 from MAST.utility.mastobj import MASTObj
 from MAST.utility.masterror import MASTError
 from MAST.utility.inputoptions import InputOptions
+from MAST.utility.mastfile import MASTFile
 from MAST.utility.picklemanager import PickleManager
 
 def MAST2Structure(lattice=None, coordinates=None, atom_list=None, coord_type='fractional'):

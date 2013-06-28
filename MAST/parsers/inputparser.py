@@ -73,6 +73,7 @@ class InputParser(MASTObj):
                 'recipe'   : self.parse_recipe_section,
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
+                'phonon'   : self.parse_phonon_section,
                                }
 
     def parse(self):
@@ -224,7 +225,8 @@ class InputParser(MASTObj):
                 for elline in value:
                     elkey = elline[0].strip().upper() #all caps
                     elname = elline[1].strip().title() #Title case
-                    element_map[elkey] = elname
+                    element_map[elkey]=elname
+                structure_dict['element_map'] = element_map
 
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
@@ -454,7 +456,7 @@ class InputParser(MASTObj):
         """
         neblines = dict()
         images = 0
-
+        phonon = dict()
         neblabel=""
         for line in section_content:
             type_dict = dict()
@@ -522,3 +524,56 @@ class InputParser(MASTObj):
             options.set_item(section_name, key, value)
 
 
+    def parse_phonon_section(self, section_name, section_content, options):
+        """Parses the phonon section and populates the options.
+            
+            The phonon_center_site is a coordinate (as a string, like "0 0 0")
+                for the center of the phonon calculations. Give a coordinate
+                of an atom for that atom.
+                Do not set this value in order to calculate phonons for all
+                atoms.
+            The phonon_center_radius is a radius in ANGSTROMS to search for
+                neighbors to the phonon_center_site, and also take into account
+                their vibrations.
+                Do not set this value or set to 0 to only calculate phonons
+                for the atom given in phonon_center_site.
+            All phonons must be enclosed in a begin and end tag within the 
+            phonon section. Phonons should be labeled
+            xxxx_phonon_label and the label should correspond to the 
+            auto-generation of the
+            recipe (e.g. corresponding exactly to defect group names like vac1
+            or to neb image names like vac1-vac2_02)
+
+            $phonon
+
+            begin crowdion1
+            phonon_center_site 0 0.3 0
+            phonon_center_radius 2
+            end
+            
+            begin crowdion1-crowdion2_02
+            phonon_center_site 0 0.15 0
+            phonon_center_radius 2
+            end
+
+            $end
+        """
+        phonon = dict()
+        label=""
+        for line in section_content:
+            type_dict = dict()
+            line = line.strip()
+            if 'images' in line:
+                line = line.split(self.delimiter)
+                images = int(line[1])
+            elif 'begin' in line:
+                line = line.split(self.delimiter)
+                label = line[1].strip()
+                phonon[label]=dict()
+            elif 'end' in line:
+                neblabel = ""
+            else:
+                line = line.split(self.delimiter, 1)
+                phonon[label][line[0]] = line[1]
+
+        options.set_item(section_name, 'phonon', phonon)

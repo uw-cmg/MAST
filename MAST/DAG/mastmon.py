@@ -2,6 +2,7 @@ import os
 from MAST.utility.picklemanager import PickleManager
 from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 import time
 from MAST.DAG.dagutil import *
 abspath = os.path.abspath
@@ -101,6 +102,8 @@ class MASTmon(object):
             errorstr = "Error: Failed to move to MASTmon home %s" % self.home
             raise MASTError(self.__class__.__name__, errorstr)
         
+        if verbose == 1:
+            print "MAST is in: ", os.getcwd()
         if interval is None:
             interval = SCHEDULING_INTERVAL
             
