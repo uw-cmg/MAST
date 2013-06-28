@@ -115,9 +115,10 @@ class MAST(MASTObj):
             defdict = self.input_options.get_item('defects','defects')
             for dkey in defdict.keys():
                 for sdkey in defdict[dkey].keys():
-                    symbol = defdict[dkey][sdkey]['symbol'].upper()
-                    if symbol in eldict.keys():
-                        defdict[dkey][sdkey]['symbol'] = eldict[symbol]
+                    if not (sdkey == "charge"):
+                        symbol = defdict[dkey][sdkey]['symbol'].upper()
+                        if symbol in eldict.keys():
+                            defdict[dkey][sdkey]['symbol'] = eldict[symbol]
         if 'neb' in self.input_options.get_sections():
             neblinedict = self.input_options.get_item('neb','neblines')
             for nlabelkey in neblinedict.keys():
