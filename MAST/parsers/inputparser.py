@@ -283,7 +283,8 @@ class InputParser(MASTObj):
                     label = str(count)
 
                 defect = {'charge': charge,
-                          'subdefect_1': type_dict}
+                          'subdefect_1': type_dict,
+                          'coord_type': coord_type}
 
                 defect_types['defect_%s' % label] = defect
 
@@ -293,6 +294,7 @@ class InputParser(MASTObj):
                 multidefect = True
                 subcount = 1
                 defect['charge'] = charge
+                defect['coord_type'] = coord_type
 
                 try:
                     label = line[1]
@@ -306,7 +308,7 @@ class InputParser(MASTObj):
                 count += 1
                 multidefect = False
             elif ('charge' in line[0]):
-                charge_range = line[0].split('=').split(',')
+                charge_range = line[0].split('=')[-1].split(',')
                 defect['charge'] = range(int(charge_range[0]),
                                          int(charge_range[1])+1)
             else:

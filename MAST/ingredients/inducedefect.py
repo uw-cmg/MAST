@@ -37,7 +37,7 @@ class InduceDefect(BaseIngredient):
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
-    def induce_defect(self, base_structure, defect):
+    def induce_defect(self, base_structure, defect, coord_type):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
             'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
@@ -54,16 +54,18 @@ class InduceDefect(BaseIngredient):
         symbol = defect['symbol'].title() #Cap first letter
 
         # If we have cartesian coordinates, then we convert them to fractional here.
-        if ('cartesian' in defect['type']):
-            defect['coordinates'] = self._cart2frac(mydict['coordinates'])
+        if ('cartesian' in coord_type):
+            defect['coordinates'] = self._cart2frac(defect['coordinates'])
 
         if (defect['type'] == 'vacancy'):
             print 'Creating a %s vacancy at %s' % (symbol, str(defect['coordinates']))
 
+            #print defect['coordinates']
             index = find_in_coord_list(base_structure.frac_coords,
                                        defect['coordinates'],
-                                       atol=1e-04)
-
+                                       atol=1e-02)
+            #print base_structure.frac_coords
+            #print 'Index of deleted atom is', index
             struct_ed.delete_site(index)
         elif (defect['type'] == 'interstitial'):
             print 'Creating a %s interstitial at %s' % (symbol, str(defect['coordinates']))
@@ -77,7 +79,7 @@ class InduceDefect(BaseIngredient):
 
             index = find_in_coord_list(base_structure.frac_coords,
                                        defect['coordinates'],
-                                       atol=1e-04)
+                                       atol=1e-02)
 
             struct_ed.replace_site(index, symbol)
         else:
@@ -87,7 +89,13 @@ class InduceDefect(BaseIngredient):
 
     def _cart2frac(self, position):
         """Converts between cartesian coordinates and fractional coordinates"""
-        return self.keywords['structure'].lattice.get_fractional_coords(self.keywords['position'])
+        fractional =  self.keywords['structure'].lattice.get_fractional_coords(position)
+        for i in range(len(fractional)):
+            if (fractional[i] < 0.0):
+                fractional[i] += 1.0
+            elif (fractional[i] > 1.0):
+                fractional[i] -= 1.0
+        return fractional
 
     def write_files(self):
         name = self.keywords['name']
@@ -95,16 +103,16 @@ class InduceDefect(BaseIngredient):
         self.get_new_structure()
 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-#        print name.split('/')
+        #print name.split('/')
         defect = self.keywords['program_keys'][defect_label]
-#        print 'Defect in write_files:', defect
+        #print 'Defect in write_files:', defect
 
         base_structure = self.keywords['structure'].copy()
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                base_structure = self.induce_defect(base_structure, subdefect)
-#                base_structure = modified_structure
+                base_structure = self.induce_defect(base_structure, subdefect, defect['coord_type'])
+                #base_structure = modified_structure
             else:
                 pass
 

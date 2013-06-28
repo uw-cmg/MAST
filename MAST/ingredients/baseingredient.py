@@ -11,7 +11,7 @@ class BaseIngredient(MASTObj):
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
-    
+
     def write_directory(self):
         try:
             os.makedirs(self.keywords['name'])
@@ -178,6 +178,32 @@ class BaseIngredient(MASTObj):
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_neb)")
+
+    def get_children(self):
+        """Returns the children of this ingredient.
+            If there are no children, it will return None instead.
+        """
+        if (self.keywords['child_dict']):
+            return self.keywords['child_dict'].copy()
+        else:
+            return None
+
+    @property
+    def children(self):
+        return self.get_children()
+
+    def get_name(self):
+        return self.keywords['name'].split('/')[-1]
+
+    @property
+    def name(self):
+        return self.get_name()
+
+    def get_keywords(self):
+        return self.keywords.copy()
+
+    def __repr__(self):
+        return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
     def add_selective_dynamics_to_structure(self, sdarray):
         """Adds selective dynamics to a structure."""

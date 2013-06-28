@@ -39,3 +39,10 @@ class RecipePlan:
         """
         for ingredient_name, ingredient_obj in self.ingredients.iteritems():
             yield ingredient_name, ingredient_obj
+
+    def __iter__(self):
+        """Iterates through the ingredients dict and returns the ingredients one by one
+        """
+        for ingredient_name, ingredient_obj in self.ingredients.iteritems():
+            yield ingredient_obj
+
