@@ -1,0 +1,148 @@
+from MAST.utility import InputOptions
+import numpy as np
+#MAST INPUT OPTIONS
+inputoptions = InputOptions()
+ 
+###################################
+#Section: ingredients
+####################################
+ 
+ingredients = dict()
+ingredients['optimize'] = dict()
+ingredients['optimize']['ibrion'] = '2'
+ingredients['optimize']['encut'] = '300'
+ingredients['global'] = dict()
+ingredients['global']['mast_kpoints'] = list()
+ingredients['global']['mast_kpoints'].append(3)
+ingredients['global']['mast_kpoints'].append(3)
+ingredients['global']['mast_kpoints'].append(3)
+ingredients['global']['mast_exec'] = '//share/apps/vasp5.2_cneb'
+ingredients['global']['mast_walltime'] = '4'
+ingredients['global']['mast_xc'] = 'pbe'
+ingredients['global']['mast_ppn'] = '1'
+ingredients['singlepoint'] = dict()
+ingredients['singlepoint']['mast_xc'] = 'pw91'
+ingredients['singlepoint']['encut'] = '400'
+ingredients['inducedefect'] = dict()
+inputoptions.options['ingredients'] = ingredients
+ 
+###################################
+#Section: recipe
+####################################
+ 
+recipe = dict()
+recipe['recipe_file'] = '/home/tam/tammast/recipe_templates/defect_test.txt'
+inputoptions.options['recipe'] = recipe
+ 
+###################################
+#Section: mast
+####################################
+ 
+mast = dict()
+mast['system_name'] = 'inputtest'
+mast['scratch_directory'] = '/home/tam/tammast/SCRATCH'
+mast['program'] = 'vasp'
+inputoptions.options['mast'] = mast
+ 
+###################################
+#Section: chemical_potentials
+####################################
+ 
+chemical_potentials = dict()
+chemical_potentials['ga rich'] = dict()
+chemical_potentials['ga rich']['as']=4.5
+chemical_potentials['ga rich']['ga']=3.5
+chemical_potentials['as rich'] = dict()
+chemical_potentials['as rich']['as']=3.5
+chemical_potentials['as rich']['ga']=4.5
+inputoptions.options['chemical_potentials'] = chemical_potentials
+ 
+###################################
+#Section: structure
+####################################
+ 
+structure = dict()
+structure['element_map'] = dict()
+structure['element_map']['X2'] = 'As'
+structure['element_map']['X1'] = 'Ga'
+structure['primitive'] = False
+structure['atom_list'] = list()
+structure['atom_list'].append('Ga')
+structure['atom_list'].append('Ga')
+structure['atom_list'].append('Ga')
+structure['atom_list'].append('Ga')
+structure['atom_list'].append('As')
+structure['atom_list'].append('As')
+structure['atom_list'].append('As')
+structure['atom_list'].append('As')
+structure['coordinates']=np.array([[0.0, 0.0, 0.0], [0.5, 0.5, 0.0], [0.0, 0.5, 0.5], [0.5, 0.0, 0.5], [0.25, 0.25, 0.25], [0.75, 0.75, 0.25], [0.25, 0.75, 0.75], [0.75, 0.25, 0.75]])
+structure['lattice']=np.array([[6.0, 0.0, 0.0], [0.0, 6.0, 0.0], [0.0, 0.0, 6.0]])
+structure['posfile'] = None
+structure['coord_type'] = 'fractional'
+structure['symmetry_only'] = False
+structure['spacegroup'] = None
+#ignoring created structure
+inputoptions.options['structure'] = structure
+ 
+###################################
+#Section: defects
+####################################
+ 
+defects = dict()
+defects['coord_type'] = 'fractional'
+defects['num_defects'] = 3
+defects['defects'] = dict()
+defects['defects']['defect_2'] = dict()
+defects['defects']['defect_2']['charge'] = list()
+defects['defects']['defect_2']['charge'].append(0)
+defects['defects']['defect_2']['subdefect_1'] = dict()
+defects['defects']['defect_2']['subdefect_1']['symbol'] = 'as'
+defects['defects']['defect_2']['subdefect_1']['type'] = 'interstitial'
+defects['defects']['defect_2']['subdefect_1']['coordinates']=np.array([0.35, 0.45, 0.25])
+defects['defects']['defect_1'] = dict()
+defects['defects']['defect_1']['charge'] = list()
+defects['defects']['defect_1']['charge'].append(0)
+defects['defects']['defect_1']['subdefect_1'] = dict()
+defects['defects']['defect_1']['subdefect_1']['symbol'] = 'ga'
+defects['defects']['defect_1']['subdefect_1']['type'] = 'vacancy'
+defects['defects']['defect_1']['subdefect_1']['coordinates']=np.array([0.0, 0.0, 0.0])
+defects['defects']['defect_crowdiongroup1'] = dict()
+defects['defects']['defect_crowdiongroup1']['charge'] = list()
+defects['defects']['defect_crowdiongroup1']['charge'].append(0)
+defects['defects']['defect_crowdiongroup1']['subdefect_3'] = dict()
+defects['defects']['defect_crowdiongroup1']['subdefect_3']['symbol'] = 'as'
+defects['defects']['defect_crowdiongroup1']['subdefect_3']['type'] = 'antisite'
+defects['defects']['defect_crowdiongroup1']['subdefect_3']['coordinates']=np.array([0.5, 0.0, 0.5])
+defects['defects']['defect_crowdiongroup1']['subdefect_2'] = dict()
+defects['defects']['defect_crowdiongroup1']['subdefect_2']['symbol'] = 'ga'
+defects['defects']['defect_crowdiongroup1']['subdefect_2']['type'] = 'antisite'
+defects['defects']['defect_crowdiongroup1']['subdefect_2']['coordinates']=np.array([0.25, 0.75, 0.75])
+defects['defects']['defect_crowdiongroup1']['subdefect_1'] = dict()
+defects['defects']['defect_crowdiongroup1']['subdefect_1']['symbol'] = 'ga'
+defects['defects']['defect_crowdiongroup1']['subdefect_1']['type'] = 'vacancy'
+defects['defects']['defect_crowdiongroup1']['subdefect_1']['coordinates']=np.array([0.0, 0.0, 0.0])
+inputoptions.options['defects'] = defects
+ 
+###############################################
+#Structure Creation Section
+################################################
+ 
+iopscoords=inputoptions.get_item('structure','coordinates')
+iopslatt=inputoptions.get_item('structure','lattice')
+iopsatoms=inputoptions.get_item('structure','atom_list')
+iopsctype=inputoptions.get_item('structure','coord_type')
+from MAST.utility import MAST2Structure
+structure = MAST2Structure(lattice=iopslatt,
+    coordinates=iopscoords, atom_list=iopsatoms,
+    coord_type=iopsctype)
+inputoptions.set_item('structure','structure',structure)
+ 
+###############################################
+#Buffet Command Section
+################################################
+ 
+from MAST.recipe.recipeinput import RecipeInput
+from MAST.buffet.buffetmanager import Buffet
+from MAST.mast import MAST
+mast_obj = MAST()
+mast_obj.start_from_input_options(inputoptions)

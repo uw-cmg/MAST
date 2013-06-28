@@ -1,5 +1,5 @@
 from MAST.utility.picklemanager import PickleManager
-from MAST.parsers.recipeparsers import RecipeParser
+from MAST.parsers import RecipeParser
 from MAST.recipe.recipesetup import RecipeSetup
 from MAST.recipe.recipe_plan import RecipePlan
 import sys

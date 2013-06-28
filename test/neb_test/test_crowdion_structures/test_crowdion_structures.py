@@ -7,7 +7,7 @@ import unittest
 import time
 from filecmp import dircmp
 
-from MAST.ingredients.performneb import PerformNEB
+from MAST.ingredients.neb import NEB
 from MAST.utility import MASTError
 from MAST.utility.dirutil import *
 
@@ -21,7 +21,7 @@ class TestCrowdionStructures(unittest.TestCase):
         if os.path.exists('output'):
             self.tearDown()
         self.progkeys = dict()
-        self.progkeys['neblines'] = list()
+        self.progkeys['neblines'] = dict()
 
 
     def tearDown(self):
@@ -31,9 +31,11 @@ class TestCrowdionStructures(unittest.TestCase):
     def test_structure_sorting(self):
         def1str = pymatgen.io.smartio.read_structure("POSCAR_defectgroup1")
         def2str = pymatgen.io.smartio.read_structure("POSCAR_defectgroup2")
-        self.progkeys['neblines'].append("Cr, 0.3 0 0, 0 0 0")
-        self.progkeys['neblines'].append("Ni, 0.6 0 0, 0.3 0 0")
-        myneb=PerformNEB(name="neb_1-2", program_keys = self.progkeys)
+        self.progkeys['neblines']["1-2"] = list()
+        self.progkeys['neblines']["1-2"].append(["Cr","0.3 0 0", "0 0 0"])
+        self.progkeys['neblines']["1-2"].append(["Ni", "0.6 0 0", "0.3 0 0"])
+        myneb=NEB(name="neb_1-2", program_keys = self.progkeys)
+        myneb.keywords['structure'] = pymatgen.io.vaspio.Poscar.from_file('POSCAR_bulk').structure
         sorted1=myneb.sort_structure_and_neb_lines(def1str,0)
         sorted2=myneb.sort_structure_and_neb_lines(def2str,1)
         os.mkdir('output')
