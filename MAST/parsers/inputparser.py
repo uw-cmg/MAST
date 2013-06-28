@@ -285,7 +285,8 @@ class InputParser(MASTObj):
 
                 defect = {'charge': charge,
                           'subdefect_1': type_dict,
-                          'coord_type': coord_type}
+                          'coord_type': coord_type,
+                          'threshold': threshold}
 
                 defect_types['defect_%s' % label] = defect
 
@@ -296,6 +297,7 @@ class InputParser(MASTObj):
                 subcount = 1
                 defect['charge'] = charge
                 defect['coord_type'] = coord_type
+                defect['threshold'] = threshold
 
                 try:
                     label = line[1]
