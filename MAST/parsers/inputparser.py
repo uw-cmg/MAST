@@ -405,6 +405,14 @@ class InputParser(MASTObj):
                     if len(opt) > 2:
                         kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
+                elif (opt[0] == 'mast_pp_setup'):
+                    psp_dict = dict()
+                    for key in opt[1:]:
+                        key = key.split('=')
+                        ref = key[0].title()
+                        val = str().join(key[1][0].upper() + key[1][1:])
+                        psp_dict[ref] = val
+                    ingredient_dict[opt[0]] = psp_dict
                 else:
                     ingredient_dict[opt[0]] = opt[1]
             elif ('end' in line):
