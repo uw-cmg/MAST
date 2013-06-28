@@ -163,12 +163,26 @@ def _vasp_kpoints_setup(keywords):
     return my_kpoints
 
 def _vasp_potcar_setup(keywords, my_poscar):
-    name=keywords['name']
+    name = keywords['name']
+
     if 'mast_xc' in keywords['program_keys'].keys():
         myxc = keywords['program_keys']['mast_xc'].upper() #Uppercase
     else:
         raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
-    my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
+
+    if (keywords['program_keys']['mast_pp_setup']):
+        sites = my_poscar.site_symbols
+        setup = keywords['program_keys']['mast_pp_setup']
+        pp_sites = list()
+        for site in sites:
+            try:
+                pp_sites.append(setup[site])
+            except KeyError:
+                pp_sites.append(site)
+        my_potcar = Potcar(symbols=pp_sites, functional=myxc, sym_potcar_map=None)
+    else:
+        my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
+
     dirutil.lock_directory(name)
     my_potcar.write_file(name + "/POTCAR")
     dirutil.unlock_directory(name)

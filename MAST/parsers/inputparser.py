@@ -249,12 +249,15 @@ class InputParser(MASTObj):
         charge = [0]
         count = 1
         coord_type = 'cartesian'
+        threshold = 1.e-4
 
         for line in section_content:
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
                 coord_type = line[1]
+            elif (line[0] == 'threshold'):
+                threshold = float(line[1])
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
@@ -284,7 +287,8 @@ class InputParser(MASTObj):
 
                 defect = {'charge': charge,
                           'subdefect_1': type_dict,
-                          'coord_type': coord_type}
+                          'coord_type': coord_type,
+                          'threshold': threshold}
 
                 defect_types['defect_%s' % label] = defect
 
@@ -295,6 +299,7 @@ class InputParser(MASTObj):
                 subcount = 1
                 defect['charge'] = charge
                 defect['coord_type'] = coord_type
+                defect['threshold'] = threshold
 
                 try:
                     label = line[1]
@@ -402,6 +407,14 @@ class InputParser(MASTObj):
                     if len(opt) > 2:
                         kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
+                elif (opt[0] == 'mast_pp_setup'):
+                    psp_dict = dict()
+                    for key in opt[1:]:
+                        key = key.split('=')
+                        ref = key[0].title()
+                        val = str().join(key[1][0].upper() + key[1][1:])
+                        psp_dict[ref] = val
+                    ingredient_dict[opt[0]] = psp_dict
                 else:
                     ingredient_dict[opt[0]] = opt[1]
             elif ('end' in line):

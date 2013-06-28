@@ -195,6 +195,16 @@ class MAST(MASTObj):
         except:
             MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
+        for ingredient in self.input_options.get_item('ingredients'):
+            if 'mast_exec' in ingredient:
+                have_exec = True
+            else:
+                have_exec = False
+
+        if (not have_exec):
+            error = 'mast_exec keyword not found in the $ingredients section'
+            raise MASTError(self.__clas__.__name__, error)
+
         self.input_options.set_item('mast', 'working_directory', dir_path)
         system_name = system_name + '_' + element_str
         self.input_options.update_item('mast', 'system_name', system_name)
@@ -228,43 +238,6 @@ class MAST(MASTObj):
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
     def _initialize_ingredients(self, ingredients_dict):
-
-#        print '\nInitializing ingredients.'
-#
-#        print '\nExtracting base structure.'
-#        structure = self.input_options.get_item('structure', 'structure')
-#        print structure, '\n'
-#
-#        print '\nExtracting default ingredient options.'
-#        ingredient_global = self.input_options.get_item('ingredients', 'global')
-#
-#        print '\nChecking status of defects.'
-#        ndefects = self.input_options.get_item('defects', 'num_defects')
-#        if ndefects == None:
-#            defects = False
-#            print 'No defects found.'
-#        else:
-#            defects = True
-#            defect_keys = self.input_options.get_item('defects', 'defects')
-#            if (ndefects == 1):
-#                print 'Found %i defect.\n' % ndefects
-#            else:
-#                print 'Found %i defects.\n' % ndefects
-#
-#        print "GRJ DEBUG:", self.unique_ingredients
-#        print "GRJ DEBUG:", ingredients_dict
-#        print "GRJ DEBUG:", defect_keys
-#        for ingredient in self.unique_ingredients:
-#            print 'Initializing ingredient %s.' % ingredient
-#            if (ingredient == 'inducedefect'):
-#                self.input_options.set_item('ingredients', ingredient, defect_keys)              
-#            elif (not self.input_options.get_item('ingredients', ingredient)):
-#                self.input_options.set_item('ingredients', ingredient, ingredient_global)
-#
-#        print 'GRJ DEBUG:', self.input_options.get_item('ingredients', 'inducedefect')
-#
-#        setup_obj = RecipeSetup(recipeFile='test-recipe.txt', inputOptions=self.input_options,
-#                                structure=structure, ingredientsDict=ingredients_dict)
         setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
                 inputOptions=self.input_options,
                 structure=self.input_options.get_item('structure','structure'), 
