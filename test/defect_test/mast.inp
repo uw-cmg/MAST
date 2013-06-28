@@ -9,6 +9,8 @@ posfile POSCAR.ga4as4
 $end
 
 $defects
+threshold 1e-4
+
 vacancy 0.0 0.0 0.0 Ga charge=-3,0
 
 begin
@@ -31,6 +33,7 @@ mast_xc PBE
 mast_ppn 1
 mast_queue default
 mast_exec //share/apps/vasp5.2_CNEB > vasp.out
+mast_pp_setup Ga=Ga_d Bi=Bi_d
 ispin 2
 lwave False
 lcharg False
