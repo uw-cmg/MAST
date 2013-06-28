@@ -247,12 +247,15 @@ class InputParser(MASTObj):
         charge = [0]
         count = 1
         coord_type = 'cartesian'
+        threshold = 1.e-4
 
         for line in section_content:
             line = line.split(self.delimiter)
 
             if (line[0] == 'coord_type'):
                 coord_type = line[1]
+            elif (line[0] == 'threshold'):
+                threshold = float(line[1])
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
