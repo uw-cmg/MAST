@@ -19,7 +19,15 @@ class BaseIngredient(MASTObj):
             print "Directory exists."
             return
         return
-   
+  
+    def get_structure_from_directory(self, dirname):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.get_structure_from_directory(dirname)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_structure_from_directory)")
+
     def get_structure_from_file(self, filepath):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
@@ -46,6 +54,14 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in forward_parent_structure)")
 
+    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            vasp_checker.forward_parent_dynmat(parentpath, childpath, newname)
+            return None
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in forward_parent_structure)")
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
         if self.keywords['program'] == 'vasp':
@@ -70,6 +86,11 @@ class BaseIngredient(MASTObj):
                 if errct > 0:
                     pass #self.run() #Should try to rerun automatically or not?? NO.
                 return False
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            usepath = self.keywords['name']
+            mycomplete = phon_checker.is_complete(usepath)
+            return mycomplete
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
@@ -92,6 +113,9 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.is_ready_to_run(self.keywords['name'])
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            return phon_checker.is_ready_to_run(self.keywords['name'])
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in is_complete)")
@@ -129,6 +153,9 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'] == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             return vasp_checker.set_up_program_input(self.keywords)
+        elif self.keywords['program'] == 'phon':
+            from MAST.ingredients.checker import phon_checker
+            return phon_checker.set_up_program_input(self.keywords)
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in set_up_program_input)")
@@ -178,8 +205,19 @@ class BaseIngredient(MASTObj):
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
+    def add_selective_dynamics_to_structure(self, sdarray):
+        """Adds selective dynamics to a structure."""
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.add_selective_dynamics_to_structure(self.keywords, sdarray)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in add_selective_dynamics_to_structure)")
+
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
         raise NotImplementedError
+    
+
 

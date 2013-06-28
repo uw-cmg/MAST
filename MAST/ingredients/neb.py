@@ -17,7 +17,7 @@ import shutil
 #import pdb
 #TTM
 
-class PerformNEB(BaseIngredient):
+class NEB(BaseIngredient):
     """
         Attributes:
         self.labels <list of str>: list of labels labeling the NEB.
@@ -225,13 +225,16 @@ class PerformNEB(BaseIngredient):
             Returns:
                 list of <Structure>: list of pymatgen Structure objects
         """
-        header = os.path.join(self.keywords['name'], "parent_structure_")
+        header = "parent_structure_"
         numim = self.keywords['program_keys']['images']
         imct = 1
         imstrs=list()
         while imct <= numim:
-            pfpath = header + str(imct).zfill(2)
-            if not os.path.isfile(pfpath):
+            pfpath=""
+            for myfile in os.listdir(self.keywords['name']):
+                if (header in myfile) and (str(imct).zfill(2) in myfile):
+                    pfpath = os.path.join(self.keywords['name'],myfile)
+            if pfpath == "":
                 pass
             else:
                 struct_im = BaseIngredient.get_structure_from_file(self, pfpath)

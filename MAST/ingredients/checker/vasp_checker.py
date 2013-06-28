@@ -14,6 +14,25 @@ def get_structure_from_file(filepath):
     """Get structure from file."""
     return Poscar.from_file(filepath, False).structure
 
+def get_structure_from_directory(dirname):
+    """Get structure from directory. Preferentially gets CONTCAR first."""
+    cpath = os.path.join(dirname, "CONTCAR")
+    ppath = os.path.join(dirname, "POSCAR")
+    if os.path.isfile(cpath):
+        return Poscar.from_file(cpath, False).structure
+    elif os.path.isfile(ppath):
+        return Poscar.from_file(ppath, False).structure
+    else:
+        raise MASTError("vasp_checker, get_structure_from_directory", "No valid structure in %s" % dirname)
+
+def forward_parent_dynmat(parentpath, childpath, newname="DYNMAT"):
+    """Forward the DYNMAT."""
+    dirutil.lock_directory(childpath)
+    shutil.copy(os.path.join(parentpath, "DYNMAT"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
+    return
+
+
 def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     """Copy CONTCAR to new POSCAR"""
     dirutil.lock_directory(childpath)
@@ -249,6 +268,8 @@ def get_path_to_write_neb_parent_energy(myname, myimages, parent):
         return os.path.join(myname, "00", "OSZICAR")
     elif parent == 2:
         return os.path.join(myname, str(int(myimages)+1).zfill(2),"OSZICAR")
+    elif len(parent) > 1:
+        return os.path.join(myname, parent, "OSZICAR")
     else:
         raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
 
@@ -281,4 +302,13 @@ def set_up_program_input_neb(keywords, image_structures):
     myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
     return
 
-
+def add_selective_dynamics_to_structure(keywords, sdarray):
+    name = keywords['name']
+    pname = os.path.join(name,"POSCAR")
+    phposcar = Poscar.from_file(pname)
+    phposcar.selective_dynamics = sdarray
+    dirutil.lock_directory(name)
+    os.rename(pname, pname + "_no_sd")
+    phposcar.write_file(pname)
+    dirutil.unlock_directory(name)
+    return
