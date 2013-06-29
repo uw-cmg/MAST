@@ -170,7 +170,7 @@ def _vasp_potcar_setup(keywords, my_poscar):
     else:
         raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
 
-    if (keywords['program_keys']['mast_pp_setup']):
+    if ('mast_pp_setup' in keywords['program_keys'].keys()):
         sites = my_poscar.site_symbols
         setup = keywords['program_keys']['mast_pp_setup']
         pp_sites = list()
