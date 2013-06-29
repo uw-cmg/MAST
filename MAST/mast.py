@@ -195,15 +195,17 @@ class MAST(MASTObj):
         except:
             MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
-        for ingredient in self.input_options.get_item('ingredients'):
-            if 'mast_exec' in ingredient:
+        for ingredient, options in self.input_options.get_item('ingredients').items():
+            print ingredient, options
+            if 'mast_exec' in options:
                 have_exec = True
+                break
             else:
                 have_exec = False
 
         if (not have_exec):
             error = 'mast_exec keyword not found in the $ingredients section'
-            raise MASTError(self.__clas__.__name__, error)
+            raise MASTError(self.__class__.__name__, error)
 
         self.input_options.set_item('mast', 'working_directory', dir_path)
         system_name = system_name + '_' + element_str
