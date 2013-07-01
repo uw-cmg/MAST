@@ -103,6 +103,8 @@ class MASTmon(object):
             errorstr = "Error: Failed to move to MASTmon home %s" % self.home
             raise MASTError(self.__class__.__name__, errorstr)
         
+        dirutil.lock_directory(self.home, 1) # Wait 5 seconds
+
         if verbose == 1:
             print "MAST is in: ", os.getcwd()
         if interval is None:
@@ -155,6 +157,7 @@ class MASTmon(object):
             #time.sleep(interval) #TTM remove this sleep
                           
         # move back to original directory
+        dirutil.unlock_directory(self.home) #unlock directory
         os.chdir(curdir)
             
                          

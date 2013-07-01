@@ -103,10 +103,15 @@ def directory_is_locked(dirname):
     else:
         return False
 
-def lock_directory(dirname):
+def lock_directory(dirname, waitmax=1000):
+    """Lock a directory using a lockfile.
+        Args:
+            dirname <str>: Directory name
+            waitmax <int>: maximum number of 5-second waits
+    """
     import time
     if directory_is_locked(dirname):
-        wait_to_write(dirname)
+        wait_to_write(dirname, waitmax)
     lockfile = open(dirname + "/mast.write_files.lock", 'wb')
     lockfile.writelines(time.ctime())
     lockfile.close()
@@ -116,16 +121,22 @@ def unlock_directory(dirname):
         os.remove(dirname + "/mast.write_files.lock")
     except OSError:
         raise MASTError("utility unlock_directory",
-            "Tried to unlock a directory which was not locked.")
+            "Tried to unlock directory %s which was not locked." % dirname)
 
 
-def wait_to_write(dirname):
+def wait_to_write(dirname, waitmax=1000):
+    """Wait to write to directory.
+        Args:
+            dirname <str>: Directory name
+            waitmax <int>: maximum number of 5-second waits
+    """
+    if waitmax < 1:
+        waitmax = 1
     import time
-    waitmax = 1000
     waitcount = 1
     while directory_is_locked(dirname) and (waitcount < waitmax):
         time.sleep(5)
         waitcount = waitcount + 1
     if directory_is_locked(dirname):
         raise MASTError("utility wait_to_write", 
-            "Timed out waiting to obtain lock on directory.")
+            "Timed out waiting to obtain lock on directory %s" % dirname)
