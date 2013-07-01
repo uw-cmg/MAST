@@ -112,7 +112,7 @@ class MAST(MASTObj):
             defdict = self.input_options.get_item('defects','defects')
             for dkey in defdict.keys():
                 for sdkey in defdict[dkey].keys():
-                    if not (sdkey in ["charge", "coord_type"]):
+                    if 'subdefect' in sdkey:
                         symbol = defdict[dkey][sdkey]['symbol'].upper()
                         if symbol in eldict.keys():
                             defdict[dkey][sdkey]['symbol'] = eldict[symbol]
