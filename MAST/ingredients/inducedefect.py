@@ -37,7 +37,7 @@ class InduceDefect(BaseIngredient):
         #if (self.keywords['coordtype'] == 'cartesian'):
         #    self.keywords['position'] = self._cart2frac(self.keywords['position'])
 
-    def induce_defect(self, base_structure, defect, coord_type):
+    def induce_defect(self, base_structure, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
             mast_defect is a dictionary like this: 
             'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
@@ -63,7 +63,7 @@ class InduceDefect(BaseIngredient):
             #print defect['coordinates']
             index = find_in_coord_list(base_structure.frac_coords,
                                        defect['coordinates'],
-                                       atol=1e-02)
+                                       atol=threshold)
             #print base_structure.frac_coords
             #print 'Index of deleted atom is', index
             struct_ed.delete_site(index)
@@ -79,7 +79,7 @@ class InduceDefect(BaseIngredient):
 
             index = find_in_coord_list(base_structure.frac_coords,
                                        defect['coordinates'],
-                                       atol=1e-02)
+                                       atol=threshold)
 
             struct_ed.replace_site(index, symbol)
         else:
@@ -111,7 +111,7 @@ class InduceDefect(BaseIngredient):
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                base_structure = self.induce_defect(base_structure, subdefect, defect['coord_type'])
+                base_structure = self.induce_defect(base_structure, subdefect, defect['coord_type'], defect['threshold'])
                 #base_structure = modified_structure
             else:
                 pass

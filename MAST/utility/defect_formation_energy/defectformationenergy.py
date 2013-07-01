@@ -60,7 +60,7 @@ class DefectFormationEnergy:
                 print 'Calculating DFEs for defect %s' % (label)
 
                 # List of directories pertaining to a certain defect
-                ddir = [ddir for ddir in def_dir if label in ddir]
+                ddir = [ddir for ddir in def_dir if (label.split('defect_')[1] == ddir.split('defect_')[1].split('_q=')[0])]
 
                 # Now loop through the charges for each defect
                 energy_list = list()
