@@ -57,13 +57,10 @@ class MAST(MASTObj):
             generated set of input files.
         """
         ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
-        loopdict=ipl_obj.scan_for_indep_loop()
-        if len(loopdict) == 0:
+        loopfiles = ipl_obj.main()
+        if len(loopfiles) == 0:
             self.parse_and_run_input()
         else:
-            looplines=ipl_obj.prepare_looped_lines(loopdict)
-            loopdata=ipl_obj.prepare_looped_datasets(looplines)
-            loopfiles=ipl_obj.create_input_files(loopdata)
             for ipfile in loopfiles:
                 self.keywords['inputfile']=ipfile
                 self.parse_and_run_input()

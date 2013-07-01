@@ -79,7 +79,10 @@ class IndepLoopInputParser(MASTObj):
         self.pegloop = "pegloop"
     
     def main(self, verbose=0):
-        """Scan for independent loops and set up dictionaries."""
+        """Scan for independent loops and set up dictionaries.
+            Return:
+                createdfiles <list of str>: list of created input files
+        """
         indepdict=self.scan_for_loop(self.indeploop)
         pegdict = self.scan_for_loop(self.pegloop)
         alldict = dict(indepdict)
@@ -88,15 +91,14 @@ class IndepLoopInputParser(MASTObj):
         pegcomb=self.get_combo_list(pegdict, 1)
         allcombs = self.combine_combo_lists(indepcomb, pegcomb)
         datasets = self.prepare_looped_datasets(alldict, allcombs)
-        self.create_input_files(datasets)
+        createdfiles = self.create_input_files(datasets)
         if verbose == 1:
             self.print_list(indepcomb)
             self.print_list(pegcomb)
             self.print_list(allcombs)
             for datakey in datasets:
                 self.print_list(datasets[datakey])
-        #indeplines = self.prepare_looped_lines(indepdict)
-        #peglines = self.prepare_looped_lines(pegdict)
+        return createdfiles
 
     def scan_for_loop(self, loopkey):
         """Scan for loops.
@@ -275,6 +277,6 @@ class IndepLoopInputParser(MASTObj):
             newfile.data = list(datasets_dict[didx])
             newname = newfile.to_unique_file(dirstem, 
                         'loop_' + basename + '_', '.inp', 10000)
-            createdfiles.append(newname)
+            createdfiles.append(os.path.basename(newname))
         return createdfiles
 
