@@ -114,7 +114,7 @@ class NEB(BaseIngredient):
         struct_ed_base = StructureEditor(sortedstruc_base)
         # We are not actually translating the sites; just get them into unit
         # cell
-        struct_ed.translate_sites(range(0,len(sortedstruc.sites)),np.zeros(3),True)
+        #TTM DEBUG REMOVE THIS struct_ed.translate_sites(range(0,len(sortedstruc.sites)),np.zeros(3),True)
         nebidx = list()
 
         elemstarts = self.get_element_indices(sortedstruc)
