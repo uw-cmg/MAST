@@ -58,6 +58,7 @@ class MAST(MASTObj):
         """
         ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
         loopfiles = ipl_obj.main()
+        #print "TTM DEBUG: loopfiles: ", loopfiles
         if len(loopfiles) == 0:
             self.parse_and_run_input()
         else:

@@ -85,6 +85,8 @@ class IndepLoopInputParser(MASTObj):
         """
         indepdict=self.scan_for_loop(self.indeploop)
         pegdict = self.scan_for_loop(self.pegloop)
+        if len(indepdict.keys()) == 0 and len(pegdict.keys()) == 0:
+            return dict()
         alldict = dict(indepdict)
         alldict.update(pegdict)
         indepcomb=self.get_combo_list(indepdict, 0)
@@ -134,6 +136,8 @@ class IndepLoopInputParser(MASTObj):
                 loopdict[lidx]['looplist'] = split2[0].split(self.loop_delim)
             lidx = lidx + 1
         #print "TTM DEBUG: ", loopdict
+        if len(loopdict.keys()) == 0:
+            return dict()
         return loopdict
     
     def get_combo_list(self, loopdict, pegged=0):
