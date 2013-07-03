@@ -34,7 +34,7 @@ class PotentialAlignment:
 
                 pot_line = True
                 while (pot_line):
-                    pot_line = outfile.readline().strip().split()
+                    pot_line = outfile.readline().strip()
                     if (not line):
                         pot_line = False
                     else:
@@ -48,9 +48,13 @@ class PotentialAlignment:
 
         outfile.close()
         elst_pot = list()
+#        print raw_data
         for data in raw_data:
-            for datum in data[1:10:2]:
-                elst_pot.append(float(datum))
+            data = data.split('-')
+            for datum in data[1:-1]:
+                elst_pot.append(-float(datum.split()[0]))
+            if data[0]:
+                elst_pot.append(-float(data[-1]))
 
         for i in range(len(atom_numbers)):
             for j in range(atom_numbers[i]):
