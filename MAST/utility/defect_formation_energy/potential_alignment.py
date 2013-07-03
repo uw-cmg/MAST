@@ -63,7 +63,17 @@ class PotentialAlignment:
         return (elst_pot, atom_list, efermi)
 
     def get_potential_alignment(self, perfect_info, defect_info):
-        """Gets the shift.  Assumes all atoms in the perfect cell are symmetry equivalent"""
+        """Gets the shift.  Assumes all atoms in the perfect cell are symmetry
+            equivalent, i.e. for Sc2O3, by symmetry we have two different Sc
+            atoms (8b and 24d Wycoff positions) with two different potentials.
+
+            In reality the best way to do this is to match up the symmetry
+            positions of the perfect with that in the defected and do the 
+            alignment that way.  However, a quick and dirty way is to average
+            over each symmetry position, which allows us to account for the 
+            different symmetry environments in an effective way without having
+            to dig into the underlying unit cell symmetry.
+        """
 
         perf_elst_pot, perf_atom_list, perf_efermi = perfect_info
         def_elst_pot, def_atom_list, def_efermi = defect_info
