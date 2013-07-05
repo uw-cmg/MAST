@@ -40,7 +40,8 @@ def main():
     print 'You have selected %s ran on %s/%s/%s at %s:%s and %ss.' % (label, month, day, year, hour, minute, second)
     print 'Calculating defect formation energies now.'
 
-    DFE = DefectFormationEnergy('%s/%s/' % (archive, directory))
+    directory_path = '%s/%s/' % (archive, directory)
+    DFE = DefectFormationEnergy(directory=directory_path)
     #defect_energies = DFE.calculate_defect_formation_energies()
     DFE.print_table()
 
