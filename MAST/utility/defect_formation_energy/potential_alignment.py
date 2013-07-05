@@ -18,7 +18,6 @@ class PotentialAlignment:
         """
         outfile = open(outcar, 'r')
 
-        raw_data = list()
         atom_types = list()
         atom_numbers = list()
         atom_list = list()
@@ -29,6 +28,7 @@ class PotentialAlignment:
             if (not line):
                 eof = True
             elif 'average (electrostatic) potential at core' in line:
+                raw_data = list()
                 outfile.readline() # Read in Junk line
                 outfile.readline() # Read in Junk line
 
