@@ -490,9 +490,9 @@ class DiffusionCoefficient():
         jfw2 = jumpfreqdict['w2']
         jfw3 = jumpfreqdict['w3']
         jfw4 = jumpfreqdict['w4']
-        f_0 = 0.715
+        f_0 = 0.7815
         myx = jfw4/jfw0
-        bigf_num = 10*np.power(myx,4) + 180.5*np.power(myx,3) + 927*np.power(myx,2) + 1341
+        bigf_num = 10*np.power(myx,4) + 180.5*np.power(myx,3) + 927*np.power(myx,2) + 1341*myx
         bigf_denom = 2*np.power(myx,4) + 40.2*np.power(myx,3) + 254*np.power(myx,2) + 597*myx + 435
         bigf_x = 1-(1.0/7.0)*(bigf_num/bigf_denom)
         f_2_num = 1+3.5*bigf_x *(jfw3/jfw1)
@@ -500,7 +500,7 @@ class DiffusionCoefficient():
         f_2 = f_2_num / f_2_denom
         vacconc = self.get_vac_conc(temp)
         lattparam = self.get_latt_param()
-        Dself = vacconc*np.power(lattparam,2)*jfw0
+        Dself = f_0*vacconc*np.power(lattparam,2)*jfw0
         Dsol_num = Dself * f_2 * jfw2 * jfw4 * jfw1
         Dsol_denom = f_0 * jfw1 * jfw0 * jfw3
         Dsolute = Dsol_num / Dsol_denom
