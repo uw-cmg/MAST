@@ -11,6 +11,7 @@ from MAST.utility.mastobj import MASTObj
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.ingredients.optimize import Optimize
+from MAST.utility import MASTError
 
 import os
 import shutil
