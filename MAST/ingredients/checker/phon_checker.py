@@ -96,7 +96,8 @@ def is_ready_to_run(dirname):
 
 def _phon_poscar_setup(keywords):
     """Set up a PHON POSCAR file. Strip out the "elements" line (that is,
-        use VASP version 4 format.
+        use VASP version 4 format. Also strip out anything beneath the atoms
+        line.
     """
     name = keywords['name']
     pospath = os.path.join(name, "POSCAR")
@@ -272,21 +273,25 @@ def _nosd_my_dynmat(keywords):
     for nct in range(0,numdisp):
         idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
     for idx in idxrg: #strip out the 'direction' indicator 1, 2, 3
-        myatom = mysplit[0]
+        mysplit = myforces.get_line_number(idx).strip().split()
+        myatom = int(mysplit[0])
         if not myatom in atomsanddirs.keys():
             atomsanddirs[myatom] = dict()
             atomsanddirs[myatom][1] = 'not found'
             atomsanddirs[myatom][2] = 'not found'
             atomsanddirs[myatom][3] = 'not found'
-        mydirection = mysplit[1]
+        mydirection = int(mysplit[1])
         atomsanddirs[myatom][mydirection] = 'found'
     lct=2 #start at line 2 ("masses" line)
     zeroline="0 0 0" + "\n"
     for act in range(1,numatoms + 1):
         if not act in atomsanddirs.keys():
             atomsanddirs[act] = dict()
+            atomsanddirs[act][1] = 'not found'
+            atomsanddirs[act][2] = 'not found'
+            atomsanddirs[act][3] = 'not found'
         for didx in range(1,4):
-            if not didx in atomsanddirs[act].keys():
+            if atomsanddirs[act][didx] == 'not found':
                 if didx == 1:
                     headerline=str(act) + " 1 0.00001 0 0" + "\n"
                 elif didx == 2:
@@ -295,12 +300,11 @@ def _nosd_my_dynmat(keywords):
                     headerline=str(act) + " 3 0 0 0.00001" + "\n"
                 myforces.modify_file_by_line_number(lct, "I", headerline)
                 lct = lct + 1
-                myforces.modify_file_by_line_number(lct, "I", zeroline)
-                lct = lct + 1
-                myforces.modify_file_by_line_number(lct, "I", zeroline)
-                lct = lct + 1
-                myforces.modify_file_by_line_number(lct, "I", zeroline)
-                lct = lct + 1
+                for zct in range(0,numatoms):
+                    myforces.modify_file_by_line_number(lct, "I", zeroline)
+                    lct = lct + 1
+            else:
+                lct = lct + 1 + numatoms
     numdisp = numatoms*3
     newheader = str(numspec) + " " + str(numatoms) + " " + str(numdisp) + "\n"
     myforces.modify_file_by_line_number(1, "R", newheader)
