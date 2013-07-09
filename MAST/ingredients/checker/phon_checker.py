@@ -228,11 +228,15 @@ def _phon_inphon_get_masses(keywords):
 
 def _phon_forces_setup(keywords):
     """Set up the FORCES file. This is like the DYNMAT but with the mass
-        line stripped out."""
+        line stripped out and no direction indicators. Also, a block must
+        be present for every atom, with a displacement, even if all entries
+        are zero (e.g. fake block for selective dynamics)
+    """
+    _nosd_my_dynmat(keywords)
     name=keywords['name']
-    if not os.path.isfile(name + "/DYNMAT"):
-        raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT")
+    if not os.path.isfile(name + "/DYNMAT_mod"):
+        raise MASTError("checker/phon_checker", "No modified DYNMAT found in %s." % name)
+    myforces=MASTFile(name + "/DYNMAT_mod")
     infosplit = myforces.get_line_number(1).strip().split()
     numdisp = int(infosplit[2])  #number of dynmat chunks
     numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
@@ -250,6 +254,59 @@ def _phon_forces_setup(keywords):
     myforces.modify_file_by_line_number(2, "D") #remove masses line
     myforces.to_file(name + "/FORCES")
     return
+
+def _nosd_my_dynmat(keywords):
+    """Creates fake blocks in DYNMAT for filling back in the atoms and 
+        directions skipped through selective dynamics.
+    """
+    name=keywords['name']
+    if not os.path.isfile(name + "/DYNMAT"):
+        raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
+    myforces=MASTFile(name + "/DYNMAT")
+    infosplit = myforces.get_line_number(1).strip().split()
+    numspec = int(infosplit[0])
+    numdisp = int(infosplit[2])  #number of dynmat chunks
+    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
+    idxrg=list()
+    atomsanddirs=dict()
+    for nct in range(0,numdisp):
+        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
+    for idx in idxrg: #strip out the 'direction' indicator 1, 2, 3
+        myatom = mysplit[0]
+        if not myatom in atomsanddirs.keys():
+            atomsanddirs[myatom] = dict()
+            atomsanddirs[myatom][1] = 'not found'
+            atomsanddirs[myatom][2] = 'not found'
+            atomsanddirs[myatom][3] = 'not found'
+        mydirection = mysplit[1]
+        atomsanddirs[myatom][mydirection] = 'found'
+    lct=2 #start at line 2 ("masses" line)
+    zeroline="0 0 0" + "\n"
+    for act in range(1,numatoms + 1):
+        if not act in atomsanddirs.keys():
+            atomsanddirs[act] = dict()
+        for didx in range(1,4):
+            if not didx in atomsanddirs[act].keys():
+                if didx == 1:
+                    headerline=str(act) + " 1 0.00001 0 0" + "\n"
+                elif didx == 2:
+                    headerline=str(act) + " 2 0 0.00001 0" + "\n"
+                elif didx == 3:
+                    headerline=str(act) + " 3 0 0 0.00001" + "\n"
+                myforces.modify_file_by_line_number(lct, "I", headerline)
+                lct = lct + 1
+                myforces.modify_file_by_line_number(lct, "I", zeroline)
+                lct = lct + 1
+                myforces.modify_file_by_line_number(lct, "I", zeroline)
+                lct = lct + 1
+                myforces.modify_file_by_line_number(lct, "I", zeroline)
+                lct = lct + 1
+    numdisp = numatoms*3
+    newheader = str(numspec) + " " + str(numatoms) + " " + str(numdisp) + "\n"
+    myforces.modify_file_by_line_number(1, "R", newheader)
+    myforces.to_file(name + "/DYNMAT_mod")
+
+
 
 def set_up_program_input(keywords):
     _phon_poscar_setup(keywords)

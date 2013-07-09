@@ -28,7 +28,7 @@ class PhononSingle(Optimize):
     def __init__(self, **kwargs):
         Optimize.__init__(self, **kwargs)
     def update_children(self):
-        Optimize.update_children(self)
+        #Do NOT forward the structure, since the ending CONTCAR contains a displacement in it.
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
 
