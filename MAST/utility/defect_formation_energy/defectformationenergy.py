@@ -4,15 +4,16 @@ from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.smartio import read_structure
 
 from MAST.utility import PickleManager
-from MAST.ingredients.inducedefect import InduceDefect
+from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 
 class DefectFormationEnergy:
     """Class for calculating the defect formation energy for a completed MAST
         run.
     """
 
-    def __init__(self, directory):
+    def __init__(self, directory=None, plot_threshold=0.01):
         self.directory = directory
+        self.plot_threshold = plot_threshold
 
         pm = PickleManager(self.directory + '/input_options.pickle')
         self.input_options = pm.load_variable()
@@ -94,13 +95,16 @@ class DefectFormationEnergy:
                             nperf = 0
                         struct_diff[str(specie)] = number - nperf
 
+                    # Get the potential alignment correction
+                    alignment = self.get_potential_alignment(perf_dir, charged)
+
                     # Calculate the base DFE energy
                     e_def = energy - e_perf # E_defect - E_perf
                     for specie, number in struct_diff.items():
                         mu = potentials[str(specie).lower()]
                         #print str(specie), mu, number
                         e_def -= (number * mu)
-                    e_def += charge * (efermi) # Add in the shift here!
+                    e_def += charge * (efermi + alignment) # Add in the shift here!
                     energy_list.append([charge, e_def])
 
                 energy_list = sorted(energy_list, key=lambda energy: energy[0])
@@ -110,16 +114,11 @@ class DefectFormationEnergy:
 
         return e_defects
 
-    def get_defect_directories(self):
-        return [x[0] for x in os.walk(self.directory) if ('defect_' in x[0] and '_sp' in x[0])]
-
-    def get_perfect_directory(self):
-        return [x[0] for x in os.walk(self.directory) if ('perfect' in x[0] and '_sp' in x[0])]
-
     def get_total_energy(self, directory):
         """Returns the total energy from a directory"""
-        # Are we dealing with VASP?
+
         abspath = '%s/%s/' % (self.directory, directory)
+
         if ('vasprun.xml' in os.listdir(abspath)):
         # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
             return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
@@ -127,15 +126,31 @@ class DefectFormationEnergy:
     def get_fermi_energy(self, directory):
         """Returns the Fermi energy from a directory"""
         abspath = '%s/%s/' % (self.directory, directory)
+
         if ('vasprun.xml' in os.listdir(abspath)):
-        # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
             return Vasprun('%s/vasprun.xml' % abspath).efermi
 
     def get_structure(self, directory):
         """Returns the final structure from an optimization"""
+
         abspath = '%s/%s/' % (self.directory, directory)
+
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
+
+    def get_potential_alignment(self, perf_dir, def_dir):
+        """Returns the potential alignment correction used in charge defects"""
+
+        abs_path_perf = '%s/%s/' % (self.directory, perf_dir)
+        abs_path_def = '%s/%s/' % (self.directory, def_dir)
+
+        pa = PotentialAlignment()
+
+        if ('OUTCAR' in os.listdir(abs_path_perf)):
+            perfect_info = pa.read_outcar('%s/%s' % (abs_path_perf, 'OUTCAR'))
+            defect_info = pa.read_outcar('%s/%s' % (abs_path_def, 'OUTCAR'))
+
+            return pa.get_potential_alignment(perfect_info, defect_info)
 
     def print_table(self):
         e_defects = self.calculate_defect_formation_energies()
