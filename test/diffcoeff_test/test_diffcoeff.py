@@ -40,7 +40,7 @@ class TestDiffCoeff(unittest.TestCase):
 
 
     def test_fivefreq_run_from_prompt(self):
-        verbose="0"
+        verbose="1"
         mastpath = get_mast_install_path()
         myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/alcu", "73", "1273", "100", "5", "w0=ep10-ep91,w1=ep10-ep37,w2=ep10-ep9,w3=ep10-ep20,w4=ep20-ep10",verbose])
             #stdout=subprocess.PIPE, stderr=subprocess.PIPE)

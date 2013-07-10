@@ -524,12 +524,14 @@ class DiffusionCoefficient():
         self.get_formdict()
         self.get_entrodict_approx()
         self.get_attemptdict() #Adams approximations
+        entromdict=dict()
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
         for freq in freqs:
+            entromdict[freq]=0
             jumpfreqdict[freq] = self.estimate_jump_freq(self.attemptdict[freq],
-                self.entrodict[freq],
-                self.hopdict[freq]+self.formdict[freq], temp)
+                entromdict[freq],
+                self.hopdict[freq], temp)
         jfw0 = jumpfreqdict['w0']
         jfw1 = jumpfreqdict['w1']
         jfw2 = jumpfreqdict['w2']
@@ -635,9 +637,12 @@ class DiffusionCoefficient():
     def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
         """Estimate jump frequency (Adams, Foiles, Wolfer)
             w_i = v_i exp(S_i/k) exp(-E_i/kT)
+            Use only Emig, Smig in here for five-frequency.
+            Evf, Svf are taken in "vacancy concentration" (see five_freq)
         """
         jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
         if self.verbose == 1:
+            print "Act energy: ", actenergy
             print "Jump freq: ", jumpfreq
         return jumpfreq
 
