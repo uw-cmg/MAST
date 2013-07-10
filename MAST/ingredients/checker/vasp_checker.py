@@ -25,10 +25,11 @@ def get_structure_from_directory(dirname):
     else:
         raise MASTError("vasp_checker, get_structure_from_directory", "No valid structure in %s" % dirname)
 
-def forward_parent_dynmat(parentpath, childpath, newname="DYNMAT"):
-    """Forward the DYNMAT."""
+def forward_parent_dynmat(parentpath, childpath, newname1="DYNMAT", newname2="XDATCAR"):
+    """Forward the DYNMAT and the XDATCAR."""
     dirutil.lock_directory(childpath)
-    shutil.copy(os.path.join(parentpath, "DYNMAT"),os.path.join(childpath, newname))
+    shutil.copy(os.path.join(parentpath, "DYNMAT"),os.path.join(childpath, newname1))
+    shutil.copy(os.path.join(parentpath, "XDATCAR"),os.path.join(childpath, newname2))
     dirutil.unlock_directory(childpath)
     return
 

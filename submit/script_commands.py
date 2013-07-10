@@ -76,6 +76,10 @@ def write_submit_script(keywords):
         mast_nodes = "1"
     try:
         mast_exec = str(keywords['program_keys']['mast_exec'])
+        if "$MAST_INSTALL_PATH" in mast_exec:
+            startpos=mast_exec.find("$MAST_INSTALL_PATH")
+            newexec = mast_exec[:startpos] + os.getenv("MAST_INSTALL_PATH") + mast_exec[startpos+18:] 
+            mast_exec = newexec
     except KeyError:
         mast_exec = "mpiexec vasp"
     try:

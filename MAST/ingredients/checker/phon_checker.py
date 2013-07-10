@@ -10,6 +10,7 @@ from MAST.utility import MASTError
 import os
 import shutil
 import pymatgen
+import numpy as np
 
 def get_structure_from_file(filepath):
     """Get structure from file."""
@@ -233,11 +234,12 @@ def _phon_forces_setup(keywords):
         be present for every atom, with a displacement, even if all entries
         are zero (e.g. fake block for selective dynamics)
     """
+    _replace_my_displacements(keywords)
     _nosd_my_dynmat(keywords)
     name=keywords['name']
-    if not os.path.isfile(name + "/DYNMAT_mod"):
-        raise MASTError("checker/phon_checker", "No modified DYNMAT found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT_mod")
+    if not os.path.isfile(name + "/DYNMAT_mod_2"):
+        raise MASTError("checker/phon_checker", "No DYNMAT_mod_2 found in %s." % name)
+    myforces=MASTFile(name + "/DYNMAT_mod_2")
     infosplit = myforces.get_line_number(1).strip().split()
     numdisp = int(infosplit[2])  #number of dynmat chunks
     numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
@@ -261,9 +263,9 @@ def _nosd_my_dynmat(keywords):
         directions skipped through selective dynamics.
     """
     name=keywords['name']
-    if not os.path.isfile(name + "/DYNMAT"):
-        raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT")
+    if not os.path.isfile(name + "/DYNMAT_mod_1"):
+        raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
+    myforces=MASTFile(name + "/DYNMAT_mod_1")
     infosplit = myforces.get_line_number(1).strip().split()
     numspec = int(infosplit[0])
     numdisp = int(infosplit[2])  #number of dynmat chunks
@@ -308,9 +310,72 @@ def _nosd_my_dynmat(keywords):
     numdisp = numatoms*3
     newheader = str(numspec) + " " + str(numatoms) + " " + str(numdisp) + "\n"
     myforces.modify_file_by_line_number(1, "R", newheader)
-    myforces.to_file(name + "/DYNMAT_mod")
+    myforces.to_file(name + "/DYNMAT_mod_2")
 
-
+def _replace_my_displacements(keywords):
+    """
+        In VASP, 0.01 0 0 in DYNMAT from phonons is 1/Angstroms in the 
+        x-direction (XDATCAR shows that it makes fractional coord 
+        displacements for all 3 lattice vectors in a non-cubic system to get 
+        this strictly-x-direction) 
+        In PHON, 0.01 0 0 means 0.01 multiplied by lattice vector a.
+        Back out the fractional displacements used by VASP from the XDATCAR, 
+        match them up, and use them.
+        Konfig =1 is the un-displaced cell.
+        Now for NFREE=2,
+        there are two Konfigs for each displacment; the first is positive
+        POTIM in the x-direction (for example, POTIM = 0.01), then negative
+        POTIM in the x-direction, then y, then z.
+        So one unfrozen atom has seven Konfigs.
+        DYNMAT, however, reports the AVERAGE force from each Konfig pair.
+        So we only want Konfigs 2, 4, and 6, corresponding to POTIM 0 0, 
+        0 POTIM 0, and 0 0 POTIM
+    """
+    name=keywords['name']
+    if not os.path.isfile(name + "/XDATCAR"):
+        raise MASTError("checker/phon_checker", "No XDATCAR found in %s." % name)
+    myxdat=MASTFile(name + "/XDATCAR")
+    if not os.path.isfile(name + "/DYNMAT"):
+        raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
+    myforces=MASTFile(name + "/DYNMAT")
+    infosplit = myforces.get_line_number(1).strip().split()
+    numspec = int(infosplit[0])
+    numdisp = int(infosplit[2])  #number of dynmat chunks
+    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
+    idxrg=list() #list of header line numbers in DYNMAT
+    kfgrg=list() #list of Konfig line numbers in XDATCAR
+    atomsanddirs=dict()
+    for nct in range(0,numdisp*2+1): #get all konfig lines
+        kfgrg.append(4+1+nct*(numatoms + 1))
+    kfgdict=dict()
+    for kidx in kfgrg:
+        if kidx == 5: #first configuration
+            kct = 0
+        else: 
+            hline = myxdat.get_line_number(kidx).strip().split()
+            kfgnum = int(hline[1])
+            if np.mod(kfgnum,2) == 1: #skip odd configurations
+                continue
+            else:
+                kct = np.divide(kfgnum,2)
+        kfgdict[kct]=dict()
+        for act in range(1,numatoms+1):
+            klin=kidx+act
+            mycoords=np.array(myxdat.get_line_number(klin).strip().split(),float)
+            kfgdict[kct][act]=mycoords
+    for nct in range(0,numdisp):
+        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
+    dct=1
+    for idx in idxrg:
+        mysplit = myforces.get_line_number(idx).strip().split()
+        myatom = mysplit[0]
+        mydispdir = mysplit[1]
+        newcoords = kfgdict[dct][int(myatom)] - kfgdict[0][int(myatom)]
+        coordstr = str(newcoords[0]) + " " + str(newcoords[1]) + " " + str(newcoords[2])
+        mynewline = myatom + " " + mydispdir + " " + coordstr + "\n"
+        myforces.modify_file_by_line_number(idx, "R", mynewline)
+        dct=dct+1
+    myforces.to_file(name + "/DYNMAT_mod_1")
 
 def set_up_program_input(keywords):
     _phon_poscar_setup(keywords)
