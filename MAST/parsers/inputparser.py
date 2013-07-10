@@ -89,7 +89,7 @@ class InputParser(MASTObj):
 
         eof = False
         while (not eof):
-            line = infile.readline().lower()
+            #line = infile.readline().lower() #Remove the lowercasing
             # This works because the blank lines in the file are really 
             # newline (\n)!
             # This is why strip() didn't work, cause it removed that \n, 
