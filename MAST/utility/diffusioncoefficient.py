@@ -447,6 +447,51 @@ class DiffusionCoefficient():
             print "Entrodict: ", self.entrodict
         return self.entrodict
 
+    def get_entrodict_from_phonons(self, temp):
+        """Get entropy dictionary from phonon calculations, integrated by
+            PHON.
+            Args:
+                temp <float>: Temperature in K
+        """
+        entromdict=dict() #migration entropy
+        entrovdict=dict() #vacancy formation entropy
+        entrodict=dict()
+        freqs = self.freqdict.keys()
+        freqs.sort() #do w0 before w2
+        bulkfind=metafile.find_ingredient("perf","phon","parse")
+        bulkfile = MASTFile(bulkfind.name + "/THERMO")
+        entropybulk=0
+        for myline in bulkfile.data:
+            mlist = myline.strip().split()
+            if float(mlist[0]) == temp:
+                entropybulk = float(mlist[4]) #in kB/cell
+                break
+        for freq in freqs:
+            [startlabel,tstlabel]=self.find_start_and_tst_labels(self.freqdict[freq])
+            initfind=metafile.find_ingredient(startlabel,"phon","parse")
+            tstfind=metafile.find_ingredient(tstlabel,"phon","parse")
+            initfile = MASTFile(initfind.name + "/THERMO")
+            tstfile = MASTFile(tstfind.name + "/THERMO")
+            entropyinit=0
+            entropytst=0
+            for myline in initfile.data:
+                mlist = myline.strip().split()
+                if float(mlist[0]) == temp:
+                    entropyinit = float(mlist[4]) #in kB/cell
+                    break
+            for myline in tstfile.data:
+                mlist = myline.strip().split()
+                if float(mlist[0]) == temp:
+                    entropytst = float(mlist[4]) #in kB/cell
+                    break
+            entromdict[freq]=(entropytst-entropyinit)
+            entrovdict[freq]=(entropyinit-entropybulk)
+            entrodict[freq]=entrovdict[freq]+entromdict[freq]
+        self.entrodict = entrodict
+        if self.verbose == 1:
+            print "Entrodict: ", self.entrodict
+        return self.entrodict
+
     def parse_melting_point(self, elem):
         """Parse the melting point.
             Args:
