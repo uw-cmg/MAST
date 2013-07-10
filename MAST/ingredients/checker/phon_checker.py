@@ -83,7 +83,7 @@ def is_ready_to_run(dirname):
     notready=0
     if not(os.path.isfile(dirname + "/FORCES")):
         notready = notready + 1
-    if not(os.path.isfile(dirname + "/POTCAR")):
+    if not(os.path.isfile(dirname + "/POSCAR")):
         notready = notready + 1
     if not(os.path.isfile(dirname + "/INPHON")):
         notready = notready + 1

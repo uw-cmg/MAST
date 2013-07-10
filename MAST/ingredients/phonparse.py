@@ -23,5 +23,6 @@ class PhonParse(Optimize):
     
     def __init__(self, **kwargs):
         Optimize.__init__(self, **kwargs)
+        print "USING PHON PROGRAM. Cite Dario Alfe."
         self.keywords['program'] = 'phon'
 
