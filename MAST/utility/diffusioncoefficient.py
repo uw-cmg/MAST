@@ -37,7 +37,7 @@ class DiffusionCoefficient():
                                         (right now this is ENERGIES, NOT
                                         ENTHALPIES)
             self.attemptdict <dict of float>: freq-labeled dict of attempt freqs
-            self.entrodict <dict of float>: freq-labeled dict of entropies
+            self.entromdict <dict of float>: freq-labeled dict of migration entropies
             self.formdict <dict of float>: freq-labeled dict of formation
             self.tempdict <dict of float>: temperature list of diffusion coeffs
     """
@@ -414,7 +414,7 @@ class DiffusionCoefficient():
         return self.attemptdict
     
 
-    def get_entrodict_approx(self):
+    def get_entromigdict_approx(self):
         """Get approximate entropy.
             Use Adams approximations for now, Wert-Zener, 
             where S_0=S_1=S_3=S_4 and
@@ -428,7 +428,7 @@ class DiffusionCoefficient():
                 def_en/kap_3/backbone/r3_1_1.html, Sform ~ Smig ~ 1k?         
             LATER, REPLACE WITH EXTRACTION of "THERMO" from PHON by Dario Alfe
         """
-        entrodict=dict()
+        entromdict=dict()
         beta=0.4
         hostelem = pymatgen.core.periodic_table.Element(self.host)
         tmeltpurehost = self.parse_melting_point(hostelem)
@@ -436,16 +436,16 @@ class DiffusionCoefficient():
         freqs.sort() #do w0 before w2
         for freq in freqs:
             if not (freq == 'w2'):
-                entrodict[freq] = stock_S_v + stock_S_m
+                entromdict[freq] = stock_S_m
             else:
-                eact2 = self.hopdict['w2'] + self.formdict['w2']
-                eact1 = self.hopdict['w1'] + self.formdict['w1']
+                eact2 = self.hopdict['w2']
+                eact1 = self.hopdict['w1']
                 delta_act_s = beta*(eact2-eact1)/tmeltpurehost
-                entrodict['w2'] = entrodict['w0'] + delta_act_s
-        self.entrodict = entrodict
+                entromdict['w2'] = entromdict['w0'] + delta_act_s
+        self.entromdict = entromdict
         if self.verbose == 1:
-            print "Entrodict: ", self.entrodict
-        return self.entrodict
+            print "Entro mig dict: ", self.entromdict
+        return self.entromdict
 
     def get_entrodict_from_phonons(self, temp):
         """Get entropy dictionary from phonon calculations, integrated by
@@ -522,16 +522,13 @@ class DiffusionCoefficient():
         """
         self.get_hopdict()
         self.get_formdict()
-        self.get_entrodict_approx()
+        self.get_entromigdict_approx()
         self.get_attemptdict() #Adams approximations
-        entromdict=dict()
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
         for freq in freqs:
-            entromdict[freq]=0
             jumpfreqdict[freq] = self.estimate_jump_freq(self.attemptdict[freq],
-                entromdict[freq],
-                self.hopdict[freq], temp)
+                self.entromdict[freq], self.hopdict[freq], temp)
         jfw0 = jumpfreqdict['w0']
         jfw1 = jumpfreqdict['w1']
         jfw2 = jumpfreqdict['w2']
@@ -634,15 +631,15 @@ class DiffusionCoefficient():
             print "Latt param in centimeters: ", mylatt
         return mylatt
     
-    def estimate_jump_freq(self, vibfreq, actentropy, actenergy, temp):
+    def estimate_jump_freq(self, vibfreq, migentropy, migenergy, temp):
         """Estimate jump frequency (Adams, Foiles, Wolfer)
             w_i = v_i exp(S_i/k) exp(-E_i/kT)
-            Use only Emig, Smig in here for five-frequency.
+            Use only Smig, Emig in here for five-frequency.
             Evf, Svf are taken in "vacancy concentration" (see five_freq)
         """
-        jumpfreq = vibfreq*np.exp(actentropy/kboltz)*np.exp(-1*actenergy/(kboltz*temp))
+        jumpfreq = vibfreq*np.exp(migentropy/kboltz)*np.exp(-1*migenergy/(kboltz*temp))
         if self.verbose == 1:
-            print "Act energy: ", actenergy
+            print "Act energy: ", migenergy
             print "Jump freq: ", jumpfreq
         return jumpfreq
 
@@ -671,14 +668,14 @@ class DiffusionCoefficient():
         """
         self.get_hopdict()
         self.get_formdict()
-        self.get_entrodict_approx()
+        self.get_entromigdict_approx()
         self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
         for freq in freqs:
             jumpfreqdict[freq] = self.estimate_jump_freq(self.attemptdict[freq],
-                self.entrodict[freq],
-                self.hopdict[freq]+self.formdict[freq], temp)
+                self.entromdict[freq],
+                self.hopdict[freq], temp)
         jfw0 = jumpfreqdict['w0']
         #f_0 = 0.715
         vacconc = self.get_vac_conc(temp)
