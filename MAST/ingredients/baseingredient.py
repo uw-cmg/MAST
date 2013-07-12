@@ -87,6 +87,12 @@ class BaseIngredient(MASTObj):
 
             if mycomplete:
                 self.metafile.write_data('Completed on', time.asctime())
+                if 'vasprun.xml' in os.listdir(self.keywords['name']):
+                    energy = vasp_checker.get_vasp_energy(self.keywords['name'])
+                else:
+                    energy = None
+                self.metafile.write_data('Energy', energy)
+
                 return mycomplete
             else:
                 if not os.path.exists(usepath + '/OUTCAR'):
