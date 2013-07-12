@@ -67,7 +67,7 @@ class Metadata(MASTObj):
         self.clear_file()
         for line in data:
             keyword, data = line.split('=')
-            self.write_data(keyword, data)
+            self.write_data(keyword, data.strip())
 
     def clear_file(self):
         """Empties the metafile"""
