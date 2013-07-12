@@ -32,10 +32,6 @@ class Metadata(MASTObj):
                     data = line.split('=')[1].strip()
                     break
 
-        if line_number is None:
-            error = 'Specified keyword %s not found in metafile %s' % (keyword, self.keywords['metafile'])
-            MASTError(self.__class__.__name__, error)
-
         return line_number, data
 
     def read_data(self, keyword):
