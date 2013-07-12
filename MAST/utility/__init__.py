@@ -8,6 +8,7 @@ from MAST.utility.masterror import MASTError
 from MAST.utility.inputoptions import InputOptions
 from MAST.utility.mastfile import MASTFile
 from MAST.utility.picklemanager import PickleManager
+from MAST.utility.metadata import Metadata
 
 def MAST2Structure(lattice=None, coordinates=None, atom_list=None, coord_type='fractional'):
     """Helper function for converting input options into a pymatgen Structure object"""

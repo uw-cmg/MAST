@@ -1,20 +1,31 @@
+import os
+import subprocess
+import time
+
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
-import os
-import subprocess
+from MAST.utility import Metadata
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
+
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
 
     def write_directory(self):
         try:
             os.makedirs(self.keywords['name'])
+            self.metafile.write_data('Directory created', time.asctime())
+            self.metafile.write_data('Name', self.keywords['name'].split('/')[-1])
+            self.metafile.write_data('Program', self.keywords['program'])
+            self.metafile.write_data('Ingredient type', self.__class__.__name__)
+            if 'mast_charge' in self.keywords['program_keys']:
+                self.metafile.write_data('Charge', self.keywords['program_keys']['mast_charge'])
         except OSError:
             print "Directory exists."
             return
@@ -73,7 +84,15 @@ class BaseIngredient(MASTObj):
                 usepath = usepath + '/01'
             else:
                 mycomplete = vasp_checker.is_complete(usepath)
+
             if mycomplete:
+                self.metafile.write_data('Completed on', time.asctime())
+                if 'vasprun.xml' in os.listdir(self.keywords['name']):
+                    energy = vasp_checker.get_vasp_energy(self.keywords['name'])
+                else:
+                    energy = None
+                self.metafile.write_data('Energy', energy)
+
                 return mycomplete
             else:
                 if not os.path.exists(usepath + '/OUTCAR'):
@@ -86,10 +105,12 @@ class BaseIngredient(MASTObj):
                 if errct > 0:
                     pass #self.run() #Should try to rerun automatically or not?? NO.
                 return False
+
         elif self.keywords['program'] == 'phon':
             from MAST.ingredients.checker import phon_checker
             usepath = self.keywords['name']
             mycomplete = phon_checker.is_complete(usepath)
+            self.metafile.write_data('Completed on', time.asctime())
             return mycomplete
         else:
             raise MASTError(self.__class__.__name__, 
@@ -147,6 +168,8 @@ class BaseIngredient(MASTObj):
             # for scheduling other jobs
             #runme.wait()
         os.chdir(curdir)
+        self.metafile.write_data('Run start', time.asctime())
+
         return
 
     def set_up_program_input(self):

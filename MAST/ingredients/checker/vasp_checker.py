@@ -3,10 +3,13 @@ from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Potcar
 from pymatgen.io.vaspio import Incar
 from pymatgen.io.vaspio import Kpoints
+from pymatgen.io.vaspio.vasp_output import Vasprun
+
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
+
 import os
 import shutil
 
@@ -313,3 +316,7 @@ def add_selective_dynamics_to_structure(keywords, sdarray):
     phposcar.write_file(pname)
     dirutil.unlock_directory(name)
     return
+
+def get_vasp_energy(abspath):
+    return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
+

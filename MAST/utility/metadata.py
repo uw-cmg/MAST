@@ -1,3 +1,5 @@
+import os
+
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 
@@ -12,6 +14,9 @@ class Metadata(MASTObj):
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
+
+#        if not os.path.isfile(self.keywords['metafile']):
+#            open(self.keywords['metafile'], 'w').close()            
 
     def write_data(self, keyword, data):
         """Writes a keyword and it's associated data to the metafile"""
@@ -31,10 +36,6 @@ class Metadata(MASTObj):
                     line_number = n
                     data = line.split('=')[1].strip()
                     break
-
-        if line_number is None:
-            error = 'Specified keyword %s not found in metafile %s' % (keyword, self.keywords['metafile'])
-            MASTError(self.__class__.__name__, error)
 
         return line_number, data
 
@@ -66,7 +67,7 @@ class Metadata(MASTObj):
         self.clear_file()
         for line in data:
             keyword, data = line.split('=')
-            self.write_data(keyword, data)
+            self.write_data(keyword, data.strip())
 
     def clear_file(self):
         """Empties the metafile"""

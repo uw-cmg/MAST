@@ -12,11 +12,13 @@ import os, math
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import MASTError
+from MAST.utility import Metadata
 
 ALLOWED_KEYS = {\
                  'templateFile'    : (str, None, 'template file name'),\
                  'inputOptions'    : (InputOptions, None, 'input options parsed using input parser'),\
                  'personalRecipe'  : (str, None, 'personalized recipe file'),\
+                 'working_directory' : (str, None, 'Working directory'),
                }
 
 class RecipeTemplateParser(MASTObj):
@@ -37,6 +39,8 @@ class RecipeTemplateParser(MASTObj):
         self.template_file   = self.keywords['templateFile']
         self.personal_recipe = self.keywords['personalRecipe']
         self.ingredient_list = list()
+
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['working_directory'])
 
     def parse(self):
         """ Parses the template recipe file and creates
@@ -195,17 +199,19 @@ class RecipeTemplateParser(MASTObj):
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
 
+        print 'GRJ DEBUG: parse_defects() working_directory =', self.keywords['working_directory']
         new_lines = list()
 
         if not n_defects:
             return processing_lines
 
         for line in processing_lines:
+            #print 'GRJ DEBUG: line =', line
             if ('<n>' in line) or ('<q>' in line):
                 for defect_key in d_defects.keys():
                     #print 'GRJ DEBUG: defect_key =', defect_key
-                    defect_label = defect_key.split('_')[1] #defect_1, etc.
-                    def_line = line.replace("<n>", defect_label)
+                    #defect_label = defect_key.split('_')[1] #defect_1, etc.
+                    def_line = line.replace("<n>", defect_key)
 
                     charge_list = d_defects[defect_key]['charge']
                     #print 'GRJ DEBUG: charge_list =', charge_list
@@ -214,9 +220,16 @@ class RecipeTemplateParser(MASTObj):
                             clabel = 'q=n' + str(abs(charge))
                         else:
                             clabel = 'q=p' + str(charge)
-                        new_lines.append(def_line.replace('<q>', clabel))
+                        def_line = def_line.replace('<q>', clabel)
+                        new_lines.append(def_line)
+
+                        if 'ingredient' in def_line:
+                            keyword = def_line.split()[1]
+                            data = 'defect_label: %s, charge: %i' % (defect_key, charge)
+                            self.metafile.write_data(keyword, data)
             else:
                 new_lines.append(line)
+
         return new_lines
 
     def get_unique_ingredients(self):
