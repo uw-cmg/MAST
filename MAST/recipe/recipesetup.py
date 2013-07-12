@@ -168,7 +168,7 @@ class RecipeSetup(MASTObj):
         if 'chemical_potentials' in self.input_options.options.keys():
             pkey_d.update(self.input_options.options['chemical_potentials'])
 
-        print 'Final pkey_d =', pkey_d
+#        print 'Final pkey_d =', pkey_d
         return self.ingredients_dict[ingredient_type](name=ingredient_name, 
                     structure= self.structure, \
                     program=self.program, \
