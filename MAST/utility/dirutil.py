@@ -2,7 +2,7 @@ import os
 import sys
 import fnmatch
 from MAST.utility import MASTError
-from MAST.utility import Metadata
+from MAST.utility.metadata import Metadata
 
 def walkdirs(existdir, mindepth=1, maxdepth=5, matchme=""):
     """Walk through directory and return list of subdirectories."""
@@ -158,7 +158,7 @@ def wait_to_write(dirname, waitmax=1000):
     if directory_is_locked(dirname):
         raise MASTError("utility wait_to_write", 
             "Timed out waiting to obtain lock on directory %s" % dirname)
-def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.txt"):
+def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.txt", verbose=1):
     """Match a metadata file based on input.
         Args:
             metastring <str>: equals-sign-separated metatag=value pairs with
@@ -166,13 +166,14 @@ def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.tx
                 Example: "ingredtype=phonon, neblabel=vac1-vac2, charge=0"
             dirname <str>: directory name to start. Default "" goes to ARCHIVE.
             metafilename <str>: metadata file name. Default "metadata.txt"
+            verbose <int>: 1 for verbose messages, 0 otherwise
         Returns:
             dlist <list of str>: list of directories containing matching
                                     metadata files.
     """
     if dirname=="":
-        dirname = self.get_mast_archive_path()
-    allmetas = walkfiles(dirname, metafilename)
+        dirname = get_mast_archive_path()
+    allmetas = walkfiles(dirname, 1, 5, metafilename)
     if len(allmetas) == 0:
         raise MASTError("utility dirutil, search_for_metadata_file", "No matching metafiles found in %s for tags %s." % (dirname, metastring))
     metaparse=dict()
@@ -186,12 +187,18 @@ def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.tx
         mokay=0
         mymeta = Metadata(metafile=mtry)
         for metatag,metaval in metaparse.iteritems():
-            if mymeta.search_data(metatg) == metaval:
+            searchresult = mymeta.search_data(metatag)
+            if searchresult[1] == metaval:
                 mokay=mokay+1
             else:
-                pass
+                if verbose == 1:
+                    print metatag, searchresult
         if mokay == mustmatch:
             metamatch.append(mtry)
+    if verbose==1:
+        print allmetas
+        print metaparse
+        print metamatch
     return metamatch
 
 
