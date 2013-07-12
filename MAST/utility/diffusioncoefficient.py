@@ -6,7 +6,7 @@ import numpy as np
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import PickleManager
-
+from MAST.utility import dirutil
 kboltz = 8.6173325E-5
 stock_v=1e13
 stock_S_v=2.07e-4 #Shewmon, Sv/R approx 2.4?? =2.07e-4
@@ -458,8 +458,10 @@ class DiffusionCoefficient():
         entrodict=dict()
         freqs = self.freqdict.keys()
         freqs.sort() #do w0 before w2
-        bulkfind=metafile.find_ingredient("perf","phon","parse")
-        bulkfile = MASTFile(bulkfind.name + "/THERMO")
+        bulkfind=dirutil.search_for_metadata_file("phononlabel=perfect,ingredient type=phonparse")
+        if len(bulkfind) > 1:
+            raise MASTError(self.__class__.__name__, "More than one bulk phonon parse found.")
+        bulkfile = MASTFile(os.path.join(bulkfind[0] + "/THERMO"))
         entropybulk=0
         for myline in bulkfile.data:
             mlist = myline.strip().split()
@@ -468,10 +470,14 @@ class DiffusionCoefficient():
                 break
         for freq in freqs:
             [startlabel,tstlabel]=self.find_start_and_tst_labels(self.freqdict[freq])
-            initfind=metafile.find_ingredient(startlabel,"phon","parse")
-            tstfind=metafile.find_ingredient(tstlabel,"phon","parse")
-            initfile = MASTFile(initfind.name + "/THERMO")
-            tstfile = MASTFile(tstfind.name + "/THERMO")
+            initfind=dirutil.search_for_metadata_file("neblabel=" + startlabel + ",ingredient type=phonparse")
+            tstfind=metafile.find_ingredient("neblabel=" + tstlabel + ",ingredient type=phonparse")
+            if len(initfind) > 1:
+                raise MASTError(self.__class__.__name__, "More than one initial phonon parse found for %s" % startlabel)
+            if len(tstfind) > 1:
+                raise MASTError(self.__class__.__name__, "More than one transition phonon parse found for %s" % tstlabel)
+            initfile = MASTFile(os.path.join(initfind[0] + "/THERMO"))
+            tstfile = MASTFile(os.path.join(tstfind[0] "/THERMO"))
             entropyinit=0
             entropytst=0
             for myline in initfile.data:
