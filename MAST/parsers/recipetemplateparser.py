@@ -210,8 +210,8 @@ class RecipeTemplateParser(MASTObj):
             if ('<n>' in line) or ('<q>' in line):
                 for defect_key in d_defects.keys():
                     #print 'GRJ DEBUG: defect_key =', defect_key
-                    defect_label = defect_key.split('_')[1] #defect_1, etc.
-                    def_line = line.replace("<n>", defect_label)
+                    #defect_label = defect_key.split('_')[1] #defect_1, etc.
+                    def_line = line.replace("<n>", defect_key)
 
                     charge_list = d_defects[defect_key]['charge']
                     #print 'GRJ DEBUG: charge_list =', charge_list
@@ -220,7 +220,13 @@ class RecipeTemplateParser(MASTObj):
                             clabel = 'q=n' + str(abs(charge))
                         else:
                             clabel = 'q=p' + str(charge)
-                        new_lines.append(def_line.replace('<q>', clabel))
+                        def_line = def_line.replace('<q>', clabel)
+                        new_lines.append(def_line)
+
+                        if 'ingredient' in def_line:
+                            keyword = def_line.split()[1]
+                            data = 'defect_label: %s, charge: %i' % (defect_key, charge)
+                            self.metafile.write_data(keyword, data)
             else:
                 new_lines.append(line)
 
