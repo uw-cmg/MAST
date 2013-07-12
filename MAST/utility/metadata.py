@@ -1,3 +1,5 @@
+import os
+
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 
@@ -12,6 +14,9 @@ class Metadata(MASTObj):
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
+
+#        if not os.path.isfile(self.keywords['metafile']):
+#            open(self.keywords['metafile'], 'w').close()            
 
     def write_data(self, keyword, data):
         """Writes a keyword and it's associated data to the metafile"""
