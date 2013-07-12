@@ -12,11 +12,13 @@ import os, math
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import MASTError
+from MAST.utility import Metadata
 
 ALLOWED_KEYS = {\
                  'templateFile'    : (str, None, 'template file name'),\
                  'inputOptions'    : (InputOptions, None, 'input options parsed using input parser'),\
                  'personalRecipe'  : (str, None, 'personalized recipe file'),\
+                 'working_directory' : (str, None, 'Working directory'),
                }
 
 class RecipeTemplateParser(MASTObj):
@@ -37,6 +39,8 @@ class RecipeTemplateParser(MASTObj):
         self.template_file   = self.keywords['templateFile']
         self.personal_recipe = self.keywords['personalRecipe']
         self.ingredient_list = list()
+
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['working_directory'])
 
     def parse(self):
         """ Parses the template recipe file and creates
@@ -195,12 +199,14 @@ class RecipeTemplateParser(MASTObj):
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
 
+        print 'GRJ DEBUG: parse_defects() working_directory =', self.keywords['working_directory']
         new_lines = list()
 
         if not n_defects:
             return processing_lines
 
         for line in processing_lines:
+            #print 'GRJ DEBUG: line =', line
             if ('<n>' in line) or ('<q>' in line):
                 for defect_key in d_defects.keys():
                     #print 'GRJ DEBUG: defect_key =', defect_key
@@ -217,6 +223,7 @@ class RecipeTemplateParser(MASTObj):
                         new_lines.append(def_line.replace('<q>', clabel))
             else:
                 new_lines.append(line)
+
         return new_lines
 
     def get_unique_ingredients(self):

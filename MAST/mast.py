@@ -164,9 +164,9 @@ class MAST(MASTObj):
         self.input_options = input_options
         
         #parse the recipe template file and create a personal file
-        self._parse_recipe_template()
-        
         self.initialize_environment()
+        self._parse_recipe_template()
+
         ing_loader = IngredientsLoader()
         ing_loader.load_ingredients()
         ingredients_dict = ing_loader.ingredients_dict
@@ -209,7 +209,6 @@ class MAST(MASTObj):
         system_name = system_name + '_' + element_str
         self.input_options.update_item('mast', 'system_name', system_name)
 
-
     def pickle_plan(self, recipe_plan_obj):
         """Pickles the reciple plan object to the respective file
            in the scratch directory
@@ -231,9 +230,12 @@ class MAST(MASTObj):
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
 
+        #print 'GRJ DEBUG: _parse_recipe_template: working_directory =', self.input_options.get_item('mast', 'working_directory')
         parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
-                        inputOptions=self.input_options,
-                        personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt')
+                                          inputOptions=self.input_options,
+                                          personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt',
+                                          working_directory=self.input_options.get_item('mast', 'working_directory')
+                                         )
         self.input_options.set_item('recipe','recipe_name', parser_obj.parse())
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
