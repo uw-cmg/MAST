@@ -32,27 +32,20 @@ class PhononSingle(Optimize):
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
 
-    def get_my_label(self, signal="phonon"):
-        """Get the calculation label.
-            There should be nothing after the label (e.g. _phonon_label, 
-            with nothing after it.)
-            Args:
-                signal <str>: string to signal the beginning of the label.
+    def get_my_label(self):
+        """Get the phonon label from the metadata file.
             Returns:
-                The next "_"-delimited piece after the first occurrence of
-                signal.
+                plabel <str>: phonon label
         """
-        bname = os.path.basename(self.keywords['name'])
-        namesplit = bname.split('_')
-        if not (signal in namesplit):
-            raise MASTError(self.__class__.__name__, "Phonon label could not be found after signal '%s_'" % signal)
-        sidx = namesplit.index(signal)
-        label = '_'.join(namesplit[sidx+1:])
-        if label == "":
-            raise MASTError(self.__class__.__name__, "No label found after signal '%s_' in ingredient name %s" % (signal, bname)) 
-        self.label = label
-        return label
-
+        myname = self.keywords['name']
+        mymeta = Metadata(metafile=os.path.join(myname, "metadata.txt"))
+        mylabel = mymeta.search_data("phononlabel")
+        if mylabel == "":
+            raise MASTError(self.__class__.__name__,
+                "No metadata file for tag phononlabel.")
+        plabel = mylabel[1]
+        return plabel
+        
 
     def write_files(self):
         """Write the single phonon files. 

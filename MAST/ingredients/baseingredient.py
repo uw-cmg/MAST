@@ -219,5 +219,7 @@ class BaseIngredient(MASTObj):
         '''writes the files needed as input for the jobs'''
         raise NotImplementedError
     
-
+    def create_metadata_file(self):
+        '''writes the initial metadata file'''
+        raise NotImplementedError
 

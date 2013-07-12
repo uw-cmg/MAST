@@ -11,16 +11,20 @@ class StaticDefect(Optimize):
             self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + mynum)
             self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + mynum)
 
-    def get_my_label(self, signal="defect", altsignal="image"):
-        """For defect in the format 
-            <sys>_..._<signal>_<label>_..._stat, return label.
-            Args:
-                signal <str>: Signal tag that precedes the label and is
-                                separated from the label by an underscore.
-                                Only the FIRST OCCURRENCE of the signal is
-                                noticed.
-                altsignal <str>: Alternative signal tag 
+    def get_my_label(self):
+        """Return the defect label.
+            Returns:
+                label <str>: defect label
         """
+        myname = self.keywords['name']
+        mymeta = Metadata(metafile=os.path.join(myname, "metadata.txt"))
+        mylabel = mymeta.search_data("defect")
+        if mylabel == "":
+            raise MASTError(self.__class__.__name__,
+                "No metadata file for tag defect.")
+        plabel = mylabel[1]
+        return label
+
         import os
         tempname = os.path.basename(self.keywords['name'].lower())
         tempsplit = tempname.split('_')

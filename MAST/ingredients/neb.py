@@ -77,12 +77,19 @@ class NEB(BaseIngredient):
     def get_my_labels(self):
         """For neb in the format <sys>_neb_<N>-<N>_... return the two
             labels identifying the defect sites.
+            This should also be in the metadata.txt file as "neblabel=<N>-<N>"
         """
-        myname = os.path.basename(self.keywords['name'])
-        tempname = myname.lower()
-        lsplit = tempname.split('_') #last underscore segment
-        nebidx = lsplit.index('neb')
-        lseg = lsplit[nebidx + 1] #Follows after "neb"
+        myname = self.keywords['name']
+        mymeta = Metadata(metafile=os.path.join(myname, "metadata.txt"))
+        #tempname = myname.lower()
+        #lsplit = tempname.split('_') #last underscore segment
+        #nebidx = lsplit.index('neb')
+        #lseg = lsplit[nebidx + 1] #Follows after "neb"
+        myneblabel = mymeta.search_data("neblabel")
+        if myneblabel == "":
+            raise MASTError(self.__class__.__name__, 
+                "No metadata for tag neblabel.")
+        lseg = myneblabel[1]
         llist = lseg.split('-')
         if not(len(llist) == 2):
             raise MASTError(self.__class__.__name__, 
