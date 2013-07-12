@@ -1,8 +1,10 @@
+import os
+import subprocess
+
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
-import os
-import subprocess
+from MAST.utility import Metadata
 
 class BaseIngredient(MASTObj):
     def __init__(self, allowed_keys, **kwargs):
