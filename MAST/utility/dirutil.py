@@ -2,6 +2,7 @@ import os
 import sys
 import fnmatch
 from MAST.utility import MASTError
+from MAST.utility import Metadata
 
 def walkdirs(existdir, mindepth=1, maxdepth=5, matchme=""):
     """Walk through directory and return list of subdirectories."""
@@ -41,7 +42,16 @@ def walkdirs(existdir, mindepth=1, maxdepth=5, matchme=""):
         return smalldirlist
 
 def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
-    """Walk through directory and subdirectories and return list of files."""
+    """Walk through directory and subdirectories and return list of files.
+        Args:
+            existdir <str>: directory under which to search.
+            mindepth <int>: minimum depth of folders to search;
+                            default 1 = within that directory
+            maxdepth <int>: maximum depth of folders to search; default 5
+            matchme <str>: string to match; every file ending in matchme
+                            will be found, since a * is required at the front
+                            to match the full paths.
+    """
     if not(os.path.exists(existdir)):
         raise MASTError("utility","No directory at " +existdir)
 #   walk and make main list
@@ -79,6 +89,8 @@ def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
     paredfilelist.sort()
     if not matchme == "":
         matchfilelist=[]
+        if not matchme[0] == "*":
+            matchme="*"+matchme
         for myfile in paredfilelist:
             if fnmatch.fnmatch(myfile, matchme):
                 matchfilelist.append(myfile)
@@ -94,7 +106,13 @@ def get_mast_install_path():
 def get_mast_scratch_path():
     getpath = os.getenv('MAST_SCRATCH')
     if getpath == None:
-        raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
+        raise MASTError("utility dirutil","No path set in environment variable MAST_SCRATCH")
+    return getpath
+
+def get_mast_archive_path():
+    getpath = os.getenv('MAST_ARCHIVE')
+    if getpath == None:
+        raise MASTError("utility dirutil","No path set in environment variable MAST_ARCHIVE")
     return getpath
 
 def directory_is_locked(dirname):
@@ -140,3 +158,42 @@ def wait_to_write(dirname, waitmax=1000):
     if directory_is_locked(dirname):
         raise MASTError("utility wait_to_write", 
             "Timed out waiting to obtain lock on directory %s" % dirname)
+def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.txt"):
+    """Match a metadata file based on input.
+        Args:
+            metastring <str>: equals-sign-separated metatag=value pairs with
+                                commas separating the meta sections.
+                Example: "ingredtype=phonon, neblabel=vac1-vac2, charge=0"
+            dirname <str>: directory name to start. Default "" goes to ARCHIVE.
+            metafilename <str>: metadata file name. Default "metadata.txt"
+        Returns:
+            dlist <list of str>: list of directories containing matching
+                                    metadata files.
+    """
+    if dirname=="":
+        dirname = self.get_mast_archive_path()
+    allmetas = walkfiles(dirname, metafilename)
+    if len(allmetas) == 0:
+        raise MASTError("utility dirutil, search_for_metadata_file", "No matching metafiles found in %s for tags %s." % (dirname, metastring))
+    metaparse=dict()
+    metasplit = metastring.split(",")
+    for metaitem in metasplit:
+        onesplit=metaitem.strip().split("=")
+        metaparse[onesplit[0].strip()]=onesplit[1].strip()
+    metamatch=list()
+    mustmatch=len(metaparse.keys())
+    for mtry in allmetas:
+        mokay=0
+        mymeta = Metadata(metafile=mtry)
+        for metatag,metaval in metaparse.iteritems():
+            if mymeta.search_data(metatg) == metaval:
+                mokay=mokay+1
+            else:
+                pass
+        if mokay == mustmatch:
+            metamatch.append(mtry)
+    return metamatch
+
+
+
+                
