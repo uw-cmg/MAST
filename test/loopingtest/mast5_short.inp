@@ -1,85 +1,38 @@
-# Test file
-
-
 $mast
 program vasp
 system_name GaAsBi
 $end
-
 $structure
 coord_type fractional
-
 begin elementmap
 pegloop1 X1 (Bi, Ga)
 X2 Al
 end
-
 begin coordinates
 X1 0.000000 0.000000 0.000000
-X1 0.500000 0.500000 0.000000
-X1 0.000000 0.500000 0.500000
-X1 0.500000 0.000000 0.500000
+X1 0.500000 0.500000 0.500000
 X2 0.250000 0.250000 0.250000
-X2 0.750000 0.750000 0.250000
-X2 0.250000 0.750000 0.750000
-X2 0.750000 0.250000 0.750000
 end
-
 begin lattice
 pegloop2 (6.0,4.0) 0.0 0.0
 pegloop2 0.0 (6.0,4.0) 0.0 
 indeploop 0.0 0.0 (2.0,3.0)
 end
 $end
-
 $defects
 coord_type fractional
 vacancy 0.0 0.0 0.0 X1
-interstitial 0.35 0.45 0.25 X2
-begin crowdiongroup1
-vacancy 0.0 0.0 0.0 X1
-antisite 0.25 0.75 0.75 X2
-antisite 0.50 0.00 0.50 X2
 end
 $end
-
 $ingredients
 begin ingredients_global
 mast_kpoints 3x3x3
 indeploop mast_xc (pbe,pw91)
 mast_exec //share/apps/vasp5.2_cNEB
-mast_walltime 4
-mast_ppn 1
 pegloop1 ldauu (13 10, 11 10)
 end
-
-begin singlepoint
-encut 400
-end
-
-begin optimize
-encut 300
-ibrion 2
-end
-
-begin inducedefect
-end
-
 $end
-
 $recipe
 recipe_file defect_test.txt
-$end
-
-$chemical_potentials
-begin As rich
-Ga 4.5
-As 3.5
-end
-
-begin Ga rich
-Ga 3.5
-As 4.5
-end
 $end
 

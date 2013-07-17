@@ -63,7 +63,8 @@ class IndepLoopInputParser(MASTObj):
             self.loop_start <str>: character indicating start of loop
             self.loop_end <str>: character indicating end of loop
             self.baseinput <MASTFile>: MASTFile created from *.inp input file
-            self.pegloop <str>: flag for pegged looping
+            self.pegloop1 <str>: flag for one pegged loop
+            self.pegloop2 <str>: flag for second pegged loop
 
         Looping must be indicated at the beginning of the line, and the
         text to be looped must be complete:
@@ -76,7 +77,8 @@ class IndepLoopInputParser(MASTObj):
         self.loop_start = "("
         self.loop_end = ")"
         self.baseinput = MASTFile(self.keywords['inputfile'])
-        self.pegloop = "pegloop"
+        self.pegloop1 = "pegloop1"
+        self.pegloop2 = "pegloop2"
     
     def main(self, verbose=0):
         """Scan for independent loops and set up dictionaries.
@@ -84,14 +86,17 @@ class IndepLoopInputParser(MASTObj):
                 createdfiles <list of str>: list of created input files
         """
         indepdict=self.scan_for_loop(self.indeploop)
-        pegdict = self.scan_for_loop(self.pegloop)
-        if len(indepdict.keys()) == 0 and len(pegdict.keys()) == 0:
+        pegdict1 = self.scan_for_loop(self.pegloop1)
+        pegdict2 = self.scan_for_loop(self.pegloop2)
+        if len(indepdict.keys()) == 0 and len(pegdict1.keys()) == 0 and len(pegdict2.keys()) == 0:
             return dict()
         alldict = dict(indepdict)
-        alldict.update(pegdict)
+        alldict.update(pegdict1)
+        alldict.update(pegdict2)
         indepcomb=self.get_combo_list(indepdict, 0)
-        pegcomb=self.get_combo_list(pegdict, 1)
-        allcombs = self.combine_combo_lists(indepcomb, pegcomb)
+        pegcomb1=self.get_combo_list(pegdict1, 1)
+        pegcomb2=self.get_combo_list(pegdict2, 1)
+        allcombs = self.combine_three_combo_lists(indepcomb, pegcomb1, pegcomb2)
         datasets = self.prepare_looped_datasets(alldict, allcombs)
         createdfiles = self.create_input_files(datasets)
         if verbose == 1:
@@ -186,6 +191,24 @@ class IndepLoopInputParser(MASTObj):
         #print "TTM DEBUG: ", flatlists
         return combolist
 
+    def combine_three_combo_lists(self, indeplist, peglist1, peglist2):
+        """Combine two pegged lists and one independent list.
+            Args:
+                indeplist <list of list>: List of indeploop combinations.
+                peglist1 <list of list>: List of pegged loop 1 combinations
+                peglist2 <list of list>: List of pegged loop 2 combinations
+            Returns:
+                alllist <list of list>: List of all combinations
+        """
+        indeplen=len(indeplist)
+        p1len=len(peglist1)
+        p2len=len(peglist2)
+        templist=list()
+        threelist=list()
+        templist = self.combine_combo_lists(indeplist, peglist1)
+        threelist = self.combine_combo_lists(templist, peglist2)
+        return threelist
+
     def combine_combo_lists(self, indeplist, peggedlist):
         """Combine combination lists.
             Args:
@@ -276,11 +299,13 @@ class IndepLoopInputParser(MASTObj):
             dirstem = os.getcwd()
         dkeys = datasets_dict.keys()
         dkeys.sort()
+        dct=1
         for didx in dkeys:
             newfile = MASTFile()
             newfile.data = list(datasets_dict[didx])
-            newname = newfile.to_unique_file(dirstem, 
-                        'loop_' + basename + '_', '.inp', 10000)
+            newname="%s/loop_%s_%s.inp" % (dirstem, basename, str(dct).zfill(2))
+            newfile.to_file(newname)
             createdfiles.append(os.path.basename(newname))
+            dct=dct+1
         return createdfiles
 
