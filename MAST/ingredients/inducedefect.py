@@ -103,7 +103,7 @@ class InduceDefect(BaseIngredient):
         self.get_new_structure()
 
         defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-        #print name.split('/')
+        self.metafile.write_data('debug', [name, name.split('/')])
         defect = self.keywords['program_keys'][defect_label]
         #print 'Defect in write_files:', defect
 
