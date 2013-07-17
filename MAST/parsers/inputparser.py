@@ -192,7 +192,7 @@ class InputParser(MASTObj):
         # an error.
         if (structure_dict['posfile'] is not None): # Do we have a geometry file?
             # First build a list of likely files
-            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file.lower(), structure_dict['posfile'])]
+            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file, structure_dict['posfile'])]
             if (len(file_list) > 1):
                 # If we have multiple files with the same name, but different capitalization, throw an error here
                 print 'Found mutliple files with the name %s' % structure_dict['posfile']
