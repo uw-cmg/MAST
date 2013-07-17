@@ -199,7 +199,7 @@ class RecipeTemplateParser(MASTObj):
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
 
-        print 'GRJ DEBUG: parse_defects() working_directory =', self.keywords['working_directory']
+        #print 'GRJ DEBUG: parse_defects() working_directory =', self.keywords['working_directory']
         new_lines = list()
 
         if not n_defects:
@@ -215,17 +215,21 @@ class RecipeTemplateParser(MASTObj):
 
                     charge_list = d_defects[defect_key]['charge']
                     #print 'GRJ DEBUG: charge_list =', charge_list
+                    print 'GRJ DEBUG: def_line before charges:', def_line
                     for charge in charge_list:
                         if (charge < 0):
                             clabel = 'q=n' + str(abs(charge))
                         else:
                             clabel = 'q=p' + str(charge)
-                        def_line = def_line.replace('<q>', clabel)
-                        new_lines.append(def_line)
+                        print 'GRJ DEBUG: clabel =', clabel
+                        new_def_line = def_line.replace('<q>', clabel)
+                        new_lines.append(new_def_line)
+                        #new_lines.append(def_line.replace('<q>', clabel))
 
                         if 'ingredient' in def_line:
-                            keyword = def_line.split()[1]
+                            keyword = new_def_line.split()[1]
                             data = 'defect_label: %s, charge: %i' % (defect_key, charge)
+                            #print 'GRJ DEBUG: def_line, keyword, charge', new_def_line, keyword, charge
                             self.metafile.write_data(keyword, data)
             else:
                 new_lines.append(line)
