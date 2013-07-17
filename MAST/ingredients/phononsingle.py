@@ -12,6 +12,7 @@ from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.ingredients.optimize import Optimize
 from MAST.utility import MASTError
+from MAST.utility.metadata import Metadata
 
 import os
 import shutil
@@ -44,11 +45,12 @@ class PhononSingle(Optimize):
             raise MASTError(self.__class__.__name__,
                 "No metadata file for tag phononlabel.")
         plabel = mylabel[1]
-        return plabel
+        self.label=plabel
+        return 
         
 
     def write_files(self):
-        """Write the single phonon files. 
+        """Write the multiple phonon files to different directories
         """
         self.get_my_label()
         self.get_my_phonon_params()
