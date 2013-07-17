@@ -1,7 +1,10 @@
 import numpy as np
 import pymatgen
 from MAST.ingredients.phononsingle import PhononSingle
+from MAST.ingredients.baseingredient import BaseIngredient
 import os
+from MAST.utility import dirutil
+
 class PhononMultiple(PhononSingle):
     """
         Split out phonons into individual atoms and directions.
@@ -33,7 +36,10 @@ class PhononMultiple(PhononSingle):
         myname=self.keywords['name']
         for sdarr in sdarrlist:
             newname = os.path.join(myname,"phon_%s" % str(sct).zfill(2))
-            os.mkdir(newname)
+            try:
+                os.mkdir(newname)
+            except OSError:
+                pass
             self.keywords['name']=newname
             self.keywords['structure']=mystructure
             self.set_up_program_input()
@@ -44,13 +50,32 @@ class PhononMultiple(PhononSingle):
 
     def is_ready_to_run(self):
         """Make sure all subfolders are ready to run."""
-        print "Make sure subfolders are ready to run."
-        return False
+        myname=self.keywords['name']
+        phondirs = dirutil.walkdirs(myname,1,1)
+        notready=0
+        if len(phondirs) == 0:
+            return False
+        for phondir in phondirs:
+            newname = os.path.join(myname, phondir)
+            self.keywords['name']=newname
+            if not BaseIngredient.is_ready_to_run(self):
+                notready = notready + 1
+        self.keywords['name']=myname
+        if notready == 0:
+            return True
+        else:
+            return False
 
     def run(self):
         """Run all subfolders."""
-        print "Run all subfolders."
-        return False
+        myname=self.keywords['name']
+        phondirs = dirutil.walkdirs(myname,1,1)
+        for phondir in phondirs:
+            newname = os.path.join(myname, phondir)
+            self.keywords['name']=newname
+            BaseIngredient.run(self,"serial")
+        self.keywords['name']=myname
+        return
 
     def get_multiple_sd_array(self, mystruc):
         """Create a selective dynamics array.
