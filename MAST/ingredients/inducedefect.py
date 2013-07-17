@@ -116,7 +116,7 @@ class InduceDefect(BaseIngredient):
             else:
                 pass
 
-        if self.keywords['program'] == 'vasp':
+        if self.keywords['program'].lower() == 'vasp':
             #myposcar = Poscar(modified_structure)
             myposcar = Poscar(base_structure)
             #print "poscar OK"
@@ -127,20 +127,20 @@ class InduceDefect(BaseIngredient):
             self.unlock_directory()
             #print "Unlock sucessful"
         else:
-            raise MASTError(self.__class__.__name__, "Program not supported.")
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
 
         return
     
     def is_ready_to_run(self):
         if self.directory_is_locked():
             return False
-        if self.keywords['program'] == 'vasp':
+        if self.keywords['program'].lower() == 'vasp':
             if os.path.exists(self.keywords['name'] +'/POSCAR'):
                 return True
             else:
                 return False
         else:
-            raise MASTError(self.__class__.__name__, "Program not supported.")
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
 
     def run(self, mode='noqsub'):
         if self.is_ready_to_run():
@@ -150,25 +150,25 @@ class InduceDefect(BaseIngredient):
     def is_complete(self):
         if self.directory_is_locked():
             return False
-        if self.keywords['program'] == 'vasp':
+        if self.keywords['program'].lower() == 'vasp':
             if os.path.exists(self.keywords['name'] +'/CONTCAR'):
                 return True
             else:
                 return False
         else:
-            raise MASTError(self.__class__.__name__, "Program not supported.")
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
 
     def update_children(self):
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_structure(self.keywords['name'], childname)
 
     def get_new_structure(self):
-        if self.keywords['program'] == 'vasp':
+        if self.keywords['program'].lower() == 'vasp':
             if os.path.isfile(self.keywords['name'] + "/POSCAR"):
                 myposcar = Poscar.from_file(self.keywords['name'] + "/POSCAR")
                 self.keywords['structure'] = myposcar.structure
         else:
-            raise MASTError(self.__class__.__name__, "Program not supported.")
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
         return
     
     def get_my_number(self):
