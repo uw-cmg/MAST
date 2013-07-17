@@ -17,6 +17,7 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import MASTError
+from MAST.utility import Metadata
 
 from recipe_plan import RecipePlan
 from pymatgen.core.structure import Structure
@@ -40,6 +41,8 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.ingredients_dict = self.keywords['ingredientsDict']
         self.delimiter      = '::'
+
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.input_options.get_item('mast', 'working_directory'))
 
         """Special keywords used in the recipe templates
         """
@@ -154,13 +157,19 @@ class RecipeSetup(MASTObj):
 
                 pkey_d.update(self.input_options.get_item('defects','defects'))
                 if 'inducedefect' not in ingredient_type:
-                    print 'GRJ DEBUG: ingredient_name =', ingredient_name
-                    clabel = [label for label in ingredient_name.split('_') if 'q=' in label][0].split('=')[1]
-                    if 'n' in clabel[0]:
-                        sign = -1
-                    else:
-                        sign = 1
-                    charge = sign * int(clabel[1:])
+                    #print 'GRJ DEBUG: ingredient_name =', ingredient_name
+                    data = self.metafile.read_data(ingredient_name.split('/')[-1]).split(',')
+                    #print 'GRJ DEBUG:  ingredient data:', data
+                    for datum in data:
+                        if 'charge' in datum:
+                            charge = int(datum.split(':')[-1])
+                    #print 'GRJ DEBUG: charge = ', charge
+                    #clabel = [label for label in ingredient_name.split('_') if 'q=' in label][0].split('=')[1]
+                    #if 'n' in clabel[0]:
+                    #    sign = -1
+                    #else:
+                    #    sign = 1
+                    #charge = sign * int(clabel[1:])
                     #print 'GRJ DEBUG: Charge =', charge
                     pkey_d['mast_charge'] = charge
                     #print 'GRJ DEBUG: Name =', name
