@@ -34,7 +34,7 @@ class Metadata(MASTObj):
             for n, line in enumerate(metafile):
                 if keyword in line:
                     line_number = n
-                    data = line.split('=')[1].strip()
+                    data = line.split(' = ')[1].strip()
                     break
 
         return line_number, data
