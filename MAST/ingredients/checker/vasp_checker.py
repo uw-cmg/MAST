@@ -305,7 +305,17 @@ def set_up_program_input_neb(keywords, image_structures):
     mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
     myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
     return
-
+def forward_extra_restart_files(parentpath, childpath):
+    """Forward extra restart files: softlink to WAVECAR and CHGCAR."""
+    dirutil.lock_directory(childpath)
+    import subprocess
+    os.chdir(childpath)
+    mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath)
+    mylink.wait()
+    mylink2=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath)
+    mylink2.wait()
+    os.chdir(parentpath)
+    dirutil.unlock_directory(childpath)
 def add_selective_dynamics_to_structure(keywords, sdarray):
     name = keywords['name']
     pname = os.path.join(name,"POSCAR")

@@ -237,6 +237,14 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in add_selective_dynamics_to_structure)")
 
+    def forward_extra_restart_files(self, parentpath, childpath):
+        """Forward links to extra restart files."""
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.checker import vasp_checker
+            return vasp_checker.forward_extra_restart_files(parentpath, childpath)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in add_selective_dynamics_to_structure)")
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''
