@@ -2,7 +2,7 @@ from pymatgen.io.vaspio import *
 import numpy as np
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
-
+from MAST.utility import MASTFile
 def get_max_enmax_from_potcar(mypotcar):
     """Get maximum enmax value (float) from Potcar (combined list)"""
     enmax_list=list()
@@ -47,8 +47,64 @@ def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
     dynlist=[]
 #    for entry in dirlist:
 
-def combine_dynmats(myposcar, mydir):
-    """Combine DYNMATs into one hessian.
+def combine_dynmats(mydir):
+    """Combine DYNMATs into one file.
+        Args:
+            mydir <str>: top directory for DYNMAT files
+    """
+    largedyn=MASTFile()
+    #natoms = sum(myposcar.natoms)
+    #mydyn=np.zeros([natoms*3, natoms*3])
+    #arrange as x1, y1, z1, x2, y2, z2, etc.
+    dynmatlist = walkfiles(mydir, 1, 5, "*DYNMAT*")
+    if len(dynmatlist) == 0:
+        raise MASTError("pmgextend combine_dynmats", "No DYNMATs found under " + mydir)
+    firstline="" #will be "numspecies numatoms numdisplacements"
+    secondline="" #will be mass for each species
+    for onedynmat in dynmatlist:
+        onedynfile=MASTFile(os.path.join(mydir, onedynmat))
+        onedyn=list(onedynfile.data)
+        if firstline=="":
+            firstline = onedyn.pop(0) #remove first line with general info
+        else:
+            onedyn.pop(0)
+        if secondline=="":
+            secondline = onedyn.pop(0) #remove masses line
+        else:
+            onedyn.pop(0)
+        largedyn.data.extend(onedyn)
+    largedyn.data.insert(0,secondline)
+    largedyn.data.insert(0,firstline)
+    largedyn.to_file(mydir + "/DYNMAT_combined")
+    
+def combine_displacements(mydir):
+    """Combine displacements (here XDATCARs) into one file.
+        Args:
+            mydir <str>: top directory for DYNMAT files
+    """
+    largexdat=MASTFile()
+    #natoms = sum(myposcar.natoms)
+    #mydyn=np.zeros([natoms*3, natoms*3])
+    #arrange as x1, y1, z1, x2, y2, z2, etc.
+    xdatlist = walkfiles(mydir, 1, 5, "*XDATCAR*")
+    if len(xdatlist) == 0:
+        raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
+    firstfile=MASTFile(os.path.join(mydir, xdatlist[0]))
+    numline = firstfile.data[2]
+    natoms=sum(map(int, numline.split()))
+    firstconfig=list(firstfile.data[0:4+natoms+1])
+    otherconfigs=list()
+    for onexdatmat in xdatlist:
+        onexdatfile=MASTFile(os.path.join(mydir, onexdatmat))
+        onexdat=list(onexdatfile.data)
+        for popct in range(0,4+natoms+1):
+            onexdat.pop(0)
+        otherconfigs.extend(onexdat)
+    largexdat.data.extend(firstconfig)
+    largexdat.data.extend(otherconfigs)
+    largexdat.to_file(mydir + "/XDATCAR_combined")
+def make_hessian(myposcar, mydir):
+    """Combine DYNMATs into one hessian and solve for frequencies.
         myposcar = Poscar
         mydir = top directory for DYNMAT files
     """

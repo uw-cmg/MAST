@@ -245,6 +245,22 @@ class BaseIngredient(MASTObj):
         else:
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in add_selective_dynamics_to_structure)")
+    def combine_dynmats(self):
+        """Combine dynmats."""
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.pmgextend import vasp_extensions
+            vasp_extensions.combine_dynmats(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in add_selective_dynamics_to_structure)")
+    def combine_displacements(self):
+        """Combine displacements."""
+        if self.keywords['program'] == 'vasp':
+            from MAST.ingredients.pmgextend import vasp_extensions
+            vasp_extensions.combine_displacements(self.keywords['name'])
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in add_selective_dynamics_to_structure)")
 # The following functions need to be defined by the child class:
     def write_files(self):
         '''writes the files needed as input for the jobs'''

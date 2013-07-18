@@ -312,9 +312,9 @@ def forward_extra_restart_files(parentpath, childpath):
     os.chdir(childpath)
     print parentpath
     print childpath
-    mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath)
+    mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath, shell=True)
     mylink.wait()
-    mylink2=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath)
+    mylink2=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
     mylink2.wait()
     os.chdir(parentpath)
     dirutil.unlock_directory(childpath)

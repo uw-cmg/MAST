@@ -3,6 +3,7 @@ import pymatgen
 from MAST.ingredients.phononsingle import PhononSingle
 from MAST.ingredients.baseingredient import BaseIngredient
 import os
+import shutil
 from MAST.utility import dirutil
 
 class PhononMultiple(PhononSingle):
@@ -16,8 +17,13 @@ class PhononMultiple(PhononSingle):
     def __init__(self, **kwargs):
         PhononSingle.__init__(self, **kwargs)
     def update_children(self):
-        #Do NOT forward the structure, since the ending CONTCAR contains a displacement in it.
-        self.recombine_dynmat()
+        #Do NOT forward the structure, since the ending CONTCAR contains a displacement in it. The last defect relaxation or static should forward the structure.
+        self.combine_dynmats()
+        shutil.copy(os.path.join(self.keywords['name'],"DYNMAT_combined"),
+            os.path.join(self.keywords['name'],"DYNMAT"))
+        self.combine_displacements()
+        shutil.copy(os.path.join(self.keywords['name'],"XDATCAR_combined"),
+            os.path.join(self.keywords['name'],"XDATCAR"))
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
 
@@ -45,8 +51,26 @@ class PhononMultiple(PhononSingle):
             self.set_up_program_input()
             self.add_selective_dynamics_to_structure(sdarr)
             self.write_submit_script()
+            self.forward_extra_restart_files(myname, newname)
             sct = sct + 1
         self.keywords['name']=myname
+    def is_complete(self):
+        """Make sure all subfolders are complete."""
+        myname=self.keywords['name']
+        phondirs = dirutil.walkdirs(myname,1,1)
+        notready=0
+        if len(phondirs) == 0:
+            return False
+        for phondir in phondirs:
+            newname = os.path.join(myname, phondir)
+            self.keywords['name']=newname
+            if not BaseIngredient.is_complete(self):
+                notready = notready + 1
+        self.keywords['name']=myname
+        if notready == 0:
+            return True
+        else:
+            return False
 
     def is_ready_to_run(self):
         """Make sure all subfolders are ready to run."""
