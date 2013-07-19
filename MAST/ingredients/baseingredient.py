@@ -13,19 +13,34 @@ class BaseIngredient(MASTObj):
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
 
+        work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
+        topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
+        data = topmeta.read_data(self.keywords['name'].split('/')[-1])
+        print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
+        print 'GRJ DEBUG: data =', data
+        print 'GRJ DEBUG: topmeta =\n', topmeta
+
+        self.meta_dict = dict()
+        if data:
+            for datum in data.split(','):
+                self.meta_dict[datum.split(':')[0]] = datum.split(':')[1]
+
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
+
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
 
     def write_directory(self):
         try:
             os.makedirs(self.keywords['name'])
-            self.metafile.write_data('Directory created', time.asctime())
-            self.metafile.write_data('Name', self.keywords['name'].split('/')[-1])
-            self.metafile.write_data('Program', self.keywords['program'])
-            self.metafile.write_data('Ingredient type', self.__class__.__name__)
+            self.metafile.write_data('directory created', time.asctime())
+            self.metafile.write_data('name', self.keywords['name'].split('/')[-1])
+            self.metafile.write_data('program', self.keywords['program'])
+            self.metafile.write_data('ingredient type', self.__class__.__name__)
             if 'mast_charge' in self.keywords['program_keys']:
-                self.metafile.write_data('Charge', self.keywords['program_keys']['mast_charge'])
+                self.metafile.write_data('charge', self.keywords['program_keys']['mast_charge'])
+            for key, value in self.meta_dict.items():
+                self.metafile.write_data(key, value)
         except OSError:
             print "Directory exists."
             return

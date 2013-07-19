@@ -100,15 +100,11 @@ class InduceDefect(BaseIngredient):
 
     def write_files(self):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
-        topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
-
         name = self.keywords['name'].split('/')[-1]
         print "write_files:", name
         self.get_new_structure()
 
-        for datum in topmeta.read_data(name).split(','):
-            if 'defect_label' in datum:
-                defect_label = datum.split(':')[-1].strip()
+        defect_label = self.metafile.read_data('defect_label')
         #print 'GRJ DEBUG: defect_label =', defect_label
         #defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
         #print 'GRJ DEBUG: defect_label (regex) =', defect_label
