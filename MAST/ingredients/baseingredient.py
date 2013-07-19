@@ -23,7 +23,7 @@ class BaseIngredient(MASTObj):
         self.meta_dict = dict()
         if data:
             for datum in data.split(','):
-                self.meta_dict[datum.split(':')[0]] = datum.split(':')[1]
+                self.meta_dict[datum.split(':')[0]] = datum.split(':')[1].strip()
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
@@ -37,8 +37,8 @@ class BaseIngredient(MASTObj):
             self.metafile.write_data('name', self.keywords['name'].split('/')[-1])
             self.metafile.write_data('program', self.keywords['program'])
             self.metafile.write_data('ingredient type', self.__class__.__name__)
-            if 'mast_charge' in self.keywords['program_keys']:
-                self.metafile.write_data('charge', self.keywords['program_keys']['mast_charge'])
+            #if 'mast_charge' in self.keywords['program_keys']:
+            #    self.metafile.write_data('charge', self.keywords['program_keys']['mast_charge'])
             for key, value in self.meta_dict.items():
                 self.metafile.write_data(key, value)
         except OSError:
