@@ -18,6 +18,7 @@ from pymatgen.io.vaspio import Poscar
 
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+from MAST.utility import Metadata
 from MAST.ingredients.baseingredient import BaseIngredient
 
 
@@ -98,12 +99,21 @@ class InduceDefect(BaseIngredient):
         return fractional
 
     def write_files(self):
-        name = self.keywords['name']
+        work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
+        topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
+
+        name = self.keywords['name'].split('/')[-1]
         print "write_files:", name
         self.get_new_structure()
 
-        defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-        self.metafile.write_data('debug', [name, name.split('/')])
+        for datum in topmeta.read_data(name).split(','):
+            if 'defect_label' in datum:
+                defect_label = datum.split(':')[-1].strip()
+        #print 'GRJ DEBUG: defect_label =', defect_label
+        #defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
+        #print 'GRJ DEBUG: defect_label (regex) =', defect_label
+
+        #self.metafile.write_data('debug', [name, name.split('/')])
         defect = self.keywords['program_keys'][defect_label]
         #print 'Defect in write_files:', defect
 
@@ -122,7 +132,7 @@ class InduceDefect(BaseIngredient):
             #print "poscar OK"
             self.lock_directory()
             #print "lock OK"
-            myposcar.write_file(name + '/CONTCAR')
+            myposcar.write_file('%s/%s/CONTCAR' % (work_dir, name))
             #print "Write sucessful"
             self.unlock_directory()
             #print "Unlock sucessful"
