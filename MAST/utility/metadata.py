@@ -15,13 +15,17 @@ class Metadata(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
 
-#        if not os.path.isfile(self.keywords['metafile']):
-#            open(self.keywords['metafile'], 'w').close()            
-
     def write_data(self, keyword, data):
         """Writes a keyword and it's associated data to the metafile"""
         with open(self.keywords['metafile'], 'a') as metafile:
-            metafile.write('%s = %s\n' % (keyword, data))
+            # First check to see if the keyword already exists in the metadata file
+            if None in self.search_data(keyword):
+                metafile.write('%s = %s\n' % (keyword, data))
+            else:
+                entry = self.read_data(keyword)
+                entry += ', %s' % data
+                self.clear_data(keyword)
+                metafile.write('%s = %s\n' % (keyword, entry))
 
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
@@ -34,7 +38,7 @@ class Metadata(MASTObj):
             for n, line in enumerate(metafile):
                 if keyword in line:
                     line_number = n
-                    data = line.split('=')[1].strip()
+                    data = line.split(' = ')[1].strip()
                     break
 
         return line_number, data
@@ -73,3 +77,5 @@ class Metadata(MASTObj):
         """Empties the metafile"""
         open(self.keywords['metafile'], 'w').close()
 
+    def __repr__(self):
+        return file(self.keywords['metafile']).read()
