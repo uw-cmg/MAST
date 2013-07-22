@@ -118,6 +118,10 @@ class RecipeTemplateParser(MASTObj):
         """
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
+            if 'ingredient' in processing_lines[index]:
+                nameval = processing_lines[index].split()[1]
+                data = 'name: %s' % nameval
+                self.metafile.write_data(nameval, data)
         return processing_lines
 
     def process_hop_combinations(self, processing_lines, d_neblines):

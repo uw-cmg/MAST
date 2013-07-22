@@ -419,6 +419,10 @@ class InputParser(MASTObj):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 elif (opt[0] == 'ptemp'):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
+                elif (opt[0] == 'rwigs'):
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                elif (opt[0] == 'mast_setmagmom'):
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 else:
                     ingredient_dict[opt[0]] = opt[1]
             elif ('end' in line):
