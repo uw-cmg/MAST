@@ -72,8 +72,9 @@ class PhononSingle(Optimize):
             self.phonon_center_site = None
             self.phonon_center_radius = None
             return
+        self.get_my_label()
         if not self.label in self.keywords['program_keys']['phonon'].keys():
-            raise MASTError(self.__class__.__name__, "Label %s for phonons not found in phonon input dict." % self.label)
+            raise MASTError(self.__class__.__name__, "Label %s for phonons not found in phonon input dict for %s" % (self.label, self.keywords['name']))
 
         myphdict = dict(self.keywords['program_keys']['phonon'][self.label])
         if not 'phonon_center_site' in myphdict.keys():

@@ -12,6 +12,8 @@ from MAST.utility import MASTObj
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.utility import MASTError
 from MAST.utility.mastfile import MASTFile
+from MAST.utility.metadata import Metadata
+
 import os
 import shutil
 #import pdb
@@ -36,7 +38,7 @@ class NEB(BaseIngredient):
                 }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
         self.neblines = self.keywords['program_keys']['neblines']
-        self.labels = self.get_my_labels()
+        self.labels = "" 
 
     def is_complete(self):
         return BaseIngredient.is_complete(self)
@@ -55,6 +57,7 @@ class NEB(BaseIngredient):
         """Get the parent structures, sort and match atoms, and interpolate.
             Write images to the appropriate folders.
         """
+        self.labels = self.get_my_labels()
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
         if len(parentimagestructures) == 0:

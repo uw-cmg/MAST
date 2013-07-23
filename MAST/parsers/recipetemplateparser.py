@@ -104,6 +104,9 @@ class RecipeTemplateParser(MASTObj):
             #step 3
             processing_lines = self.process_images(processing_lines, n_images)
 
+            self.make_metadata_entries(processing_lines)
+
+            self.process_phononlines(processing_lines)
             #dump the processed lines to file
             output_str = "\n".join(processing_lines)
             o_ptr.write("%s\n" % output_str)
@@ -118,10 +121,6 @@ class RecipeTemplateParser(MASTObj):
         """
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
-            if 'ingredient' in processing_lines[index]:
-                nameval = processing_lines[index].split()[1]
-                data = 'name: %s' % nameval
-                self.metafile.write_data(nameval, data)
         return processing_lines
 
     def process_hop_combinations(self, processing_lines, d_neblines):
@@ -142,6 +141,10 @@ class RecipeTemplateParser(MASTObj):
                 for neblabel in d_neblines.keys():
                     n_line = line.replace('<n-n>', neblabel)
                     eval_lines.append(n_line)
+                    if 'ingredient' in n_line and not '<' in n_line: 
+                        keyword = n_line.split()[1]
+                        data = 'neblabel: %s' % neblabel
+                        self.metafile.write_data(keyword, data)
             else:
                 eval_lines.append(line)
         line=""
@@ -183,7 +186,12 @@ class RecipeTemplateParser(MASTObj):
         for line in processing_lines:
             if '<img-n>' in line:
                 for index in xrange(n_images):
-                    new_lines.append(line.replace('<img-n>', str(index+1).zfill(2)))
+                    n_line = line.replace('<img-n>', str(index+1).zfill(2))
+                    if 'ingredient' in n_line and not '<' in n_line: 
+                        keyword = n_line.split()[1]
+                        data = 'name: %s' % keyword
+                        self.metafile.write_data(keyword, data)
+                    new_lines.append(n_line)
             else:
                  new_lines.append(line)
         return new_lines
@@ -240,6 +248,45 @@ class RecipeTemplateParser(MASTObj):
 
         return new_lines
 
+    def process_phononlines(self, processing_lines):
+        """add phonon information to the metadata. Does not change line info.
+        """
+        for line in processing_lines:
+            if 'ingredient' in line and 'phonon_' in line:
+                nameval = line.split()[1]
+                [dataline,dataval]=self.metafile.search_data(nameval)
+                okay=0
+                if not (dataval == None):
+                    datapcs = dataval.split(',')
+                    for datapc in datapcs:
+                        dlabel = datapc.split(":")[0].strip()
+                        dval = datapc.split(":")[1].strip()
+                        if dlabel == 'neblabel' or dlabel == 'defect_label':
+                            data = 'phononlabel: %s' % dval
+                            self.metafile.write_data(nameval, data)
+                            okay=1
+                            break
+                if okay==0:
+                    if 'perfect' in line:
+                        data = 'phononlabel: perfect'
+                        self.metafile.write_data(nameval, data)
+                        okay=1
+                    else:
+                        data = 'phononlabel: %s' % nameval
+                        self.metafile.write_data(nameval, data)
+                        okay=1
+        return
+
+    def make_metadata_entries(self, processing_lines):
+        """Add metadata entry for all ingredients. 
+            Does not change line information.
+        """
+        for line in processing_lines:
+            if 'ingredient' in line:
+                nameval = line.split()[1]
+                data = 'name: %s' % nameval
+                self.metafile.write_data(nameval, data)
+        return 
     def get_unique_ingredients(self):
         """fetches the ingredients names"""
         return list(set(self.ingredient_list))
