@@ -9,7 +9,7 @@ from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
-
+from MAST.utility.metadata import Metadata
 import os
 import shutil
 
@@ -210,6 +210,21 @@ def _vasp_incar_get_non_mast_keywords(program_keys_dict):
                     incar_dict[keytry]=value
     return incar_dict
 
+def _vasp_is_neb(keywords):
+    """Check if ingredient type is an actual NEB run.
+        Returns:
+            True if NEB, False otherwise.
+    """
+    metapath = "%s/metadata.txt" % keywords['name']
+    if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
+        return False
+    mymeta = Metadata(metafile="%s/metadata.txt" % keywords['name'])
+    [ingline,ingval]=mymeta.search_data("ingredient type")
+    if ingval == "NEB" or ingval == "NEBLowMesh":
+        return True
+    else:
+        return False
+
 def _vasp_incar_get_allowed_keywords(allowedpath):
     """Get allowed vasp keywords.
         Args:
@@ -226,6 +241,11 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
     name=keywords['name']
     myd = dict()
     myd = _vasp_incar_get_non_mast_keywords(keywords['program_keys'])
+    if not _vasp_is_neb(keywords):
+        try:
+            myd.pop("IMAGES")
+        except KeyError:
+            pass
     if 'mast_multiplyencut' in keywords['program_keys'].keys():
         mymult = float(keywords['program_keys']['mast_multiplyencut'])
     else:

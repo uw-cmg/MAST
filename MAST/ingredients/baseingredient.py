@@ -93,7 +93,7 @@ class BaseIngredient(MASTObj):
         if self.keywords['program'].lower() == 'vasp':
             from MAST.ingredients.checker import vasp_checker
             usepath = self.keywords['name']
-            if 'images' in self.keywords['program_keys'].keys():
+            if vasp_checker._vasp_is_neb(self.keywords):
                 mycomplete = vasp_checker.images_complete(self.keywords['name'],
                                 self.keywords['program_keys']['images'])
                 usepath = usepath + '/01'

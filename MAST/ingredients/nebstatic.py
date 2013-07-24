@@ -25,7 +25,9 @@ class NEBStatic(NEB):
                 pass
             else:
                 newname = os.path.join(myname, subdir)
-                self.forward_parent_structure(newname, childname)
+                for childname in self.keywords['child_dict'].iterkeys():
+                    self.forward_parent_structure(newname, childname)
+            imct = imct + 1
         return
 
     def write_files(self):
@@ -66,9 +68,11 @@ class NEBStatic(NEB):
             if imct == 0 or imct > numim:
                 pass
             elif not BaseIngredient.is_complete(self):
+                #print "TTM DEBUG: Not ready at imct %1i" % imct
                 notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
+        #print "TTM DEBUG: Notready: ", notready
         if notready == 0:
             return True
         else:

@@ -1,6 +1,7 @@
 from MAST.ingredients.optimize import Optimize
+from MAST.utility.metadata import Metadata
 from MAST.utility import MASTError
-
+import os
 class StaticDefectForNEB(Optimize):
     def __init__(self, **kwargs):
         Optimize.__init__(self, **kwargs)
@@ -12,7 +13,7 @@ class StaticDefectForNEB(Optimize):
             self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
 
     def get_my_label(self):
-        """Return the defect label.
+        """Return the defect label, without the word "defect".
             Returns:
                 label <str>: defect label
         """
@@ -23,4 +24,6 @@ class StaticDefectForNEB(Optimize):
             raise MASTError(self.__class__.__name__,
                 "No metadata file for tag defect.")
         plabel = mylabel[1]
-        return label
+        if 'defect_' in plabel:
+            plabel = plabel.split("defect_")[-1]
+        return plabel

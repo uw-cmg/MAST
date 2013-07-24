@@ -108,9 +108,11 @@ class PhononSingle(Optimize):
         """
         if self.phonon_center_site == None:
             return None
-        
+        print "TTM DEBUG: centersite: ", self.phonon_center_site.strip().split()
+        print "TTM DEBUG: MYSTRUC: ", mystruc 
         pcscoord = np.array(self.phonon_center_site.strip().split(), float)
         pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
+        print "TTM DEBUG PCSarr: ", pcsarr
         uniqsites = np.unique(pcsarr)
         
         if len(uniqsites) == 0:
