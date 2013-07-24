@@ -36,7 +36,7 @@ class Metadata(MASTObj):
 
         with open(self.keywords['metafile'], 'r') as metafile:
             for n, line in enumerate(metafile):
-                if keyword in line:
+                if (keyword + ' = ') in line:
                     line_number = n
                     data = line.split(' = ')[1].strip()
                     break
