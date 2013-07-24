@@ -215,13 +215,13 @@ class RecipeTemplateParser(MASTObj):
 
                     charge_list = d_defects[defect_key]['charge']
                     #print 'GRJ DEBUG: charge_list =', charge_list
-                    print 'GRJ DEBUG: def_line before charges:', def_line
+                    #print 'GRJ DEBUG: def_line before charges:', def_line
                     for charge in charge_list:
                         if (charge < 0):
                             clabel = 'q=n' + str(abs(charge))
                         else:
                             clabel = 'q=p' + str(charge)
-                        print 'GRJ DEBUG: clabel =', clabel
+                        #print 'GRJ DEBUG: clabel =', clabel
                         new_def_line = def_line.replace('<q>', clabel)
                         new_lines.append(new_def_line)
                         #new_lines.append(def_line.replace('<q>', clabel))

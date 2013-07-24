@@ -16,9 +16,9 @@ class BaseIngredient(MASTObj):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
         topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
         data = topmeta.read_data(self.keywords['name'].split('/')[-1])
-        print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
-        print 'GRJ DEBUG: data =', data
-        print 'GRJ DEBUG: topmeta =\n', topmeta
+        #print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
+        #print 'GRJ DEBUG: data =', data
+        #print 'GRJ DEBUG: topmeta =\n', topmeta
 
         self.meta_dict = dict()
         if data:
