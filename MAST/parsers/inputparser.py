@@ -283,14 +283,15 @@ class InputParser(MASTObj):
                             label = lin[1]
 
                 if (not label):
-                    label = str(count)
+                    label = 'defect_%s' % str(count)
 
                 defect = {'charge': charge,
                           'subdefect_1': type_dict,
                           'coord_type': coord_type,
                           'threshold': threshold}
 
-                defect_types['defect_%s' % label] = defect
+                #defect_types['defect_%s' % label] = defect
+                defect_types[label] = defect
 
                 count += 1
             elif (line[0] == 'begin'):
@@ -307,9 +308,9 @@ class InputParser(MASTObj):
                     label = None
             elif (line[0] == 'end'):
                 if (not label):
-                    label = str(count)
+                    label = 'defect_%s' % str(count)
 
-                defect_types['defect_%s' % label] = defect
+                defect_types[label] = defect
                 count += 1
                 multidefect = False
             elif ('charge' in line[0]):
