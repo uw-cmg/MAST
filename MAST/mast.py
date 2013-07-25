@@ -81,8 +81,9 @@ class MAST(MASTObj):
         self.perform_element_mapping()
         
         #set an input stem name
-        ipstem = self._initialize_input_stem()
+        ipstem, timestamp = self._initialize_input_stem()
         self.input_options.set_item('mast', 'input_stem', ipstem)
+        self.input_options.set_item('mast', 'timestamp', timestamp)
 
         #create the *.py input script
         ipc_obj = InputPythonCreator(input_options=self.input_options)
@@ -135,12 +136,14 @@ class MAST(MASTObj):
             raise MASTError(self.__class__.__name__, "File '%s' should be named with a .inp extension and formatted correctly." % inp_file)
         
         timestamp = time.strftime('%Y%m%dT%H%M%S')
+        tstamp = time.asctime()
+
         stem_dir = os.path.dirname(inp_file)
         if len(stem_dir) == 0:
             stem_dir = get_mast_scratch_path()
         inp_name = os.path.basename(inp_file).split('.')[0]
         stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
-        return stem_name
+        return stem_name, tstamp
 
     def _get_element_string(self):
         """Get the element string from the structure."""
@@ -190,6 +193,9 @@ class MAST(MASTObj):
 
         try:
             os.mkdir(dir_path)
+            topmeta = Metadata(metafile='%s/metadata.txt' % dir_path)
+            topmeta.write_data('directory created', self.input_options.get_item('mast', 'timestamp'))
+            topmeta.write_data('system name', system_name)
         except:
             MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
