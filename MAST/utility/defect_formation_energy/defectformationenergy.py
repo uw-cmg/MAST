@@ -5,6 +5,7 @@ from pymatgen.io.smartio import read_structure
 
 from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
+from MAST.utility import Metadata
 
 class DefectFormationEnergy:
     """Class for calculating the defect formation energy for a completed MAST
@@ -23,19 +24,16 @@ class DefectFormationEnergy:
         for ingredient in self.recipe_plan:
             if (ingredient.children is None):
                 self.final_ingredients.append(ingredient.name)
+        #print self.final_ingredients
 
     def calculate_defect_formation_energies(self):
         perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
         def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
+        for whatever in sorted(def_dir):
+            print whatever
 
         defects = self.input_options.get_item('defects', 'defects')
         chempot = self.input_options.get_item('chemical_potentials')
-
-        # Need to reconstitute the original system name
-        system_name = self.input_options.get_item('mast', 'system_name').split('_')
-        name = system_name[0]
-        for string in system_name[1:-1]:
-            name += ('_' + string)
 
         e_perf = self.get_total_energy(perf_dir)
         efermi = self.get_fermi_energy(perf_dir)
@@ -57,60 +55,44 @@ class DefectFormationEnergy:
             defect_info = dict()
 
             # Loop through each defect
-            for label, defect in defects.items():
-                print 'Calculating DFEs for defect %s' % (label)
+            for ddir in sorted(def_dir):
+                def_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, ddir))
+                label = def_meta.read_data('defect_label')
+                charge = int(def_meta.read_data('charge'))
+                energy = float(def_meta.read_data('energy'))
+                structure = self.get_structure(ddir)
 
-                # List of directories pertaining to a certain defect
-                ddir = [ddir for ddir in def_dir if (label.split('defect_')[1] == ddir.split('defect_')[1].split('_q=')[0])]
+                print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
 
-                # Now loop through the charges for each defect
-                energy_list = list()
-                for charged in ddir:
-                    charge = charged.split('_q=')[-1].split('_')[0]
-                    sign = charge[0]
+                # Find out how many atoms of each type are in the defects
+                def_species = dict()
+                for site in structure.sites:
+                    if (site.specie not in def_species):
+                        def_species[site.specie] = 1
+                    else:
+                        def_species[site.specie] += 1
 
-                    if (sign == 'p'):
-                        charge = int(charge[1:])
-                    elif (sign == 'n'):
-                        charge = -1 * int(charge[1:])
+                # Find the differences in the number of each atom type
+                # between the perfect and the defect
+                struct_diff = dict()
+                for specie, number in def_species.items():
+                    try:
+                        nperf = perf_species[str(specie)]
+                    except KeyError:
+                        nperf = 0
+                    struct_diff[str(specie)] = number - nperf
 
-                    energy = self.get_total_energy(charged)
-                    structure = self.get_structure(charged)
+                # Get the potential alignment correction
+                alignment = self.get_potential_alignment(perf_dir, ddir)
 
-                    # Find out how many atoms of each type are in the defects
-                    def_species = dict()
-                    for site in structure.sites:
-                        if (site.specie not in def_species):
-                            def_species[site.specie] = 1
-                        else:
-                            def_species[site.specie] += 1
-
-                    # Find the differences in the number of each atom type
-                    # between the perfect and the defect
-                    struct_diff = dict()
-                    for specie, number in def_species.items():
-                        try:
-                            nperf = perf_species[str(specie)]
-                        except KeyError:
-                            nperf = 0
-                        struct_diff[str(specie)] = number - nperf
-
-                    # Get the potential alignment correction
-                    alignment = self.get_potential_alignment(perf_dir, charged)
-
-                    # Calculate the base DFE energy
-                    e_def = energy - e_perf # E_defect - E_perf
-                    for specie, number in struct_diff.items():
-                        mu = potentials[str(specie).lower()]
-                        #print str(specie), mu, number
-                        e_def -= (number * mu)
-                    e_def += charge * (efermi + alignment) # Add in the shift here!
-                    energy_list.append([charge, e_def])
-
-                energy_list = sorted(energy_list, key=lambda energy: energy[0])
-                defect_info[label] = energy_list
-
-            e_defects[conditions] = defect_info
+                # Calculate the base DFE energy
+                e_def = energy - e_perf # E_defect - E_perf
+                for specie, number in struct_diff.items():
+                    mu = potentials[str(specie)]
+                    #print str(specie), mu, number
+                    e_def -= (number * mu)
+                e_def += charge * (efermi + alignment) # Add in the shift here!
+                print 'DFE = %f' % e_def
 
         return e_defects
 
