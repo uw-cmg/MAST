@@ -250,7 +250,10 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
         mymult = float(keywords['program_keys']['mast_multiplyencut'])
     else:
         mymult = 1.5
-    myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
+    if 'ENCUT' in myd.keys():
+        pass
+    else:
+        myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
     if 'mast_setmagmom' in keywords['program_keys'].keys():
         magstr = str(keywords['program_keys']['mast_setmagmom'])
         magmomstr=""
