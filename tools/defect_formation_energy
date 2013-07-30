@@ -3,23 +3,8 @@
 import sys, os
 
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
+from MAST.utility import Metadata
 
-def get_label_timestamp(name):
-    """Helper function to reconstitute the system label, date, and time from
-        a directory name.
-    """
-    tmp = name.split('mast_')
-    label = tmp[0][:-1]
-    time = tmp[1]
-
-    year = time[0:4]
-    month = time[4:6]
-    day = time[6:8]
-    hour = time[9:11]
-    minute = time[11:13]
-    second = time[13:]
-
-    return (label, year, month, day, hour, minute, second)
 
 def main():
     archive = os.path.expandvars(os.environ['MAST_ARCHIVE'])
@@ -28,16 +13,22 @@ def main():
     print 'Found %i completed jobs in %s:\n' % (len(dir_list), archive)
 
     for ndir, directory in enumerate(dir_list):
-        label, year, month, day, hour, minute, second = get_label_timestamp(directory)
-        print '%i) %s ran on %s/%s/%s at %s:%s and %ss.' % (ndir, label, month, day, year, hour, minute, second)
+        metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
+        system = metafile.read_data('system name')
+        date = metafile.read_data('directory created')
+
+        print '%i) %s ran on %s' % (ndir, system, date)
 
     print '\nPlease select a run from the above list to calculate the defect formation energies for:'
     index = int(sys.stdin.readline())
-    print 'Index selected:', index
+    #print 'Index selected:', index
 
     directory = dir_list[index]
-    label, year, month, day, hour, minute, second = get_label_timestamp(directory)
-    print 'You have selected %s ran on %s/%s/%s at %s:%s and %ss.' % (label, month, day, year, hour, minute, second)
+    metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
+    system = metafile.read_data('system name')
+    date = metafile.read_data('directory created')
+
+    print 'You have selected %s ran on %s.' % (system, date)
     print 'Calculating defect formation energies now.'
 
     directory_path = '%s/%s/' % (archive, directory)

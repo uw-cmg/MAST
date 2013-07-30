@@ -16,9 +16,9 @@ class BaseIngredient(MASTObj):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
         topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
         data = topmeta.read_data(self.keywords['name'].split('/')[-1])
-        print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
-        print 'GRJ DEBUG: data =', data
-        print 'GRJ DEBUG: topmeta =\n', topmeta
+        #print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
+        #print 'GRJ DEBUG: data =', data
+        #print 'GRJ DEBUG: topmeta =\n', topmeta
 
         self.meta_dict = dict()
         if data:
@@ -101,12 +101,12 @@ class BaseIngredient(MASTObj):
                 mycomplete = vasp_checker.is_complete(usepath)
 
             if mycomplete:
-                self.metafile.write_data('Completed on', time.asctime())
+                self.metafile.write_data('completed on', time.asctime())
                 if 'vasprun.xml' in os.listdir(self.keywords['name']):
                     energy = vasp_checker.get_vasp_energy(self.keywords['name'])
                 else:
                     energy = None
-                self.metafile.write_data('Energy', energy)
+                self.metafile.write_data('energy', energy)
 
                 return mycomplete
             else:
@@ -125,7 +125,7 @@ class BaseIngredient(MASTObj):
             from MAST.ingredients.checker import phon_checker
             usepath = self.keywords['name']
             mycomplete = phon_checker.is_complete(usepath)
-            self.metafile.write_data('Completed on', time.asctime())
+            self.metafile.write_data('completed on', time.asctime())
             return mycomplete
         else:
             raise MASTError(self.__class__.__name__, 
@@ -183,7 +183,7 @@ class BaseIngredient(MASTObj):
             # for scheduling other jobs
             #runme.wait()
         os.chdir(curdir)
-        self.metafile.write_data('Run start', time.asctime())
+        self.metafile.write_data('run start', time.asctime())
 
         return
 
