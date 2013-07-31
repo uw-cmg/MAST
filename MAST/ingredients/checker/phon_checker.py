@@ -11,7 +11,7 @@ import os
 import shutil
 import pymatgen
 import numpy as np
-
+import time
 
 def is_complete(dirname):
     """Check if PHON thermo run is complete."""
@@ -168,13 +168,14 @@ def _nosd_my_dynmat(keywords):
     name=keywords['name']
     if not os.path.isfile(name + "/DYNMAT_mod_1"):
         raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
-    myforces=vasp_extensions.read_my_dynmat(name,"/DYNMAT_mod_1")
+    myforces=vasp_extensions.read_my_dynmat(name,"DYNMAT_mod_1")
     numatoms = myforces['numatoms']
     for atom in range(1, numatoms+1):
         if not atom in myforces['atoms'].keys():
             myforces['atoms'][atom]=dict()
         for dispct in range(1, 4):
             if not dispct in myforces['atoms'][atom].keys():
+                myforces['atoms'][atom][dispct]=dict()
                 if dispct == 1:
                     displine = "0.000001 0 0"
                 elif dispct == 2:

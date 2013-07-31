@@ -151,6 +151,25 @@ def read_my_xdatcar(mydir, fname="XDATCAR"):
         kfgct=kfgct+1
     return xdatdict
 
+def write_my_xdatcar(mydir, xdatdict, fname="XDATCAR"):
+    """Write an XDATCAR file.
+        Args:
+            mydir <str>: Directory in which to write
+            xdatdict <dict>: Dictionary of XDATCAR (see read_my_xdatcar)
+            fname <str>: filename (default DYNMAT)
+    """
+    xdatwrite=MASTFile()
+    xdatwrite.data=list()
+    xdatwrite.data.append(xdatdict['descline'])
+    xdatwrite.data.append(xdatdict['specline'])
+    xdatwrite.data.append(xdatdict['numline'])
+    xdatwrite.data.append(xdatdict['type'])
+    configlist = xdatdict['configs'].keys()
+    configlist.sort()
+    for cfg in configlist:
+        xdatwrite.data.append("Konfig=%1i\n" % cfg)
+        xdatwrite.data.extend(xdatdict['configs'][cfg])
+    xdatwrite.to_file(os.path.join(mydir, fname))
 
 def combine_dynmats(mydir):
     """Combine DYNMATs into one file.
@@ -188,26 +207,24 @@ def combine_displacements(mydir):
         Args:
             mydir <str>: top directory for DYNMAT files
     """
+    largexdat=dict()
     xdatlist = walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
     if len(xdatlist) == 0:
         raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
     configs=list()
     kfgct=0
+    largexdat['configs']=dict()
     for onexdatmat in xdatlist:
         xdatdir = os.path.dirname(onexdatmat)
         onexdat = read_my_xdatcar(xdatdir)
         for kfg in onexdat['configs'].keys():
-            kfgct = kfgct + 1
-            configs.append("Konfig = %1i\n" % kfgct)
-            configs.extend(onexdat['configs'][kfg])
-    largexdat=MASTFile()
-    largexdat.data=list()
-    largexdat.data.append(onexdat['descline']) #should all be the same
-    largexdat.data.append(onexdat['specline'])
-    largexdat.data.append(onexdat['numline'])
-    largexdat.data.append(onexdat['type'])
-    largexdat.data.extend(configs)
-    largexdat.to_file(mydir + "/XDATCAR_combined")
+            largexdat['configs'][kfg] = onexdat['configs'][kfg]
+    largexdat['descline'] = onexdat['descline'] #should all be the same
+    largexdat['specline'] = onexdat['specline']
+    largexdat['numline'] = onexdat['numline']
+    largexdat['numatoms'] = onexdat['numatoms']
+    largexdat['type'] = onexdat['type']
+    write_my_xdatcar(mydir, largexdat, "XDATCAR_combined")
 def make_hessian(myposcar, mydir):
     """Combine DYNMATs into one hessian and solve for frequencies.
         myposcar = Poscar
