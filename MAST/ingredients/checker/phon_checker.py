@@ -184,7 +184,7 @@ def _nosd_my_dynmat(keywords):
                 myforces['atoms'][atom][dispct]['displine']=displine
                 myforces['atoms'][atom][dispct]['dynmat']=list()
                 for act in range(0, numatoms):
-                    myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000")
+                    myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000\n")
     vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_2")
 
 def _replace_my_displacements(keywords):
@@ -227,11 +227,11 @@ def _replace_my_displacements(keywords):
             kfgidx = dispct * 2
             atomline = myxdat['configs'][kfgidx][atom-1] #indexing of atoms starts at config list entry 0 for atom 1
             baseline = myxdat['configs'][1][atom-1]
-            atomcoords = np.array(atomline.strip(), float)
-            basecoords = np.array(baseline.strip(), float)
+            atomcoords = np.array(atomline.strip().split(), float)
+            basecoords = np.array(baseline.strip().split(), float)
             dispcoords = atomcoords - basecoords
             displine = str(dispcoords[0]) + " " + str(dispcoords[1]) + " " + str(dispcoords[2])
-            myforces['atoms'][atoms][disp]['displine'] = displine
+            myforces['atoms'][atom][disp]['displine'] = displine
     vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_1")
 
 def set_up_program_input(keywords):
