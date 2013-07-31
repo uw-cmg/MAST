@@ -168,52 +168,24 @@ def _nosd_my_dynmat(keywords):
     name=keywords['name']
     if not os.path.isfile(name + "/DYNMAT_mod_1"):
         raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT_mod_1")
-    infosplit = myforces.get_line_number(1).strip().split()
-    numspec = int(infosplit[0])
-    numdisp = int(infosplit[2])  #number of dynmat chunks
-    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
-    idxrg=list()
-    atomsanddirs=dict()
-    for nct in range(0,numdisp):
-        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
-    for idx in idxrg: #strip out the 'direction' indicator 1, 2, 3
-        mysplit = myforces.get_line_number(idx).strip().split()
-        myatom = int(mysplit[0])
-        if not myatom in atomsanddirs.keys():
-            atomsanddirs[myatom] = dict()
-            atomsanddirs[myatom][1] = 'not found'
-            atomsanddirs[myatom][2] = 'not found'
-            atomsanddirs[myatom][3] = 'not found'
-        mydirection = int(mysplit[1])
-        atomsanddirs[myatom][mydirection] = 'found'
-    lct=2 #start at line 2 ("masses" line)
-    zeroline="0 0 0" + "\n"
-    for act in range(1,numatoms + 1):
-        if not act in atomsanddirs.keys():
-            atomsanddirs[act] = dict()
-            atomsanddirs[act][1] = 'not found'
-            atomsanddirs[act][2] = 'not found'
-            atomsanddirs[act][3] = 'not found'
-        for didx in range(1,4):
-            if atomsanddirs[act][didx] == 'not found':
-                if didx == 1:
-                    headerline=str(act) + " 1 0.00001 0 0" + "\n"
-                elif didx == 2:
-                    headerline=str(act) + " 2 0 0.00001 0" + "\n"
-                elif didx == 3:
-                    headerline=str(act) + " 3 0 0 0.00001" + "\n"
-                myforces.modify_file_by_line_number(lct, "I", headerline)
-                lct = lct + 1
-                for zct in range(0,numatoms):
-                    myforces.modify_file_by_line_number(lct, "I", zeroline)
-                    lct = lct + 1
-            else:
-                lct = lct + 1 + numatoms
-    numdisp = numatoms*3
-    newheader = str(numspec) + " " + str(numatoms) + " " + str(numdisp) + "\n"
-    myforces.modify_file_by_line_number(1, "R", newheader)
-    myforces.to_file(name + "/DYNMAT_mod_2")
+    myforces=vasp_extensions.read_my_dynmat(name,"/DYNMAT_mod_1")
+    numatoms = myforces['numatoms']
+    for atom in range(1, numatoms+1):
+        if not atom in myforces['atoms'].keys():
+            myforces['atoms'][atom]=dict()
+        for dispct in range(1, 4):
+            if not dispct in myforces['atoms'][atom].keys():
+                if dispct == 1:
+                    displine = "0.000001 0 0"
+                elif dispct == 2:
+                    displine = "0 0.000001 0"
+                else:
+                    displine = "0 0 0.000001"
+                myforces['atoms'][atom][dispct]['displine']=displine
+                myforces['atoms'][atom][dispct]['dynmat']=list()
+                for act in range(0, numatoms):
+                    myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000")
+    vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_2")
 
 def _replace_my_displacements(keywords):
     """
@@ -241,46 +213,26 @@ def _replace_my_displacements(keywords):
     if not os.path.isfile(name + "/DYNMAT"):
         raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
     myforces=vasp_extensions.read_my_dynmat(name)
-    #resume editing here
-    infosplit = myforces.get_line_number(1).strip().split()
-    numspec = int(infosplit[0])
-    numdisp = int(infosplit[2])  #number of dynmat chunks
-    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
-    idxrg=list() #list of header line numbers in DYNMAT
-    kfgrg=list() #list of Konfigs in XDATCAR
-    atomsanddirs=dict()
-    for nct in range(0,numdisp*2+1): #get all konfig lines
-        kfgrg.append(4+1+nct*(numatoms + 1))
-    kfgdict=dict()
-    kfgnum=0
-    for kidx in kfgrg:
-        if kidx == 5: #first configuration
-            kct = 0
-        if np.mod(kfgnum,2) == 1: #skip odd configurations
-            pass
-        else:
-            kct = np.divide(kfgnum,2)
-            kfgdict[kct]=dict()
-            for act in range(1,numatoms+1):
-                klin=kidx+act
-                mycoords=np.array(myxdat.get_line_number(klin).strip().split(),float)
-                kfgdict[kct][act]=mycoords
-        kfgnum = kfgnum + 1
-    import pdb
-    pdb.set_trace()
-    for nct in range(0,numdisp):
-        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
-    dct=1
-    for idx in idxrg:
-        mysplit = myforces.get_line_number(idx).strip().split()
-        myatom = mysplit[0]
-        mydispdir = mysplit[1]
-        newcoords = kfgdict[dct][int(myatom)] - kfgdict[0][int(myatom)]
-        coordstr = str(newcoords[0]) + " " + str(newcoords[1]) + " " + str(newcoords[2])
-        mynewline = myatom + " " + mydispdir + " " + coordstr + "\n"
-        myforces.modify_file_by_line_number(idx, "R", mynewline)
-        dct=dct+1
-    myforces.to_file(name + "/DYNMAT_mod_1")
+    atomlist = myforces['atoms'].keys()
+    atomlist.sort()
+    #first disp needs kfg 2
+    #second disp needs kfg 4
+    #third disp needs kfg 6...
+    dispct=0
+    for atom in atomlist:
+        displist = myforces['atoms'][atom].keys()
+        displist.sort()
+        for disp in displist:
+            dispct = dispct + 1
+            kfgidx = dispct * 2
+            atomline = myxdat['configs'][kfgidx][atom-1] #indexing of atoms starts at config list entry 0 for atom 1
+            baseline = myxdat['configs'][1][atom-1]
+            atomcoords = np.array(atomline.strip(), float)
+            basecoords = np.array(baseline.strip(), float)
+            dispcoords = atomcoords - basecoords
+            displine = str(dispcoords[0]) + " " + str(dispcoords[1]) + " " + str(dispcoords[2])
+            myforces['atoms'][atoms][disp]['displine'] = displine
+    vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_1")
 
 def set_up_program_input(keywords):
     _phon_poscar_setup(keywords)
