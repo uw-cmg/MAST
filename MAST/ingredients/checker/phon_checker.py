@@ -12,65 +12,6 @@ import shutil
 import pymatgen
 import numpy as np
 
-def get_structure_from_file(filepath):
-    """Get structure from file."""
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    return Poscar.from_file(filepath, False).structure
-
-def get_structure_from_directory(dirname):
-    """Get structure from directory. Preferentially gets CONTCAR first."""
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    cpath = os.path.join(dirname, "CONTCAR")
-    ppath = os.path.join(dirname, "POSCAR")
-    if os.path.isfile(cpath):
-        return Poscar.from_file(cpath, False).structure
-    elif os.path.isfile(ppath):
-        return Poscar.from_file(ppath, False).structure
-    else:
-        raise MASTError("vasp_checker, get_structure_from_directory", "No valid structure in %s" % dirname)
-
-def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
-    """Copy CONTCAR to new POSCAR"""
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    dirutil.lock_directory(childpath)
-    shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
-    dirutil.unlock_directory(childpath)
-    return
-
-def forward_parent_energy(parentpath, childpath, newname="OSZICAR"):
-    """Copy OSZICAR"""
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    dirutil.lock_directory(childpath)
-    shutil.copy(os.path.join(parentpath, "OSZICAR"),os.path.join(childpath, newname))
-    dirutil.unlock_directory(childpath)
-    return
-
-def images_complete(dirname, numim):
-    """Check if all images in a VASP NEB calculation are complete.
-        dirname = directory housing /00.../0N+1 files; 
-                  only checks directories /01.../0N where N is # images
-        numim = number of images
-    """
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    imct=1
-    numim = int(numim)
-    while imct <= numim:
-        num_str = str(imct).zfill(2)
-        impath = os.path.join(dirname, num_str)
-        try:
-            myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
-        except (IOError):
-            return False
-        if not 'User time (sec)' in myoutcar.run_stats.keys():
-            return False
-        if myoutcar.run_stats['User time (sec)'] > 0:
-            #print "image",imct,"complete"
-            pass
-        else:
-            return False
-        imct = imct + 1
-    return True
-
 
 def is_complete(dirname):
     """Check if PHON thermo run is complete."""
@@ -124,45 +65,7 @@ def _phon_poscar_setup(keywords):
     mypfile.to_file(pospath)
     return
 
-def _vasp_kpoints_setup(keywords):
-    """Parse mast_kpoints string, which should take the format:
-        number, number, number designation
-        examples: "3x3x3 M", "1x1x1 G". If no designation is given,
-        Monkhorst-Pack is assumed.
-    """
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    name = keywords['name']
-    if 'mast_kpoints' in keywords['program_keys'].keys():
-        kptlist = keywords['program_keys']['mast_kpoints']
-    else:
-        raise MASTError("vasp_checker, _vasp_kpoint_setup","k-point instructions need to be set in ingredients keyword mast_kpoints")
-    if len(kptlist) == 3:
-        desig = "M"
-    else:
-        desig = kptlist[3].upper()
-    if desig == "M":
-        my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
-    elif desig == "G":
-        my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
-    else:
-        raise MASTError("vasp_checker, _vasp_kpoint_setup","kpoint designation " + desig + " not recognized.")
-    dirutil.lock_directory(name)
-    my_kpoints.write_file(name + "/KPOINTS")
-    dirutil.unlock_directory(name)
-    return my_kpoints
 
-def _vasp_potcar_setup(keywords, my_poscar):
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    name=keywords['name']
-    if 'mast_xc' in keywords['program_keys'].keys():
-        myxc = keywords['program_keys']['mast_xc'].upper() #Uppercase
-    else:
-        raise MASTError("vasp_checker, _vasp_potcar_setup","Exchange correlation functional needs to be specified in ingredients keyword mast_xc")
-    my_potcar = Potcar(symbols=my_poscar.site_symbols, functional=myxc, sym_potcar_map=None)
-    dirutil.lock_directory(name)
-    my_potcar.write_file(name + "/POTCAR")
-    dirutil.unlock_directory(name)
-    return my_potcar
 
 def _phon_inphon_get_non_mast_keywords(program_keys_dict):
     """Sort out the non-PHON keywords and make a dictionary."""
@@ -334,10 +237,11 @@ def _replace_my_displacements(keywords):
     name=keywords['name']
     if not os.path.isfile(name + "/XDATCAR"):
         raise MASTError("checker/phon_checker", "No XDATCAR found in %s." % name)
-    myxdat=MASTFile(name + "/XDATCAR")
+    myxdat=vasp_extensions.read_my_xdatcar(name)
     if not os.path.isfile(name + "/DYNMAT"):
         raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT")
+    myforces=vasp_extensions.read_my_dynmat(name)
+    #resume editing here
     infosplit = myforces.get_line_number(1).strip().split()
     numspec = int(infosplit[0])
     numdisp = int(infosplit[2])  #number of dynmat chunks
@@ -384,56 +288,3 @@ def set_up_program_input(keywords):
     _phon_forces_setup(keywords)
     return
 
-def get_path_to_write_neb_parent_energy(myname, myimages, parent):
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    if parent == 1:
-        return os.path.join(myname, "00", "OSZICAR")
-    elif parent == 2:
-        return os.path.join(myname, str(int(myimages)+1).zfill(2),"OSZICAR")
-    elif len(parent) > 1:
-        return os.path.join(myname, parent, "OSZICAR")
-    else:
-        raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
-
-def set_up_neb_folders(myname, image_structures):
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    imct=0
-    while imct < len(image_structures):
-        imposcar = Poscar(image_structures[imct])
-        num_str = str(imct).zfill(2)
-        impath = os.path.join(myname, num_str)
-        impospath = os.path.join(myname, "POSCAR_" + num_str)
-        dirutil.lock_directory(myname)
-        imposcar.write_file(impospath)
-        dirutil.unlock_directory(myname)
-        try:
-            os.makedirs(impath)
-        except OSError:
-            print "Directory at", impath, "already exists."
-            return None
-        dirutil.lock_directory(impath)
-        imposcar.write_file(os.path.join(impath, "POSCAR"))
-        dirutil.unlock_directory(impath)
-        imct = imct + 1
-    return
-    
-
-def set_up_program_input_neb(keywords, image_structures):
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    set_up_neb_folders(keywords['name'], image_structures)
-    mykpoints = _vasp_kpoints_setup(keywords)
-    mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
-    myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
-    return
-
-def add_selective_dynamics_to_structure(keywords, sdarray):
-    raise MASTError("checker/phon_checker","Not implemented for PHON!")
-    name = keywords['name']
-    pname = os.path.join(name,"POSCAR")
-    phposcar = Poscar.from_file(pname)
-    phposcar.selective_dynamics = sdarray
-    dirutil.lock_directory(name)
-    os.rename(pname, pname + "_no_sd")
-    phposcar.write_file(pname)
-    dirutil.unlock_directory(name)
-    return
