@@ -47,46 +47,122 @@ def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
     dynlist=[]
 #    for entry in dirlist:
 
+def read_my_dynmat(mydir, fname="DYNMAT"):
+    """Read a DYNMAT file.
+        Returns:
+            dyndict <dict>: dictionary structured like this:
+                ['numspec'] = <int> number of species
+                ['numatoms'] = <int> number of atoms
+                ['numdisp'] = <int> number of displacements
+                ['massline'] = <str> masses line
+                ['atoms'][atom <int>][disp <int>]['displine'] = 
+                    displacement
+                    vector (part of first line in dynmat block, 
+                    e.g. "0.01 0 0")
+                ['atoms'][atom <int>][disp <int>]['dynmat'] = 
+                        <list> 
+                        list of dynmat lines for this atom 
+                        and this displacement
+    """
+    mydyn = MASTFile(os.path.join(mydir, fname))
+    mydata = list(mydyn.data) #whole new copy
+    dyndict=dict()
+    firstline = mydata.pop(0) #pop first value
+    firstspl = firstline.strip().split()
+    dyndict['numspec']=int(firstspl[0])
+    numatoms = int(firstspl[1])
+    dyndict['numatoms']=numatoms
+    dyndict['numdisp']=int(firstspl[2])
+    dyndict['massline']=mydata.pop(0)
+    dyndict['atoms']=dict()
+    atom=0
+    disp=0
+    thirdline=""
+    while len(mydata) > 0:
+        thirdline = mydata.pop(0)
+        thirdspl = thirdline.strip().split()
+        atom=int(thirdspl[0])
+        disp=int(thirdspl[1])
+        displine=' '.join(thirdspl[2:])
+        if not atom in dyndict['atoms'].keys():
+            dyndict['atoms'][atom]=dict()
+        dyndict['atoms'][atom][disp]=dict()
+        dyndict['atoms'][atom][disp]['displine'] = displine
+        dyndict['atoms'][atom][disp]['dynmat']=list()
+        for act in range(0, numatoms):
+            dyndict['atoms'][atom][disp]['dynmat'].append(mydata.pop(0))
+    return dyndict
+
+def read_my_xdatcar(mydir, fname="XDATCAR"):
+    """Read an XDATCAR file.
+        Returns: 
+            xdatdict <dict>: Dictionary of configurations
+                xdatdict['descline'] = <str> description line
+                xdatdict['specline'] = <str> species line
+                xdatdict['numline'] = <str> numbers lines
+                xdatdict['type'] = <str> Direct or not
+                xdatdict['numatoms'] = <int> number of atoms
+                xdatdict['configs'][config <int>] = <list>
+                        list of lines in this configuration
+    """
+    myxdat = MASTFile(os.path.join(mydir, fname))
+    mydata = list(myxdat.data) #whole new copy
+    xdatdict=dict()
+    xdatdict['descline'] = mydata.pop(0) #pop first value
+    xdatdict['specline'] = mydata.pop(0)
+    numline = mydata.pop(0)
+    xdatdict['numline'] = numline
+    numatoms = sum(map(int, numline.strip().split()))
+    xdatdict['numatoms'] = numatoms
+
+
+
 def combine_dynmats(mydir):
     """Combine DYNMATs into one file.
         Args:
             mydir <str>: top directory for DYNMAT files
     """
-    largedyn=MASTFile()
-    #natoms = sum(myposcar.natoms)
-    #mydyn=np.zeros([natoms*3, natoms*3])
-    #arrange as x1, y1, z1, x2, y2, z2, etc.
-    dynmatlist = walkfiles(mydir, 1, 5, "*DYNMAT*")
+    dynmatlist = walkfiles(mydir, 2, 5, "*DYNMAT*") #start one level below
     if len(dynmatlist) == 0:
         raise MASTError("pmgextend combine_dynmats", "No DYNMATs found under " + mydir)
-    firstline="" #will be "numspecies numatoms numdisplacements"
-    secondline="" #will be mass for each species
+    totnumdisp=0
+    largedyn=dict()
     for onedynmat in dynmatlist:
-        onedynfile=MASTFile(os.path.join(mydir, onedynmat))
-        onedyn=list(onedynfile.data)
-        if firstline=="":
-            firstline = onedyn.pop(0) #remove first line with general info
-        else:
-            onedyn.pop(0)
-        if secondline=="":
-            secondline = onedyn.pop(0) #remove masses line
-        else:
-            onedyn.pop(0)
-        largedyn.data.extend(onedyn)
-    largedyn.data.insert(0,secondline)
-    largedyn.data.insert(0,firstline)
-    largedyn.to_file(mydir + "/DYNMAT_combined")
+        dyndir = os.path.dirname(onedynmat)
+        onedyn = read_my_dynmat(dyndir)
+        totnumdisp = totnumdisp + onedyn['numdisp']
+        for atom in onedyn['atoms'].keys():
+            if not atom in largedyn.keys():
+                largedyn[atom]=dict()
+                mydisp=1 #start at 1
+            for disp in onedyn['atoms'][atom].keys():
+                if disp in largedyn[atom].keys():
+                    mydisp=mydisp + 1 #increment
+                largedyn[atom][mydisp]=dict()
+                largedyn[atom][mydisp]['displine'] = str(onedyn['atoms'][atom][disp]['displine'])
+                largedyn[atom][mydisp]['dynmat']=list(onedyn['atoms'][atom][disp]['dynmat'])
+    dyncomb=MASTFile()
+    dyncomb.data=list()
+    firstline=str(onedyn['numspec']) + " " + str(onedyn['numatoms']) + " " + str(totnumdisp) + "\n"
+    dyncomb.data.append(firstline)
+    dyncomb.data.append(onedyn['massline'])
+    for atom in largedyn.keys():
+        for disp in largedyn[atom].keys():
+            thirdline = str(atom) + " " + str(disp) + " " + largedyn[atom][disp]['displine'] + "\n"
+            dyncomb.data.append(thirdline)
+            for line in largedyn[atom][disp]['dynmat']:
+                dyncomb.data.append(line)
+    dyncomb.to_file(mydir + "/DYNMAT_combined")
     
 def combine_displacements(mydir):
     """Combine displacements (here XDATCARs) into one file.
         Args:
             mydir <str>: top directory for DYNMAT files
     """
-    largexdat=MASTFile()
     #natoms = sum(myposcar.natoms)
     #mydyn=np.zeros([natoms*3, natoms*3])
     #arrange as x1, y1, z1, x2, y2, z2, etc.
-    xdatlist = walkfiles(mydir, 1, 5, "*XDATCAR*")
+    xdatlist = walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
     if len(xdatlist) == 0:
         raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
     firstfile=MASTFile(os.path.join(mydir, xdatlist[0]))
@@ -100,6 +176,8 @@ def combine_displacements(mydir):
         for popct in range(0,4+natoms+1):
             onexdat.pop(0)
         otherconfigs.extend(onexdat)
+    largexdat=MASTFile()
+    largexdat.data=list()
     largexdat.data.extend(firstconfig)
     largexdat.data.extend(otherconfigs)
     largexdat.to_file(mydir + "/XDATCAR_combined")

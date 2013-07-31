@@ -343,26 +343,27 @@ def _replace_my_displacements(keywords):
     numdisp = int(infosplit[2])  #number of dynmat chunks
     numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
     idxrg=list() #list of header line numbers in DYNMAT
-    kfgrg=list() #list of Konfig line numbers in XDATCAR
+    kfgrg=list() #list of Konfigs in XDATCAR
     atomsanddirs=dict()
     for nct in range(0,numdisp*2+1): #get all konfig lines
         kfgrg.append(4+1+nct*(numatoms + 1))
     kfgdict=dict()
+    kfgnum=0
     for kidx in kfgrg:
         if kidx == 5: #first configuration
             kct = 0
-        else: 
-            hline = myxdat.get_line_number(kidx).strip().split()
-            kfgnum = int(hline[1])
-            if np.mod(kfgnum,2) == 1: #skip odd configurations
-                continue
-            else:
-                kct = np.divide(kfgnum,2)
-        kfgdict[kct]=dict()
-        for act in range(1,numatoms+1):
-            klin=kidx+act
-            mycoords=np.array(myxdat.get_line_number(klin).strip().split(),float)
-            kfgdict[kct][act]=mycoords
+        if np.mod(kfgnum,2) == 1: #skip odd configurations
+            pass
+        else:
+            kct = np.divide(kfgnum,2)
+            kfgdict[kct]=dict()
+            for act in range(1,numatoms+1):
+                klin=kidx+act
+                mycoords=np.array(myxdat.get_line_number(klin).strip().split(),float)
+                kfgdict[kct][act]=mycoords
+        kfgnum = kfgnum + 1
+    import pdb
+    pdb.set_trace()
     for nct in range(0,numdisp):
         idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
     dct=1
