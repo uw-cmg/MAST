@@ -243,10 +243,10 @@ def combine_displacements(mydir):
         xdatdir = os.path.dirname(onexdatmat)
         onexdat = read_my_xdatcar(xdatdir)
         for kfg in onexdat['configs'].keys():
-            kfgct = kfgct + 1 #start at 2
             if kfg == 1: #skip config 1 until the end
                 pass
             else:
+                kfgct = kfgct + 1 #start at 2
                 largexdat['configs'][kfgct] = onexdat['configs'][kfg]
     largexdat['configs'][1] = onexdat['configs'][1] #get one of the first configs (the first should be the same for all the XDATCARs)
     largexdat['descline'] = onexdat['descline'] #should all be the same
