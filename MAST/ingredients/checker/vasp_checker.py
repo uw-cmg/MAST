@@ -44,6 +44,12 @@ def forward_parent_structure(parentpath, childpath, newname="POSCAR"):
     dirutil.unlock_directory(childpath)
     return
 
+def forward_parent_initial_structure(parentpath, childpath, newname="POSCAR"):
+    """Copy POSCAR to new POSCAR (for use in phonons)"""
+    dirutil.lock_directory(childpath)
+    shutil.copy(os.path.join(parentpath, "POSCAR"),os.path.join(childpath, newname))
+    dirutil.unlock_directory(childpath)
+    return
 def forward_parent_energy(parentpath, childpath, newname="OSZICAR"):
     """Copy OSZICAR"""
     dirutil.lock_directory(childpath)

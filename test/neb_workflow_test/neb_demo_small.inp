@@ -105,6 +105,8 @@ ibrion -1
 nsw 0
 mast_multiplyencut 1.25
 isif 2
+lwave True
+lcharg True
 end
 
 begin performneblowmesh
@@ -124,6 +126,14 @@ images 1
 spring -5
 end
 
+begin staticforphonon
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+isif 2
+lwave True
+lcharg True
+end
 
 begin phononmultiple
 ibrion 5
@@ -157,12 +167,12 @@ phonon_center_site 0.5 0.5 0
 phonon_center_radius 1
 end
 
-begin defect_vac1
+begin vac1
 phonon_center_site 0.5 0.5 0
 phonon_center_radius 1
 end
 
-begin defect_vac2
+begin vac2
 phonon_center_site 0.0 0.0 0
 phonon_center_radius 1
 end

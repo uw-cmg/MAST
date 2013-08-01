@@ -17,7 +17,6 @@ class PhononMultiple(PhononSingle):
     def __init__(self, **kwargs):
         PhononSingle.__init__(self, **kwargs)
     def update_children(self):
-        #Do NOT forward the structure, since the ending CONTCAR contains a displacement in it. The last defect relaxation or static should forward the structure.
         self.combine_dynmats()
         shutil.copy(os.path.join(self.keywords['name'],"DYNMAT_combined"),
             os.path.join(self.keywords['name'],"DYNMAT"))
@@ -26,6 +25,8 @@ class PhononMultiple(PhononSingle):
             os.path.join(self.keywords['name'],"XDATCAR"))
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
+            #Do NOT forward the CONTCAR, since the ending CONTCAR contains a displacement in it. Forward the POSCAR instead.
+            self.forward_parent_initial_structure(self.keywords['name'],childname)
 
     def write_files(self):
         """Write the multiple phonon files, one for each atom and each direction.

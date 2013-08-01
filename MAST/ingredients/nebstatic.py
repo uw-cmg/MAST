@@ -27,6 +27,7 @@ class NEBStatic(NEB):
                 newname = os.path.join(myname, subdir)
                 for childname in self.keywords['child_dict'].iterkeys():
                     self.forward_parent_structure(newname, childname)
+                    self.forward_extra_restart_files(newname, childname)
             imct = imct + 1
         return
 

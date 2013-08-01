@@ -7,6 +7,7 @@ Ingredient <sys>_inducedefect_<N> InduceDefect
 Ingredient <sys>_<N>_opt1 OptimizeLowMeshDefect
 Ingredient <sys>_<N>_opt2 OptimizeDefect
 Ingredient <sys>_<N>_stat StaticDefectForNEB
+Ingredient <sys>_<N>_statph StaticForPhonon
 Ingredient <sys>_neb_<N-N>_opt1lm NEBLowMesh
 Ingredient <sys>_neb_<N-N>_opt2 NEBLowMesh
 Ingredient <sys>_neb_<N-N>_stat NEBStatic
@@ -23,13 +24,14 @@ Parent <sys>_perfect_opt2 Child <sys>_inducedefect_<N>
 Parent <sys>_inducedefect_<N> Child <sys>_<N>_opt1
 Parent <sys>_<N>_opt1 Child <sys>_<N>_opt2
 Parent <sys>_<N>_opt2 Child <sys>_<N>_stat
+Parent <sys>_<N>_opt2 Child <sys>_<N>_statph
 Parent <sys>_<N>_stat Child <sys>_neb_<N-N>_opt1lm
 Parent <sys>_<N>_stat Child <sys>_neb_<N-N>_opt2
 Parent <sys>_<N>_stat Child <sys>_neb_<N-N>_stat
 Parent <sys>_neb_<N-N>_opt1lm Child <sys>_neb_<N-N>_opt2
 Parent <sys>_neb_<N-N>_opt2 Child <sys>_neb_<N-N>_stat
 Parent <sys>_perfect_stat Child <sys>_phonon_perfect
-Parent <sys>_<N>_stat Child <sys>_phonon_<N>
+Parent <sys>_<N>_statph Child <sys>_phonon_<N>
 Parent <sys>_neb_<N-N>_stat Child <sys>_phonon_<N-N>
 Parent <sys>_phonon_perfect Child <sys>_phonon_perfect_parse
 Parent <sys>_phonon_<N> Child <sys>_phonon_<N>_parse
