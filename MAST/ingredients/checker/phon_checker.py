@@ -135,31 +135,16 @@ def _phon_forces_setup(keywords):
     """Set up the FORCES file. This is like the DYNMAT but with the mass
         line stripped out and no direction indicators. Also, a block must
         be present for every atom, with a displacement, even if all entries
-        are zero (e.g. fake block for selective dynamics)
+        are zero (e.g. fake block for selective dynamics). First line contains
+        only the number of total displacements.
     """
     _replace_my_displacements(keywords)
     _nosd_my_dynmat(keywords)
     name=keywords['name']
     if not os.path.isfile(name + "/DYNMAT_mod_2"):
         raise MASTError("checker/phon_checker", "No DYNMAT_mod_2 found in %s." % name)
-    myforces=MASTFile(name + "/DYNMAT_mod_2")
-    infosplit = myforces.get_line_number(1).strip().split()
-    numdisp = int(infosplit[2])  #number of dynmat chunks
-    numatoms = int(infosplit[1]) #number of lines in a dynmat chunk
-    idxrg=list()
-    for nct in range(0,numdisp):
-        idxrg.append(1+1+1+nct*(numatoms + 1)) #get all the header lines
-    for idx in idxrg: #strip out the 'direction' indicator 1, 2, 3
-        mysplit = myforces.get_line_number(idx).strip().split()
-        mynewlist = list()
-        mynewlist.append(mysplit[0])
-        mynewlist.extend(mysplit[2:])
-        mynewline = ' '.join(mynewlist) + "\n"
-        myforces.modify_file_by_line_number(idx, "R", mynewline)
-    myforces.modify_file_by_line_number(1, "R", str(numdisp) + "\n") #modify info line
-    myforces.modify_file_by_line_number(2, "D") #remove masses line
-    myforces.to_file(name + "/FORCES")
-    return
+    mydyn=vasp_extensions.read_my_dynmat(name, "DYNMAT_mod_2")
+    newdyn=vasp_extensions.write_my_dynmat_without_disp_or_mass(name, mydyn, "FORCES")
 
 def _nosd_my_dynmat(keywords):
     """Creates fake blocks in DYNMAT for filling back in the atoms and 
@@ -170,6 +155,7 @@ def _nosd_my_dynmat(keywords):
         raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
     myforces=vasp_extensions.read_my_dynmat(name,"DYNMAT_mod_1")
     numatoms = myforces['numatoms']
+    myforces['numdisp'] = numatoms * 3 #full set of all blocks
     for atom in range(1, numatoms+1):
         if not atom in myforces['atoms'].keys():
             myforces['atoms'][atom]=dict()
@@ -177,11 +163,11 @@ def _nosd_my_dynmat(keywords):
             if not dispct in myforces['atoms'][atom].keys():
                 myforces['atoms'][atom][dispct]=dict()
                 if dispct == 1:
-                    displine = "0.000001 0 0"
+                    displine = "0.0001 0 0"
                 elif dispct == 2:
-                    displine = "0 0.000001 0"
+                    displine = "0 0.0001 0"
                 else:
-                    displine = "0 0 0.000001"
+                    displine = "0 0 0.0001"
                 myforces['atoms'][atom][dispct]['displine']=displine
                 myforces['atoms'][atom][dispct]['dynmat']=list()
                 for act in range(0, numatoms):

@@ -118,6 +118,30 @@ def write_my_dynmat(mydir, dyndict, fname="DYNMAT"):
     dynwrite.to_file(os.path.join(mydir, fname))
     
 
+def write_my_dynmat_without_disp_or_mass(mydir, dyndict, fname="DYNMAT"):
+    """Write a DYNMAT file without the displacement indicators 1, 2, 3 
+        and without the masses line, and with first line having only
+        the total number of displacements, for PHON.
+        Args:
+            mydir <str>: Directory in which to write
+            dyndict <dict>: Dictionary of dynmat (see read_my_dynmat)
+            fname <str>: filename (default DYNMAT)
+    """
+    dynwrite=MASTFile()
+    dynwrite.data=list()
+    firstline=str(dyndict['numdisp']) + "\n"
+    dynwrite.data.append(firstline)
+    atomlist=dyndict['atoms'].keys()
+    atomlist.sort()
+    for atom in atomlist:
+        displist = dyndict['atoms'][atom].keys()
+        displist.sort()
+        for disp in displist:
+            thirdline = str(atom) + " " + dyndict['atoms'][atom][disp]['displine'] + "\n"
+            dynwrite.data.append(thirdline)
+            for line in dyndict['atoms'][atom][disp]['dynmat']:
+                dynwrite.data.append(line)
+    dynwrite.to_file(os.path.join(mydir, fname))
 
 def read_my_xdatcar(mydir, fname="XDATCAR"):
     """Read an XDATCAR file.
@@ -212,13 +236,19 @@ def combine_displacements(mydir):
     if len(xdatlist) == 0:
         raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
     configs=list()
-    kfgct=0
+    kfgct=1 # skip config 1 until the end
     largexdat['configs']=dict()
+    xdatlist.sort() #get them in order
     for onexdatmat in xdatlist:
         xdatdir = os.path.dirname(onexdatmat)
         onexdat = read_my_xdatcar(xdatdir)
         for kfg in onexdat['configs'].keys():
-            largexdat['configs'][kfg] = onexdat['configs'][kfg]
+            kfgct = kfgct + 1 #start at 2
+            if kfg == 1: #skip config 1 until the end
+                pass
+            else:
+                largexdat['configs'][kfgct] = onexdat['configs'][kfg]
+    largexdat['configs'][1] = onexdat['configs'][1] #get one of the first configs (the first should be the same for all the XDATCARs)
     largexdat['descline'] = onexdat['descline'] #should all be the same
     largexdat['specline'] = onexdat['specline']
     largexdat['numline'] = onexdat['numline']
