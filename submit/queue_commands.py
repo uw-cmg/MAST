@@ -20,15 +20,15 @@ def queue_submission_command():
 
 def write_to_submit_list(mydir):
     """Write an entry to the submission list in 
-        $MAST_SCRATCH/submit/submitlist
+        $MAST_CONTROL/submitlist
         Args:
             mydir <str>: Directory which includes submission
                         script submit.sh for a single 
                         calculation to be submitted to the
                         queue
     """
-    scratch=dirutil.get_mast_scratch_path()
-    submitlist=os.path.join(scratch, "submit", "submitlist")
+    control=dirutil.get_mast_control_path()
+    submitlist=os.path.join(control, "submitlist")
     if os.path.isfile(submitlist):
         submitfile=MASTFile(submitlist)
     else:
@@ -39,10 +39,10 @@ def write_to_submit_list(mydir):
 
 def submit_from_submission_list():
     """Submit all entries from the submission list at
-        $MAST_SCRATCH/submit/submitlist
+        $MAST_CONTROL/submitlist
     """
-    scratch=dirutil.get_mast_scratch_path()
-    submitlist=os.path.join(scratch, "submit", "submitlist")
+    control=dirutil.get_mast_control_path()
+    submitlist=os.path.join(control, "submitlist")
     if not os.path.isfile(submitlist):
         print "No submission list at %s" % submitlist
         return
@@ -64,14 +64,14 @@ def submit_from_submission_list():
             status=subme.communicate()[0]
             submitted[subentry]=status
     print_submitted_dict(submitted)
-    os.chdir(scratch)
+    os.chdir(control)
         
 def clear_submission_list():
     """Clear all entries from the submission list at
-        $MAST_SCRATCH/submit/submitlist
+        $MAST_CONTROL/submitlist
     """
-    scratch=dirutil.get_mast_scratch_path()
-    submitlist=os.path.join(scratch, "submit", "submitlist")
+    control=dirutil.get_mast_control_path()
+    submitlist=os.path.join(control, "submitlist")
     if not os.path.isfile(submitlist):
         print "No submission list at %s" % submitlist
         return
@@ -82,13 +82,13 @@ def clear_submission_list():
 
 def print_submitted_dict(submitted):
     """Print a dictionary of all runs submitted into
-        $MAST_SCRATCH/submit/submitted
+        $MAST_CONTROL/submitted
         Args:
             submitted <dict>: Dictionary of submitted runs,
                 with key as the directory name.
     """
-    scratch=dirutil.get_mast_scratch_path()
-    subprint=os.path.join(scratch, "submit", "submitted")
+    control=dirutil.get_mast_control_path()
+    subprint=os.path.join(control, "submitted")
     if os.path.isfile(subprint):
         subprintfile=MASTFile(subprint)
     else:

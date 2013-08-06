@@ -115,6 +115,11 @@ def get_mast_archive_path():
         raise MASTError("utility dirutil","No path set in environment variable MAST_ARCHIVE")
     return getpath
 
+def get_mast_control_path():
+    getpath = os.getenv('MAST_CONTROL')
+    if getpath == None:
+        raise MASTError("utility dirutil","No path set in environment variable MAST_CONTROL")
+    return getpath
 def directory_is_locked(dirname):
     if os.path.isfile(dirname + "/mast.write_files.lock"):
         return True

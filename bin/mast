@@ -44,8 +44,8 @@ def main():
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'run'):
         mycwd=os.getcwd()
-        subdir=os.path.join(dirutil.get_mast_scratch_path(),"submit")
-        os.chdir(subdir)
+        control=dirutil.get_mast_control_path()
+        os.chdir(control)
         mycommand=queue_commands.queue_submission_command() #run the submit.sh script in $MAST_SCRATCH/submit which creates a mastmon in order to do status checking on a compute node
         mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         mysub.wait()

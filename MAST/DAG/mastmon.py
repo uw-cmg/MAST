@@ -126,8 +126,6 @@ class MASTmon(object):
             # remove 'archive' directory from the list of session directories
             if self._ARCHIVE in session_dirs:
                 session_dirs.remove(self._ARCHIVE)
-            if 'submit' in session_dirs:
-                session_dirs.remove('submit') #remove submission control folder
             else:
                 # if masthome doesn't have 'archive', then make it
                 #os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
