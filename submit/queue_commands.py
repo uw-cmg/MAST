@@ -5,7 +5,10 @@
 # 12/6/12 TTM added UKY DLX commands
 import os
 import sys
-
+from MAST.utility import dirutil
+import subprocess
+import time
+from MAST.utility import MASTFile
 system = "bardeen" #dlx, curie, bardeen, nersc, ranger
 compute_node = True
 
@@ -14,6 +17,91 @@ def direct_shell_command():
 
 def queue_submission_command():
     return "qsub submit.sh"
+
+def write_to_submit_list(mydir):
+    """Write an entry to the submission list in 
+        $MAST_SCRATCH/submit/submitlist
+        Args:
+            mydir <str>: Directory which includes submission
+                        script submit.sh for a single 
+                        calculation to be submitted to the
+                        queue
+    """
+    scratch=dirutil.get_mast_scratch_path()
+    submitlist=os.path.join(scratch, "submit", "submitlist")
+    if os.path.isfile(submitlist):
+        submitfile=MASTFile(submitlist)
+    else:
+        submitfile=MASTFile()
+    submitfile.data.append(mydir + "\n")
+    submitfile.to_file(submitlist)
+    return
+
+def submit_from_submission_list():
+    """Submit all entries from the submission list at
+        $MAST_SCRATCH/submit/submitlist
+    """
+    scratch=dirutil.get_mast_scratch_path()
+    submitlist=os.path.join(scratch, "submit", "submitlist")
+    if not os.path.isfile(submitlist):
+        print "No submission list at %s" % submitlist
+        return
+    submitfile=MASTFile(submitlist)
+    subentries=list(submitfile.data)
+    subentries.sort()
+    submitted=dict()
+    subcommand = queue_submission_command()
+    for subentry in subentries: # each entry is a directory name
+        subentry = subentry.strip()
+        if not os.path.isdir(subentry):
+            pass
+        elif subentry in submitted.keys():
+            pass
+        else:
+            os.chdir(subentry)
+            subme=subprocess.Popen(subcommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subme.wait()
+            status=subme.communicate()[0]
+            submitted[subentry]=status
+    print_submitted_dict(submitted)
+    os.chdir(scratch)
+        
+def clear_submission_list():
+    """Clear all entries from the submission list at
+        $MAST_SCRATCH/submit/submitlist
+    """
+    scratch=dirutil.get_mast_scratch_path()
+    submitlist=os.path.join(scratch, "submit", "submitlist")
+    if not os.path.isfile(submitlist):
+        print "No submission list at %s" % submitlist
+        return
+    submitfile=MASTFile(submitlist)
+    submitfile.data=list()
+    submitfile.data.append("\n")
+    submitfile.to_file(submitlist)
+
+def print_submitted_dict(submitted):
+    """Print a dictionary of all runs submitted into
+        $MAST_SCRATCH/submit/submitted
+        Args:
+            submitted <dict>: Dictionary of submitted runs,
+                with key as the directory name.
+    """
+    scratch=dirutil.get_mast_scratch_path()
+    subprint=os.path.join(scratch, "submit", "submitted")
+    if os.path.isfile(subprint):
+        subprintfile=MASTFile(subprint)
+    else:
+        subprintfile=MASTFile()
+    keylist=submitted.keys()
+    keylist.sort()
+    subprintfile.data.append(time.asctime()+ "\n")
+    for key in keylist:
+        subprintfile.data.append("%s:%s\n" % (key, submitted[key]))
+    subprintfile.to_file(subprint)
+    return
+    
+
 
 def queue_status_from_text(jobid, queuetext):
     """

@@ -3,11 +3,13 @@
 import os
 import optparse # Allows for some command line option parsing
 import glob
+import subprocess 
 
 from MAST.mast import MAST
 from MAST.parsers import InputParser
 from MAST.DAG.mastmon import MASTmon
-
+from submit import queue_commands
+from MAST.utility import dirutil
 
 def main():
     parser = optparse.OptionParser()
@@ -41,11 +43,20 @@ def main():
         mastopt.runmode = 'run'
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'run'):
-        mastmon = MASTmon()
-        if int(mastopt.verbose) == 1:
-            mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
-        else:
-            mastmon.run(1,0)
+        mycwd=os.getcwd()
+        subdir=os.path.join(dirutil.get_mast_scratch_path(),"submit")
+        os.chdir(subdir)
+        mycommand=queue_commands.queue_submission_command() #run the submit.sh script in $MAST_SCRATCH/submit which creates a mastmon in order to do status checking on a compute node
+        mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        mysub.wait()
+        os.chdir(mycwd)
+        queue_commands.submit_from_submission_list()
+        queue_commands.clear_submission_list()
+        #mastmon = MASTmon()
+        #if int(mastopt.verbose) == 1:
+        #    mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
+        #else:
+        #    mastmon.run(1,0)
 
     if (mastopt.mode == 'input'):
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
