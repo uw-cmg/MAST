@@ -23,6 +23,8 @@ def main():
                       help='Will start the DAG scheduler and submit jobs to the queue')
     parser.add_option('-v', '--verbose', dest='verbose', default='0',
                       help="Run with verbose messages.")
+    parser.add_option('-d', '--delete', dest='delete', default='0',
+                      help='Session ID to remove from the scheduler')
 
     (mastopt, mastarg) = parser.parse_args()
 
@@ -57,6 +59,10 @@ def main():
         #    mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
         #else:
         #    mastmon.run(1,0)
+
+    if (int(mastopt.delete) > 0):
+        mastmon = MASTmon()
+        mastmon.run(1,0,remove=int(mastopt.delete))
 
     if (mastopt.mode == 'input'):
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)

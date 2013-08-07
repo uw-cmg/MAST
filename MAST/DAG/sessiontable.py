@@ -24,6 +24,7 @@ class SessionTable(object):
         
     def addsession(self, session):
         """ Add sessions to SessionTable."""
+        #print 'GRJ DEBUG: sessiontable.addsession'
         if session.sid in self.sessions:
             raise Exception("SESSION ID (sid=%d) CONFLICTED" % session.sid)
         self.sessions[session.sid] = session
@@ -31,6 +32,9 @@ class SessionTable(object):
         
     def delsession(self, sid):
         """ Delete Session sid from SessionTable."""
+        #print 'GRJ DEBUG: sid', sid
+        #print 'GRJ DEBUG: self.sessions:', self.sessions
+        #print 'GRJ DEBUG: sessiontable:', self
         if sid not in self.sessions:
             raise Exception("SESSION ID (sid=%d) DOESN'T EXIST" % sid)
         session = self.sessions.pop(sid)
