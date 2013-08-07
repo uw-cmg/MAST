@@ -186,9 +186,9 @@ class BaseIngredient(MASTObj):
             p.wait()
             
         elif mode.lower() == 'serial':
-            queuesub = queue_commands.queue_submission_command()
-            runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            runme.wait()
+            queuesub = queue_commands.write_to_submit_list(self.keywords['name'])
+            #runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            #runme.wait()
             # for scheduling other jobs
             #runme.wait()
         os.chdir(curdir)

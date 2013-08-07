@@ -130,7 +130,6 @@ class MASTmon(object):
             # remove 'archive' directory from the list of session directories
             if self._ARCHIVE in session_dirs:
                 session_dirs.remove(self._ARCHIVE)
-
             else:
                 # if masthome doesn't have 'archive', then make it
                 #os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
@@ -166,7 +165,6 @@ class MASTmon(object):
                     break
                 
             #time.sleep(interval) #TTM remove this sleep
-                          
         # move back to original directory
         dirutil.unlock_directory(self.home) #unlock directory
         os.chdir(curdir)

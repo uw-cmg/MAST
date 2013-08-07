@@ -31,3 +31,4 @@ else:
     print "export PATH=$PATH:" + mycwd + "/bin"
 print "export MAST_SCRATCH=" + mycwd + "/SCRATCH"
 print "export MAST_ARCHIVE=" + mycwd + "/ARCHIVE"
+print "export MAST_CONTROL=" + mycwd + "/CONTROL"
