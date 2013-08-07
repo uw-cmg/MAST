@@ -5,6 +5,7 @@ from pymatgen.io.smartio import read_structure
 
 from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
+from MAST.utility.defect_formation_energy.gapplot import GapPlot
 from MAST.utility import Metadata
 
 class DefectFormationEnergy:
@@ -29,8 +30,8 @@ class DefectFormationEnergy:
     def calculate_defect_formation_energies(self):
         perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
         def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
-        for whatever in sorted(def_dir):
-            print whatever
+        #for whatever in sorted(def_dir):
+            #print whatever
 
         defects = self.input_options.get_item('defects', 'defects')
         chempot = self.input_options.get_item('chemical_potentials')
@@ -52,7 +53,7 @@ class DefectFormationEnergy:
         # First loop through the conditions for the defects
         for conditions, potentials in chempot.items():
             print 'Conditions:  %s' % conditions.upper()
-            defect_info = dict()
+            e_defects[conditions] = dict()
 
             # Loop through each defect
             for ddir in sorted(def_dir):
@@ -61,6 +62,9 @@ class DefectFormationEnergy:
                 charge = int(def_meta.read_data('charge'))
                 energy = float(def_meta.read_data('energy'))
                 structure = self.get_structure(ddir)
+
+                if (label not in e_defects[conditions]):
+                    e_defects[conditions][label] = list()
 
                 print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
 
@@ -93,7 +97,9 @@ class DefectFormationEnergy:
                     e_def -= (number * mu)
                 e_def += charge * (efermi + alignment) # Add in the shift here!
                 print 'DFE = %f' % e_def
+                e_defects[conditions][label].append( (charge, e_def) )
 
+        #print e_defects
         return e_defects
 
     def get_total_energy(self, directory):
