@@ -163,7 +163,7 @@ def wait_to_write(dirname, waitmax=1000):
     if directory_is_locked(dirname):
         raise MASTError("utility wait_to_write", 
             "Timed out waiting to obtain lock on directory %s" % dirname)
-def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.txt", verbose=1):
+def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.txt", verbose=0):
     """Match a metadata file based on input.
         Args:
             metastring <str>: equals-sign-separated metatag=value pairs with

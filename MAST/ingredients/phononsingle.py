@@ -32,7 +32,7 @@ class PhononSingle(Optimize):
         #Do NOT forward the structure, since the ending CONTCAR contains a displacement in it.
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
-            self.foward_parent_initial_structure(self.keywords['name'],childname)
+            self.foward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
 
     def get_my_label(self):
         """Get the phonon label from the metadata file.

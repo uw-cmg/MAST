@@ -178,7 +178,7 @@ class DiffusionCoefficient():
                 raise MASTError(self.__class__.__name__, "Not enough frequencies to determine solute and host.")
             label = self.freqdict['w2']       
         [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
-        mydir = self.get_labeled_dir(startlabel)
+        mydir = self.get_labeled_dir(startlabel, "stat","","neb")
         pospath = os.path.join(mydir, "POSCAR")
         if not os.path.isfile(pospath):
             raise MASTError(self.__class__.__name__, "No POSCAR in %s." % pospath)
@@ -226,13 +226,14 @@ class DiffusionCoefficient():
             print "Transition start and transition state: ", [startlabel, tstlabel]
         return [startlabel, tstlabel]
 
-    def get_labeled_dir(self, label, append="stat", append2=""):
+    def get_labeled_dir(self, label, append="stat", append2="", ignore=""):
         """Get a labeled directory.
             Args:
                 label <str>: label for the directory, like "vac1"
                 append <str>: extra piece which should appear in the 
                                 directory name
                 append2 <str>: additional extra piece which should appear
+                ignore <str>: piece to ignore
             Returns:
                 mypath <str>: The FIRST matching directory found, from a 
                                 sorted list. Returns a full path.
@@ -243,8 +244,11 @@ class DiffusionCoefficient():
         mypath=""
         for mydir in dirlist:
             if (label in mydir) and (append in mydir) and (append2 in mydir):
-                mypath=os.path.join(self.directory, mydir)
-                break
+                if not (ignore == "") and (ignore in mydir):
+                    pass
+                else:
+                    mypath=os.path.join(self.directory, mydir)
+                    break
         if self.verbose == 1:
             print "mypath: ", mypath
         if mypath=="":
@@ -263,8 +267,11 @@ class DiffusionCoefficient():
                 nebenergy <float>: transition state energy-starting state energy
         """
         [startlabel, tstlabel] = self.find_start_and_tst_labels(label)
-        startenergy = self.get_labeled_energy(startlabel)
+        startenergy = self.get_labeled_energy(startlabel,"stat","","neb")
         maxenergy = self.get_max_energy(tstlabel)
+        if self.verbose == 1:
+            print "Start energy: ", startenergy
+            print "Max energy: ", maxenergy
         if (startenergy > maxenergy):
             print "Attention! Maximum energy is from an endpoint, not an image!"
         nebenergy = maxenergy - startenergy
@@ -272,14 +279,15 @@ class DiffusionCoefficient():
             print "NEB energy: ", nebenergy
         return nebenergy
 
-    def get_labeled_energy(self, label, append="stat", append2=""):
+    def get_labeled_energy(self, label, append="stat", append2="", ignore=""):
         """Get an energy from a directory.
             Args:
                 label <str>: label for directory
                 append <str>: additional tag for the directory
                 append2 <str>: additional tag for the directory
+                ignore <str>: string to ignore
         """
-        mypath = self.get_labeled_dir(label, append, append2)
+        mypath = self.get_labeled_dir(label, append, append2, ignore)
         myenergy=0
         myenergy = self.get_total_energy(mypath)
         if self.verbose == 1:
@@ -367,7 +375,7 @@ class DiffusionCoefficient():
                 <float>: defect formation energy
         """
         [startlabel, tstlabel]=self.find_start_and_tst_labels(label)
-        defpath=self.get_labeled_dir(startlabel, append)
+        defpath=self.get_labeled_dir(startlabel, append, "", "neb")
         perfpath=self.get_labeled_dir(perf, append)
         defectedenergy = self.get_total_energy(defpath)
         perfectenergy = self.get_total_energy(perfpath)
@@ -458,10 +466,10 @@ class DiffusionCoefficient():
         entrodict=dict()
         freqs = self.freqdict.keys()
         freqs.sort() #do w0 before w2
-        bulkfind=dirutil.search_for_metadata_file("phononlabel=perfect,ingredient type=phonparse")
+        bulkfind=dirutil.search_for_metadata_file("phononlabel=perfect,ingredient type=PhonParse", self.directory)
         if len(bulkfind) > 1:
             raise MASTError(self.__class__.__name__, "More than one bulk phonon parse found.")
-        bulkfile = MASTFile(os.path.join(bulkfind[0] + "/THERMO"))
+        bulkfile = MASTFile(os.path.join(bulkfind[0] + "THERMO"))
         entropybulk=0
         for myline in bulkfile.data:
             mlist = myline.strip().split()
@@ -470,14 +478,14 @@ class DiffusionCoefficient():
                 break
         for freq in freqs:
             [startlabel,tstlabel]=self.find_start_and_tst_labels(self.freqdict[freq])
-            initfind=dirutil.search_for_metadata_file("neblabel=" + startlabel + ",ingredient type=phonparse")
-            tstfind=metafile.find_ingredient("neblabel=" + tstlabel + ",ingredient type=phonparse")
+            initfind=dirutil.search_for_metadata_file("phononlabel=" + startlabel + ",ingredient type=PhonParse", self.directory)
+            tstfind=dirutil.search_for_metadata_file("phononlabel=" + tstlabel + ",ingredient type=PhonParse", self.directory)
             if len(initfind) > 1:
                 raise MASTError(self.__class__.__name__, "More than one initial phonon parse found for %s" % startlabel)
             if len(tstfind) > 1:
                 raise MASTError(self.__class__.__name__, "More than one transition phonon parse found for %s" % tstlabel)
-            initfile = MASTFile(os.path.join(initfind[0] + "/THERMO"))
-            tstfile = MASTFile(os.path.join(tstfind[0] "/THERMO"))
+            initfile = MASTFile(os.path.join(os.path.dirname(initfind[0]),"THERMO"))
+            tstfile = MASTFile(os.path.join(os.path.dirname(tstfind[0]),"THERMO"))
             entropyinit=0
             entropytst=0
             for myline in initfile.data:
@@ -498,6 +506,56 @@ class DiffusionCoefficient():
             print "Entrodict: ", self.entrodict
         return self.entrodict
 
+    def get_entromigdict_from_phonons(self, temp):
+        """Get entropy migration dictionary from phonon 
+            calculations, integrated by PHON.
+            Args:
+                temp <float>: Temperature in K
+        """
+        entromdict=dict() #migration entropy
+        freqs = self.freqdict.keys()
+        freqs.sort() #do w0 before w2
+        for freq in freqs:
+            [startlabel,tstlabel]=self.find_start_and_tst_labels(self.freqdict[freq])
+            initfind=dirutil.search_for_metadata_file("phononlabel=" + startlabel + ",ingredient type=PhonParse", self.directory)
+            tstfind=dirutil.search_for_metadata_file("phononlabel=" + tstlabel + ",ingredient type=PhonParse", self.directory)
+            if self.verbose == 1:
+                print "initfind: ", initfind
+                print "tstfind: ", tstfind
+            if len(initfind) > 1:
+                raise MASTError(self.__class__.__name__, "More than one initial phonon parse found for %s" % startlabel)
+            if len(tstfind) > 1:
+                raise MASTError(self.__class__.__name__, "More than one transition phonon parse found for %s" % tstlabel)
+            initfile = MASTFile(os.path.join(os.path.dirname(initfind[0]),"THERMO"))
+            tstfile = MASTFile(os.path.join(os.path.dirname(tstfind[0]),"THERMO"))
+            entropyinit=0
+            entropytst=0
+            mfloat=0.0
+            for myline in initfile.data:
+                mlist = myline.strip().split()
+                try: 
+                    mfloat=float(mlist[0])
+                    if mfloat == temp:
+                        entropyinit = float(mlist[4]) #in kB/cell
+                        break
+                except (ValueError):
+                    pass
+            for myline in tstfile.data:
+                mlist = myline.strip().split()
+                try: 
+                    mfloat=float(mlist[0])
+                    if mfloat == temp:
+                        entropytst = float(mlist[4]) #in kB/cell
+                        break
+                except (ValueError):
+                    pass
+            entromdict[freq]=(entropytst-entropyinit)
+        self.entromdict = entromdict
+        if self.verbose == 1:
+            print "Last entry for entropytst: ", entropytst
+            print "Last entry for entropyinit: ", entropyinit
+            print "Entromigdict: ", self.entromdict
+        return self.entromdict
     def parse_melting_point(self, elem):
         """Parse the melting point.
             Args:
@@ -528,7 +586,8 @@ class DiffusionCoefficient():
         """
         self.get_hopdict()
         self.get_formdict()
-        self.get_entromigdict_approx()
+        #self.get_entromigdict_approx()
+        self.get_entromigdict_from_phonons(temp)
         self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
@@ -619,7 +678,7 @@ class DiffusionCoefficient():
         divisor=0
         try:
             closediv = np.power(numatoms/4, 0.33333333)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             raise MASTError(self.__class__.__name__, "Number of atoms could not be determined..")
         if np.abs(np.round(closediv) - closediv) > 0.001:
             raise MASTError(self.__class__.__name__, "This is apparently not a cubic lattice-vectored FCC cell and the divisor cannot be determined.")
@@ -674,7 +733,8 @@ class DiffusionCoefficient():
         """
         self.get_hopdict()
         self.get_formdict()
-        self.get_entromigdict_approx()
+        #self.get_entromigdict_approx()
+        self.get_entromigdict_from_phonons(temp)
         self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()

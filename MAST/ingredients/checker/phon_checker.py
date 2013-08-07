@@ -43,19 +43,14 @@ def _phon_poscar_setup(keywords):
     """
     name = keywords['name']
     pospath = os.path.join(name, "POSCAR")
-    if os.path.isfile(pospath + "_prePHON"): #Already done. Return.
+    prepath = os.path.join(name, "POSCAR_prePHON")
+    if os.path.isfile(pospath): #Already done. Return.
         return
-    if os.path.isfile(pospath):
-        my_poscar = Poscar.from_file(pospath) 
-        #parent should have given a structure
-    else: #this is an originating run; mast should give it a structure
-        my_poscar = Poscar(keywords['structure'])
+    my_poscar = Poscar.from_file(prepath) 
     my_poscar.selective_dynamics=None #unset SD if it is set
     my_poscar.velocities=None #unset velocities
-    #write two copies
     dirutil.lock_directory(name)
     my_poscar.write_file(pospath)
-    my_poscar.write_file(pospath + "_prePHON")
     dirutil.unlock_directory(name)
     #pick up a copy and strip out the elements line.
     mypfile = MASTFile(pospath)
