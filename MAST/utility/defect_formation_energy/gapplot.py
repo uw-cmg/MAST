@@ -1,11 +1,14 @@
 import sys, os, fileinput
 import numpy as np
 
+from MAST.utility import MASTError
+
 class GapPlot:
-    def __init__(self, gap=0.0, threshold=None, bins=300):
+    def __init__(self, gap=0.0, threshold=None, bins=300, dfe=None):
         self.gap = gap
         self.threshold = threshold
         self.bins = bins
+        self.dfe = dfe
 
         self.states = list()
         self.transitions = list()
@@ -20,18 +23,33 @@ class GapPlot:
         return label, trans
 
     def plot_levels(self):
-        # Start by finding the lost energy charge state
-        sorted_states = sorted(self.states, key=lambda dfe: dfe[1])
-
         step = self.gap / self.bins
-        data = list()
-
-        level = 0.0
-        nsteps = 0
-        energy = sorted_states[0][1]
 
         if (self.threshold is None):
             self.threshold = step
+
+        for condition in self.dfe:
+            print 'Plotting levels for %s conditions' % condition
+            for defect in self.dfe[condition]:
+                print 'Analyzing leves for defect %s.' % defect
+                state = self.dfe[condition][defect]
+                data = self.plot_defect(state, step)
+
+                print 'Writing energies and grid to file %s-%s.txt' % (defect, condition.replace(' ', '_'))
+                with open('%s-%s.txt' % (defect, condition.replace(' ', '_')), 'w') as datafile:
+                    for datum in data:
+                        datafile.write('%10.5f%10.5f\n' % (datum[0], datum[1]))
+
+                print str()
+
+    def plot_defect(self, state, step):
+        # Start by finding the lost energy charge state
+        sorted_states = sorted(state, key=lambda dfe: dfe[1])
+
+        data = list()
+        level = 0.0
+        nsteps = 0
+        energy = sorted_states[0][1]
 
         for i in range(0, len(sorted_states)-1):
             state1 = sorted_states[i]
@@ -41,15 +59,15 @@ class GapPlot:
             if state2[0] > state1[0]:
                 print 'The transition %s is losing electrons as Fermi level increases.' % transition[0]
                 print 'This is unphysical, please check your DFE\'s and run again.'
-                raise RuntimeError('Unphysical defect transition levels')
+                raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
 
             switch = False
             while not switch:
 #                if (abs(energy - state2[1]) <= self.threshold):
                 if (abs(level - transition[1]) < self.threshold):
                     print 'Transition %s found at %4.2f eV.' % (transition[0], transition[1])
-                    print 'DFE = %4.2f eV' % energy
-                    print transition[1], energy
+                    #print 'DFE = %4.2f eV' % energy
+                    #print transition[1], energy
                     switch = True
                 elif (level > self.gap):
                     switch = True # Level cannot be higher than the gap, so truncate it here
@@ -67,24 +85,4 @@ class GapPlot:
             data.append( [level, energy] )
             level += step
 
-#       for datum in data:
-#            print '%10.5f%10.5f' % (datum[0], datum[1])        
-
-if __name__ == '__main__':
-    datafile = sys.argv[1]
-    data = open(datafile, 'r')
-
-    gap = float(data.readline())
-    gp = GapPlot(gap=float(gap), bins=300)
-
-    eof = False
-    while (not eof):
-#        state = raw_input('Enter charge and DFE, or hit enter if done:\n')
-        line = data.readline()
-        if not line:
-            eof = True
-        else:
-            state = line.split()
-            gp.add_charge_state(int(state[0]), float(state[1]))
-
-    gp.plot_levels()
+        return data

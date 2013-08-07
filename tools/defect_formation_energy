@@ -3,6 +3,7 @@
 import sys, os
 
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
+from MAST.utility.defect_formation_energy import GapPlot
 from MAST.utility import Metadata
 
 
@@ -35,6 +36,23 @@ def main():
     DFE = DefectFormationEnergy(directory=directory_path)
     #defect_energies = DFE.calculate_defect_formation_energies()
     DFE.print_table()
+
+    print 'Do you wish to plot the band gap energy levels ([y]es/[n]o)?'
+    response = sys.stdin.readline().lower()
+
+    if 'y' in response:
+        print 'Before plotting the levels, please specify a band gap:'
+        bandgap = float(sys.stdin.readline())
+        print 'Procedding with a band gap of %.2f eV' % bandgap
+        gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+        gp.plot_levels()
+    elif 'n' in response:
+        print 'Not plotting'
+    else:
+        print 'Response not recognized, not plotting levels.'
+
+    print 'Finished analyzing %s ran on %s.' % (system, date)
+    print 'Have a nice day.'
 
 if __name__ == '__main__':
     main()
