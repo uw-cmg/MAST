@@ -711,7 +711,10 @@ class DiffusionCoefficient():
     def diffusion_coefficient(self):
         """Diffusion coefficient switcher and temperature looper."""
         tkeys = self.tempdict.keys()
+        tkeys.sort()
         for tkey in tkeys:
+            if self.verbose == 1:
+                print "Temperature (K): %1i\n" % tkey
             if self.freqmodel == 1:
                 self.tempdict[tkey] = self.one_freq(tkey)
             elif self.freqmodel == 5:
