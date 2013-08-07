@@ -213,6 +213,7 @@ class DAGScheduler:
         return os.path.join(self.home,self.sessiontable.get_sname(sid))
     
     def del_session(self,sid):
+        #print self.sessiontable
         self.sessiontable.delsession(sid)
         self.jobtable.del_session(sid)
 
@@ -232,4 +233,5 @@ class DAGScheduler:
             
         return csnames
 
-            
+    def __repr__(self):
+        return str(self.sessiontable)            

@@ -62,6 +62,10 @@ class MASTmon(object):
                 
         self.registered_dir = self.registered_dir.union(new_session_dirs)
 
+    def del_session(self, scheduler, sid):
+        print 'Deleting session %i from the scheduler' % sid
+        scheduler.del_session(sid)
+
     def _save(self):
         """Save current stauts of MASTmon such as registered_dir and scheduler"""
         var_dict = {}
@@ -85,7 +89,7 @@ class MASTmon(object):
             if 'scheduler' in var_dict:
                 self.scheduler = var_dict['scheduler']
         
-    def run(self, niter=None, verbose=0, stopcond=None, interval=None):
+    def run(self, niter=None, verbose=0, stopcond=None, interval=None, remove=None):
         """Run Mastmon. First of all, this makes MASTmon go to mastmon home load dagscheduler pickle.
             In addition, there are couple of options to run mastmon. \n
             ex) mastmon.run()  # run MASTmon forever as a real daemon. By default interval is 10 sec. \n
@@ -145,6 +149,13 @@ class MASTmon(object):
             self.scheduler.show_session_table()
             #remove complete sessions
 
+            if remove is not None:
+                #print 'GRJ DEBUG: Before:', self.scheduler
+                self.del_session(self.scheduler, remove)
+                #print 'GRJ DEBUG: After:', self.scheduler
+                self._save()
+                break
+
             self.registered_dir = self.registered_dir - csnames
 
             # save scheduler object
@@ -183,6 +194,3 @@ class MASTmon(object):
                 pass
                                      
         return
-
-
-
