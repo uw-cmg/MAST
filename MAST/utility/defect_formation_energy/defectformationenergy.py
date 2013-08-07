@@ -27,7 +27,9 @@ class DefectFormationEnergy:
                 self.final_ingredients.append(ingredient.name)
         #print self.final_ingredients
 
-    def calculate_defect_formation_energies(self):
+        self.e_defects = dict()
+
+    def _calculate_defect_formation_energies(self):
         perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
         def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
         #for whatever in sorted(def_dir):
@@ -48,12 +50,11 @@ class DefectFormationEnergy:
                 perf_species[str(site.specie)] += 1
 
         #print 'Perfect composition: ', perf_species
-        e_defects = dict() # dict of defect energies
 
         # First loop through the conditions for the defects
         for conditions, potentials in chempot.items():
             print 'Conditions:  %s' % conditions.upper()
-            e_defects[conditions] = dict()
+            self.e_defects[conditions] = dict()
 
             # Loop through each defect
             for ddir in sorted(def_dir):
@@ -63,8 +64,8 @@ class DefectFormationEnergy:
                 energy = float(def_meta.read_data('energy'))
                 structure = self.get_structure(ddir)
 
-                if (label not in e_defects[conditions]):
-                    e_defects[conditions][label] = list()
+                if (label not in self.e_defects[conditions]):
+                    self.e_defects[conditions][label] = list()
 
                 print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
 
@@ -97,10 +98,10 @@ class DefectFormationEnergy:
                     e_def -= (number * mu)
                 e_def += charge * (efermi + alignment) # Add in the shift here!
                 print 'DFE = %f' % e_def
-                e_defects[conditions][label].append( (charge, e_def) )
+                self.e_defects[conditions][label].append( (charge, e_def) )
 
         #print e_defects
-        return e_defects
+        #return e_defects
 
     def get_total_energy(self, directory):
         """Returns the total energy from a directory"""
@@ -140,10 +141,25 @@ class DefectFormationEnergy:
 
             return pa.get_potential_alignment(perfect_info, defect_info)
 
-    def print_table(self):
-        e_defects = self.calculate_defect_formation_energies()
+    def get_defect_formation_energies(self):
+        if not self.e_defects:
+            self._calculate_defect_formation_energies()
 
-        for conditions, defects in e_defects.items():
+        return self.e_defects
+
+    @property
+    def defect_formation_energies(self):
+        return self.get_defect_formation_energies()
+
+    @property
+    def dfe(self):
+        return self.get_defect_formation_energies()
+
+    def print_table(self):
+        if not self.e_defects:
+            self._calculate_defect_formation_energies()
+
+        for conditions, defects in self.e_defects.items():
             print '\n\nDefect formation energies for %s conditions.\n' % conditions.upper()
             print '%-20s | %10s' % ('Defect', 'DFE')
             print '---------------------------------'
