@@ -294,3 +294,19 @@ class BaseIngredient(MASTObj):
         '''writes the initial metadata file'''
         raise NotImplementedError
 
+    
+    def get_my_label(self, label):
+        """Get the value of a label in the metadata file.
+            Args:
+                label <str>: Label to search for.
+            Returns:
+                <str>: Value of the label as a string, stripped.
+        """
+        myname = self.keywords['name']
+        mymeta = Metadata(metafile=os.path.join(myname, "metadata.txt"))
+        mylabel = mymeta.search_data(label)
+        if mylabel == "":
+            raise MASTError(self.__class__.__name__, 
+                "No metadata for tag %s" % label)
+        return mylabel[1]
+

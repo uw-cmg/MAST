@@ -206,6 +206,18 @@ def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.tx
         print metamatch
     return metamatch
 
-
+def list_methods(myclass=None):
+    """List the methods in a class.
+        Args:
+            myclass <Class>: Class, like BaseIngredient
+    """
+    import inspect
+    mylist=inspect.getmembers(myclass, predicate=inspect.ismethod)
+    parsedlist=list()
+    for myentry in mylist:
+        parsedlist.append(myentry[0])
+    for myentry in parsedlist:
+        print myentry
+    return parsedlist
 
                 
