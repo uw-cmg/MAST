@@ -1,0 +1,26 @@
+Recipe NEBHCP
+
+Ingredient <sys>_induce_defect_<N> InduceDefect
+Ingredient <sys>_defect_<N>_<Q>_opt1 OptimizeLowMeshDefect
+Ingredient <sys>_defect_<N>_<Q>_opt2 StaticDefectForNEB
+Ingredient <sys>_defect_<N>_<Q>_stat StaticForPhonon
+Ingredient <sys>_neb_<N-N>_opt1lm NEBLowMesh
+Ingredient <sys>_neb_<N-N>_opt2 NEB
+Ingredient <sys>_neb_<N-N>_stat NEBStatic
+Ingredient <sys>_phonon_<N> PhononMultiple
+Ingredient <sys>_phonon_<N-N> PhononMultiple
+Ingredient <sys>_phonon_<N>_parse PhonParse
+Ingredient <sys>_phonon_<N-N>_parse PhonParse
+
+Parent <sys>_induce_defect_<N> Child <sys>_defect_<N>_<Q>_opt1
+Parent <sys>_defect_<N>_<Q>_opt1 Child <sys>_defect_<N>_<Q>_opt2
+Parent <sys>_defect_<N>_<Q>_opt2 Child <sys>_neb_<N-N>_opt1lm
+Parent <sys>_defect_<N>_<Q>_opt2 Child <sys>_neb_<N-N>_opt2
+Parent <sys>_defect_<N>_<Q>_opt2 Child <sys>_defect_<N>_<Q>_stat
+Parent <sys>_neb_<N-N>_opt1lm Child <sys>_neb_<N-N>_opt2
+Parent <sys>_neb_<N-N>_opt2 Child <sys>_neb_<N-N>_stat
+Parent <sys>_defect_<N>_<Q>_stat Child <sys>_phonon_<N>
+Parent <sys>_neb_<N-N>_stat Child <sys>_phonon_<N-N>
+Parent <sys>_phonon_<N> Child <sys>_phonon_<N>_parse
+Parent <sys>_phonon_<N-N> Child <sys>_phonon_<N-N>_parse
+
