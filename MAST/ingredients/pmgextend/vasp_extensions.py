@@ -154,24 +154,45 @@ def read_my_xdatcar(mydir, fname="XDATCAR"):
                 xdatdict['numatoms'] = <int> number of atoms
                 xdatdict['configs'][config <int>] = <list>
                         list of lines in this configuration
+                xdatdict['scale'] = <str> scale
+                xdatdict['latta'] = <str> lattice vector a
+                xdatdict['lattb'] = <str> lattice vector b
+                xdatdict['lattc'] = <str> lattice vector c
     """
     myxdat = MASTFile(os.path.join(mydir, fname))
     mydata = list(myxdat.data) #whole new copy
     xdatdict=dict()
     xdatdict['descline'] = mydata.pop(0) #pop first value
-    xdatdict['specline'] = mydata.pop(0)
+    tryspec = mydata.pop(0)
+    tryspecstrip = tryspec.strip()
+    if not tryspecstrip.isalpha(): # version 5.2.11 and on
+        xdatdict['scale'] = tryspec
+        xdatdict['latta'] = mydata.pop(0)
+        xdatdict['lattb'] = mydata.pop(0)
+        xdatdict['lattc'] = mydata.pop(0)
+        xdatdict['specline'] = mydata.pop(0)
+    else:
+        xdatdict['scale'] = ""
+        xdatdict['latta'] = ""
+        xdatdict['lattb'] = ""
+        xdatdict['lattc'] = ""
+        xdatdict['specline'] = tryspec
     numline = mydata.pop(0)
     xdatdict['numline'] = numline
     numatoms = sum(map(int, numline.strip().split()))
     xdatdict['numatoms'] = numatoms
-    xdatdict['type'] = mydata.pop(0)
+    if not tryspecstrip.isalpha(): #version 5.2.11 and on
+        xdatdict['type'] = ""
+    else:
+        xdatdict['type'] = mydata.pop(0)
     xdatdict['configs']=dict()
     kfgct=1
     while len(mydata) > 0:
         mydata.pop(0) # Konfig line, or a blank line
         xdatdict['configs'][kfgct] = list()
         for act in range(0,numatoms):
-            xdatdict['configs'][kfgct].append(mydata.pop(0))
+            if len(mydata) > 0:
+                xdatdict['configs'][kfgct].append(mydata.pop(0))
         kfgct=kfgct+1
     return xdatdict
 
@@ -185,9 +206,15 @@ def write_my_xdatcar(mydir, xdatdict, fname="XDATCAR"):
     xdatwrite=MASTFile()
     xdatwrite.data=list()
     xdatwrite.data.append(xdatdict['descline'])
+    if not (xdatdict['scale'] == ""):
+        xdatwrite.data.append(xdatdict['scale'])
+        xdatwrite.data.append(xdatdict['latta'])
+        xdatwrite.data.append(xdatdict['lattb'])
+        xdatwrite.data.append(xdatdict['lattc'])
     xdatwrite.data.append(xdatdict['specline'])
     xdatwrite.data.append(xdatdict['numline'])
-    xdatwrite.data.append(xdatdict['type'])
+    if not (xdatdict['type'] == ""):
+        xdatwrite.data.append(xdatdict['type'])
     configlist = xdatdict['configs'].keys()
     configlist.sort()
     for cfg in configlist:
@@ -251,6 +278,10 @@ def combine_displacements(mydir):
     largexdat['configs'][1] = onexdat['configs'][1] #get one of the first configs (the first should be the same for all the XDATCARs)
     largexdat['descline'] = onexdat['descline'] #should all be the same
     largexdat['specline'] = onexdat['specline']
+    largexdat['scale'] = onexdat['scale']
+    largexdat['latta'] = onexdat['latta']
+    largexdat['lattb'] = onexdat['lattb']
+    largexdat['lattc'] = onexdat['lattc']
     largexdat['numline'] = onexdat['numline']
     largexdat['numatoms'] = onexdat['numatoms']
     largexdat['type'] = onexdat['type']
