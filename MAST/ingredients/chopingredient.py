@@ -25,7 +25,6 @@ from MAST.utility import MASTFile
 from MAST.utility import dirutil
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend import structure_extensions
-
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
@@ -38,7 +37,7 @@ class WriteIngredient(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
 
-    def write_files_defect(self):
+    def write_defect(self):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
         name = self.keywords['name'].split('/')[-1]
         print "write_files:", name
@@ -77,14 +76,14 @@ class WriteIngredient(BaseIngredient):
 
         return
     
-    def write_files_neb(self):
+    def write_neb(self):
         """Get the parent structures, sort and match atoms, and interpolate.
             Write images to the appropriate folders.
         """
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
         if len(parentimagestructures) == 0:
-            image_structures = self.do_interpolation(parentstructures)
+            image_structures = structure_extensions.do_interpolation(parentstructures, self.keywords['program_keys']['images'])
         else:
             image_structures = list()
             image_structures.append(parentstructures[0])
@@ -102,106 +101,8 @@ class WriteIngredient(BaseIngredient):
 
 
 
-    def sort_structure_and_neb_lines(self, mystruc, initorfin):
-        """Sort the structure in an approved way:
-            1. Edge-coorect the fractional structure so for example 
-                -0.05 and 0.95 are the same.
-            2. Remove lines which closely match the neb moving lines in the 
-            NEB section.
-            3. Sort the structure by element and coordinate.
-            4. Prepend the NEB moving lines to their element sections.
-            5. Return the modified structure.
 
-            mystruc <Structure>   : pymatgen structure
-            initorfin <int>       : 0 = initial cfg, 1 = final cfg
-        """
-        import MAST.data
-        atol = 0.1 # Need fairly large tolerance to account for relaxation.
-        sortedstruc = mystruc.get_sorted_structure()
-        sortedstruc_base = self.keywords['structure'].get_sorted_structure()
-        struct_ed = StructureEditor(sortedstruc)
-        struct_ed_base = StructureEditor(sortedstruc_base)
-        # We are not actually translating the sites; just get them into unit
-        # cell
-        #TTM DEBUG REMOVE THIS struct_ed.translate_sites(range(0,len(sortedstruc.sites)),np.zeros(3),True)
-        nebidx = list()
 
-        elemstarts = self.get_element_indices(sortedstruc)
-        mylabel = BaseIngredient.get_my_label(self, "neblabel")
-        for nebline in self.keywords['program_keys']['neblines'][mylabel]:
-            usebase=0
-            nebdict = self.parse_neb_line(nebline)
-            mycoord = nebdict['coord'][initorfin]
-            index = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
-            print 'TTM DEBUG: index: ', index
-            if len(index) == 0: #try the base structure, for vacancies
-                usebase=1
-                index = find_in_coord_list(sortedstruc_base.frac_coords,
-                    mycoord, atol)
-            if len(index) == 0:
-                raise MASTError(self.__class__.__name__, "No coordinate found matching %s" % mycoord)
-            if usebase==0:
-                nebidx.append(index[0]) #only take first site?
-                mysite = sortedstruc.sites[index[0]]
-                myelem = MAST.data.atomic_number[mysite.species_string]
-                struct_ed.delete_site(index)
-                struct_ed.insert_site(elemstarts[myelem], mysite.specie,
-                                        mysite.frac_coords)
-            else:
-                nebidx.append(index[0]) #only take first site?
-                mysite = sortedstruc_base.sites[index[0]]
-                myelem = MAST.data.atomic_number[mysite.species_string]
-                struct_ed_base.delete_site(index)
-                struct_ed_base.insert_site(elemstarts[myelem], mysite.specie,
-                                        mysite.frac_coords)
-
-        if not len(nebidx) == len(self.keywords['program_keys']['neblines'][mylabel]):
-            raise MASTError(self.__class__.__name__, "Not all NEB lines found.")
-        return struct_ed.modified_structure        
-
-    def get_element_indices(self, sortedstruc):
-        """From a sorted structure, get the element indices
-            Args:
-                sortedstruc <Structure>: pymatgen structure sorted by
-                                            electronegativity
-            Returns:
-                elstart <dict>: element index dictionary, in the format:
-                            elstart[element number] = starting index, e.g.
-                            elstart[24] = 0
-        """
-        elstart = dict()
-        numlist = sortedstruc.atomic_numbers
-        listlen = len(numlist)
-        idx = 0
-        while idx < listlen:
-            atomnum = numlist[idx]
-            if not atomnum in elstart.keys():
-                elstart[atomnum] = idx
-            idx = idx + 1
-        return elstart
-
-    def parse_neb_line(self, nebline):
-        """Parse an NEB atomic movement line which has the following format:
-                    Cr, 0 0 0, 0.5 0.5 0.5 in the input file, and
-                    ['Cr','0 0 0','0.5 0.5 0.5'] here as nebline
-                    element, init_coord, fin_coord
-            Args:
-                line <list of str>: NEB atomic movement line
-            Returns:
-                linedict <dict>: 
-                                 ['element'] <int> = element's atomic number
-                                 ['coord'][0] <np.array> = initial coordinates
-                                 ['coord'][1] <np.array> = final coordinates
-        """
-        nebdict=dict()
-        #print "TTM DEBUG: nebline", nebline
-        nebelem = str(nebline[0].strip()).title()
-        import MAST.data
-        nebdict['element'] = MAST.data.atomic_number[nebelem]
-        nebdict['coord'] = dict()
-        nebdict['coord'][0] = np.array(nebline[1].split(), dtype='float')
-        nebdict['coord'][1] = np.array(nebline[2].split(), dtype='float')
-        return nebdict
         
     def get_parent_structures(self):
         """Assume that parents have written files
@@ -222,8 +123,11 @@ class WriteIngredient(BaseIngredient):
                 "Error: no parent file at" + pfpath_fin)
         struct_init = BaseIngredient.get_structure_from_file(self, pfpath_init)
         struct_fin = BaseIngredient.get_structure_from_file(self, pfpath_fin)
-        sorted_init = self.sort_structure_and_neb_lines(struct_init, 0) 
-        sorted_fin = self.sort_structure_and_neb_lines(struct_fin, 1)
+        base_struct = self.keywords['structure']
+        mylabel = BaseIngredient.get_my_label(self, "neblabel")
+        neblines = self.keywords['program_keys']['neblines'][mylabel]
+        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, 0) 
+        sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, 1)
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
@@ -246,20 +150,15 @@ class WriteIngredient(BaseIngredient):
                 pass
             else:
                 struct_im = BaseIngredient.get_structure_from_file(self, pfpath)
-                sorted_im = self.sort_structure_and_neb_lines(struct_im, 0) 
+                base_struct = self.keywords['structure']
+                mylabel = BaseIngredient.get_my_label(self, "neblabel")
+                neblines = self.keywords['program_keys']['neblines'][mylabel]
+                sorted_im = structure_extensions.sort_structure_and_neb_lines(struct_im, base_struct, neblines, 0) 
                 imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
             raise MASTError(self.__class__.__name__, "Incomplete number of forwared images found!")
         return imstrs
-    def do_interpolation(self, parentstructures):
-        """Do interpolation."""
-        if parentstructures == None:
-            raise MASTError(self.__class__.__name__,"Bad number of parent paths.")
-        struct_init = parentstructures[0]
-        struct_fin = parentstructures[1]
-        structure_list = struct_init.interpolate(struct_fin, int(self.keywords['program_keys']['images']) + 1 )
-        return structure_list
 
     def place_parent_energy_files(self):
         """Assume parents have written files parent_energy_<N>.
@@ -277,7 +176,7 @@ class WriteIngredient(BaseIngredient):
 
 
 
-    def write_files_in_subfolder(self):
+    def write_neb_subfolders(self):
         """Write the static runs to each subfolder.
         """
         self.write_files_default() #Write the POSCAR files
@@ -300,10 +199,10 @@ class WriteIngredient(BaseIngredient):
             imct = imct + 1
         self.keywords['name']=myname
         return
-    def write_files_default(self):
+    def write_singlerun(self):
         self.set_up_program_input()
         self.write_submit_script()
-    def write_files_phonon_multiple(self):
+    def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
         """
         self.set_up_program_input()
@@ -349,7 +248,7 @@ class WriteIngredient(BaseIngredient):
         return mysdlist
         
 
-    def write_files_phonon_single(self):
+    def write_phonon_single(self):
         """Write the phonon files to a directory.
         """
         self.set_up_program_input()
