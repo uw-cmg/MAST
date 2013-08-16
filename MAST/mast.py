@@ -17,7 +17,7 @@ from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
 
-from MAST.ingredients.ingredients_loader import IngredientsLoader
+#from MAST.ingredients.ingredients_loader import IngredientsLoader
 
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
