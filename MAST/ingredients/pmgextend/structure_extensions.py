@@ -176,3 +176,95 @@ def do_interpolation(parentstructures, numim):
     structure_list = struct_init.interpolate(struct_fin, numim+1) + 1 )
     return structure_list
 
+def get_sd_array(phonon_center_site, phonon_center_radius, mystruc):
+    """Create a selective dynamics array.
+        Args:
+            phonon_center_site <str>: phonon center site (coordinate)
+            phonon_center_radius <float>: phonon center radius
+            mystruc <Structure>: pymatgen Structure
+    """
+    mynbarr = get_neighbor_array(phonon_center_site, phonon_center_radius, mystruc)
+    mysd = np.zeros([mystruc.num_sites,3],bool)
+    for myn in mynbarr:
+        mysd[myn]=np.ones(3,bool)
+    return mysd
+
+def get_neighbor_array(phonon_center_site, phonon_center_radius, mystruc, tol=1e-1):
+    """
+        Get a neighbor-index array.
+        Use program_keywords 'phonon_center_site' and
+        'phonon_center_radius' to limit the number of phonons calculated.
+        ['program_keys']['phonon'][label]['phonon_center_site']
+                should be a coordinate
+                If the key is missing, all atoms will be taken into account.
+        ['program_keys']['phonon'][label]['phonon_center_radius']
+                should be a positive float in ANGSTROMS (Not fractional.)
+                If the key is missing or 0, nothing extra happens.
+                If the key is present and nonzero, then all atoms in a
+                    radius around EACH site found in phonon_center_site
+                    will also be taken into account.
+        Args:
+            phonon_center_site <str>: phonon center site (coordinate)
+            phonon_center_radius <float>: phonon center radius
+            mystruc <Structure>: pymatgen Structure
+            tol <float>: Tolerance for match-searching.
+    """
+    if phonon_center_site == None:
+        return None
+    print "TTM DEBUG: centersite: ", phonon_center_site.strip().split()
+    print "TTM DEBUG: MYSTRUC: ", mystruc
+    pcscoord = np.array(phonon_center_site.strip().split(), float)
+    pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
+    print "TTM DEBUG PCSarr: ", pcsarr
+    uniqsites = np.unique(pcsarr)
+
+    if len(uniqsites) == 0:
+        raise MASTError("pmgextend/structure_extensions", "No sites found for phonon centering.")
+
+    if phonon_center_radius == None:
+        return uniqsites
+
+    nrad = float(phonon_center_radius)
+    if nrad == 0:
+        return uniqsites
+    if nrad < 0:
+        raise MASTError("pmgextend/structure_extensions", "Phonon center radius should not be less than zero!")
+
+    nbtotarr=None
+    for pcs in uniqsites:
+        neighbors = mystruc.get_neighbors(mystruc[pcs], nrad, True)
+        if nbtotarr == None:
+            nbtotarr = neighbors
+        else:
+            np.concatenate([nbtotarr, neighbors])
+    nbsitelist=list()
+    for nbr in nbtotarr:
+        nbsitelist.append(nbr[-1])
+    nbsitelist = np.array(nbsitelist)
+    alltotarr = np.concatenate([uniqsites, nbsitelist])
+    allsites = np.unique(alltotarr)
+    return allsites
+
+
+def get_multiple_sd_array(phonon_center_site, phonon_center_radius, mystruc):
+    """Create a selective dynamics array, for use when every atom and every
+        direction is a separate calculation (T F F, etc.)
+        Args:
+            phonon_center_site <str>: phonon center site (coordinate)
+            phonon_center_radius <float>: phonon center radius, in Angstroms
+            mystruc <Structure>: pymatgen Structure
+        Returns:
+            mysdlist <list>: list of SD arrays
+    """
+    if phonon_center_site == None:
+        return None
+    mynbarr = get_neighbor_array(phonon_center_site, phonon_center_radius, mystruc)
+    mysdlist=list()
+    for myn in mynbarr:
+        for myct in range(0,3):
+            mysd = np.zeros([mystruc.num_sites,3],bool)
+            mysd[myn]=np.zeros(3,bool)
+            mysd[myn][myct]=1
+            mysdlist.append(mysd)
+    return mysdlist
+

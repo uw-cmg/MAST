@@ -208,7 +208,8 @@ class WriteIngredient(BaseIngredient):
         self.set_up_program_input()
         self.write_submit_script()
         mystructure = BaseIngredient.get_structure_from_directory(self, self.keywords['name'])
-        sdarrlist = self.get_multiple_sd_array(mystructure)
+        [pcs,pcr] = self.get_my_phonon_params()
+        sdarrlist = structure_extensions.get_multiple_sd_array(pcs, pcr, mystructure)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
         sct=1
@@ -227,25 +228,6 @@ class WriteIngredient(BaseIngredient):
             self.forward_extra_restart_files(myname, newname)
             sct = sct + 1
         self.keywords['name']=myname
-    def get_multiple_sd_array(self, mystruc):
-        """Create a selective dynamics array.
-            Args:
-                mystruc <Structure>: pymatgen Structure
-            Returns:
-                mysdlist <list>: list of SD arrays
-        """
-        [phonon_center_site,phonon_center_radius]=self.get_my_phonon_params()
-        if phonon_center_site == None:
-            return None
-        mynbarr = self.get_neighbor_array(mystruc)
-        mysdlist=list()
-        for myn in mynbarr:
-            for myct in range(0,3):
-                mysd = np.zeros([mystruc.num_sites,3],bool)
-                mysd[myn]=np.zeros(3,bool)
-                mysd[myn][myct]=1
-                mysdlist.append(mysd)
-        return mysdlist
         
 
     def write_phonon_single(self):
@@ -254,7 +236,8 @@ class WriteIngredient(BaseIngredient):
         self.set_up_program_input()
         self.write_submit_script()
         mystructure = BaseIngredient.get_structure_from_directory(self, self.keywords['name'])
-        sdarr = self.get_sd_array(mystructure)
+        [pcs,pcr] = self.get_my_phonon_params()
+        sdarr = structure_extensions.get_sd_array(pcs, pcr, mystructure)
         if sdarr == None:
             return
         self.add_selective_dynamics_to_structure(sdarr)
@@ -282,71 +265,7 @@ class WriteIngredient(BaseIngredient):
             phonon_center_radius = myphdict['phonon_center_radius']
         return [phonon_center_site,phonon_center_radius]
 
-    def get_neighbor_array(self, mystruc, tol=1e-1):
-        """
-            Get a neighbor-index array.
-            Use program_keywords 'phonon_center_site' and 
-            'phonon_center_radius' to limit the number of phonons calculated.
-            ['program_keys']['phonon'][label]['phonon_center_site'] 
-                    should be a coordinate
-                    If the key is missing, all atoms will be taken into account.
-            ['program_keys']['phonon'][label]['phonon_center_radius'] 
-                    should be a positive float in ANGSTROMS (Not fractional.)
-                    If the key is missing or 0, nothing extra happens.
-                    If the key is present and nonzero, then all atoms in a
-                        radius around EACH site found in phonon_center_site
-                        will also be taken into account.
-            Args:
-                mystruc <Structure>: pymatgen Structure
-                tol <float>: Tolerance for match-searching.
-        """
-        [phonon_center_site,phonon_center_radius] = self.get_my_phonon_params()
-        if phonon_center_site == None:
-            return None
-        print "TTM DEBUG: centersite: ", phonon_center_site.strip().split()
-        print "TTM DEBUG: MYSTRUC: ", mystruc 
-        pcscoord = np.array(phonon_center_site.strip().split(), float)
-        pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
-        print "TTM DEBUG PCSarr: ", pcsarr
-        uniqsites = np.unique(pcsarr)
-        
-        if len(uniqsites) == 0:
-            raise MASTError(self.__class__.__name__, "No sites found for phonon centering.")
 
-        if phonon_center_radius == None:
-            return uniqsites
-        
-        nrad = float(phonon_center_radius)
-        if nrad == 0:
-            return uniqsites
-        if nrad < 0:
-            raise MASTError(self.__class__.__name__, "Phonon center radius should not be less than zero!")
-
-        nbtotarr=None
-        for pcs in uniqsites:
-            neighbors = mystruc.get_neighbors(mystruc[pcs], nrad, True)
-            if nbtotarr == None:
-                nbtotarr = neighbors
-            else:
-                np.concatenate([nbtotarr, neighbors])
-        nbsitelist=list()
-        for nbr in nbtotarr:
-            nbsitelist.append(nbr[-1])
-        nbsitelist = np.array(nbsitelist)
-        alltotarr = np.concatenate([uniqsites, nbsitelist])
-        allsites = np.unique(alltotarr)
-        return allsites
-
-    def get_sd_array(self, mystruc):
-        """Create a selective dynamics array.
-            Args:
-                mystruc <Structure>: pymatgen Structure
-        """
-        mynbarr = self.get_neighbor_array(mystruc)
-        mysd = np.zeros([mystruc.num_sites,3],bool)
-        for myn in mynbarr:
-            mysd[myn]=np.ones(3,bool)
-        return mysd
 class IsReadyToRunIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
@@ -357,7 +276,9 @@ class IsReadyToRunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def is_ready_to_run_defect(self):
+    def ready_singlerun(self):
+        return BaseIngredient.is_ready_to_run(self)
+    def ready_defect(self):
         if self.directory_is_locked():
             return False
         if self.keywords['program'].lower() == 'vasp':
@@ -368,7 +289,7 @@ class IsReadyToRunIngredient(BaseIngredient):
         else:
             raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
 
-    def is_ready_to_run_images(self):
+    def ready_neb_subfolders(self):
         """Make sure all subfolders are ready to run."""
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
@@ -391,7 +312,7 @@ class IsReadyToRunIngredient(BaseIngredient):
         else:
             return False
 
-    def is_ready_to_run_phonons(self):
+    def ready_subfolders(self):
         """Make sure all phonon subfolders are ready to run."""
         myname=self.keywords['name']
         phondirs = dirutil.walkdirs(myname,1,1)
@@ -423,9 +344,9 @@ class RunIngredient(BaseIngredient):
         if self.is_ready_to_run():
             self.write_files()
         return True
-    def run_default(self, mode='serial', curdir=os.getcwd()):
+    def run_singlerun(self, mode='serial', curdir=os.getcwd()):
         return BaseIngredient.run(self, mode)
-    def run_image_subfolders(self):
+    def run_neb_subfolders(self):
         """Run all image subfolders."""
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
@@ -441,7 +362,7 @@ class RunIngredient(BaseIngredient):
             imct = imct + 1
         self.keywords['name']=myname
         return
-    def run_phonon_subfolders(self):
+    def run_subfolders(self):
         """Run all subfolders."""
         myname=self.keywords['name']
         phondirs = dirutil.walkdirs(myname,1,1)
@@ -464,7 +385,7 @@ class IsCompleteIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def is_complete_defect(self):
+    def complete_structure(self):
         if self.directory_is_locked():
             return False
         if self.keywords['program'].lower() == 'vasp':
@@ -474,9 +395,9 @@ class IsCompleteIngredient(BaseIngredient):
                 return False
         else:
             raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
-    def is_complete_default(self):
+    def complete_singlerun(self):
         return BaseIngredient.is_complete(self)
-    def is_complete_image_subfolders(self):
+    def complete_neb_subfolders(self):
         """Make sure all subfolders are complete."""
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
@@ -501,7 +422,7 @@ class IsCompleteIngredient(BaseIngredient):
         else:
             return False
 
-    def is_complete_phonon_subfolders(self):
+    def complete_subfolders(self):
         """Make sure all subfolders are complete."""
         myname=self.keywords['name']
         phondirs = dirutil.walkdirs(myname,1,1)
@@ -529,11 +450,11 @@ class UpdateChildrenIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def update_children_structure(self):
+    def give_structure(self):
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_structure(self.keywords['name'], childname)
 
-    def update_children_images_to_neb_top(self):
+    def give_neb_structures_to_neb(self):
         """Update to ANOTHER NEB."""
         for childname in self.keywords['child_dict'].iterkeys():
             myct=1
@@ -543,7 +464,7 @@ class UpdateChildrenIngredient(BaseIngredient):
                 self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neblabel") + '_' + imno)
                 myct = myct + 1
     
-    def update_children_images_into_images(self):
+    def give_neb_structures_to_neb_subfolders(self):
         """Update children by forwarding parent structure into image folders.
         """
         myct=1
@@ -560,7 +481,7 @@ class UpdateChildrenIngredient(BaseIngredient):
 
 
 
-    def update_children_middle_image(self):
+    def give_saddle_structure(self):
         """Forward the middle image structure."""
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
@@ -577,10 +498,7 @@ class UpdateChildrenIngredient(BaseIngredient):
                     self.forward_extra_restart_files(newname, childname)
             imct = imct + 1
         return
-    def update_children_default(self):
-        for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_structure(self.keywords['name'], childname)
-    def update_children_phonon_multiple_to_phon(self):
+    def give_phonon_multiple_forces_and_displacements(self):
         self.combine_dynmats()
         shutil.copy(os.path.join(self.keywords['name'],"DYNMAT_combined"),
             os.path.join(self.keywords['name'],"DYNMAT"))
@@ -588,20 +506,20 @@ class UpdateChildrenIngredient(BaseIngredient):
         shutil.copy(os.path.join(self.keywords['name'],"XDATCAR_combined"),
             os.path.join(self.keywords['name'],"XDATCAR"))
         self.update_children_phonon_single_to_phon()
-    def update_children_phonon_single_to_phon(self):
+    def give_phonon_single_forces_and_displacements(self):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_dynmat(self.keywords['name'], childname)
             self.forward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
 
-    def update_children_to_neb_endpoints(self):
+    def give_structure_and_energy_to_neb(self):
         label = BaseIngredient.get_my_label(self, "defect_label")
         for childname in self.keywords['child_dict'].iterkeys():
             self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + label)
             self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
-    def update_children_extra_restart(self):
-        self.update_children_default()
+    def give_structure_and_restart_files(self):
         for childname in self.keywords['child_dict'].iterkeys():
+            self.forward_parent_structure(self.keywords['name'], childname)
             self.forward_extra_restart_files(self.keywords['name'], childname)
    
 

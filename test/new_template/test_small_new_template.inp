@@ -95,7 +95,7 @@ end
 begin singlerun_to_neb
 ibrion -1
 nsw 0
-mast_update_children_method  give_structure_to_neb
+mast_update_children_method  give_structure_and_energy_to_neb
 lwave True
 lcharge True
 end
@@ -139,7 +139,10 @@ end
 
 begin phonon_to_phononparse
 mast_write_method            write_phonon_multiple
-mast_update_children_method  give_phonon_parameters
+mast_ready_method            ready_subfolders
+mast_run_method              run_subfolders
+mast_complete_method         complete_subfolders
+mast_update_children_method  give_phonon_multiple_forces_and_displacements
 ibrion 5
 nfree 2
 potim 0.01
