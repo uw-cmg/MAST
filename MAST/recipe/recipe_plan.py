@@ -16,7 +16,8 @@ class RecipePlan:
     def __init__(self, name):
         self.name            = name
         self.ingredients     = dict()
-        self.dependency_dict = dict()
+        self.how_to_update   = dict()
+        self.parents_to_check= dict()
         #print 'GRJ DEBUG: Initializing RecipePlan'
 
     def add_ingredient(self, ingredient_name, ingredient):
@@ -29,10 +30,10 @@ class RecipePlan:
         """
         return self.ingredients.get(ingredient_name)
 
-    def add_parent(self, ingredient_name, parent_name):
-        """Used to build the dependency dict using the parent child relationship
-        """
-        self.dependency_dict.setdefault(ingredient_name, list()).append(parent_name)
+    #def add_parent(self, ingredient_name, parent_name):
+    #    """Used to build the dependency dict using the parent child relationship
+    #    """
+    #    self.dependency_dict.setdefault(ingredient_name, list()).append(parent_name)
 
     def ingredient_iterator(self):
         """Iterates through the ingredients dict and returns the ingredients one by one

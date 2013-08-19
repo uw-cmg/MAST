@@ -18,9 +18,10 @@ def read_recipe(filename, verbose=1):
             filename <str>: Full path to recipe file
         Returns:
             totpdict <dict>: Dictionary of 
-                [parentname][parent method group]=[child,child..]
+                [parentname][child]=[parent method group]
             totcdict <dict>: Dictionary of
-                [childname]=[parent,parent,...]
+                [childname]['parents']=[parent,parent,...]
+                [childname]['method']=[method group]
             rname <str>: Recipe name
     """
     rfile = MASTFile(filename)
@@ -37,8 +38,9 @@ def read_recipe(filename, verbose=1):
         else:
             rdata.append(myline)
     subrdict = split_into_subrecipes(rdata) 
-    totpdict=dict()
-    totcdict=dict()
+    howtorun=dict()
+    parentstocheck=dict()
+    howtoupdate=dict()
     for subkey in subrdict.keys():
         idict = make_indentation_dictionary(subrdict[subkey])
         if verbose == 1:
@@ -48,28 +50,33 @@ def read_recipe(filename, verbose=1):
                 print "Indent: ", indentkey
                 for myitem in idict[indentkey]:
                     print myitem
-        [onepdict,onecdict]=parse_indentation_dict(idict)
-        for pkey in onepdict.keys():
-            if not (pkey in totpdict.keys()):
-                totpdict[pkey]=dict()
-            for pmkey in onepdict[pkey].keys():
-                if not (pmkey in totpdict[pkey].keys()):
-                    totpdict[pkey][pmkey]=list()
-                totpdict[pkey][pmkey].extend(onepdict[pkey][pmkey])
-        for ckey in onecdict.keys():
-            if not (ckey in totcdict.keys()):
-                totcdict[ckey]=list()
-            totcdict[ckey].extend(onecdict[ckey])
-    plist = totpdict.keys()
-    plist.sort()
+        [onehtu, oneptc, onehtr]=parse_indentation_dict(idict)
+        for pkey in onehtu.keys():
+            if not (pkey in howtoupdate.keys()):
+                howtoupdate[pkey]=dict()
+            for pmkey in onehtu[pkey].keys():
+                howtoupdate[pkey][pmkey]=onehtu[pkey][pmkey]
+        for ckey in oneptc.keys():
+            if not (ckey in parentstocheck.keys()):
+                parentstocheck[ckey]=list()
+            parentstocheck[ckey].extend(oneptc[ckey])
+            howtorun[ckey]=onehtr[ckey]
     if verbose==1:
-        for pkey in plist:
-            print pkey, ":", totpdict[pkey]
-        clist = totcdict.keys()
+        print "How-to-update-children tree: "
+        keylist = howtoupdate.keys()
+        keylist.sort()
+        for htukey in keylist:
+            print htukey, ":", howtoupdate[htukey]
+        clist = parentstocheck.keys()
         clist.sort()
+        print "Parents-to-check tree: "
         for ckey in clist:
-            print ckey, ":", totcdict[ckey]
-    return [totpdict, totcdict, rname]
+            print ckey, ":", parentstocheck[ckey]
+        print "How-to-run tree: "
+        for ckey in clist:
+            print ckey, ":", howtorun[ckey]
+
+    return [howtoupdate, parentstocheck, howtorun, rname]
 
 def split_into_subrecipes(mydata):
     """Split an entire recipe into subrecipes. Each new zero-level 
@@ -136,20 +143,26 @@ def parse_for_name_and_instructions(myline):
     return pdict
 
 def parse_indentation_dict(idict):
-    """Parse an indentation dictionary 
+    """Parse an indentation dictionary into three parts. 
         Args:
             idict <dict>: Indentation dictionary
         Returns:
-            parentdict <dict>: Dictionary of parents and 
-                instructions, with values as list of applicable 
-                children for those sets of instructions
-                    parentdict['perfect_opt1']
-                    ['volrelax_to_singlerun']=['perfect_opt2']
-            childdict <dict>: Dictionary of children, 
-                        with values as list of parents
+            how_to_update <dict>: Dictionary of how to update
+                from the parent to the child:
+                how_to_update['perfect_opt1']['perfect_opt2']=
+                            ['volrelax_to_singlerun']
+            parents_to_check <dict>: Dictionary of parents
+                for the child to check (as a list)
+                parents_to_check['neb_1-2_opt1']=
+                        ['defect1_stat','defect2_stat']
+            how_to_run <dict>: Dictionary of how to write,
+                evaluate run readiness, run, and evaluate
+                completion of the ingredient:
+                how_to_run['perfect_opt1']=['volrelax_to_singlerun']
     """
-    parentdict=dict()
-    childdict=dict()
+    htu=dict()
+    ptc=dict()
+    htr=dict()
     iidx=0
     ikeys = idict.keys()
     ikeys.sort()
@@ -160,10 +173,8 @@ def parse_indentation_dict(idict):
             lct = idict[iidx][pidx][0]
             pname = idict[iidx][pidx][1]
             pmethod = idict[iidx][pidx][2]
-            if not (pname in parentdict.keys()):
-                parentdict[pname]=dict()
-            if not (pmethod in parentdict[pname].keys()):
-                parentdict[pname][pmethod]=list()
+            if not (pname in htu.keys()):
+                htu[pname]=dict()
             if not (iidx + 1) in ikeys: #no children
                 pass
             else:
@@ -171,6 +182,7 @@ def parse_indentation_dict(idict):
                 for clitem in cllist:
                     clnum = clitem[0]
                     clname = clitem[1]
+                    clmethod = clitem[2]
                     addme=0
                     if (clnum > lct):
                         if (pidx + 1) >= plen: #no more parents
@@ -181,15 +193,17 @@ def parse_indentation_dict(idict):
                             elif clnum < idict[iidx][pidx+1][0]:
                                 addme=1
                     if addme == 1:
-                        parentdict[pname][pmethod].append(clname)
-                        if not (clname in childdict.keys()):
-                            childdict[clname]=list()
-                        childdict[clname].append(pname)
-            if not (pname in childdict.keys()):
-                childdict[pname]=list() #add tree originator(s)
+                        htu[pname][clname]=pmethod
+                        if not (clname in ptc.keys()):
+                            ptc[clname]=list()
+                            htr[clname]=clmethod 
+                        ptc[clname].append(pname)
+            if not (pname in ptc.keys()):
+                ptc[pname]=list() #add tree originator(s)
+                htr[pname]=pmethod
             pidx=pidx+1
         iidx=iidx+1
-    return [parentdict,childdict]
+    return [htu,ptc,htr]
 
 def make_indentation_dictionary(subrlist):
     """Parse a single subrecipe into an indentation dictionary:
