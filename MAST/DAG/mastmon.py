@@ -6,19 +6,20 @@ from MAST.utility import dirutil
 import time
 from MAST.DAG.dagutil import *
 abspath = os.path.abspath
+import shutil
 
 
 class MASTmon(object):
     """MASTmon is a daemon to run dagscheduler class.
-        This finds newly submitted session (recipe) and manage them. \n
-        Also completed session is moved in archive directory by MASTmon.
+        This finds newly submitted recipe (recipe) and manage them. \n
+        Also completed recipe is moved in archive directory by MASTmon.
         For consistency, users may touch sesssions in the archive directory."""
     
     def __init__(self):
         self.registered_dir = set()
 
-        self.home = os.path.expandvars(os.environ['MAST_SCRATCH'])
-        self._ARCHIVE = os.path.expandvars(os.environ['MAST_ARCHIVE'])
+        self.home = dirutil.get_mast_scratch_path()
+        self._ARCHIVE = dirutil.get_mast_archive_path()
 
         self.pm = PickleManager()
         self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
@@ -32,39 +33,43 @@ class MASTmon(object):
                 os.makedirs(self._ARCHIVE)
         except:
             raise MASTError(self.__class__.__name__,
-                    "Error making directory for MASTmon and completed sessions")
+                    "Error making directory for MASTmon and completed recipes")
 
-    def add_sessions(self, new_session_dirs):
-        """recipe_dirs is a set of sessions in MASTmon home directory"""
-        for session_dir in  new_session_dirs:
-            #print 'session_dir =', session_dir
-            if not os.path.exists(session_dir):
-                raise MASTError("mastmon, add_sessions", "No session_dir at %s" % session_dir)
-            os.chdir(session_dir)
-            self.move_extra_files(session_dir)
+    def add_recipes(self, new_recipe_dirs, verbose):
+        """recipe_dirs is a set of recipes in MASTmon home directory"""
+        for recipe_dir in  new_recipe_dirs:
+            #print 'recipe_dir =', recipe_dir
+            if not os.path.exists(recipe_dir):
+                raise MASTError("mastmon, add_recipes", "No recipe_dir at %s" % recipe_dir)
+            os.chdir(recipe_dir)
+            self.move_extra_files(recipe_dir)
             if not os.path.isfile('mast.pickle'):
-                raise MASTError("mastmon, add_sessions", "No pickle file at %s/%s" % (session_dir, 'mast.pickle'))
+                raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (recipe_dir, 'mast.pickle'))
             mastobj = self.pm.load_variable('mast.pickle')	
-            depdict = mastobj.dependency_dict
-            ingredients = mastobj.ingredients
+            mastobj.check_recipe_status(verbose)
+            #depdict = mastobj.dependency_dict
+            #ingredients = mastobj.ingredients
+            if mastobj.status == "C":
+                shutil.move(recipe_dir, self._ARCHIVE)
+            self.pm.save(mastobj, 'mast.pickle')
 
-            if self.scheduler is None:
-                print 'step 1: create DAGScheduler object'
-                self.scheduler = DAGScheduler()
+            #if self.scheduler is None:
+            #    print 'step 1: create DAGScheduler object'
+            #    self.scheduler = DAGScheduler()
             
-            try: 
-                self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=session_dir)    
-            except:
-                raise MASTError(self.__class__.__name__,
-                    "Error adding jobs to scheduler.")
+            #try: 
+            #    self.scheduler.addjobs(ingredients_dict=ingredients, dependency_dict=depdict, sname=recipe_dir)    
+            #except:
+            #    raise MASTError(self.__class__.__name__,
+            #        "Error adding jobs to scheduler.")
                 
             os.chdir(self.home)
                 
-        self.registered_dir = self.registered_dir.union(new_session_dirs)
+        #self.registered_dir = self.registered_dir.union(new_recipe_dirs)
 
-    def del_session(self, scheduler, sid):
-        print 'Deleting session %i from the scheduler' % sid
-        scheduler.del_session(sid)
+    def del_recipe(self, scheduler, sid):
+        print 'Deleting recipe %i from the scheduler' % sid
+        scheduler.del_recipe(sid)
 
     def _save(self):
         """Save current stauts of MASTmon such as registered_dir and scheduler"""
@@ -96,7 +101,7 @@ class MASTmon(object):
             ex) mastmon.run(interval=30) # run MASTmon forever as a real daemon. By default interval is 30 sec. \n
             ex) mastmon.run(niter=1) # run MASTmon one iteration for crontab user. By default interval is 10 sec. \n
             ex) mastmon.run(niter=20,stopcond='NOSESSION') # run MASTmon for 20 iterations. \n
-            And stop it all sessions are done.
+            And stop it all recipes are done.
         """
         # move to mastmon home
         curdir = os.getcwd()
@@ -115,7 +120,7 @@ class MASTmon(object):
             interval = SCHEDULING_INTERVAL
             
         #load dagscheduler pickle
-        self._load()
+        #self._load()
         iter = 0;
         while True:
             if niter is not None and iter >= niter:
@@ -123,42 +128,32 @@ class MASTmon(object):
             
             iter = iter + 1
             # get directories from mast home
-            session_dirs = os.walk('.').next()[1]
+            #recipe_dirs = os.walk('.').next()[1]
+
+            #new_recipe_dirs = set(recipe_dirs) - self.registered_dir
+            new_recipe_dirs = os.walk('.').next()[1]
             if verbose == 1:
-                print "Session dirs: ", session_dirs
+                print "Recipe directories: ", new_recipe_dirs
 
-            # remove 'archive' directory from the list of session directories
-            if self._ARCHIVE in session_dirs:
-                session_dirs.remove(self._ARCHIVE)
-            else:
-                # if masthome doesn't have 'archive', then make it
-                #os.system('mkdir %s' % os.path.join(abspath(self.home),self._ARCHIVE))
-                if not os.path.exists(self._ARCHIVE):
-                    os.makedirs(self._ARCHIVE)
+            # add new recipes
+            self.add_recipes(new_recipe_dirs, verbose)
 
-            new_session_dirs = set(session_dirs) - self.registered_dir
-            if verbose == 1:
-                print "new session dirs: ",new_session_dirs
+            # run it for n iterations or until all recipes are complete
+            #csnames = self.scheduler.run(niter=1, verbose=verbose)
+            #self.scheduler.show_recipe_table()
+            #remove complete recipes
 
-            # add new sessions
-            self.add_sessions(new_session_dirs)
+            #if remove is not None:
+            #    #print 'GRJ DEBUG: Before:', self.scheduler
+            #    self.del_recipe(self.scheduler, remove)
+            #    #print 'GRJ DEBUG: After:', self.scheduler
+            #    self._save()
+            #    break
 
-            # run it for n iterations or until all sessions are complete
-            csnames = self.scheduler.run(niter=1, verbose=verbose)
-            self.scheduler.show_session_table()
-            #remove complete sessions
-
-            if remove is not None:
-                #print 'GRJ DEBUG: Before:', self.scheduler
-                self.del_session(self.scheduler, remove)
-                #print 'GRJ DEBUG: After:', self.scheduler
-                self._save()
-                break
-
-            self.registered_dir = self.registered_dir - csnames
+            #self.registered_dir = self.registered_dir - csnames
 
             # save scheduler object
-            self._save()
+            #self._save()
 
             if stopcond is not None:
                 if stopcond.upper() == 'NOSESSION' and len(self.registered_dir) == 0:

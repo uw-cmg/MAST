@@ -27,6 +27,7 @@ class RecipePlan:
         self.ready_methods    = dict()
         self.complete_methods = dict()
         self.ingred_input_options = dict()
+        self.status="I"
         #print 'GRJ DEBUG: Initializing RecipePlan'
 
     def write_ingredient(self, iname):
@@ -34,7 +35,10 @@ class RecipePlan:
             correct method
         """
         methodname = self.write_methods[iname]
-        my_ing = WriteIngredient(self.ingred_input_options[iname])
+        my_ing = WriteIngredient(name = self.ingred_input_options[iname]['name'],
+            program=self.ingred_input_options[iname]['program'],
+            program_keys=self.ingred_input_options[iname]['program_keys'],
+            structure=self.ingred_input_options[iname]['structure'])
         writeresult=getattr(WriteIngredient, methodname)(my_ing)
         return writeresult
 
@@ -42,7 +46,10 @@ class RecipePlan:
         """Check if an ingredient is complete
         """
         methodname = self.complete_methods[iname]
-        my_ing = IsCompleteIngredient(self.ingred_input_options[iname])
+        my_ing = IsCompleteIngredient(name = self.ingred_input_options[iname]['name'],
+            program=self.ingred_input_options[iname]['program'],
+            program_keys=self.ingred_input_options[iname]['program_keys'],
+            structure=self.ingred_input_options[iname]['structure'])
         iscomplete=getattr(IsCompleteIngredient, methodname)(my_ing)
         return iscomplete
 
@@ -50,8 +57,11 @@ class RecipePlan:
         """Check if an ingredient is ready
         """
         methodname = self.ready_methods[iname]
-        my_ing = IsReadyIngredient(self.ingred_input_options[iname])
-        isready=getattr(IsReadyIngredient, methodname)(my_ing)
+        my_ing = IsReadyToRunIngredient(name = self.ingred_input_options[iname]['name'],
+            program=self.ingred_input_options[iname]['program'],
+            program_keys=self.ingred_input_options[iname]['program_keys'],
+            structure=self.ingred_input_options[iname]['structure'])
+        isready=getattr(IsReadyToRunIngredient, methodname)(my_ing)
         return isready
 
 
@@ -59,7 +69,10 @@ class RecipePlan:
         """Run ingredient
         """
         methodname = self.run_methods[iname]
-        my_ing = RunIngredient(self.ingred_input_options[iname])
+        my_ing = RunIngredient(name = self.ingred_input_options[iname]['name'],
+            program=self.ingred_input_options[iname]['program'],
+            program_keys=self.ingred_input_options[iname]['program_keys'],
+            structure=self.ingred_input_options[iname]['structure'])
         runresult=getattr(RunIngredient, methodname)(my_ing)
         return runresult
 
@@ -69,10 +82,27 @@ class RecipePlan:
         upd_results=list()
         for childname in self.update_methods[iname]:
             methodname = self.update_methods[iname][childname]
-            my_ing = UpdateChildrenIngredient(self.ingred_input_options[iname])
+            my_ing = UpdateChildrenIngredient(name = self.ingred_input_options[iname]['name'],
+                program=self.ingred_input_options[iname]['program'],
+                program_keys=self.ingred_input_options[iname]['program_keys'],
+                structure=self.ingred_input_options[iname]['structure'])
             updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing, childname)
             upd_results.append(updresult)
         return upd_results
+    def check_if_have_parents(self):
+        """Check if runs at "Initialized" status have parents 
+            and switch them to "Wait" if so; otherwise,
+            switch them to "Stage"
+        """
+        for iname in self.ingredients.keys():
+            if self.ingredients[iname] == "I":
+                ptc = list(self.parents_to_check[iname])
+                plen = len(ptc)
+                if plen > 0:
+                    self.ingredients[iname] = "W"
+                else:
+                    self.ingredients[iname] = "S"
+
 
     def check_if_queued_are_complete(self):
         """Check if queued ingredients are complete
@@ -115,20 +145,24 @@ class RecipePlan:
 
     def check_recipe_status(self, verbose=1):
         """Check ingredient statuses, and get recipe status
+            I = initialized
             W = waiting on parents
-            I = parents complete, okay to stage
+            S = staged
             Q = queued
             C = complete
-        Return:
-            C = complete
-            N = not complete
         """
+        self.check_if_have_parents()
         self.check_if_queued_are_complete()
         self.check_if_parents_are_complete()
         self.run_staged_ingredients()
         self.print_status(verbose)
     def print_status(self, verbose=1):
-        """Print status"""
+        """Print status and set the recipe status.
+            C = complete
+            R = running
+            I = initialized
+        """
+
         total = len(self.ingredients.keys())
         totcomp=0
         totwait=0
@@ -157,8 +191,10 @@ class RecipePlan:
         print "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","QUEUED","COMPLETE","TOTAL")
         print "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totqueue, totcomp, total)
         if totcomp == total:
-            return True
-        return False
+            self.status = "C"
+        else:
+            self.status = "R"
+        #print "Recipe status: %s" % self.status
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name
