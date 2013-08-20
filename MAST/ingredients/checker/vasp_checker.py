@@ -338,14 +338,16 @@ def forward_extra_restart_files(parentpath, childpath):
     """Forward extra restart files: softlink to WAVECAR and CHGCAR."""
     dirutil.lock_directory(childpath)
     import subprocess
+    #print "cwd: ", os.getcwd()
+    curpath = os.getcwd()
     os.chdir(childpath)
-    print parentpath
-    print childpath
+    #print parentpath
+    #print childpath
     mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath, shell=True)
     mylink.wait()
     mylink2=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
     mylink2.wait()
-    os.chdir(parentpath)
+    os.chdir(curpath)
     dirutil.unlock_directory(childpath)
 def add_selective_dynamics_to_structure(keywords, sdarray):
     name = keywords['name']

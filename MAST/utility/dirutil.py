@@ -1,6 +1,7 @@
 import os
 import sys
 import fnmatch
+import time
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
 
@@ -126,28 +127,41 @@ def directory_is_locked(dirname):
     else:
         return False
 
-def lock_directory(dirname, waitmax=1000):
+def lock_directory(dirname, waitmax=10):
     """Lock a directory using a lockfile.
         Args:
             dirname <str>: Directory name
             waitmax <int>: maximum number of 5-second waits
     """
-    import time
     if directory_is_locked(dirname):
         wait_to_write(dirname, waitmax)
     lockfile = open(dirname + "/mast.write_files.lock", 'wb')
     lockfile.writelines(time.ctime())
     lockfile.close()
 
-def unlock_directory(dirname):
-    try:
+def unlock_directory(dirname, waitmax=10):
+    """Unlock a directory by removing the lockfile.
+        Args:
+            dirname <str>: Directory name
+            waitmax <int>: maximum number of 5-second waits
+    """
+    if directory_is_locked(dirname):
         os.remove(dirname + "/mast.write_files.lock")
-    except OSError:
-        raise MASTError("utility unlock_directory",
-            "Tried to unlock directory %s which was not locked." % dirname)
+    else:
+        waitct=1
+        okay=0
+        while (not directory_is_locked(dirname)) and (waitct <= waitmax):
+            if directory_is_locked(dirname):
+                os.remove(dirname + "/mast.write_files.lock")
+                okay=1
+                break
+            time.sleep(5)
+            waitct=waitct+1
+        if not okay==1:
+            raise MASTError("utility unlock_directory",
+                "Tried to unlock directory %s which was not locked." % dirname)
 
-
-def wait_to_write(dirname, waitmax=1000):
+def wait_to_write(dirname, waitmax=10):
     """Wait to write to directory.
         Args:
             dirname <str>: Directory name
@@ -155,7 +169,6 @@ def wait_to_write(dirname, waitmax=1000):
     """
     if waitmax < 1:
         waitmax = 1
-    import time
     waitcount = 1
     while directory_is_locked(dirname) and (waitcount < waitmax):
         time.sleep(5)
