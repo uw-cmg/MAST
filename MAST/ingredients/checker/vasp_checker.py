@@ -225,8 +225,8 @@ def _vasp_is_neb(keywords):
     if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
         return False
     mymeta = Metadata(metafile="%s/metadata.txt" % keywords['name'])
-    [ingline,ingval]=mymeta.search_data("ingredient type")
-    if ingval == "NEB" or ingval == "NEBLowMesh":
+    [ingline,ingval]=mymeta.search_data("name")
+    if ('neb' in ingval.lower()) and not ('static' in ingval.lower()):
         return True
     else:
         return False

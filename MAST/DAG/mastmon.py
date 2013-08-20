@@ -41,6 +41,9 @@ class MASTmon(object):
             #print 'recipe_dir =', recipe_dir
             if not os.path.exists(recipe_dir):
                 raise MASTError("mastmon, add_recipes", "No recipe_dir at %s" % recipe_dir)
+            if not os.path.isfile(os.path.join(recipe_dir,'mast.pickle')):
+                print "Skipping directory %s because there is no pickle file." % recipe_dir
+                continue
             os.chdir(recipe_dir)
             self.move_extra_files(recipe_dir)
             if not os.path.isfile('mast.pickle'):

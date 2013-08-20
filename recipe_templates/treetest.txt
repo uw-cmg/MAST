@@ -3,24 +3,24 @@ Recipe NEBTreeTest
 perfect_opt1 (volrelax_to_singlerun)
     perfect_opt2 (volrelax_to_singlerun)
         perfect_stat (singlerun_to_phonon)
-            perfect_phonon (phonon_to_phononparse)
-                perfect_phonon_parse (phononparse)
-        inducedefect1 (induce_defect)
-            defect1_opt1
-                defect1_opt2
-                    defect1_stat (singlerun_to_phonon)
-                        defect1_phonon (phonon_to_phononparse)
-                            defect1_phonon_parse (phononparse)
-        inducedefect2 (induce_defect)
-            defect2_opt1
-                defect2_opt2
-                    defect2_stat (singlerun_to_phonon)
-                        defect2_phonon (phonon_to_phonparse)
-                            defect2_phonon_parse (phononparse)
-defect1_stat (singlerun_to_neb), defect2_stat (singlerun_to_neb)
+            phonon_perfect (phonon_to_phononparse)
+                phonon_perfect_parse (phononparse)
+        inducedefect_1 (induce_defect)
+            defect_1_opt1
+                defect_1_opt2
+                    defect_1_stat (singlerun_to_phonon)
+                        phonon_1 (phonon_to_phononparse)
+                            phonon_1_parse (phononparse)
+        inducedefect_2 (induce_defect)
+            defect_2_opt1
+                defect_2_opt2
+                    defect_2_stat (singlerun_to_phonon)
+                        phonon_2 (phonon_to_phonparse)
+                            phonon_2_parse (phononparse)
+defect_1_stat (singlerun_to_neb), defect_2_stat (singlerun_to_neb)
     neb_1-2_opt1 (neb_to_neb)
         neb_1-2_opt2 (neb_to_nebstat)
             neb_1-2_stat (nebstat_to_nebphonon)
-                neb_1-2_phonon (phonon_to_phononparse)
-                    neb_1-2_phonon_parse (phononparse)
+                phonon_1-2 (phonon_to_phononparse)
+                    phonon_1-2_parse (phononparse)
     neb_1-2_stat (nebstat_to_nebphonon)

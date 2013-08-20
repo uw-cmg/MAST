@@ -77,44 +77,23 @@ class RecipeSetup(MASTObj):
 
         self.program = self.input_options.options['ingredients'][ingredient_type]['mast_program']
         self.work_dir = self.input_options.get_item('mast', 'working_directory')
-        print "TTM DEBUG SCRATCH: ", self.work_dir
 
         ingredient_name = os.path.join(self.work_dir, name)
-        #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
-        #TTM update ingredients dict to include info from the
-        #'neb', 'defects', and 'chemical_potentials' sections
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
 
-        #print 'GRJ DEBUG: %s ingredient options %s' % (ingredient_type, pkey_d)
-        #print 'GRJ DEBUG: %s ingredient' % ingredient_name
-        #print 'GRJ DEBUG: Global ingredient options', self.input_options.get_item('ingredients', 'global')
-        #print 'GRJ DEBUG: %s', self.input_options.options.keys()
 
         if 'defects' in self.input_options.options.keys():
             if 'defect_' in name.lower():
-                #print 'GRJ DEBUG: self.input_options.get_item(\'defects\',\'defects\')', self.input_options.get_item('defects','defects')
                 for key in self.input_options.get_item('defects','defects'):
                     print key, ingredient_name
 
                 pkey_d.update(self.input_options.get_item('defects','defects'))
                 if 'inducedefect' not in ingredient_type:
-                    #print 'GRJ DEBUG: ingredient_name =', ingredient_name
                     data = self.metafile.read_data(ingredient_name.split('/')[-1]).split(',')
-                    #print 'GRJ DEBUG:  ingredient data:', data
                     for datum in data:
                         if 'charge' in datum:
                             charge = int(datum.split(':')[-1])
-                    #print 'GRJ DEBUG: charge = ', charge
-                    #clabel = [label for label in ingredient_name.split('_') if 'q=' in label][0].split('=')[1]
-                    #if 'n' in clabel[0]:
-                    #    sign = -1
-                    #else:
-                    #    sign = 1
-                    #charge = sign * int(clabel[1:])
-                    #print 'GRJ DEBUG: Charge =', charge
-                    pkey_d['mast_charge'] = charge
-                    #print 'GRJ DEBUG: Name =', name
-                    #print 'Defect found, pkey_d =', pkey_d
+                            pkey_d['mast_charge'] = charge
 
         if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
@@ -160,6 +139,7 @@ class RecipeSetup(MASTObj):
         recipe_obj = RecipePlan(recipe_name)
         ingredlist = how_to_run.keys()
         for ingred in ingredlist:
+            self.update_top_meta_for_ingred(ingred)
             ingredtype = how_to_run[ingred]
             recipe_obj.ingredients[ingred]="I" #set all to initialized
             recipe_obj.ingred_input_options[ingred] = self.get_my_ingredient_options(ingred, ingredtype)
@@ -174,6 +154,29 @@ class RecipeSetup(MASTObj):
                 recipe_obj.update_methods[ingred][ichild] = self.get_method_from_ingredient_type(updingredtype, "mast_update_children_method")
             recipe_obj.parents_to_check = dict(parents_to_check)
         return recipe_obj
+
+    def update_top_meta_for_ingred(self, myingred):
+        """Update the top metafile for an ingredient.
+            Args:
+                myingred <str>: ingredient name
+        """
+        datalist=list()
+        datalist.append("ingredient type: %s " % myingred)
+        if 'defect_' in myingred:
+            defectlabel = myingred.split('defect_')[1].split('_')[0]
+            if defectlabel.isdigit():
+                defectlabel = "defect_" + defectlabel
+            datalist.append("defect_label: %s" % defectlabel)
+        if 'q=' in myingred:
+            chargelabel = myingred.split('q=')[1].split('_')[0]
+            datalist.append("charge: %s" % chargelabel)
+        if 'neb_' in myingred:
+            neblabel = myingred.split('neb_')[1].split('_')[0]
+            datalist.append("neblabel: %s" % neblabel)
+        if 'phonon_' in myingred:
+            phononlabel = myingred.split('phonon_')[1].split('_')[0]
+        data=','.join(datalist)
+        self.metafile.write_data(myingred, data)
 
     def create_ingredient(self, my_ingred_input_options):
         """Create the ingredient directory and metadata file.
