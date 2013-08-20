@@ -172,6 +172,7 @@ class RecipeSetup(MASTObj):
             for ichild in how_to_update[ingred].keys():
                 updingredtype = how_to_update[ingred][ichild]
                 recipe_obj.update_methods[ingred][ichild] = self.get_method_from_ingredient_type(updingredtype, "mast_update_children_method")
+            recipe_obj.parents_to_check = dict(parents_to_check)
         return recipe_obj
 
     def create_ingredient(self, my_ingred_input_options):

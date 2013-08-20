@@ -77,7 +77,22 @@ class InputOptions:
         self.options = dict()
 
     def __repr__(self):
-        return str(self.options)
+        rlines=""
+        rlines=rlines + "Input options: \n"
+        sections = self.get_sections()
+        sections.sort()
+        for section in sections:
+            rlines = rlines + "*********************\n"
+            rlines = rlines + "*   %s section\n" % section
+            rlines = rlines + "*********************\n"
+            skeys = self.get_section_keys(section)
+            skeys.sort()
+            for skey in skeys:
+                rlines = rlines + "------------------\n" 
+                rlines = rlines + "%s:\n" % skey
+                rlines = rlines + "------------------\n" 
+                rlines = rlines + "    %s\n" % str(self.get_item(section,skey))
+        return rlines
     
 
 

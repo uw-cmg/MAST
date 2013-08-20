@@ -123,11 +123,13 @@ class RecipePlan:
             C = complete
             N = not complete
         """
-        total = len(self.ingredients.keys())
         self.check_if_queued_are_complete()
         self.check_if_parents_are_complete()
         self.run_staged_ingredients()
-        
+        self.print_status(verbose)
+    def print_status(self, verbose=1):
+        """Print status"""
+        total = len(self.ingredients.keys())
         totcomp=0
         totwait=0
         totqueue=0
@@ -137,6 +139,7 @@ class RecipePlan:
         ilist.sort()
         if verbose == 1:
             import time
+            print "Recipe name: %s" % self.name
             print time.asctime()
         for iname in ilist:
             if verbose == 1:
@@ -183,4 +186,24 @@ class RecipePlan:
         """
         for ingredient_name, ingredient_obj in self.ingredients.iteritems():
             yield ingredient_obj
-
+    def __repr__(self):
+        """Print information."""
+        rlines=""
+        rlines=rlines + "Recipe name: %s\n" % self.name
+        rlines=rlines + "Ingredients: \n"
+        ikeys = self.ingredients.keys()
+        ikeys.sort()
+        for ikey in ikeys:
+            rlines=rlines + "    %s\n" % ikey
+            rlines=rlines + "        Parents: \n" 
+            for myparent in self.parents_to_check[ikey]:
+                rlines=rlines + "            %s\n" % myparent
+            rlines=rlines + "        Write:    %s\n" % self.write_methods[ikey]
+            rlines=rlines + "        Ready:    %s\n" % self.ready_methods[ikey]
+            rlines=rlines + "        Run:      %s\n" % self.run_methods[ikey]
+            rlines=rlines + "        Complete: %s\n" % self.complete_methods[ikey]
+            rlines=rlines + "        Children: \n"
+            for htukey in self.update_methods[ikey]:
+                rlines=rlines + "            %s:%s\n" % (htukey, self.update_methods[ikey][htukey])
+        self.print_status()
+        return rlines

@@ -273,4 +273,3 @@ class MAST(MASTObj):
                                          )
         self.input_options.update_item('recipe','recipe_name', parser_obj.parse())
 
-        return recipe_plan_obj
