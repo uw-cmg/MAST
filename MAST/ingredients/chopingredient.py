@@ -111,7 +111,7 @@ class WriteIngredient(BaseIngredient):
                 [struct_init, struct_fin]: pymatgen Structure objects
         """
         header = os.path.join(self.keywords['name'], "parent_structure_")
-        mylabel = BaseIngredient.get_my_label(self, "neblabel").split("-")
+        mylabel = BaseIngredient.get_my_label(self, "neb_label").split("-")
         pfpath_init = header + mylabel[0]
         pfpath_fin = header + mylabel[1]
         if not os.path.isfile(pfpath_init):
@@ -123,7 +123,7 @@ class WriteIngredient(BaseIngredient):
         struct_init = BaseIngredient.get_structure_from_file(self, pfpath_init)
         struct_fin = BaseIngredient.get_structure_from_file(self, pfpath_fin)
         base_struct = self.keywords['structure']
-        mylabel = BaseIngredient.get_my_label(self, "neblabel")
+        mylabel = BaseIngredient.get_my_label(self, "neb_label")
         neblines = self.keywords['program_keys']['neblines'][mylabel]
         sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, 0) 
         sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, 1)
@@ -150,7 +150,7 @@ class WriteIngredient(BaseIngredient):
             else:
                 struct_im = BaseIngredient.get_structure_from_file(self, pfpath)
                 base_struct = self.keywords['structure']
-                mylabel = BaseIngredient.get_my_label(self, "neblabel")
+                mylabel = BaseIngredient.get_my_label(self, "neb_label")
                 neblines = self.keywords['program_keys']['neblines'][mylabel]
                 sorted_im = structure_extensions.sort_structure_and_neb_lines(struct_im, base_struct, neblines, 0) 
                 imstrs.append(sorted_im)
@@ -164,7 +164,7 @@ class WriteIngredient(BaseIngredient):
             Copy these files into the 00 and 0N directories.
         """
         header = os.path.join(self.keywords['name'], "parent_energy_")
-        mylabel=BaseIngredient.get_my_label(self, "neblabel").split("-")
+        mylabel=BaseIngredient.get_my_label(self, "neb_label").split("-")
         pfpath1= header + mylabel[0]
         pfpath2= header + mylabel[1]
         pffile1=MASTFile(pfpath1)
@@ -250,7 +250,7 @@ class WriteIngredient(BaseIngredient):
         """
         if not 'phonon' in self.keywords['program_keys'].keys():
             return [None, None]
-        mylabel = BaseIngredient.get_my_label(self, "phononlabel")
+        mylabel = BaseIngredient.get_my_label(self, "phonon_label")
         if not mylabel in self.keywords['program_keys']['phonon'].keys():
             raise MASTError(self.__class__.__name__, "Label %s for phonons not found in phonon input dict for %s" % (mylabel, self.keywords['name']))
 
@@ -454,7 +454,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         while myct <= self.keywords['program_keys']['images']:
             imno = str(myct).zfill(2)
             impath = os.path.join(self.keywords['name'], imno)
-            self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neblabel") + '_' + imno)
+            self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
     
 

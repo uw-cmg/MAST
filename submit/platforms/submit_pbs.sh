@@ -4,11 +4,11 @@
 #PBS -l walltime=24:00:00
 ##export all environment variables. 
 #PBS -V 
-
+#PBS -j oe
 NN=`cat $PBS_NODEFILE | wc -l`
 echo "Processors received = "$NN
 echo "script running on host `hostname`"
 cd $PBS_O_WORKDIR
 echo "PBS_NODEFILE"
 cat $PBS_NODEFILE
-python runmast.py
+python runmast.py >> $MAST_CONTROL/mastoutput 2>> $MAST_CONTROL/errormast
