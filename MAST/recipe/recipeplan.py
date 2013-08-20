@@ -70,7 +70,7 @@ class RecipePlan:
         for childname in self.update_methods[iname]:
             methodname = self.update_methods[iname][childname]
             my_ing = UpdateChildrenIngredient(self.ingred_input_options[iname])
-            updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing)
+            updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing, childname)
             upd_results.append(updresult)
         return upd_results
 

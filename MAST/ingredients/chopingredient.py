@@ -179,7 +179,6 @@ class WriteIngredient(BaseIngredient):
     def write_neb_subfolders(self):
         """Write the static runs to each subfolder.
         """
-        self.write_files_default() #Write the POSCAR files
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
         imct = 0
@@ -198,6 +197,7 @@ class WriteIngredient(BaseIngredient):
                 self.write_submit_script()
             imct = imct + 1
         self.keywords['name']=myname
+        self.write_neb() #Write the POSCAR files from existing parent-given structures
         return
     def write_singlerun(self):
         self.set_up_program_input()
@@ -272,7 +272,6 @@ class IsReadyToRunIngredient(BaseIngredient):
             'name' : (str, str(), 'Name of directory'),
             'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'child_dict': (dict, dict(), 'Dictionary of children'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
@@ -336,7 +335,6 @@ class RunIngredient(BaseIngredient):
             'name' : (str, str(), 'Name of directory'),
             'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'child_dict': (dict, dict(), 'Dictionary of children'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
@@ -381,7 +379,6 @@ class IsCompleteIngredient(BaseIngredient):
             'name' : (str, str(), 'Name of directory'),
             'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'child_dict': (dict, dict(), 'Dictionary of children'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
@@ -446,42 +443,28 @@ class UpdateChildrenIngredient(BaseIngredient):
             'name' : (str, str(), 'Name of directory'),
             'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'child_dict': (dict, dict(), 'Dictionary of children'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def give_structure(self):
-        for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_structure(self.keywords['name'], childname)
+    def give_structure(self, childname):
+        self.forward_parent_structure(self.keywords['name'], childname)
 
-    def give_neb_structures_to_neb(self):
+    def give_neb_structures_to_neb(self, childname):
         """Update to ANOTHER NEB."""
-        for childname in self.keywords['child_dict'].iterkeys():
-            myct=1
-            while myct <= self.keywords['program_keys']['images']:
-                imno = str(myct).zfill(2)
-                impath = os.path.join(self.keywords['name'], imno)
-                self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neblabel") + '_' + imno)
-                myct = myct + 1
-    
-    def give_neb_structures_to_neb_subfolders(self):
-        """Update children by forwarding parent structure into image folders.
-        """
         myct=1
-        impath=""
-        for childname in sorted(self.keywords['child_dict'].iterkeys()):
-            impath = os.path.join(self.keywords['name'], str(myct).zfill(2))
-            self.forward_parent_structure(impath, childname)       
+        while myct <= self.keywords['program_keys']['images']:
+            imno = str(myct).zfill(2)
+            impath = os.path.join(self.keywords['name'], imno)
+            self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neblabel") + '_' + imno)
             myct = myct + 1
+    
 
 
 
 
 
 
-
-
-    def give_saddle_structure(self):
+    def give_saddle_structure(self, childname):
         """Forward the middle image structure."""
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
@@ -492,34 +475,29 @@ class UpdateChildrenIngredient(BaseIngredient):
             if not (imct == middleim):
                 pass
             else:
-                newname = os.path.join(myname, subdir)
-                for childname in self.keywords['child_dict'].iterkeys():
-                    self.forward_parent_structure(newname, childname)
-                    self.forward_extra_restart_files(newname, childname)
+                self.forward_parent_structure(newname, childname)
+                self.forward_extra_restart_files(newname, childname)
             imct = imct + 1
         return
-    def give_phonon_multiple_forces_and_displacements(self):
+    def give_phonon_multiple_forces_and_displacements(self,childname):
         self.combine_dynmats()
         shutil.copy(os.path.join(self.keywords['name'],"DYNMAT_combined"),
             os.path.join(self.keywords['name'],"DYNMAT"))
         self.combine_displacements()
         shutil.copy(os.path.join(self.keywords['name'],"XDATCAR_combined"),
             os.path.join(self.keywords['name'],"XDATCAR"))
-        self.update_children_phonon_single_to_phon()
-    def give_phonon_single_forces_and_displacements(self):
+        self.give_phonon_single_forces_and_displacements()
+    def give_phonon_single_forces_and_displacements(self, childname):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
-        for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_dynmat(self.keywords['name'], childname)
-            self.forward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
+        self.forward_parent_dynmat(self.keywords['name'], childname)
+        self.forward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
 
-    def give_structure_and_energy_to_neb(self):
+    def give_structure_and_energy_to_neb(self, childname):
         label = BaseIngredient.get_my_label(self, "defect_label")
-        for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + label)
-            self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
-    def give_structure_and_restart_files(self):
-        for childname in self.keywords['child_dict'].iterkeys():
-            self.forward_parent_structure(self.keywords['name'], childname)
-            self.forward_extra_restart_files(self.keywords['name'], childname)
+        self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + label)
+        self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
+    def give_structure_and_restart_files(self, childname):
+        self.forward_parent_structure(self.keywords['name'], childname)
+        self.forward_extra_restart_files(self.keywords['name'], childname)
    
 
