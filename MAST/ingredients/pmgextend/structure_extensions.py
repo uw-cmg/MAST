@@ -173,7 +173,7 @@ def do_interpolation(parentstructures, numim):
         raise MASTError("pmgextend/structure_extensions","Bad number of parent paths.")
     struct_init = parentstructures[0]
     struct_fin = parentstructures[1]
-    structure_list = struct_init.interpolate(struct_fin, numim+1) + 1 )
+    structure_list = struct_init.interpolate(struct_fin, numim+1)
     return structure_list
 
 def get_sd_array(phonon_center_site, phonon_center_radius, mystruc):

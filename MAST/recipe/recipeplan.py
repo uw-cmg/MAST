@@ -7,7 +7,11 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
-from MAST.ingredients.chopingredient import ChopIngredient
+from MAST.ingredients.chopingredient import WriteIngredient
+from MAST.ingredients.chopingredient import IsReadyToRunIngredient
+from MAST.ingredients.chopingredient import RunIngredient
+from MAST.ingredients.chopingredient import IsCompleteIngredient
+from MAST.ingredients.chopingredient import UpdateChildrenIngredient
 class RecipePlan:
     """Contains the entire recipe plan. It consists of
        - Ingredients Objects
@@ -30,24 +34,24 @@ class RecipePlan:
             correct method
         """
         methodname = self.write_methods[iname]
-        my_ing = ChopIngredient(self.ingred_input_options[iname])
-        writeresult=getattr(ChopIngredient, methodname)(my_ing)
+        my_ing = WriteIngredient(self.ingred_input_options[iname])
+        writeresult=getattr(WriteIngredient, methodname)(my_ing)
         return writeresult
 
     def complete_ingredient(iname):
         """Check if an ingredient is complete
         """
         methodname = self.complete_methods[iname]
-        my_ing = ChopIngredient(self.ingred_input_options[iname])
-        iscomplete=getattr(ChopIngredient, methodname)(my_ing)
+        my_ing = IsCompleteIngredient(self.ingred_input_options[iname])
+        iscomplete=getattr(IsCompleteIngredient, methodname)(my_ing)
         return iscomplete
 
     def ready_ingredient(iname):
         """Check if an ingredient is ready
         """
         methodname = self.ready_methods[iname]
-        my_ing = ChopIngredient(self.ingred_input_options[iname])
-        isready=getattr(ChopIngredient, methodname)(my_ing)
+        my_ing = IsReadyIngredient(self.ingred_input_options[iname])
+        isready=getattr(IsReadyIngredient, methodname)(my_ing)
         return isready
 
 
@@ -55,8 +59,8 @@ class RecipePlan:
         """Run ingredient
         """
         methodname = self.run_methods[iname]
-        my_ing = ChopIngredient(self.ingred_input_options[iname])
-        runresult=getattr(ChopIngredient, methodname)(my_ing)
+        my_ing = RunIngredient(self.ingred_input_options[iname])
+        runresult=getattr(RunIngredient, methodname)(my_ing)
         return runresult
 
     def update_children(iname):
@@ -65,8 +69,8 @@ class RecipePlan:
         upd_results=list()
         for childname in self.update_methods[iname]:
             methodname = self.update_methods[iname][childname]
-            my_ing = ChopIngredient(self.ingred_input_options[iname])
-            updresult=getattr(ChopIngredient, methodname)(my_ing)
+            my_ing = UpdateChildrenIngredient(self.ingred_input_options[iname])
+            updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing)
             upd_results.append(updresult)
         return upd_results
 
@@ -74,9 +78,9 @@ class RecipePlan:
         """Check if queued ingredients are complete
         """
         for iname in self.ingredients.keys():
-            if self.ingredient[iname] == "Q":
+            if self.ingredients[iname] == "Q":
                 if self.complete_ingredient(iname):
-                    self.ingredient[iname] = "C"
+                    self.ingredients[iname] = "C"
                     self.update_children(iname)
         return
     
@@ -85,7 +89,7 @@ class RecipePlan:
             complete.
         """
         for iname in self.ingredients.keys():
-            if self.ingredient[iname] == "W":
+            if self.ingredients[iname] == "W":
                 okay=0
                 ptc = list(self.parents_to_check[iname])
                 plen = len(ptc)
@@ -99,14 +103,17 @@ class RecipePlan:
         """Run staged ingredients.
         """
         for iname in self.ingredients.keys():
-            if self.ingredient[iname] == "S":
-                self.write_ingredient(iname)
-                if self.ready_ingredient(iname):
-                    self.run_ingredient(iname)
-                    self.ingredient[iname] = "Q"
+            if self.ingredients[iname] == "S":
+                if self.complete_ingredient(iname):
+                    self.ingredients[iname] = "C"
+                else:
+                    if not (self.ready_ingredient(iname)):
+                        self.write_ingredient(iname)
+                    if self.ready_ingredient(iname):
+                        self.run_ingredient(iname)
+                        self.ingredients[iname] = "Q"
 
-
-    def check_recipe_status():
+    def check_recipe_status(verbose=1):
         """Check ingredient statuses, and get recipe status
             W = waiting on parents
             I = parents complete, okay to stage
@@ -114,7 +121,7 @@ class RecipePlan:
             C = complete
         Return:
             C = complete
-            R = running
+            N = not complete
         """
         total = len(self.ingredients.keys())
         self.check_if_queued_are_complete()
@@ -122,9 +129,30 @@ class RecipePlan:
         self.run_staged_ingredients()
         
         totcomp=0
-        for iname in self.ingredients():
+        totwait=0
+        totqueue=0
+        totinit=0
+        totstage=0
+        ilist = self.ingredients.keys()
+        ilist.sort()
+        if verbose == 1:
+            import time
+            print time.asctime()
+        for iname in ilist:
+            if verbose == 1:
+                print "%8s = %4s" % (iname, self.ingredients[iname])
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
+            elif self.ingredients[iname] == "Q":
+                totqueue = totqueue + 1
+            elif self.ingredients[iname] == "I":
+                totinit = totinit + 1
+            elif self.ingredients[iname] == "W":
+                totwait = totwait + 1
+            elif self.ingredients[iname] == "S":
+                totstage = totstage + 1
+        print "%8s%8s%8s%8s%8s = %8s total" % ("INIT","WAIT","STAGED","QUEUED","COMPLETE","TOTAL")
+        print "%8i%8i%8i%8i%8i" % (totinit, totwait, totstage, totqueue, totcomp, total)
         if totcomp == total:
             return True
         return False

@@ -71,9 +71,21 @@ class RecipeTemplateParser(MASTObj):
 #        print system_name, self.input_options.get_item('mast', 'system_name')
 
         for line in f_ptr.readlines():
-            line             = line.strip()
-            line             = line.lower()
+            #line             = line.strip()
+            #line             = line.lower()
             processing_lines = []
+            #shortcut straight copy + 6
+            processing_lines.append(line)
+            output_str = "\n".join(processing_lines)
+            o_ptr.write("%s\n" % output_str)
+
+        f_ptr.close()
+        o_ptr.close()
+#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
+        return recipe_name
+    def old_parsing(self):
+        linestr="hello"
+        for line in linestr:
             #validate the input line
             if not line or line.startswith('#'):
                 continue

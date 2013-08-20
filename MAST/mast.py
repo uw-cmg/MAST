@@ -170,10 +170,10 @@ class MAST(MASTObj):
         self.initialize_environment()
         self._parse_recipe_template()
 
-        ing_loader = IngredientsLoader()
-        ing_loader.load_ingredients()
-        ingredients_dict = ing_loader.ingredients_dict
-        recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
+        #ing_loader = IngredientsLoader()
+        #ing_loader.load_ingredients()
+        #ingredients_dict = ing_loader.ingredients_dict
+        recipe_plan_obj = self._initialize_ingredients() #ingredients_dict)
 
         self.pickle_plan(recipe_plan_obj)
         self.pickle_input_options() 
@@ -245,10 +245,10 @@ class MAST(MASTObj):
         self.input_options.set_item('recipe','recipe_name', parser_obj.parse())
         self.unique_ingredients = parser_obj.get_unique_ingredients()
 
-    def _initialize_ingredients(self, ingredients_dict):
+    def _initialize_ingredients(self):
         setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
                 inputOptions=self.input_options,
                 structure=self.input_options.get_item('structure','structure'), 
-                ingredientsDict=ingredients_dict)
+                )
         recipe_plan_obj = setup_obj.start()
         return recipe_plan_obj

@@ -131,7 +131,7 @@ class InputPythonCreator(MASTObj):
         pln.append("################################################")
         pln.append(" ")
         pln.append("from MAST.recipe.recipeinput import RecipeInput")
-        pln.append("from MAST.buffet.buffetmanager import Buffet")
+        #pln.append("from MAST.buffet.buffetmanager import Buffet")
         inputoptions = self.keywords['input_options']
         recipe_base_name = os.path.basename(inputoptions.options['recipe']['recipe_file'])
         recipe_base_name = recipe_base_name.split('.')[0]
