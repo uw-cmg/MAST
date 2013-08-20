@@ -33,33 +33,20 @@ ALLOWED_KEYS = {
 DATA_PATH = "~/test_dir/"
 
 class RecipeSetup(MASTObj):
-    """Parses the personalized recipe file, creates the recipe plan object,
-        and prepares the ingredients.
-        Attributes:
-            Each ingredient in the input options has the following keys for
-                method names:
-                "mast_write_method" (write the input files),
-                "mast_ready_method" (how to determine if it is ready to run),
-                "mast_run_method" (how to run the ingredient), and
-                "mast_complete_method" (how to determine if it is complete)
-                "mast_update_children_method" (how to update children)
+    """Parses the personalized recipe file,
+        creates the recipe plan object,
+        and prepares the ingredient directories.
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.recipe_file    = self.keywords['recipeFile']
         self.input_options  = self.keywords['inputOptions']
         self.structure      = self.keywords['structure']
-        self.scratch_dir    = ""
+        self.work_dir    = ""
         self.delimiter      = '::'
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.input_options.get_item('mast', 'working_directory'))
 
-        """Special keywords used in the recipe templates
-        """
-        self.recipe_keyword      = "recipe"
-        self.ingredient_keyword  = "ingredient"
-        self.parent_keyword      = "parent"
-        self.child_keyword       = "child"
         print 'Setting up the recipe based on %s' % (self.recipe_file)
 
     def get_my_ingredient_options(self, name, ingredient_type):
@@ -89,10 +76,10 @@ class RecipeSetup(MASTObj):
             self.input_options.set_item('ingredients', ingredient_type, ing_opt)
 
         self.program = self.input_options.options['ingredients'][ingredient_type]['mast_program']
-        self.scratch_dir = self.input_options.get_item('mast', 'working_directory')
-        print "TTM DEBUG SCRATCH: ", self.scratch_dir
+        self.work_dir = self.input_options.get_item('mast', 'working_directory')
+        print "TTM DEBUG SCRATCH: ", self.work_dir
 
-        ingredient_name = os.path.join(self.scratch_dir, name)
+        ingredient_name = os.path.join(self.work_dir, name)
         #print "TTM DEBUG: ",ingredient_type,":",self.input_options.get_item('ingredients',ingredient_type)
         #TTM update ingredients dict to include info from the
         #'neb', 'defects', and 'chemical_potentials' sections

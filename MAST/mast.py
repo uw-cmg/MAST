@@ -80,10 +80,11 @@ class MAST(MASTObj):
         self.input_options = parser_obj.parse()
         self.perform_element_mapping()
         
-        #set an input stem name
-        ipstem, timestamp = self._initialize_input_stem()
-        self.input_options.set_item('mast', 'input_stem', ipstem)
-        self.input_options.set_item('mast', 'timestamp', timestamp)
+        #set additional keys
+        self._set_structure_from_inputs()
+        self._set_input_stem_and_timestamp()
+        self._set_sysname_and_working_directory()
+        self._validate_execs()
 
         #create the *.py input script
         ipc_obj = InputPythonCreator(input_options=self.input_options)
@@ -92,7 +93,7 @@ class MAST(MASTObj):
         #run the *.py input script
         import subprocess
         from MAST.utility import dirutil
-        oppath=ipstem + 'output'
+        oppath=self.input_options.get_item('mast','input_stem') + 'output'
         opfile = open(oppath, 'ab')
         run_input_script = subprocess.Popen(['python ' + ipc_filename], 
                 shell=True, stdout=opfile, stderr=opfile)
@@ -130,7 +131,7 @@ class MAST(MASTObj):
                     nlinect = nlinect + 1
         return
 
-    def _initialize_input_stem(self):
+    def _set_input_stem_and_timestamp(self):
         inp_file = self.keywords['inputfile']
         if not ".inp" in inp_file:
             raise MASTError(self.__class__.__name__, "File '%s' should be named with a .inp extension and formatted correctly." % inp_file)
@@ -143,7 +144,21 @@ class MAST(MASTObj):
             stem_dir = get_mast_scratch_path()
         inp_name = os.path.basename(inp_file).split('.')[0]
         stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
-        return stem_name, tstamp
+        self.input_options.update_item('mast', 'input_stem', stem_name)
+        self.input_options.update_item('mast', 'timestamp', tstamp)
+
+    def _set_sysname_and_working_directory(self):
+        """Get the system name and working directory."""
+        element_str = self._get_element_string()
+        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
+              
+        system_name = self.input_options.get_item("mast", "system_name", "sys")
+        system_name = system_name + '_' + element_str
+
+        dir_name = "%s_%s_%s_%s" % (system_name, element_str, self.input_options.get_item('recipe','recipe_name'), ipf_name)
+        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
+        self.input_options.update_item('mast', 'working_directory', dir_path)
+        self.input_options.update_item('mast', 'system_name', system_name)
 
     def _get_element_string(self):
         """Get the element string from the structure."""
@@ -158,47 +173,8 @@ class MAST(MASTObj):
             except KeyError:
                 elemok = 0
         return elemstr
-
-    def start_from_input_options(self, input_options):
-        """Start the recipe template parsing and ingredient creation
-            once self.input_options has been set.
-        """
-        print 'in start_from_input_options'
-        self.input_options = input_options
-        
-        #parse the recipe template file and create a personal file
-        self.initialize_environment()
-        self._parse_recipe_template()
-
-        #ing_loader = IngredientsLoader()
-        #ing_loader.load_ingredients()
-        #ingredients_dict = ing_loader.ingredients_dict
-        recipe_plan_obj = self._initialize_ingredients() #ingredients_dict)
-
-        self.pickle_plan(recipe_plan_obj)
-        self.pickle_input_options() 
-
-    def initialize_environment(self):
-        """Initialize the directory information for writing the 
-            recipe and ingredient folders.
-        """
-
-        element_str = self._get_element_string()
-        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
-              
-        system_name = self.input_options.get_item("mast", "system_name", "sys")
-
-        dir_name = "%s_%s_%s_%s" % (system_name, element_str, self.input_options.get_item('recipe','recipe_name'), ipf_name)
-        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
-
-        try:
-            os.mkdir(dir_path)
-            topmeta = Metadata(metafile='%s/metadata.txt' % dir_path)
-            topmeta.write_data('directory created', self.input_options.get_item('mast', 'timestamp'))
-            topmeta.write_data('system name', system_name)
-        except:
-            MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
-
+    def _validate_execs(self):
+        """Make sure each ingredient has a mast_exec line."""
         for ingredient, options in self.input_options.get_item('ingredients').items():
             print ingredient, options
             if 'mast_exec' in options:
@@ -210,10 +186,64 @@ class MAST(MASTObj):
         if (not have_exec):
             error = 'mast_exec keyword not found in the $ingredients section'
             raise MASTError(self.__class__.__name__, error)
+    def _set_structure_from_inputs(self):
+        """Make a pymatgen structure and update the 
+            structure key.
+        """
+        strposfile = self.input_options.get_item('structure','posfile')
+        if strposfile is None:
+            from MAST.utility import MAST2Structure
+            iopscoords=self.input_options.get_item('structure','coordinates')
+            iopslatt=self.input_options.get_item('structure','lattice')
+            iopsatoms=self.input_options.get_item('structure','atom_list')
+            iopsctype=self.input_options.get_item('structure','coord_type')
+            structure = MAST2Structure(lattice=iopslatt,
+                coordinates=iopscoords, atom_list=iopsatoms,
+                coord_type=iopsctype)
+        elif ('poscar' in strposfile.lower()):
+            from pymatgen.io.vaspio import Poscar
+            structure = Poscar.from_file(strposfile).structure
+        elif ('cif' in strposfile.lower()):
+            from pymatgen.io.cifio import CifParser
+            structure = CifParser(strposfile).get_structures()[0]
+        else:
+            error = 'Cannot build structure from file %s' % strposfile
+            raise MASTError(self.__class__.__name__, error)
+        self.input_options.update_item('structure','structure',structure)
+    def start_from_input_options(self, input_options):
+        """Start the recipe template parsing and ingredient creation
+            once self.input_options has been set.
+        """
+        print 'in start_from_input_options'
+        self.input_options = input_options
+        
+        #parse the recipe template file and create a personal file
+        self.make_working_directory()
+        self._parse_recipe_template()
 
-        self.input_options.set_item('mast', 'working_directory', dir_path)
-        system_name = system_name + '_' + element_str
-        self.input_options.update_item('mast', 'system_name', system_name)
+        #make recipe plan object
+        setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
+                inputOptions=self.input_options,
+                structure=self.input_options.get_item('structure','structure'), 
+                )
+        recipe_plan_obj = setup_obj.start()
+
+        self.pickle_plan(recipe_plan_obj)
+        self.pickle_input_options() 
+
+    def make_working_directory(self):
+        """Initialize the directory information for writing the 
+            recipe and ingredient folders.
+        """
+        dir_path = self.input_options.get_item('mast',
+                    'working_directory')
+        try:
+            os.mkdir(dir_path)
+            topmeta = Metadata(metafile='%s/metadata.txt' % dir_path)
+            topmeta.write_data('directory created', self.input_options.get_item('mast', 'timestamp'))
+            topmeta.write_data('system name', self.input_options.get_item('mast','system_name'))
+        except:
+            MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
 
     def pickle_plan(self, recipe_plan_obj):
         """Pickles the reciple plan object to the respective file
@@ -236,19 +266,11 @@ class MAST(MASTObj):
 
         recipe_file = self.input_options.get_item('recipe', 'recipe_file')
 
-        #print 'GRJ DEBUG: _parse_recipe_template: working_directory =', self.input_options.get_item('mast', 'working_directory')
         parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
-                                          inputOptions=self.input_options,
-                                          personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt',
-                                          working_directory=self.input_options.get_item('mast', 'working_directory')
+            inputOptions=self.input_options,
+            personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt',
+            working_directory=self.input_options.get_item('mast', 'working_directory')
                                          )
-        self.input_options.set_item('recipe','recipe_name', parser_obj.parse())
-        self.unique_ingredients = parser_obj.get_unique_ingredients()
+        self.input_options.update_item('recipe','recipe_name', parser_obj.parse())
 
-    def _initialize_ingredients(self):
-        setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
-                inputOptions=self.input_options,
-                structure=self.input_options.get_item('structure','structure'), 
-                )
-        recipe_plan_obj = setup_obj.start()
         return recipe_plan_obj

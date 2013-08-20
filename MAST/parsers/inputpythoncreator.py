@@ -76,7 +76,7 @@ class InputPythonCreator(MASTObj):
                             sectionname))
             pln.append("inputoptions.options['"+sectionname+"'] = " + sectionname)
         pln.extend(self.print_create_structure_section())
-        pln.extend(self.print_buffet_section())
+        pln.extend(self.print_mast_command_section())
         return self.addnewlines(pln)
 
     def print_create_structure_section(self):
@@ -114,24 +114,20 @@ class InputPythonCreator(MASTObj):
         else:
             error = 'Cannot build structure from file %s' % strposfile
             raise MASTError(self.__class__.__name__, error)
-        pln.append("inputoptions.set_item('structure','structure',structure)")
+        pln.append("inputoptions.update_item('structure','structure',structure)")
         return pln
 
-    def print_buffet_section(self):
-        """Print the buffet section lines. Looping is accomplished
-            through an "independent_loop_key" option key.
-
+    def print_mast_command_section(self):
+        """Print the mast commands section.
             Returns:
                 pln <list of str>: list of lines to append
         """
         pln=list()
         pln.append(" ")
         pln.append("###############################################")
-        pln.append("#Buffet Command Section")
+        pln.append("#MAST Command Section")
         pln.append("################################################")
         pln.append(" ")
-        pln.append("from MAST.recipe.recipeinput import RecipeInput")
-        #pln.append("from MAST.buffet.buffetmanager import Buffet")
         inputoptions = self.keywords['input_options']
         recipe_base_name = os.path.basename(inputoptions.options['recipe']['recipe_file'])
         recipe_base_name = recipe_base_name.split('.')[0]
@@ -139,27 +135,8 @@ class InputPythonCreator(MASTObj):
         timestamp = time.strftime('%Y%m%d%H%M%S')
         self.name = recipe_base_name + '_' + timestamp + '.py'
         
-        if "independent_loop_key" in inputoptions.options.keys():
-            #for run_idx in xrange(len(SYSTEM_NAME)):
-            #    recipe_input = RecipeInput(recipe_name="independent_recipe%s" % run_idx)
-
-            #   #add input parameters
-            #    recipe_input.addMastInfo(PROGRAM, SYSTEM_NAME[run_idx])
-            #    recipe_input.addStructureInfoFromCoords(COORD_TYPE, COORDINATES[run_idx], LATTICE)
-            #    recipe_input.addGlobalIngredientsInfo(ING_GLOBAL_PARAM)
-            #    recipe_input.addIngredientsInfo(OPTIMIZE_ING, OPTIMIZE_INFO)
-            #    recipe_input.addRecipeInfo(RECIPE_FILE)
-
-            #    #add recipe input to buffet and cook it
-            #    buffet_obj = Buffet(name="independent_recipe_%s" % SYSTEM_NAME[run_idx])
-            #    buffet_obj.addRecipe(recipe_input)
-            #    buffet_obj.cook()
-            pass
-        
-        else:
-            #copy from mast.py
-            pln.append("from MAST.mast import MAST")
-            pln.append("mast_obj = MAST()")
-            pln.append("mast_obj.start_from_input_options(inputoptions)")
+        pln.append("from MAST.mast import MAST")
+        pln.append("mast_obj = MAST()")
+        pln.append("mast_obj.start_from_input_options(inputoptions)")
         return pln
 

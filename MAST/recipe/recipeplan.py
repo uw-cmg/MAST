@@ -29,7 +29,7 @@ class RecipePlan:
         self.ingred_input_options = dict()
         #print 'GRJ DEBUG: Initializing RecipePlan'
 
-    def write_ingredient(iname):
+    def write_ingredient(self, iname):
         """Write the ingredient files according to the 
             correct method
         """
@@ -38,7 +38,7 @@ class RecipePlan:
         writeresult=getattr(WriteIngredient, methodname)(my_ing)
         return writeresult
 
-    def complete_ingredient(iname):
+    def complete_ingredient(self, iname):
         """Check if an ingredient is complete
         """
         methodname = self.complete_methods[iname]
@@ -46,7 +46,7 @@ class RecipePlan:
         iscomplete=getattr(IsCompleteIngredient, methodname)(my_ing)
         return iscomplete
 
-    def ready_ingredient(iname):
+    def ready_ingredient(self, iname):
         """Check if an ingredient is ready
         """
         methodname = self.ready_methods[iname]
@@ -55,7 +55,7 @@ class RecipePlan:
         return isready
 
 
-    def run_ingredient(iname):
+    def run_ingredient(self, iname):
         """Run ingredient
         """
         methodname = self.run_methods[iname]
@@ -63,7 +63,7 @@ class RecipePlan:
         runresult=getattr(RunIngredient, methodname)(my_ing)
         return runresult
 
-    def update_children(iname):
+    def update_children(self, iname):
         """Update the children of an ingredient
         """
         upd_results=list()
@@ -74,7 +74,7 @@ class RecipePlan:
             upd_results.append(updresult)
         return upd_results
 
-    def check_if_queued_are_complete():
+    def check_if_queued_are_complete(self):
         """Check if queued ingredients are complete
         """
         for iname in self.ingredients.keys():
@@ -84,7 +84,7 @@ class RecipePlan:
                     self.update_children(iname)
         return
     
-    def check_if_parents_are_complete():
+    def check_if_parents_are_complete(self):
         """Check if parents of waiting ingredients are
             complete.
         """
@@ -99,7 +99,7 @@ class RecipePlan:
                 if okay == plen:
                     self.ingredients[iname] = "S"
 
-    def run_staged_ingredients():
+    def run_staged_ingredients(self):
         """Run staged ingredients.
         """
         for iname in self.ingredients.keys():
@@ -113,7 +113,7 @@ class RecipePlan:
                         self.run_ingredient(iname)
                         self.ingredients[iname] = "Q"
 
-    def check_recipe_status(verbose=1):
+    def check_recipe_status(self, verbose=1):
         """Check ingredient statuses, and get recipe status
             W = waiting on parents
             I = parents complete, okay to stage
@@ -140,7 +140,7 @@ class RecipePlan:
             print time.asctime()
         for iname in ilist:
             if verbose == 1:
-                print "%8s = %4s" % (iname, self.ingredients[iname])
+                print "%30s = %4s" % (iname, self.ingredients[iname])
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
             elif self.ingredients[iname] == "Q":
@@ -151,8 +151,8 @@ class RecipePlan:
                 totwait = totwait + 1
             elif self.ingredients[iname] == "S":
                 totstage = totstage + 1
-        print "%8s%8s%8s%8s%8s = %8s total" % ("INIT","WAIT","STAGED","QUEUED","COMPLETE","TOTAL")
-        print "%8i%8i%8i%8i%8i" % (totinit, totwait, totstage, totqueue, totcomp, total)
+        print "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","QUEUED","COMPLETE","TOTAL")
+        print "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totqueue, totcomp, total)
         if totcomp == total:
             return True
         return False
