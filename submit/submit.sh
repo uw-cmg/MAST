@@ -11,4 +11,4 @@ echo "script running on host `hostname`"
 cd $PBS_O_WORKDIR
 echo "PBS_NODEFILE"
 cat $PBS_NODEFILE
-python runmast.py >> $MAST_CONTROL/mastoutput 2>> $MAST_CONTROL/errormast
+python runmast.py >> $MAST_CONTROL/mastoutput 2> $MAST_CONTROL/errormast

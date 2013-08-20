@@ -136,6 +136,7 @@ class RecipePlan:
             if self.ingredients[iname] == "S":
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
+                    self.update_children(iname)
                 else:
                     if not (self.ready_ingredient(iname)):
                         self.write_ingredient(iname)

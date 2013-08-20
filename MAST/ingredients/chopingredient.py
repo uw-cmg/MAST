@@ -338,8 +338,7 @@ class RunIngredient(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
     def run_noqueue(self, mode='noqsub'):
-        if self.is_ready_to_run():
-            self.write_files()
+        self.write_files()
         return True
     def run_singlerun(self, mode='serial', curdir=os.getcwd()):
         return BaseIngredient.run(self, mode)
@@ -485,7 +484,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         self.combine_displacements()
         shutil.copy(os.path.join(self.keywords['name'],"XDATCAR_combined"),
             os.path.join(self.keywords['name'],"XDATCAR"))
-        self.give_phonon_single_forces_and_displacements()
+        self.give_phonon_single_forces_and_displacements(childname)
     def give_phonon_single_forces_and_displacements(self, childname):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
         self.forward_parent_dynmat(self.keywords['name'], childname)
