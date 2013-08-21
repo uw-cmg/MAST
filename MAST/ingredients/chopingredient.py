@@ -56,7 +56,7 @@ class WriteIngredient(BaseIngredient):
             image_structures.append(parentstructures[1])
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
-        if self.keywords['program'] == 'vasp':
+        if self.program == 'vasp':
             BaseIngredient.set_up_program_input_neb(self, image_structures)
             self.place_parent_energy_files()
             self.write_submit_script()
@@ -235,7 +235,6 @@ class IsReadyToRunIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of directory'),
-            'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
@@ -245,13 +244,13 @@ class IsReadyToRunIngredient(BaseIngredient):
     def ready_defect(self):
         if self.directory_is_locked():
             return False
-        if self.keywords['program'].lower() == 'vasp':
+        if self.program == 'vasp':
             if os.path.exists(self.keywords['name'] +'/POSCAR'):
                 return True
             else:
                 return False
         else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
 
     def ready_neb_subfolders(self):
         """Make sure all subfolders are ready to run."""
@@ -298,7 +297,6 @@ class RunIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of directory'),
-            'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
@@ -356,7 +354,7 @@ class RunIngredient(BaseIngredient):
             else:
                 pass
 
-        if self.keywords['program'].lower() == 'vasp':
+        if self.program == 'vasp':
             #myposcar = Poscar(modified_structure)
             myposcar = Poscar(base_structure)
             #print "poscar OK"
@@ -367,7 +365,7 @@ class RunIngredient(BaseIngredient):
             self.unlock_directory()
             #print "Unlock sucessful"
         else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
 
         return
 
@@ -376,7 +374,6 @@ class IsCompleteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of directory'),
-            'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
@@ -384,13 +381,13 @@ class IsCompleteIngredient(BaseIngredient):
     def complete_structure(self):
         if self.directory_is_locked():
             return False
-        if self.keywords['program'].lower() == 'vasp':
+        if self.program == 'vasp':
             if os.path.exists(self.keywords['name'] +'/CONTCAR'):
                 return True
             else:
                 return False
         else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
     def complete_singlerun(self):
         return BaseIngredient.is_complete(self)
     def complete_neb_subfolders(self):
@@ -440,7 +437,6 @@ class UpdateChildrenIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
             'name' : (str, str(), 'Name of directory'),
-            'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }

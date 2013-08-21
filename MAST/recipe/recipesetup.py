@@ -195,7 +195,6 @@ class RecipeSetup(MASTObj):
 
         myingred = BaseIngredient(allowed_keys, 
                         name=my_ingred_input_options['name'],
-                        program=my_ingred_input_options['program'],
                         structure=my_ingred_input_options['structure'],
                         program_keys=my_ingred_input_options['program_keys'])
         myingred.write_directory()

@@ -36,7 +36,6 @@ class RecipePlan:
         """
         methodname = self.write_methods[iname]
         my_ing = WriteIngredient(name = self.ingred_input_options[iname]['name'],
-            program=self.ingred_input_options[iname]['program'],
             program_keys=self.ingred_input_options[iname]['program_keys'],
             structure=self.ingred_input_options[iname]['structure'])
         writeresult=getattr(WriteIngredient, methodname)(my_ing)
@@ -47,7 +46,6 @@ class RecipePlan:
         """
         methodname = self.complete_methods[iname]
         my_ing = IsCompleteIngredient(name = self.ingred_input_options[iname]['name'],
-            program=self.ingred_input_options[iname]['program'],
             program_keys=self.ingred_input_options[iname]['program_keys'],
             structure=self.ingred_input_options[iname]['structure'])
         iscomplete=getattr(IsCompleteIngredient, methodname)(my_ing)
@@ -58,7 +56,6 @@ class RecipePlan:
         """
         methodname = self.ready_methods[iname]
         my_ing = IsReadyToRunIngredient(name = self.ingred_input_options[iname]['name'],
-            program=self.ingred_input_options[iname]['program'],
             program_keys=self.ingred_input_options[iname]['program_keys'],
             structure=self.ingred_input_options[iname]['structure'])
         isready=getattr(IsReadyToRunIngredient, methodname)(my_ing)
@@ -70,7 +67,6 @@ class RecipePlan:
         """
         methodname = self.run_methods[iname]
         my_ing = RunIngredient(name = self.ingred_input_options[iname]['name'],
-            program=self.ingred_input_options[iname]['program'],
             program_keys=self.ingred_input_options[iname]['program_keys'],
             structure=self.ingred_input_options[iname]['structure'])
         runresult=getattr(RunIngredient, methodname)(my_ing)
@@ -83,7 +79,6 @@ class RecipePlan:
         for childname in self.update_methods[iname]:
             methodname = self.update_methods[iname][childname]
             my_ing = UpdateChildrenIngredient(name = self.ingred_input_options[iname]['name'],
-                program=self.ingred_input_options[iname]['program'],
                 program_keys=self.ingred_input_options[iname]['program_keys'],
                 structure=self.ingred_input_options[iname]['structure'])
             updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing, childname)
