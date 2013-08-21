@@ -53,7 +53,7 @@ class MASTmon(object):
             #ingredients = mastobj.ingredients
             if mastobj.status == "C":
                 shutil.move(recipe_dir, self._ARCHIVE)
-            pm.save(mastobj, os.path.join(recipe_dir, 'mast.pickle'))
+            pm.save(mastobj, os.path.join(self.home, recipe_dir, 'mast.pickle'))
 
             #if self.scheduler is None:
             #    print 'step 1: create DAGScheduler object'
