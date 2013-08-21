@@ -86,9 +86,9 @@ lcharge True
 end
 
 begin induce_defect
-mast_write_method            write_defect
+mast_write_method            no_setup
 mast_ready_method            ready_defect
-mast_run_method              run_noqueue
+mast_run_method              run_defect
 mast_complete_method         complete_structure
 end
 
@@ -102,8 +102,6 @@ end
 
 begin neb_to_neb
 mast_write_method            write_neb
-mast_ready_method            ready_neb
-mast_complete_method         complete_neb
 mast_update_children_method  give_neb_structures_to_neb
 mast_nodes                   1
 mast_kpoints                 1x1x1 G
@@ -116,8 +114,6 @@ end
 
 begin neb_to_nebstat
 mast_write_method            write_neb
-mast_ready_method            ready_neb
-mast_complete_method         complete_neb
 mast_update_children_method  give_neb_structures_to_neb
 mast_nodes                   1
 ibrion 1
@@ -152,8 +148,6 @@ end
 
 begin phononparse
 mast_program                 phon
-mast_ready_method            ready_phonon_parse
-mast_complete_method         complete_singlerun
 lfree .True.
 temperature 273
 ptemp 10 110

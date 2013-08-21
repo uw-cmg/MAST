@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+"""Display the contents of a single-object pickle file,
+    through that object's __repr__ function
+    Args:
+        [1] Pickle name - default "mast.pickle"
+"""
+from MAST.utility.picklemanager import PickleManager as pm
+import sys
+import os
+
+def main(mypickle):
+    mypm = pm(mypickle)
+    pickled_obj = mypm.load_variable()
+    print pickled_obj
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        mypickle = 'mast.pickle'
+    else:
+        mypickle = sys.argv[1]
+    main(mypickle)
+

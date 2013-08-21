@@ -89,6 +89,17 @@ class RecipePlan:
             updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing, childname)
             upd_results.append(updresult)
         return upd_results
+
+    def fast_forward_check_complete(self):
+        """Check if runs are complete."""
+        for iname in self.ingredients.keys():
+            if not (self.ingredients[iname] == "C"):
+                if self.complete_ingredient(iname):
+                    self.ingredients[iname] = "C"
+                    self.update_children(iname)
+        return
+
+
     def check_if_have_parents(self):
         """Check if runs at "Initialized" status have parents 
             and switch them to "Wait" if so; otherwise,
@@ -152,6 +163,7 @@ class RecipePlan:
             Q = queued
             C = complete
         """
+        self.fast_forward_check_complete()
         self.check_if_have_parents()
         self.check_if_queued_are_complete()
         self.check_if_parents_are_complete()

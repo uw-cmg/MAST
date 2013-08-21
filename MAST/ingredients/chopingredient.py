@@ -35,45 +35,10 @@ class WriteIngredient(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
+    def no_setup(self):
+        """No setup is needed."""
+        pass
 
-    def write_defect(self):
-        work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
-        name = self.keywords['name'].split('/')[-1]
-        print "write_files:", name
-        BaseIngredient.get_structure_from_directory(self, self.keywords['name']) #TTM+1 changed to use BaseIngredient method
-
-        defect_label = BaseIngredient.get_my_label(self, "defect_label")
-        #print 'GRJ DEBUG: defect_label =', defect_label
-        #defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-        #print 'GRJ DEBUG: defect_label (regex) =', defect_label
-
-        #self.metafile.write_data('debug', [name, name.split('/')])
-        defect = self.keywords['program_keys'][defect_label]
-        #print 'Defect in write_files:', defect
-
-        base_structure = self.keywords['structure'].copy()
-        for key in defect:
-            if 'subdefect' in key:
-                subdefect = defect[key]
-                base_structure = structure_extensions.induce_defect(base_structure, subdefect, defect['coord_type'], defect['threshold'])
-                #base_structure = modified_structure
-            else:
-                pass
-
-        if self.keywords['program'].lower() == 'vasp':
-            #myposcar = Poscar(modified_structure)
-            myposcar = Poscar(base_structure)
-            #print "poscar OK"
-            self.lock_directory()
-            #print "lock OK"
-            myposcar.write_file('%s/%s/CONTCAR' % (work_dir, name))
-            #print "Write sucessful"
-            self.unlock_directory()
-            #print "Unlock sucessful"
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
-
-        return
     
     def write_neb(self):
         """Get the parent structures, sort and match atoms, and interpolate.
@@ -337,9 +302,6 @@ class RunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def run_noqueue(self, mode='noqsub'):
-        self.write_files()
-        return True
     def run_singlerun(self, mode='serial', curdir=os.getcwd()):
         return BaseIngredient.run(self, mode)
     def run_neb_subfolders(self):
@@ -369,6 +331,44 @@ class RunIngredient(BaseIngredient):
         self.keywords['name']=myname
         return
 
+    def run_defect(self):
+        work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
+        name = self.keywords['name'].split('/')[-1]
+        print "write_files:", name
+        BaseIngredient.get_structure_from_directory(self, self.keywords['name']) #TTM+1 changed to use BaseIngredient method
+
+        defect_label = BaseIngredient.get_my_label(self, "defect_label")
+        #print 'GRJ DEBUG: defect_label =', defect_label
+        #defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
+        #print 'GRJ DEBUG: defect_label (regex) =', defect_label
+
+        #self.metafile.write_data('debug', [name, name.split('/')])
+        defect = self.keywords['program_keys'][defect_label]
+        #print 'Defect in write_files:', defect
+
+        base_structure = self.keywords['structure'].copy()
+        for key in defect:
+            if 'subdefect' in key:
+                subdefect = defect[key]
+                base_structure = structure_extensions.induce_defect(base_structure, subdefect, defect['coord_type'], defect['threshold'])
+                #base_structure = modified_structure
+            else:
+                pass
+
+        if self.keywords['program'].lower() == 'vasp':
+            #myposcar = Poscar(modified_structure)
+            myposcar = Poscar(base_structure)
+            #print "poscar OK"
+            self.lock_directory()
+            #print "lock OK"
+            myposcar.write_file('%s/%s/CONTCAR' % (work_dir, name))
+            #print "Write sucessful"
+            self.unlock_directory()
+            #print "Unlock sucessful"
+        else:
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.keywords['program'])
+
+        return
 
 
 class IsCompleteIngredient(BaseIngredient):
@@ -444,11 +444,26 @@ class UpdateChildrenIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+    def _fullpath_childname(self, childname):
+        """Make sure the childname has a full path.
+            Args:
+                childname <str>: child name, like defect_1
+            Returns:
+                fullpathchild <str>: full path to child, e.g.
+                $MAST_SCRATCH/recipefolder/defect_1
+        """
+        fullpathchild=""
+        mydirname = os.path.dirname(self.keywords['name'])
+        fullpathchild = os.path.join(mydirname, childname)
+        return fullpathchild
+
     def give_structure(self, childname):
+        childname = self._fullpath_childname(childname)
         self.forward_parent_structure(self.keywords['name'], childname)
 
     def give_neb_structures_to_neb(self, childname):
         """Update to ANOTHER NEB."""
+        childname = self._fullpath_childname(childname)
         myct=1
         while myct <= self.keywords['program_keys']['images']:
             imno = str(myct).zfill(2)
@@ -464,6 +479,7 @@ class UpdateChildrenIngredient(BaseIngredient):
 
     def give_saddle_structure(self, childname):
         """Forward the middle image structure."""
+        childname = self._fullpath_childname(childname)
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
         imct = 0
@@ -487,14 +503,17 @@ class UpdateChildrenIngredient(BaseIngredient):
         self.give_phonon_single_forces_and_displacements(childname)
     def give_phonon_single_forces_and_displacements(self, childname):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
+        childname = self._fullpath_childname(childname)
         self.forward_parent_dynmat(self.keywords['name'], childname)
         self.forward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
 
     def give_structure_and_energy_to_neb(self, childname):
+        childname = self._fullpath_childname(childname)
         label = BaseIngredient.get_my_label(self, "defect_label")
         self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + label)
         self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
     def give_structure_and_restart_files(self, childname):
+        childname = self._fullpath_childname(childname)
         self.forward_parent_structure(self.keywords['name'], childname)
         self.forward_extra_restart_files(self.keywords['name'], childname)
    

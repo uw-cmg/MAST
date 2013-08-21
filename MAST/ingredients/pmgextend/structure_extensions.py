@@ -3,6 +3,8 @@ import numpy as np
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
+from pymatgen.core.structure_modifier import StructureEditor
+from pymatgen.util.coord_utils import find_in_coord_list
 
 def induce_defect(base_structure, defect, coord_type, threshold):
     """Creates a defect, and returns the modified structure

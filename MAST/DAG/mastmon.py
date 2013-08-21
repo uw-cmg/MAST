@@ -21,8 +21,6 @@ class MASTmon(object):
         self.home = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
 
-        self.pm = PickleManager()
-        self.pn_mastmon = os.path.join(self.home,'mastmon_info.pickle')
         self.scheduler = DAGScheduler()
         self.version = 0.1
         
@@ -48,13 +46,14 @@ class MASTmon(object):
             self.move_extra_files(recipe_dir)
             if not os.path.isfile('mast.pickle'):
                 raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (recipe_dir, 'mast.pickle'))
-            mastobj = self.pm.load_variable('mast.pickle')	
+            pm = PickleManager()
+            mastobj = pm.load_variable('mast.pickle')	
             mastobj.check_recipe_status(verbose)
             #depdict = mastobj.dependency_dict
             #ingredients = mastobj.ingredients
             if mastobj.status == "C":
                 shutil.move(recipe_dir, self._ARCHIVE)
-            self.pm.save(mastobj, 'mast.pickle')
+            pm.save(mastobj, os.path.join(recipe_dir, 'mast.pickle'))
 
             #if self.scheduler is None:
             #    print 'step 1: create DAGScheduler object'
