@@ -75,7 +75,7 @@ class RecipeSetup(MASTObj):
                     ing_opt[glob_key] = glob_value
             self.input_options.set_item('ingredients', ingredient_type, ing_opt)
 
-        self.program = self.input_options.options['ingredients'][ingredient_type]['mast_program']
+        #self.program = self.input_options.options['ingredients'][ingredient_type]['mast_program']
         self.work_dir = self.input_options.get_item('mast', 'working_directory')
 
         ingredient_name = os.path.join(self.work_dir, name)
@@ -105,7 +105,7 @@ class RecipeSetup(MASTObj):
 
         allopt=dict()
         allopt['name'] = ingredient_name
-        allopt['program'] = self.program
+        #allopt['program'] = self.program
         allopt['structure'] = self.structure
         allopt['program_keys'] = pkey_d
         return allopt
