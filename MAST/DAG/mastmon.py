@@ -118,6 +118,7 @@ class MASTmon(object):
         self._load()
         iter = 0;
         while True:
+            #print "GRJ DEBUG: CHECKING"
             if niter is not None and iter >= niter:
                 break
             
@@ -153,7 +154,7 @@ class MASTmon(object):
                 self.del_session(self.scheduler, remove)
                 #print 'GRJ DEBUG: After:', self.scheduler
                 self._save()
-                break
+                #break
 
             self.registered_dir = self.registered_dir - csnames
 
