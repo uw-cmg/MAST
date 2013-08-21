@@ -261,6 +261,7 @@ class InputParser(MASTObj):
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
+                charge = [0]
 
                 if (len(line) < 5):
                     error = 'Defect specification requires at least 5 arguments.'
