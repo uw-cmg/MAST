@@ -25,6 +25,7 @@ from MAST.utility import MASTFile
 from MAST.utility import dirutil
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend import structure_extensions
+
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
@@ -482,16 +483,22 @@ class UpdateChildrenIngredient(BaseIngredient):
         childname = self._fullpath_childname(childname)
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
-        imct = 0
+        highenergyimct=0
+        imct=0
+        highenergy=-1000000000000.0
         numim = int(self.keywords['program_keys']['images'])
-        middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc
+        #middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc
+        subdirs.sort()
         for subdir in subdirs:
-            if not (imct == middleim):
-                pass
-            else:
-                self.forward_parent_structure(newname, childname)
-                self.forward_extra_restart_files(newname, childname)
+            myenergy = self.get_e0_energy(subdir) 
+            if myenergy > highenergy:
+                highenergyimct = imct
+                highenergy = myenergy
             imct = imct + 1
+        imno = str(highenergyimct).zfill(2)
+        impath = os.path.join(self.keywords['name'], imno)
+        self.forward_parent_structure(impath, childname)
+        self.forward_extra_restart_files(impath, childname)
         return
     def give_phonon_multiple_forces_and_displacements(self,childname):
         self.combine_dynmats()

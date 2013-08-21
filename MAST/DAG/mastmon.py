@@ -36,24 +36,24 @@ class MASTmon(object):
     def add_recipes(self, new_recipe_dirs, verbose):
         """recipe_dirs is a set of recipes in MASTmon home directory"""
         for recipe_dir in  new_recipe_dirs:
+            fulldir = os.path.join(self.home, recipe_dir)
             #print 'recipe_dir =', recipe_dir
-            if not os.path.exists(recipe_dir):
+            if not os.path.exists(fulldir):
                 raise MASTError("mastmon, add_recipes", "No recipe_dir at %s" % recipe_dir)
-            if not os.path.isfile(os.path.join(recipe_dir,'mast.pickle')):
+            if not os.path.isfile(os.path.join(fulldir,'mast.pickle')):
                 print "Skipping directory %s because there is no pickle file." % recipe_dir
                 continue
-            os.chdir(recipe_dir)
-            self.move_extra_files(recipe_dir)
-            if not os.path.isfile('mast.pickle'):
-                raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (recipe_dir, 'mast.pickle'))
+            self.move_extra_files(fulldir)
+            if not os.path.isfile(os.path.join(fulldir, 'mast.pickle')):
+                raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (fulldir, 'mast.pickle'))
             pm = PickleManager()
-            mastobj = pm.load_variable('mast.pickle')	
+            mastobj = pm.load_variable(os.path.join(fulldir,'mast.pickle'))
             mastobj.check_recipe_status(verbose)
             #depdict = mastobj.dependency_dict
             #ingredients = mastobj.ingredients
+            pm.save(mastobj, os.path.join(fulldir, 'mast.pickle'))
             if mastobj.status == "C":
-                shutil.move(recipe_dir, self._ARCHIVE)
-            pm.save(mastobj, os.path.join(self.home, recipe_dir, 'mast.pickle'))
+                shutil.move(fulldir, self._ARCHIVE)
 
             #if self.scheduler is None:
             #    print 'step 1: create DAGScheduler object'
@@ -65,7 +65,6 @@ class MASTmon(object):
             #    raise MASTError(self.__class__.__name__,
             #        "Error adding jobs to scheduler.")
                 
-            os.chdir(self.home)
                 
         #self.registered_dir = self.registered_dir.union(new_recipe_dirs)
 

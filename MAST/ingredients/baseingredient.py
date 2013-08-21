@@ -309,4 +309,14 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "No metadata for tag %s" % label)
         return mylabel[1]
+    def get_e0_energy(self, mydir):
+        """Get the E0 energy from a directory.
+        """
+        if self.keywords['program'].lower() == 'vasp':
+            from MAST.ingredients.pmgextend import vasp_extensions
+            return vasp_extensions.get_e0_energy(mydir)
+        else:
+            raise MASTError(self.__class__.__name__, 
+                "Program not recognized (in get_e0_energy)")
+
 

@@ -409,4 +409,16 @@ def get_zval_list(mypotcar):
         zval_list.append(onepotcar.zval)
         potcarct = potcarct + 1
     return zval_list
-
+def get_e0_energy(mydir):
+    """Get last E0 energy from OSZICAR.
+        Args:
+            mydir <str>: Directory in which to look.
+        Returns:
+            <float>: last E0 energy from OSZICAR
+    """
+    fullpath=os.path.join(mydir, "OSZICAR")
+    if not os.path.isfile(fullpath):
+        raise MASTError("vasp_checker, get_e0_energy", "No OSZICAR file at %s" % mydir)
+    myosz = MASTFile(fullpath)
+    mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
+    return float(mye0)
