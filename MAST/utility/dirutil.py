@@ -52,6 +52,8 @@ def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
             matchme <str>: string to match; every file ending in matchme
                             will be found, since a * is required at the front
                             to match the full paths.
+        Returns:
+            <list of str>: list of full file paths
     """
     if not(os.path.exists(existdir)):
         raise MASTError("utility","No directory at " +existdir)

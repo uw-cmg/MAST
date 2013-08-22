@@ -4,7 +4,7 @@ from pymatgen.io.vaspio import Potcar
 from pymatgen.io.vaspio import Incar
 from pymatgen.io.vaspio import Kpoints
 from pymatgen.io.vaspio.vasp_output import Vasprun
-
+from pymatgen.io.cifio import CifParser
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
@@ -141,9 +141,15 @@ def _vasp_poscar_setup(keywords):
         #parent should have given a structure
     else: #this is an originating run; mast should give it a structure
         my_poscar = Poscar(keywords['structure'])
-        dirutil.lock_directory(name)
-        my_poscar.write_file(pospath)
-        dirutil.unlock_directory(name)
+    if 'mast_coordinates' in keywords['program_keys'].keys():
+        goodstrucs=[my_poscar.structure.copy()]
+        coordstrucs=get_coordinates_only_structure_from_input(keywords)
+        newstrucs=graft_coordinates_onto_structure(goodstrucs, 
+            coordstrucs)
+        myposcar.structure=newstrucs[0].copy()
+    dirutil.lock_directory(name)
+    my_poscar.write_file(pospath)
+    dirutil.unlock_directory(name)
     return my_poscar
 
 def _vasp_kpoints_setup(keywords):
@@ -306,13 +312,27 @@ def get_path_to_write_neb_parent_energy(myname, myimages, parent):
     else:
         raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
 
-def set_up_neb_folders(myname, image_structures):
+def set_up_neb_folders(myname, image_structures, keywords):
     imct=0
+    if 'mast_coordinates' in keywords['program_keys'].keys():
+        goodstrucs=list()
+        for imstruc in image_structures[1:-1]:
+            goodstrucs.append(imstruc.copy())
+            coordstrucs=get_coordinates_only_structure_from_input(keywords)
+            newstrucs=graft_coordinates_onto_structure(goodstrucs, 
+                coordstrucs)
     while imct < len(image_structures):
         imposcar = Poscar(image_structures[imct])
         num_str = str(imct).zfill(2)
         impath = os.path.join(myname, num_str)
         impospath = os.path.join(myname, "POSCAR_" + num_str)
+        if 'mast_coordinates' in keywords['program_keys'].keys():
+            if imct == 0: #skip endpoint
+                pass 
+            elif imct == len(image_structures)-1: #skip other endpt
+                pass
+            else:
+                imposcar.structure=newstrucs[imct-1].copy()
         dirutil.lock_directory(myname)
         imposcar.write_file(impospath)
         dirutil.unlock_directory(myname)
@@ -329,7 +349,7 @@ def set_up_neb_folders(myname, image_structures):
     
 
 def set_up_program_input_neb(keywords, image_structures):
-    set_up_neb_folders(keywords['name'], image_structures)
+    set_up_neb_folders(keywords['name'], image_structures, keywords)
     mykpoints = _vasp_kpoints_setup(keywords)
     mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
     myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
@@ -363,3 +383,59 @@ def add_selective_dynamics_to_structure(keywords, sdarray):
 def get_vasp_energy(abspath):
     return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
+def get_coordinates_only_structure_from_input(keywords):
+    """Get coordinates-only structures from mast_coordinates
+        ingredient keyword
+        Args:
+            keywords <dict>: ingredient keywords
+        Returns:
+            coordstrucs <list>: list of Structure objects
+    """
+    coordposlist=keywords['program_keys']['mast_coordinates']
+    coordstrucs=list()
+    coordstruc=None
+    for coordpositem in coordposlist:
+        if ('poscar' in os.path.basename(coordpositem).lower()):
+            coordstruc = Poscar.from_file(coordpositem).structure
+        elif ('cif' in os.path.basename(coordpositem).lower())):
+            coordstruc = CifParser(coordpositem).get_structures()[0]
+        else:
+            error = 'Cannot build structure from file %s' % coordpositem
+            raise MASTError("vasp_checker,get_coordinates_only_structure_from_input", error)
+        coordstrucs.append(coordstruc)
+    return coordstrucs
+
+def graft_coordinates_onto_structure(goodstrucs,coordstrucs):
+    """Graft coordinates from mast_coordinates Structure objects
+        onto the appropriate structure
+        Args:
+            goodstrucs <list>: list of Structure objects with
+                the correct lattice parameters and elements
+            coordstrucs <list>: list of Structure objects with
+                the coordinates for grafting
+        Returns:
+            modstrucs <list>: list of modified Structure objects
+    """
+    sidx=0
+    slen=len(goodstrucs)
+    while sidx < slen:
+        lengoodsites=len(goodstrucs[sidx].sites)
+        lencoordsites=len(coordstrucs[sidx].sites)
+        if not (lengoodsites == lencoordsites):
+            raise MASTError("vasp_checker,graft_coordinates_onto_structure", "Original and coordinate structures do not have the same amount of sites.")
+        cct=0
+        newsites=list()
+        mylattice=goodstrucs[sidx].lattice
+        while cct < lengoodsites:
+            newcoords=coordstrucs[sidx].sites[cct].frac_coords
+            oldspecie=goodstrucs[sidx].sites[cct].specie
+            newsite=pymatgen.core.sites.PeriodicSite(oldspecie,
+                        newcoords, mylattice)
+            newsites.append(newsite)
+            cct=cct+1
+        goodstrucs[sidx].remove_sites(range(0,lengoodsites))
+        for cct in range(0, lengoodsites):
+            goodstrucs[sidx].append(newsites[cct].specie,
+                newsites[cct].frac_coords)
+        sidx = sidx + 1
+    return goodstrucs

@@ -18,7 +18,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
 from MAST.utility import PickleManager
-
+from MAST.utility import dirutil
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
@@ -421,6 +421,17 @@ class InputParser(MASTObj):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 elif (opt[0] == 'mast_setmagmom'):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                elif (opt[0] == 'mast_coordinates'):
+                    shortsplit = opt[1].split(",")
+                    filesplit=list()
+                    myfiles = dirutil.walkfiles(os.getcwd())
+                    for shortname in shortsplit:
+                        for fullfile in myfiles:
+                            if shortname in os.path.basename(fullfile):
+                                filesplit.append(fullfile)
+                    if not (len(filesplit) == len(shortsplit)):
+                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, os.getcwd()))
+                    ingredient_dict[opt[0]] = filesplit
                 else:
                     ingredient_dict[opt[0]] = opt[1]
                 if (opt[0] == 'mast_program') and opt[1] == 'vasp':

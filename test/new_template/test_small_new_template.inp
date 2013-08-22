@@ -42,7 +42,7 @@ $neb
 begin vac1-vac2
 X1, 0.5 0.5 0.0, 0.0 0.0 0.0
 end
-images 1
+images 3
 $end
 
 
@@ -85,11 +85,20 @@ lwave True
 lcharge True
 end
 
-begin induce_defect
+begin induce_defect_vac1
 mast_write_method            no_setup
 mast_ready_method            ready_defect
 mast_run_method              run_defect
 mast_complete_method         complete_structure
+mast_coordinates             vac1poscar
+end
+
+begin induce_defect_vac2
+mast_write_method            no_setup
+mast_ready_method            ready_defect
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+mast_coordinates             vac2poscar
 end
 
 begin singlerun_to_neb
@@ -101,13 +110,14 @@ lcharge True
 end
 
 begin neb_to_neb
+mast_coordinates             nebim1poscar,nebim2poscar,nebim3poscar
 mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
-mast_nodes                   1
+mast_nodes                   3
 mast_kpoints                 1x1x1 G
 ibrion 1
 potim 0.5
-images 1
+images 3
 lclimb True
 spring -5
 end
@@ -115,10 +125,10 @@ end
 begin neb_to_nebstat
 mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
-mast_nodes                   1
+mast_nodes                   3
 ibrion 1
 potim 0.5
-images 1
+images 3
 lclimb True
 spring -5
 end
