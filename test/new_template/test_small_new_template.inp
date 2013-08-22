@@ -85,19 +85,18 @@ lwave True
 lcharge True
 end
 
-begin induce_defect_vac1
+begin inducedefect
 mast_write_method            no_setup
 mast_ready_method            ready_defect
 mast_run_method              run_defect
 mast_complete_method         complete_structure
+end
+
+begin singlerun_vac1
 mast_coordinates             vac1poscar
 end
 
-begin induce_defect_vac2
-mast_write_method            no_setup
-mast_ready_method            ready_defect
-mast_run_method              run_defect
-mast_complete_method         complete_structure
+begin singlerun_vac2
 mast_coordinates             vac2poscar
 end
 

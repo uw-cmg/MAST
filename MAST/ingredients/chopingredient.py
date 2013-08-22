@@ -37,7 +37,7 @@ class WriteIngredient(BaseIngredient):
 
     def no_setup(self):
         """No setup is needed."""
-        pass
+        return
 
     
     def write_neb(self):
