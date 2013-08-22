@@ -92,7 +92,6 @@ class MAST(MASTObj):
         
         #run the *.py input script
         import subprocess
-        from MAST.utility import dirutil
         oppath=self.input_options.get_item('mast','input_stem') + 'output'
         opfile = open(oppath, 'ab')
         run_input_script = subprocess.Popen(['python ' + ipc_filename], 
@@ -192,7 +191,6 @@ class MAST(MASTObj):
         """
         strposfile = self.input_options.get_item('structure','posfile')
         if strposfile is None:
-            from MAST.utility import MAST2Structure
             iopscoords=self.input_options.get_item('structure','coordinates')
             iopslatt=self.input_options.get_item('structure','lattice')
             iopsatoms=self.input_options.get_item('structure','atom_list')

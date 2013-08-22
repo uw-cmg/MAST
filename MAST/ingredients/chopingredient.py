@@ -11,7 +11,6 @@ import os
 import shutil
 import numpy as np
 
-import pymatgen
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
@@ -301,7 +300,7 @@ class RunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def run_singlerun(self, mode='serial', curdir=os.getcwd()):
+    def run_singlerun(self, mode='serial'):
         return BaseIngredient.run(self, mode)
     def run_neb_subfolders(self):
         """Run all image subfolders."""
@@ -482,7 +481,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         highenergyimct=0
         imct=0
         highenergy=-1000000000000.0
-        numim = int(self.keywords['program_keys']['images'])
+        #numim = int(self.keywords['program_keys']['images'])
         #middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc
         subdirs.sort()
         for subdir in subdirs:

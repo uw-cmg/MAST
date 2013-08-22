@@ -72,8 +72,7 @@ class InputPythonCreator(MASTObj):
             pln.append("#Section: %3s" % sectionname)
             pln.append("####################################")
             pln.append(" ")
-            pln.extend(inputoptions.print_python_section('inputoptions.options',
-                            sectionname))
+            pln.extend(inputoptions.print_python_section(sectionname))
             pln.append("inputoptions.options['"+sectionname+"'] = " + sectionname)
         pln.extend(self.print_create_structure_section())
         pln.extend(self.print_mast_command_section())
@@ -107,8 +106,8 @@ class InputPythonCreator(MASTObj):
             pln.append("from pymatgen.io.vaspio import Poscar")
             pln.append("structure = Poscar.from_file('" +strposfile+ "').structure")
         elif ('cif' in strposfile.lower()):
-            from pymatgen.io.cifio import CifParser
-            structure = CifParser(strposfile).get_structures()[0]
+            #from pymatgen.io.cifio import CifParser
+            #structure = CifParser(strposfile).get_structures()[0]
             pln.append("from pymatgen.io.cifio import CifParser")
             pln.append("structure = CifParser('"+strposfile+"').get_structures()[0]")
         else:

@@ -489,10 +489,8 @@ class InputParser(MASTObj):
         """
         neblines = dict()
         images = 0
-        phonon = dict()
         neblabel=""
         for line in section_content:
-            type_dict = dict()
             line = line.strip()
             if 'images' in line:
                 line = line.split(self.delimiter)
@@ -594,17 +592,13 @@ class InputParser(MASTObj):
         phonon = dict()
         label=""
         for line in section_content:
-            type_dict = dict()
             line = line.strip()
-            if 'images' in line:
-                line = line.split(self.delimiter)
-                images = int(line[1])
-            elif 'begin' in line:
+            if 'begin' in line:
                 line = line.split(self.delimiter)
                 label = line[1].strip()
                 phonon[label]=dict()
             elif 'end' in line:
-                neblabel = ""
+                pass
             else:
                 line = line.split(self.delimiter, 1)
                 phonon[label][line[0]] = line[1]

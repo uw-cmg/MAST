@@ -5,6 +5,7 @@ from pymatgen.io.vaspio import Incar
 from pymatgen.io.vaspio import Kpoints
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.cifio import CifParser
+from pymatgen.core.sites import PeriodicSite
 from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
@@ -146,7 +147,7 @@ def _vasp_poscar_setup(keywords):
         coordstrucs=get_coordinates_only_structure_from_input(keywords)
         newstrucs=graft_coordinates_onto_structure(goodstrucs, 
             coordstrucs)
-        myposcar.structure=newstrucs[0].copy()
+        my_poscar.structure=newstrucs[0].copy()
     dirutil.lock_directory(name)
     my_poscar.write_file(pospath)
     dirutil.unlock_directory(name)
@@ -297,9 +298,9 @@ def _vasp_incar_setup(keywords, my_potcar, my_poscar):
 
 def set_up_program_input(keywords):
     myposcar = _vasp_poscar_setup(keywords)
-    mykpoints = _vasp_kpoints_setup(keywords)
+    _vasp_kpoints_setup(keywords)
     mypotcar = _vasp_potcar_setup(keywords, myposcar)
-    myincar = _vasp_incar_setup(keywords, mypotcar, myposcar)
+    _vasp_incar_setup(keywords, mypotcar, myposcar)
     return
 
 def get_path_to_write_neb_parent_energy(myname, myimages, parent):
@@ -350,9 +351,9 @@ def set_up_neb_folders(myname, image_structures, keywords):
 
 def set_up_program_input_neb(keywords, image_structures):
     set_up_neb_folders(keywords['name'], image_structures, keywords)
-    mykpoints = _vasp_kpoints_setup(keywords)
+    _vasp_kpoints_setup(keywords)
     mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
-    myincar = _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
+    _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
     return
 def forward_extra_restart_files(parentpath, childpath):
     """Forward extra restart files: softlink to WAVECAR and CHGCAR."""
@@ -397,7 +398,7 @@ def get_coordinates_only_structure_from_input(keywords):
     for coordpositem in coordposlist:
         if ('poscar' in os.path.basename(coordpositem).lower()):
             coordstruc = Poscar.from_file(coordpositem).structure
-        elif ('cif' in os.path.basename(coordpositem).lower())):
+        elif ('cif' in os.path.basename(coordpositem).lower()):
             coordstruc = CifParser(coordpositem).get_structures()[0]
         else:
             error = 'Cannot build structure from file %s' % coordpositem

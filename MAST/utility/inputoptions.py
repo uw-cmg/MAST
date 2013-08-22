@@ -96,11 +96,10 @@ class InputOptions:
     
 
 
-    def print_python_section(self, prepend, secname):
+    def print_python_section(self, secname):
         """Print python commands that will recreate the InputOptions section
             when the commands are run in python.
 
-            prepend <str>: prepend string, like input_option_varname.options
             secname <str>: section name
         """
         pln=list()
@@ -228,7 +227,7 @@ class InputOptions:
                 pln.append(mystr)
                 pln.extend(self.print_fourthlevel_dict(header, val3))
             else:
-                errstr="UNSUPPORTED TYPE" + str(type(val2))
+                errstr="UNSUPPORTED TYPE" + str(type(val3))
                 raise MASTError(self.__class__.__name__, errstr)
         return pln
     

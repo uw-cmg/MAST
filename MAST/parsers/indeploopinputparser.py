@@ -101,7 +101,8 @@ class IndepLoopInputParser(MASTObj):
         createdfiles = self.create_input_files(datasets)
         if verbose == 1:
             self.print_list(indepcomb)
-            self.print_list(pegcomb)
+            self.print_list(pegcomb1)
+            self.print_list(pegcomb2)
             self.print_list(allcombs)
             for datakey in datasets:
                 self.print_list(datasets[datakey])
@@ -126,7 +127,6 @@ class IndepLoopInputParser(MASTObj):
         realline=""
         split1=""
         split2=""
-        looplist=""
         numlines = len(self.baseinput.data)
         lidx =0
         while lidx < numlines:
@@ -200,9 +200,6 @@ class IndepLoopInputParser(MASTObj):
             Returns:
                 alllist <list of list>: List of all combinations
         """
-        indeplen=len(indeplist)
-        p1len=len(peglist1)
-        p2len=len(peglist2)
         templist=list()
         threelist=list()
         templist = self.combine_combo_lists(indeplist, peglist1)

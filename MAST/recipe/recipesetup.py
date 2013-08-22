@@ -8,14 +8,11 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
-import glob
-import inspect
 
 from MAST import ingredients
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
-from MAST.utility import InputOptions
 from MAST.utility import MASTError
 from MAST.utility import Metadata
 

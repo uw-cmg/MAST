@@ -59,7 +59,6 @@ def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
         raise MASTError("utility","No directory at " +existdir)
 #   walk and make main list
     walkme=""
-    walkentry=""
     walkme = os.walk(existdir)
     if walkme == ():
         raise MASTError("utility walkfiles","No folders found in " + existdir)

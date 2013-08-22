@@ -216,7 +216,7 @@ def get_neighbor_array(phonon_center_site, phonon_center_radius, mystruc, tol=1e
     print "TTM DEBUG: centersite: ", phonon_center_site.strip().split()
     print "TTM DEBUG: MYSTRUC: ", mystruc
     pcscoord = np.array(phonon_center_site.strip().split(), float)
-    pcsarr = pymatgen.util.coord_utils.find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
+    pcsarr = find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
     print "TTM DEBUG PCSarr: ", pcsarr
     uniqsites = np.unique(pcsarr)
 

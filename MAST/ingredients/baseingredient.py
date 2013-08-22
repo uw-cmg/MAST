@@ -295,13 +295,13 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "Program not recognized (in add_selective_dynamics_to_structure)")
 # The following functions need to be defined by the child class:
-    def write_files(self):
-        '''writes the files needed as input for the jobs'''
-        raise NotImplementedError
+    #def write_files(self):
+    #    '''writes the files needed as input for the jobs'''
+    #    raise NotImplementedError
     
-    def create_metadata_file(self):
-        '''writes the initial metadata file'''
-        raise NotImplementedError
+    #def create_metadata_file(self):
+    #    '''writes the initial metadata file'''
+    #    raise NotImplementedError
 
     
     def get_my_label(self, label):
