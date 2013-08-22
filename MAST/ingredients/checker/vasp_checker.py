@@ -430,8 +430,7 @@ def graft_coordinates_onto_structure(goodstrucs,coordstrucs):
         while cct < lengoodsites:
             newcoords=coordstrucs[sidx].sites[cct].frac_coords
             oldspecie=goodstrucs[sidx].sites[cct].specie
-            newsite=pymatgen.core.sites.PeriodicSite(oldspecie,
-                        newcoords, mylattice)
+            newsite=PeriodicSite(oldspecie, newcoords, mylattice)
             newsites.append(newsite)
             cct=cct+1
         goodstrucs[sidx].remove_sites(range(0,lengoodsites))

@@ -427,7 +427,7 @@ class InputParser(MASTObj):
                     myfiles = dirutil.walkfiles(os.getcwd())
                     for shortname in shortsplit:
                         for fullfile in myfiles:
-                            if shortname in os.path.basename(fullfile):
+                            if shortname.strip() in os.path.basename(fullfile):
                                 filesplit.append(fullfile)
                     if not (len(filesplit) == len(shortsplit)):
                         raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, os.getcwd()))
