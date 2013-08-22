@@ -165,7 +165,13 @@ class RecipeSetup(MASTObj):
                 defectlabel = "defect_" + defectlabel
             datalist.append("defect_label: %s" % defectlabel)
         if 'q=' in myingred:
-            chargelabel = myingred.split('q=')[1].split('_')[0]
+            chargestr = myingred.split('q=')[1].split('_')[0]
+            if chargestr[0] == 'p':
+                chargelabel=chargestr[1:]
+            elif chargestr[0] == 'n':
+                chargelabel='-'+chargestr[1:]
+            else:
+                chargelabel=chargestr
             datalist.append("charge: %s" % chargelabel)
         if 'neb_' in myingred:
             neblabel = myingred.split('neb_')[1].split('_')[0]
