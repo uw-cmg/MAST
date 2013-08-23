@@ -8,7 +8,6 @@ import filecmp
 from filecmp import dircmp
 import subprocess
 
-from MAST.ingredients.optimize import Optimize
 from MAST.utility import MASTError
 from pymatgen.io.vaspio import Poscar
 from MAST.utility.dirutil import *
@@ -29,20 +28,24 @@ class TestDiffCoeff(unittest.TestCase):
         #except OSError:
         #    pass
     
-    def test_onefreq_run_from_prompt(self):
+    def test_onefreq_run_from_prompt_with_and_without_phonons(self):
         #raise SkipTest
         verbose="0"
         mastpath = get_mast_install_path()
-        myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/diffcoeff_singlevac", "73", "1273", "100", "1", "w0=vac1-vac2",verbose])
+        myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/onefreq_recipe", "73", "1273", "100", "1", "w0=vac1-vac2",verbose,"1"])
+            #stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #myp.communicate()[0]
+        myp.wait()
+        myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/onefreq_recipe", "73", "1273", "100", "1", "w0=vac1-vac2",verbose,"0"])
             #stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #myp.communicate()[0]
         myp.wait()
 
 
-    def test_fivefreq_run_from_prompt(self):
+    def test_fivefreq_run_from_prompt_no_phonons(self):
         verbose="1"
         mastpath = get_mast_install_path()
-        myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/alcu", "73", "1273", "100", "5", "w0=ep10-ep91,w1=ep10-ep37,w2=ep10-ep9,w3=ep10-ep20,w4=ep20-ep10",verbose])
+        myp=subprocess.Popen([mastpath+"/MAST/utility/diffusioncoefficient.py", mastpath+"/test/diffcoeff_test/alcu", "73", "1273", "100", "5", "w0=ep10-ep91,w1=ep10-ep37,w2=ep10-ep9,w3=ep10-ep20,w4=ep20-ep10",verbose,"0"])
             #stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #myp.communicate()[0]
         myp.wait()

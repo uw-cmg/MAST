@@ -32,6 +32,7 @@ class RecipeTemplateParser(MASTObj):
             self.personal_recipe <str>: Path to the personalized recipe.
             self.ingredient_list <list of str>: List of ingredients mentioned
                                                 in the recipe template file.
+            self.chunks <list of list>: List of chunks
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -41,7 +42,7 @@ class RecipeTemplateParser(MASTObj):
         self.ingredient_list = list()
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['working_directory'])
-
+        self.chunks = list()
     def parse(self):
         """ Parses the template recipe file and creates
             the personalized recipe file
@@ -57,7 +58,7 @@ class RecipeTemplateParser(MASTObj):
 
         if self.personal_recipe is None:
             raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
-
+        
         #fetch required paramaters
         f_ptr           = open(self.template_file, "r")
         o_ptr           = open(self.personal_recipe, "w")
@@ -69,20 +70,74 @@ class RecipeTemplateParser(MASTObj):
         recipe_name     = None
 
 #        print system_name, self.input_options.get_item('mast', 'system_name')
-
+        chunkcount=0
+        mychunk=list()
+        modchunk=False
         for line in f_ptr.readlines():
-            #line             = line.strip()
-            #line             = line.lower()
-            processing_lines = []
-            #shortcut straight copy + 6
-            processing_lines.append(line)
-            output_str = "\n".join(processing_lines)
-            o_ptr.write("%s\n" % output_str)
-
+            if '{begin}' in line:
+                self.chunks.append(list(mychunk))
+                mychunk=list()
+            elif '{end}' in line:
+                pass
+            else:
+                mychunk.append(line)
+        if len(mychunk) > 0:
+            self.chunks.append(list(mychunk))
+        #for chunk in self.chunks:
+        #    print chunk
+        expandedlist=list()
+        for chunk in self.chunks:
+            expanded=self.parse_chunk(chunk)
+            expandedlist.append(expanded)
+        o_ptr.writelines(expandedlist)
         f_ptr.close()
         o_ptr.close()
-#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
         return recipe_name
+        #self.chunks[chunkcount]=dict()
+        #self.chunks[chunkcount]['modify'] = modchunk
+        #    #line             = line.strip()
+        #    #line             = line.lower()
+        #    processing_lines = []
+        #    #shortcut straight copy + 6
+        #    processing_lines.append(line)
+        #    output_str = "\n".join(processing_lines)
+        #    o_ptr.write("%s\n" % output_str)
+
+        #f_ptr.close()
+        #o_ptr.close()
+#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
+        #return recipe_name
+    def parse_chunk(self, chunk):
+        """Parse a chunk of lines.
+            Args:
+                chunk <list>: List of lines
+            Returns:
+                expandedchunk <list>: List of lines
+        """
+        d_defects       = self.input_options.get_item("defects","defects")
+        origchunk = list(chunk)
+        expandedchunk=list()
+        for defectname in self.d_defects:
+            for charge in self.d_defects['charge']:
+                if charge < 0:
+                    mycharge = 'n' + str(math.fabs(charge))
+                else:
+                    mycharge = 'p' + str(charge)
+                for line in origchunk:
+                    newline = line.replace("<N>", defectname)
+                    expandedchunk.append(line)
+        print "Expanded: " 
+        for line in expandedchunk:
+            print line
+        return expandedchunk
+        #origchunk = list(expandedchunk)
+        #expandedchunk=list()
+        #for defectname in self.d_defects:
+        #    for line in origchunk:
+        #        newline = line.replace("<N>", defectname)
+        #        expandedchunk.append(line)
+
+
     def old_parsing(self):
         linestr="hello"
         for line in linestr:

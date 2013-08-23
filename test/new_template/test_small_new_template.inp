@@ -28,19 +28,28 @@ $end
 $defects
 coord_type fractional
 
-begin vac1
+begin vac1 
 vacancy 0.0 0.0 0.0 X1
+charge=-3,2
 end
 
-begin vac2
+begin vac2 
 vacancy 0.5 0.5 0.0 X1
+charge=0,2
 end
 
+begin vac3 
+vacancy 0.0 0.5 0.5 X1
+charge=-3,0
+end
 $end
 
 $neb
 begin vac1-vac2
 X1, 0.5 0.5 0.0, 0.0 0.0 0.0
+end
+begin vac1-vac3
+X1, 0.0 0.5 0.5, 0.0 0.0 0.0
 end
 images 3
 $end
@@ -108,7 +117,20 @@ lwave True
 lcharge True
 end
 
-begin neb_to_neb
+begin neb_to_neb_vac1-vac2
+mast_coordinates             nebim1poscar,nebim2poscar,nebim3poscar
+mast_write_method            write_neb
+mast_update_children_method  give_neb_structures_to_neb
+mast_nodes                   3
+mast_kpoints                 1x1x1 G
+ibrion 1
+potim 0.5
+images 3
+lclimb True
+spring -5
+end
+
+begin neb_to_neb_vac1-vac3
 mast_coordinates             nebim1poscar,nebim2poscar,nebim3poscar
 mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
@@ -196,10 +218,14 @@ phonon_center_site 0.25 0.25 0
 phonon_center_radius 1
 end
 
+begin vac1-vac2
+phonon_center_site 0.0 0.25 0.25
+phonon_center_radius 1
+end
 $end
 
 
 
 $recipe
-recipe_file treetest.txt
+recipe_file fillintreetest.txt
 $end

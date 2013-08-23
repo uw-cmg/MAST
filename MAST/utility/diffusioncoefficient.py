@@ -41,7 +41,7 @@ class DiffusionCoefficient():
             self.formdict <dict of float>: freq-labeled dict of formation
             self.tempdict <dict of float>: temperature list of diffusion coeffs
     """
-    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100, freqmodel=0, freqdict=None, verbose=0):
+    def __init__(self, directory, tempstart=73, tempend=1273, tempstep=100, freqmodel=0, freqdict=None, verbose=0, withphonons=1):
         """
             Args:
                 directory <str>: directory to start in
@@ -51,6 +51,7 @@ class DiffusionCoefficient():
                 freqmodel <int>: Integer for frequency model
                 freqdict <dict>: Dictionary for frequency-to-hop-labels
                 verbose <int>: 0 for not verbose (default), 1 for verbose
+                withphonons <int>: 1 for phonons (default), 0 for no phonons
         """
         self.directory = directory
         dirlist = os.listdir(self.directory)
@@ -67,6 +68,7 @@ class DiffusionCoefficient():
         self.formdict=None
         self.tempdict=None
         self.verbose=verbose
+        self.withphonons=withphonons
         if self.verbose == 1:
             print "verbose mode is on"
         try:
@@ -517,8 +519,8 @@ class DiffusionCoefficient():
         freqs.sort() #do w0 before w2
         for freq in freqs:
             [startlabel,tstlabel]=self.find_start_and_tst_labels(self.freqdict[freq])
-            initfind=dirutil.search_for_metadata_file("phononlabel=" + startlabel + ",ingredient type=PhonParse", self.directory)
-            tstfind=dirutil.search_for_metadata_file("phononlabel=" + tstlabel + ",ingredient type=PhonParse", self.directory)
+            initfind=dirutil.search_for_metadata_file("phonon_label=" + startlabel + ",program=phon", self.directory)
+            tstfind=dirutil.search_for_metadata_file("phonon_label=" + tstlabel + ",program=phon", self.directory)
             if self.verbose == 1:
                 print "initfind: ", initfind
                 print "tstfind: ", tstfind
@@ -571,10 +573,12 @@ class DiffusionCoefficient():
         return meltval
 
 
-    def five_freq(self, temp):
+    def five_freq(self, temp, withphonons=1):
         """Five-frequency model for FCC SYSTEMS ONLY.
             Args:
                 temp <float>: Temperature in K
+                withphonons <int>: 1 - use phonons (default)
+                             0 - no phonons
             Returns:
                 [Dself <float>, Dsolute <float>]
                     Self-diffusion coefficient
@@ -586,8 +590,10 @@ class DiffusionCoefficient():
         """
         self.get_hopdict()
         self.get_formdict()
-        #self.get_entromigdict_approx()
-        self.get_entromigdict_from_phonons(temp)
+        if withphonons == 1:
+            self.get_entromigdict_from_phonons(temp)
+        else:
+            self.get_entromigdict_approx()
         self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
@@ -716,9 +722,9 @@ class DiffusionCoefficient():
             if self.verbose == 1:
                 print "Temperature (K): %1i\n" % tkey
             if self.freqmodel == 1:
-                self.tempdict[tkey] = self.one_freq(tkey)
+                self.tempdict[tkey] = self.one_freq(tkey, self.withphonons)
             elif self.freqmodel == 5:
-                self.tempdict[tkey] = self.five_freq(tkey)
+                self.tempdict[tkey] = self.five_freq(tkey, self.withphonons)
             else:
                 raise MASTError(self.__class__.__name__, "%s is not a supported frequency model." % int(self.freqmodel))
         if self.verbose == 1:
@@ -726,18 +732,22 @@ class DiffusionCoefficient():
         return self.tempdict
 
 
-    def one_freq(self, temp):
+    def one_freq(self, temp, withphonons=1):
         """One-frequency (pure) model for FCC SYSTEMS ONLY.
             Args:
                 temp <float>: Temperature in K
+                withphonons <int>: 1 - with phonons (default)
+                                   0 - no phonons
             Returns:
                 Dself <float>
                     Self-vacancy-diffusion coefficient
         """
         self.get_hopdict()
         self.get_formdict()
-        #self.get_entromigdict_approx()
-        self.get_entromigdict_from_phonons(temp)
+        if withphonons == 1:
+            self.get_entromigdict_from_phonons(temp)
+        else:
+            self.get_entromigdict_approx()
         self.get_attemptdict() #Adams approximations
         freqs = self.freqdict.keys()
         jumpfreqdict=dict()
@@ -757,6 +767,10 @@ class DiffusionCoefficient():
     def print_temp_dict(self):
         """Print the self.tempdict dictionary of coefficients."""
         print "-----------------------------------------------"
+        if self.withphonons == 1:
+            print "With phonons."
+        else:
+            print "No phonons."
         if self.freqmodel > 1:
             print "Host: ", self.host
             print "Solute: ", self.solute
@@ -795,6 +809,7 @@ def main():
     tend=1273
     tstep=100
     freqmodel=1
+    withphonons=1
     try:
         trytstart=sys.argv[2]
         tstart=float(trytstart)
@@ -831,9 +846,13 @@ def main():
         verbose=int(sys.argv[7])
     except IndexError:
         pass
+    try:
+        withphonons=int(sys.argv[8])
+    except IndexError:
+        pass
 
     print 'Looking at diffusion coefficient for %s' % directory
-    DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict, verbose)
+    DC = DiffusionCoefficient(directory, tstart, tend, tstep, freqmodel, freqdict, verbose, withphonons)
     DC.diffusion_coefficient()
     DC.print_temp_dict()
 
