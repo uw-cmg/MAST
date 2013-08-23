@@ -771,12 +771,13 @@ class DiffusionCoefficient():
             print "With phonons."
         else:
             print "No phonons."
-        if self.freqmodel > 1:
-            print "Host: ", self.host
+        print "Host: ", self.host
+        if not (self.solute == None):
             print "Solute: ", self.solute
+        print "Frequency model: ", str(self.freqmodel)
+        if self.freqmodel > 1:
             print "%8s %20s %20s" % ("TEMP (K)","Dself cm2/sec","Dsolute cm2/sec")   
         else:
-            print "Pure: ", self.host
             print "%8s %20s" % ("TEMP (K)","D cm2/sec")   
         tkeys = self.tempdict.keys()
         tkeys.sort()
