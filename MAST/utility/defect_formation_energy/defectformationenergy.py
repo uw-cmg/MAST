@@ -59,6 +59,7 @@ class DefectFormationEnergy:
             # Loop through each defect
             for ddir in sorted(def_dir):
                 def_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, ddir))
+                #print def_meta
                 label = def_meta.read_data('defect_label')
                 charge = int(def_meta.read_data('charge'))
                 energy = float(def_meta.read_data('energy'))
@@ -97,6 +98,7 @@ class DefectFormationEnergy:
                     #print str(specie), mu, number
                     e_def -= (number * mu)
                 e_def += charge * (efermi + alignment) # Add in the shift here!
+                #print '%-15s%-5i%12.5f%12.5f%12.5f%12.5f' % (label.split('_')[1], charge, energy, e_perf, efermi, alignment)
                 print 'DFE = %f' % e_def
                 self.e_defects[conditions][label].append( (charge, e_def) )
 

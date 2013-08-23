@@ -57,29 +57,33 @@ class GapPlot:
             transition = self.get_transition(state1, state2)
             #print transition, state1, state2
             if state2[0] > state1[0]:
-                print 'The transition %s is losing electrons as Fermi level increases.' % transition[0]
-                print 'This is unphysical, please check your DFE\'s and run again.'
-                raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
+                print 'The transition %s at %.2f is losing electrons as Fermi level increases.' % (transition[0], transition[1])
+                #print 'This is unphysical, please check your DFE\'s and run again.'
+                print 'Skipping this transition'
+#                raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
+                # Since state2 is higher in energy, we neglect here, and continue on from state1
+                final_state = state1
+            else:
+                final_state = state2
+                switch = False
+                while not switch:
+    #                if (abs(energy - state2[1]) <= self.threshold):
+                    if (abs(level - transition[1]) < self.threshold):
+                        print 'Transition %s found at %4.2f eV.' % (transition[0], transition[1])
+                        #print 'DFE = %4.2f eV' % energy
+                        #print transition[1], energy
+                        switch = True
+                    elif (level > self.gap):
+                        switch = True # Level cannot be higher than the gap, so truncate it here
+                    else:
+                        #print '%10.5f%10.5f%10.5f' % (energy - state2[1], level, energy)
+                        data.append( [level, energy] )
 
-            switch = False
-            while not switch:
-#                if (abs(energy - state2[1]) <= self.threshold):
-                if (abs(level - transition[1]) < self.threshold):
-                    print 'Transition %s found at %4.2f eV.' % (transition[0], transition[1])
-                    #print 'DFE = %4.2f eV' % energy
-                    #print transition[1], energy
-                    switch = True
-                elif (level > self.gap):
-                    switch = True # Level cannot be higher than the gap, so truncate it here
-                else:
-                    #print '%10.5f%10.5f%10.5f' % (energy - state2[1], level, energy)
-                    data.append( [level, energy] )
+                        energy += state1[0] * step
+                        level += step
+                        nsteps += 1
 
-                    energy += state1[0] * step
-                    level += step
-                    nsteps += 1
-
-        final_state = sorted_states[-1]
+        #final_state = sorted_states[-1]
         while (level <= self.gap):
             energy += final_state[0] * step
             data.append( [level, energy] )
