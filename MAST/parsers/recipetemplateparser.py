@@ -88,7 +88,7 @@ class RecipeTemplateParser(MASTObj):
         expandedlist=list()
         for chunk in self.chunks:
             expanded=self.parse_chunk(chunk)
-            expandedlist.append(expanded)
+            expandedlist.extend(expanded)
         o_ptr.writelines(expandedlist)
         f_ptr.close()
         o_ptr.close()
@@ -114,21 +114,62 @@ class RecipeTemplateParser(MASTObj):
             Returns:
                 expandedchunk <list>: List of lines
         """
-        d_defects       = self.input_options.get_item("defects","defects")
         origchunk = list(chunk)
         expandedchunk=list()
-        for defectname in self.d_defects:
-            for charge in self.d_defects['charge']:
-                if charge < 0:
-                    mycharge = 'n' + str(math.fabs(charge))
-                else:
-                    mycharge = 'p' + str(charge)
-                for line in origchunk:
-                    newline = line.replace("<N>", defectname)
-                    expandedchunk.append(line)
-        print "Expanded: " 
-        for line in expandedchunk:
-            print line
+        needsdefects=0
+        needscharges=0
+        needsnebs=0
+        for line in chunk:
+            if "<N>" in line:
+                needsdefects=1
+            if "<B-E>" in line:
+                needsnebs=1
+            if "<Q>" in line:
+                needscharges=1
+            if "<B>" in line:
+                needsnebs=1
+            if "<E>" in line:
+                needsnebs=1
+        d_defects       = self.input_options.get_item("defects","defects")
+        d_neblines      = self.input_options.get_item("neb", "neblines")
+        if needsdefects == 1:
+            mydefects=d_defects.keys()
+            mydefects.sort()
+            for defectname in mydefects:
+                for charge in d_defects[defectname]['charge']:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    for line in origchunk:
+                        newline = line.replace("<N>", defectname)
+                        if needscharges == 1:
+                            newline = newline.replace("<Q>", mycharge)
+                        expandedchunk.append(newline)
+        elif needsnebs == 1:
+            mynebs=d_neblines.keys()
+            mynebs.sort()
+            for neblabel in mynebs:
+                defbegin = neblabel.split('-')[0]
+                defend = neblabel.split('-')[1]
+                chargebegin = d_defects[defbegin]['charge']
+                chargeend = d_defects[defend]['charge']
+                chargeboth = set(chargebegin) & set(chargeend)
+                for charge in chargeboth:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    for line in origchunk:
+                        newline = line.replace("<B>", defbegin)
+                        newline = newline.replace("<E>", defend)
+                        newline = newline.replace("<B-E>", neblabel)
+                        if needscharges == 1:
+                            newline = newline.replace("<Q>", mycharge)
+                        expandedchunk.append(newline)
+
+        else:
+            expandedchunk = list(origchunk)
         return expandedchunk
         #origchunk = list(expandedchunk)
         #expandedchunk=list()
