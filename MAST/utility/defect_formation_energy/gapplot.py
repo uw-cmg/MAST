@@ -86,13 +86,12 @@ class GapPlot:
                             if not self.real_gap:
                                 data.append( [level, energy] )
                             else:
-                                senergy = energy * (self.real_gap / self.gap)
                                 slevel = level * (self.real_gap / self.gap)
 
                                 print 'Scaling by %f' % (self.real_gap / self.gap)
                                 print 'Old: %f, %f' % (level, energy)
-                                print 'Scaled: %f, %f' % (slevel, senergy)
-                                data.append( [slevel, senergy] )
+                                print 'Scaled: %f, %f' % (slevel, energy)
+                                data.append( [slevel, energy] )
 
                             energy += state1[0] * step
                             level += step
