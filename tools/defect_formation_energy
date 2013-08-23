@@ -5,6 +5,7 @@ import sys, os
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
 from MAST.utility.defect_formation_energy import GapPlot
 from MAST.utility import Metadata
+from MAST.utility import MASTError
 
 
 def main():
@@ -43,8 +44,32 @@ def main():
     if 'y' in response:
         print 'Before plotting the levels, please specify a band gap:'
         bandgap = float(sys.stdin.readline())
-        print 'Procedding with a band gap of %.2f eV' % bandgap
-        gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+        print 'Is this a LDA/GGA band gap ([y]es/[n]o)?'
+        response = sys.stdin.readline()
+        if 'y' in response:
+            undergap = True
+        elif 'n' in response:
+            undergap = False
+        else:
+            error = 'I do not recognize the answer'
+            raise MASTError('defect_formation_energy', error)
+ 
+        if undergap:
+            print 'Would you like to stretch your LDA/GGA results to the real band bap ([y]es/[n]o)?'
+            response = sys.stdin.readline()
+            if 'y' in response:
+                print 'Please specify the HSE/experimental band gap:'
+                real_gap = float(sys.stdin.readline())
+
+                print 'Procedding with a band gap of %.2f eV, rescaled to a real band gap of %f eV.' % (bandgap, real_gap)
+                gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies, real_gap=real_gap)
+            elif 'n' in response:
+                print 'Proceeding with a band gap of %.2f eV' % bandgap
+                gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+        elif not undergap:
+            print 'Procedding with a band gap of %.2f eV' % bandgap
+            gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+
         gp.plot_levels()
     elif 'n' in response:
         print 'Not plotting'

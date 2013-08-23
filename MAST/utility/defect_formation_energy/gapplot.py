@@ -4,11 +4,12 @@ import numpy as np
 from MAST.utility import MASTError
 
 class GapPlot:
-    def __init__(self, gap=0.0, threshold=None, bins=300, dfe=None):
+    def __init__(self, gap=0.0, threshold=None, bins=300, dfe=None, real_gap=None):
         self.gap = gap
         self.threshold = threshold
         self.bins = bins
         self.dfe = dfe
+        self.real_gap = real_gap
 
         self.states = list()
         self.transitions = list()
@@ -64,14 +65,14 @@ class GapPlot:
                     print 'The transition %s at %.2f is losing electrons as Fermi level increases.' % (transition[0], transition[1])
                     #print 'This is unphysical, please check your DFE\'s and run again.'
                     print 'Skipping this transition'
-#                    raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
+                    #raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
                     # Since state2 is higher in energy, we neglect here, and continue on from state1
                     final_state = state1
                 else:
                     final_state = state2
                     switch = False
                     while not switch:
-        #                if (abs(energy - state2[1]) <= self.threshold):
+                        #if (abs(energy - state2[1]) <= self.threshold):
                         if (abs(level - transition[1]) < self.threshold):
                             print 'Transition %s found at %4.2f eV.' % (transition[0], transition[1])
                             #print 'DFE = %4.2f eV' % energy
@@ -81,7 +82,17 @@ class GapPlot:
                             switch = True # Level cannot be higher than the gap, so truncate it here
                         else:
                             #print '%10.5f%10.5f%10.5f' % (energy - state2[1], level, energy)
-                            data.append( [level, energy] )
+
+                            if not self.real_gap:
+                                data.append( [level, energy] )
+                            else:
+                                senergy = energy * (self.real_gap / self.gap)
+                                slevel = level * (self.real_gap / self.gap)
+
+                                print 'Scaling by %f' % (self.real_gap / self.gap)
+                                print 'Old: %f, %f' % (level, energy)
+                                print 'Scaled: %f, %f' % (slevel, senergy)
+                                data.append( [slevel, senergy] )
 
                             energy += state1[0] * step
                             level += step
@@ -89,8 +100,14 @@ class GapPlot:
 
         #final_state = sorted_states[-1]
         while (level <= self.gap):
+            if not self.real_gap:
+                data.append( [level, energy] )
+            else:
+                senergy = energy * (self.real_gap / self.gap)
+                slevel = level * (self.real_gap / self.gap)
+                data.append([slevel, senergy])
+
             energy += final_state[0] * step
-            data.append( [level, energy] )
             level += step
 
         return data
