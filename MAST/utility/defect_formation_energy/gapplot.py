@@ -68,6 +68,7 @@ class GapPlot:
                     #raise MASTError(self.__class__.__name__, 'Unphysical defect transition levels')
                     # Since state2 is higher in energy, we neglect here, and continue on from state1
                     final_state = state1
+                    sorted_states[i+1] = state1 # restart the checking from the current state 
                 else:
                     final_state = state2
                     switch = False
