@@ -1,4 +1,3 @@
-[tma249@dlxlogin2-1 submit]$ cat queue_commands.py
 #!/usr/bin/env python
 # Purpose: Submit a job to the queue. This function is highly platform-specific and may need to be modified.
 # Authors: Tam Mayeshiba
