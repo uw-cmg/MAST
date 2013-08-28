@@ -1,6 +1,7 @@
 import sys, os
 
-from pymatgen.io.vaspio.vasp_output import Vasprun
+import pymatgen as pmg
+from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
 from pymatgen.io.smartio import read_structure
 
 from MAST.utility import PickleManager
@@ -38,7 +39,8 @@ class DefectFormationEnergy:
         defects = self.input_options.get_item('defects', 'defects')
         chempot = self.input_options.get_item('chemical_potentials')
 
-        e_perf = self.get_total_energy(perf_dir)
+        perf_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, perf_dir))
+        e_perf = float(perf_meta.read_data('energy'))
         efermi = self.get_fermi_energy(perf_dir)
         struct_perf = self.get_structure(perf_dir)
 
@@ -120,6 +122,8 @@ class DefectFormationEnergy:
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).efermi
+        elif ('OUTCAR' in os.listdir(abspath)):
+            return Outcar('%s/OUTCAR' % abspath).efermi
 
     def get_structure(self, directory):
         """Returns the final structure from an optimization"""
@@ -128,6 +132,8 @@ class DefectFormationEnergy:
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
+        elif ('CONTCAR' in os.listdir(abspath)):
+            return pmg.read_structure('%s/CONTCAR' % abspath)
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""
