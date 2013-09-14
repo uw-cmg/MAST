@@ -165,6 +165,7 @@ def read_my_xdatcar(mydir, fname="XDATCAR"):
     xdatdict['descline'] = mydata.pop(0) #pop first value
     tryspec = mydata.pop(0)
     tryspecstrip = tryspec.strip()
+    tryspecstrip = tryspecstrip.replace(" ","x")
     if not tryspecstrip.isalpha(): # version 5.2.11 and on
         xdatdict['scale'] = tryspec
         xdatdict['latta'] = mydata.pop(0)
