@@ -63,7 +63,7 @@ def _cart2frac(position, base_structure):
             fractional[i] -= 1.0
     return fractional
 
-def sort_structure_and_neb_lines(mystruc, basestruc, neblines, initorfin):
+def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images=0):
     """Sort the structure in an approved way:
         2. Remove lines which closely match the neb moving lines in the
         NEB section.
@@ -74,8 +74,10 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, initorfin):
         mystruc <Structure>   : pymatgen structure of endpoint
         basestruc <Structure> : pymatgen structure of initial 
                                 cell (used to match vacancies)
-        initorfin <int>       : 0 = initial cfg, 1 = final cfg
+        folderstr <str>       : '00' = initial config, '0N+1' = final config,
+                                '0N' = corresponding image
         neblines <list>       : list of NEB lines
+        images <int>          : number of images
     """
     import MAST.data
     atol = 0.1 # Need fairly large tolerance to account for relaxation.
@@ -83,39 +85,34 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, initorfin):
     sortedstruc_base = basestruc.get_sorted_structure()
     struct_ed = StructureEditor(sortedstruc)
     struct_ed_base = StructureEditor(sortedstruc_base)
-    # We are not actually translating the sites; just get them into unit
-    # cell
-    #TTM DEBUG REMOVE THIS struct_ed.translate_sites(range(0,len(sortedstruc.sites)),np.zeros(3),True)
     nebidx = list()
-
     elemstarts = get_element_indices(sortedstruc)
     for nebline in neblines:
-        usebase=0
         nebdict = _parse_neb_line(nebline)
-        mycoord = nebdict['coord'][initorfin]
+        if folderstr == '00':
+            mycoord = nebdict['coord'][0]
+        elif folderstr == str(images+1).zfill(2):
+            mycoord = nebdict['coord'][1]
+        else:
+            temp_fin = sortedstruc_base.copy()
+            temp_fin.append("Xe",nebdict['coord'][1])
+            temp_start = sortedstruc_base.copy()
+            temp_start.append("Xe",nebdict['coord'][0])
+            strlist=temp_start.interpolate(temp_fin, images)
+            lastidx = strlist[0].num_sites-1
+            mystridx = int(folderstr)
+            mycoord = strlist[mystridx].frac_coords[lastidx]
+        
         index = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
         print 'TTM DEBUG: index: ', index
-        if len(index) == 0: #try the base structure, for vacancies
-            usebase=1
-            index = find_in_coord_list(sortedstruc_base.frac_coords,
-                mycoord, atol)
         if len(index) == 0:
             raise MASTError("pmgextend/structure_extensions", "No coordinate found matching %s" % mycoord)
-        if usebase==0:
-            nebidx.append(index[0]) #only take first site?
-            mysite = sortedstruc.sites[index[0]]
-            myelem = MAST.data.atomic_number[mysite.species_string]
-            struct_ed.delete_site(index)
-            struct_ed.insert_site(elemstarts[myelem], mysite.specie,
-                                    mysite.frac_coords)
-        else:
-            nebidx.append(index[0]) #only take first site?
-            mysite = sortedstruc_base.sites[index[0]]
-            myelem = MAST.data.atomic_number[mysite.species_string]
-            struct_ed_base.delete_site(index)
-            struct_ed_base.insert_site(elemstarts[myelem], mysite.specie,
-                                    mysite.frac_coords)
-
+        nebidx.append(index[0]) #only take first site?
+        mysite = sortedstruc.sites[index[0]]
+        myelem = MAST.data.atomic_number[mysite.species_string]
+        struct_ed.delete_site(index)
+        struct_ed.insert_site(elemstarts[myelem], mysite.specie,
+                                mysite.frac_coords)
     if not len(nebidx) == len(neblines):
         raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
     return struct_ed.modified_structure
@@ -163,6 +160,7 @@ def _parse_neb_line(nebline):
     nebdict['coord'][0] = np.array(nebline[1].split(), dtype='float')
     nebdict['coord'][1] = np.array(nebline[2].split(), dtype='float')
     return nebdict
+
 
 def do_interpolation(parentstructures, numim):
     """Do interpolation.

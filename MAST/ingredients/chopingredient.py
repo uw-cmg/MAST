@@ -90,8 +90,8 @@ class WriteIngredient(BaseIngredient):
         base_struct = self.keywords['structure']
         mylabel = BaseIngredient.get_my_label(self, "neb_label")
         neblines = self.keywords['program_keys']['neblines'][mylabel]
-        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, 0) 
-        sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, 1)
+        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, '00') 
+        sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, str(self.keywords['program_keys']['images'] + 1).zfill(2), self.keywords['program_keys']['images'])
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
@@ -117,7 +117,7 @@ class WriteIngredient(BaseIngredient):
                 base_struct = self.keywords['structure']
                 mylabel = BaseIngredient.get_my_label(self, "neb_label")
                 neblines = self.keywords['program_keys']['neblines'][mylabel]
-                sorted_im = structure_extensions.sort_structure_and_neb_lines(struct_im, base_struct, neblines, 0) 
+                sorted_im = structure_extensions.sort_structure_and_neb_lines(struct_im, base_struct, neblines, str(imct).zfill(2), self.keywords['program_keys']['images']) 
                 imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
