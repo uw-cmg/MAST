@@ -89,30 +89,33 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
     elemstarts = get_element_indices(sortedstruc)
     for nebline in neblines:
         nebdict = _parse_neb_line(nebline)
+        temp_fin = sortedstruc.copy()
+        temp_fin.append("Xe",nebdict['coord'][1])
+        temp_start = sortedstruc.copy()
+        temp_start.append("Xe",nebdict['coord'][0])
+        strlist=temp_start.interpolate(temp_fin, images)
+        lastidx = strlist[0].num_sites-1
         if folderstr == '00':
             mycoord = nebdict['coord'][0]
         elif folderstr == str(images+1).zfill(2):
             mycoord = nebdict['coord'][1]
         else:
-            temp_fin = sortedstruc_base.copy()
-            temp_fin.append("Xe",nebdict['coord'][1])
-            temp_start = sortedstruc_base.copy()
-            temp_start.append("Xe",nebdict['coord'][0])
-            strlist=temp_start.interpolate(temp_fin, images)
-            lastidx = strlist[0].num_sites-1
             mystridx = int(folderstr)
             mycoord = strlist[mystridx].frac_coords[lastidx]
         
-        index = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
-        print 'TTM DEBUG: index: ', index
+        indexraw = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
+        index=list()
+        for indexentry in indexraw:
+            if sortedstruc.species[indexentry] == temp_start.species[lastidx]:
+                index.append(indexentry)
         if len(index) == 0:
             raise MASTError("pmgextend/structure_extensions", "No coordinate found matching %s" % mycoord)
         nebidx.append(index[0]) #only take first site?
         mysite = sortedstruc.sites[index[0]]
         myelem = MAST.data.atomic_number[mysite.species_string]
-        struct_ed.delete_site(index)
+        struct_ed.delete_site(index[0])
         struct_ed.insert_site(elemstarts[myelem], mysite.specie,
-                                mysite.frac_coords)
+                                mycoord)
     if not len(nebidx) == len(neblines):
         raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
     return struct_ed.modified_structure
