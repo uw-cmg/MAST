@@ -415,6 +415,8 @@ class InputParser(MASTObj):
                     ingredient_dict[opt[0]] = psp_dict
                 elif (opt[0] == 'mast_exec'):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                elif (opt[0] == 'mast_strain'):
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 elif (opt[0] == 'ptemp'):
                     ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
                 elif (opt[0] == 'rwigs'):
