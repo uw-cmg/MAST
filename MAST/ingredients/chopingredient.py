@@ -90,7 +90,7 @@ class WriteIngredient(BaseIngredient):
         base_struct = self.keywords['structure']
         mylabel = BaseIngredient.get_my_label(self, "neb_label")
         neblines = self.keywords['program_keys']['neblines'][mylabel]
-        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, '00') 
+        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, '00', self.keywords['program_keys']['images']) 
         sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, str(self.keywords['program_keys']['images'] + 1).zfill(2), self.keywords['program_keys']['images'])
         return [sorted_init, sorted_fin]
 
