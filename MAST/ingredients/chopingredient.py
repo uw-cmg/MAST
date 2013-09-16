@@ -13,6 +13,7 @@ import numpy as np
 
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
+from pymatgen.core.structure import Lattice
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
@@ -367,6 +368,41 @@ class RunIngredient(BaseIngredient):
             raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
 
         return
+
+    def run_strain(self):
+        """Strain the lattice.
+            Args:
+                Looks for mast_strain in input file, for 
+                percent strains.
+                mast_strain 1.01 1.01 -0.98
+            Returns:
+                Creates structure file in directory 
+        """
+        if self.program == 'vasp':
+            mystructure = self.get_structure_from_file(os.path.join(self.keywords['name'],'POSCAR'))
+        else:
+            raise MASTError(self.__class__.__name__, "Program %s not supported for run_strain" % self.program)
+        mystrain = self.keywords['program_keys']['mast_strain']
+        strainsplit = mystrain.strip().split()
+        strarray = np.array([[0.],[0.],[0.]],'float')
+        for sidx in range(0,3):
+            strflt = float(strainsplit[sidx])
+            strarray[sidx][0]=strflt
+        newlattice = Lattice(np.multiply(mystructure._lattice.matrix, strarray)) #be very careful here. np.multiply is NOT regular matrix multiplication.
+        newstructure = mystructure.copy()
+        newstructure.modify_lattice(newlattice)
+        print "NEW LATTICE:", newstructure.lattice
+        print "NEW STRUCTURE:", newstructure
+        if self.program == 'vasp':
+            myposcar = Poscar(newstructure)
+            self.lock_directory()
+            myposcar.write_file('%s/CONTCAR' % self.keywords['name'])
+            self.unlock_directory()
+        else:
+            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
+
+        return
+
 
 
 class IsCompleteIngredient(BaseIngredient):
