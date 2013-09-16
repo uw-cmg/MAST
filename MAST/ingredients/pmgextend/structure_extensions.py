@@ -90,9 +90,9 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
     for nebline in neblines:
         nebdict = _parse_neb_line(nebline)
         temp_fin = sortedstruc.copy()
-        temp_fin.append("Xe",nebdict['coord'][1])
+        temp_fin.append(nebdict['element'],nebdict['coord'][1])
         temp_start = sortedstruc.copy()
-        temp_start.append("Xe",nebdict['coord'][0])
+        temp_start.append(nebdict['element'],nebdict['coord'][0])
         strlist=temp_start.interpolate(temp_fin, images)
         lastidx = strlist[0].num_sites-1
         if folderstr == '00':
