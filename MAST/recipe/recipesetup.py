@@ -133,7 +133,7 @@ class RecipeSetup(MASTObj):
         print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         [how_to_update, parents_to_check, how_to_run, recipe_name] = ru.read_recipe(self.recipe_file)
 
-        recipe_obj = RecipePlan(recipe_name)
+        recipe_obj = RecipePlan(recipe_name, self.work_dir)
         ingredlist = how_to_run.keys()
         for ingred in ingredlist:
             self.update_top_meta_for_ingred(ingred)

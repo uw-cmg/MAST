@@ -7,17 +7,20 @@
 # Replace this section with appropriate license text before shipping.
 # Add additional programmers and schools as necessary.
 ############################################################################
+import os
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 from MAST.ingredients.chopingredient import RunIngredient
 from MAST.ingredients.chopingredient import IsCompleteIngredient
 from MAST.ingredients.chopingredient import UpdateChildrenIngredient
+from MAST.utility import MASTFile
+from MAST.utility import MASTError
 class RecipePlan:
     """Contains the entire recipe plan. It consists of
        - Ingredients Objects
        - Dependency Dict.
     """
-    def __init__(self, name):
+    def __init__(self, name, working_directory):
         self.name            = name
         self.ingredients     = dict()  #name=status
         self.update_methods   = dict()
@@ -28,6 +31,7 @@ class RecipePlan:
         self.complete_methods = dict()
         self.ingred_input_options = dict()
         self.status="I"
+        self.working_directory = working_directory
         #print 'GRJ DEBUG: Initializing RecipePlan'
 
     def write_ingredient(self, iname):
@@ -179,13 +183,15 @@ class RecipePlan:
         totstage=0
         ilist = self.ingredients.keys()
         ilist.sort()
+        statusfile = MASTFile()
         if verbose == 1:
             import time
             print "Recipe name: %s" % self.name
             print time.asctime()
         for iname in ilist:
             if verbose == 1:
-                print "%30s = %4s" % (iname, self.ingredients[iname])
+                print "%30s : %4s" % (iname, self.ingredients[iname])
+            statusfile.data.append("%30s : %4s\n" % (iname, self.ingredients[iname]))
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
             elif self.ingredients[iname] == "Q":
@@ -203,6 +209,7 @@ class RecipePlan:
         else:
             self.status = "R"
         #print "Recipe status: %s" % self.status
+        statusfile.to_file(os.path.join(self.working_directory,"status.txt"))
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name
@@ -251,3 +258,21 @@ class RecipePlan:
                 rlines=rlines + "            %s:%s\n" % (htukey, self.update_methods[ikey][htukey])
         self.print_status()
         return rlines
+    def get_statuses_from_file(self):
+        """Get status of each ingredient from a status.txt
+            file in the recipe directory.
+        """
+        statpath = os.path.join(self.working_directory,'status.txt')
+        if not os.path.isfile(statpath):
+            raise MASTError(self.__class__.__name__, "Could not get status file in %s" % statpath)
+        statfile = MASTFile(statpath)
+        for statline in statfile.data:
+            statsplit = statline.strip().split(':')
+            oneingred = statsplit[0].strip()
+            onestatus = statsplit[1].strip()
+            if oneingred in self.ingredients.keys():
+                self.ingredients[oneingred] = onestatus
+            else:
+                raise MASTError(self.__class__.__name__, "Ingredient %s is not in the original recipe's ingredients list." % oneingred)
+
+            

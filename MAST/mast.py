@@ -129,6 +129,7 @@ class MAST(MASTObj):
                 workingDirectory=self.working_directory
                 )
         recipe_plan_obj = setup_obj.start()
+        recipe_plan_obj.print_status()
 
         self.pickle_plan(recipe_plan_obj)
         #self.pickle_input_options() 

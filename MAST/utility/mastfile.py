@@ -44,7 +44,7 @@ class MASTFile:
         readf.close()    
     
     def to_file(self,file_path):
-        """Writes data to a file"""
+        """Writes data to a file (overwrites existing file)."""
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
             raise MASTError(self.__class__.__name__,

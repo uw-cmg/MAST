@@ -4,6 +4,7 @@ from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.parsers.inputparser import InputParser
+from MAST.recipe.recipesetup import RecipeSetup
 import time
 from MAST.DAG.dagutil import *
 abspath = os.path.abspath
@@ -46,16 +47,25 @@ class MASTmon(object):
                 continue
             os.chdir(recipe_dir)
             #self.move_extra_files(fulldir)
-            if not os.path.isfile(os.path.join(fulldir, 'mast.pickle')):
-                raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (fulldir, 'mast.pickle'))
-            pm = PickleManager()
-            mastobj = pm.load_variable(os.path.join(fulldir,'mast.pickle'))
-            mastobj.check_recipe_status(verbose)
+            #if not os.path.isfile(os.path.join(fulldir, 'mast.pickle')):
+            #    raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (fulldir, 'mast.pickle'))
+            myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
+            myinputoptions = myipparser.parse()
+            rsetup = RecipeSetup(recipeFile=os.path.join(fulldir,'personal_recipe.txt'),
+                    inputOptions=myinputoptions,
+                    structure=myinputoptions.get_item('structure','structure'),
+                    workingDirectory=fulldir)
+            recipe_plan_obj = rsetup.start()
+
+            #pm = PickleManager()
+            #mastobj = pm.load_variable(os.path.join(fulldir,'mast.pickle'))
+            recipe_plan_obj.get_statuses_from_file()
+            recipe_plan_obj.check_recipe_status(verbose)
             #depdict = mastobj.dependency_dict
             #ingredients = mastobj.ingredients
-            pm.save(mastobj, os.path.join(fulldir, 'mast.pickle'))          
+            #pm.save(mastobj, os.path.join(fulldir, 'mast.pickle'))          
             os.chdir(self.home)
-            if mastobj.status == "C":
+            if recipe_plan_obj.status == "C":
                 shutil.move(fulldir, self._ARCHIVE)
 
             #if self.scheduler is None:
