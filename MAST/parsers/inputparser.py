@@ -120,6 +120,8 @@ class InputParser(MASTObj):
                     section_content.append(line)
         infile.close()
 
+        self.perform_element_mapping(options)
+
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
@@ -606,3 +608,39 @@ class InputParser(MASTObj):
                 phonon[label][line[0]] = line[1]
 
         options.set_item(section_name, 'phonon', phonon)
+
+
+    def perform_element_mapping(self, input_options):
+        """Perform element mapping if there is an element map specified,
+            so that defects and NEB lines get the correct element name.
+            Args:
+                input_options <InputOptions>
+            Returns:
+                modifies input_options dictionary entries in place.
+        """
+        #print self.input_options.get_section_keys('structure')
+        eldict=dict()
+        if 'element_map' in input_options.get_section_keys('structure'):
+            eldict = input_options.get_item('structure','element_map')
+        if len(eldict) == 0:
+            return
+        if 'defects' in input_options.get_sections():
+            defdict = input_options.get_item('defects','defects')
+            for dkey in defdict.keys():
+                for sdkey in defdict[dkey].keys():
+                    if 'subdefect' in sdkey:
+                        symbol = defdict[dkey][sdkey]['symbol'].upper()
+                        if symbol in eldict.keys():
+                            defdict[dkey][sdkey]['symbol'] = eldict[symbol]
+        if 'neb' in input_options.get_sections():
+            neblinedict = input_options.get_item('neb','neblines')
+            for nlabelkey in neblinedict.keys():
+                nlinenum = len(neblinedict[nlabelkey])
+                nlinect=0
+                while nlinect < nlinenum:
+                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
+                    if symbol in eldict.keys():
+                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
+                    nlinect = nlinect + 1
+        return
+
