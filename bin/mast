@@ -7,7 +7,6 @@ import subprocess
 
 from MAST.mast import MAST
 from MAST.parsers import InputParser
-from MAST.DAG.mastmon import MASTmon
 from submit import queue_commands
 from MAST.utility import dirutil
 
@@ -23,8 +22,6 @@ def main():
                       help='Will start the DAG scheduler and submit jobs to the queue')
     parser.add_option('-v', '--verbose', dest='verbose', default='0',
                       help="Run with verbose messages.")
-    parser.add_option('-d', '--delete', dest='delete', default='0',
-                      help='Session ID to remove from the scheduler')
 
     (mastopt, mastarg) = parser.parse_args()
 
@@ -56,15 +53,6 @@ def main():
         queue_commands.submit_from_submission_list()
         queue_commands.clear_submission_list()
         dirutil.unlock_directory(dirutil.get_mast_scratch_path())
-        #mastmon = MASTmon()
-        #if int(mastopt.verbose) == 1:
-        #    mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 
-        #else:
-        #    mastmon.run(1,0)
-
-    if (int(mastopt.delete) > 0):
-        mastmon = MASTmon()
-        mastmon.run(1,0,remove=int(mastopt.delete))
 
     if (mastopt.mode == 'input'):
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
