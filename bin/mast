@@ -25,7 +25,7 @@ def main():
 
     (mastopt, mastarg) = parser.parse_args()
 
-    print 'Welcome to Material and Simulation Toolkit (MAST), November 2012 revision.'
+    print 'Welcome to the MAterials Simulation Toolkit (MAST), September 2013 version.'
 
     # Set mode to input if an input file is given
     if (mastopt.input is not None):
@@ -58,6 +58,17 @@ def main():
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
         mast.check_independent_loops()
 
+    if (mastopt.mode == 'interface') and (mastopt.runmode == 'check'):
+        mycheck = subprocess.Popen(['ls -l %s' % os.getenv("MAST_CONTROL")],shell=True)
+        mycheck.wait()
+        print "Any errors printed below:"
+        mycheck = subprocess.Popen(['cat %s/errormast' % os.getenv("MAST_CONTROL")],shell=True)
+        mycheck.wait()
+        print "-------------------------"
+
+    if (mastopt.mode == 'interface') and (mastopt.runmode == 'list'):
+        mycheck = subprocess.Popen(['cat %s/submitlist' % os.getenv("MAST_CONTROL")],shell=True)
+        mycheck.wait()
 if __name__ == '__main__':
     main()
 
