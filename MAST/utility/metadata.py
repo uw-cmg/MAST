@@ -30,6 +30,10 @@ class Metadata(MASTObj):
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
             and data for that keyword.
+            Returns:
+                [line_number, data]
+                line_number <int>: line number found
+                data <str>: data found
         """
         line_number = None
         data = None

@@ -25,6 +25,7 @@ ALLOWED_KEYS = {
                   'inputOptions'   : (InputOptions, None, 'Input options parsed using input parser'),\
                   'structure'      : (Structure, None, 'Structure to be used to create the ingredient objects'),\
                   'ingredientsDict': (dict, dict(), 'Dictionary of ingredients'),\
+                  'workingDirectory': (str, None, 'Working directory')
                }
 
 DATA_PATH = "~/test_dir/"
@@ -39,10 +40,10 @@ class RecipeSetup(MASTObj):
         self.recipe_file    = self.keywords['recipeFile']
         self.input_options  = self.keywords['inputOptions']
         self.structure      = self.keywords['structure']
-        self.work_dir    = ""
+        self.work_dir    = self.keywords['workingDirectory']
         self.delimiter      = '::'
 
-        self.metafile = Metadata(metafile='%s/metadata.txt' % self.input_options.get_item('mast', 'working_directory'))
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
 
         print 'Setting up the recipe based on %s' % (self.recipe_file)
 
@@ -73,7 +74,6 @@ class RecipeSetup(MASTObj):
             self.input_options.set_item('ingredients', ingredient_type, ing_opt)
 
         #self.program = self.input_options.options['ingredients'][ingredient_type]['mast_program']
-        self.work_dir = self.input_options.get_item('mast', 'working_directory')
 
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()

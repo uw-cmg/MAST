@@ -20,6 +20,7 @@ from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
 from MAST.utility import PickleManager
 from MAST.utility import dirutil
+from MAST.utility import Metadata
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
@@ -121,10 +122,8 @@ class InputParser(MASTObj):
         infile.close()
 
         self.perform_element_mapping(options)
-        
         self.set_structure_from_inputs(options)
-        self.set_input_stem_and_timestamp(options)
-        self.set_sysname_and_working_directory(options)
+        
         self.validate_execs(options)
 
         return options
@@ -432,13 +431,19 @@ class InputParser(MASTObj):
                 elif (opt[0] == 'mast_coordinates'):
                     shortsplit = opt[1].split(",")
                     filesplit=list()
-                    myfiles = dirutil.walkfiles(options.get_item('mast','origin_dir'))
+                    origindir = os.getcwd()
+                    metatry = os.path.join(os.getcwd(), 'metadata.txt')
+                    if os.path.isfile(metatry):
+                        myrecipemeta = Metadata(metafile=metatry)
+                        origindir = myrecipemeta.search_data('origin_dir')[1]
+                        print "SEARCHED AND FOUND: ", origindir
+                    myfiles = dirutil.walkfiles(origindir)
                     for shortname in shortsplit:
                         for fullfile in myfiles:
                             if shortname.strip() in os.path.basename(fullfile):
                                 filesplit.append(fullfile)
                     if not (len(filesplit) == len(shortsplit)):
-                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, options.get_item('mast','origin_dir')))
+                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, origindir))
                     ingredient_dict[opt[0]] = filesplit
                 else:
                     ingredient_dict[opt[0]] = opt[1]

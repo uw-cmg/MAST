@@ -44,7 +44,8 @@ class MASTmon(object):
             if not os.path.isfile(os.path.join(fulldir,'mast.pickle')):
                 print "Skipping directory %s because there is no pickle file." % recipe_dir
                 continue
-            self.move_extra_files(fulldir)
+            os.chdir(recipe_dir)
+            #self.move_extra_files(fulldir)
             if not os.path.isfile(os.path.join(fulldir, 'mast.pickle')):
                 raise MASTError("mastmon, add_recipes", "No pickle file at %s/%s" % (fulldir, 'mast.pickle'))
             pm = PickleManager()
@@ -52,7 +53,8 @@ class MASTmon(object):
             mastobj.check_recipe_status(verbose)
             #depdict = mastobj.dependency_dict
             #ingredients = mastobj.ingredients
-            pm.save(mastobj, os.path.join(fulldir, 'mast.pickle'))
+            pm.save(mastobj, os.path.join(fulldir, 'mast.pickle'))          
+            os.chdir(self.home)
             if mastobj.status == "C":
                 shutil.move(fulldir, self._ARCHIVE)
 
