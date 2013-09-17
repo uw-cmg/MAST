@@ -49,6 +49,9 @@ class RecipeTemplateParser(MASTObj):
         """
         if self.template_file is None:
             raise MASTError(self.__class__.__name__, "Template file not provided!")
+        
+        self.template_file = os.path.join(os.getenv("MAST_RECIPE_PATH"),self.template_file)
+
 
         if not os.path.exists(self.template_file):
             raise MASTError(self.__class__.__name__, "Template file not found!")

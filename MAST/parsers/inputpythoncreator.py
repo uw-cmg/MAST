@@ -29,17 +29,20 @@ class InputPythonCreator(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
     
-    def write_script(self, dirname=""):
+    def write_script(self, dirname="", fname=""):
         """Write the python input script, created from the *.inp input file.
             Args:
                 dirname <str>: directory in which to write
+                fname <str>: filename to write
             Returns:
                 filename <str>: Full file name of the input script created.
         """
         mylines = self.print_input_options()
         if dirname == "":
             dirname = os.getcwd()
-        filename = os.path.join(dirname, 'input.py')
+        if fname == "":
+            fname = 'input.py'
+        filename = os.path.join(dirname, fname)
         inputpy = MASTFile()
         inputpy.data = mylines
         inputpy.to_file(filename)
