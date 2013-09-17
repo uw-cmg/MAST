@@ -140,7 +140,8 @@ class RecipeSetup(MASTObj):
             ingredtype = how_to_run[ingred]
             recipe_obj.ingredients[ingred]="I" #set all to initialized
             recipe_obj.ingred_input_options[ingred] = self.get_my_ingredient_options(ingred, ingredtype)
-            self.create_ingredient(recipe_obj.ingred_input_options[ingred])
+            if not os.path.isdir(os.path.join(self.work_dir, ingred)):
+                self.create_ingredient(recipe_obj.ingred_input_options[ingred])
             recipe_obj.write_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_write_method")
             recipe_obj.ready_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_ready_method")
             recipe_obj.run_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_run_method")
