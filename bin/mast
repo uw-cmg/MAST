@@ -20,6 +20,8 @@ def main():
                       help='Output file to print MAST information about run to')
     parser.add_option('-r', '--runmode', dest='runmode', default='run',
                       help='Use "check" to check the CONTROL folder and print errors.\n Use "list" to print the list of runs on the submitlist.')
+    parser.add_option('-s', '--status', dest='status', default=None,
+                        help='Print the status of a the recipe in a specified folder.')
     parser.add_option('-v', '--verbose', dest='verbose', default='0',
                       help="Run with verbose messages.")
 
@@ -41,7 +43,7 @@ def main():
     if (mastopt.mode == 'interface') and (mastopt.runmode is None):
         mastopt.runmode = 'run'
 
-    if (mastopt.mode == 'interface') and (mastopt.runmode == 'run'):
+    if (mastopt.mode == 'interface') and (mastopt.runmode == 'run') and (mastopt.status == None):
         mycwd=os.getcwd()
         subdir = os.path.join(dirutil.get_mast_install_path(),'submit')
         os.chdir(subdir)
@@ -68,6 +70,10 @@ def main():
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'list'):
         mycheck = subprocess.Popen(['cat %s/submitlist' % os.getenv("MAST_CONTROL")],shell=True)
+        mycheck.wait()
+    if (mastopt.mode == 'interface') and not mastopt.status == None:
+        mydir = str(mastopt.status)
+        mycheck = subprocess.Popen(['cat %s/status.txt' % mastopt.status],shell=True)
         mycheck.wait()
 if __name__ == '__main__':
     main()
