@@ -7,6 +7,7 @@ from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import PickleManager
 from MAST.utility import dirutil
+from MAST.parsers import InputParser
 kboltz = 8.6173325E-5
 stock_v=1e13
 stock_S_v=2.07e-4 #Shewmon, Sv/R approx 2.4?? =2.07e-4
@@ -72,9 +73,11 @@ class DiffusionCoefficient():
         if self.verbose == 1:
             print "verbose mode is on"
         try:
-            pm = PickleManager(os.path.join(self.directory,
-                                        'input_options.pickle'))
-            self.input_options = pm.load_variable()
+            ipparser = InputParser(inputfile=os.path.join(self.directory,'input.inp'))
+            self.input_options = ipparser.parse()
+            #pm = PickleManager(os.path.join(self.directory,
+            #                            'input_options.pickle'))
+            #self.input_options = pm.load_variable()
         except IOError:
             pass
         self.set_up_temp_dict(tempstart, tempend, tempstep)
