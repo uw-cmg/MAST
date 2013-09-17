@@ -5,6 +5,7 @@ from sessionentry import SessionEntry
 from sessiontable import SessionTable
 import subprocess
 import os
+from MAST.utility import MASTError
 
 """
 This is for schedulring.
@@ -15,6 +16,7 @@ class DAGScheduler:
     """In a session, the maximum number of jobs is MAXJID at once."""
     
     def __init__(self):
+        raise MASTError(self.__class__.__name__,"Do not use!")
         self.jobtable = JobTable()
         self.sessiontable = SessionTable()
         self._run_mode = 'noqsub' # noqsub, serial (by qsub), parallel

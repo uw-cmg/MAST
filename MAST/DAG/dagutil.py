@@ -1,6 +1,7 @@
 import datetime
 import time
-
+from MAST.utility import MASTError
+raise MASTError("dagutil","Do not use!")
 def shortstr(mystr, n):
     """ shortstr shortens mystr to length n string with padding ... """
     if len(mystr) > n :

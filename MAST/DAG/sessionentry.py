@@ -1,8 +1,9 @@
 from dagutil import *
-
+from MAST.utility import MASTError
 class SessionEntry(object):
 
     def __init__(self, sid, totaljobs, name=None):
+        raise MASTError(self.__class__.__name__,"Do not use!")
         self.sid =  sid # session id
         self.totaljobs = totaljobs # number of total jobs
         self.preq_jobs = totaljobs # number of jobs before queue

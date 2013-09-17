@@ -52,8 +52,10 @@ def main():
         mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         mysub.wait()
         os.chdir(mycwd)
+        dirutil.lock_directory(dirutil.get_mast_scratch_path(), 100) #wait until the MASTmon is finished running.
         queue_commands.submit_from_submission_list()
         queue_commands.clear_submission_list()
+        dirutil.unlock_directory(dirutil.get_mast_scratch_path())
         #mastmon = MASTmon()
         #if int(mastopt.verbose) == 1:
         #    mastmon.run(1,1) #TTM run for only 1 dagscheduler iteration. Use crontab to check periodically. 

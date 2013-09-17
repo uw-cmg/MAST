@@ -1,11 +1,12 @@
 from jobentry import JobEntry
 from dagutil import *
-
+from MAST.utility import MASTError
 class JobTable(object):
     """ JobTable is a class for dagscheduler. This has multiple JobEntry objects.
         This has multiple methods to deal with jobentries.
     """
     def __init__(self):
+        raise MASTError(self.__class__.__name__,"Do not use!")
         self.jobs = {}
         self._nextjid = 1
         self._name2jid = {}

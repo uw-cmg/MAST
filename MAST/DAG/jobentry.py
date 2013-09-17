@@ -8,7 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 from dagutil import *
-
+from MAST.utility import MASTError
 class JobEntry(object):
     """JobEntry is an entry in class JobTable. \n
         isready : method to check if this job is ready or not \n
@@ -21,6 +21,7 @@ class JobEntry(object):
         ingredient_obj : ingredient obj \n
     """
     def __init__(self, sid, jid, jobname=None, type=None, ingredient=None):
+        raise MASTError(self.__class__.__name__,"Do not use!")
         self.sid = sid # session id
         self.jid = jid # job id which is unique in a session.
         self.name = None # job name must be unique so that each job is stored in different directory

@@ -1,11 +1,12 @@
 from dagutil import *
 from sessionentry import SessionEntry
-
+from MAST.utility import MASTError
 class SessionTable(object):
     """SessionTable has multiple SessionEntry objects. Those are for keeping information of each session
         Each session is independant each other.
     """
     def __init__(self):
+        raise MASTError(self.__class__.__name__,"Do not use!")
         self.sessions = {}
         self._nextsid = 1
         self._sname2sid ={}

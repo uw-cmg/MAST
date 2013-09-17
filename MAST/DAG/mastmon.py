@@ -1,12 +1,12 @@
 import os
 from MAST.utility.picklemanager import PickleManager
-from MAST.DAG.dagscheduler import DAGScheduler
+#from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
 import time
-from MAST.DAG.dagutil import *
+#from MAST.DAG.dagutil import *
 abspath = os.path.abspath
 import shutil
 
