@@ -3,6 +3,7 @@ from MAST.utility.picklemanager import PickleManager
 from MAST.DAG.dagscheduler import DAGScheduler
 from MAST.utility import MASTError
 from MAST.utility import dirutil
+from MAST.parsers.inputparser import InputParser
 import time
 from MAST.DAG.dagutil import *
 abspath = os.path.abspath
@@ -172,8 +173,10 @@ class MASTmon(object):
             Args:
                 recipedir <str>: Recipe directory
         """
-        mypm = PickleManager(os.path.join(self.home, recipedir, 'input_options.pickle'))
-        myinputoptions = mypm.load_variable()
+        #mypm = PickleManager(os.path.join(self.home, recipedir, 'input_options.pickle'))
+        myipparser = InputParser(inputfile=os.path.join(recipedir, 'input.inp'))
+        myinputoptions = myipparser.parse()
+        #myinputoptions = mypm.load_variable()
         workdir = myinputoptions.get_item("mast","working_directory")
         inpstem = myinputoptions.get_item("mast","input_stem")
         inpstembase = os.path.basename(inpstem)

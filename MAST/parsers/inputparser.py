@@ -145,7 +145,6 @@ class InputParser(MASTObj):
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
         
-
     def parse_structure_section(self, section_name, section_content, options):
         """Parses the structure section and populate the options.
             Does not create the structure.
@@ -433,13 +432,13 @@ class InputParser(MASTObj):
                 elif (opt[0] == 'mast_coordinates'):
                     shortsplit = opt[1].split(",")
                     filesplit=list()
-                    myfiles = dirutil.walkfiles(os.getcwd())
+                    myfiles = dirutil.walkfiles(options.get_item('mast','origin_dir'))
                     for shortname in shortsplit:
                         for fullfile in myfiles:
                             if shortname.strip() in os.path.basename(fullfile):
                                 filesplit.append(fullfile)
                     if not (len(filesplit) == len(shortsplit)):
-                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, os.getcwd()))
+                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, options.get_item('mast','origin_dir')))
                     ingredient_dict[opt[0]] = filesplit
                 else:
                     ingredient_dict[opt[0]] = opt[1]
@@ -651,57 +650,6 @@ class InputParser(MASTObj):
 
 
 
-    def set_input_stem_and_timestamp(self, input_options):
-        """Set the input stem and timestamp.
-            Args: 
-                input_options <InputOptions>
-        """
-        mastkeys = input_options.get_section_keys('mast')
-        if ('input_stem' in mastkeys) and ('timestamp' in mastkeys):
-            return
-        timestamp = time.strftime('%Y%m%dT%H%M%S')
-        tstamp = time.asctime()
-        inp_file = self.keywords['inputfile']
-        stem_dir = os.path.dirname(inp_file)
-        if len(stem_dir) == 0:
-            stem_dir = dirutil.get_mast_scratch_path()
-        inp_name = os.path.basename(inp_file).split('.')[0]
-        stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
-        input_options.update_item('mast', 'input_stem', stem_name)
-        input_options.update_item('mast', 'timestamp', tstamp)
-
-    def set_sysname_and_working_directory(self, input_options):
-        """Get the system name and working directory.
-            Args:
-                input_options <InputOptions>
-        """
-        element_str = self.get_element_string(input_options)
-        ipf_name = '_'.join(os.path.basename(input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
-
-        system_name = input_options.get_item("mast", "system_name", "sys")
-        system_name = system_name + '_' + element_str
-
-        dir_name = "%s_%s_%s_%s" % (system_name, element_str, input_options.get_item('recipe','recipe_name'), ipf_name)
-        dir_path = os.path.join(input_options.get_item('mast', 'scratch_directory'), dir_name)
-        input_options.update_item('mast', 'working_directory', dir_path)
-        input_options.update_item('mast', 'system_name', system_name)
-
-    def get_element_string(self, input_options):
-        """Get the element string from the structure.
-            Args:
-                input_options <InputOptions>
-        """
-        mystruc = input_options.get_item('structure','structure')
-        elemset = set(mystruc.species)
-        elemstr=""
-        elemok=1
-        while elemok == 1:
-            try:
-                elempop = elemset.pop()
-                elemstr = elemstr + elempop.symbol
-            except KeyError:
-                elemok = 0
-        return elemstr
     def validate_execs(self, input_options):
         """Make sure each ingredient has a mast_exec line.
             Args:
