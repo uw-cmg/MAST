@@ -80,10 +80,10 @@ class MAST(MASTObj):
         self.input_options = parser_obj.parse()
         
         #set additional keys
-        self._set_structure_from_inputs()
-        self._set_input_stem_and_timestamp()
-        self._set_sysname_and_working_directory()
-        self._validate_execs()
+        #self._set_structure_from_inputs()
+        #self._set_input_stem_and_timestamp()
+        #self._set_sysname_and_working_directory()
+        #self._validate_execs()
 
         #create the *.py input script
         ipc_obj = InputPythonCreator(input_options=self.input_options)
