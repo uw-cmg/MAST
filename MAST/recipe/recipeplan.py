@@ -114,11 +114,11 @@ class RecipePlan:
                     self.ingredients[iname] = "S"
 
 
-    def check_if_queued_are_complete(self):
-        """Check if queued ingredients are complete
+    def check_if_ready_to_proceed_are_complete(self):
+        """Check if ready-to-proceed ingredients are complete
         """
         for iname in self.ingredients.keys():
-            if self.ingredients[iname] == "Q":
+            if self.ingredients[iname] == "P":
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
                     self.update_children(iname)
@@ -152,19 +152,19 @@ class RecipePlan:
                         self.write_ingredient(iname)
                     if self.ready_ingredient(iname):
                         self.run_ingredient(iname)
-                        self.ingredients[iname] = "Q"
+                        self.ingredients[iname] = "P"
 
     def check_recipe_status(self, verbose=1):
         """Check ingredient statuses, and get recipe status
-            I = initialized
-            W = waiting on parents
-            S = staged
-            Q = queued
-            C = complete
+            I = Initialized
+            W = Waiting on parents
+            S = Staged
+            P = ready to Proceed
+            C = Complete
         """
         self.fast_forward_check_complete()
         self.check_if_have_parents()
-        self.check_if_queued_are_complete()
+        self.check_if_ready_to_proceed_are_complete()
         self.check_if_parents_are_complete()
         self.run_staged_ingredients()
         self.print_status(verbose)
@@ -178,7 +178,7 @@ class RecipePlan:
         total = len(self.ingredients.keys())
         totcomp=0
         totwait=0
-        totqueue=0
+        totproceed=0
         totinit=0
         totstage=0
         ilist = self.ingredients.keys()
@@ -194,16 +194,16 @@ class RecipePlan:
             statusfile.data.append("%30s : %4s\n" % (iname, self.ingredients[iname]))
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
-            elif self.ingredients[iname] == "Q":
-                totqueue = totqueue + 1
+            elif self.ingredients[iname] == "P":
+                totproceed = totproceed + 1
             elif self.ingredients[iname] == "I":
                 totinit = totinit + 1
             elif self.ingredients[iname] == "W":
                 totwait = totwait + 1
             elif self.ingredients[iname] == "S":
                 totstage = totstage + 1
-        print "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","QUEUED","COMPLETE","TOTAL")
-        print "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totqueue, totcomp, total)
+        print "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL")
+        print "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total)
         if totcomp == total:
             self.status = "C"
         else:
