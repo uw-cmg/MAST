@@ -4,7 +4,8 @@
 #PBS -l walltime=24:00:00
 ##export all environment variables. 
 #PBS -V 
-#PBS -j oe
+#PBS -o mastmon_submission_output
+#PBS -e mastmon_submission_errors
 NN=`cat $PBS_NODEFILE | wc -l`
 echo "Processors received = "$NN
 echo "script running on host `hostname`"

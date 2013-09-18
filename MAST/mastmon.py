@@ -6,6 +6,7 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
+import logging
 
 
 class MASTmon(object):
@@ -19,6 +20,13 @@ class MASTmon(object):
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        logger.info("MAST monitor started at %s." % time.asctime())
+        try:
+            self.run(1)
+        except BaseException as errormsg:
+            logger.error(str(errormsg))
 
     def make_directories(self):
         """Attempt to make scratch and archive directories
@@ -62,28 +70,36 @@ class MASTmon(object):
     def run(self, verbose=0):
         """Run the MAST monitor.
         """
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        logger=logging.getLogger(__name__)
         curdir = os.getcwd()
         try:
             os.chdir(self.scratch)    
         except:
             os.chdir(curdir)
-            errorstr = "Error: Failed to move to MASTmon scratch directory at %s" % self.scratch
+            errorstr = "Could not change directories to MAST_SCRATCH at %s" % self.scratch
             raise MASTError(self.__class__.__name__, errorstr)
         
         dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
-
-        if verbose == 1:
-            print "MAST is in: ", os.getcwd()
         
         recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
         if verbose == 1:
-            print "Recipe directories:"
+            logger.info("Recipe directories:")
             for recipe_dir in recipe_dirs:
-                print recipe_dir
+                logger.info(recipe_dir)
+            logger.info("-------------------")
 
-            # add new recipes
         for recipe_dir in recipe_dirs:
-            self.check_recipe_dir(recipe_dir, verbose)
+            logger.info("Processing recipe %s" % recipe_dir)
+            try:
+                self.check_recipe_dir(recipe_dir, verbose)
+                logger.info("Recipe %s processed." % recipe_dir)
+            except MASTError as errormsg:
+                logger.error(str(errormsg))
+                logger.info("Recipe %s failed with MASTError." % recipe_dir)
+            except IOError as errormsg:
+                logger.error(str(errormsg))
+                logger.info("Recipe %s failed with IO Error." % recipe_dir)
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
