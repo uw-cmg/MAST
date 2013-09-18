@@ -5,6 +5,7 @@ from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
+from pymatgen.util.coord_utils import find_in_coord_list_pbc
 
 def induce_defect(base_structure, defect, coord_type, threshold):
     """Creates a defect, and returns the modified structure
