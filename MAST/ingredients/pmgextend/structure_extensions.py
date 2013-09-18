@@ -94,7 +94,7 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
         temp_fin.append(nebdict['element'],nebdict['coord'][1])
         temp_start = sortedstruc.copy()
         temp_start.append(nebdict['element'],nebdict['coord'][0])
-        strlist=temp_start.interpolate(temp_fin, images)
+        strlist=temp_start.interpolate(temp_fin, images+1)
         lastidx = strlist[0].num_sites-1
         if folderstr == '00':
             mycoord = nebdict['coord'][0]
