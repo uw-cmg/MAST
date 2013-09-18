@@ -10,25 +10,29 @@ import logging
 
 
 class MASTmon(object):
-    """MASTmon is a daemon to run dagscheduler class.
-        This finds newly submitted recipe (recipe) and manage them. \n
-        Also completed recipe is moved in archive directory by MASTmon.
-        For consistency, users may touch sesssions in the archive directory."""
-    
+    """The MAST monitor runs on a submission node and checks
+        the status of each recipe in the MAST_SCRATCH directory.
+        Attributes:
+            self.scratch <str>: MAST_SCRATCH
+            self._ARCHIVE <str>: MAST_ARCHIVE
+            self.logger <logging logger>
+    """ 
     def __init__(self):
 
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        logger = logging.getLogger(__name__)
-        logger.info("\nMAST monitor started at %s.\n" % time.asctime())
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         try:
             self.run(1)
         except MASTError as errormsg:
-            logger.error(errormsg)
+            self.logger.error(errormsg)
         except BaseException as errormsg:
-            logger.error(errormsg)
+            self.logger.error(errormsg)
 
     def make_directories(self):
         """Attempt to make scratch and archive directories
@@ -49,8 +53,6 @@ class MASTmon(object):
                 fulldir <str>: full path of recipe directory
                 verbose <int>: verbosity
         """
-        if verbose > 0:
-            print "Recipe directory: ", fulldir
         if not os.path.exists(fulldir):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
         os.chdir(fulldir) #need to change directories in order to submit jobs?
@@ -72,9 +74,6 @@ class MASTmon(object):
     def run(self, verbose=0):
         """Run the MAST monitor.
         """
-        raise MASTError("hello","hello")
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        logger=logging.getLogger(__name__)
         curdir = os.getcwd()
         try:
             os.chdir(self.scratch)    
@@ -87,22 +86,31 @@ class MASTmon(object):
         
         recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
         if verbose == 1:
-            logger.info("Recipe directories:")
+            self.logger.info("================================")
+            self.logger.info("Recipe directories:")
             for recipe_dir in recipe_dirs:
-                logger.info(recipe_dir)
-            logger.info("-------------------")
+                self.logger.info(recipe_dir)
+            self.logger.info("================================")
 
         for recipe_dir in recipe_dirs:
-            logger.info("Processing recipe %s" % recipe_dir)
+            self.logger.info("--------------------------------")
+            self.logger.info("Processing recipe %s" % recipe_dir)
+            self.logger.info("--------------------------------")
             try:
                 self.check_recipe_dir(recipe_dir, verbose)
-                logger.info("Recipe %s processed." % recipe_dir)
+                self.logger.info("-----------------------------")
+                self.logger.info("Recipe %s processed." % recipe_dir)
+                self.logger.info("-----------------------------")
             except MASTError as errormsg:
-                logger.error(str(errormsg))
-                logger.info("Recipe %s failed with MASTError." % recipe_dir)
-            except IOError as errormsg:
-                logger.error(str(errormsg))
-                logger.info("Recipe %s failed with IO Error." % recipe_dir)
+                self.logger.error(str(errormsg))
+                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
+                self.logger.log(logging.ERROR, "Recipe %s failed with MASTError." % recipe_dir)
+                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
+            except BaseException as errormsg:
+                self.logger.error(str(errormsg))
+                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
+                self.logger.log(logging.ERROR, "Recipe %s failed with an error." % recipe_dir)
+                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)

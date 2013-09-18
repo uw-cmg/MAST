@@ -10,10 +10,12 @@
 import os
 import time
 import shutil
+import logging
 
 from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
+from MAST.utility import MASTFile
 from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
@@ -32,9 +34,8 @@ ALLOWED_KEYS     = {\
 
 
 class MAST(MASTObj):
-    """User interface to set up a calculation group.
-
-        Each instance of Interface sets up one calculation group.
+    """User interface to set up a calculation group or a set of
+        independently and/or pegged looped calculation groups.
 
         Attributes:
             self.input_options <InputOptions object>: Stores the
@@ -50,6 +51,7 @@ class MAST(MASTObj):
             self.working_directory <str>: Working directory 
                 created for new recipe from mast -i *.inp command
             self.sysname <str>: System name (elements)
+            self.logger <logging logger>
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -60,21 +62,30 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,
             parse and run the input file. Otherwise, parse and run the
             generated set of input files.
         """
-        ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
-        loopfiles = ipl_obj.main()
-        #print "TTM DEBUG: loopfiles: ", loopfiles
-        if len(loopfiles) == 0:
-            self.set_up_recipe()
-        else:
-            for ipfile in loopfiles:
-                self.keywords['inputfile']=ipfile
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        self.logger.info("\nMAST input started at %s with inputfile %s.\n" % (time.asctime(),self.keywords['inputfile']))
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        try:
+            ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
+            loopfiles = ipl_obj.main()
+            #print "TTM DEBUG: loopfiles: ", loopfiles
+            if len(loopfiles) == 0:
                 self.set_up_recipe()
+            else:
+                for ipfile in loopfiles:
+                    self.keywords['inputfile']=ipfile
+                    self.set_up_recipe()
+        except MASTError as errormsg:
+            self.logger.error(str(errormsg))
+        self.logger.info("%%%%%%Finished processing inputfile.%%%%%%")
 
 
     def set_input_options(self):
@@ -145,21 +156,28 @@ class MAST(MASTObj):
     def create_archive_files(self):
         """Save off archive files.
             Returns:
-                creates archive_recipe_plan.pickle
-                        archive_input_options.pickle
-                        archive_input_options.py
+                creates archive_input_options.txt
+                creates archive_recipe_plan.txt
         """
-        pickle_plan = os.path.join(self.working_directory, 'archive_recipe_plan.pickle')
-        pm = PickleManager(pickle_plan)
-        pm.save_variable(self.recipe_plan)
+        inputsave = MASTFile()
+        inputsave.data = repr(self.input_options)
+        inputsave.to_file(os.path.join(self.working_directory, 'archive_input_options.txt'))
+
+        recipesave = MASTFile()
+        recipesave.data = repr(self.recipe_plan)
+        recipesave.to_file(os.path.join(self.working_directory, 'archive_recipe_plan.txt'))
+
+        #pickle_plan = os.path.join(self.working_directory, 'archive_recipe_plan.pickle')
+        #pm = PickleManager(pickle_plan)
+        #pm.save_variable(self.recipe_plan)
         
-        pickle_options = os.path.join(self.working_directory, 'archive_input_options.pickle')
-        pm = PickleManager(pickle_options)
-        pm.save_variable(self.input_options)
+        #pickle_options = os.path.join(self.working_directory, 'archive_input_options.pickle')
+        #pm = PickleManager(pickle_options)
+        #pm.save_variable(self.input_options)
 
         #create the *.py input script
-        ipc_obj = InputPythonCreator(input_options=self.input_options)
-        ipc_filename = ipc_obj.write_script(self.working_directory, 'archive_input_options.py')
+        #ipc_obj = InputPythonCreator(input_options=self.input_options)
+        #ipc_filename = ipc_obj.write_script(self.working_directory, 'archive_input_options.py')
         return
 
     def parse_recipe_template(self):

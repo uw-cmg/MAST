@@ -8,7 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
-
+import logging
 from MAST import ingredients
 
 from MAST.utility import InputOptions
@@ -42,10 +42,12 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.work_dir    = self.keywords['workingDirectory']
         self.delimiter      = '::'
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
 
-        print 'Setting up the recipe based on %s' % (self.recipe_file)
+        self.logger.info('Setting up the recipe based on %s' % (self.recipe_file))
 
     def get_my_ingredient_options(self, name, ingredient_type):
         """Creates the ingredient based on the ingredient type.
@@ -58,15 +60,15 @@ class RecipeSetup(MASTObj):
                            this makes more sense).
             TTM 8/19/13: Unspecified ingredient is "default"
         """
-        print '\nInitializing ingredient %s of type %s' % (name, ingredient_type)
+        self.logger.info('Initializing ingredient %s of type %s' % (name, ingredient_type))
         global_defaults = self.input_options.get_item('ingredients', 'global')
 
         if (ingredient_type not in self.input_options.get_section_keys('ingredients')):
-            print 'Ingredient type %s has not be specified in the input file.' % ingredient_type
-            print 'Using defaults from ingredients_global.'
+            self.logger.info('Ingredient type %s has not be specified in the input file.' % ingredient_type)
+            self.logger.info('Using defaults from ingredients_global.')
             self.input_options.set_item('ingredients', ingredient_type, global_defaults)
         else:
-            print 'Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type
+            self.logger.info('Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type)
             ing_opt = self.input_options.get_item('ingredients', ingredient_type)
             for glob_key, glob_value in global_defaults.items():
                 if glob_key not in ing_opt:
@@ -82,7 +84,7 @@ class RecipeSetup(MASTObj):
         if 'defects' in self.input_options.options.keys():
             if 'defect_' in name.lower():
                 for key in self.input_options.get_item('defects','defects'):
-                    print key, ingredient_name
+                    self.logger.info("%s, %s" % (key, ingredient_name))
 
                 pkey_d.update(self.input_options.get_item('defects','defects'))
                 if 'inducedefect' not in ingredient_type:
@@ -130,7 +132,7 @@ class RecipeSetup(MASTObj):
         """Creates a recipe object which has the ingredients and dependency information
         """
         import inspect
-        print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
+        #'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         [how_to_update, parents_to_check, how_to_run, recipe_name] = ru.read_recipe(self.recipe_file)
 
         recipe_obj = RecipePlan(recipe_name, self.work_dir)

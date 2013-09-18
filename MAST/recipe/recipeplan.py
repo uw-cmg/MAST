@@ -8,6 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import logging
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 from MAST.ingredients.chopingredient import RunIngredient
@@ -16,13 +17,34 @@ from MAST.ingredients.chopingredient import UpdateChildrenIngredient
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
 class RecipePlan:
-    """Contains the entire recipe plan. It consists of
-       - Ingredients Objects
-       - Dependency Dict.
+    """Contains the entire recipe plan.
+        Attributes:
+            self.name <str>: Recipe name
+            self.ingredients <dict>: Dictionary of ingredients
+                                     and their statuses
+            self.update_methods <dict>: Dictionary of each
+                  ingredient's update method, per child
+                  [ingredient][child] = update method for child
+            self.parents_to_check <dict>: Dictionary of parents
+                  to check for completion before each ingredient
+                  may be run
+            self.run_methods <dict>: Dictionary of ingredient
+                                     run methods
+            self.write_methods <dict>: Dictionary of ingredient
+                                       write methods
+            self.ready_methods <dict>: Dictionary of ingredient
+                                       ready methods
+            self.complete_methods <dict>: Dictionary of ingred.
+                                          complete methods
+            self.ingred_input_options <dict>: Dictionary of 
+                       ingredient input options
+            self.status <str>: Recipe status
+            self.working_directory <str>: Recipe working directory
+            self.logger <logging logger>
     """
     def __init__(self, name, working_directory):
         self.name            = name
-        self.ingredients     = dict()  #name=status
+        self.ingredients     = dict()  #name: status
         self.update_methods   = dict()
         self.parents_to_check= dict()
         self.run_methods      = dict()
@@ -32,7 +54,8 @@ class RecipePlan:
         self.ingred_input_options = dict()
         self.status="I"
         self.working_directory = working_directory
-        #print 'GRJ DEBUG: Initializing RecipePlan'
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
@@ -186,11 +209,11 @@ class RecipePlan:
         statusfile = MASTFile()
         if verbose == 1:
             import time
-            print "Recipe name: %s" % self.name
-            print time.asctime()
+            self.logger.info("Recipe name: %s" % self.name)
+            self.logger.info(time.asctime())
         for iname in ilist:
             if verbose == 1:
-                print "%30s : %4s" % (iname, self.ingredients[iname])
+                self.logger.info("%30s : %4s" % (iname, self.ingredients[iname]))
             statusfile.data.append("%30s : %4s\n" % (iname, self.ingredients[iname]))
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
@@ -202,8 +225,8 @@ class RecipePlan:
                 totwait = totwait + 1
             elif self.ingredients[iname] == "S":
                 totstage = totstage + 1
-        print "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL")
-        print "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total)
+        self.logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
+        self.logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
         if totcomp == total:
             self.status = "C"
         else:
