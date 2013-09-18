@@ -63,7 +63,6 @@ class MASTmon(object):
                 structure=myinputoptions.get_item('structure','structure'),
                 workingDirectory=fulldir)
         recipe_plan_obj = rsetup.start()
-
         recipe_plan_obj.get_statuses_from_file()
         recipe_plan_obj.check_recipe_status(verbose)
         os.chdir(self.scratch)
@@ -82,7 +81,9 @@ class MASTmon(object):
             errorstr = "Could not change directories to MAST_SCRATCH at %s" % self.scratch
             raise MASTError(self.__class__.__name__, errorstr)
         
-        dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
+        #dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
+        #Directory is now locked by mast initially, but gets
+        #unlocked at the end of the mastmon run.
         
         recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
         if verbose == 1:

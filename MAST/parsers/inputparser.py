@@ -10,6 +10,7 @@
 import os
 import time
 import fnmatch
+import logging
 
 import numpy as np
 import pymatgen as pmg
@@ -76,6 +77,9 @@ class InputParser(MASTObj):
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                 'phonon'   : self.parse_phonon_section,
                                }
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+
 
     def parse(self):
         """Parses information from the *.inp style input file.
@@ -110,11 +114,11 @@ class InputParser(MASTObj):
                     return
 
                 section_content = list()
-                print '\nFound section %s.  Reading in options.' % section_name
+                self.logger.info('Found section %s.  Reading in options.' % section_name)
             elif (self.section_end in line) and (section_name):
                 self.section_parsers[section_name](section_name, 
                         section_content, options)
-                print 'Finished parsing the %s section.' % section_name
+                self.logger.info('Finished parsing the %s section.' % section_name)
             else:
                 line = line.strip()
                 if (line):
@@ -197,11 +201,11 @@ class InputParser(MASTObj):
             file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file, structure_dict['posfile'])]
             if (len(file_list) > 1):
                 # If we have multiple files with the same name, but different capitalization, throw an error here
-                print 'Found mutliple files with the name %s' % structure_dict['posfile']
-                print 'Found the files:'
+                self.logger.warning('Found multiple files with the name %s' % structure_dict['posfile'])
+                self.logger.warning('Found the files:')
                 for file in file_list:
-                    print file
-                error = 'Found ambiguous file names'
+                    self.logger.warning(file)
+                error='Found ambiguous file names'
                 MASTError(self.__class__.__name__, error)
             else:
                 structure_dict['posfile'] = file_list[0]
@@ -436,7 +440,6 @@ class InputParser(MASTObj):
                     if os.path.isfile(metatry):
                         myrecipemeta = Metadata(metafile=metatry)
                         origindir = myrecipemeta.search_data('origin_dir')[1]
-                        print "SEARCHED AND FOUND: ", origindir
                     myfiles = dirutil.walkfiles(origindir)
                     for shortname in shortsplit:
                         for fullfile in myfiles:
@@ -661,7 +664,6 @@ class InputParser(MASTObj):
                 input_options <InputOptions>
         """
         for ingredient, options in input_options.get_item('ingredients').items():
-            print ingredient, options
             if 'mast_exec' in options:
                 have_exec = True
                 break

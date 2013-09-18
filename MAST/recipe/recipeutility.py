@@ -12,7 +12,7 @@ import logging
 from MAST.utility import MASTFile
 
 """Utility to read the indented recipe file."""
-def read_recipe(filename, verbose=1):
+def read_recipe(filename, verbose=0):
     """Read the indented recipe.
         "Recipe" is a protected keyword signaling the recipe name.
         Args:
