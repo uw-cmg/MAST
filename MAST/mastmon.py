@@ -22,11 +22,13 @@ class MASTmon(object):
         self.make_directories() 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         logger = logging.getLogger(__name__)
-        logger.info("MAST monitor started at %s." % time.asctime())
+        logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         try:
             self.run(1)
+        except MASTError as errormsg:
+            logger.error(errormsg)
         except BaseException as errormsg:
-            logger.error(str(errormsg))
+            logger.error(errormsg)
 
     def make_directories(self):
         """Attempt to make scratch and archive directories
@@ -70,6 +72,7 @@ class MASTmon(object):
     def run(self, verbose=0):
         """Run the MAST monitor.
         """
+        raise MASTError("hello","hello")
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         logger=logging.getLogger(__name__)
         curdir = os.getcwd()

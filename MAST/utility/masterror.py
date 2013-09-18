@@ -27,12 +27,14 @@ class MASTError(Exception):
     """Base class for exceptions in MAST."""
     def __init__(self, classname, errormsg):
         message = '\n\nError detected in MAST class %s!\n' % classname
-        message += 'Please fix the error and rerun mast.\n'
+        message += 'Please fix the error and rerun MAST.\n'
         message += 'Error message:\n'
         message += '    %s\n' % errormsg
         message += '\n\n'
-
+        self.value = message
         sys.stderr.write(message)
+    def __str__(self):
+        return self.value
 
 class FileNotFoundError(MASTError):
     """Exception raised for file not found in MAST."""
