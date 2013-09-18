@@ -75,6 +75,7 @@ def main():
         mydir = str(mastopt.status)
         mycheck = subprocess.Popen(['cat %s/status.txt' % mastopt.status],shell=True)
         mycheck.wait()
+    myerrors = subprocess.Popen(['grep ERROR %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
 if __name__ == '__main__':
     main()
 

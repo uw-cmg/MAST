@@ -8,6 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import logging
 from MAST.utility import MASTFile
 
 """Utility to read the indented recipe file."""
@@ -24,6 +25,9 @@ def read_recipe(filename, verbose=1):
                 [childname]['method']=[method group]
             rname <str>: Recipe name
     """
+    logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+
     rfile = MASTFile(filename)
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
@@ -47,9 +51,9 @@ def read_recipe(filename, verbose=1):
             ikeys = idict.keys()
             ikeys.sort()
             for indentkey in ikeys:
-                print "Indent: ", indentkey
+                logger.info("Indent: %s" % indentkey)
                 for myitem in idict[indentkey]:
-                    print myitem
+                    logger.info(myitem)
         [onehtu, oneptc, onehtr]=parse_indentation_dict(idict)
         for pkey in onehtu.keys():
             if not (pkey in howtoupdate.keys()):
@@ -62,19 +66,19 @@ def read_recipe(filename, verbose=1):
             parentstocheck[ckey].extend(oneptc[ckey])
             howtorun[ckey]=onehtr[ckey]
     if verbose==1:
-        print "How-to-update-children tree: "
+        logger.info("How-to-update-children tree: ")
         keylist = howtoupdate.keys()
         keylist.sort()
         for htukey in keylist:
-            print htukey, ":", howtoupdate[htukey]
+            logger.info("%s: %s" % (htukey, howtoupdate[htukey]))
         clist = parentstocheck.keys()
         clist.sort()
-        print "Parents-to-check tree: "
+        logger.info("Parents-to-check tree: ")
         for ckey in clist:
-            print ckey, ":", parentstocheck[ckey]
-        print "How-to-run tree: "
+            logger.info("%s: %s" % (ckey, parentstocheck[ckey]))
+        logger.info("How-to-run tree: ")
         for ckey in clist:
-            print ckey, ":", howtorun[ckey]
+            logger.info("%s: %s" % (ckey, howtorun[ckey]))
 
     return [howtoupdate, parentstocheck, howtorun, rname]
 
