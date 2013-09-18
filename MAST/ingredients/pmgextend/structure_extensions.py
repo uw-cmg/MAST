@@ -103,7 +103,7 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
             mystridx = int(folderstr)
             mycoord = strlist[mystridx].frac_coords[lastidx]
         
-        indexraw = find_in_coord_list(sortedstruc.frac_coords, mycoord, atol)
+        indexraw = find_in_coord_list_pbc(sortedstruc.frac_coords, mycoord, atol)
         index=list()
         for indexentry in indexraw:
             if sortedstruc.species[indexentry] == temp_start.species[lastidx]:
