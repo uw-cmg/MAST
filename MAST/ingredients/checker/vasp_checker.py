@@ -230,10 +230,10 @@ def _vasp_is_neb(keywords):
     """
     metapath = "%s/metadata.txt" % keywords['name']
     if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
-        if not os.path.isfile("%s/metadata.txt" % os.path.dirname(keywords['name']): #no metadata can be found
+        if not os.path.isfile("%s/metadata.txt" % os.path.dirname(keywords['name'])): #no metadata can be found
             return False 
         else:
-            mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name'])
+            mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name']))
     else:
         mymeta = Metadata(metapath)
     [ingline,ingval]=mymeta.search_data("neb_label")
