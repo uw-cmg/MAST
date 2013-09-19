@@ -198,7 +198,13 @@ class InputParser(MASTObj):
         # an error.
         if (structure_dict['posfile'] is not None): # Do we have a geometry file?
             # First build a list of likely files
-            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file, structure_dict['posfile'])]
+            origindir = os.getcwd()
+            metatry = os.path.join(os.getcwd(), 'metadata.txt')
+            if os.path.isfile(metatry):
+                myrecipemeta = Metadata(metafile=metatry)
+                origindir = myrecipemeta.search_data('origin_dir')[1]
+            myfiles = dirutil.walkfiles(origindir)
+            file_list = [file for file in myfiles if fnmatch.fnmatch(file, structure_dict['posfile'])]
             if (len(file_list) > 1):
                 # If we have multiple files with the same name, but different capitalization, throw an error here
                 self.logger.warning('Found multiple files with the name %s' % structure_dict['posfile'])
