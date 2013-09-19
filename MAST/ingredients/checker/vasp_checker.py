@@ -235,7 +235,7 @@ def _vasp_is_neb(keywords):
         else:
             mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name']))
     else:
-        mymeta = Metadata(metapath)
+        mymeta = Metadata(metafile=metapath)
     [ingline,ingval]=mymeta.search_data("neb_label")
     if not ingval == None:
         return True
