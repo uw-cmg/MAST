@@ -56,21 +56,18 @@ def main():
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'run') and (mastopt.status == None):
         if os.path.isfile(logfile):
             shutil.move(logfile, "%s/archive.log.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
-        try:
-            dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
-            mycwd=os.getcwd()
-            subdir = os.path.join(dirutil.get_mast_install_path(),'submit')
-            os.chdir(subdir)
-            mycommand=queue_commands.queue_submission_command() #run the submit.sh script in $MAST_SCRATCH/submit which creates a mastmon in order to do status checking on a compute node
-            mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            mysub.wait()
-            os.chdir(mycwd)
-            dirutil.lock_directory(dirutil.get_mast_scratch_path(), 100) #wait until the MASTmon is finished running.
-            queue_commands.submit_from_submission_list()
-            queue_commands.clear_submission_list()
-            dirutil.unlock_directory(dirutil.get_mast_scratch_path())
-        except MASTError as errormsg:
-            logger.error(str(errormsg))
+        dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
+        mycwd=os.getcwd()
+        subdir = os.path.join(dirutil.get_mast_install_path(),'submit')
+        os.chdir(subdir)
+        mycommand=queue_commands.queue_submission_command() #run the submit.sh script in $MAST_SCRATCH/submit which creates a mastmon in order to do status checking on a compute node
+        mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        mysub.wait()
+        os.chdir(mycwd)
+        dirutil.lock_directory(dirutil.get_mast_scratch_path(), 100) #wait until the MASTmon is finished running.
+        queue_commands.submit_from_submission_list()
+        queue_commands.clear_submission_list()
+        dirutil.unlock_directory(dirutil.get_mast_scratch_path())
         display_errors()
     if (mastopt.mode == 'input'):
         if os.path.isfile(logfile):
