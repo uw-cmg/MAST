@@ -27,12 +27,7 @@ class MASTmon(object):
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        try:
-            self.run(1)
-        except MASTError as errormsg:
-            self.logger.error(errormsg)
-        except BaseException as errormsg:
-            self.logger.error(errormsg)
+        self.run(1)
 
     def make_directories(self):
         """Attempt to make scratch and archive directories
@@ -97,21 +92,10 @@ class MASTmon(object):
             self.logger.info("--------------------------------")
             self.logger.info("Processing recipe %s" % recipe_dir)
             self.logger.info("--------------------------------")
-            try:
-                self.check_recipe_dir(recipe_dir, verbose)
-                self.logger.info("-----------------------------")
-                self.logger.info("Recipe %s processed." % recipe_dir)
-                self.logger.info("-----------------------------")
-            except MASTError as errormsg:
-                self.logger.error(str(errormsg))
-                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
-                self.logger.log(logging.ERROR, "Recipe %s failed with MASTError." % recipe_dir)
-                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
-            except BaseException as errormsg:
-                self.logger.error(str(errormsg))
-                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
-                self.logger.log(logging.ERROR, "Recipe %s failed with an error." % recipe_dir)
-                self.logger.log(logging.ERROR, "*!*!*!*!*!*!*!*!*!*!*!*!*!*!*")
+            self.check_recipe_dir(recipe_dir, verbose)
+            self.logger.info("-----------------------------")
+            self.logger.info("Recipe %s processed." % recipe_dir)
+            self.logger.info("-----------------------------")
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
