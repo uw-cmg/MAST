@@ -25,6 +25,12 @@ end
 
 $end
 
+$defects
+begin vac1
+vacancy 0.0 0.0 0.0 X1
+end
+$end
+
 $ingredients
 begin ingredients_global
 mast_program       vasp
@@ -49,6 +55,13 @@ mast_ready_method            ready_singlerun
 mast_run_method              run_singlerun
 mast_complete_method         complete_singlerun
 mast_update_children_method  give_structure
+end
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_defect
+mast_run_method              run_defect
+mast_complete_method         complete_structure
 end
 
 begin lowmesh
