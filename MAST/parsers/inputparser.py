@@ -672,6 +672,7 @@ class InputParser(MASTObj):
             Args:
                 input_options <InputOptions>
         """
+        have_exec = False
         for ingredient, options in input_options.get_item('ingredients').items():
             if 'mast_exec' in options:
                 have_exec = True
