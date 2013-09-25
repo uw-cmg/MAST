@@ -8,6 +8,7 @@ coord_type fractional
 
 begin elementmap
 X1 Al
+X2 Mg
 end
 
 begin lattice
@@ -29,18 +30,22 @@ $defects
 begin vac1
 vacancy 0.0 0.0 0.0 X1
 end
+
+begin int1
+interstitial 0.25 0.25 0.25 X2
+end
+
 $end
 
 $ingredients
 begin ingredients_global
-mast_program       vasp
 mast_nodes         1
 mast_multiplyencut 1.5
 mast_ppn           1
 mast_queue         default
 mast_exec          //share/apps/vasp5.2_cNEB
 mast_kpoints       2x2x2 M
-mast_xc PW91
+mast_xc            PBE
 isif 3
 ibrion 2
 nsw 191

@@ -16,12 +16,12 @@ from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
-from MAST.utility.picklemanager import PickleManager
+#from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
-from MAST.parsers import InputPythonCreator
+#from MAST.parsers import InputPythonCreator
 from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
 
