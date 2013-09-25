@@ -344,8 +344,14 @@ class RunIngredient(BaseIngredient):
         #self.metafile.write_data('debug', [name, name.split('/')])
         defect = self.keywords['program_keys'][defect_label]
         #print 'Defect in write_files:', defect
-
-        base_structure = self.keywords['structure'].copy()
+        if self.program == 'vasp':
+            trypath = os.path.join(self.keywords['name'],'POSCAR')
+            if os.path.isfile(trypath):
+                base_structure = Poscar.from_file(trypath).structure.copy()
+            else:
+                base_structure = self.keywords['structure'].copy()
+        else:
+            raise MASTError(self.__class__.__name__,"Program %s not supported." % self.program)
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
