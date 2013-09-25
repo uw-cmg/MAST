@@ -8,7 +8,6 @@ from MAST.utility import dirutil
 from MAST.utility import Metadata
 allowed_keys = {
     'name' : (str, str(), 'Name of directory'),
-    'program': (str, str(), 'Program, e.g. "vasp"'),
     'program_keys': (dict, dict(), 'Dictionary of program keywords'),
     'structure': (Structure, None, 'Pymatgen Structure object')
             }
