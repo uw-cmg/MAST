@@ -237,7 +237,7 @@ def _vasp_is_neb(keywords):
     else:
         mymeta = Metadata(metafile=metapath)
     [ingline,ingval]=mymeta.search_data("neb_label")
-    if not ingval == None:
+    if not ingval == None and (not 'stat' in keywords['name']):
         return True
     else:
         return False
