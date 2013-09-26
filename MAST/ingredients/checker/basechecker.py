@@ -23,49 +23,28 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-
-    def get_structure_from_directory(self, dirname):
-        raise NotImplementedError
-
-    def get_structure_from_file(self, filepath):
-        raise NotImplementedError
-
-    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
-        raise NotImplementedError
     
-    def forward_parent_initial_structure(self, parentpath, childpath, newname="POSCAR"):
-        raise NotImplementedError
-
-    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
-        raise NotImplementedError
-    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
-        raise NotImplementedError
     def is_complete(self):
         raise NotImplementedError
-   
-    def is_ready_to_run(self):
-        raise NotImplementedError
     
-    def set_up_program_input(self):
-        raise NotImplementedError
-
-    def get_path_to_write_neb_parent_energy(self, parent):
-        raise NotImplementedError
-
-    def set_up_program_input_neb(self, image_structures):
-        raise NotImplementedError
-
-    def add_selective_dynamics_to_structure(self, sdarray):
-        raise NotImplementedError
-
-    def forward_extra_restart_files(self, parentpath, childpath):
-        raise NotImplementedError
-    
-    def combine_dynmats(self):
-        raise NotImplementedError
-    
-    def combine_displacements(self):
-        raise NotImplementedError
-    
-    def get_e0_energy(self, mydir):
-        raise NotImplementedError
+    def get_coordinates_only_structure_from_input(self):
+        """Get coordinates-only structures from mast_coordinates
+            ingredient keyword
+            Args:
+                keywords <dict>: ingredient keywords
+            Returns:
+                coordstrucs <list>: list of Structure objects
+        """
+        coordposlist=self.keywords['program_keys']['mast_coordinates']
+        coordstrucs=list()
+        coordstruc=None
+        for coordpositem in coordposlist:
+            if ('poscar' in os.path.basename(coordpositem).lower()):
+                coordstruc = Poscar.from_file(coordpositem).structure
+            elif ('cif' in os.path.basename(coordpositem).lower()):
+                coordstruc = CifParser(coordpositem).get_structures()[0]
+            else:
+                error = 'Cannot build structure from file %s' % coordpositem
+                raise MASTError("vasp_checker,get_coordinates_only_structure_from_input", error)
+            coordstrucs.append(coordstruc)
+        return coordstrucs

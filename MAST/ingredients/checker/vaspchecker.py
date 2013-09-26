@@ -12,6 +12,7 @@ from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
+from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import os
 import shutil
 from MAST.ingredients.checker import BaseChecker
@@ -26,80 +27,109 @@ class VaspChecker(BaseChecker):
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
-    def get_structure_from_file(self, filepath):
-        """Get structure from file."""
-        return Poscar.from_file(filepath, False).structure
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
-    def get_structure_from_directory(self, dirname):
-        """Get structure from directory. Preferentially gets CONTCAR first."""
-        cpath = os.path.join(dirname, "CONTCAR")
-        ppath = os.path.join(dirname, "POSCAR")
-        if os.path.isfile(cpath):
-            return Poscar.from_file(cpath, False).structure
-        elif os.path.isfile(ppath):
-            return Poscar.from_file(ppath, False).structure
-        else:
-            raise MASTError(self.__class__.__name__, "No valid structure in %s" % dirname)
-
-    def forward_parent_dynmat(self, parentpath, childpath, newname1="DYNMAT", newname2="XDATCAR"):
-        """Forward the DYNMAT and the XDATCAR."""
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(parentpath, "DYNMAT"),os.path.join(childpath, newname1))
-        shutil.copy(os.path.join(parentpath, "XDATCAR"),os.path.join(childpath, newname2))
-        dirutil.unlock_directory(childpath)
-        return
-
-
-    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
-        """Copy CONTCAR to new POSCAR"""
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(parentpath, "CONTCAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
-
-    def forward_parent_initial_structure(self, parentpath, childpath, newname="POSCAR"):
-        """Copy POSCAR to new POSCAR (for use in phonons)"""
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(parentpath, "POSCAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
-    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
-        """Copy OSZICAR"""
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(parentpath, "OSZICAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
-
-    def images_complete(self, dirname, numim):
-        """Check if all images in a VASP NEB calculation are complete.
-            dirname = directory housing /00.../0N+1 files; 
-                      only checks directories /01.../0N where N is # images
-            numim = number of images
+    def get_structure_from_file(self, myfilepath=""):
+        """Get the structure from a specified file path.
+            For VASP, this is a POSCAR-type file.
+            Args:
+                myfilepath <str>: File path for structure.
         """
-        imct=1
-        numim = int(numim)
-        while imct <= numim:
-            num_str = str(imct).zfill(2)
-            impath = os.path.join(dirname, num_str)
-            try:
-                myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
-            except (IOError):
-                return False
-            if not 'User time (sec)' in myoutcar.run_stats.keys():
-                return False
-            if myoutcar.run_stats['User time (sec)'] > 0:
-                #print "image",imct,"complete"
-                pass
-            else:
-                return False
-            imct = imct + 1
-        return True
+        return Poscar.from_file(myfilepath).structure
 
+    def get_initial_structure_from_directory(self,mydir=""):
+        """Get the initial structure.
+            For VASP, this is the POSCAR file.
+            Args:
+                mydir <str>: Directory. If no directory is given,
+                    use current ingredient directory given as
+                    keyword 'name'
+        """
+        if mydir == "":
+            mydir = self.keywords['name']
+        return Poscar.from_file("%s/POSCAR" % mydir).structure
+    
+    def get_final_structure_from_directory(self, mydir=""):
+        """Get the final structure.
+            For VASP, this is the CONTCAR file.
+            Args:
+                mydir <str>: Directory. If no directory is given,
+                    use current ingredient directory given
+                    as keyword 'name'
+        """
+        if mydir == "":
+            mydir = self.keywords['name']
+        return Poscar.from_file("%s/CONTCAR" % mydir).structure
+    
+    def forward_final_structure_file(self, childpath, newname="POSCAR"):
+        """Forward the final structure.
+            For VASP, this is the CONTCAR.
+            Args:
+                childpath <str>: Path of child ingredient
+                newname <str>: new name (default 'POSCAR')
+        """
+        dirutil.lock_directory(childpath)
+        shutil.copy(os.path.join(self.keywords['name'], "CONTCAR"),os.path.join(childpath, newname))
+        dirutil.unlock_directory(childpath)
+        return
 
-    def is_complete(self, dirname):
-        """Check if single VASP non-NEB calculation is complete."""
+    def forward_initial_structure_file(self, childpath, newname="POSCAR"):
+        """Forward the initial structure.
+            For VASP, this is the POSCAR. This function is
+            used after phonon calculations, where the CONTCAR
+            contains the last displacement. To forward to PHON,
+            the POSCAR (without displacements) should be used.
+            Args:
+                childpath <str>: Path of child ingredient
+                newname <str>: new name (default 'POSCAR')
+        """
+        dirutil.lock_directory(childpath)
+        shutil.copy(os.path.join(self.keywords['name'], "POSCAR"),os.path.join(childpath, newname))
+        dirutil.unlock_directory(childpath)
+        return
+
+    def forward_dynamical_matrix_file(self, childpath, newname="DYNMAT")
+        """Forward the dynamical matrix.
+            For VASP, this is the DYNMAT file.
+            Args:
+                childpath <str>: Path of child ingredient
+                newname <str>: new name (default 'DYNMAT')
+        """
+        dirutil.lock_directory(childpath)
+        shutil.copy(os.path.join(self.keywords['name'], "DYNMAT"),os.path.join(childpath, newname))
+        dirutil.unlock_directory(childpath)
+        return
+
+    def forward_displacement_file(self, childpath, newname="XDATCAR"):
+        """Forward displacement information.
+            For VASP, this is the XDATCAR file.
+            Args:
+                childpath <str>: Path of child ingredient
+                newname <str>: new name (default 'XDATCAR')
+        """
+        dirutil.lock_directory(childpath)
+        shutil.copy(os.path.join(self.keywords['name'], "XDATCAR"),os.path.join(childpath, newname))
+        dirutil.unlock_directory(childpath)
+        return
+
+    def forward_energy_file(self, childpath, newname="OSZICAR"):
+        """Forward the energy file.
+            For VASP, this is the OSZICAR file.
+            Args:
+                childpath <str>: Path of child ingredient
+                newname <str>: new name (default 'OSZICAR')
+        """
+        dirutil.lock_directory(childpath)
+        shutil.copy(os.path.join(self.keywords['name'], "OSZICAR"),os.path.join(childpath, newname))
+        dirutil.unlock_directory(childpath)
+        return
+
+    def is_complete(self):
+        """Check if single VASP non-NEB calculation is complete.
+        """
         try:
-            myoutcar = Outcar(os.path.join(dirname, "OUTCAR"))
+            myoutcar = Outcar(os.path.join(self.keywords['name'], "OUTCAR"))
         except (IOError):
             return False
 
@@ -112,8 +142,11 @@ class VaspChecker(BaseChecker):
         except KeyError:
             return False
 
-    def is_ready_to_run(self, dirname):
-        """Check if vasp is ready to run."""
+    def is_ready_to_run(self):
+        """Check if single VASP non-NEB ingredient is 
+            ready to run.
+        """
+        dirname = self.keywords['name']
         notready=0
         if not(os.path.isfile(dirname + "/KPOINTS")):
             notready = notready + 1
@@ -121,24 +154,8 @@ class VaspChecker(BaseChecker):
             notready = notready + 1
         if not(os.path.isfile(dirname + "/INCAR")):
             notready = notready + 1
-        else: #INCAR exists. Now check POSCARs.
-            myincar = MASTFile(dirname + "/INCAR")
-            if myincar.get_line_match("IMAGES") == None: 
-                if not(os.path.isfile(dirname + "/POSCAR")):
-                    notready = notready + 1
-            else:
-                subdirs = dirutil.walkdirs(dirname)
-                subdirs.sort()
-                if len(subdirs) == 0: #This is an NEB without folders yet
-                    notready = notready + 1
-                else:
-                    for subdir in subdirs:
-                        if not (os.path.isfile(subdir + "/POSCAR")):
-                            notready = notready + 1
-                    if not os.path.isfile(subdirs[0] + "/OSZICAR"):
-                        notready = notready + 1
-                    if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
-                        notready = notready + 1
+        if not(os.path.isfile(dirname + "/POSCAR")):
+            notready = notready + 1
         if not(os.path.isfile(dirname + "/submit.sh")):
             notready = notready + 1
         if notready > 0:
@@ -147,6 +164,8 @@ class VaspChecker(BaseChecker):
             return True
 
     def _vasp_poscar_setup(self):
+        """Set up the POSCAR file for a single VASP run.
+        """
         name = self.keywords['name']
         pospath = os.path.join(name, "POSCAR")
         if os.path.isfile(pospath):
@@ -154,12 +173,12 @@ class VaspChecker(BaseChecker):
             #parent should have given a structure
         else: #this is an originating run; mast should give it a structure
             my_poscar = Poscar(self.keywords['structure'])
+            self.logger.info("No POSCAR found from a parent; base structure used for %s" % self.keywords['name'])
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
-            goodstrucs=[my_poscar.structure.copy()]
+            sxtend = Structure_Extensions(struc_work1=my_poscar.structure)
             coordstrucs=get_coordinates_only_structure_from_input(keywords)
-            newstrucs=graft_coordinates_onto_structure(goodstrucs, 
-                coordstrucs)
-            my_poscar.structure=newstrucs[0].copy()
+            newstruc = sxtend.graft_coordinates_onto_structure(coordstrucs[0])
+            my_poscar.structure=newstruc.copy()
         dirutil.lock_directory(name)
         my_poscar.write_file(pospath)
         dirutil.unlock_directory(name)
@@ -175,7 +194,7 @@ class VaspChecker(BaseChecker):
         if 'mast_kpoints' in self.keywords['program_keys'].keys():
             kptlist = self.keywords['program_keys']['mast_kpoints']
         else:
-            raise MASTError("vasp_checker, _vasp_kpoint_setup","k-point instructions need to be set in ingredients keyword mast_kpoints")
+            raise MASTError(self.__class__.__name__,"k-point instructions need to be set in ingredients keyword mast_kpoints")
         if len(kptlist) == 3:
             desig = "M"
         else:
@@ -185,13 +204,14 @@ class VaspChecker(BaseChecker):
         elif desig == "G":
             my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
         else:
-            raise MASTError("vasp_checker, _vasp_kpoint_setup","kpoint designation " + desig + " not recognized.")
+            raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
         dirutil.lock_directory(name)
         my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
         return my_kpoints
 
     def _vasp_potcar_setup(self, my_poscar):
+        """Set up the POTCAR file."""
         name = self.keywords['name']
 
         if 'mast_xc' in self.keywords['program_keys'].keys():
@@ -235,24 +255,6 @@ class VaspChecker(BaseChecker):
                         incar_dict[keytry]=value
         return incar_dict
 
-    def _vasp_is_neb(self):
-        """Check if ingredient type is an actual NEB run.
-            Returns:
-                True if NEB, False otherwise.
-        """
-        metapath = "%s/metadata.txt" % self.keywords['name']
-        if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
-            if not os.path.isfile("%s/metadata.txt" % os.path.dirname(keywords['name'])): #no metadata can be found
-                return False 
-            else:
-                mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name']))
-        else:
-            mymeta = Metadata(metafile=metapath)
-        [ingline,ingval]=mymeta.search_data("neb_label")
-        if not ingval == None and (not 'stat' in self.keywords['name']):
-            return True
-        else:
-            return False
 
     def _vasp_incar_get_allowed_keywords(self, allowedpath):
         """Get allowed vasp keywords.
@@ -270,11 +272,10 @@ class VaspChecker(BaseChecker):
         name=self.keywords['name']
         myd = dict()
         myd = self._vasp_incar_get_non_mast_keywords()
-        if not self._vasp_is_neb():
-            try:
-                myd.pop("IMAGES")
-            except KeyError:
-                pass
+        try:
+            myd.pop("IMAGES")
+        except KeyError:
+            pass
         if 'mast_multiplyencut' in self.keywords['program_keys'].keys():
             mymult = float(self.keywords['program_keys']['mast_multiplyencut'])
         else:
@@ -313,13 +314,26 @@ class VaspChecker(BaseChecker):
         return my_incar
 
     def set_up_program_input(self):
+        """Set up the program input files."""
         myposcar = self._vasp_poscar_setup()
         self._vasp_kpoints_setup()
         mypotcar = self._vasp_potcar_setup(myposcar)
         self._vasp_incar_setup(mypotcar, myposcar)
         return
 
-    def get_path_to_write_neb_parent_energy(self, myname, myimages, parent):
+    def get_path_to_write_neb_parent_energy(self, myimages, parent):
+        """Get the path into which to write the NEB parent
+            energy.
+            For VASP, the paths are the 00 and 0(N+1) 
+            directories, where N is the number of images.
+            Args:
+                myimages <int or str>: number of images
+                parent <int>: 1 for initial endpoint; 2 for
+                              final endpoint
+                parent <str>: destination folder specified as 
+                              a string, e.g. "03"
+        """
+        myname = self.keywords['name']
         if parent == 1:
             return os.path.join(myname, "00", "OSZICAR")
         elif parent == 2:
@@ -327,17 +341,25 @@ class VaspChecker(BaseChecker):
         elif len(parent) > 1:
             return os.path.join(myname, parent, "OSZICAR")
         else:
-            raise MASTError("vasp_checker, get_path_to_write_neb_parent_energy","Parent not specified correctly.")
+            raise MASTError(self.__class__.__name__,"Parent not specified correctly.")
 
-    def set_up_neb_folders(self, myname, image_structures, keywords):
+    def set_up_neb_folders(self, image_structures):
+        """Set up NEB folders.
+            Args:
+               image_structures <list of Structure>: List
+                   of image structures
+        """
         imct=0
-        if 'mast_coordinates' in keywords['program_keys'].keys():
+        myname = self.keywords['name']
+        if 'mast_coordinates' in self.keywords['program_keys'].keys():
             goodstrucs=list()
-            for imstruc in image_structures[1:-1]:
-                goodstrucs.append(imstruc.copy())
-                coordstrucs=get_coordinates_only_structure_from_input(keywords)
-                newstrucs=graft_coordinates_onto_structure(goodstrucs, 
-                    coordstrucs)
+            coordstrucs=self.get_coordinates_only_structure_from_input()
+            newstrucs=list()
+            sidx = 0 #ex. coordstrucs 0, 1, 2 for 3 images
+            while sidx < self.keywords['program_keys']['images']:
+                sxtend = StructureExtension(struct_work1=imstruc.copy())
+                newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
+                sidx = sidx + 1
         while imct < len(image_structures):
             imposcar = Poscar(image_structures[imct])
             num_str = str(imct).zfill(2)
@@ -364,15 +386,14 @@ class VaspChecker(BaseChecker):
             imct = imct + 1
         return
         
-
-    def set_up_program_input_neb(self, keywords, image_structures):
-        set_up_neb_folders(keywords['name'], image_structures, keywords)
-        _vasp_kpoints_setup(keywords)
-        mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
-        _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
-        return
-    def forward_extra_restart_files(self, parentpath, childpath):
-        """Forward extra restart files: softlink to WAVECAR and CHGCAR."""
+    def forward_extra_restart_files(self, childpath):
+        """Forward extra restart files: 
+            For VASP, this entails a softlink to WAVECAR and 
+            CHGCAR.
+            Args:
+                childpath <str>: path to child ingredient
+        """
+        parentpath = self.keywords['name']
         dirutil.lock_directory(childpath)
         import subprocess
         #print "cwd: ", os.getcwd()
@@ -386,8 +407,15 @@ class VaspChecker(BaseChecker):
         mylink2.wait()
         os.chdir(curpath)
         dirutil.unlock_directory(childpath)
-    def add_selective_dynamics_to_structure(keywords, sdarray):
-        name = keywords['name']
+    def add_selective_dynamics_to_structure_file(self, sdarray):
+        """Add selective dynamics to a structure file.
+            In the case of VASP, the structure file is 
+            POSCAR-like
+            Args:
+                sdarray <numpy array of bool>: Numpy array of
+                    booleans for T F F etc.
+        """
+        name = self.keywords['name']
         pname = os.path.join(name,"POSCAR")
         phposcar = Poscar.from_file(pname)
         phposcar.selective_dynamics = sdarray
@@ -400,27 +428,6 @@ class VaspChecker(BaseChecker):
     def get_vasp_energy(abspath):
         return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
-    def get_coordinates_only_structure_from_input(self):
-        """Get coordinates-only structures from mast_coordinates
-            ingredient keyword
-            Args:
-                keywords <dict>: ingredient keywords
-            Returns:
-                coordstrucs <list>: list of Structure objects
-        """
-        coordposlist=self.keywords['program_keys']['mast_coordinates']
-        coordstrucs=list()
-        coordstruc=None
-        for coordpositem in coordposlist:
-            if ('poscar' in os.path.basename(coordpositem).lower()):
-                coordstruc = Poscar.from_file(coordpositem).structure
-            elif ('cif' in os.path.basename(coordpositem).lower()):
-                coordstruc = CifParser(coordpositem).get_structures()[0]
-            else:
-                error = 'Cannot build structure from file %s' % coordpositem
-                raise MASTError("vasp_checker,get_coordinates_only_structure_from_input", error)
-            coordstrucs.append(coordstruc)
-        return coordstrucs
 
     def graft_coordinates_onto_structure(self, goodstrucs,coordstrucs):
         """Graft coordinates from mast_coordinates Structure objects
@@ -877,3 +884,136 @@ class VaspChecker(BaseChecker):
         mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
         return float(mye0)
 
+    def images_complete(self, dirname, numim):
+        """Check if all images in a VASP NEB calculation are complete.
+            dirname = directory housing /00.../0N+1 files; 
+                      only checks directories /01.../0N where N is # images
+            numim = number of images
+        """
+        imct=1
+        numim = int(numim)
+        while imct <= numim:
+            num_str = str(imct).zfill(2)
+            impath = os.path.join(dirname, num_str)
+            try:
+                myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
+            except (IOError):
+                return False
+            if not 'User time (sec)' in myoutcar.run_stats.keys():
+                return False
+            if myoutcar.run_stats['User time (sec)'] > 0:
+                #print "image",imct,"complete"
+                pass
+            else:
+                return False
+            imct = imct + 1
+        return True
+
+    def is_ready_to_run_neb(self):
+        """Check if single VASP NEB ingredient is 
+            ready to run.
+        """
+        dirname = self.keywords['name']
+        notready=0
+        if not(os.path.isfile(dirname + "/KPOINTS")):
+            notready = notready + 1
+        if not(os.path.isfile(dirname + "/POTCAR")):
+            notready = notready + 1
+        if not(os.path.isfile(dirname + "/INCAR")):
+            notready = notready + 1
+        else: #INCAR exists. Now check POSCARs.
+            myincar = MASTFile(dirname + "/INCAR")
+            if myincar.get_line_match("IMAGES") == None: 
+                if not(os.path.isfile(dirname + "/POSCAR")):
+                    notready = notready + 1
+            else:
+                subdirs = dirutil.walkdirs(dirname)
+                subdirs.sort()
+                if len(subdirs) == 0: #This is an NEB without folders yet
+                    notready = notready + 1
+                else:
+                    for subdir in subdirs:
+                        if not (os.path.isfile(subdir + "/POSCAR")):
+                            notready = notready + 1
+                    if not os.path.isfile(subdirs[0] + "/OSZICAR"):
+                        notready = notready + 1
+                    if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
+                        notready = notready + 1
+        if not(os.path.isfile(dirname + "/submit.sh")):
+            notready = notready + 1
+        if notready > 0:
+            return False
+        else:
+            return True
+    
+    def _vasp_is_neb(self):
+        """Check if ingredient type is an actual NEB run.
+            Returns:
+                True if NEB, False otherwise.
+        """
+        metapath = "%s/metadata.txt" % self.keywords['name']
+        if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
+            if not os.path.isfile("%s/metadata.txt" % os.path.dirname(keywords['name'])): #no metadata can be found
+                return False 
+            else:
+                mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name']))
+        else:
+            mymeta = Metadata(metafile=metapath)
+        [ingline,ingval]=mymeta.search_data("neb_label")
+        if not ingval == None and (not 'stat' in self.keywords['name']):
+            return True
+        else:
+            return False
+    def _vasp_incar_setup_neb(self, my_potcar, my_poscar):
+        """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
+        name=self.keywords['name']
+        myd = dict()
+        myd = self._vasp_incar_get_non_mast_keywords()
+        if not self._vasp_is_neb():
+            try:
+                myd.pop("IMAGES")
+            except KeyError:
+                pass
+        if 'mast_multiplyencut' in self.keywords['program_keys'].keys():
+            mymult = float(self.keywords['program_keys']['mast_multiplyencut'])
+        else:
+            mymult = 1.5
+        if 'ENCUT' in myd.keys():
+            pass
+        else:
+            myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
+        if 'mast_setmagmom' in self.keywords['program_keys'].keys():
+            magstr = str(self.keywords['program_keys']['mast_setmagmom'])
+            magmomstr=""
+            maglist = magstr.split()
+            numatoms = sum(my_poscar.natoms)
+            if len(maglist) < numatoms:
+                magct=0
+                while magct < len(maglist):
+                    magmomstr = magmomstr + str(my_poscar.natoms[magct]) + "*" + maglist[magct] + " " 
+                    magct = magct + 1
+            else:
+                magmomstr = magstr
+            myd['MAGMOM']=magmomstr
+        if 'mast_charge' in self.keywords['program_keys'].keys():
+            myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
+            newelectrons=0.0
+            try:
+                adjustment = float(self.keywords['program_keys']['mast_charge'])
+            except (ValueError, TypeError):
+                raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
+            #newelectrons = myelectrons + adjustment
+            newelectrons = myelectrons - adjustment
+            myd['NELECT']=str(newelectrons)
+        my_incar = Incar(myd)
+        dirutil.lock_directory(name)
+        my_incar.write_file(name + "/INCAR")
+        dirutil.unlock_directory(name)
+        return my_incar
+
+    def set_up_program_input_neb(self, keywords, image_structures):
+        set_up_neb_folders(keywords['name'], image_structures, keywords)
+        _vasp_kpoints_setup(keywords)
+        mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
+        _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
+        return
