@@ -8,19 +8,19 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
+from pymatgen.core.sites import PeriodicSite
+import logging
 
-allowed_keys = {
-    'struc_work1': (Structure, None, 'First working Pymatgen Structure object (e.g. create a defect, or use work1 and work2 to interpolate positions)'),
-    'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
-    'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe')
-    }
 class StructureExtensions(MASTObj):
     """Structure extensions
     """
-    def __init__(self, allowed_keys, **kwargs):
-        allowed_keys_base = dict()
-        allowed_keys_base.update(allowed_keys)
-        MASTObj.__init__(self, allowed_keys_base, **kwargs)
+    def __init__(self, **kwargs):
+        allowed_keys = {
+            'struc_work1': (Structure, None, 'First working Pymatgen Structure object (e.g. create a defect, or use work1 and work2 to interpolate positions)'),
+            'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
+            'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe')
+            }
+        MASTObj.__init__(self, allowed_keys, **kwargs)
 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class StructureExtensions(MASTObj):
             print 'Creating a %s vacancy at %s' % (symbol, str(defect['coordinates']))
 
             #print defect['coordinates']
-            index = find_in_coord_list(base_structure.frac_coords,
+            index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
             #print base_structure.frac_coords
@@ -63,7 +63,7 @@ class StructureExtensions(MASTObj):
         elif (defect['type'] in ['antisite', 'substitution']):
             print 'Creating a %s antisite at %s' % (symbol, str(defect['coordinates']))
 
-            index = find_in_coord_list(base_structure.frac_coords,
+            index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
 
@@ -98,13 +98,11 @@ class StructureExtensions(MASTObj):
         import MAST.data
         atol = 0.1 # Need fairly large tolerance to account for relaxation.
         sortedstruc = self.keywords['struc_work1'].get_sorted_structure()
-        sortedstruc_base = self.keywords['struc_init'].get_sorted_structure()
         struct_ed = StructureEditor(sortedstruc)
-        struct_ed_base = StructureEditor(sortedstruc_base)
         nebidx = list()
         elemstarts = self._get_element_indices(sortedstruc)
         for nebline in neblines:
-            nebdict = _parse_neb_line(nebline)
+            nebdict = self._parse_neb_line(nebline)
             temp_fin = sortedstruc.copy()
             temp_fin.append(nebdict['element'],nebdict['coord'][1])
             temp_start = sortedstruc.copy()
@@ -157,7 +155,7 @@ class StructureExtensions(MASTObj):
             idx = idx + 1
         return elstart
 
-    def _parse_neb_line(nebline):
+    def _parse_neb_line(self, nebline):
         """Parse an NEB atomic movement line which has the following format:
                     Cr, 0 0 0, 0.5 0.5 0.5 in the input file, and
                     ['Cr','0 0 0','0.5 0.5 0.5'] here as nebline
@@ -181,7 +179,7 @@ class StructureExtensions(MASTObj):
         return nebdict
 
 
-    def do_interpolation(numim):
+    def do_interpolation(self, numim):
         """Do interpolation.
             Args:
                 numim <int>: number of images
@@ -193,14 +191,14 @@ class StructureExtensions(MASTObj):
         structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
-    def get_sd_array(phonon_center_site, phonon_center_radius):
+    def get_sd_array(self, phonon_center_site, phonon_center_radius):
         """Create a selective dynamics array.
             Args:
                 phonon_center_site <str>: phonon center site (coordinate)
                 phonon_center_radius <float>: phonon center radius
         """
         mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'])
-        mysd = np.zeros([mystruc.num_sites,3],bool)
+        mysd = np.zeros([self.keywords['struc_work1'].num_sites,3],bool)
         for myn in mynbarr:
             mysd[myn]=np.ones(3,bool)
         return mysd
@@ -273,7 +271,7 @@ class StructureExtensions(MASTObj):
         """
         if phonon_center_site == None:
             return None
-        mynbarr = get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'])
+        mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'])
         mysdlist=list()
         for myn in mynbarr:
             for myct in range(0,3):
