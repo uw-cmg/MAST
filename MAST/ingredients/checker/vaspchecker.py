@@ -454,7 +454,7 @@ class VaspChecker(BaseChecker):
                 dyndict['atoms'][atom][disp]['dynmat'].append(mydata.pop(0))
         return dyndict
 
-    def write_dynamical_matrix_file(self, mydir, dyndict, fname="DYNMAT"):
+    def write_my_dynamical_matrix_file(self, mydir, dyndict, fname="DYNMAT"):
         """Write a dynamical matrix file based on a dictionary.
             Args:
                 mydir <str>: Directory in which to write
@@ -504,7 +504,7 @@ class VaspChecker(BaseChecker):
                     dynwrite.data.append(line)
         dynwrite.to_file(os.path.join(mydir, fname))
 
-    def read_my_displacement_file(mydir, fname="XDATCAR"):
+    def read_my_displacement_file(self, mydir, fname="XDATCAR"):
         """Read a displacement file. For VASP this is XDATCAR.
             Returns:
                 xdatdict <dict>: Dictionary of configurations
@@ -597,7 +597,7 @@ class VaspChecker(BaseChecker):
         largedyn['atoms'] = dict()
         for onedynmat in dynmatlist:
             dyndir = os.path.dirname(onedynmat)
-            onedyn = read_my_dynmat(dyndir)
+            onedyn = self.read_my_dynamical_matrix_file(dyndir)
             totnumdisp = totnumdisp + onedyn['numdisp']
             for atom in onedyn['atoms'].keys():
                 if not atom in largedyn['atoms'].keys():
@@ -613,7 +613,7 @@ class VaspChecker(BaseChecker):
         largedyn['numatoms'] = onedyn['numatoms']
         largedyn['massline'] = onedyn['massline']
         largedyn['numdisp'] = totnumdisp
-        write_my_dynmat(mydir, largedyn, "DYNMAT_combined")
+        self.write_my_dynamical_matrix_file(mydir, largedyn, "DYNMAT_combined")
 
     def combine_displacement_files(self, mydir):
         """Combine displacement files (here XDATCARs) into one file.
@@ -624,13 +624,12 @@ class VaspChecker(BaseChecker):
         xdatlist = walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
         if len(xdatlist) == 0:
             raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
-        configs=list()
         kfgct=1 # skip config 1 until the end
         largexdat['configs']=dict()
         xdatlist.sort() #get them in order
         for onexdatmat in xdatlist:
             xdatdir = os.path.dirname(onexdatmat)
-            onexdat = read_my_xdatcar(xdatdir)
+            onexdat = self.read_my_displacement_file(xdatdir)
             for kfg in onexdat['configs'].keys():
                 if kfg == 1: #skip config 1 until the end
                     pass
@@ -647,8 +646,8 @@ class VaspChecker(BaseChecker):
         largexdat['numline'] = onexdat['numline']
         largexdat['numatoms'] = onexdat['numatoms']
         largexdat['type'] = onexdat['type']
-        write_my_xdatcar(mydir, largexdat, "XDATCAR_combined")
-    def make_hessian(myposcar, mydir):
+        self.write_my_displacement_file(mydir, largexdat, "XDATCAR_combined")
+    def make_hessian(self, myposcar, mydir):
         """Combine DYNMATs into one hessian and solve for frequencies.
             myposcar = Poscar
             mydir = top directory for DYNMAT files
@@ -664,8 +663,6 @@ class VaspChecker(BaseChecker):
         print "DYNMATLIST:"
         print dynmatlist
         datoms=0
-        dmats=0
-        mct=0
         for onedynmat in dynmatlist:
             dynlines=[]
             opendyn = open(onedynmat,'rb')
@@ -751,7 +748,7 @@ class VaspChecker(BaseChecker):
     def get_total_electrons(self, myposcar, mypotcar):
         """Get the total number of considered electrons in the system."""
         atomlist = myposcar.natoms
-        zvallist = get_zval_list(mypotcar)
+        zvallist = self.get_valence_list(mypotcar)
         totzval = 0.0
         atomct = 0
         if not (len(zvallist) == len(atomlist)):
@@ -791,7 +788,7 @@ class VaspChecker(BaseChecker):
         """
         fullpath=os.path.join(self.keywords['name'], "OSZICAR")
         if not os.path.isfile(fullpath):
-            raise MASTError("vasp_checker, get_e0_energy", "No OSZICAR file at %s" % mydir)
+            raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % self.keywords['name'])
         myosz = MASTFile(fullpath)
         mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
         return float(mye0)
