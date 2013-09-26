@@ -4,7 +4,6 @@ from pymatgen.io.vaspio import Potcar
 from pymatgen.io.vaspio import Incar
 from pymatgen.io.vaspio import Kpoints
 from pymatgen.core.structure import Structure
-from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
@@ -24,15 +23,16 @@ class PhonChecker(BaseChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
-    def is_complete(self, dirname):
+    def is_complete(self):
         """Check if PHON thermo run is complete."""
-        if os.path.isfile(os.path.join(dirname, "THERMO")):
+        if os.path.isfile(os.path.join(self.keywords['name'], "THERMO")):
             return True
         else:
             return False
 
-    def is_ready_to_run(self, dirname):
+    def is_ready_to_run(self):
         """Check if PHON is ready to run."""
+        dirname = self.keywords['name']
         notready=0
         if not(os.path.isfile(dirname + "/FORCES")):
             notready = notready + 1
@@ -106,7 +106,7 @@ class PhonChecker(BaseChecker):
         """Set up the INPHON file."""
         name=self.keywords['name']
         myd = dict()
-        myd = _phon_inphon_get_non_mast_keywords(keywords['program_keys'])
+        myd = self._phon_inphon_get_non_mast_keywords(self.keywords['program_keys'])
         my_inphon = MASTFile()
         for key, value in myd.iteritems():
             my_inphon.data.append(str(key) + "=" + str(value).upper() + "\n")

@@ -3,6 +3,8 @@ import numpy as np
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
+from MAST.utility import MASTObj
+from pymatgen.core.structure import Structure
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc

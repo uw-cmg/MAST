@@ -7,7 +7,6 @@ from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.cifio import CifParser
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
-from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError

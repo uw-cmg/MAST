@@ -1,17 +1,13 @@
 import os
-import subprocess
-import time
 
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
 from pymatgen.core.structure import Structure
-allowed_keys = {
-    'name' : (str, str(), 'Name of directory'),
-    'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-    'structure': (Structure, None, 'Pymatgen Structure object')
-            }
+from pymatgen.io.vaspio import Poscar
+from pymatgen.io.cifio import CifParser
+
 class BaseChecker(MASTObj):
     """Base checker class. This class switches between
         program-specific functions.
@@ -45,6 +41,6 @@ class BaseChecker(MASTObj):
                 coordstruc = CifParser(coordpositem).get_structures()[0]
             else:
                 error = 'Cannot build structure from file %s' % coordpositem
-                raise MASTError("vasp_checker,get_coordinates_only_structure_from_input", error)
+                raise MASTError(self.__class__.__name__, error)
             coordstrucs.append(coordstruc)
         return coordstrucs

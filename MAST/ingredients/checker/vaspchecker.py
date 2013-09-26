@@ -7,7 +7,6 @@ from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.cifio import CifParser
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
-from MAST.ingredients.pmgextend import vasp_extensions
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
@@ -15,6 +14,7 @@ from MAST.utility.metadata import Metadata
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import os
 import shutil
+import logging
 from MAST.ingredients.checker import BaseChecker
 class VaspChecker(BaseChecker):
     """VASP checker functions
@@ -89,7 +89,7 @@ class VaspChecker(BaseChecker):
         dirutil.unlock_directory(childpath)
         return
 
-    def forward_dynamical_matrix_file(self, childpath, newname="DYNMAT")
+    def forward_dynamical_matrix_file(self, childpath, newname="DYNMAT"):
         """Forward the dynamical matrix.
             For VASP, this is the DYNMAT file.
             Args:
@@ -175,8 +175,8 @@ class VaspChecker(BaseChecker):
             my_poscar = Poscar(self.keywords['structure'])
             self.logger.info("No POSCAR found from a parent; base structure used for %s" % self.keywords['name'])
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
-            sxtend = Structure_Extensions(struc_work1=my_poscar.structure)
-            coordstrucs=get_coordinates_only_structure_from_input(keywords)
+            sxtend = StructureExtensions(struc_work1=my_poscar.structure)
+            coordstrucs=self.get_coordinates_only_structure_from_input()
             newstruc = sxtend.graft_coordinates_onto_structure(coordstrucs[0])
             my_poscar.structure=newstruc.copy()
         dirutil.lock_directory(name)
@@ -242,7 +242,7 @@ class VaspChecker(BaseChecker):
         incar_dict=dict()
         allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
                         'ingredients','programkeys','vasp_allowed_keywords.py')
-        allowed_list = _vasp_incar_get_allowed_keywords(allowedpath)
+        allowed_list = self._vasp_incar_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
                 keytry = key.upper()
@@ -298,7 +298,7 @@ class VaspChecker(BaseChecker):
                 magmomstr = magstr
             myd['MAGMOM']=magmomstr
         if 'mast_charge' in self.keywords['program_keys'].keys():
-            myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
+            myelectrons = self.get_total_electrons(my_poscar, my_potcar)
             newelectrons=0.0
             try:
                 adjustment = float(self.keywords['program_keys']['mast_charge'])
@@ -404,13 +404,6 @@ class VaspChecker(BaseChecker):
         myposcar.selective_dynamics = mysd
         return myposcar
 
-        """Recombine DYNMAT files from one unfrozen atom in folder."""
-        natoms = sum(myposcar.natoms)
-        myhess=np.zeros([natoms*3, natoms*3])
-        #arrange as x1 y1 z1 x2 y2 z2 x3 y3 z3...
-        dirlist = os.listdir(mydir)
-        dynlist=[]
-#    for entry in dirlist:
 
     def read_my_dynamical_matrix_file(self, fname="DYNMAT"):
         """Read a dynamical matrix file.
