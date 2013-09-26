@@ -405,10 +405,11 @@ class VaspChecker(BaseChecker):
         return myposcar
 
 
-    def read_my_dynamical_matrix_file(self, fname="DYNMAT"):
+    def read_my_dynamical_matrix_file(self, mydir="", fname="DYNMAT"):
         """Read a dynamical matrix file.
             For VASP this is DYNMAT.
             Args:
+                mydir <str>: directory
                 fname <str>: file name (default 'DYNMAT')
             Returns:
                 dyndict <dict>: dictionary structured like this:
@@ -425,7 +426,7 @@ class VaspChecker(BaseChecker):
                             list of dynmat lines for this atom
                             and this displacement
         """
-        mydyn = MASTFile(os.path.join(self.keywords['name'], fname))
+        mydyn = MASTFile(os.path.join(mydir, fname))
         mydata = list(mydyn.data) #whole new copy
         dyndict=dict()
         firstline = mydata.pop(0) #pop first value

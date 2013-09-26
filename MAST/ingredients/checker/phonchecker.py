@@ -8,8 +8,8 @@ from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.ingredients.checker import BaseChecker
+from MAST.ingredients.checker import VaspChecker
 import os
-import shutil
 import pymatgen
 import numpy as np
 import time
@@ -106,12 +106,12 @@ class PhonChecker(BaseChecker):
         """Set up the INPHON file."""
         name=self.keywords['name']
         myd = dict()
-        myd = self._phon_inphon_get_non_mast_keywords(self.keywords['program_keys'])
+        myd = self._phon_inphon_get_non_mast_keywords()
         my_inphon = MASTFile()
         for key, value in myd.iteritems():
             my_inphon.data.append(str(key) + "=" + str(value).upper() + "\n")
         if not ("NTYPES" in myd.keys()) and not ("MASS" in myd.keys()):
-            [nline,massline] = _phon_inphon_get_masses(keywords)
+            [nline,massline] = self._phon_inphon_get_masses()
             my_inphon.data.append(nline + "\n")
             my_inphon.data.append(massline + "\n")
         my_inphon.to_file(name + "/INPHON")
@@ -145,12 +145,13 @@ class PhonChecker(BaseChecker):
             only the number of total displacements.
         """
         self._replace_my_displacements()
-        self_nosd_my_dynmat()
+        self._nosd_my_dynmat()
         name=self.keywords['name']
         if not os.path.isfile(name + "/DYNMAT_mod_2"):
             raise MASTError("checker/phon_checker", "No DYNMAT_mod_2 found in %s." % name)
-        mydyn=vasp_extensions.read_my_dynmat(name, "DYNMAT_mod_2")
-        newdyn=vasp_extensions.write_my_dynmat_without_disp_or_mass(name, mydyn, "FORCES")
+        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
+        mydyn=myvc.read_my_dynamical_matrix_file(name, "DYNMAT_mod_2")
+        myvc.write_my_dynmat_without_disp_or_mass(name, mydyn, "FORCES")
 
     def _nosd_my_dynmat(self):
         """Creates fake blocks in DYNMAT for filling back in the atoms and 
@@ -159,7 +160,8 @@ class PhonChecker(BaseChecker):
         name=self.keywords['name']
         if not os.path.isfile(name + "/DYNMAT_mod_1"):
             raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
-        myforces=vasp_extensions.read_my_dynmat(name,"DYNMAT_mod_1")
+        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
+        myforces=myvc.read_my_dynamical_matrix_file(name,"DYNMAT_mod_1")
         numatoms = myforces['numatoms']
         myforces['numdisp'] = numatoms * 3 #full set of all blocks
         for atom in range(1, numatoms+1):
@@ -178,7 +180,9 @@ class PhonChecker(BaseChecker):
                     myforces['atoms'][atom][dispct]['dynmat']=list()
                     for act in range(0, numatoms):
                         myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000\n")
-        vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_2")
+        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
+
+        myvc.write_my_dynamical_matrix_file(name, myforces, "DYNMAT_mod_2")
 
     def _replace_my_displacements(self):
         """
@@ -202,10 +206,11 @@ class PhonChecker(BaseChecker):
         name=self.keywords['name']
         if not os.path.isfile(name + "/XDATCAR"):
             raise MASTError("checker/phon_checker", "No XDATCAR found in %s." % name)
-        myxdat=vasp_extensions.read_my_xdatcar(name)
+        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
+        myxdat=myvc.read_my_displacement_file(name)
         if not os.path.isfile(name + "/DYNMAT"):
             raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-        myforces=vasp_extensions.read_my_dynmat(name)
+        myforces=myvc.read_my_dynamical_matrix_file(name)
         atomlist = myforces['atoms'].keys()
         atomlist.sort()
         #first disp needs kfg 2
@@ -225,7 +230,7 @@ class PhonChecker(BaseChecker):
                 dispcoords = atomcoords - basecoords
                 displine = str(dispcoords[0]) + " " + str(dispcoords[1]) + " " + str(dispcoords[2])
                 myforces['atoms'][atom][disp]['displine'] = displine
-        vasp_extensions.write_my_dynmat(name, myforces, "DYNMAT_mod_1")
+        myvc.write_my_dynamical_matrix_file(name, myforces, "DYNMAT_mod_1")
 
     def set_up_program_input(self):
         self._phon_poscar_setup()
