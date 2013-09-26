@@ -3,7 +3,7 @@ import numpy as np
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
-from pymatgen.core.structure_modifier import StructureEditor
+from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 
@@ -18,7 +18,7 @@ def induce_defect(base_structure, defect, coord_type, threshold):
     """
     #print 'Defect in induce_defect', defect
     #print 'base_structure in induce_defect', base_structure
-    struct_ed = StructureEditor(base_structure) #should be updated using get_new_structure)
+    struct_ed = base_structure.copy() #should be updated using get_new_structure)
     symbol = defect['symbol'].title() #Cap first letter
 
     # If we have cartesian coordinates, then we convert them to fractional here.
@@ -34,11 +34,11 @@ def induce_defect(base_structure, defect, coord_type, threshold):
                                    atol=threshold)
         #print base_structure.frac_coords
         #print 'Index of deleted atom is', index
-        struct_ed.delete_site(index)
+        struct_ed.remove(index)
     elif (defect['type'] == 'interstitial'):
         print 'Creating a %s interstitial at %s' % (symbol, str(defect['coordinates']))
 
-        struct_ed.append_site(symbol,
+        struct_ed.append(symbol,
                               defect['coordinates'],
                               coords_are_cartesian=False,
                               validate_proximity=True)
@@ -49,11 +49,11 @@ def induce_defect(base_structure, defect, coord_type, threshold):
                                    defect['coordinates'],
                                    atol=threshold)
 
-        struct_ed.replace_site(index, symbol)
+        struct_ed.replace(index, symbol)
     else:
         raise RuntimeError('Defect type %s not supported' % defect['type'])
 
-    return struct_ed.modified_structure
+    return struct_ed.copy()
 def _cart2frac(position, base_structure):
     """Converts between cartesian coordinates and fractional coordinates"""
     fractional =  base_structure.lattice.get_fractional_coords(position)
@@ -84,8 +84,8 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
     atol = 0.1 # Need fairly large tolerance to account for relaxation.
     sortedstruc = mystruc.get_sorted_structure()
     sortedstruc_base = basestruc.get_sorted_structure()
-    struct_ed = StructureEditor(sortedstruc)
-    struct_ed_base = StructureEditor(sortedstruc_base)
+    struct_ed = sortedstruc.copy()
+    struct_ed_base = sortedstruc_base.copy()
     nebidx = list()
     elemstarts = get_element_indices(sortedstruc)
     for nebline in neblines:
@@ -114,12 +114,12 @@ def sort_structure_and_neb_lines(mystruc, basestruc, neblines, folderstr, images
         nebidx.append(index[0]) #only take first site?
         mysite = sortedstruc.sites[index[0]]
         myelem = MAST.data.atomic_number[mysite.species_string]
-        struct_ed.delete_site(index[0])
-        struct_ed.insert_site(elemstarts[myelem], mysite.specie,
+        struct_ed.remove(index[0])
+        struct_ed.insert(elemstarts[myelem], mysite.specie,
                                 mycoord)
     if not len(nebidx) == len(neblines):
         raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
-    return struct_ed.modified_structure
+    return struct_ed.copy()
 
 def get_element_indices(sortedstruc):
     """From a sorted structure, get the element indices
