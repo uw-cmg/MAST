@@ -6,6 +6,9 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.ingredients.checker import BaseChecker
+from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.checker import PhonChecker
 
 class BaseIngredient(MASTObj):
     """Base Ingredient class
@@ -15,6 +18,8 @@ class BaseIngredient(MASTObj):
             self.program <str>: program name, all lowercase,
                                 from 'mast_program' in input
                                 file
+            self.checker <BaseChecker, PhonChecker, VaspChecker>:
+                    program-dependent checker object
     """
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
@@ -36,6 +41,15 @@ class BaseIngredient(MASTObj):
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
+        if self.program == 'vasp':
+            self.checker = VaspChecker(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
+        elif self.program == 'phon':
+            self.checker = PhonChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+        else:
+            self.checker = BaseChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
 
