@@ -272,3 +272,37 @@ def get_multiple_sd_array(phonon_center_site, phonon_center_radius, mystruc):
             mysdlist.append(mysd)
     return mysdlist
 
+def graft_coordinates_onto_structure(goodstrucs,coordstrucs):
+    """Graft coordinates from mast_coordinates Structure objects
+        onto the appropriate structure
+        Args:
+            goodstrucs <list>: list of Structure objects with
+                the correct lattice parameters and elements
+            coordstrucs <list>: list of Structure objects with
+                the coordinates for grafting
+        Returns:
+            modstrucs <list>: list of modified Structure objects
+    """
+    sidx=0
+    slen=len(goodstrucs)
+    while sidx < slen:
+        lengoodsites=len(goodstrucs[sidx].sites)
+        lencoordsites=len(coordstrucs[sidx].sites)
+        if not (lengoodsites == lencoordsites):
+            raise MASTError("vasp_checker,graft_coordinates_onto_structure", "Original and coordinate structures do not have the same amount of sites.")
+        cct=0
+        newsites=list()
+        mylattice=goodstrucs[sidx].lattice
+        while cct < lengoodsites:
+            newcoords=coordstrucs[sidx].sites[cct].frac_coords
+            oldspecie=goodstrucs[sidx].sites[cct].specie
+            newsite=PeriodicSite(oldspecie, newcoords, mylattice)
+            newsites.append(newsite)
+            cct=cct+1
+        goodstrucs[sidx].remove_sites(range(0,lengoodsites))
+        for cct in range(0, lengoodsites):
+            goodstrucs[sidx].append(newsites[cct].specie,
+                newsites[cct].frac_coords)
+        sidx = sidx + 1
+    return goodstrucs
+

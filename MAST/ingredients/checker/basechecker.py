@@ -6,6 +6,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from pymatgen.core.structure import Structure
 allowed_keys = {
     'name' : (str, str(), 'Name of directory'),
     'program_keys': (dict, dict(), 'Dictionary of program keywords'),
