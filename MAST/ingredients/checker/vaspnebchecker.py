@@ -14,7 +14,9 @@ from MAST.utility.metadata import Metadata
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import os
 import shutil
+import logging
 from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.checker import BaseChecker
 class VaspNEBChecker(VaspChecker):
     """VASP checker functions
     """
@@ -28,10 +30,6 @@ class VaspNEBChecker(VaspChecker):
 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-
-
-
-
 
 
     def get_path_to_write_neb_parent_energy(self, myimages, parent):
@@ -65,12 +63,11 @@ class VaspNEBChecker(VaspChecker):
         imct=0
         myname = self.keywords['name']
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
-            goodstrucs=list()
             coordstrucs=self.get_coordinates_only_structure_from_input()
             newstrucs=list()
             sidx = 0 #ex. coordstrucs 0, 1, 2 for 3 images
             while sidx < self.keywords['program_keys']['images']:
-                sxtend = StructureExtension(struct_work1=imstruc.copy())
+                sxtend = StructureExtensions(struct_work1=image_structures[sidx+1].copy())
                 newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
                 sidx = sidx + 1
         while imct < len(image_structures):
@@ -78,7 +75,7 @@ class VaspNEBChecker(VaspChecker):
             num_str = str(imct).zfill(2)
             impath = os.path.join(myname, num_str)
             impospath = os.path.join(myname, "POSCAR_" + num_str)
-            if 'mast_coordinates' in keywords['program_keys'].keys():
+            if 'mast_coordinates' in self.keywords['program_keys'].keys():
                 if imct == 0: #skip endpoint
                     pass 
                 elif imct == len(image_structures)-1: #skip other endpt
@@ -99,14 +96,12 @@ class VaspNEBChecker(VaspChecker):
             imct = imct + 1
         return
         
-    def is_complete(self, dirname, numim):
+    def is_complete(self):
         """Check if all images in a VASP NEB calculation are complete.
-            dirname = directory housing /00.../0N+1 files; 
-                      only checks directories /01.../0N where N is # images
-            numim = number of images
         """
+        dirname = self.keywords['name']
+        numim = int(self.keywords['program_keys']['images'])
         imct=1
-        numim = int(numim)
         while imct <= numim:
             num_str = str(imct).zfill(2)
             impath = os.path.join(dirname, num_str)
@@ -189,7 +184,7 @@ class VaspNEBChecker(VaspChecker):
                 magmomstr = magstr
             myd['MAGMOM']=magmomstr
         if 'mast_charge' in self.keywords['program_keys'].keys():
-            myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
+            myelectrons = self.get_total_electrons(my_poscar, my_potcar)
             newelectrons=0.0
             try:
                 adjustment = float(self.keywords['program_keys']['mast_charge'])
