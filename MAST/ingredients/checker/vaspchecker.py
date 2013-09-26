@@ -283,7 +283,7 @@ class VaspChecker(BaseChecker):
         if 'ENCUT' in myd.keys():
             pass
         else:
-            myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
+            myd['ENCUT']=self._get_max_enmax_from_potcar(my_potcar)*mymult
         if 'mast_setmagmom' in self.keywords['program_keys'].keys():
             magstr = str(self.keywords['program_keys']['mast_setmagmom'])
             magmomstr=""
@@ -321,71 +321,6 @@ class VaspChecker(BaseChecker):
         self._vasp_incar_setup(mypotcar, myposcar)
         return
 
-    def get_path_to_write_neb_parent_energy(self, myimages, parent):
-        """Get the path into which to write the NEB parent
-            energy.
-            For VASP, the paths are the 00 and 0(N+1) 
-            directories, where N is the number of images.
-            Args:
-                myimages <int or str>: number of images
-                parent <int>: 1 for initial endpoint; 2 for
-                              final endpoint
-                parent <str>: destination folder specified as 
-                              a string, e.g. "03"
-        """
-        myname = self.keywords['name']
-        if parent == 1:
-            return os.path.join(myname, "00", "OSZICAR")
-        elif parent == 2:
-            return os.path.join(myname, str(int(myimages)+1).zfill(2),"OSZICAR")
-        elif len(parent) > 1:
-            return os.path.join(myname, parent, "OSZICAR")
-        else:
-            raise MASTError(self.__class__.__name__,"Parent not specified correctly.")
-
-    def set_up_neb_folders(self, image_structures):
-        """Set up NEB folders.
-            Args:
-               image_structures <list of Structure>: List
-                   of image structures
-        """
-        imct=0
-        myname = self.keywords['name']
-        if 'mast_coordinates' in self.keywords['program_keys'].keys():
-            goodstrucs=list()
-            coordstrucs=self.get_coordinates_only_structure_from_input()
-            newstrucs=list()
-            sidx = 0 #ex. coordstrucs 0, 1, 2 for 3 images
-            while sidx < self.keywords['program_keys']['images']:
-                sxtend = StructureExtension(struct_work1=imstruc.copy())
-                newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
-                sidx = sidx + 1
-        while imct < len(image_structures):
-            imposcar = Poscar(image_structures[imct])
-            num_str = str(imct).zfill(2)
-            impath = os.path.join(myname, num_str)
-            impospath = os.path.join(myname, "POSCAR_" + num_str)
-            if 'mast_coordinates' in keywords['program_keys'].keys():
-                if imct == 0: #skip endpoint
-                    pass 
-                elif imct == len(image_structures)-1: #skip other endpt
-                    pass
-                else:
-                    imposcar.structure=newstrucs[imct-1].copy()
-            dirutil.lock_directory(myname)
-            imposcar.write_file(impospath)
-            dirutil.unlock_directory(myname)
-            try:
-                os.makedirs(impath)
-            except OSError:
-                print "Directory at", impath, "already exists."
-                return None
-            dirutil.lock_directory(impath)
-            imposcar.write_file(os.path.join(impath, "POSCAR"))
-            dirutil.unlock_directory(impath)
-            imct = imct + 1
-        return
-        
     def forward_extra_restart_files(self, childpath):
         """Forward extra restart files: 
             For VASP, this entails a softlink to WAVECAR and 
@@ -425,46 +360,16 @@ class VaspChecker(BaseChecker):
         dirutil.unlock_directory(name)
         return
 
-    def get_vasp_energy(abspath):
-        return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
-
-
-    def graft_coordinates_onto_structure(self, goodstrucs,coordstrucs):
-        """Graft coordinates from mast_coordinates Structure objects
-            onto the appropriate structure
-            Args:
-                goodstrucs <list>: list of Structure objects with
-                    the correct lattice parameters and elements
-                coordstrucs <list>: list of Structure objects with
-                    the coordinates for grafting
-            Returns:
-                modstrucs <list>: list of modified Structure objects
+    def get_energy(self):
+        """Get the energy.
+            For VASP, this is E0 energy from vasprun.xml
         """
-        sidx=0
-        slen=len(goodstrucs)
-        while sidx < slen:
-            lengoodsites=len(goodstrucs[sidx].sites)
-            lencoordsites=len(coordstrucs[sidx].sites)
-            if not (lengoodsites == lencoordsites):
-                raise MASTError("vasp_checker,graft_coordinates_onto_structure", "Original and coordinate structures do not have the same amount of sites.")
-            cct=0
-            newsites=list()
-            mylattice=goodstrucs[sidx].lattice
-            while cct < lengoodsites:
-                newcoords=coordstrucs[sidx].sites[cct].frac_coords
-                oldspecie=goodstrucs[sidx].sites[cct].specie
-                newsite=PeriodicSite(oldspecie, newcoords, mylattice)
-                newsites.append(newsite)
-                cct=cct+1
-            goodstrucs[sidx].remove_sites(range(0,lengoodsites))
-            for cct in range(0, lengoodsites):
-                goodstrucs[sidx].append(newsites[cct].specie,
-                    newsites[cct].frac_coords)
-            sidx = sidx + 1
-        return goodstrucs
+        return Vasprun('%s/vasprun.xml' % self.keywords['name']).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
-    def get_max_enmax_from_potcar(mypotcar):
-        """Get maximum enmax value (float) from Potcar (combined list)"""
+    def _get_max_enmax_from_potcar(self, mypotcar):
+        """Get maximum enmax value (float) from Potcar 
+            (combined list)
+        """
         enmax_list=list()
         potcarct=0
         onepotcar=None
@@ -474,7 +379,7 @@ class VaspChecker(BaseChecker):
             potcarct = potcarct + 1
         return max(enmax_list)
 
-    def make_one_unfrozen_atom_poscar(myposcar, natom):
+    def _make_one_unfrozen_atom_poscar(self, myposcar, natom):
         """Use selective dynamics to make a poscar with one unfrozen atom.
             myposcar = Poscar
             natom = the number of the atom to unfreeze
@@ -487,7 +392,7 @@ class VaspChecker(BaseChecker):
         myposcar.selective_dynamics = mysd
         return myposcar
 
-    def make_one_unfrozen_direction_poscar(myposcar, natom, ndir):
+    def _make_one_unfrozen_direction_poscar(self, myposcar, natom, ndir):
         """Use selective dynamics to make a poscar with one unfrozen atom.
             myposcar = Poscar
             natom = the number of the atom to unfreeze
@@ -507,8 +412,11 @@ class VaspChecker(BaseChecker):
         dynlist=[]
 #    for entry in dirlist:
 
-    def read_my_dynmat(mydir, fname="DYNMAT"):
-        """Read a DYNMAT file.
+    def read_my_dynamical_matrix_file(self, fname="DYNMAT"):
+        """Read a dynamical matrix file.
+            For VASP this is DYNMAT.
+            Args:
+                fname <str>: file name (default 'DYNMAT')
             Returns:
                 dyndict <dict>: dictionary structured like this:
                     ['numspec'] = <int> number of species
@@ -524,7 +432,7 @@ class VaspChecker(BaseChecker):
                             list of dynmat lines for this atom
                             and this displacement
         """
-        mydyn = MASTFile(os.path.join(mydir, fname))
+        mydyn = MASTFile(os.path.join(self.keywords['name'], fname))
         mydata = list(mydyn.data) #whole new copy
         dyndict=dict()
         firstline = mydata.pop(0) #pop first value
@@ -553,8 +461,8 @@ class VaspChecker(BaseChecker):
                 dyndict['atoms'][atom][disp]['dynmat'].append(mydata.pop(0))
         return dyndict
 
-    def write_my_dynmat(mydir, dyndict, fname="DYNMAT"):
-        """Write a DYNMAT file.
+    def write_dynamical_matrix_file(self, mydir, dyndict, fname="DYNMAT"):
+        """Write a dynamical matrix file based on a dictionary.
             Args:
                 mydir <str>: Directory in which to write
                 dyndict <dict>: Dictionary of dynmat (see read_my_dynmat)
@@ -578,8 +486,8 @@ class VaspChecker(BaseChecker):
         dynwrite.to_file(os.path.join(mydir, fname))
 
 
-    def write_my_dynmat_without_disp_or_mass(mydir, dyndict, fname="DYNMAT"):
-        """Write a DYNMAT file without the displacement indicators 1, 2, 3
+    def write_my_dynmat_without_disp_or_mass(self, mydir, dyndict, fname="DYNMAT"):
+        """Write a dynamical matrix file without the displacement indicators 1, 2, 3
             and without the masses line, and with first line having only
             the total number of displacements, for PHON.
             Args:
@@ -603,8 +511,8 @@ class VaspChecker(BaseChecker):
                     dynwrite.data.append(line)
         dynwrite.to_file(os.path.join(mydir, fname))
 
-    def read_my_xdatcar(mydir, fname="XDATCAR"):
-        """Read an XDATCAR file.
+    def read_my_displacement_file(mydir, fname="XDATCAR"):
+        """Read a displacement file. For VASP this is XDATCAR.
             Returns:
                 xdatdict <dict>: Dictionary of configurations
                     xdatdict['descline'] = <str> description line
@@ -657,8 +565,8 @@ class VaspChecker(BaseChecker):
             kfgct=kfgct+1
         return xdatdict
 
-    def write_my_xdatcar(mydir, xdatdict, fname="XDATCAR"):
-        """Write an XDATCAR file.
+    def write_my_displacement_file(self, mydir, xdatdict, fname="XDATCAR"):
+        """Write a displacement file.
             Args:
                 mydir <str>: Directory in which to write
                 xdatdict <dict>: Dictionary of XDATCAR (see read_my_xdatcar)
@@ -683,8 +591,8 @@ class VaspChecker(BaseChecker):
             xdatwrite.data.extend(xdatdict['configs'][cfg])
         xdatwrite.to_file(os.path.join(mydir, fname))
 
-    def combine_dynmats(mydir):
-        """Combine DYNMATs into one file.
+    def combine_dynamical_matrix_files(self, mydir):
+        """Combine dynamical matrix files into one file.
             Args:
                 mydir <str>: top directory for DYNMAT files
         """
@@ -714,8 +622,8 @@ class VaspChecker(BaseChecker):
         largedyn['numdisp'] = totnumdisp
         write_my_dynmat(mydir, largedyn, "DYNMAT_combined")
 
-    def combine_displacements(mydir):
-        """Combine displacements (here XDATCARs) into one file.
+    def combine_displacement_files(self, mydir):
+        """Combine displacement files (here XDATCARs) into one file.
             Args:
                 mydir <str>: top directory for DYNMAT files
         """
@@ -752,6 +660,7 @@ class VaspChecker(BaseChecker):
             myposcar = Poscar
             mydir = top directory for DYNMAT files
         """
+        raise MASTError(self.__class__.__name__, "This method is abandoned and should not be used.")
         natoms = sum(myposcar.natoms)
         myhess=np.zeros([natoms*3, natoms*3])
         #arrange as x1, y1, z1, x2, y2, z2, etc.
@@ -846,22 +755,29 @@ class VaspChecker(BaseChecker):
         print myfreqThzsorted
         return myfreqThzsorted
 
-    def get_total_electrons(myposcar, mypotcar):
+    def get_total_electrons(self, myposcar, mypotcar):
         """Get the total number of considered electrons in the system."""
         atomlist = myposcar.natoms
         zvallist = get_zval_list(mypotcar)
         totzval = 0.0
         atomct = 0
         if not (len(zvallist) == len(atomlist)):
-            raise MASTError("pmgextend, get_total_electrons",
+            raise MASTError(self.__class__.__name__,
                 "Number of species and number of POTCARs do not match.")
         while atomct < len(atomlist):
             totzval = totzval + (atomlist[atomct] * zvallist[atomct])
             atomct = atomct + 1
         return totzval
 
-    def get_zval_list(mypotcar):
-        """Get zvals from POTCAR"""
+    def get_valence_list(self, mypotcar):
+        """Get list of number of valence electrons for species.
+            For VASP, this is a list of zvals from POTCAR.
+            Args:
+                mypotcar <list of PotcarSingle objects>
+            Returns:
+                zval_list <list of int>: List of number of
+                                        valence electrons
+        """
         zval_list=list()
         potcarct=0
         onepotcar=None
@@ -870,150 +786,20 @@ class VaspChecker(BaseChecker):
             zval_list.append(onepotcar.zval)
             potcarct = potcarct + 1
         return zval_list
-    def get_e0_energy(mydir):
-        """Get last E0 energy from OSZICAR.
+    def get_energy_from_energy_file(self):
+        """Get the energy from the energy file.
+            For VASP, this is the last E0 energy from OSZICAR,
+            and this function should be used if vasprun.xml
+            is corrupted or not available.
             Args:
                 mydir <str>: Directory in which to look.
             Returns:
                 <float>: last E0 energy from OSZICAR
         """
-        fullpath=os.path.join(mydir, "OSZICAR")
+        fullpath=os.path.join(self.keywords['name'], "OSZICAR")
         if not os.path.isfile(fullpath):
             raise MASTError("vasp_checker, get_e0_energy", "No OSZICAR file at %s" % mydir)
         myosz = MASTFile(fullpath)
         mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
         return float(mye0)
 
-    def images_complete(self, dirname, numim):
-        """Check if all images in a VASP NEB calculation are complete.
-            dirname = directory housing /00.../0N+1 files; 
-                      only checks directories /01.../0N where N is # images
-            numim = number of images
-        """
-        imct=1
-        numim = int(numim)
-        while imct <= numim:
-            num_str = str(imct).zfill(2)
-            impath = os.path.join(dirname, num_str)
-            try:
-                myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
-            except (IOError):
-                return False
-            if not 'User time (sec)' in myoutcar.run_stats.keys():
-                return False
-            if myoutcar.run_stats['User time (sec)'] > 0:
-                #print "image",imct,"complete"
-                pass
-            else:
-                return False
-            imct = imct + 1
-        return True
-
-    def is_ready_to_run_neb(self):
-        """Check if single VASP NEB ingredient is 
-            ready to run.
-        """
-        dirname = self.keywords['name']
-        notready=0
-        if not(os.path.isfile(dirname + "/KPOINTS")):
-            notready = notready + 1
-        if not(os.path.isfile(dirname + "/POTCAR")):
-            notready = notready + 1
-        if not(os.path.isfile(dirname + "/INCAR")):
-            notready = notready + 1
-        else: #INCAR exists. Now check POSCARs.
-            myincar = MASTFile(dirname + "/INCAR")
-            if myincar.get_line_match("IMAGES") == None: 
-                if not(os.path.isfile(dirname + "/POSCAR")):
-                    notready = notready + 1
-            else:
-                subdirs = dirutil.walkdirs(dirname)
-                subdirs.sort()
-                if len(subdirs) == 0: #This is an NEB without folders yet
-                    notready = notready + 1
-                else:
-                    for subdir in subdirs:
-                        if not (os.path.isfile(subdir + "/POSCAR")):
-                            notready = notready + 1
-                    if not os.path.isfile(subdirs[0] + "/OSZICAR"):
-                        notready = notready + 1
-                    if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
-                        notready = notready + 1
-        if not(os.path.isfile(dirname + "/submit.sh")):
-            notready = notready + 1
-        if notready > 0:
-            return False
-        else:
-            return True
-    
-    def _vasp_is_neb(self):
-        """Check if ingredient type is an actual NEB run.
-            Returns:
-                True if NEB, False otherwise.
-        """
-        metapath = "%s/metadata.txt" % self.keywords['name']
-        if not os.path.isfile(metapath): #we are in some sort of sub-ingredient folder masquerading as a separate ingredient
-            if not os.path.isfile("%s/metadata.txt" % os.path.dirname(keywords['name'])): #no metadata can be found
-                return False 
-            else:
-                mymeta = Metadata(metafile="%s/metadata.txt" % os.path.dirname(keywords['name']))
-        else:
-            mymeta = Metadata(metafile=metapath)
-        [ingline,ingval]=mymeta.search_data("neb_label")
-        if not ingval == None and (not 'stat' in self.keywords['name']):
-            return True
-        else:
-            return False
-    def _vasp_incar_setup_neb(self, my_potcar, my_poscar):
-        """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
-        name=self.keywords['name']
-        myd = dict()
-        myd = self._vasp_incar_get_non_mast_keywords()
-        if not self._vasp_is_neb():
-            try:
-                myd.pop("IMAGES")
-            except KeyError:
-                pass
-        if 'mast_multiplyencut' in self.keywords['program_keys'].keys():
-            mymult = float(self.keywords['program_keys']['mast_multiplyencut'])
-        else:
-            mymult = 1.5
-        if 'ENCUT' in myd.keys():
-            pass
-        else:
-            myd['ENCUT']=vasp_extensions.get_max_enmax_from_potcar(my_potcar)*mymult
-        if 'mast_setmagmom' in self.keywords['program_keys'].keys():
-            magstr = str(self.keywords['program_keys']['mast_setmagmom'])
-            magmomstr=""
-            maglist = magstr.split()
-            numatoms = sum(my_poscar.natoms)
-            if len(maglist) < numatoms:
-                magct=0
-                while magct < len(maglist):
-                    magmomstr = magmomstr + str(my_poscar.natoms[magct]) + "*" + maglist[magct] + " " 
-                    magct = magct + 1
-            else:
-                magmomstr = magstr
-            myd['MAGMOM']=magmomstr
-        if 'mast_charge' in self.keywords['program_keys'].keys():
-            myelectrons = vasp_extensions.get_total_electrons(my_poscar, my_potcar)
-            newelectrons=0.0
-            try:
-                adjustment = float(self.keywords['program_keys']['mast_charge'])
-            except (ValueError, TypeError):
-                raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
-            #newelectrons = myelectrons + adjustment
-            newelectrons = myelectrons - adjustment
-            myd['NELECT']=str(newelectrons)
-        my_incar = Incar(myd)
-        dirutil.lock_directory(name)
-        my_incar.write_file(name + "/INCAR")
-        dirutil.unlock_directory(name)
-        return my_incar
-
-    def set_up_program_input_neb(self, keywords, image_structures):
-        set_up_neb_folders(keywords['name'], image_structures, keywords)
-        _vasp_kpoints_setup(keywords)
-        mypotcar = _vasp_potcar_setup(keywords, Poscar(image_structures[0]))
-        _vasp_incar_setup(keywords, mypotcar, Poscar(image_structures[0]))
-        return
