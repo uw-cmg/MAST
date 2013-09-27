@@ -5,6 +5,7 @@ from unittest import SkipTest
 import filecmp
 from filecmp import dircmp
 import MAST
+import shutil
 
 testname ="mast_test"
 oldcontrol = os.getenv("MAST_CONTROL")
@@ -27,6 +28,9 @@ class TestMAST(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
+        basicdirs = MAST.utility.dirutil.walkdirs(testdir, 1,1,"*Basic*")
+        for basicdir in basicdirs:
+            shutil.rmtree(basicdir)
         os.environ['MAST_CONTROL'] = oldcontrol
         os.environ['MAST_RECIPE_PATH'] = oldrecipe
         os.environ['MAST_SCRATCH'] = oldscratch
