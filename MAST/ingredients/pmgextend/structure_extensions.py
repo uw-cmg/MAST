@@ -46,7 +46,7 @@ class StructureExtensions(MASTObj):
             index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
-            struct_ed.delete_site(index)
+            struct_ed.remove_sites([index])
         elif (defect['type'] == 'interstitial'):
             self.logger.info('Creating a %s interstitial at %s' % (symbol, str(defect['coordinates'])))
 
