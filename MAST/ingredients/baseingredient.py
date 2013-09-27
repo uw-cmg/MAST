@@ -10,6 +10,10 @@ from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
+from MAST.ingredients.errorhandler import BaseError
+from MAST.ingredients.errorhandler import VaspError
+from MAST.ingredients.errorhandler import PhonError
+from MAST.ingredients.errorhandler import VaspNEBError
 
 class BaseIngredient(MASTObj):
     """Base Ingredient class
