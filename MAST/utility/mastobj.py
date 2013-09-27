@@ -77,7 +77,7 @@ class MASTObj(object):
             if isinstance(value, self.allowed_keys[key][0]):
                 keywords[key] = value
             else:
-                error = 'Keyword %s value %s invalid' % (key, str(value))
+                error = 'Keyword %s value %s invalid; expected type %s, got type %s' % (key, str(value), self.allowed_keys[key][0], type(value))
                 MASTError(self.__class__.__name__, error)
 #                raise RuntimeError('Keyword %s value invalid' % key)
 
