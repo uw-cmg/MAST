@@ -99,7 +99,7 @@ class BaseIngredient(MASTObj):
             else:
                 errct = self.errhandler.loop_through_errors()
                 if errct > 0:
-                    raise MASTError("Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
+                    raise MASTError(self.__class__.__name__,"Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
                     #if not self.checker.is_on_queue():
                     #    self.run()
                 return False

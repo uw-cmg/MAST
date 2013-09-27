@@ -615,6 +615,7 @@ class VaspChecker(BaseChecker):
         largedyn['massline'] = onedyn['massline']
         largedyn['numdisp'] = totnumdisp
         self.write_my_dynamical_matrix_file(mydir, largedyn, "DYNMAT_combined")
+        self.write_my_dynamical_matrix_file(mydir, largedyn, "DYNMAT")
 
     def combine_displacement_files(self, mydir):
         """Combine displacement files (here XDATCARs) into one file.
@@ -648,6 +649,7 @@ class VaspChecker(BaseChecker):
         largexdat['numatoms'] = onexdat['numatoms']
         largexdat['type'] = onexdat['type']
         self.write_my_displacement_file(mydir, largexdat, "XDATCAR_combined")
+        self.write_my_displacement_file(mydir, largexdat, "XDATCAR")
     def make_hessian(self, myposcar, mydir):
         """Combine DYNMATs into one hessian and solve for frequencies.
             myposcar = Poscar
@@ -801,3 +803,10 @@ class VaspChecker(BaseChecker):
             return True
         else:
             return False
+
+    def write_final_structure_file(self, mystruc):
+        """Write the final structure to a file.
+            For VASP, this is CONTCAR.
+        """
+        mycontcar = Poscar(mystruc)
+        mycontcar.write_file(os.path.join(self.keywords['name'],'CONTCAR'))

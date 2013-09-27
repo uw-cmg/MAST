@@ -8,9 +8,8 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
-import shutil
 import numpy as np
-
+import logging
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
@@ -24,7 +23,7 @@ from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import dirutil
 from MAST.ingredients.baseingredient import BaseIngredient
-from MAST.ingredients.pmgextend import structure_extensions
+from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
@@ -35,6 +34,8 @@ class WriteIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
     def no_setup(self):
         """No setup is needed."""
@@ -48,7 +49,8 @@ class WriteIngredient(BaseIngredient):
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
         if len(parentimagestructures) == 0:
-            image_structures = structure_extensions.do_interpolation(parentstructures, self.keywords['program_keys']['images'])
+            sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1])
+            image_structures = sxtend.do_interpolation(self.keywords['program_keys']['images'])
         else:
             image_structures = list()
             image_structures.append(parentstructures[0])
@@ -56,12 +58,9 @@ class WriteIngredient(BaseIngredient):
             image_structures.append(parentstructures[1])
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
-        if self.program == 'vasp':
-            BaseIngredient.set_up_program_input_neb(self, image_structures)
-            self.place_parent_energy_files()
-            self.write_submit_script()
-        else:
-            raise MASTError(self.__class__.__name__,"Program not supported. No setup accomplished.")
+        self.checker.set_up_program_input(image_structures)
+        self.checker.place_parent_energy_files()
+        self.checker.write_submit_script()
         return
 
 
@@ -86,13 +85,15 @@ class WriteIngredient(BaseIngredient):
         if not os.path.isfile(pfpath_fin):
             raise MASTError(self.__class__.__name__,
                 "Error: no parent file at" + pfpath_fin)
-        struct_init = BaseIngredient.get_structure_from_file(self, pfpath_init)
-        struct_fin = BaseIngredient.get_structure_from_file(self, pfpath_fin)
+        struct_init = self.checker.get_structure_from_file(pfpath_init)
+        struct_fin = self.checker.get_structure_from_file(pfpath_fin)
         base_struct = self.keywords['structure']
         mylabel = BaseIngredient.get_my_label(self, "neb_label")
         neblines = self.keywords['program_keys']['neblines'][mylabel]
-        sorted_init = structure_extensions.sort_structure_and_neb_lines(struct_init, base_struct, neblines, '00', self.keywords['program_keys']['images']) 
-        sorted_fin = structure_extensions.sort_structure_and_neb_lines(struct_fin, base_struct, neblines, str(self.keywords['program_keys']['images'] + 1).zfill(2), self.keywords['program_keys']['images'])
+        sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct)
+        sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', self.keywords['program_keys']['images']) 
+        sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct)
+        sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(self.keywords['program_keys']['images'] + 1).zfill(2), self.keywords['program_keys']['images'])
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
@@ -114,11 +115,12 @@ class WriteIngredient(BaseIngredient):
             if pfpath == "":
                 pass
             else:
-                struct_im = BaseIngredient.get_structure_from_file(self, pfpath)
+                struct_im = self.checker.get_structure_from_file(pfpath)
                 base_struct = self.keywords['structure']
                 mylabel = BaseIngredient.get_my_label(self, "neb_label")
                 neblines = self.keywords['program_keys']['neblines'][mylabel]
-                sorted_im = structure_extensions.sort_structure_and_neb_lines(struct_im, base_struct, neblines, str(imct).zfill(2), self.keywords['program_keys']['images']) 
+                sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct)
+                sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['images']) 
                 imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
@@ -135,8 +137,8 @@ class WriteIngredient(BaseIngredient):
         pfpath2= header + mylabel[1]
         pffile1=MASTFile(pfpath1)
         pffile2=MASTFile(pfpath2)
-        pffile1.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self,1)) #MASTFile contains directory locking.
-        pffile2.to_file(BaseIngredient.get_path_to_write_neb_parent_energy(self, 2))
+        pffile1.to_file(self.checker.get_path_to_write_neb_parent_energy(1)) #MASTFile contains directory locking.
+        pffile2.to_file(self.checker.get_path_to_write_neb_parent_energy(2))
         return
 
 
@@ -157,24 +159,25 @@ class WriteIngredient(BaseIngredient):
                     os.mkdir(newname)
                 except OSError:
                     pass
-                self.keywords['name']=newname
-                self.set_up_program_input()
+                self.checker.keywords['name']=newname
+                self.checker.set_up_program_input()
                 self.write_submit_script()
             imct = imct + 1
         self.keywords['name']=myname
         self.write_neb() #Write the POSCAR files from existing parent-given structures
         return
     def write_singlerun(self):
-        self.set_up_program_input()
+        self.checker.set_up_program_input()
         self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
         """
-        self.set_up_program_input()
+        self.checker.set_up_program_input()
         self.write_submit_script()
-        mystructure = BaseIngredient.get_structure_from_directory(self, self.keywords['name'])
+        mystructure = self.checker.get_initial_structure_from_directory()
         [pcs,pcr] = self.get_my_phonon_params()
-        sdarrlist = structure_extensions.get_multiple_sd_array(pcs, pcr, mystructure)
+        sxtend = StructureExtensions(struc_work1 = mystructure)
+        sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
         sct=1
@@ -185,12 +188,12 @@ class WriteIngredient(BaseIngredient):
                 os.mkdir(newname)
             except OSError:
                 pass
-            self.keywords['name']=newname
-            self.keywords['structure']=mystructure
-            self.set_up_program_input()
-            self.add_selective_dynamics_to_structure(sdarr)
+            self.checker.keywords['name']=newname
+            self.checker.keywords['structure']=mystructure
+            self.checker.set_up_program_input()
+            self.checker.add_selective_dynamics_to_structure_file(sdarr)
             self.write_submit_script()
-            self.forward_extra_restart_files(myname, newname)
+            self.checker.forward_extra_restart_files(myname, newname)
             sct = sct + 1
         self.keywords['name']=myname
         
@@ -198,14 +201,15 @@ class WriteIngredient(BaseIngredient):
     def write_phonon_single(self):
         """Write the phonon files to a directory.
         """
-        self.set_up_program_input()
+        self.checker.set_up_program_input()
         self.write_submit_script()
-        mystructure = BaseIngredient.get_structure_from_directory(self, self.keywords['name'])
+        mystructure = self.checker.get_initial_structure_from_directory()
         [pcs,pcr] = self.get_my_phonon_params()
-        sdarr = structure_extensions.get_sd_array(pcs, pcr, mystructure)
+        sxtend = StructureExtensions(struc_work1 = mystructure)
+        sdarr = sxtend.get_sd_array(pcs, pcr)
         if sdarr == None:
             return
-        self.add_selective_dynamics_to_structure(sdarr)
+        self.checker.add_selective_dynamics_to_structure_file(sdarr)
 
     def get_my_phonon_params(self):
         """Get phonon parameters from 
@@ -239,6 +243,8 @@ class IsReadyToRunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
     def ready_singlerun(self):
         return BaseIngredient.is_ready_to_run(self)
     def ready_defect(self):
@@ -301,6 +307,8 @@ class RunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
     def run_singlerun(self, mode='serial'):
         return BaseIngredient.run(self, mode)
     def run_neb_subfolders(self):
@@ -331,48 +339,22 @@ class RunIngredient(BaseIngredient):
         return
 
     def run_defect(self):
-        work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
-        name = self.keywords['name'].split('/')[-1]
-        print "write_files:", name
-        BaseIngredient.get_structure_from_directory(self, self.keywords['name']) #TTM+1 changed to use BaseIngredient method
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory() 
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
 
         defect_label = BaseIngredient.get_my_label(self, "defect_label")
-        #print 'GRJ DEBUG: defect_label =', defect_label
-        #defect_label = 'defect_' + name.split('/')[-1].split('_')[-1]
-        #print 'GRJ DEBUG: defect_label (regex) =', defect_label
-
-        #self.metafile.write_data('debug', [name, name.split('/')])
         defect = self.keywords['program_keys'][defect_label]
-        #print 'Defect in write_files:', defect
-        if self.program == 'vasp':
-            trypath = os.path.join(self.keywords['name'],'POSCAR')
-            if os.path.isfile(trypath):
-                base_structure = Poscar.from_file(trypath).structure.copy()
-            else:
-                base_structure = self.keywords['structure'].copy()
-        else:
-            raise MASTError(self.__class__.__name__,"Program %s not supported." % self.program)
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                base_structure = structure_extensions.induce_defect(base_structure, subdefect, defect['coord_type'], defect['threshold'])
-                #base_structure = modified_structure
+                sxtend = StructureExtensions(struc_work1=base_structure)
+                base_structure = sxtend.induce_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
-
-        if self.program == 'vasp':
-            #myposcar = Poscar(modified_structure)
-            myposcar = Poscar(base_structure)
-            #print "poscar OK"
-            self.lock_directory()
-            #print "lock OK"
-            myposcar.write_file('%s/%s/CONTCAR' % (work_dir, name))
-            #print "Write sucessful"
-            self.unlock_directory()
-            #print "Unlock sucessful"
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
-
+        self.checker.write_final_structure_file()
         return
 
     def run_strain(self):
@@ -384,10 +366,7 @@ class RunIngredient(BaseIngredient):
             Returns:
                 Creates structure file in directory 
         """
-        if self.program == 'vasp':
-            mystructure = self.get_structure_from_file(os.path.join(self.keywords['name'],'POSCAR'))
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported for run_strain" % self.program)
+        mystructure = self.checker.get_initial_structure_from_directory()
         mystrain = self.keywords['program_keys']['mast_strain']
         strainsplit = mystrain.strip().split()
         strarray = np.array([[0.],[0.],[0.]],'float')
@@ -419,6 +398,8 @@ class IsCompleteIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
     def complete_structure(self):
         if self.directory_is_locked():
             return False
@@ -482,6 +463,8 @@ class UpdateChildrenIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
     def _fullpath_childname(self, childname):
         """Make sure the childname has a full path.
             Args:
@@ -497,7 +480,7 @@ class UpdateChildrenIngredient(BaseIngredient):
 
     def give_structure(self, childname):
         childname = self._fullpath_childname(childname)
-        self.forward_parent_structure(self.keywords['name'], childname)
+        self.checker.forward_final_structure_file(childname)
 
     def give_neb_structures_to_neb(self, childname):
         """Update to ANOTHER NEB."""
@@ -506,7 +489,8 @@ class UpdateChildrenIngredient(BaseIngredient):
         while myct <= self.keywords['program_keys']['images']:
             imno = str(myct).zfill(2)
             impath = os.path.join(self.keywords['name'], imno)
-            self.forward_parent_structure(impath, childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
+            self.checker.keywords['name'] = impath
+            self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
     
 
@@ -527,38 +511,36 @@ class UpdateChildrenIngredient(BaseIngredient):
         #middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc
         subdirs.sort()
         for subdir in subdirs:
-            myenergy = self.get_e0_energy(subdir) 
+            self.checker.keywords['name'] = subdir
+            myenergy = self.checker.get_energy_from_energy_file(subdir)
             if myenergy > highenergy:
                 highenergyimct = imct
                 highenergy = myenergy
             imct = imct + 1
         imno = str(highenergyimct).zfill(2)
         impath = os.path.join(self.keywords['name'], imno)
-        self.forward_parent_structure(impath, childname)
-        self.forward_extra_restart_files(impath, childname)
+        self.checker.keywords['name'] = impath
+        self.checker.forward_final_structure_file(childname)
+        self.checker.forward_extra_restart_files(childname)
         return
     def give_phonon_multiple_forces_and_displacements(self,childname):
-        self.combine_dynmats()
-        shutil.copy(os.path.join(self.keywords['name'],"DYNMAT_combined"),
-            os.path.join(self.keywords['name'],"DYNMAT"))
-        self.combine_displacements()
-        shutil.copy(os.path.join(self.keywords['name'],"XDATCAR_combined"),
-            os.path.join(self.keywords['name'],"XDATCAR"))
+        self.checker.combine_dynamical_matrix_files(self.keywords['name'])
+        self.checker.combine_displacement_files(self.keywords['name'])
         self.give_phonon_single_forces_and_displacements(childname)
     def give_phonon_single_forces_and_displacements(self, childname):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
         childname = self._fullpath_childname(childname)
-        self.forward_parent_dynmat(self.keywords['name'], childname)
-        self.forward_parent_initial_structure(self.keywords['name'],childname, "POSCAR_prePHON")
+        self.checker.forward_dynamical_matrix_file(childname)
+        self.checker.forward_initial_structure_file(childname, "POSCAR_prePHON")
 
     def give_structure_and_energy_to_neb(self, childname):
         childname = self._fullpath_childname(childname)
         label = BaseIngredient.get_my_label(self, "defect_label")
-        self.forward_parent_structure(self.keywords['name'], childname,"parent_structure_" + label)
-        self.forward_parent_energy(self.keywords['name'], childname, "parent_energy_" + label)
+        self.checker.forward_final_structure_file(childname,"parent_structure_" + label)
+        self.checker.forward_energy_file(childname, "parent_energy_" + label)
     def give_structure_and_restart_files(self, childname):
         childname = self._fullpath_childname(childname)
-        self.forward_parent_structure(self.keywords['name'], childname)
-        self.forward_extra_restart_files(self.keywords['name'], childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.forward_extra_restart_files(childname)
    
 

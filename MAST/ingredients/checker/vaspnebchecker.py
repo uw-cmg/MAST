@@ -215,7 +215,7 @@ class VaspNEBChecker(VaspChecker):
         myct=0
         mystr=""
         while myct <= self.keywords['program_keys']['images']+1:
-            fullpath = os.path.join(fullpath, str(myct).zfill(2), "OSZICAR")
+            fullpath = os.path.join(self.keywords['name'], str(myct).zfill(2), "OSZICAR")
             if not os.path.isfile(fullpath):
                 raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % fullpath)
             myosz = MASTFile(fullpath)
