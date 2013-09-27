@@ -50,7 +50,7 @@ class StructureExtensions(MASTObj):
         elif (defect['type'] == 'interstitial'):
             self.logger.info('Creating a %s interstitial at %s' % (symbol, str(defect['coordinates'])))
 
-            struct_ed.append_site(symbol,
+            struct_ed.append(symbol,
                                   defect['coordinates'],
                                   coords_are_cartesian=False,
                                   validate_proximity=True)
@@ -61,11 +61,11 @@ class StructureExtensions(MASTObj):
                                        defect['coordinates'],
                                        atol=threshold)
 
-            struct_ed.replace_site(index, symbol)
+            struct_ed.replace(index, symbol)
         else:
             raise RuntimeError('Defect type %s not supported' % defect['type'])
 
-        return struct_ed.modified_structure
+        return struct_ed
     def _cart2frac(self, position, base_structure):
         """Converts between cartesian coordinates and fractional coordinates"""
         fractional =  base_structure.lattice.get_fractional_coords(position)
@@ -121,12 +121,12 @@ class StructureExtensions(MASTObj):
             nebidx.append(index[0]) #only take first site?
             mysite = sortedstruc.sites[index[0]]
             myelem = MAST.data.atomic_number[mysite.species_string]
-            struct_ed.delete_site(index[0])
+            struct_ed.remove_sites([index[0]])
             struct_ed.insert_site(elemstarts[myelem], mysite.specie,
                                     mycoord)
         if not len(nebidx) == len(neblines):
             raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
-        return struct_ed.modified_structure
+        return struct_ed
 
     def _get_element_indices(self, sortedstruc):
         """From a sorted structure, get the element indices
