@@ -92,7 +92,7 @@ class BaseIngredient(MASTObj):
         if self.checker.is_complete():
             self.metafile.write_data('completed on', time.asctime())
             if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker):
-                energy = self.checker.get_energy_from_energy_file(self.keywords['name'])
+                energy = self.checker.get_energy_from_energy_file()
                 self.metafile.write_data('energy', energy)
             return True
         else:
