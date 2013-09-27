@@ -34,8 +34,6 @@ class StructureExtensions(MASTObj):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
-        #print 'Defect in induce_defect', defect
-        #print 'base_structure in induce_defect', base_structure
         struct_ed = StructureEditor(self.keywords['struc_work1']) #should be updated using get_new_structure)
         symbol = defect['symbol'].title() #Cap first letter
 
@@ -44,24 +42,21 @@ class StructureExtensions(MASTObj):
             defect['coordinates'] = self._cart2frac(defect['coordinates'], self.keywords['struc_work1'])
 
         if (defect['type'] == 'vacancy'):
-            print 'Creating a %s vacancy at %s' % (symbol, str(defect['coordinates']))
+            self.logger.info('Creating a %s vacancy at %s' % (symbol, str(defect['coordinates'])))
 
-            #print defect['coordinates']
             index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
-            #print base_structure.frac_coords
-            #print 'Index of deleted atom is', index
             struct_ed.delete_site(index)
         elif (defect['type'] == 'interstitial'):
-            print 'Creating a %s interstitial at %s' % (symbol, str(defect['coordinates']))
+            self.logger.info('Creating a %s interstitial at %s' % (symbol, str(defect['coordinates'])))
 
             struct_ed.append_site(symbol,
                                   defect['coordinates'],
                                   coords_are_cartesian=False,
                                   validate_proximity=True)
         elif (defect['type'] in ['antisite', 'substitution']):
-            print 'Creating a %s antisite at %s' % (symbol, str(defect['coordinates']))
+            self.logger.info('Creating a %s antisite at %s' % (symbol, str(defect['coordinates'])))
 
             index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
@@ -169,7 +164,6 @@ class StructureExtensions(MASTObj):
                                  ['coord'][1] <np.array> = final coordinates
         """
         nebdict=dict()
-        #print "TTM DEBUG: nebline", nebline
         nebelem = str(nebline[0].strip()).title()
         import MAST.data
         nebdict['element'] = MAST.data.atomic_number[nebelem]
@@ -225,11 +219,8 @@ class StructureExtensions(MASTObj):
         """
         if phonon_center_site == None:
             return None
-        print "TTM DEBUG: centersite: ", phonon_center_site.strip().split()
-        print "TTM DEBUG: MYSTRUC: ", mystruc
         pcscoord = np.array(phonon_center_site.strip().split(), float)
         pcsarr = find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
-        print "TTM DEBUG PCSarr: ", pcsarr
         uniqsites = np.unique(pcsarr)
 
         if len(uniqsites) == 0:

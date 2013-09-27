@@ -1,7 +1,7 @@
 import os
 import subprocess
 import time
-
+import logging
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -32,9 +32,6 @@ class BaseIngredient(MASTObj):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
         topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
         data = topmeta.read_data(self.keywords['name'].split('/')[-1])
-        #print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
-        #print 'GRJ DEBUG: data =', data
-        #print 'GRJ DEBUG: topmeta =\n', topmeta
 
         self.meta_dict = dict()
         if data:
@@ -44,6 +41,10 @@ class BaseIngredient(MASTObj):
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
+        
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],
             program_keys = self.keywords['program_keys'],
@@ -66,9 +67,6 @@ class BaseIngredient(MASTObj):
             self.checker = BaseChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
             self.errhandler = BaseError(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
-        #self.logger    = logger #keep this space
-        #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
-
     def write_directory(self):
         try:
             os.makedirs(self.keywords['name'])
@@ -81,7 +79,7 @@ class BaseIngredient(MASTObj):
             for key, value in self.meta_dict.items():
                 self.metafile.write_data(key, value)
         except OSError:
-            print "Directory exists."
+            self.logger.info("Directory for %s already exists." % self.keywords['name'])
             return
         return
 

@@ -10,6 +10,7 @@ from MAST.utility import MASTError
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 import os
+import logging
 import pymatgen
 import numpy as np
 import time
@@ -23,6 +24,9 @@ class PhonChecker(BaseChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+
     def is_complete(self):
         """Check if PHON thermo run is complete."""
         if os.path.isfile(os.path.join(self.keywords['name'], "THERMO")):
@@ -83,7 +87,7 @@ class PhonChecker(BaseChecker):
             if not key[0:5] == "mast_":
                 keytry = key.upper()
                 if not (keytry in allowed_list):
-                    print "Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath)
+                    self.logger.warning("Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath))
                 else:
                     if type(value)==str and value.isalpha():
                         inphon_dict[keytry]=value.capitalize() #First letter cap

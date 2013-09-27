@@ -376,8 +376,6 @@ class RunIngredient(BaseIngredient):
         newlattice = Lattice(np.multiply(mystructure._lattice.matrix, strarray)) #be very careful here. np.multiply is NOT regular matrix multiplication.
         newstructure = mystructure.copy()
         newstructure.modify_lattice(newlattice)
-        print "NEW LATTICE:", newstructure.lattice
-        print "NEW STRUCTURE:", newstructure
         if self.program == 'vasp':
             myposcar = Poscar(newstructure)
             self.lock_directory()
@@ -427,11 +425,9 @@ class IsCompleteIngredient(BaseIngredient):
             if imct == 0 or imct > numim:
                 pass
             elif not BaseIngredient.is_complete(self):
-                #print "TTM DEBUG: Not ready at imct %1i" % imct
                 notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
-        #print "TTM DEBUG: Notready: ", notready
         if notready == 0:
             return True
         else:

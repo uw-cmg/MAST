@@ -88,7 +88,7 @@ class VaspNEBChecker(VaspChecker):
             try:
                 os.makedirs(impath)
             except OSError:
-                print "Directory at", impath, "already exists."
+                self.logger.warning("Directory at %s already exists." % impath)
                 return None
             dirutil.lock_directory(impath)
             imposcar.write_file(os.path.join(impath, "POSCAR"))
@@ -112,7 +112,6 @@ class VaspNEBChecker(VaspChecker):
             if not 'User time (sec)' in myoutcar.run_stats.keys():
                 return False
             if myoutcar.run_stats['User time (sec)'] > 0:
-                #print "image",imct,"complete"
                 pass
             else:
                 return False

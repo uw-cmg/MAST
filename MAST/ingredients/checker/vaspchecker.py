@@ -247,7 +247,7 @@ class VaspChecker(BaseChecker):
             if not key[0:5] == "mast_":
                 keytry = key.upper()
                 if not (keytry in allowed_list):
-                    print "Ignoring program key %s for INCAR. To allow this keyword, add it to %s" % (keytry, allowedpath)
+                    self.logger.warning("Ignoring program key %s for INCAR. To allow this keyword, add it to %s" % (keytry, allowedpath))
                 else:
                     if type(value)==str and value.isalpha():
                         incar_dict[keytry]=value.capitalize() #First letter cap
