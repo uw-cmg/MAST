@@ -237,4 +237,12 @@ class PhonChecker(BaseChecker):
         self._phon_inphon_setup()
         self._phon_forces_setup()
         return
-
+    def is_started(self):
+        """See if the ingredient has been started on
+            the queue.
+        """
+        if os.path.isfile(os.path.join(self.keywords['name'],'QPOINTS')):
+            return True
+        else:
+            return False
+        return

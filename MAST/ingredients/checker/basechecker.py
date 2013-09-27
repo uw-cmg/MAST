@@ -22,7 +22,10 @@ class BaseChecker(MASTObj):
     
     def is_complete(self):
         raise NotImplementedError
-    
+    def is_started(self):
+        raise NotImplementedError
+    def is_ready_to_run(self):
+        raise NotImplementedError
     def get_coordinates_only_structure_from_input(self):
         """Get coordinates-only structures from mast_coordinates
             ingredient keyword

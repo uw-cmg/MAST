@@ -132,23 +132,18 @@ class VaspNEBChecker(VaspChecker):
         if not(os.path.isfile(dirname + "/INCAR")):
             notready = notready + 1
         else: #INCAR exists. Now check POSCARs.
-            myincar = MASTFile(dirname + "/INCAR")
-            if myincar.get_line_match("IMAGES") == None: 
-                if not(os.path.isfile(dirname + "/POSCAR")):
-                    notready = notready + 1
+            subdirs = dirutil.walkdirs(dirname)
+            subdirs.sort()
+            if len(subdirs) == 0: #This is an NEB without folders yet
+                notready = notready + 1
             else:
-                subdirs = dirutil.walkdirs(dirname)
-                subdirs.sort()
-                if len(subdirs) == 0: #This is an NEB without folders yet
+                for subdir in subdirs:
+                    if not (os.path.isfile(subdir + "/POSCAR")):
+                        notready = notready + 1
+                if not os.path.isfile(subdirs[0] + "/OSZICAR"):
                     notready = notready + 1
-                else:
-                    for subdir in subdirs:
-                        if not (os.path.isfile(subdir + "/POSCAR")):
-                            notready = notready + 1
-                    if not os.path.isfile(subdirs[0] + "/OSZICAR"):
-                        notready = notready + 1
-                    if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
-                        notready = notready + 1
+                if not os.path.isfile(subdirs[-1] + "/OSZICAR"):
+                    notready = notready + 1
         if not(os.path.isfile(dirname + "/submit.sh")):
             notready = notready + 1
         if notready > 0:
@@ -230,3 +225,11 @@ class VaspNEBChecker(VaspChecker):
         mystr=mystr[0:-1] #remove last semicolon
         return mystr
 
+    def is_started(self):
+        """See if the ingredient has been started on
+            the queue.
+        """
+        if os.path.isfile(os.path.join(self.keywords['name'],'01','OUTCAR')):
+            return True
+        else:
+            return False

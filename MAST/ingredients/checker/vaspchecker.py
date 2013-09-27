@@ -793,4 +793,11 @@ class VaspChecker(BaseChecker):
         myosz = MASTFile(fullpath)
         mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
         return float(mye0)
-
+    def is_started(self):
+        """See if the ingredient has been started on
+            the queue.
+        """
+        if os.path.isfile(os.path.join(self.keywords['name'],'OUTCAR')):
+            return True
+        else:
+            return False

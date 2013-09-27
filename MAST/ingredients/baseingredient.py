@@ -99,7 +99,9 @@ class BaseIngredient(MASTObj):
             else:
                 errct = self.errhandler.loop_through_errors()
                 if errct > 0:
-                    self.run()
+                    raise MASTError("Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
+                    #if not self.checker.is_on_queue():
+                    #    self.run()
                 return False
 
     def directory_is_locked(self):
@@ -117,15 +119,7 @@ class BaseIngredient(MASTObj):
     def is_ready_to_run(self):
         if self.directory_is_locked():
             return False
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.is_ready_to_run(self.keywords['name'])
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            return phon_checker.is_ready_to_run(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in is_complete)")
+        return self.checker.is_ready_to_run()
         
     def getpath(self):
         '''getpath returns the directory of the ingredient'''
@@ -139,13 +133,15 @@ class BaseIngredient(MASTObj):
     def run(self, mode='serial', curdir=os.getcwd()):
         from submit import queue_commands 
         
-        curdir = os.getcwd()
-        os.chdir(self.keywords['name'])
 
         if mode.lower() == 'noqsub':
+            curdir = os.getcwd()
+            os.chdir(self.keywords['name'])
             programpath = queue_commands.direct_shell_command()
             p = subprocess.Popen(programpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             p.wait()
+            os.chdir(curdir)
+            self.metafile.write_data('run', time.asctime())
             
         elif mode.lower() == 'serial':
             queuesub = queue_commands.write_to_submit_list(self.keywords['name'])
@@ -153,9 +149,7 @@ class BaseIngredient(MASTObj):
             #runme.wait()
             # for scheduling other jobs
             #runme.wait()
-        os.chdir(curdir)
-        self.metafile.write_data('run start', time.asctime())
-
+            self.metafile.write_data('queued', time.asctime())
         return
 
     def get_name(self):
