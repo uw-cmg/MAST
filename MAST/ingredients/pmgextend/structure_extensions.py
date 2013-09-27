@@ -5,7 +5,6 @@ from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import MASTObj
 from pymatgen.core.structure import Structure
-from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 from pymatgen.core.sites import PeriodicSite
@@ -34,7 +33,7 @@ class StructureExtensions(MASTObj):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
-        struct_ed = StructureEditor(self.keywords['struc_work1']) #should be updated using get_new_structure)
+        struct_ed = self.keywords['struc_work1']).copy() 
         symbol = defect['symbol'].title() #Cap first letter
 
         # If we have cartesian coordinates, then we convert them to fractional here.
@@ -93,7 +92,7 @@ class StructureExtensions(MASTObj):
         import MAST.data
         atol = 0.1 # Need fairly large tolerance to account for relaxation.
         sortedstruc = self.keywords['struc_work1'].get_sorted_structure()
-        struct_ed = StructureEditor(sortedstruc)
+        struct_ed = sortedstruc.copy()
         nebidx = list()
         elemstarts = self._get_element_indices(sortedstruc)
         for nebline in neblines:
