@@ -221,7 +221,7 @@ class MAST(MASTObj):
         """
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
-        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
+        dir_path = os.path.join(os.getenv("MAST_SCRATCH"), dir_name)
         self.working_directory = dir_path
         return
 
