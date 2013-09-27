@@ -145,7 +145,7 @@ class MAST(MASTObj):
     def create_recipe_metadata(self):
         """Create the recipe metadata file.
         """
-        topmeta = Metadata(metafile=str("%s/metadata.txt" % self.working_directory))
+        topmeta = Metadata(metafile="%s/metadata.txt" % self.working_directory)
         topmeta.write_data('directory_created', self.asctime)
         topmeta.write_data('system_name', self.sysname)
         topmeta.write_data('origin_dir', self.origin_dir)
@@ -221,7 +221,7 @@ class MAST(MASTObj):
         """
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
-        dir_path = os.path.join(os.getenv("MAST_SCRATCH"), dir_name)
+        dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
         self.working_directory = dir_path
         return
 
