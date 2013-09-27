@@ -354,7 +354,7 @@ class RunIngredient(BaseIngredient):
                 base_structure = sxtend.induce_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
-        self.checker.write_final_structure_file()
+        self.checker.write_final_structure_file(base_structure)
         return
 
     def run_strain(self):
