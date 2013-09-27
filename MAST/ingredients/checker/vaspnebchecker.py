@@ -205,3 +205,27 @@ class VaspNEBChecker(VaspChecker):
         mypotcar = self._vasp_potcar_setup(Poscar(image_structures[0]))
         self._vasp_incar_setup(mypotcar, Poscar(image_structures[0]))
         return
+
+    def get_energy_from_energy_file(self):
+        """Get the energy from the energy file.
+            For VASP neb, this is the last E0 energy from each
+            OSZICAR,
+            and this function should be used if vasprun.xml
+            is corrupted or not available.
+            Args:
+                mydir <str>: Directory in which to look.
+            Returns:
+                <str>: all last E0 energies from OSZICAR files.
+        """
+        myct=0
+        mystr=""
+        while myct <= self.keywords['program_keys']['images']+1:
+            fullpath = os.path.join(fullpath, str(myct).zfill(2), "OSZICAR")
+            if not os.path.isfile(fullpath):
+                raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % fullpath)
+            myosz = MASTFile(fullpath)
+            mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
+            mystr = mystr + "%3.3f" % mye0 + ';'
+        mystr=mystr[0:-1] #remove last semicolon
+        return mystr
+

@@ -48,7 +48,8 @@ class BaseIngredient(MASTObj):
         elif self.program == 'phon':
             self.checker = PhonChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
-            self.checker = BaseChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            allowed_keys={'name','program_keys','structure'}
+            self.checker = BaseChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
@@ -68,58 +69,7 @@ class BaseIngredient(MASTObj):
             print "Directory exists."
             return
         return
-  
-    def get_structure_from_directory(self, dirname):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_structure_from_directory(dirname)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_structure_from_directory)")
 
-    def get_structure_from_file(self, filepath):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_structure_from_file(filepath)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_structure_from_file)")
-
-    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_structure(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
-    def forward_parent_initial_structure(self, parentpath, childpath, newname="POSCAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_initial_structure(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_initial_structure)")
-
-
-    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_energy(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
-
-    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_dynmat(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
         if self.program == 'vasp':
@@ -135,7 +85,7 @@ class BaseIngredient(MASTObj):
             if mycomplete:
                 self.metafile.write_data('completed on', time.asctime())
                 if 'OSZICAR' in os.listdir(self.keywords['name']):
-                    energy = self.get_e0_energy(self.keywords['name'])
+                    energy = self.checker.get_energy_from_energy_file(self.keywords['name'])
                 else:
                     energy = None
                 self.metafile.write_data('energy', energy)
@@ -219,49 +169,6 @@ class BaseIngredient(MASTObj):
 
         return
 
-    def set_up_program_input(self):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.set_up_program_input(self.keywords)
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            return phon_checker.set_up_program_input(self.keywords)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in set_up_program_input)")
-
-    def get_path_to_write_neb_parent_energy(self, parent):
-        """Get path to write the NEB's parent energy file.
-            parent = 1 for initial, 2 for final
-        """
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_path_to_write_neb_parent_energy(self.keywords['name'], self.keywords['program_keys']['images'],parent)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_path_to_write_neb_parent_energy)")
-
-    def set_up_program_input_neb(self, image_structures):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.set_up_program_input_neb(self.keywords, image_structures)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in set_up_neb)")
-
-    #def get_children(self):
-    #    """Returns the children of this ingredient.
-    #        If there are no children, it will return None instead.
-    #    """
-    #    if (self.keywords['child_dict']):
-    #        return self.keywords['child_dict'].copy()
-    #    else:
-    #        return None
-
-    #@property
-    #def children(self):
-    #    return self.get_children()
-
     def get_name(self):
         return self.keywords['name'].split('/')[-1]
 
@@ -275,47 +182,6 @@ class BaseIngredient(MASTObj):
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
-    def add_selective_dynamics_to_structure(self, sdarray):
-        """Adds selective dynamics to a structure."""
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.add_selective_dynamics_to_structure(self.keywords, sdarray)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-
-    def forward_extra_restart_files(self, parentpath, childpath):
-        """Forward links to extra restart files."""
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.forward_extra_restart_files(parentpath, childpath)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-    def combine_dynmats(self):
-        """Combine dynmats."""
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            vasp_extensions.combine_dynmats(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-    def combine_displacements(self):
-        """Combine displacements."""
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            vasp_extensions.combine_displacements(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-# The following functions need to be defined by the child class:
-    #def write_files(self):
-    #    '''writes the files needed as input for the jobs'''
-    #    raise NotImplementedError
-    
-    #def create_metadata_file(self):
-    #    '''writes the initial metadata file'''
-    #    raise NotImplementedError
 
     
     def get_my_label(self, label):
@@ -332,14 +198,3 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "No metadata for tag %s" % label)
         return mylabel[1]
-    def get_e0_energy(self, mydir):
-        """Get the E0 energy from a directory.
-        """
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            return vasp_extensions.get_e0_energy(mydir)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_e0_energy)")
-
-
