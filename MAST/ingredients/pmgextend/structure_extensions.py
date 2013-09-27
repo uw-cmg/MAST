@@ -33,7 +33,7 @@ class StructureExtensions(MASTObj):
                         'coordinates': array([ 0.25,  0.25,  0.25])}
             'coord_type': 'fractional' 
         """
-        struct_ed = self.keywords['struc_work1']).copy() 
+        struct_ed = self.keywords['struc_work1'].copy() 
         symbol = defect['symbol'].title() #Cap first letter
 
         # If we have cartesian coordinates, then we convert them to fractional here.
