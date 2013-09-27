@@ -27,7 +27,7 @@ ALLOWED_KEYS = {\
                }
 MAST_KEYWORDS = {'program': 'vasp',
                  'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
+                 'scratch_directory': os.path.expanduser(os.getenv("MAST_SCRATCH")),
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
@@ -127,7 +127,7 @@ class InputParser(MASTObj):
 
         self.perform_element_mapping(options)
         self.set_structure_from_inputs(options)
-        
+        self.logger.info(options)
         self.validate_execs(options)
 
         return options
@@ -365,7 +365,7 @@ class InputParser(MASTObj):
                 return
             elif (line[0] == 'recipe_file'):
                 try:
-                    recipe_path = os.environ['MAST_RECIPE_PATH']
+                    recipe_path = os.getenv('MAST_RECIPE_PATH')
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
                     MASTError(self.__class__.__name__, error) 
