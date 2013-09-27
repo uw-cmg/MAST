@@ -25,9 +25,8 @@ from MAST.utility import Metadata
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
-MAST_KEYWORDS = {'program': 'vasp',
-                 'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.getenv("MAST_SCRATCH")),
+MAST_KEYWORDS = {
+                 'system_name': 'mast'
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
