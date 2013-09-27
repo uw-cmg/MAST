@@ -8,6 +8,7 @@ from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
 
 class BaseIngredient(MASTObj):
@@ -18,8 +19,10 @@ class BaseIngredient(MASTObj):
             self.program <str>: program name, all lowercase,
                                 from 'mast_program' in input
                                 file
-            self.checker <BaseChecker, PhonChecker, VaspChecker>:
+            self.checker <VaspChecker, PhonChecker, etc.>:
                     program-dependent checker object
+            self.errhandler <VaspError, PhonError, etc.>:
+                    program-dependent handler object
     """
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
@@ -45,11 +48,23 @@ class BaseIngredient(MASTObj):
             self.checker = VaspChecker(name=self.keywords['name'],
             program_keys = self.keywords['program_keys'],
             structure = self.keywords['structure'])
+            self.errhandler = VaspError(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
+        elif self.program == 'vasp_neb':
+            self.checker = VaspNEBChecker(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
+            self.errhandler = VaspNEBError(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
         elif self.program == 'phon':
             self.checker = PhonChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
             allowed_keys={'name','program_keys','structure'}
             self.checker = BaseChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = BaseError(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
         #self.logger    = logger #keep this space
         #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
@@ -72,46 +87,20 @@ class BaseIngredient(MASTObj):
 
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            usepath = self.keywords['name']
-            if vasp_checker._vasp_is_neb(self.keywords):
-                mycomplete = vasp_checker.images_complete(self.keywords['name'],
-                                self.keywords['program_keys']['images'])
-                usepath = usepath + '/01'
-            else:
-                mycomplete = vasp_checker.is_complete(usepath)
-
-            if mycomplete:
-                self.metafile.write_data('completed on', time.asctime())
-                if 'OSZICAR' in os.listdir(self.keywords['name']):
-                    energy = self.checker.get_energy_from_energy_file(self.keywords['name'])
-                else:
-                    energy = None
-                self.metafile.write_data('energy', energy)
-
-                return mycomplete
-            else:
-                if not os.path.exists(usepath + '/OUTCAR'):
-                    return False #hasn't started running yet.
-                from MAST.ingredients.errorhandler import vasp_error
-                if 'images' in self.keywords['program_keys'].keys():
-                    errct = vasp_error.loop_through_errors(usepath, 1)
-                else:
-                    errct = vasp_error.loop_through_errors(usepath)
-                if errct > 0:
-                    pass #self.run() #Should try to rerun automatically or not?? NO.
-                return False
-
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            usepath = self.keywords['name']
-            mycomplete = phon_checker.is_complete(usepath)
+        if self.checker.is_complete():
             self.metafile.write_data('completed on', time.asctime())
-            return mycomplete
+            if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker):
+                energy = self.checker.get_energy_from_energy_file(self.keywords['name'])
+                self.metafile.write_data('energy', energy)
+            return True
         else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in is_complete)")
+            if not self.checker.is_started():
+                return False #hasn't started running yet.
+            else:
+                errct = self.errhandler.loop_through_errors()
+                if errct > 0:
+                    self.run()
+                return False
 
     def directory_is_locked(self):
         return dirutil.directory_is_locked(self.keywords['name'])

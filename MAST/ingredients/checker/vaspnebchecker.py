@@ -226,6 +226,7 @@ class VaspNEBChecker(VaspChecker):
             myosz = MASTFile(fullpath)
             mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
             mystr = mystr + "%3.3f" % mye0 + ';'
+            myct = myct + 1
         mystr=mystr[0:-1] #remove last semicolon
         return mystr
 
