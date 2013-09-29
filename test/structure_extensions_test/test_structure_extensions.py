@@ -5,7 +5,10 @@ from unittest import SkipTest
 import filecmp
 from filecmp import dircmp
 import MAST
+from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import shutil
+import pymatgen
+import numpy as np
 
 testname ="structure_extensions_test"
 #oldcontrol = os.getenv("MAST_CONTROL")
@@ -22,53 +25,24 @@ class TestSE(unittest.TestCase):
     """Test StructureExtensions
     """
     def setUp(self):
-        os.environ['MAST_CONTROL'] = testdir
-        os.environ['MAST_RECIPE_PATH'] = testdir
-        os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
 
     def tearDown(self):
-        basicdirs = MAST.utility.dirutil.walkdirs(testdir, 1,1,"*Basic*")
-        for basicdir in basicdirs:
-            shutil.rmtree(basicdir)
-        os.environ['MAST_CONTROL'] = oldcontrol
-        os.environ['MAST_RECIPE_PATH'] = oldrecipe
-        os.environ['MAST_SCRATCH'] = oldscratch
-
-    def test_check_indep_loop_no_loops(self):
-        raise SkipTest
-        print "New paths:"
-        print os.getenv("MAST_CONTROL")
-        print os.getenv("MAST_RECIPE_PATH")
-        print os.getenv("MAST_SCRATCH")
-        mymast = MAST.mast.MAST(inputfile="basic_test.inp",outputfile="output.inp")
-        mymast.check_independent_loops()
-    def test_set_up_recipe(self):
-        mymast = MAST.mast.MAST(inputfile="basic_test.inp",
-                                outputfile="output.inp")
-        mymast.set_input_options()
-        #print "INPUT OPTIONS: ", mymast.input_options
-        mymast.set_class_attributes()
-        mymast.make_working_directory()
-        #print "WORKING DIRECTORY:", mymast.working_directory
-        mymast.create_recipe_metadata()
-        mymast.copy_input_file()
-        mymast.parse_recipe_template()
-        mymast.create_recipe_plan()
-        mymast.create_archive_files()
-        myfolders = MAST.utility.dirutil.walkdirs(testdir,1,1,"*Basic*")
-        myfiles = MAST.utility.dirutil.walkfiles(myfolders[-1],1,1)
-        subfolders = MAST.utility.dirutil.walkdirs(myfolders[-1],1,1)
-        lacksfolders=0
-        for folder in ['opt1','opt2']:
-            if not os.path.join(myfolders[-1],folder) in subfolders:
-                lacksfolders = lacksfolders + 1
-        lacksfiles=0
-        for file in ['archive_input_options.txt','metadata.txt',
-                        'personal_recipe.txt', 'status.txt',
-                        'archive_recipe_plan.txt', 'input.inp']:
-            if not os.path.join(myfolders[-1],file) in myfiles:
-                lacksfiles = lacksfiles + 1
-        self.assertEqual(lacksfiles,0)
-        self.assertEqual(lacksfolders,0)
-
+        pass
+    def test_induce_defect_frac(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        compare_vac1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_vac1").structure
+        compare_int1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_int1").structure
+        compare_sub1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sub1").structure
+        coord_type='fractional'
+        threshold=1.e-4
+        vac1={'symbol':'O', 'type': 'vacancy', 'coordinates':  np.array([0.25, 0.75, 0.25])}
+        int1={'symbol':'Ni', 'type': 'interstitial', 'coordinates': np.array([0.3, 0.3, 0.3])}
+        sub1={'symbol':'Fe', 'type': 'substitution','coordinates':np.array([0.25, 0.25,0.75])}
+        sxtend = StructureExtensions(struc_work1=perfect)
+        struc_vac1 = sxtend.induce_defect(vac1, coord_type, threshold)
+        struc_int1 = sxtend.induce_defect(int1, coord_type, threshold)
+        struc_sub1 = sxtend.induce_defect(sub1, coord_type, threshold)
+        self.assertEqual(struc_vac1,compare_vac1)
+        self.assertEqual(struc_int1,compare_int1)
+        self.assertEqual(struc_sub1,compare_sub1)
