@@ -99,5 +99,11 @@ class TestSE(unittest.TestCase):
         self.assertEqual(sum(np.fabs(sum(mysdlist[0]-mylist[0]))),0)
         self.assertEqual(sum(np.fabs(sum(mysdlist[1]-mylist[1]))),0)
         self.assertEqual(sum(np.fabs(sum(mysdlist[2]-mylist[2]))),0)
-
+    def test_graft_coordinates(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        coordsonly = pymatgen.io.vaspio.Poscar.from_file("POSCAR_coordinates").structure
+        compare_grafted = pymatgen.io.vaspio.Poscar.from_file("POSCAR_grafted").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        grafted = sxtend.graft_coordinates_onto_structure(coordsonly)
+        self.assertEqual(grafted, compare_grafted)
 

@@ -291,13 +291,13 @@ class StructureExtensions(MASTObj):
         """Graft coordinates from mast_coordinates Structure objects
             onto the appropriate structure
             Args:
-                coordstrucs <list>: Structure object with
+                coordstruc <Structure>: Structure object with
                     the coordinates for grafting
                 self.keywords['struc_work1'] will contain
                     the elements and lattice parameter, which
                     will not be touched.
             Returns:
-                modstruc: modified Structure objects
+                modified Structure object <Structure>
         """
         goodstruc = self.keywords['struc_work1'].copy()
         lengoodsites=len(goodstruc.sites)
