@@ -26,12 +26,18 @@ class StructureExtensions(MASTObj):
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
-            mast_defect is a dictionary like this: 
-            'defect_1': {'symbol': 'cr', 'type': 'interstitial', 
-                        'coordinates': array([ 0. ,  0.5,  0. ])}}
-            'defect_2': {'symbol': 'o', 'type': 'vacancy', 
-                        'coordinates': array([ 0.25,  0.25,  0.25])}
-            'coord_type': 'fractional' 
+            Args:
+                defect <dict>: Defect subdictionary (single 
+                               defect) of the form:
+                        {'symbol': 'cr', 'type': 'interstitial', 
+                    'coordinates': array([ 0. ,  0.5,  0. ])}}
+                coord_type <str>: cartesian or fractional
+                threshold <float>: Threshold for finding the
+                                   defect position in what may
+                                   be a relaxed, imperfect 
+                                   structure.
+            Returns:
+                defected structure <Structure>
         """
         struct_ed = self.keywords['struc_work1'].copy() 
         symbol = defect['symbol'].title() #Cap first letter
@@ -78,16 +84,20 @@ class StructureExtensions(MASTObj):
 
     def sort_structure_and_neb_lines(self, neblines, folderstr, images=0):
         """Sort the structure in an approved way:
-            2. Remove lines which closely match the neb moving lines in the
-            NEB section.
-            3. Sort the structure by element and coordinate.
-            4. Prepend the NEB moving lines to their element sections.
-            5. Return the modified structure.
-
-            folderstr <str>       : '00' = initial config, '0N+1' = final config,
-                                    '0N' = corresponding image
-            neblines <list>       : list of NEB lines
-            images <int>          : number of images
+            1. Remove lines which closely match the neb moving 
+               lines in the NEB section.
+            2. Sort the structure by element and coordinate.
+            3. Prepend the NEB moving lines to their element 
+               sections.
+            4. Return the modified structure.
+            Args:
+                folderstr <str>  : '00' = initial config, 
+                                   '0N+1' = final config,
+                                   '0N' = corresponding image
+                neblines <list>  : list of NEB lines
+                images <int>     : number of images
+            Returns:
+                sorted structure <Structure>
         """
         import MAST.data
         atol = 0.1 # Need fairly large tolerance to account for relaxation.
@@ -131,12 +141,13 @@ class StructureExtensions(MASTObj):
     def _get_element_indices(self, sortedstruc):
         """From a sorted structure, get the element indices
             Args:
-                sortedstruc <Structure>: pymatgen structure sorted by
-                                            electronegativity
+                sortedstruc <Structure>: pymatgen structure 
+                                sorted by electronegativity
             Returns:
-                elstart <dict>: element index dictionary, in the format:
-                            elstart[element number] = starting index, e.g.
-                            elstart[24] = 0
+                elstart <dict>: element index dictionary, in the
+                                format:
+                elstart[element number] = starting index, e.g.
+                elstart[24] = 0
         """
         elstart = dict()
         numlist = sortedstruc.atomic_numbers
@@ -150,7 +161,8 @@ class StructureExtensions(MASTObj):
         return elstart
 
     def _parse_neb_line(self, nebline):
-        """Parse an NEB atomic movement line which has the following format:
+        """Parse an NEB atomic movement line which has the 
+           following format:
                     Cr, 0 0 0, 0.5 0.5 0.5 in the input file, and
                     ['Cr','0 0 0','0.5 0.5 0.5'] here as nebline
                     element, init_coord, fin_coord
@@ -158,9 +170,9 @@ class StructureExtensions(MASTObj):
                 line <list of str>: NEB atomic movement line
             Returns:
                 linedict <dict>:
-                                 ['element'] <int> = element's atomic number
-                                 ['coord'][0] <np.array> = initial coordinates
-                                 ['coord'][1] <np.array> = final coordinates
+                    ['element'] <int> = element's atomic number
+                    ['coord'][0] <np.array> = initial coordinates
+                    ['coord'][1] <np.array> = final coordinates
         """
         nebdict=dict()
         nebelem = str(nebline[0].strip()).title()
@@ -174,8 +186,12 @@ class StructureExtensions(MASTObj):
 
     def do_interpolation(self, numim):
         """Do interpolation.
+            Both struc_work1 and struc_work2 should be defined.
             Args:
                 numim <int>: number of images
+            Returns:
+                <list of Structure>: list of interpolated 
+                 structures, including the two endpoints
         """
         if self.keywords['struc_work1'] == None:
             raise MASTError(self.__class__.__name__, "No initial state structure")
