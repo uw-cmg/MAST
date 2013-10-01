@@ -46,3 +46,20 @@ class TestSE(unittest.TestCase):
         self.assertEqual(struc_vac1,compare_vac1)
         self.assertEqual(struc_int1,compare_int1)
         self.assertEqual(struc_sub1,compare_sub1)
+    
+    def test_sort_structure_and_neb_lines(self):
+        perfect1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup1").structure
+        compare_sorted1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted1").structure
+        perfect2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup2").structure
+        compare_sorted2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted2").structure
+        neblines = list()
+        neblines.append(["Cr","0.3 0 0","0 0 0"])
+        neblines.append(["Ni","0.6 0 0","0.3 0 0"])
+        sxtend1 = StructureExtensions(struc_work1=perfect1)
+        sorted1 = sxtend1.sort_structure_and_neb_lines(neblines,"00",3)
+        sxtend2 = StructureExtensions(struc_work1=perfect2)
+        sorted2 = sxtend2.sort_structure_and_neb_lines(neblines,"04",3)
+        self.assertEqual(sorted1, compare_sorted1)
+        self.assertEqual(sorted2, compare_sorted2)
+
+        
