@@ -74,6 +74,30 @@ class TestSE(unittest.TestCase):
         self.assertEqual(slist[2],compare_im2)
         self.assertEqual(slist[3],compare_im3)
         self.assertEqual(slist[4],ep2)
+    def test_get_sd_array(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        mysd = sxtend.get_sd_array("0.5 0.5 0.5", 3)
+        #print mysd
+        myarr=np.zeros([40,3],bool)
+        for idx in [8,20,25,26,28,30,32,33,36,37,38,39,40]:
+            myarr[idx-1][0]=True
+            myarr[idx-1][1]=True
+            myarr[idx-1][2]=True
+        self.assertEqual(sum(np.fabs(sum(mysd-myarr))),0)
+    def test_multiple_sd_array(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        mysdlist = sxtend.get_multiple_sd_array("0.5 0.5 0.5", 1)
+        mylist=list()
+        mylist.append(np.zeros([40,3],bool))
+        mylist.append(np.zeros([40,3],bool))
+        mylist.append(np.zeros([40,3],bool))
+        mylist[0][8-1][0]=True
+        mylist[1][8-1][1]=True
+        mylist[2][8-1][2]=True
+        self.assertEqual(sum(np.fabs(sum(mysdlist[0]-mylist[0]))),0)
+        self.assertEqual(sum(np.fabs(sum(mysdlist[1]-mylist[1]))),0)
+        self.assertEqual(sum(np.fabs(sum(mysdlist[2]-mylist[2]))),0)
 
-        
-        
+
