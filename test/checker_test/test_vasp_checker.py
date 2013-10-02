@@ -28,10 +28,11 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        try:
-            os.remove("childdir/POSCAR")
-        except OSError:
-            pass
+        for fname in ["POSCAR","XDATCAR","DYNMAT"]:
+            try:
+                os.remove("childdir/%s" % fname)
+            except OSError:
+                pass
 
     def test_get_structure_from_file(self):
         myvc = VaspChecker(name = "structure")
@@ -69,3 +70,17 @@ class TestVaspChecker(unittest.TestCase):
         istrp = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR").structure
         istrc = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR").structure
         self.assertEqual(istrp, istrc)
+    
+    def test_forward_dynamical_matrix(self):
+        myvc = VaspChecker(name = "dynamics")
+        myvc.forward_dynamical_matrix_file(os.path.join(testdir,"childdir"))
+        dp = myvc.read_my_dynamical_matrix_file("dynamics")
+        dc = myvc.read_my_dynamical_matrix_file("childdir")
+        self.assertEqual(dp,dc)
+
+    def test_forward_displacement(self):
+        myvc = VaspChecker(name="dynamics")
+        myvc.forward_displacement_file(os.path.join(testdir,"childdir"))
+        dp = myvc.read_my_displacement_file("dynamics")
+        dc = myvc.read_my_displacement_file("childdir")
+        self.assertEqual(dp,dc)
