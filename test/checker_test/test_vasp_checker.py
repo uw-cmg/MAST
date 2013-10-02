@@ -28,7 +28,10 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        pass
+        try:
+            os.remove("childdir/POSCAR")
+        except OSError:
+            pass
 
     def test_get_structure_from_file(self):
         myvc = VaspChecker(name = "structure")
@@ -53,5 +56,16 @@ class TestVaspChecker(unittest.TestCase):
         withdir = myvc.get_final_structure_from_directory("withdir")
         compare_withdir = pymatgen.io.vaspio.Poscar.from_file("withdir/CONTCAR").structure
         self.assertEqual(withdir, compare_withdir)
+    def test_forward_final_structure(self):
+        myvc = VaspChecker(name = "structure")
+        myvc.forward_final_structure_file(os.path.join(testdir,"childdir"))
+        fstrp = pymatgen.io.vaspio.Poscar.from_file("structure/CONTCAR").structure
+        fstrc = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR").structure
+        self.assertEqual(fstrp, fstrc)
 
-
+    def test_forward_initial_structure(self):
+        myvc = VaspChecker(name = "structure")
+        myvc.forward_initial_structure_file(os.path.join(testdir,"childdir"))
+        istrp = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR").structure
+        istrc = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR").structure
+        self.assertEqual(istrp, istrc)
