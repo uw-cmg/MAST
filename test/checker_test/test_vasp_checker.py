@@ -84,3 +84,14 @@ class TestVaspChecker(unittest.TestCase):
         dp = myvc.read_my_displacement_file("dynamics")
         dc = myvc.read_my_displacement_file("childdir")
         self.assertEqual(dp,dc)
+
+    def test_write_displacement(self):
+        myvc = VaspChecker(name="dynamics")
+        dp = myvc.read_my_displacement_file("dynamics")
+        myvc.write_my_displacement_file("childdir", dp)
+        dw = myvc.read_my_displacement_file("childdir")
+        self.assertEqual(dp,dw)
+
+    def test_combine_dynamical_matrix(self):
+        myvc = VaspChecker(name="dynamics_split")
+        myvc.combine_dynamical_matrix_files(myvc.keywords['name'])
