@@ -28,7 +28,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -92,6 +92,19 @@ class TestVaspChecker(unittest.TestCase):
         dw = myvc.read_my_displacement_file("childdir")
         self.assertEqual(dp,dw)
 
+    def test_forward_energy_file(self):
+        myvc = VaspChecker(name="energy")
+        myvc.forward_energy_file(os.path.join(testdir, "childdir"))
+        op = pymatgen.io.vaspio.Outcar("energy/OSZICAR")
+        oc = pymatgen.io.vaspio.Outcar("childdir/OSZICAR")
+        self.assertEqual(op.run_stats,oc.run_stats)
+    def test_is_complete(self):
+        vcc = VaspChecker(name="done")
+        vcs = VaspChecker(name="started")
+        self.assertFalse(vcs.is_complete())
+        self.assertTrue(vcc.is_complete())
     def test_combine_dynamical_matrix(self):
+        raise SkipTest
         myvc = VaspChecker(name="dynamics_split")
         myvc.combine_dynamical_matrix_files(myvc.keywords['name'])
+
