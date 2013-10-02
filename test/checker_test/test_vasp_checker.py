@@ -103,6 +103,21 @@ class TestVaspChecker(unittest.TestCase):
         vcs = VaspChecker(name="started")
         self.assertFalse(vcs.is_complete())
         self.assertTrue(vcc.is_complete())
+
+    def test_is_ready(self):
+        vcnr1 = VaspChecker(name="notready1")
+        vcnr2 = VaspChecker(name="notready2")
+        vcnr3 = VaspChecker(name="notready3")
+        vcnr4 = VaspChecker(name="notready4")
+        vcnr5 = VaspChecker(name="notready5")
+        vcr = VaspChecker(name="ready")
+        self.assertFalse(vcnr1.is_ready_to_run())
+        self.assertFalse(vcnr2.is_ready_to_run())
+        self.assertFalse(vcnr3.is_ready_to_run())
+        self.assertFalse(vcnr4.is_ready_to_run())
+        self.assertFalse(vcnr5.is_ready_to_run())
+        self.assertTrue(vcr.is_ready_to_run())
+
     def test_combine_dynamical_matrix(self):
         raise SkipTest
         myvc = VaspChecker(name="dynamics_split")
