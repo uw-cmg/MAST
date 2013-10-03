@@ -9,6 +9,7 @@ import MAST
 import pymatgen
 import unittest
 from MAST.utility import dirutil
+from MAST.utility import MASTFile
 
 testname="checker_test_phon"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
@@ -19,8 +20,11 @@ class TestPhonChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        pass
-
+        for fname in ["POSCAR","POSCAR_prePHON"]:
+            try:
+                os.remove("childdir/%s" % fname)
+            except OSError:
+                pass
     def test___init__(self):
         raise SkipTest
         #self.testclass.__init__(**kwargs)
@@ -38,11 +42,31 @@ class TestPhonChecker(unittest.TestCase):
         #self.testclass.is_complete()
 
     def test_is_ready_to_run(self):
-        raise SkipTest
-        #self.testclass.is_ready_to_run()
+        mypc=PhonChecker(name="notready1")
+        self.assertFalse(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="notready2")
+        self.assertFalse(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="notready3")
+        self.assertFalse(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="notready4")
+        self.assertFalse(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="ready")
+        self.assertTrue(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="started") #should these actually return false?
+        self.assertTrue(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="done_thermo")
+        self.assertTrue(mypc.is_ready_to_run())
+        mypc=PhonChecker(name="done_freq")
+        self.assertTrue(mypc.is_ready_to_run())
 
     def test__phon_poscar_setup(self):
-        raise SkipTest
+        phonposcar = MASTFile("files/POSCAR_for_PHON")
+        mypc=PhonChecker(name="childdir")
+        mypc._phon_poscar_setup()
+        myposcar = MASTFile("childdir/POSCAR")
+        self.assertEqual(myposcar.data, phonposcar.data)
+
+        
         #self.testclass._phon_poscar_setup()
 
     def test__phon_inphon_get_non_mast_keywords(self):
