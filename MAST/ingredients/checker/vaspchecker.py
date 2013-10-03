@@ -590,7 +590,7 @@ class VaspChecker(BaseChecker):
             Args:
                 mydir <str>: top directory for DYNMAT files
         """
-        dynmatlist = walkfiles(mydir, 2, 5, "*DYNMAT*") #start one level below
+        dynmatlist = dirutil.walkfiles(mydir, 2, 5, "*DYNMAT*") #start one level below
         if len(dynmatlist) == 0:
             raise MASTError("pmgextend combine_dynmats", "No DYNMATs found under " + mydir)
         totnumdisp=0

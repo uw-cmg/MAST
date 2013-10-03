@@ -28,7 +28,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -119,7 +119,12 @@ class TestVaspChecker(unittest.TestCase):
         self.assertTrue(vcr.is_ready_to_run())
 
     def test_combine_dynamical_matrix(self):
-        raise SkipTest
         myvc = VaspChecker(name="dynamics_split")
         myvc.combine_dynamical_matrix_files(myvc.keywords['name'])
+        shutil.move(os.path.join(testdir, "dynamics_split/DYNMAT"),os.path.join(testdir,"childdir"))
+        shutil.move(os.path.join(testdir, "dynamics_split/DYNMAT_combined"),os.path.join(testdir,"childdir"))
+        dynmat_compare = myvc.read_my_dynamical_matrix_file(myvc.keywords['name'],"DYNMAT_compare")
+        dynmat_combined = myvc.read_my_dynamical_matrix_file(os.path.join(testdir, "childdir"),"DYNMAT_combined")
+        self.assertEqual(dynmat_compare, dynmat_combined)
+
 
