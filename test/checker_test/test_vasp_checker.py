@@ -29,7 +29,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -198,6 +198,69 @@ class TestVaspChecker(unittest.TestCase):
         mypotcar = pymatgen.io.vaspio.Potcar.from_file("childdir/POTCAR")
         potcar_compare = pymatgen.io.vaspio.Potcar.from_file("files/POTCAR_LNO_PW91")
         self.assertEqual(potcar_compare[0],mypotcar[0])
+
+    def test_vasp_incar_setup(self):
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR_LNO").structure
+        kdict=dict()
+        kdict['mast_xc'] = "pw91"
+        kdict['mast_pp_setup']={'La':'La','Ni':'Ni_pv','O':'O_s'}
+        kdict['IBRION'] = 3
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        mypos = myvc._vasp_poscar_setup()
+        mypot = myvc._vasp_potcar_setup(mypos)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_notags"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict['ENCUT'] = 100
+        kdict['mast_multiplyencut'] = 1.1
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_encut"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict.pop("ENCUT")
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_multiply_110"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict.pop("mast_multiplyencut")
+        kdict["mast_charge"] = -2
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_charge_neg"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict["mast_charge"] = 2
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_charge_pos"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict.pop("mast_charge")
+        kdict["mast_setmagmom"]="3 5 2"
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_setmagmom"))
+        self.assertEqual(myincar, incar_compare)
+        #
+        kdict["mast_setmagmom"]="-1 -2 3 1 2 3 1 2 7 8 7 8 7 8 7 8 5 4 3 2 1 1 2 3 4 5 -5 -4 -3 -2 -1 1 2 3 4 5 4 4 4 -4"
+        myvc = VaspChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        myvc._vasp_incar_setup(mypot, mypos)
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR_setmagmom_indiv"))
+        self.assertEqual(myincar, incar_compare)
+
+
+
+
 
 
 
