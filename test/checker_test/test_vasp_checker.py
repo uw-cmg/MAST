@@ -10,6 +10,7 @@ import shutil
 import pymatgen
 import numpy as np
 from MAST.utility import MASTError
+from MAST.utility import dirutil
 
 testname ="checker_test"
 #oldcontrol = os.getenv("MAST_CONTROL")
@@ -29,7 +30,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -291,4 +292,11 @@ class TestVaspChecker(unittest.TestCase):
 
 
         self.assertEqual(mypotcar, compare_potcar)
+
+    def test_forward_extra_restart_files(self):
+        myvc = VaspChecker(name="files")
+        myvc.forward_extra_restart_files("childdir")
+        myfiles=dirutil.walkfiles("childdir")
+        self.assertTrue("childdir/WAVECAR" in myfiles)
+        self.assertTrue("childdir/CHGCAR" in myfiles)
 
