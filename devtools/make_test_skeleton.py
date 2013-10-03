@@ -6,7 +6,7 @@ Writes to a new file.
 Args:
     [$1] <str>: script name for which to create unit tests
 """
-from MAST.mastfile.mastfile import MASTFile
+from MAST.utility import MASTFile
 import os
 import sys
 
