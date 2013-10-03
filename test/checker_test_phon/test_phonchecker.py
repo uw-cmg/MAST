@@ -1,13 +1,21 @@
 """Tests for Phonchecker"""
 
-from MAST..phonchecker import Phonchecker
+from MAST.ingredients.checker.phonchecker import PhonChecker
 
-from nose.plugins.skip import SkipTest
+from unittest import SkipTest
+import os
+import time
+import MAST
+import pymatgen
+from MAST.utility import dirutil
 
-class TestPhonchecker:
+testname="checker_test_phon"
+testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+
+class TestPhonChecker:
 
     def setUp(self):
-        self.testclass = Phonchecker()
+        os.chdir(testdir)
 
     def tearDown(self):
         pass
