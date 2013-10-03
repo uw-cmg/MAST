@@ -9,6 +9,7 @@ from MAST.ingredients.checker.vaspchecker import VaspChecker
 import shutil
 import pymatgen
 import numpy as np
+from MAST.utility import MASTError
 
 testname ="checker_test"
 #oldcontrol = os.getenv("MAST_CONTROL")
@@ -28,7 +29,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -127,4 +128,54 @@ class TestVaspChecker(unittest.TestCase):
         dynmat_combined = myvc.read_my_dynamical_matrix_file(os.path.join(testdir, "childdir"),"DYNMAT_combined")
         self.assertEqual(dynmat_compare, dynmat_combined)
 
+    def test_vasp_poscar_setup_has_poscar(self):
+        compare_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir, "structure","POSCAR_perfect"))
+        compare_pos.write_file(os.path.join(testdir,"childdir","POSCAR"))
+        myvc = VaspChecker(name="childdir")
+        mypos = myvc._vasp_poscar_setup()
+        self.assertEqual(mypos.structure, compare_pos.structure)
 
+    def test_vasp_poscar_setup_no_poscar(self):
+        compare_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir, "structure","POSCAR_perfect"))
+        myvc = VaspChecker(name="childdir",structure=compare_pos.structure)
+        self.assertFalse(os.path.isfile(os.path.join(testdir, "childdir","POSCAR")))
+        myvc._vasp_poscar_setup()
+        mypos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir, "childdir","POSCAR"))
+        self.assertEqual(mypos.structure, compare_pos.structure)
+
+    def test_vasp_poscar_setup_mast_coordinates(self):
+        kdict=dict()
+        kdict['mast_coordinates'] = ["structure/POSCAR_coordinates"] #note that the input is a list of strings
+        myvc = VaspChecker(name="childdir", program_keys=kdict)
+        perf_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_perfect"))
+        perf_pos.write_file(os.path.join(testdir,"childdir","POSCAR"))
+        coord_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_coordinates"))
+        grafted_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_grafted"))
+        mypos = myvc._vasp_poscar_setup()
+        self.assertEqual(mypos.structure, grafted_pos.structure)
+
+    def test_vasp_kpoints_setup(self):
+        kdict=dict()
+        kdict['mast_kpoints'] = [3,3,3,"M"]
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        mykpt=myvc._vasp_kpoints_setup()
+        kpt_compare = pymatgen.io.vaspio.Kpoints.from_file("files/KPOINTS_333M")
+        self.assertEqual(kpt_compare.kpts[0][0],mykpt.kpts[0][0])
+        self.assertEqual(kpt_compare.kpts[0][1],mykpt.kpts[0][1])
+        self.assertEqual(kpt_compare.kpts[0][2],mykpt.kpts[0][2])
+        self.assertEqual(kpt_compare.num_kpts, mykpt.num_kpts)
+        self.assertEqual(kpt_compare.style, mykpt.style)
+
+        kdict['mast_kpoints'] = [1,2,5,"G"]
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        mykpt=myvc._vasp_kpoints_setup()
+        kpt_compare = pymatgen.io.vaspio.Kpoints.from_file("files/KPOINTS_125G")
+        self.assertEqual(kpt_compare.kpts[0][0],mykpt.kpts[0][0])
+        self.assertEqual(kpt_compare.kpts[0][1],mykpt.kpts[0][1])
+        self.assertEqual(kpt_compare.kpts[0][2],mykpt.kpts[0][2])
+        self.assertEqual(kpt_compare.num_kpts, mykpt.num_kpts)
+        self.assertEqual(kpt_compare.style, mykpt.style)
+
+        kdict['mast_kpoints'] = [2,2,2,"throw error"]
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        self.assertRaises(MASTError, myvc._vasp_kpoints_setup)
