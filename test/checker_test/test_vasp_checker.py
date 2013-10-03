@@ -72,7 +72,6 @@ class TestVaspChecker(unittest.TestCase):
         istrp = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR").structure
         istrc = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR").structure
         self.assertEqual(istrp, istrc)
-    
     def test_forward_dynamical_matrix(self):
         myvc = VaspChecker(name = "dynamics")
         myvc.forward_dynamical_matrix_file(os.path.join(testdir,"childdir"))
@@ -353,7 +352,19 @@ class TestVaspChecker(unittest.TestCase):
         self.assertEqual(mydm['atoms'][1][1]['dynmat'][0]," -0.101036   0.000000   0.000000\n")
         self.assertEqual(mydm['atoms'][1][3]['dynmat'][2],"  0.000000   0.000000   0.000000\n")
 
-
+    def test_write_my_dynamical_matrix_file(self):
+        myvc = VaspChecker(name="childdir")
+        mydm=myvc.read_my_dynamical_matrix_file("dynamics")
+        myvc.write_my_dynamical_matrix_file(mydm)
+        mydm2 = myvc.read_my_dynamical_matrix_file()
+        self.assertEqual(mydm,mydm2)
+    def test_write_my_dynamical_matrix_file_without_disp_mass(self):
+        myvc = VaspChecker(name="childdir")
+        mydm=myvc.read_my_dynamical_matrix_file("dynamics")
+        myvc.write_my_dynmat_without_disp_or_mass(mydm)
+        myread = MAST.utility.MASTFile("dynamics/DYNMAT_for_PHON")
+        myread2 = MAST.utility.MASTFile("childdir/DYNMAT")
+        self.assertEqual(myread2.data,myread.data)
 
 
 

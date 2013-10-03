@@ -498,6 +498,8 @@ class VaspChecker(BaseChecker):
                              ingredient directory if null
                 fname <str>: filename (default DYNMAT)
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         dynwrite=MASTFile()
         dynwrite.data=list()
         firstline=str(dyndict['numdisp']) + "\n"
