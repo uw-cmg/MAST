@@ -654,7 +654,7 @@ class VaspChecker(BaseChecker):
         if mydir == "":
             mydir = self.keywords['name']
         largexdat=dict()
-        xdatlist = walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
+        xdatlist = dirutil.walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
         if len(xdatlist) == 0:
             raise MASTError("pmgextend combine_displacements", "No XDATCARs found under " + mydir)
         kfgct=1 # skip config 1 until the end

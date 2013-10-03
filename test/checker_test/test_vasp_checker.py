@@ -30,7 +30,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -86,13 +86,6 @@ class TestVaspChecker(unittest.TestCase):
         dc = myvc.read_my_displacement_file("childdir")
         self.assertEqual(dp,dc)
 
-    def test_write_displacement(self):
-        myvc = VaspChecker(name="dynamics")
-        dp = myvc.read_my_displacement_file("dynamics")
-        myvc_child = VaspChecker(name="childdir")
-        myvc_child.write_my_displacement_file(dp)
-        dc = myvc_child.read_my_displacement_file()
-        self.assertEqual(dp,dc)
 
     def test_forward_energy_file(self):
         myvc = VaspChecker(name="energy")
@@ -366,5 +359,34 @@ class TestVaspChecker(unittest.TestCase):
         myread2 = MAST.utility.MASTFile("childdir/DYNMAT")
         self.assertEqual(myread2.data,myread.data)
 
+    def test_read_my_displacement_file(self):
+        myvc = VaspChecker(name="dynamics")
+        mydisp = myvc.read_my_displacement_file(myvc.keywords['name'],"XDATCAR_vasp522")
+        self.assertEqual(mydisp['numatoms'],4)
+        self.assertEqual(mydisp['configs'][6][0],"   0.00000000  0.00000000  0.00286262\n")
+        mydisp = myvc.read_my_displacement_file(myvc.keywords['name'],"XDATCAR_vasp5211")
+        self.assertEqual(mydisp['numatoms'],4)
+        self.assertEqual(mydisp['configs'][2][1],"   0.50244722  0.50000000  0.00000000\n")
 
+    def test_write_my_displacement_file(self):
+        myvc = VaspChecker(name="childdir")
+        mydisp = myvc.read_my_displacement_file("dynamics","XDATCAR_vasp5211")
+        myvc.write_my_displacement_file(mydisp)
+        mydisp2 = myvc.read_my_displacement_file()
+        self.assertEqual(mydisp,mydisp2)
+        mydisp = myvc.read_my_displacement_file("dynamics","XDATCAR_vasp522")
+        myvc.write_my_displacement_file(mydisp)
+        mydisp2 = myvc.read_my_displacement_file()
+        self.assertEqual(mydisp,mydisp2)
+
+    def test_combine_displacement_files(self):
+        myvc = VaspChecker(name="dynamics_split")
+        myvc.combine_displacement_files()
+        shutil.move(os.path.join(testdir, "dynamics_split/XDATCAR"),os.path.join(testdir,"childdir"))
+        shutil.move(os.path.join(testdir, "dynamics_split/XDATCAR_combined"),os.path.join(testdir,"childdir"))
+        disp_compare = myvc.read_my_displacement_file(myvc.keywords['name'],"XDATCAR_compare")
+        disp_combined = myvc.read_my_displacement_file("childdir","XDATCAR_combined")
+        print "COMPARE"
+        for key,value in disp_compare.iteritems():
+            self.assertEqual(value, disp_combined[key])
 
