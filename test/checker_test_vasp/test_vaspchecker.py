@@ -12,7 +12,7 @@ import numpy as np
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 
-testname ="checker_test"
+testname ="checker_test_vasp"
 #oldcontrol = os.getenv("MAST_CONTROL")
 #oldrecipe = os.getenv("MAST_RECIPE_PATH")
 #oldscratch = os.getenv("MAST_SCRATCH")
