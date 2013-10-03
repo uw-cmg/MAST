@@ -389,4 +389,19 @@ class TestVaspChecker(unittest.TestCase):
         print "COMPARE"
         for key,value in disp_compare.iteritems():
             self.assertEqual(value, disp_combined[key])
+    def test_get_total_electrons(self):
+        mypos = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR_LTO")
+        mypot = pymatgen.io.vaspio.Potcar.from_file("files/POTCAR_LTO_PW91")
+        myvc = VaspChecker()
+        numelec = myvc.get_total_electrons(mypos, mypot)
+        self.assertEqual(numelec,328)
+    def test_get_valence_list(self):
+        mypot = pymatgen.io.vaspio.Potcar.from_file("files/POTCAR_LTO_PW91")
+        myvc = VaspChecker()
+        vlist = myvc.get_valence_list(mypot)
+        self.assertEqual(vlist,[11,12,6])
+    def test_get_energy_from_energy_file(self):
+        myvc = VaspChecker(name="done")
+        myenergy=myvc.get_energy_from_energy_file()
+        self.assertAlmostEqual(myenergy,float(-.83312666E+01),places=7)
 
