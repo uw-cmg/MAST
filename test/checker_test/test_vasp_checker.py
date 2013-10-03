@@ -30,7 +30,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined","CONTCAR"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -404,4 +404,19 @@ class TestVaspChecker(unittest.TestCase):
         myvc = VaspChecker(name="done")
         myenergy=myvc.get_energy_from_energy_file()
         self.assertAlmostEqual(myenergy,float(-.83312666E+01),places=7)
+    def test_is_started(self):
+        myvc = VaspChecker(name="notready1")
+        self.assertFalse(myvc.is_started())
+        myvc = VaspChecker(name="ready")
+        self.assertFalse(myvc.is_started())
+        myvc = VaspChecker(name="started")
+        self.assertTrue(myvc.is_started())
+        myvc = VaspChecker(name="done")
+        self.assertTrue(myvc.is_started())
+    def test_write_final_structure_file(self):
+        myvc = VaspChecker(name="childdir")
+        finalstruc = pymatgen.io.vaspio.Poscar.from_file("structure/CONTCAR").structure
+        myvc.write_final_structure_file(finalstruc)
+        mystruc = pymatgen.io.vaspio.Poscar.from_file("childdir/CONTCAR").structure
+        self.assertEqual(mystruc,finalstruc)
 
