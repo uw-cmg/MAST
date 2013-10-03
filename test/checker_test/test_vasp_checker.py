@@ -30,7 +30,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -299,4 +299,31 @@ class TestVaspChecker(unittest.TestCase):
         myfiles=dirutil.walkfiles("childdir")
         self.assertTrue("childdir/WAVECAR" in myfiles)
         self.assertTrue("childdir/CHGCAR" in myfiles)
+
+    def test_add_selective_dynamics(self):
+        mystruc = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_Al")).structure
+        myvc = VaspChecker(name="childdir",structure=mystruc)
+        myvc._vasp_poscar_setup()
+        sdarr = np.zeros([4,3],bool)
+        sdarr[0][0]=True
+        sdarr[1][1]=True
+        sdarr[2][2]=True
+        sdarr[3][0]=True
+        sdarr[3][1]=True
+        myvc.add_selective_dynamics_to_structure_file(sdarr)
+        after_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"childdir","POSCAR"))
+        compare_pos = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_Al_sd"))
+        self.assertEqual(after_pos.structure, compare_pos.structure)
+        self.assertEqual(after_pos.selective_dynamics, compare_pos.selective_dynamics)
+
+    def test_get_non_mast_keywords(self):
+        kdict=dict()
+        kdict['mast_nokeyword']="hello"
+        kdict['mast_charge']="1"
+        kdict['IBRION']="3"
+        kdict['skip_keyword']="skip"
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        keydict=myvc._vasp_incar_get_non_mast_keywords()
+        self.assertEqual(keydict,{"IBRION":"3"})
+
 
