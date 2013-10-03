@@ -31,6 +31,8 @@ class PhonChecker(BaseChecker):
         """Check if PHON thermo run is complete."""
         if os.path.isfile(os.path.join(self.keywords['name'], "THERMO")):
             return True
+        elif os.path.isfile(os.path.join(self.keywords['name'],"FREQ")):
+            return True
         else:
             return False
 

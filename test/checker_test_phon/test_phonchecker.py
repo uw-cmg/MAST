@@ -7,12 +7,13 @@ import os
 import time
 import MAST
 import pymatgen
+import unittest
 from MAST.utility import dirutil
 
 testname="checker_test_phon"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 
-class TestPhonChecker:
+class TestPhonChecker(unittest.TestCase):
 
     def setUp(self):
         os.chdir(testdir)
@@ -25,7 +26,15 @@ class TestPhonChecker:
         #self.testclass.__init__(**kwargs)
 
     def test_is_complete(self):
-        raise SkipTest
+        mypc=PhonChecker(name="ready")
+        self.assertFalse(mypc.is_complete())
+        mypc=PhonChecker(name="started")
+        self.assertFalse(mypc.is_complete())
+        mypc=PhonChecker(name="done_thermo")
+        self.assertTrue(mypc.is_complete())
+        mypc=PhonChecker(name="done_freq")
+        self.assertTrue(mypc.is_complete())
+
         #self.testclass.is_complete()
 
     def test_is_ready_to_run(self):
