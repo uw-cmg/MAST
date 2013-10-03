@@ -29,7 +29,7 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -179,3 +179,25 @@ class TestVaspChecker(unittest.TestCase):
         kdict['mast_kpoints'] = [2,2,2,"throw error"]
         myvc = VaspChecker(name="childdir",program_keys=kdict)
         self.assertRaises(MASTError, myvc._vasp_kpoints_setup)
+
+    def test_vasp_potcar_setup(self):
+        kdict=dict()
+        kdict['mast_xc'] = "pbe"
+        my_poscar = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR_Al")
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        mypotcar=myvc._vasp_potcar_setup(my_poscar)
+        mypotcar = pymatgen.io.vaspio.Potcar.from_file("childdir/POTCAR")
+        potcar_compare = pymatgen.io.vaspio.Potcar.from_file("files/POTCAR_Al_PBE")
+        self.assertEqual(potcar_compare[0],mypotcar[0])
+        
+        kdict['mast_xc'] = "pw91"
+        kdict['mast_pp_setup']={'La':'La','Ni':'Ni_pv','O':'O_s'}
+        my_poscar = pymatgen.io.vaspio.Poscar.from_file("structure/POSCAR_LNO")
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        mypotcar=myvc._vasp_potcar_setup(my_poscar)
+        mypotcar = pymatgen.io.vaspio.Potcar.from_file("childdir/POTCAR")
+        potcar_compare = pymatgen.io.vaspio.Potcar.from_file("files/POTCAR_LNO_PW91")
+        self.assertEqual(potcar_compare[0],mypotcar[0])
+
+
+
