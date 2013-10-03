@@ -90,9 +90,10 @@ class TestVaspChecker(unittest.TestCase):
     def test_write_displacement(self):
         myvc = VaspChecker(name="dynamics")
         dp = myvc.read_my_displacement_file("dynamics")
-        myvc.write_my_displacement_file("childdir", dp)
-        dw = myvc.read_my_displacement_file("childdir")
-        self.assertEqual(dp,dw)
+        myvc_child = VaspChecker(name="childdir")
+        myvc_child.write_my_displacement_file(dp)
+        dc = myvc_child.read_my_displacement_file()
+        self.assertEqual(dp,dc)
 
     def test_forward_energy_file(self):
         myvc = VaspChecker(name="energy")
@@ -122,11 +123,11 @@ class TestVaspChecker(unittest.TestCase):
 
     def test_combine_dynamical_matrix(self):
         myvc = VaspChecker(name="dynamics_split")
-        myvc.combine_dynamical_matrix_files(myvc.keywords['name'])
+        myvc.combine_dynamical_matrix_files()
         shutil.move(os.path.join(testdir, "dynamics_split/DYNMAT"),os.path.join(testdir,"childdir"))
         shutil.move(os.path.join(testdir, "dynamics_split/DYNMAT_combined"),os.path.join(testdir,"childdir"))
         dynmat_compare = myvc.read_my_dynamical_matrix_file(myvc.keywords['name'],"DYNMAT_compare")
-        dynmat_combined = myvc.read_my_dynamical_matrix_file(os.path.join(testdir, "childdir"),"DYNMAT_combined")
+        dynmat_combined = myvc.read_my_dynamical_matrix_file("childdir","DYNMAT_combined")
         self.assertEqual(dynmat_compare, dynmat_combined)
 
     def test_vasp_poscar_setup_has_poscar(self):
@@ -325,5 +326,34 @@ class TestVaspChecker(unittest.TestCase):
         myvc = VaspChecker(name="childdir",program_keys=kdict)
         keydict=myvc._vasp_incar_get_non_mast_keywords()
         self.assertEqual(keydict,{"IBRION":"3"})
+
+    def test_get_energy(self):
+        myvc = VaspChecker(name="done")
+        myenergy=myvc.get_energy()
+        self.assertAlmostEqual(myenergy, float(-.83312666E+01),places=7)
+
+    def test_get_max_enmax_from_potcar(self):
+        mypotcar = pymatgen.io.vaspio.Potcar.from_file(os.path.join(testdir,"files","POTCAR_LNO_PW91"))
+        myvc = VaspChecker(name="childdir")
+        maxenmax = myvc._get_max_enmax_from_potcar(mypotcar)
+        self.assertEqual(maxenmax, 367.921)
+        mypotcar = pymatgen.io.vaspio.Potcar.from_file(os.path.join(testdir,"files","POTCAR_LTO_PW91"))
+        maxenmax = myvc._get_max_enmax_from_potcar(mypotcar)
+        self.assertEqual(maxenmax, 400)
+
+    def test_read_my_dynamical_matrix_file(self):
+        myvc = VaspChecker(name="dynamics")
+        mydm=myvc.read_my_dynamical_matrix_file()
+        self.assertEqual(mydm['numspec'],1)
+        self.assertEqual(mydm['numatoms'],4)
+        self.assertEqual(mydm['numdisp'],3)
+        self.assertEqual(mydm['massline']," 55.847\n")
+        self.assertEqual(mydm['atoms'][1][1]['displine'],"0.0100 0.0000 0.0000")
+        self.assertEqual(mydm['atoms'][1][3]['displine'],"0.0000 0.0000 0.0100")
+        self.assertEqual(mydm['atoms'][1][1]['dynmat'][0]," -0.101036   0.000000   0.000000\n")
+        self.assertEqual(mydm['atoms'][1][3]['dynmat'][2],"  0.000000   0.000000   0.000000\n")
+
+
+
 
 

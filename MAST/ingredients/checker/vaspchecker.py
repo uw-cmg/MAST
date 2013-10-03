@@ -385,6 +385,7 @@ class VaspChecker(BaseChecker):
             natom = the number of the atom to unfreeze
             Returns: Poscar (use write_file function on it).
         """
+        raise MASTError(self.__class__.__name__, "This method is abandoned and should not be used.")
         mysd=np.zeros([sum(myposcar.natoms),3],bool)
         mysd[natom-1][0]=True #indexing starts at 0
         mysd[natom-1][1]=True
@@ -399,6 +400,7 @@ class VaspChecker(BaseChecker):
             ndir = the direction to freeze (0, 1, 2 for x, y, z)
             Returns: Poscar (use write_file function on it).
         """
+        raise MASTError(self.__class__.__name__, "This method is abandoned and should not be used.")
         mysd=np.zeros([sum(myposcar.natoms),3],bool)
         mysd[natom-1][ndir]=True #indexing starts at 0
         myposcar.selective_dynamics = mysd
@@ -409,7 +411,8 @@ class VaspChecker(BaseChecker):
         """Read a dynamical matrix file.
             For VASP this is DYNMAT.
             Args:
-                mydir <str>: directory
+                mydir <str>: directory; use ingredient directory
+                             if null is given
                 fname <str>: file name (default 'DYNMAT')
             Returns:
                 dyndict <dict>: dictionary structured like this:
@@ -426,6 +429,8 @@ class VaspChecker(BaseChecker):
                             list of dynmat lines for this atom
                             and this displacement
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         mydyn = MASTFile(os.path.join(mydir, fname))
         mydata = list(mydyn.data) #whole new copy
         dyndict=dict()
@@ -455,13 +460,16 @@ class VaspChecker(BaseChecker):
                 dyndict['atoms'][atom][disp]['dynmat'].append(mydata.pop(0))
         return dyndict
 
-    def write_my_dynamical_matrix_file(self, mydir, dyndict, fname="DYNMAT"):
+    def write_my_dynamical_matrix_file(self, dyndict, mydir="", fname="DYNMAT"):
         """Write a dynamical matrix file based on a dictionary.
             Args:
-                mydir <str>: Directory in which to write
                 dyndict <dict>: Dictionary of dynmat (see read_my_dynmat)
+                mydir <str>: Directory in which to write;
+                             use ingredient directory if null
                 fname <str>: filename (default DYNMAT)
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         dynwrite=MASTFile()
         dynwrite.data=list()
         firstline=str(dyndict['numspec']) + " " + str(dyndict['numatoms']) + " " + str(dyndict['numdisp']) + "\n"
@@ -480,13 +488,14 @@ class VaspChecker(BaseChecker):
         dynwrite.to_file(os.path.join(mydir, fname))
 
 
-    def write_my_dynmat_without_disp_or_mass(self, mydir, dyndict, fname="DYNMAT"):
+    def write_my_dynmat_without_disp_or_mass(self, dyndict, mydir="", fname="DYNMAT"):
         """Write a dynamical matrix file without the displacement indicators 1, 2, 3
             and without the masses line, and with first line having only
             the total number of displacements, for PHON.
             Args:
-                mydir <str>: Directory in which to write
                 dyndict <dict>: Dictionary of dynmat (see read_my_dynmat)
+                mydir <str>: Directory in which to write; use 
+                             ingredient directory if null
                 fname <str>: filename (default DYNMAT)
         """
         dynwrite=MASTFile()
@@ -505,8 +514,13 @@ class VaspChecker(BaseChecker):
                     dynwrite.data.append(line)
         dynwrite.to_file(os.path.join(mydir, fname))
 
-    def read_my_displacement_file(self, mydir, fname="XDATCAR"):
+    def read_my_displacement_file(self, mydir="", fname="XDATCAR"):
         """Read a displacement file. For VASP this is XDATCAR.
+            Args:
+                mydir <str>: Directory. Use ingredient directory
+                             if null.
+                fname <str>: Filename to read. Default is
+                             XDATCAR
             Returns:
                 xdatdict <dict>: Dictionary of configurations
                     xdatdict['descline'] = <str> description line
@@ -521,6 +535,8 @@ class VaspChecker(BaseChecker):
                     xdatdict['lattb'] = <str> lattice vector b
                     xdatdict['lattc'] = <str> lattice vector c
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         myxdat = MASTFile(os.path.join(mydir, fname))
         mydata = list(myxdat.data) #whole new copy
         xdatdict=dict()
@@ -559,13 +575,16 @@ class VaspChecker(BaseChecker):
             kfgct=kfgct+1
         return xdatdict
 
-    def write_my_displacement_file(self, mydir, xdatdict, fname="XDATCAR"):
+    def write_my_displacement_file(self, xdatdict, mydir="", fname="XDATCAR"):
         """Write a displacement file.
             Args:
-                mydir <str>: Directory in which to write
                 xdatdict <dict>: Dictionary of XDATCAR (see read_my_xdatcar)
+                mydir <str>: Directory in which to write.
+                             Use ingredient directory if null.
                 fname <str>: filename (default DYNMAT)
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         xdatwrite=MASTFile()
         xdatwrite.data=list()
         xdatwrite.data.append(xdatdict['descline'])
@@ -585,11 +604,18 @@ class VaspChecker(BaseChecker):
             xdatwrite.data.extend(xdatdict['configs'][cfg])
         xdatwrite.to_file(os.path.join(mydir, fname))
 
-    def combine_dynamical_matrix_files(self, mydir):
+    def combine_dynamical_matrix_files(self, mydir=""):
         """Combine dynamical matrix files into one file.
+            The subfiles should be in subfolders under
+            the top directory.
             Args:
-                mydir <str>: top directory for DYNMAT files
+                mydir <str>: top directory for DYNMAT files.
+                             Use ingredient directory if null.
+            Returns:
+                Creates a single DYNMAT file
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         dynmatlist = dirutil.walkfiles(mydir, 2, 5, "*DYNMAT*") #start one level below
         if len(dynmatlist) == 0:
             raise MASTError("pmgextend combine_dynmats", "No DYNMATs found under " + mydir)
@@ -614,14 +640,17 @@ class VaspChecker(BaseChecker):
         largedyn['numatoms'] = onedyn['numatoms']
         largedyn['massline'] = onedyn['massline']
         largedyn['numdisp'] = totnumdisp
-        self.write_my_dynamical_matrix_file(mydir, largedyn, "DYNMAT_combined")
-        self.write_my_dynamical_matrix_file(mydir, largedyn, "DYNMAT")
+        self.write_my_dynamical_matrix_file(largedyn, mydir, "DYNMAT_combined")
+        self.write_my_dynamical_matrix_file(largedyn, mydir, "DYNMAT")
 
-    def combine_displacement_files(self, mydir):
+    def combine_displacement_files(self, mydir=""):
         """Combine displacement files (here XDATCARs) into one file.
             Args:
-                mydir <str>: top directory for DYNMAT files
+                mydir <str>: top directory for DYNMAT files.
+                             Use ingredient directory if null.
         """
+        if mydir == "":
+            mydir = self.keywords['name']
         largexdat=dict()
         xdatlist = walkfiles(mydir, 2, 5, "*XDATCAR*") #start one level below
         if len(xdatlist) == 0:
@@ -648,8 +677,8 @@ class VaspChecker(BaseChecker):
         largexdat['numline'] = onexdat['numline']
         largexdat['numatoms'] = onexdat['numatoms']
         largexdat['type'] = onexdat['type']
-        self.write_my_displacement_file(mydir, largexdat, "XDATCAR_combined")
-        self.write_my_displacement_file(mydir, largexdat, "XDATCAR")
+        self.write_my_displacement_file(largexdat, mydir, "XDATCAR_combined")
+        self.write_my_displacement_file(largexdat, mydir, "XDATCAR")
     def make_hessian(self, myposcar, mydir):
         """Combine DYNMATs into one hessian and solve for frequencies.
             myposcar = Poscar
