@@ -43,9 +43,16 @@ class TestSE(unittest.TestCase):
         struc_vac1 = sxtend.induce_defect(vac1, coord_type, threshold)
         struc_int1 = sxtend.induce_defect(int1, coord_type, threshold)
         struc_sub1 = sxtend.induce_defect(sub1, coord_type, threshold)
+        print struc_sub1
         self.assertEqual(struc_vac1,compare_vac1)
         self.assertEqual(struc_int1,compare_int1)
         self.assertEqual(struc_sub1,compare_sub1)
+        self.assertEqual(struc_vac1.lattice,compare_vac1.lattice)
+        self.assertEqual(struc_int1.lattice,compare_int1.lattice)
+        self.assertEqual(struc_sub1.lattice,compare_sub1.lattice)
+        self.assertEqual(struc_vac1.sites,compare_vac1.sites)
+        self.assertEqual(struc_int1.sites,compare_int1.sites)
+        self.assertEqual(struc_sub1.sites,compare_sub1.sites)
     
     def test_sort_structure_and_neb_lines(self):
         perfect1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup1").structure
@@ -61,6 +68,10 @@ class TestSE(unittest.TestCase):
         sorted2 = sxtend2.sort_structure_and_neb_lines(neblines,"04",3)
         self.assertEqual(sorted1, compare_sorted1)
         self.assertEqual(sorted2, compare_sorted2)
+        self.assertEqual(sorted1.lattice, compare_sorted1.lattice)
+        self.assertEqual(sorted2.lattice, compare_sorted2.lattice)
+        self.assertEqual(sorted1.sites, compare_sorted1.sites)
+        self.assertEqual(sorted2.sites, compare_sorted2.sites)
         neblines = list()
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
@@ -70,6 +81,35 @@ class TestSE(unittest.TestCase):
         sorted2 = sxtend2.sort_structure_and_neb_lines(neblines,"04",3)
         self.assertEqual(sorted1, compare_sorted1)
         self.assertEqual(sorted2, compare_sorted2)
+        self.assertEqual(sorted1.lattice, compare_sorted1.lattice)
+        self.assertEqual(sorted2.lattice, compare_sorted2.lattice)
+        self.assertEqual(sorted1.sites, compare_sorted1.sites)
+        self.assertEqual(sorted2.sites, compare_sorted2.sites)
+        neblines = list()
+        neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
+        neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
+        neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
+        neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
+        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3").structure
+        #print perfect3.get_sorted_structure()
+        perfect4 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup4").structure
+        #print perfect4.get_sorted_structure()
+        sxtend3 = StructureExtensions(struc_work1=perfect3)
+        sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
+        #print sorted3
+        sxtend4 = StructureExtensions(struc_work1=perfect4)
+        sorted4 = sxtend4.sort_structure_and_neb_lines(neblines,"04",3)
+        #print sorted4
+        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
+        #print compare_sorted3
+        compare_sorted4 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted4").structure
+        #print compare_sorted4
+        self.assertEqual(sorted3, compare_sorted3)
+        self.assertEqual(sorted4, compare_sorted4)
+        self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
+        self.assertEqual(sorted4.lattice, compare_sorted4.lattice)
+        self.assertEqual(sorted3.sites, compare_sorted3.sites)
+        self.assertEqual(sorted4.sites, compare_sorted4.sites)
 
 
     def test_interpolation(self):
@@ -117,4 +157,6 @@ class TestSE(unittest.TestCase):
         sxtend = StructureExtensions(struc_work1=perfect)
         grafted = sxtend.graft_coordinates_onto_structure(coordsonly)
         self.assertEqual(grafted, compare_grafted)
+        self.assertEqual(grafted.lattice, compare_grafted.lattice)
+        self.assertEqual(grafted.sites, compare_grafted.sites)
 

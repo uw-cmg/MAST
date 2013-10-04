@@ -68,6 +68,7 @@ class StructureExtensions(MASTObj):
                                        atol=threshold)
 
             struct_ed.replace(index, symbol)
+            struct_ed = struct_ed.get_sorted_structure()
         else:
             raise RuntimeError('Defect type %s not supported' % defect['type'])
 
@@ -134,6 +135,7 @@ class StructureExtensions(MASTObj):
             struct_ed.remove_sites([index[0]])
             struct_ed.insert(elemstarts[myelem], mysite.specie,
                                     mysite.frac_coords)
+            sortedstruc = struct_ed.copy() #get new ordering
         if not len(nebidx) == len(neblines):
             raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
         return struct_ed
