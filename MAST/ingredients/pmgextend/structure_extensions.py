@@ -133,7 +133,7 @@ class StructureExtensions(MASTObj):
             myelem = MAST.data.atomic_number[mysite.species_string]
             struct_ed.remove_sites([index[0]])
             struct_ed.insert(elemstarts[myelem], mysite.specie,
-                                    mycoord)
+                                    mysite.frac_coords)
         if not len(nebidx) == len(neblines):
             raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
         return struct_ed
