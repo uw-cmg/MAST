@@ -61,6 +61,17 @@ class TestSE(unittest.TestCase):
         sorted2 = sxtend2.sort_structure_and_neb_lines(neblines,"04",3)
         self.assertEqual(sorted1, compare_sorted1)
         self.assertEqual(sorted2, compare_sorted2)
+        neblines = list()
+        neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
+        neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
+        sxtend1 = StructureExtensions(struc_work1=perfect1)
+        sorted1 = sxtend1.sort_structure_and_neb_lines(neblines,"00",3)
+        sxtend2 = StructureExtensions(struc_work1=perfect2)
+        sorted2 = sxtend2.sort_structure_and_neb_lines(neblines,"04",3)
+        self.assertEqual(sorted1, compare_sorted1)
+        self.assertEqual(sorted2, compare_sorted2)
+
+
     def test_interpolation(self):
         ep1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_ep1").structure
         ep2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_ep2").structure
