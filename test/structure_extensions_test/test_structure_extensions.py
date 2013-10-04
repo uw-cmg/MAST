@@ -43,7 +43,6 @@ class TestSE(unittest.TestCase):
         struc_vac1 = sxtend.induce_defect(vac1, coord_type, threshold)
         struc_int1 = sxtend.induce_defect(int1, coord_type, threshold)
         struc_sub1 = sxtend.induce_defect(sub1, coord_type, threshold)
-        print struc_sub1
         self.assertEqual(struc_vac1,compare_vac1)
         self.assertEqual(struc_int1,compare_int1)
         self.assertEqual(struc_sub1,compare_sub1)
