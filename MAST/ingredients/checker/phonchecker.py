@@ -140,7 +140,7 @@ class PhonChecker(BaseChecker):
         massline="MASS="
         for sym in sitesym:
             el = pymatgen.core.periodic_table.Element(sym)
-            massline = massline + str(el.atomic_mass) + " "
+            massline = massline + str(float(el.atomic_mass)) + " "
         return [nline, massline]
 
     def _phon_forces_setup(self):

@@ -20,7 +20,7 @@ class TestPhonChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","POSCAR_prePHON"]:
+        for fname in ["POSCAR","POSCAR_prePHON","INPHON"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -60,30 +60,80 @@ class TestPhonChecker(unittest.TestCase):
         self.assertTrue(mypc.is_ready_to_run())
 
     def test__phon_poscar_setup(self):
-        raise SkipTest
+        poscar_pre = MASTFile("files/POSCAR_prePHON")
+        poscar_pre.to_file("childdir/POSCAR_prePHON")
         phonposcar = MASTFile("files/POSCAR_for_PHON")
         mypc=PhonChecker(name="childdir")
         mypc._phon_poscar_setup()
         myposcar = MASTFile("childdir/POSCAR")
         self.assertEqual(myposcar.data, phonposcar.data)
 
-        
-        #self.testclass._phon_poscar_setup()
-
     def test__phon_inphon_get_non_mast_keywords(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['mast_program']='phon'
+        kdict['LFREE']='True'
+        kdict['QA']=11
+        mypc=PhonChecker(name="childdir",program_keys = kdict)
+        mdict=mypc._phon_inphon_get_non_mast_keywords()
+        self.assertEqual(mdict, {'LFREE':'True','QA':11})
         #self.testclass._phon_inphon_get_non_mast_keywords()
 
     def test__phon_inphon_get_allowed_keywords(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['mast_program']='phon'
+        kdict['LFREE']='True'
+        kdict['QA']=11
+        kdict['IBRION']=2 #This is a VASP, not PHON, keyword
+        kdict['nosuchkeyword']="hello"
+        mypc=PhonChecker(name="childdir",program_keys = kdict)
+        mdict=mypc._phon_inphon_get_non_mast_keywords()
+        self.assertEqual(mdict, {'LFREE':'True','QA':11})
         #self.testclass._phon_inphon_get_allowed_keywords(allowedpath)
 
     def test__phon_inphon_setup(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['mast_program']='phon'
+        kdict['TEMPERATURE']='1173'
+        kdict['LFREE']='.TRUE.'
+        kdict['QA']='11'
+        kdict['QB']='11'
+        kdict['QC']='11'
+        kdict['LSUPER']='.FALSE.'
+        kdict['NTYPES']='3'
+        kdict['MASS']='55.845 20.000 77.123'
+        kdict['IPRINT']='0'
+        kdict['ND']='3'
+        kdict['IBRION']=2 #This is a VASP, not PHON, keyword
+        kdict['nosuchkeyword']="hello"
+        mypc=PhonChecker(name="childdir",program_keys = kdict)
+        mdict=mypc._phon_inphon_setup()
+        compare_inphon = MASTFile("files/INPHON")
+        my_inphon = MASTFile("childdir/INPHON")
+        self.assertItemsEqual(compare_inphon.data, my_inphon.data)
+        poscar_pre = MASTFile("files/POSCAR_prePHON")
+        poscar_pre.to_file("childdir/POSCAR_prePHON")
+        kdict.pop("NTYPES")
+        kdict.pop("MASS")
+        mypc=PhonChecker(name="childdir",program_keys = kdict)
+        mdict=mypc._phon_inphon_setup()
+        compare_inphon = MASTFile("files/INPHON_automass")
+        my_inphon = MASTFile("childdir/INPHON")
+        self.assertItemsEqual(compare_inphon.data, my_inphon.data)
+        poscar_pre = MASTFile("files/POSCAR_prePHON_triple")
+        poscar_pre.to_file("childdir/POSCAR_prePHON")
+        mypc=PhonChecker(name="childdir",program_keys = kdict)
+        mdict=mypc._phon_inphon_setup()
+        compare_inphon = MASTFile("files/INPHON_automass_triple")
+        my_inphon = MASTFile("childdir/INPHON")
+        self.assertItemsEqual(compare_inphon.data, my_inphon.data)
+
         #self.testclass._phon_inphon_setup()
 
     def test__phon_inphon_get_masses(self):
-        raise SkipTest
+        mypc=PhonChecker(name="files")
+        [nline,mline]=mypc._phon_inphon_get_masses()
+        self.assertEqual(nline,"NTYPES=1")
+        self.assertEqual(mline,"MASS=26.9815386 ")
         #self.testclass._phon_inphon_get_masses()
 
     def test__phon_forces_setup(self):
