@@ -48,7 +48,7 @@ class TestVaspnebchecker(unittest.TestCase):
             mystrs.append(pos[posstr].structure)
         kdict=dict()
         kdict['images']=3
-        myvcneb=VaspNEBChecker(name="childdir")
+        myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_neb_folders(mystrs)
         for subdir in ['00','01','02','03','04']:
             mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR_%s" % subdir)
@@ -61,26 +61,27 @@ class TestVaspnebchecker(unittest.TestCase):
             self.assertEqual(mypos.structure.sites,pos[subdir].structure.sites)
         #self.testclass.set_up_neb_folders(image_structures)
     def test_set_up_neb_folders_with_mast_coordinates(self):
-        raise SkipTest
-        mystrs=list()
-        pos=dict()
-        
-        for posstr in ['00','01','02','03','04']:
-            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
-            mystrs.append(pos[posstr].structure)
         kdict=dict()
         kdict['images']=3
-        myvcneb=VaspNEBChecker(name="childdir")
+        kdict['mast_coordinates']=["structures/POSCAR_coords_01","structures/POSCAR_coords_02","structures/POSCAR_coords_03"]
+        mystrs=list()
+        pos=dict()
+        graftedpos=dict()
+        for posstr in ['00','01','02','03','04']:
+            graftedpos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_grafted_%s" % posstr)
+            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
+            mystrs.append(pos[posstr].structure)
+        myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_neb_folders(mystrs)
         for subdir in ['00','01','02','03','04']:
             mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR_%s" % subdir)
-            self.assertEqual(mypos.structure,pos[subdir].structure)
-            self.assertEqual(mypos.structure.lattice,pos[subdir].structure.lattice)
-            self.assertEqual(mypos.structure.sites,pos[subdir].structure.sites)
+            self.assertEqual(mypos.structure,graftedpos[subdir].structure)
+            self.assertEqual(mypos.structure.lattice,graftedpos[subdir].structure.lattice)
+            self.assertEqual(mypos.structure.sites,graftedpos[subdir].structure.sites)
             mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/%s/POSCAR" % subdir)
-            self.assertEqual(mypos.structure,pos[subdir].structure)
-            self.assertEqual(mypos.structure.lattice,pos[subdir].structure.lattice)
-            self.assertEqual(mypos.structure.sites,pos[subdir].structure.sites)
+            self.assertEqual(mypos.structure,graftedpos[subdir].structure)
+            self.assertEqual(mypos.structure.lattice,graftedpos[subdir].structure.lattice)
+            self.assertEqual(mypos.structure.sites,graftedpos[subdir].structure.sites)
         #self.testclass.set_up_neb_folders(image_structures)
 
     def test_is_complete(self):

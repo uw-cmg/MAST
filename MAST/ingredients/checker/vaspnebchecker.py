@@ -67,7 +67,7 @@ class VaspNEBChecker(VaspChecker):
             newstrucs=list()
             sidx = 0 #ex. coordstrucs 0, 1, 2 for 3 images
             while sidx < self.keywords['program_keys']['images']:
-                sxtend = StructureExtensions(struct_work1=image_structures[sidx+1].copy())
+                sxtend = StructureExtensions(struc_work1=image_structures[sidx+1].copy())
                 newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
                 sidx = sidx + 1
         while imct < len(image_structures):
