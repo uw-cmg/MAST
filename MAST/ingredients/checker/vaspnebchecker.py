@@ -192,6 +192,7 @@ class VaspNEBChecker(VaspChecker):
                 raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % fullpath)
             myosz = MASTFile(fullpath)
             mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
+            mye0 = float(mye0)
             mystr = mystr + "%3.3f" % mye0 + ';'
             myct = myct + 1
         mystr=mystr[0:-1] #remove last semicolon

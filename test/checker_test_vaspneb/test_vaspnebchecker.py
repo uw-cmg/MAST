@@ -8,6 +8,7 @@ import time
 import MAST
 import pymatgen
 from MAST.utility import dirutil
+from MAST.utility import MASTFile
 import shutil
 testname="checker_test_vaspneb"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
@@ -143,14 +144,46 @@ class TestVaspnebchecker(unittest.TestCase):
         #self.testclass._vasp_incar_setup(my_potcar, my_poscar)
 
     def test_set_up_program_input_neb(self):
-        raise SkipTest
+        mystrs=list()
+        pos=dict()
+        for posstr in ['00','01','02','03','04']:
+            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
+            mystrs.append(pos[posstr].structure)
+        kdict=dict()
+        kdict['images']=3
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']="pw91"
+        myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
+        myvcneb.set_up_program_input_neb(mystrs)
+        submitscript = MASTFile()
+        submitscript.data="Submission script placeholder."
+        submitscript.to_file("childdir/submit.sh")
+        ozholder = MASTFile()
+        ozholder.data="OSZICAR placeholder."
+        submitscript.to_file("childdir/00/OSZICAR")
+        submitscript.to_file("childdir/04/OSZICAR")
+        self.assertTrue(myvcneb.is_ready_to_run())
         #self.testclass.set_up_program_input_neb(image_structures)
 
     def test_get_energy_from_energy_file(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['images']=3
+        myvcneb=VaspNEBChecker(name="done",program_keys=kdict)
+        estr = myvcneb.get_energy_from_energy_file()
+        estr_compare="-99.860;-99.649;-99.538;-99.649;-99.860"
+        self.assertEqual(estr,estr_compare)
         #self.testclass.get_energy_from_energy_file()
 
     def test_is_started(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['images']=3
+        myvcneb=VaspNEBChecker(name="notready1",program_keys=kdict)
+        self.assertFalse(myvcneb.is_started())
+        myvcneb=VaspNEBChecker(name="ready",program_keys=kdict)
+        self.assertFalse(myvcneb.is_started())
+        myvcneb=VaspNEBChecker(name="started",program_keys=kdict)
+        self.assertTrue(myvcneb.is_started())
+        myvcneb=VaspNEBChecker(name="done",program_keys=kdict)
+        self.assertTrue(myvcneb.is_started())
         #self.testclass.is_started()
 
