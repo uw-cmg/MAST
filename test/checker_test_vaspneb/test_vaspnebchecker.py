@@ -85,11 +85,40 @@ class TestVaspnebchecker(unittest.TestCase):
         #self.testclass.set_up_neb_folders(image_structures)
 
     def test_is_complete(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['images']=3
+        myvcneb=VaspNEBChecker(name="notready1",program_keys=kdict)
+        self.assertFalse(myvcneb.is_complete())
+        myvcneb=VaspNEBChecker(name="ready",program_keys=kdict)
+        self.assertFalse(myvcneb.is_complete())
+        myvcneb=VaspNEBChecker(name="started",program_keys=kdict)
+        self.assertFalse(myvcneb.is_complete())
+        myvcneb=VaspNEBChecker(name="done",program_keys=kdict)
+        self.assertTrue(myvcneb.is_complete())
         #self.testclass.is_complete()
 
     def test_is_ready_to_run(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['images']=3
+        myvcneb=VaspNEBChecker(name="notready1",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="notready2",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="notready3",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="notready4",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="notready5",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="notready6",program_keys=kdict)
+        self.assertFalse(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="ready", program_keys=kdict)
+        self.assertTrue(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="started", program_keys=kdict)
+        self.assertTrue(myvcneb.is_ready_to_run())
+        myvcneb=VaspNEBChecker(name="done", program_keys=kdict)
+        self.assertTrue(myvcneb.is_ready_to_run())
+        
         #self.testclass.is_ready_to_run()
 
     def test__vasp_incar_setup(self):

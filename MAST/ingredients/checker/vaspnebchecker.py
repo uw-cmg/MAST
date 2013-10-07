@@ -132,6 +132,8 @@ class VaspNEBChecker(VaspChecker):
             notready = notready + 1
         else: #INCAR exists. Now check POSCARs.
             subdirs = dirutil.walkdirs(dirname)
+            if not (len(subdirs) == self.keywords['program_keys']['images'] + 2):
+                notready = notready + 1 #bad number of subdirs
             subdirs.sort()
             if len(subdirs) == 0: #This is an NEB without folders yet
                 notready = notready + 1
