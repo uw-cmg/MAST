@@ -27,9 +27,6 @@ class TestVaspnebchecker(unittest.TestCase):
         for fname in fnames:
             os.remove(fname)
 
-    def test___init__(self):
-        raise SkipTest
-        #self.testclass.__init__(**kwargs)
 
     def test_get_path_to_write_neb_parent_energy(self):
         myvcneb=VaspNEBChecker(name="childdir")
