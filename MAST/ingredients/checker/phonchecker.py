@@ -157,7 +157,7 @@ class PhonChecker(BaseChecker):
             raise MASTError("checker/phon_checker", "No DYNMAT_mod_2 found in %s." % name)
         myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
         mydyn=myvc.read_my_dynamical_matrix_file(name, "DYNMAT_mod_2")
-        myvc.write_my_dynmat_without_disp_or_mass(name, mydyn, "FORCES")
+        myvc.write_my_dynmat_without_disp_or_mass(mydyn, name, "FORCES")
 
     def _nosd_my_dynmat(self):
         """Creates fake blocks in DYNMAT for filling back in the atoms and 
@@ -188,7 +188,7 @@ class PhonChecker(BaseChecker):
                         myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000\n")
         myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
 
-        myvc.write_my_dynamical_matrix_file(name, myforces, "DYNMAT_mod_2")
+        myvc.write_my_dynamical_matrix_file(myforces, name, "DYNMAT_mod_2")
 
     def _replace_my_displacements(self):
         """
@@ -236,7 +236,7 @@ class PhonChecker(BaseChecker):
                 dispcoords = atomcoords - basecoords
                 displine = str(dispcoords[0]) + " " + str(dispcoords[1]) + " " + str(dispcoords[2])
                 myforces['atoms'][atom][disp]['displine'] = displine
-        myvc.write_my_dynamical_matrix_file(name, myforces, "DYNMAT_mod_1")
+        myvc.write_my_dynamical_matrix_file(myforces, name, "DYNMAT_mod_1")
 
     def set_up_program_input(self):
         self._phon_poscar_setup()

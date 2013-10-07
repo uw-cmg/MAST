@@ -20,14 +20,11 @@ class TestPhonChecker(unittest.TestCase):
         os.chdir(testdir)
 
     def tearDown(self):
-        for fname in ["POSCAR","POSCAR_prePHON","INPHON"]:
+        for fname in ["POSCAR","POSCAR_prePHON","INPHON","FORCES","DYNMAT","XDATCAR","DYNMAT_mod_1","DYNMAT_mod_2"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
                 pass
-    def test___init__(self):
-        raise SkipTest
-        #self.testclass.__init__(**kwargs)
 
     def test_is_complete(self):
         mypc=PhonChecker(name="ready")
@@ -137,22 +134,89 @@ class TestPhonChecker(unittest.TestCase):
         #self.testclass._phon_inphon_get_masses()
 
     def test__phon_forces_setup(self):
-        raise SkipTest
+        mystr = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_prePHON").structure
+        myxdat = MASTFile("forces/XDATCAR")
+        myxdat.to_file("childdir/XDATCAR")
+        mydyn = MASTFile("forces/DYNMAT")
+        mydyn.to_file("childdir/DYNMAT")
+        mypc=PhonChecker(name="childdir",structure=mystr)
+        mypc._phon_forces_setup()
+        compare_forces = MASTFile("forces/FORCES_finished")
+        myforces = MASTFile("childdir/FORCES")
+        self.assertEqual(myforces.data, compare_forces.data)
         #self.testclass._phon_forces_setup()
 
     def test__nosd_my_dynmat(self):
-        raise SkipTest
+        mystr = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_prePHON").structure
+        mydyn1 = MASTFile("forces/DYNMAT_mod_1")
+        mydyn1.to_file("childdir/DYNMAT_mod_1")
+        mypc=PhonChecker(name="childdir",structure=mystr)
+        mypc._nosd_my_dynmat()
+        mydyn2 = MASTFile("childdir/DYNMAT_mod_2")
+        dyn2_compare = MASTFile("forces/DYNMAT_mod_2")
+        self.assertEqual(mydyn2.data, dyn2_compare.data)
         #self.testclass._nosd_my_dynmat()
 
     def test__replace_my_displacements(self):
-        raise SkipTest
+        mystr = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_prePHON").structure
+        myxdat = MASTFile("forces/XDATCAR")
+        myxdat.to_file("childdir/XDATCAR")
+        mydyn = MASTFile("forces/DYNMAT")
+        mydyn.to_file("childdir/DYNMAT")
+        mypc=PhonChecker(name="childdir",structure=mystr)
+        mypc._replace_my_displacements()
+        mydyn1 = MASTFile("childdir/DYNMAT_mod_1")
+        dyn1_compare = MASTFile("forces/DYNMAT_mod_1")
+        self.assertEqual(mydyn1.data, dyn1_compare.data)
         #self.testclass._replace_my_displacements()
 
     def test_set_up_program_input(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['mast_program']='phon'
+        kdict['TEMPERATURE']='1173'
+        kdict['LFREE']='.TRUE.'
+        kdict['QA']='11'
+        kdict['QB']='11'
+        kdict['QC']='11'
+        kdict['LSUPER']='.FALSE.'
+        kdict['NTYPES']='3'
+        kdict['MASS']='55.845 20.000 77.123'
+        kdict['IPRINT']='0'
+        kdict['ND']='3'
+        kdict['IBRION']=2 #This is a VASP, not PHON, keyword
+        kdict['nosuchkeyword']="hello"
+        poscar_pre = MASTFile("files/POSCAR_prePHON")
+        poscar_pre.to_file("childdir/POSCAR_prePHON")
+        myxdat = MASTFile("forces/XDATCAR")
+        myxdat.to_file("childdir/XDATCAR")
+        mydyn = MASTFile("forces/DYNMAT")
+        mydyn.to_file("childdir/DYNMAT")
+        mystr = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_prePHON").structure
+        mypc=PhonChecker(name="childdir",program_keys=kdict,structure=mystr)
+        mypc.set_up_program_input()
+        forces_compare=MASTFile("forces/FORCES_finished")
+        poscar_compare=MASTFile("files/POSCAR_for_PHON")
+        inphon_compare=MASTFile("files/INPHON")
+        myforces = MASTFile("childdir/FORCES")
+        myinphon = MASTFile("childdir/INPHON")
+        myposcar = MASTFile("childdir/POSCAR")
+        self.assertEqual(myforces.data,forces_compare.data)
+        self.assertEqual(myposcar.data,poscar_compare.data)
+        self.assertItemsEqual(myinphon.data,inphon_compare.data)
+
         #self.testclass.set_up_program_input()
 
     def test_is_started(self):
-        raise SkipTest
+        mypc=PhonChecker(name="notready1")
+        self.assertFalse(mypc.is_started())
+        mypc=PhonChecker(name="ready")
+        self.assertFalse(mypc.is_started())
+        mypc=PhonChecker(name="started")
+        self.assertTrue(mypc.is_started())
+        mypc=PhonChecker(name="done_freq")
+        self.assertTrue(mypc.is_started())
+        mypc=PhonChecker(name="done_thermo")
+        self.assertTrue(mypc.is_started())
+
         #self.testclass.is_started()
 
