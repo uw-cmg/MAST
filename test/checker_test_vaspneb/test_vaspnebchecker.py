@@ -140,7 +140,7 @@ class TestVaspnebchecker(unittest.TestCase):
         self.assertEqual(myincar, incar_compare)
         #self.testclass._vasp_incar_setup(my_potcar, my_poscar)
 
-    def test_set_up_program_input_neb(self):
+    def test_set_up_program_input(self):
         mystrs=list()
         pos=dict()
         for posstr in ['00','01','02','03','04']:
@@ -151,7 +151,7 @@ class TestVaspnebchecker(unittest.TestCase):
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']="pw91"
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
-        myvcneb.set_up_program_input_neb(mystrs)
+        myvcneb.set_up_program_input(mystrs)
         submitscript = MASTFile()
         submitscript.data="Submission script placeholder."
         submitscript.to_file("childdir/submit.sh")

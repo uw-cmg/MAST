@@ -165,7 +165,7 @@ class VaspNEBChecker(VaspChecker):
         my_incar.to_file(self.keywords['name'] + "/INCAR")
         return my_incar
 
-    def set_up_program_input_neb(self, image_structures):
+    def set_up_program_input(self, image_structures):
         self.set_up_neb_folders(image_structures)
         self._vasp_kpoints_setup()
         mypotcar = self._vasp_potcar_setup(Poscar(image_structures[0]))
