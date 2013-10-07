@@ -152,47 +152,17 @@ class VaspNEBChecker(VaspChecker):
         else:
             return True
     
-    def _vasp_incar_setup(self, my_potcar, my_poscar):
-        """Set up the INCAR, including MAGMOM string, ENCUT, and NELECT."""
+    def _vasp_neb_incar_modify(self):
+        """Modify the INCAR to add the IMAGES tag back in.
+        """
         name=self.keywords['name']
-        myd = dict()
-        myd = self._vasp_incar_get_non_mast_keywords()
-        #Include the IMAGES tag
-        if 'mast_multiplyencut' in self.keywords['program_keys'].keys():
-            mymult = float(self.keywords['program_keys']['mast_multiplyencut'])
-        else:
-            mymult = 1.5
-        if 'ENCUT' in myd.keys():
-            pass
-        else:
-            myd['ENCUT']=self._get_max_enmax_from_potcar(my_potcar)*mymult
-        if 'mast_setmagmom' in self.keywords['program_keys'].keys():
-            magstr = str(self.keywords['program_keys']['mast_setmagmom'])
-            magmomstr=""
-            maglist = magstr.split()
-            numatoms = sum(my_poscar.natoms)
-            if len(maglist) < numatoms:
-                magct=0
-                while magct < len(maglist):
-                    magmomstr = magmomstr + str(my_poscar.natoms[magct]) + "*" + maglist[magct] + " " 
-                    magct = magct + 1
-            else:
-                magmomstr = magstr
-            myd['MAGMOM']=magmomstr
-        if 'mast_charge' in self.keywords['program_keys'].keys():
-            myelectrons = self.get_total_electrons(my_poscar, my_potcar)
-            newelectrons=0.0
-            try:
-                adjustment = float(self.keywords['program_keys']['mast_charge'])
-            except (ValueError, TypeError):
-                raise MASTError("vasp_checker, vasp_incar_setup","Could not parse adjustment")
-            #newelectrons = myelectrons + adjustment
-            newelectrons = myelectrons - adjustment
-            myd['NELECT']=str(newelectrons)
-        my_incar = Incar(myd)
-        dirutil.lock_directory(name)
-        my_incar.write_file(name + "/INCAR")
-        dirutil.unlock_directory(name)
+        myd_with_images = dict()
+        myd_with_images = self._vasp_incar_get_non_mast_keywords()
+        if not 'IMAGES' in myd_with_images.keys():
+            raise MASTError("IMAGES keyword not found in program keys for NEB ingredient at %s" % name)
+        my_incar = MASTFile(self.keywords['name'] + "/INCAR")
+        my_incar.data.append("IMAGES=%s\n" % str(myd_with_images['IMAGES']))
+        my_incar.to_file(self.keywords['name'] + "/INCAR")
         return my_incar
 
     def set_up_program_input_neb(self, image_structures):
@@ -200,6 +170,7 @@ class VaspNEBChecker(VaspChecker):
         self._vasp_kpoints_setup()
         mypotcar = self._vasp_potcar_setup(Poscar(image_structures[0]))
         self._vasp_incar_setup(mypotcar, Poscar(image_structures[0]))
+        self._vasp_neb_incar_modify()
         return
 
     def get_energy_from_energy_file(self):

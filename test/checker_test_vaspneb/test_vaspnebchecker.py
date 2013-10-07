@@ -122,7 +122,24 @@ class TestVaspnebchecker(unittest.TestCase):
         #self.testclass.is_ready_to_run()
 
     def test__vasp_incar_setup(self):
-        raise SkipTest
+        my_poscar = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_00")
+        my_structure = my_poscar.structure
+        my_poscar.write_file("childdir/POSCAR")
+        kdict=dict()
+        kdict['mast_xc'] = "pw91"
+        kdict['mast_pp_setup']={'Cr':'Cr_pv','Fe':'Fe_sv','Ni':'Ni_pv'}
+        kdict['IBRION'] = '1'
+        kdict['IMAGES'] = '3'
+        kdict['POTIM'] = '0.5'
+        kdict['LCLIMB'] = 'True'
+        kdict['SPRING'] ='-5'
+        myvc = VaspNEBChecker(name="childdir",program_keys=kdict,structure=my_structure)
+        mypot = myvc._vasp_potcar_setup(my_poscar)
+        myvc._vasp_incar_setup(mypot, my_poscar)
+        myvc._vasp_neb_incar_modify()
+        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR"))
+        self.assertEqual(myincar, incar_compare)
         #self.testclass._vasp_incar_setup(my_potcar, my_poscar)
 
     def test_set_up_program_input_neb(self):
