@@ -11,7 +11,7 @@ import pymatgen
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 
-testname="chopingredient_test"
+testname="chop_test_run"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 
 class TestRunIngredient(unittest.TestCase):
