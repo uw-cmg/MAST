@@ -25,9 +25,11 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             os.mkdir("writedir/next_ingred")
         if not os.path.isdir("writedir/single_label1"):
             os.mkdir("writedir/single_label1")
+        if not os.path.isdir("writedir/neb_labelinit-labelfin"):
+            os.mkdir("writedir/neb_labelinit-labelfin")
 
     def tearDown(self):
-        for foldername in ["writedir/single_label1","writedir/next_ingred"]:
+        for foldername in ["writedir/single_label1","writedir/next_ingred","writedir/neb_labelinit-labelfin"]:
             try:
                 shutil.rmtree(foldername)
             except OSError:
@@ -71,7 +73,27 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         #self.testclass.give_structure(childname)
 
     def test_give_neb_structures_to_neb(self):
-        raise SkipTest
+        ingdir="%s/writedir/neb_labelinit-labelfin" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_neb")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_neb")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp_neb'
+        kdict['images'] = 3
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed=dict()
+        for subdir in ['00','01','02','03','04']:
+            os.mkdir("writedir/neb_labelinit-labelfin/%s" % subdir)
+            myrelaxed[subdir] = MASTFile("files/POSCAR_%s" % subdir)
+            myrelaxed[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CONTCAR" % subdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_neb_structures_to_neb("next_ingred")
+        for subdir in ['01','02','03']:
+            givenstr = MASTFile("%s/writedir/next_ingred/parent_structure_labelinit-labelfin_%s" % (testdir,subdir))
+            self.assertEqual(myrelaxed[subdir].data, givenstr.data)
         #self.testclass.give_neb_structures_to_neb(childname)
 
     def test_give_saddle_structure(self):
