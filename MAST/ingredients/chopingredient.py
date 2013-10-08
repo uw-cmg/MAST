@@ -24,6 +24,8 @@ from MAST.utility import MASTFile
 from MAST.utility import dirutil
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
+from MAST.ingredients.checker import VaspNEBChecker
+
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
@@ -147,21 +149,26 @@ class WriteIngredient(BaseIngredient):
         """Write the static runs to each subfolder.
         """
         myname=self.keywords['name']
-        subdirs = dirutil.walkdirs(myname,1,1)
-        imct = 0
+        mystr=self.keywords['structure']
         numim = int(self.keywords['program_keys']['images'])
+        singlechecker = self.checker
+        if self.program == 'vasp':
+            nebchecker = VaspNEBChecker(name=self.checker.keywords['name'], program_keys = dict(self.checker.keywords['program_keys']), structure = self.checker.keywords['structure'].copy())
+        else:
+            raise MASTError(self.__class__.__name__, "NEB checker not supported for program %s") % self.program
+        self.checker = nebchecker
+        self.write_neb() #Write the POSCAR and OSZICAR files from existing parent-given structures
+        self.checker = singlechecker
         for imct in range(1, numim+1):
             subdir = str(imct).zfill(2)
             newname = os.path.join(myname, subdir)
-            try:
-                os.mkdir(newname)
-            except OSError:
-                pass
             self.checker.keywords['name']=newname
             self.checker.set_up_program_input()
+            self.keywords['name'] = newname
             self.write_submit_script()
-        self.keywords['name']=myname
-        self.write_neb() #Write the POSCAR and OSZICAR files from existing parent-given structures
+        self.keywords['name'] = myname
+        self.checker.keywords['name']=myname
+        self.checker.keywords['structure']=mystr
         return
     def write_singlerun(self):
         self.checker.set_up_program_input()
