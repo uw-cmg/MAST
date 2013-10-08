@@ -150,6 +150,7 @@ class TestWriteIngredient(unittest.TestCase):
         metad = MASTFile("files/metadata_neb")
         metad.to_file("%s/metadata.txt" % ingdir)
         unsorted_init = MASTFile("unsorted/parent_structure_labelinit")
+        #unsorted_init = MASTFile("unsorted/parent_structure_labelinit_scrambled")
         unsorted_init.to_file("%s/parent_structure_labelinit" % ingdir)
         unsorted_fin = MASTFile("unsorted/parent_structure_labelfin")
         unsorted_fin.to_file("%s/parent_structure_labelfin" % ingdir)
@@ -158,10 +159,10 @@ class TestWriteIngredient(unittest.TestCase):
         [sinit, sfin] = mywi.get_parent_structures()
         init_compare = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit").structure
         fin_compare = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelfin").structure
-        print sinit
-        print init_compare
-        print sfin
-        print fin_compare
+        #print sinit
+        #print init_compare
+        #print sfin
+        #print fin_compare
         self.assertEqual(sinit.sites, init_compare.sites)
         self.assertEqual(sinit.lattice, init_compare.lattice)
         self.assertEqual(sfin.sites, fin_compare.sites)

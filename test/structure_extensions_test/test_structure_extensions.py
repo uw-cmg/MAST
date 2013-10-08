@@ -109,11 +109,29 @@ class TestSE(unittest.TestCase):
         self.assertEqual(sorted4.lattice, compare_sorted4.lattice)
         self.assertEqual(sorted3.sites, compare_sorted3.sites)
         self.assertEqual(sorted4.sites, compare_sorted4.sites)
+
+    def test_sort_structure_and_neb_lines_really_scrambled(self):
+        raise SkipTest
+        neblines = list()
+        neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
+        neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
+        neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
+        neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
         perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3_scrambled").structure
         #print perfect3.get_sorted_structure()
         #print perfect4.get_sorted_structure()
         sxtend3 = StructureExtensions(struc_work1=perfect3)
         sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
+        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
+        self.assertEqual(sorted3, compare_sorted3)
+        self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
+        self.assertEqual(sorted3.sites, compare_sorted3.sites)
+        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3_really_scrambled").structure
+        #print perfect3.get_sorted_structure()
+        #print perfect4.get_sorted_structure()
+        sxtend3 = StructureExtensions(struc_work1=perfect3)
+        sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
+        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
         self.assertEqual(sorted3, compare_sorted3)
         self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
         self.assertEqual(sorted3.sites, compare_sorted3.sites)
