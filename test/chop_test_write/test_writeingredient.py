@@ -170,11 +170,68 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.get_parent_structures()
 
     def test_get_parent_image_structures(self):
-        raise SkipTest
+        kdict=dict()
+        kdict['mast_program'] = 'vasp_neb'
+        kdict['images'] = 3
+        neblines = list()
+        neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
+        neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
+        neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
+        neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
+        kdict['neblines']=dict()
+        kdict['neblines']['labelinit-labelfin']=neblines
+        ingdir = "writedir/neb_labelinit-labelfin"
+        topmetad = MASTFile("files/top_metadata_neb")
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_neb")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        unsorted_01 = MASTFile("unsorted/parent_structure_labelinit-labelfin_01")
+        unsorted_01.to_file("%s/parent_structure_labelinit-labelfin_01" % ingdir)
+        unsorted_02 = MASTFile("unsorted/parent_structure_labelinit-labelfin_02")
+        unsorted_02.to_file("%s/parent_structure_labelinit-labelfin_02" % ingdir)
+        unsorted_03 = MASTFile("unsorted/parent_structure_labelinit-labelfin_03")
+        unsorted_03.to_file("%s/parent_structure_labelinit-labelfin_03" % ingdir)
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        imstrs = mywi.get_parent_image_structures()
+        compare_01 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_01").structure
+        compare_02 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_02").structure
+        compare_03 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_03").structure
+        self.assertEqual(imstrs[0].sites, compare_01.sites)
+        self.assertEqual(imstrs[0].lattice, compare_01.lattice)
+        self.assertEqual(imstrs[1].sites, compare_02.sites)
+        self.assertEqual(imstrs[1].lattice, compare_02.lattice)
+        self.assertEqual(imstrs[2].sites, compare_03.sites)
+        self.assertEqual(imstrs[2].lattice, compare_03.lattice)
         #self.testclass.get_parent_image_structures()
 
     def test_place_parent_energy_files(self):
-        raise SkipTest
+        ingdir="writedir/neb_labelinit-labelfin"
+        topmetad = MASTFile("files/top_metadata_neb")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_neb")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        peinit = MASTFile("files/parent_energy_labelinit")
+        peinit.to_file("%s/parent_energy_labelinit" % ingdir)
+        pefin = MASTFile("files/parent_energy_labelfin")
+        pefin.to_file("%s/parent_energy_labelfin" % ingdir)
+        kdict=dict()
+        kdict['images']=3
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp_neb'
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        os.mkdir(ingdir + '/00')
+        os.mkdir(ingdir + '/04')
+        mywi.place_parent_energy_files()
+        self.assertTrue(os.path.isfile(ingdir + '/00/OSZICAR'))
+        self.assertTrue(os.path.isfile(ingdir + '/04/OSZICAR'))
+        oszinit = MASTFile(ingdir + "/00/OSZICAR")
+        oszfinal = MASTFile(ingdir + "/04/OSZICAR")
+        self.assertEqual(oszinit.data, peinit.data)
+        self.assertEqual(oszfinal.data, pefin.data)
         #self.testclass.place_parent_energy_files()
 
     def test_write_neb_subfolders(self):
