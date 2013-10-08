@@ -97,7 +97,29 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         #self.testclass.give_neb_structures_to_neb(childname)
 
     def test_give_saddle_structure(self):
-        raise SkipTest
+        ingdir="%s/writedir/neb_labelinit-labelfin" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_neb")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_neb")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp_neb'
+        kdict['images'] = 3
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed=dict()
+        myosz=dict()
+        for subdir in ['00','01','02','03','04']:
+            os.mkdir("writedir/neb_labelinit-labelfin/%s" % subdir)
+            myrelaxed[subdir] = MASTFile("files/POSCAR_%s" % subdir)
+            myrelaxed[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CONTCAR" % subdir)
+            myosz[subdir] = MASTFile("files/OSZICAR_%s" % subdir)
+            myosz[subdir].to_file("writedir/neb_labelinit-labelfin/%s/OSZICAR" % subdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_saddle_structure("next_ingred") #should be OSZ3
+        saddle = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed['03'].data, saddle.data)
         #self.testclass.give_saddle_structure(childname)
 
     def test_give_phonon_multiple_forces_and_displacements(self):
