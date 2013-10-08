@@ -23,11 +23,11 @@ class TestWriteIngredient(unittest.TestCase):
             os.mkdir("writedir/neb_labelinit-labelfin")
 
     def tearDown(self):
-        return
-        try:
-            shutil.rmtree("writedir/neb_labelinit-labelfin")
-        except OSError:
-            pass
+        for foldername in ["writedir/neb_labelinit-labelfin","writedir/single_labelone"]:
+            try:
+                shutil.rmtree(foldername)
+            except OSError:
+                pass
 
     def test___init__(self):
         raise SkipTest
@@ -38,7 +38,6 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.no_setup()
 
     def test_write_neb_from_endpoints_only(self):
-        raise SkipTest
         ingdir="writedir/neb_labelinit-labelfin"
         topmetad = MASTFile("files/top_metadata_neb")
         topmetad.to_file("writedir/metadata.txt")
@@ -85,7 +84,6 @@ class TestWriteIngredient(unittest.TestCase):
         self.assertEqual(pos_compare_04.data, mypos04.data)
         #self.testclass.write_neb()
     def test_write_neb_with_parent_image_structures(self):
-        raise SkipTest
         ingdir="writedir/neb_labelinit-labelfin"
         topmetad = MASTFile("files/top_metadata_neb")
         topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
@@ -137,7 +135,6 @@ class TestWriteIngredient(unittest.TestCase):
         self.assertEqual(pos_compare_04.data, mypos04.data)
 
     def test_get_parent_structures(self):
-        raise SkipTest
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
         kdict['images'] = 3
@@ -174,7 +171,6 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.get_parent_structures()
 
     def test_get_parent_image_structures(self):
-        raise SkipTest
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
         kdict['images'] = 3
@@ -211,7 +207,6 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.get_parent_image_structures()
 
     def test_place_parent_energy_files(self):
-        raise SkipTest
         ingdir="writedir/neb_labelinit-labelfin"
         topmetad = MASTFile("files/top_metadata_neb")
         topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
