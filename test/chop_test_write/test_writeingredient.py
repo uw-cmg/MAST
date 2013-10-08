@@ -235,7 +235,37 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.place_parent_energy_files()
 
     def test_write_neb_subfolders(self):
-        raise SkipTest
+        ingdir="writedir/neb_labelinit-labelfin"
+        topmetad = MASTFile("files/top_metadata_neb")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_neb")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        parent_01 = MASTFile("files/parent_structure_labelinit-labelfin_01")
+        parent_01.to_file(ingdir + "/parent_structure_labelinit-labelfin_01")
+        parent_02 = MASTFile("files/parent_structure_labelinit-labelfin_02")
+        parent_02.to_file(ingdir + "/parent_structure_labelinit-labelfin_02")
+        parent_03 = MASTFile("files/parent_structure_labelinit-labelfin_03")
+        parent_03.to_file(ingdir + "/parent_structure_labelinit-labelfin_03")
+        parent_init = MASTFile("files/parent_structure_labelinit")
+        parent_init.to_file(ingdir + "/parent_structure_labelinit")
+        parent_fin = MASTFile("files/parent_structure_labelfin")
+        parent_fin.to_file(ingdir + "/parent_structure_labelfin")
+        kdict=dict()
+        kdict['images']=3
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp'
+        neblines = list()
+        neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
+        neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
+        neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
+        neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
+        kdict['neblines']=dict()
+        kdict['neblines']['labelinit-labelfin']=neblines
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        mywi.write_neb_subfolders()
         #self.testclass.write_neb_subfolders()
 
     def test_write_singlerun(self):

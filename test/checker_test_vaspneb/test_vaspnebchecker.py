@@ -152,8 +152,9 @@ class TestVaspnebchecker(unittest.TestCase):
         kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']="pw91"
+        kdict['image_structures'] = mystrs
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
-        myvcneb.set_up_program_input(mystrs)
+        myvcneb.set_up_program_input()
         submitscript = MASTFile()
         submitscript.data="Submission script placeholder."
         submitscript.to_file("childdir/submit.sh")

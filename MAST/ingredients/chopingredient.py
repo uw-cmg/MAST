@@ -24,7 +24,6 @@ from MAST.utility import MASTFile
 from MAST.utility import dirutil
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
-
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {
@@ -58,7 +57,8 @@ class WriteIngredient(BaseIngredient):
             image_structures.append(parentstructures[1])
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
-        self.checker.set_up_program_input(image_structures)
+        self.checker.keywords['program_keys']['image_structures']=image_structures
+        self.checker.set_up_program_input()
         self.place_parent_energy_files()
         self.write_submit_script()
         return
@@ -150,21 +150,18 @@ class WriteIngredient(BaseIngredient):
         subdirs = dirutil.walkdirs(myname,1,1)
         imct = 0
         numim = int(self.keywords['program_keys']['images'])
-        for subdir in subdirs:
-            if imct == 0 or imct > numim:
+        for imct in range(1, numim+1):
+            subdir = str(imct).zfill(2)
+            newname = os.path.join(myname, subdir)
+            try:
+                os.mkdir(newname)
+            except OSError:
                 pass
-            else:
-                newname = os.path.join(myname, subdir)
-                try:
-                    os.mkdir(newname)
-                except OSError:
-                    pass
-                self.checker.keywords['name']=newname
-                self.checker.set_up_program_input()
-                self.write_submit_script()
-            imct = imct + 1
+            self.checker.keywords['name']=newname
+            self.checker.set_up_program_input()
+            self.write_submit_script()
         self.keywords['name']=myname
-        self.write_neb() #Write the POSCAR files from existing parent-given structures
+        self.write_neb() #Write the POSCAR and OSZICAR files from existing parent-given structures
         return
     def write_singlerun(self):
         self.checker.set_up_program_input()
