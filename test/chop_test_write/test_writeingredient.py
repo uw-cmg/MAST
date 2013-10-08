@@ -21,9 +21,13 @@ class TestWriteIngredient(unittest.TestCase):
             os.mkdir("writedir")
         if not os.path.isdir("writedir/neb_labelinit-labelfin"):
             os.mkdir("writedir/neb_labelinit-labelfin")
+        if not os.path.isdir("writedir/single_label1"):
+            os.mkdir("writedir/single_label1")
+        if not os.path.isdir("writedir/single_phonon_label1"):
+            os.mkdir("writedir/single_phonon_label1")
 
     def tearDown(self):
-        for foldername in ["writedir/neb_labelinit-labelfin","writedir/single_labelone"]:
+        for foldername in ["writedir/neb_labelinit-labelfin","writedir/single_label1", "writedir/single_phonon_label1"]:
             try:
                 shutil.rmtree(foldername)
             except OSError:
@@ -295,15 +299,82 @@ class TestWriteIngredient(unittest.TestCase):
         #self.testclass.write_neb_subfolders()
 
     def test_write_singlerun(self):
-        raise SkipTest
+        ingdir="writedir/single_label1"
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp'
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        mywi.write_singlerun()
+        self.assertTrue(mywi.checker.is_ready_to_run())
         #self.testclass.write_singlerun()
 
     def test_write_phonon_multiple(self):
-        raise SkipTest
+        ingdir="writedir/single_phonon_label1"
+        topmetad = MASTFile("files/top_metadata_single_phonon")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single_phonon")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp'
+        kdict['phonon']=dict()
+        kdict['phonon']['label1']=dict()
+        kdict['phonon']['label1']['phonon_center_site']="0.33 0.25 0.0"
+        kdict['phonon']['label1']['phonon_center_radius']="1"
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        mywi.write_phonon_multiple()
+        self.assertTrue(os.path.isdir("%s/phon_01" % ingdir))
+        self.assertTrue(os.path.isdir("%s/phon_02" % ingdir))
+        self.assertTrue(os.path.isdir("%s/phon_03" % ingdir))
+        mywi.checker.keywords['name'] = "%s/phon_01" % ingdir
+        self.assertTrue(mywi.checker.is_ready_to_run())
+        mywi.checker.keywords['name'] = "%s/phon_02" % ingdir
+        self.assertTrue(mywi.checker.is_ready_to_run())
+        mywi.checker.keywords['name'] = "%s/phon_03" % ingdir
+        self.assertTrue(mywi.checker.is_ready_to_run())
+        compare_phon01 = MASTFile("files/phon_01_POSCAR")
+        compare_phon02 = MASTFile("files/phon_02_POSCAR")
+        compare_phon03 = MASTFile("files/phon_03_POSCAR")
+        phon01 = MASTFile("%s/phon_01/POSCAR" % ingdir)
+        phon02 = MASTFile("%s/phon_02/POSCAR" % ingdir)
+        phon03 = MASTFile("%s/phon_03/POSCAR" % ingdir)
+        self.assertEqual(phon01.data, compare_phon01.data)
+        self.assertEqual(phon02.data, compare_phon02.data)
+        self.assertEqual(phon03.data, compare_phon03.data)
         #self.testclass.write_phonon_multiple()
 
     def test_write_phonon_single(self):
-        raise SkipTest
+        ingdir="writedir/single_phonon_label1"
+        topmetad = MASTFile("files/top_metadata_single_phonon")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single_phonon")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp'
+        kdict['phonon']=dict()
+        kdict['phonon']['label1']=dict()
+        kdict['phonon']['label1']['phonon_center_site']="0.33 0.25 0.0"
+        kdict['phonon']['label1']['phonon_center_radius']="1"
+        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        mywi.write_phonon_single()
+        self.assertTrue(mywi.checker.is_ready_to_run())
+        compare_phon_single = MASTFile("files/phon_single_POSCAR")
+        phon_singlepos = MASTFile("%s/POSCAR" % ingdir)
+        self.assertEqual(phon_singlepos.data, compare_phon_single.data)
         #self.testclass.write_phonon_single()
 
     def test_get_my_phonon_params(self):

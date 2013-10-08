@@ -196,9 +196,11 @@ class WriteIngredient(BaseIngredient):
             self.checker.keywords['structure']=mystructure
             self.checker.set_up_program_input()
             self.checker.add_selective_dynamics_to_structure_file(sdarr)
+            self.keywords['name'] = newname
             self.write_submit_script()
-            self.checker.forward_extra_restart_files(myname, newname)
+            self.checker.forward_extra_restart_files(newname)
             sct = sct + 1
+        self.checker.keywords['name'] = myname
         self.keywords['name']=myname
         
 
