@@ -32,19 +32,19 @@ class VaspNEBChecker(VaspChecker):
         self.logger = logging.getLogger(__name__)
 
 
-    def get_path_to_write_neb_parent_energy(self, myimages, parent):
+    def get_path_to_write_neb_parent_energy(self, parent):
         """Get the path into which to write the NEB parent
             energy.
             For VASP, the paths are the 00 and 0(N+1) 
             directories, where N is the number of images.
             Args:
-                myimages <int or str>: number of images
-                parent <int>: 1 for initial endpoint; 2 for
+                parent (if integer) <int>: 1 for initial endpoint; 2 for
                               final endpoint
-                parent <str>: destination folder specified as 
+                parent (if string) <str>: destination folder specified as 
                               a string, e.g. "03"
         """
         myname = self.keywords['name']
+        myimages = self.keywords['program_keys']['images']
         if parent == 1:
             return os.path.join(myname, "00", "OSZICAR")
         elif parent == 2:

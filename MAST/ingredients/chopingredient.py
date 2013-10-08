@@ -59,8 +59,8 @@ class WriteIngredient(BaseIngredient):
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
         self.checker.set_up_program_input(image_structures)
-        self.checker.place_parent_energy_files()
-        self.checker.write_submit_script()
+        self.place_parent_energy_files()
+        self.write_submit_script()
         return
 
 

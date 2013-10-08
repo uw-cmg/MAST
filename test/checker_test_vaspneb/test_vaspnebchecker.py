@@ -29,12 +29,14 @@ class TestVaspnebchecker(unittest.TestCase):
 
 
     def test_get_path_to_write_neb_parent_energy(self):
-        myvcneb=VaspNEBChecker(name="childdir")
-        mypath = myvcneb.get_path_to_write_neb_parent_energy(3,1)
+        kdict=dict()
+        kdict['images']=3
+        myvcneb=VaspNEBChecker(name="childdir",program_keys = kdict)
+        mypath = myvcneb.get_path_to_write_neb_parent_energy(1)
         self.assertEqual(mypath, "childdir/00/OSZICAR")
-        mypath = myvcneb.get_path_to_write_neb_parent_energy(3,2)
+        mypath = myvcneb.get_path_to_write_neb_parent_energy(2)
         self.assertEqual(mypath, "childdir/04/OSZICAR")
-        mypath = myvcneb.get_path_to_write_neb_parent_energy(3,'02')
+        mypath = myvcneb.get_path_to_write_neb_parent_energy('02')
         self.assertEqual(mypath, "childdir/02/OSZICAR")
         #self.testclass.get_path_to_write_neb_parent_energy(myimages, parent)
 
