@@ -109,6 +109,14 @@ class TestSE(unittest.TestCase):
         self.assertEqual(sorted4.lattice, compare_sorted4.lattice)
         self.assertEqual(sorted3.sites, compare_sorted3.sites)
         self.assertEqual(sorted4.sites, compare_sorted4.sites)
+        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3_scrambled").structure
+        #print perfect3.get_sorted_structure()
+        #print perfect4.get_sorted_structure()
+        sxtend3 = StructureExtensions(struc_work1=perfect3)
+        sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
+        self.assertEqual(sorted3, compare_sorted3)
+        self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
+        self.assertEqual(sorted3.sites, compare_sorted3.sites)
 
 
     def test_interpolation(self):
