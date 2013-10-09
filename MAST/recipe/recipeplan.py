@@ -237,11 +237,13 @@ class RecipePlan:
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.")
         self.ingredients[ingredient_name] = ingredient
 
     def get_ingredient(self, ingredient_name):
         """Used to get an ingredient_object corresponding to an ingredient name
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.")
         return self.ingredients.get(ingredient_name)
 
     #def add_parent(self, ingredient_name, parent_name):
@@ -252,12 +254,14 @@ class RecipePlan:
     def ingredient_iterator(self):
         """Iterates through the ingredients dict and returns the ingredients one by one
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.")
         for ingredient_name, ingredient_obj in self.ingredients.iteritems():
             yield ingredient_name, ingredient_obj
 
     def __iter__(self):
         """Iterates through the ingredients dict and returns the ingredients one by one
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.")
         for ingredient_name, ingredient_obj in self.ingredients.iteritems():
             yield ingredient_obj
     def __repr__(self):
