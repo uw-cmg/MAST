@@ -393,13 +393,7 @@ class IsCompleteIngredient(BaseIngredient):
     def complete_structure(self):
         if self.directory_is_locked():
             return False
-        if self.program == 'vasp':
-            if os.path.exists(self.keywords['name'] +'/CONTCAR'):
-                return True
-            else:
-                return False
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
+        return self.checker.has_ending_structure_file()
     def complete_singlerun(self):
         return BaseIngredient.is_complete(self)
     def complete_neb_subfolders(self):
