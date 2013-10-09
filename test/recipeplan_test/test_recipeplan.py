@@ -17,7 +17,20 @@ testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 class TestRecipeplan(unittest.TestCase):
 
     def setUp(self):
+        os.environ['MAST_CONTROL'] = testdir + "/test_control"
+        os.environ['MAST_RECIPE_PATH'] = testdir
+        os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
+        if not os.path.isdir("test_control"):
+            os.mkdir("test_control")
+        if not os.path.isdir("recipedir"):
+            os.mkdir("recipedir")
+        if not os.path.isdir("recipedir/ing2a"):
+            os.mkdir("recipedir/ing2a")
+        if not os.path.isdir("recipedir/ing2b"):
+            os.mkdir("recipedir/ing2b")
+        if not os.path.isdir("recipedir/ing3"):
+            os.mkdir("recipedir/ing3")
 
     def tearDown(self):
         removelist=list()
@@ -27,6 +40,10 @@ class TestRecipeplan(unittest.TestCase):
         removelist.append("recipedir/ing2b/POTCAR")
         removelist.append("recipedir/ing2b/KPOINTS")
         removelist.append("recipedir/ing2b/submit.sh")
+        removelist.append("recipedir/ing2b/CHGCAR")
+        removelist.append("recipedir/ing2b/WAVECAR")
+        removelist.append("recipedir/ing2a/POSCAR")
+        removelist.append("test_control/submitlist")
         for myfile in removelist:
             try:
                 os.remove(myfile)
@@ -42,6 +59,7 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.__init__(name, working_directory)
 
     def test_write_ingredient(self):
+        raise SkipTest
         topmetad = MASTFile("files/top_metadata_single")
         topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
         topmetad.to_file("recipedir/metadata.txt")
@@ -87,15 +105,76 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.complete_ingredient(iname)
 
     def test_ready_ingredient(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        #metad = MASTFile("files/metadata_single")
+        #metad.to_file("%s/metadata.txt" % ingdir)
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing2b'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.write_methods['ing2b']='write_singlerun'
+        rp.write_ingredient('ing2b')
+        rp.ready_methods['ing2b']='ready_singlerun'
+        self.assertTrue(rp.ready_ingredient('ing2b'))
         #self.testclass.ready_ingredient(iname)
 
     def test_run_ingredient(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        #metad = MASTFile("files/metadata_single")
+        #metad.to_file("%s/metadata.txt" % ingdir)
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing2b'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.write_methods['ing2b']='write_singlerun'
+        rp.write_ingredient('ing2b')
+        rp.run_methods['ing2b']='run_singlerun'
+        rp.run_ingredient('ing2b')
+        mysubmit = MASTFile("test_control/submitlist")
+        self.assertEquals(mysubmit.data[0],"recipedir/ing2b\n")
         #self.testclass.run_ingredient(iname)
 
     def test_update_children(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        #metad = MASTFile("files/metadata_single")
+        #metad.to_file("%s/metadata.txt" % ingdir)
+        rp = RecipePlan("test_recipe","%s/recipedir" % testdir)
+        rp.ingredients['ing1'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="%s/ing1" % rp.working_directory
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.update_methods['ing1']=dict()
+        rp.update_methods['ing1']['ing2a']='give_structure'
+        rp.update_methods['ing1']['ing2b']='give_structure_and_restart_files'
+        rp.update_children('ing1')
+        self.assertTrue(os.path.isfile("recipedir/ing2a/POSCAR"))
+        self.assertTrue(os.path.isfile("recipedir/ing2b/POSCAR"))
+        #CHGCAR softlink only sent to second child
+        self.assertFalse(os.path.exists("recipedir/ing2a/CHGCAR"))
+        self.assertTrue(os.path.exists("recipedir/ing2b/CHGCAR"))
         #self.testclass.update_children(iname)
 
     def test_fast_forward_check_complete(self):
