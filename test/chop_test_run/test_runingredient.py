@@ -244,6 +244,24 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.run_defect()
 
     def test_run_strain(self):
-        raise SkipTest
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        kdict['mast_strain']=" 0.98 0.92 1.03 \n"
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        myunstrained = MASTFile("files/POSCAR_unstrained")
+        myunstrained.to_file("%s/POSCAR" % ingdir)
+        myri = RunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myri.run_strain()
+        my_strained = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure
+        strained_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_strained").structure
+        self.assertEquals(my_strained, strained_compare)
+        self.assertFalse(os.path.isfile("test_control/submitlist"))
         #self.testclass.run_strain()
 

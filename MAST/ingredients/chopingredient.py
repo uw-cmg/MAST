@@ -375,22 +375,9 @@ class RunIngredient(BaseIngredient):
         """
         mystructure = self.checker.get_initial_structure_from_directory()
         mystrain = self.keywords['program_keys']['mast_strain']
-        strainsplit = mystrain.strip().split()
-        strarray = np.array([[0.],[0.],[0.]],'float')
-        for sidx in range(0,3):
-            strflt = float(strainsplit[sidx])
-            strarray[sidx][0]=strflt
-        newlattice = Lattice(np.multiply(mystructure._lattice.matrix, strarray)) #be very careful here. np.multiply is NOT regular matrix multiplication.
-        newstructure = mystructure.copy()
-        newstructure.modify_lattice(newlattice)
-        if self.program == 'vasp':
-            myposcar = Poscar(newstructure)
-            self.lock_directory()
-            myposcar.write_file('%s/CONTCAR' % self.keywords['name'])
-            self.unlock_directory()
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
-
+        sxtend = StructureExtensions(struc_work1 = mystructure)
+        strained_structure = sxtend.strain_lattice(mystrain)
+        self.checker.write_final_structure_file(strained_structure)
         return
 
 
