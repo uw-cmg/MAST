@@ -67,7 +67,23 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.write_ingredient(iname)
 
     def test_complete_ingredient(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        #metad = MASTFile("files/metadata_single")
+        #metad.to_file("%s/metadata.txt" % ingdir)
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="recipedir/ing1"
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.complete_methods['ing1']='complete_singlerun'
+        self.assertTrue(rp.complete_ingredient('ing1'))
         #self.testclass.complete_ingredient(iname)
 
     def test_ready_ingredient(self):
