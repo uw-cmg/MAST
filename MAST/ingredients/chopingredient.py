@@ -275,19 +275,21 @@ class IsReadyToRunIngredient(BaseIngredient):
         for subdir in subdirs:
             newname = os.path.join(myname, subdir)
             self.keywords['name']=newname
+            self.checker.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
             elif not BaseIngredient.is_ready_to_run(self):
                 notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
+        self.checker.keywords['name']=myname
         if notready == 0:
             return True
         else:
             return False
 
     def ready_subfolders(self):
-        """Make sure all phonon subfolders are ready to run."""
+        """Make sure all subfolders are ready to run."""
         myname=self.keywords['name']
         phondirs = dirutil.walkdirs(myname,1,1)
         notready=0
@@ -296,9 +298,11 @@ class IsReadyToRunIngredient(BaseIngredient):
         for phondir in phondirs:
             newname = os.path.join(myname, phondir)
             self.keywords['name']=newname
+            self.checker.keywords['name']=newname
             if not BaseIngredient.is_ready_to_run(self):
                 notready = notready + 1
         self.keywords['name']=myname
+        self.checker.keywords['name']=myname
         if notready == 0:
             return True
         else:
