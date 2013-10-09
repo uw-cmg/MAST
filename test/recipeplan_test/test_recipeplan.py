@@ -43,6 +43,7 @@ class TestRecipeplan(unittest.TestCase):
         removelist.append("recipedir/ing2b/CHGCAR")
         removelist.append("recipedir/ing2b/WAVECAR")
         removelist.append("recipedir/ing2a/POSCAR")
+        #removelist.append("recipedir/printed.txt")
         removelist.append("test_control/submitlist")
         for myfile in removelist:
             try:
@@ -294,19 +295,188 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.check_if_parents_are_complete()
 
     def test_run_staged_ingredients(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        #metad = MASTFile("files/metadata_single")
+        #metad.to_file("%s/metadata.txt" % ingdir)
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1']="C"
+        rp.ingredients['ing2a'] = "W"
+        rp.ingredients['ing2b'] = "S"
+        rp.ingredients['ing3'] = "W"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.write_methods['ing2b']='write_singlerun'
+        rp.write_ingredient('ing2b')
+        rp.ready_methods['ing2b']='ready_singlerun'
+        rp.run_methods['ing2b']='run_singlerun'
+        rp.complete_methods['ing2b']='complete_singlerun'
+        rp.run_staged_ingredients()
+        mysubmit = MASTFile("test_control/submitlist")
+        self.assertEquals(mysubmit.data[0],"recipedir/ing2b\n")
+        self.assertEquals(rp.ingredients,{'ing1':'C','ing2a':'W','ing2b':'P','ing3':'W'})
         #self.testclass.run_staged_ingredients()
 
     def test_check_recipe_status(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing1/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labela\n")
+        metad.to_file("recipedir/ing2a/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labelb\n")
+        metad.to_file("recipedir/ing2b/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing3/metadata.txt")
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "I"
+        rp.ingredients['ing2a'] = "I"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="recipedir/ing1"
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=my_struc
+        rp.complete_methods['ing1']='complete_singlerun'
+        rp.run_methods['ing1']='run_singlerun'
+        rp.update_methods['ing1']=dict()
+        rp.update_methods['ing1']['ing2a']='give_structure'
+        rp.update_methods['ing1']['ing2b']='give_structure'
+        rp.ingred_input_options['ing2a']=dict()
+        rp.ingred_input_options['ing2a']['name']="recipedir/ing2a"
+        rp.ingred_input_options['ing2a']['program_keys']=kdict
+        rp.ingred_input_options['ing2a']['structure']=my_struc
+        rp.complete_methods['ing2a']='complete_singlerun'
+        rp.ready_methods['ing2a']='ready_structure'
+        rp.run_methods['ing2a']='run_singlerun'
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=my_struc
+        rp.complete_methods['ing2b']='complete_singlerun'
+        rp.ready_methods['ing2b']='ready_structure'
+        rp.run_methods['ing2b']='run_singlerun'
+        rp.ingred_input_options['ing3']=dict()
+        rp.ingred_input_options['ing3']['name']="recipedir/ing3"
+        rp.ingred_input_options['ing3']['program_keys']=kdict
+        rp.ingred_input_options['ing3']['structure']=my_struc
+        rp.complete_methods['ing3']='complete_singlerun'
+        rp.ready_methods['ing3']='ready_structure'
+        rp.run_methods['ing3']='run_singlerun'
+        rp.parents_to_check['ing3']=['ing2a','ing2b']
+        rp.parents_to_check['ing2a']=['ing1']
+        rp.parents_to_check['ing2b']=[]
+        rp.parents_to_check['ing1']=[]
+        rp.check_recipe_status()
+        mystatus = MASTFile("recipedir/status.txt")
+        status_compare = MASTFile("files/status_current.txt")
+        self.assertEqual(mystatus.data, status_compare.data)
+        
         #self.testclass.check_recipe_status(verbose=1)
 
     def test_print_status(self):
-        raise SkipTest
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "S"
+        rp.ingredients['ing2a'] = "W"
+        rp.ingredients['ing2b'] = "C"
+        rp.ingredients['ing3'] = "P"
+        rp.print_status()
+        mystatus = MASTFile("recipedir/status.txt")
+        status_compare = MASTFile("files/status_artificial.txt")
+        self.assertEqual(mystatus.data, status_compare.data)
         #self.testclass.print_status(verbose=1)
 
     def test___repr__(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing1/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labela\n")
+        metad.to_file("recipedir/ing2a/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labelb\n")
+        metad.to_file("recipedir/ing2b/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing3/metadata.txt")
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "I"
+        rp.ingredients['ing2a'] = "I"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="recipedir/ing1"
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=my_struc
+        rp.complete_methods['ing1']='complete_singlerun'
+        rp.run_methods['ing1']='run_singlerun'
+        rp.ready_methods['ing1']='ready_singlerun'
+        rp.write_methods['ing1']='write_singlerun'
+        rp.update_methods['ing1']=dict()
+        rp.update_methods['ing1']['ing2a']='give_structure'
+        rp.update_methods['ing1']['ing2b']='give_structure'
+        rp.ingred_input_options['ing2a']=dict()
+        rp.ingred_input_options['ing2a']['name']="recipedir/ing2a"
+        rp.ingred_input_options['ing2a']['program_keys']=kdict
+        rp.ingred_input_options['ing2a']['structure']=my_struc
+        rp.complete_methods['ing2a']='complete_singlerun'
+        rp.ready_methods['ing2a']='ready_structure'
+        rp.run_methods['ing2a']='run_singlerun'
+        rp.write_methods['ing2a']='write_singlerun'
+        rp.update_methods['ing2a']=dict()
+        rp.update_methods['ing2a']['ing3']='give_structure_and_restart_files'
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=my_struc
+        rp.complete_methods['ing2b']='complete_singlerun'
+        rp.ready_methods['ing2b']='ready_structure'
+        rp.run_methods['ing2b']='run_singlerun'
+        rp.write_methods['ing2b']='write_singlerun'
+        rp.update_methods['ing2b']=dict()
+        rp.update_methods['ing2b']['ing3']='give_structure_and_restart_files'
+        rp.ingred_input_options['ing3']=dict()
+        rp.ingred_input_options['ing3']['name']="recipedir/ing3"
+        rp.ingred_input_options['ing3']['program_keys']=kdict
+        rp.ingred_input_options['ing3']['structure']=my_struc
+        rp.complete_methods['ing3']='complete_singlerun'
+        rp.ready_methods['ing3']='ready_structure'
+        rp.run_methods['ing3']='run_singlerun'
+        rp.write_methods['ing3']='write_singlerun'
+        rp.update_methods['ing3']=dict()
+        rp.parents_to_check['ing3']=['ing2a','ing2b']
+        rp.parents_to_check['ing2a']=['ing1']
+        rp.parents_to_check['ing2b']=[]
+        rp.parents_to_check['ing1']=[]
+        mylines=rp.__repr__()
+        printed =MASTFile()
+        printed.data = mylines
+        printed.to_file("recipedir/printed.txt")
+        compare_print=MASTFile("files/printout.txt")
+        printedread = MASTFile("recipedir/printed.txt")
+        self.assertEqual(printedread.data, compare_print.data)
+
         #self.testclass.__repr__()
 
     def test_get_statuses_from_file(self):
