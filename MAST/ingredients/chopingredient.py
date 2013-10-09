@@ -538,6 +538,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         #Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR
         childname = self._fullpath_childname(childname)
         self.checker.forward_dynamical_matrix_file(childname)
+        self.checker.forward_displacement_file(childname)
         self.checker.forward_initial_structure_file(childname, "POSCAR_prePHON")
 
     def give_structure_and_energy_to_neb(self, childname):

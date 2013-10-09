@@ -27,9 +27,16 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             os.mkdir("writedir/single_label1")
         if not os.path.isdir("writedir/neb_labelinit-labelfin"):
             os.mkdir("writedir/neb_labelinit-labelfin")
+        if not os.path.isdir("writedir/single_phonon_label1"):
+            os.mkdir("writedir/single_phonon_label1")
 
     def tearDown(self):
-        for foldername in ["writedir/single_label1","writedir/next_ingred","writedir/neb_labelinit-labelfin"]:
+        tearlist = list()
+        tearlist.append("writedir/single_label1")
+        tearlist.append("writedir/next_ingred")
+        tearlist.append("writedir/neb_labelinit-labelfin")
+        tearlist.append("writedir/single_phonon_label1")
+        for foldername in tearlist:
             try:
                 shutil.rmtree(foldername)
             except OSError:
@@ -123,7 +130,39 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         #self.testclass.give_saddle_structure(childname)
 
     def test_give_phonon_multiple_forces_and_displacements(self):
-        raise SkipTest
+        ingdir="%s/writedir/single_phonon_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single_phonon")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        mypos = MASTFile("files/phonon_initial_POSCAR")
+        mypos.to_file("%s/POSCAR" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myxdat=dict()
+        mydynmat=dict()
+        for subdir in ['phon_01','phon_02','phon_03']:
+            os.mkdir("%s/%s" % (ingdir,subdir))
+            myxdat[subdir] = MASTFile("files/XDATCAR_%s" % subdir)
+            myxdat[subdir].to_file("%s/%s/XDATCAR" % (ingdir,subdir))
+            mydynmat[subdir] = MASTFile("files/DYNMAT_%s" % subdir)
+            mydynmat[subdir].to_file("%s/%s/DYNMAT" % (ingdir, subdir))
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_phonon_multiple_forces_and_displacements("next_ingred") #should be OSZ3
+        #print dirutil.walkfiles("writedir/next_ingred")
+        #return
+        newpos = MASTFile("%s/writedir/next_ingred/POSCAR_prePHON" % testdir)
+        newdyn = MASTFile("%s/writedir/next_ingred/DYNMAT" % testdir)
+        newxdat = MASTFile("%s/writedir/next_ingred/XDATCAR" % testdir)
+        comparepos = MASTFile("files/phonon_initial_POSCAR")
+        comparedyn = MASTFile("files/DYNMAT_compare")
+        comparexdat = MASTFile("%s/XDATCAR" % ingdir)
+        self.assertEqual(newpos.data, comparepos.data)
+        self.assertEqual(newdyn.data, comparedyn.data)
+        self.assertEqual(newxdat.data, comparexdat.data)
         #self.testclass.give_phonon_multiple_forces_and_displacements(childname)
 
     def test_give_phonon_single_forces_and_displacements(self):
