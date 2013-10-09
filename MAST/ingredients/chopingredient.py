@@ -254,16 +254,14 @@ class IsReadyToRunIngredient(BaseIngredient):
         self.logger = logging.getLogger(__name__)
     def ready_singlerun(self):
         return BaseIngredient.is_ready_to_run(self)
-    def ready_defect(self):
+    def ready_structure(self):
         if self.directory_is_locked():
             return False
-        if self.program == 'vasp':
-            if os.path.exists(self.keywords['name'] +'/POSCAR'):
-                return True
-            else:
-                return False
-        else:
-            raise MASTError(self.__class__.__name__, "Program %s not supported." % self.program)
+        return self.checker.has_starting_structure_file()
+
+    def ready_defect(self):
+        self.logger.warning("ready_defect is deprecated. use ready_structure instead")
+        return self.ready_structure()
 
     def ready_neb_subfolders(self):
         """Make sure all subfolders are ready to run."""

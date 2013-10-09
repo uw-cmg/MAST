@@ -841,3 +841,14 @@ class VaspChecker(BaseChecker):
         """
         mycontcar = Poscar(mystruc)
         mycontcar.write_file(os.path.join(self.keywords['name'],'CONTCAR'))
+    def has_starting_structure_file(self):
+        """Evaluate whether the ingredient has a starting
+            structure file. For VASP, this is a POSCAR.
+        """
+        return os.path.isfile(os.path.join(self.keywords['name'], 'POSCAR'))
+
+    def has_ending_structure_file(self):
+        """Evaluate whether the ingredient has a starting
+            structure file. For VASP, this is a CONTCAR.
+        """
+        return os.path.isfile(os.path.join(self.keywords['name'], 'CONTCAR'))

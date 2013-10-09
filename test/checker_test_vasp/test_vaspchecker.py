@@ -28,6 +28,8 @@ class TestVaspChecker(unittest.TestCase):
     """
     def setUp(self):
         os.chdir(testdir)
+        if not os.path.exists("childdir"):
+            os.mkdir("childdir")
 
     def tearDown(self):
         for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined","CONTCAR"]:
@@ -419,4 +421,21 @@ class TestVaspChecker(unittest.TestCase):
         myvc.write_final_structure_file(finalstruc)
         mystruc = pymatgen.io.vaspio.Poscar.from_file("childdir/CONTCAR").structure
         self.assertEqual(mystruc,finalstruc)
-
+    def test_has_starting_structure_file(self):
+        myvc = VaspChecker(name="notready3")
+        self.assertFalse(myvc.has_starting_structure_file())
+        myvc = VaspChecker(name="ready")
+        self.assertTrue(myvc.has_starting_structure_file())
+        myvc = VaspChecker(name="notready1")
+        self.assertTrue(myvc.has_starting_structure_file())
+        myvc = VaspChecker(name="notready2")
+        self.assertTrue(myvc.has_starting_structure_file())
+        myvc = VaspChecker(name="notready4")
+        self.assertTrue(myvc.has_starting_structure_file())
+        myvc = VaspChecker(name="notready5")
+        self.assertTrue(myvc.has_starting_structure_file())
+    def test_has_ending_structure_file(self):
+        myvc = VaspChecker(name="ready")
+        self.assertFalse(myvc.has_ending_structure_file())
+        myvc = VaspChecker(name="done")
+        self.assertTrue(myvc.has_ending_structure_file())
