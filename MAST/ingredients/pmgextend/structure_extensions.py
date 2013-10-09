@@ -48,25 +48,29 @@ class StructureExtensions(MASTObj):
 
         if (defect['type'] == 'vacancy'):
             self.logger.info('Creating a %s vacancy at %s' % (symbol, str(defect['coordinates'])))
-
             index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
+            if len(index) > 1:
+                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance." % (index, threshold))
+            if len(index) == 0:
+                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance." % threshold)
             struct_ed.remove_sites([index])
         elif (defect['type'] == 'interstitial'):
             self.logger.info('Creating a %s interstitial at %s' % (symbol, str(defect['coordinates'])))
-
             struct_ed.append(symbol,
                                   defect['coordinates'],
                                   coords_are_cartesian=False,
                                   validate_proximity=True)
         elif (defect['type'] in ['antisite', 'substitution']):
             self.logger.info('Creating a %s antisite at %s' % (symbol, str(defect['coordinates'])))
-
             index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
-
+            if len(index) > 1:
+                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance." % (index, threshold))
+            if len(index) == 0:
+                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance." % threshold)
             struct_ed.replace(index, symbol)
             struct_ed = struct_ed.get_sorted_structure()
         else:
