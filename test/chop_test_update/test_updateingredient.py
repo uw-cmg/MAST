@@ -55,7 +55,8 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict)
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         fullpath = myuci._fullpath_childname("next_ingred")
         self.assertEqual(fullpath, "%s/writedir/next_ingred" % testdir)
         #self.testclass._fullpath_childname(childname)
@@ -151,9 +152,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             mydynmat[subdir] = MASTFile("files/DYNMAT_%s" % subdir)
             mydynmat[subdir].to_file("%s/%s/DYNMAT" % (ingdir, subdir))
         myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
-        myuci.give_phonon_multiple_forces_and_displacements("next_ingred") #should be OSZ3
-        #print dirutil.walkfiles("writedir/next_ingred")
-        #return
+        myuci.give_phonon_multiple_forces_and_displacements("next_ingred") 
         newpos = MASTFile("%s/writedir/next_ingred/POSCAR_prePHON" % testdir)
         newdyn = MASTFile("%s/writedir/next_ingred/DYNMAT" % testdir)
         newxdat = MASTFile("%s/writedir/next_ingred/XDATCAR" % testdir)
@@ -166,14 +165,81 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         #self.testclass.give_phonon_multiple_forces_and_displacements(childname)
 
     def test_give_phonon_single_forces_and_displacements(self):
-        raise SkipTest
+        ingdir="%s/writedir/single_phonon_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single_phonon")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        mypos = MASTFile("files/phonon_initial_POSCAR")
+        mypos.to_file("%s/POSCAR" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myxdat = MASTFile("files/XDATCAR_compare")
+        myxdat.to_file("%s/XDATCAR" % ingdir)
+        mydynmat = MASTFile("files/DYNMAT_compare")
+        mydynmat.to_file("%s/DYNMAT" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_phonon_single_forces_and_displacements("next_ingred") 
+        newpos = MASTFile("%s/writedir/next_ingred/POSCAR_prePHON" % testdir)
+        newdyn = MASTFile("%s/writedir/next_ingred/DYNMAT" % testdir)
+        newxdat = MASTFile("%s/writedir/next_ingred/XDATCAR" % testdir)
+        comparepos = MASTFile("files/phonon_initial_POSCAR")
+        comparedyn = MASTFile("files/DYNMAT_compare")
+        comparexdat = MASTFile("%s/XDATCAR" % ingdir)
+        self.assertEqual(newpos.data, comparepos.data)
+        self.assertEqual(newdyn.data, comparedyn.data)
+        self.assertEqual(newxdat.data, comparexdat.data)
         #self.testclass.give_phonon_single_forces_and_displacements(childname)
 
     def test_give_structure_and_energy_to_neb(self):
-        raise SkipTest
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = label1\n")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        myenergy = MASTFile("files/OSZICAR_relaxed")
+        myenergy.to_file("%s/OSZICAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_energy_to_neb("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/parent_structure_label1" % testdir)
+        givenenergy = MASTFile("%s/writedir/next_ingred/parent_energy_label1" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertEqual(myenergy.data, givenenergy.data)
         #self.testclass.give_structure_and_energy_to_neb(childname)
 
     def test_give_structure_and_restart_files(self):
-        raise SkipTest
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_restart_files("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/WAVECAR" % testdir))
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
         #self.testclass.give_structure_and_restart_files(childname)
 
