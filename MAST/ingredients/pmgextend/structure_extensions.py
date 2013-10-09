@@ -324,4 +324,24 @@ class StructureExtensions(MASTObj):
             goodstruc.append(newsites[cct].specie,
                 newsites[cct].frac_coords)
         return goodstruc
-
+    def strain_lattice(self, strainstring):
+        """Strain the lattice. 
+            Args:
+                strainstring <str>: Strain string from 
+                    'mast_strain' in program keys, 
+                    with space-separated strain along 
+                    lattice vectors a, b, and c, e.g.
+                    "0.98 0.96 1.01"
+            Returns:
+                newstructure <Structure>: strained structure
+        """
+        mystructure = self.keywords['struc_work1']
+        strainsplit = strainstring.strip().split()
+        strarray = np.array([[0.],[0.],[0.]],'float')
+        for sidx in range(0,3):
+            strflt = float(strainsplit[sidx])
+            strarray[sidx][0]=strflt
+        newlattice = Lattice(np.multiply(mystructure._lattice.matrix, strarray)) #be very careful here. np.multiply is NOT regular matrix multiplication.
+        newstructure = mystructure.copy()
+        newstructure.modify_lattice(newlattice)
+        return newstructure

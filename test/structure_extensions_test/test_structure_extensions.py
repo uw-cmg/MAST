@@ -185,3 +185,12 @@ class TestSE(unittest.TestCase):
         self.assertEqual(grafted.lattice, compare_grafted.lattice)
         self.assertEqual(grafted.sites, compare_grafted.sites)
 
+    def test_strain_lattice(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_unstrained").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        strained = sxtend.strain_lattice(" 0.98 0.92 1.03  \n")
+        strain_compare = pymatgen.io.vaspio.Poscar.from_file("POSCAR_strained").structure
+        self.assertEqual(strained, strain_compare)
+        self.assertEqual(strained.lattice, strain_compare.lattice)
+        self.assertEqual(strained.sites, strain_compare.sites)
+
