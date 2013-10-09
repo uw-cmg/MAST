@@ -91,7 +91,7 @@ class BaseIngredient(MASTObj):
         '''Function to check if Ingredient is ready'''
         if self.checker.is_complete():
             self.metafile.write_data('completed on', time.asctime())
-            if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker):
+            if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
                 energy = self.checker.get_energy_from_energy_file()
                 self.metafile.write_data('energy', energy)
             return True

@@ -266,22 +266,20 @@ class IsReadyToRunIngredient(BaseIngredient):
     def ready_neb_subfolders(self):
         """Make sure all subfolders are ready to run."""
         myname=self.keywords['name']
-        subdirs = dirutil.walkdirs(myname,1,1)
-        if len(subdirs) == 0:
-            return False
         notready=0
-        imct = 0
         numim = int(self.keywords['program_keys']['images'])
-        for subdir in subdirs:
+        for imct in range(0,numim+2):
+            subdir = str(imct).zfill(2)
             newname = os.path.join(myname, subdir)
-            self.keywords['name']=newname
             self.checker.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
-            elif not BaseIngredient.is_ready_to_run(self):
-                notready = notready + 1
+            else:
+                if dirutil.directory_is_locked(newname):
+                    notready = notready + 1
+                if not self.checker.is_ready_to_run():
+                    notready = notready + 1
             imct = imct + 1
-        self.keywords['name']=myname
         self.checker.keywords['name']=myname
         if notready == 0:
             return True
@@ -291,17 +289,17 @@ class IsReadyToRunIngredient(BaseIngredient):
     def ready_subfolders(self):
         """Make sure all subfolders are ready to run."""
         myname=self.keywords['name']
-        phondirs = dirutil.walkdirs(myname,1,1)
+        subdirs = dirutil.walkdirs(myname,1,1)
         notready=0
-        if len(phondirs) == 0:
+        if len(subdirs) == 0:
             return False
-        for phondir in phondirs:
-            newname = os.path.join(myname, phondir)
-            self.keywords['name']=newname
+        for subdir in subdirs:
+            newname = os.path.join(myname, subdir)
             self.checker.keywords['name']=newname
-            if not BaseIngredient.is_ready_to_run(self):
+            if dirutil.directory_is_locked(newname):
                 notready = notready + 1
-        self.keywords['name']=myname
+            if not self.checker.is_ready_to_run():
+                notready = notready + 1
         self.checker.keywords['name']=myname
         if notready == 0:
             return True
@@ -412,12 +410,14 @@ class IsCompleteIngredient(BaseIngredient):
         for subdir in subdirs:
             newname = os.path.join(myname, subdir)
             self.keywords['name']=newname
+            self.checker.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
             elif not BaseIngredient.is_complete(self):
                 notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
+        self.checker.keywords['name']=myname
         if notready == 0:
             return True
         else:
@@ -433,9 +433,11 @@ class IsCompleteIngredient(BaseIngredient):
         for phondir in phondirs:
             newname = os.path.join(myname, phondir)
             self.keywords['name']=newname
+            self.checker.keywords['name']=newname
             if not BaseIngredient.is_complete(self):
                 notready = notready + 1
         self.keywords['name']=myname
+        self.checker.keywords['name']=myname
         if notready == 0:
             return True
         else:
