@@ -43,7 +43,7 @@ class TestRecipeplan(unittest.TestCase):
         removelist.append("recipedir/ing2b/CHGCAR")
         removelist.append("recipedir/ing2b/WAVECAR")
         removelist.append("recipedir/ing2a/POSCAR")
-        #removelist.append("recipedir/printed.txt")
+        removelist.append("recipedir/printed.txt")
         removelist.append("test_control/submitlist")
         for myfile in removelist:
             try:
@@ -60,7 +60,6 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.__init__(name, working_directory)
 
     def test_write_ingredient(self):
-        raise SkipTest
         topmetad = MASTFile("files/top_metadata_single")
         topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
         topmetad.to_file("recipedir/metadata.txt")
