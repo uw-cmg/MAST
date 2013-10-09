@@ -178,19 +178,119 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.update_children(iname)
 
     def test_fast_forward_check_complete(self):
-        raise SkipTest
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("recipedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing1/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labela\n")
+        metad.to_file("recipedir/ing2a/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = labelb\n")
+        metad.to_file("recipedir/ing2b/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("recipedir/ing3/metadata.txt")
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "I"
+        rp.ingredients['ing2a'] = "I"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="recipedir/ing1"
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=my_struc
+        rp.complete_methods['ing1']='complete_singlerun'
+        rp.update_methods['ing1']=dict()
+        rp.update_methods['ing1']['ing2a']='give_structure'
+        rp.update_methods['ing1']['ing2b']='give_structure'
+        rp.ingred_input_options['ing2a']=dict()
+        rp.ingred_input_options['ing2a']['name']="recipedir/ing2a"
+        rp.ingred_input_options['ing2a']['program_keys']=kdict
+        rp.ingred_input_options['ing2a']['structure']=my_struc
+        rp.complete_methods['ing2a']='complete_singlerun'
+        rp.ready_methods['ing2a']='ready_structure'
+        rp.ingred_input_options['ing2b']=dict()
+        rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
+        rp.ingred_input_options['ing2b']['program_keys']=kdict
+        rp.ingred_input_options['ing2b']['structure']=my_struc
+        rp.complete_methods['ing2b']='complete_singlerun'
+        rp.ready_methods['ing2b']='ready_structure'
+        rp.ingred_input_options['ing3']=dict()
+        rp.ingred_input_options['ing3']['name']="recipedir/ing3"
+        rp.ingred_input_options['ing3']['program_keys']=kdict
+        rp.ingred_input_options['ing3']['structure']=my_struc
+        rp.complete_methods['ing3']='complete_singlerun'
+        rp.ready_methods['ing3']='ready_structure'
+        rp.fast_forward_check_complete()
+        #self.assertTrue(rp.complete_ingredient('ing1'))
+        self.assertEquals(rp.ingredients, {'ing1':'C','ing2a':'I','ing2b':'I','ing3':'I'})
+        self.assertTrue(rp.ready_ingredient('ing2a'))
+        self.assertTrue(rp.ready_ingredient('ing2b'))
         #self.testclass.fast_forward_check_complete()
 
     def test_check_if_have_parents(self):
-        raise SkipTest
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "I"
+        rp.ingredients['ing2a'] = "I"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        rp.parents_to_check['ing3']=['ing2a','ing2b']
+        rp.parents_to_check['ing2a']=['ing1']
+        rp.parents_to_check['ing2b']=[]
+        rp.parents_to_check['ing1']=[]
+        rp.check_if_have_parents()
+        self.assertEquals(rp.ingredients,{'ing1':'S','ing2a':'W','ing2b':'S','ing3':'W'})
         #self.testclass.check_if_have_parents()
 
     def test_check_if_ready_to_proceed_are_complete(self):
-        raise SkipTest
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "P"
+        rp.ingredients['ing2a'] = "I"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        kdict=dict()
+        kdict['mast_program']='vasp'
+        kdict['mast_xc']='pw91'
+        kdict['mast_kpoints']=[1,2,3,"G"]
+        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']=dict()
+        rp.ingred_input_options['ing1']['name']="recipedir/ing1"
+        rp.ingred_input_options['ing1']['program_keys']=kdict
+        rp.ingred_input_options['ing1']['structure']=my_struc
+        rp.complete_methods['ing1']='complete_singlerun'
+        rp.update_methods['ing1']=dict()
+        rp.update_methods['ing1']['ing2a']='give_structure'
+        rp.update_methods['ing1']['ing2b']='give_structure'
+        rp.ingred_input_options['ing2a']=dict()
+        rp.ingred_input_options['ing2a']['name']="recipedir/ing2a"
+        rp.ingred_input_options['ing2a']['program_keys']=kdict
+        rp.ingred_input_options['ing2a']['structure']=my_struc
+        rp.complete_methods['ing2a']='complete_singlerun'
+        rp.ready_methods['ing2a']='ready_structure'
+        rp.check_if_ready_to_proceed_are_complete()
+        self.assertTrue(rp.ready_ingredient('ing2a'))
+        self.assertEquals
+        self.assertEquals(rp.ingredients,{'ing1':'C','ing2a':'I','ing2b':'I','ing3':'I'})
         #self.testclass.check_if_ready_to_proceed_are_complete()
 
     def test_check_if_parents_are_complete(self):
-        raise SkipTest
+        rp = RecipePlan("test_recipe","recipedir")
+        rp.ingredients['ing1'] = "C"
+        rp.ingredients['ing2a'] = "W"
+        rp.ingredients['ing2b'] = "I"
+        rp.ingredients['ing3'] = "I"
+        rp.parents_to_check['ing3']=['ing2a','ing2b']
+        rp.parents_to_check['ing2a']=['ing1']
+        rp.parents_to_check['ing2b']=[]
+        rp.parents_to_check['ing1']=[]
+        rp.check_if_parents_are_complete()
+        self.assertEquals(rp.ingredients,{'ing1':'C','ing2a':'S','ing2b':'I','ing3':'I'})
         #self.testclass.check_if_parents_are_complete()
 
     def test_run_staged_ingredients(self):
