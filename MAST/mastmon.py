@@ -1,7 +1,6 @@
 import os
 import time
 import shutil
-from MAST.utility.picklemanager import PickleManager
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.parsers.inputparser import InputParser
