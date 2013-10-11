@@ -19,7 +19,6 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-from MAST.utility import PickleManager
 from MAST.utility import dirutil
 from MAST.utility import Metadata
 ALLOWED_KEYS = {\
