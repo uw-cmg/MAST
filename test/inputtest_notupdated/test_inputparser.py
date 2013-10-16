@@ -111,7 +111,17 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_structure_section(section_name, section_content, options)
 
     def test_parse_defects_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/defects_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_defects_section('defects',cleanlines,myoptions)
+        mdict=dict()
+        print myoptions.options['defects']
+        mdict['defects']=dict()
+        mdict['defects']['system_name'] = "SystemName!"
         #self.testclass.parse_defects_section(section_name, section_content, options)
 
     def test_parse_recipe_section(self):
