@@ -3,7 +3,7 @@ import sys, os
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.smartio import read_structure
 
-from MAST.utility import PickleManager
+#from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 from MAST.utility import Metadata
 from MAST.parsers import InputParser
