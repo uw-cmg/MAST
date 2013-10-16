@@ -498,7 +498,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         #numim = int(self.keywords['program_keys']['images'])
         #middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc
         subdirs.sort()
-        if self.program == 'vasp_neb':
+        if self.program == 'vasp_neb' or self.program == 'vasp':
             singlechecker = VaspChecker(name=self.checker.keywords['name'],program_keys = dict(self.checker.keywords['program_keys']),structure = self.checker.keywords['structure'].copy())
         else:
             raise MASTError(self.__class__.__name__, "Program %s not supported" % self.program)
