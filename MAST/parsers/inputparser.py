@@ -177,8 +177,8 @@ class InputParser(MASTObj):
         structure_dict = STRUCTURE_KEYWORDS.copy() 
 
         subsection_dict = dict()
-        for line in section_content:
-            line = line.split(self.delimiter)
+        for myline in section_content:
+            line = myline.split(self.delimiter, 1)
 
             if (line[0] in structure_dict):
                 structure_dict[line[0]] = line[1]
@@ -186,7 +186,13 @@ class InputParser(MASTObj):
                 subsection = line[1]
                 subsection_list = list()
             elif ('end' not in line):
-                subsection_list.append(line)
+                lsplit = myline.split(self.delimiter)
+                lineval = list()
+                for lval in lsplit:
+                    lval.strip()
+                    if len(lval) > 0:
+                        lineval.append(lval)
+                subsection_list.append(lineval)
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
@@ -234,6 +240,7 @@ class InputParser(MASTObj):
                 coordinates = np.array(value[:, 1:], dtype='float')
                 structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
+                print "VALUE: ", value
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
             if (key == 'elementmap'):
@@ -533,8 +540,7 @@ class InputParser(MASTObj):
         options.set_item(section_name, 'images', images)
         options.set_item(section_name, 'neblines', neblines)
 
-    def parse_chemical_potentials_section(self, section_name, section_content,
-                                          options):
+    def parse_chemical_potentials_section(self, section_name, section_content, options):
         """Parses the chemical_potentials section and populates the options.
             Section uses the standard begin...end subsection structure, but with
             a modification: instead of strict subsection titles (i.e. structure,
