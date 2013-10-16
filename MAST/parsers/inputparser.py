@@ -213,7 +213,9 @@ class InputParser(MASTObj):
                 for file in file_list:
                     self.logger.warning(file)
                 error='Found ambiguous file names'
-                MASTError(self.__class__.__name__, error)
+                raise MASTError(self.__class__.__name__, error)
+            elif len(file_list) == 0:
+                raise MASTError(self.__class__.__name__, "No structure file %s found in %s" % (structure_dict['posfile'], origindir))
             else:
                 structure_dict['posfile'] = file_list[0]
 
