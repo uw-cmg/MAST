@@ -240,7 +240,7 @@ class InputParser(MASTObj):
                 coordinates = np.array(value[:, 1:], dtype='float')
                 structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
-                print "VALUE: ", value
+                #print "VALUE: ", value
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
             if (key == 'elementmap'):
