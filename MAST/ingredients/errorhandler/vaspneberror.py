@@ -69,7 +69,7 @@ class VaspNEBError(BaseError):
                 if hname in handler_input_d.keys():
                     hinputs = handler_input_d[hname]
                     hinputs = os.path.join(imstr, hinputs)
-                if hinputs == "mast_skip":
+                if 'mast_skip' in hinputs:
                     self.logger.info("Skipping %s" % hname)
                     pass
                 else:
