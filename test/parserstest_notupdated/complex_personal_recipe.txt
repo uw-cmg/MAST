@@ -1,0 +1,15 @@
+recipe neb
+ingredient testSys_perfect_opt1 lowmeshoptimize
+ingredient testSys_induce_defectvac1 inducedefect
+ingredient testSys_induce_defectvac2 inducedefect
+ingredient testSys_defectvac1_q=p0_opt1 lowmeshoptimizedefect
+ingredient testSys_defectvac2_q=p0_opt1 lowmeshoptimizedefect
+ingredient testSys_neb<n-n>_opt1 performlowmeshneb
+ingredient testSys_neb<n-n>_image01_stat static
+ingredient testSys_neb<n-n>_image02_stat static
+parent testSys_induce_defectvac1 child testSys_defectvac1_q=p0_opt1::structure
+parent testSys_induce_defectvac2 child testSys_defectvac2_q=p0_opt1::structure
+parent testSys_defectvac2_q=p0_opt1 child testSys_neb<n-n>_opt1::structure
+parent testSys_defectvac1_q=p0_opt1 child testSys_neb<n-n>_opt1::structure
+parent testSys_neb<n-n>_opt1 child testSys_neb<n-n>_image01_stat::structure
+parent testSys_neb<n-n>_opt1 child testSys_neb<n-n>_image02_stat::structure

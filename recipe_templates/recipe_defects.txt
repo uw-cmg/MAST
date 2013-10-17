@@ -1,12 +1,12 @@
 Recipe DEFECTS
 
 Ingredient <sys>_perfect_opt Optimize
-Ingredient <sys>_perfect_sp SinglePoint
-Ingredient <sys>_induce_defect<N> InduceDefect
-Ingredient <sys>_defect<N>_opt Optimize
-Ingredient <sys>_defect<N>_sp SinglePoint
+Ingredient <sys>_perfect_sp Static
+Ingredient <sys>_induce_defect_<N> InduceDefect
+Ingredient <sys>_defect_<N>_<Q>_opt Optimize
+Ingredient <sys>_defect_<N>_<Q>_sp Static
 
-Parent <sys>_perfect_opt child <sys>_perfect_sp::structure
-Parent <sys>_perfect_opt child <sys>_induce_defect<N>::structure
-Parent <sys>_induce_defect<N> child <sys>_defect<N>_opt::structure
-Parent <sys>_defect<N>_opt child <sys>_defect<N>_sp::structure
+Parent <sys>_perfect_opt child <sys>_perfect_sp
+Parent <sys>_perfect_opt child <sys>_induce_defect_<N>
+Parent <sys>_induce_defect_<N> child <sys>_defect_<N>_<Q>_opt
+Parent <sys>_defect_<N>_<Q>_opt child <sys>_defect_<N>_<Q>_sp

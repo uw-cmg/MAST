@@ -1,0 +1,86 @@
+# Test file
+
+
+$mast
+#rahaononadiouodnndlnnsd
+program vasp
+system_name inputtest
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Ga
+X2 As
+end
+
+begin coordinates
+X1 0.000000 0.000000 0.000000
+X1 0.500000 0.500000 0.000000
+X1 0.000000 0.500000 0.500000
+X1 0.500000 0.000000 0.500000
+X2 0.250000 0.250000 0.250000
+X2 0.750000 0.750000 0.250000
+X2 0.250000 0.750000 0.750000
+X2 0.750000 0.250000 0.750000
+end
+
+begin lattice
+6.0 0.0 0.0
+0.0 6.0 0.0
+0.0 0.0 6.0
+end
+$end
+
+$defects
+coord_type fractional
+vacancy 0.0 0.0 0.0 Ga
+interstitial 0.35 0.45 0.25 As
+begin crowdiongroup1
+vacancy 0.0 0.0 0.0 Ga
+antisite 0.25 0.75 0.75 Ga
+antisite 0.50 0.00 0.50 As
+end
+$end
+
+$ingredients
+begin ingredients_global
+mast_kpoints 3x3x3
+mast_xc pbe
+mast_exec //share/apps/vasp5.2_cNEB
+mast_walltime 4
+mast_ppn 1
+end
+
+begin singlepoint
+encut 400
+mast_xc pw91
+end
+
+begin optimize
+encut 300
+ibrion 2
+end
+
+begin inducedefect
+end
+
+$end
+
+$recipe
+recipe_file defect_test.txt
+$end
+
+$chemical_potentials
+begin As rich
+Ga 4.5
+As 3.5
+end
+
+begin Ga rich
+Ga 3.5
+As 4.5
+end
+$end
+

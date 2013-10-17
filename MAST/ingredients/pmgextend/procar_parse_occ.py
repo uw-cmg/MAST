@@ -6,8 +6,8 @@ Classes for reading/manipulating/writing VASP ouput files.
 
 from __future__ import division
 
-__author__ = "Tam Mayeshiba"
-__date__ = "April 4, 2013"
+__author__ = "Tam Mayeshiba from vasp_output by Shyue Ping Ong"
+__date__ = "April 8, 2012"
 
 import os
 import glob
@@ -36,13 +36,12 @@ from pymatgen.io.vaspio.vasp_input import Incar, Kpoints, Poscar
 
 logger = logging.getLogger(__name__)
 
-import pdb
 
 
 
 class ProcarOcc(object):
     """
-    Object for reading a PROCAR file, only occupied bands
+    Object for reading a PROCAR file
     """
     def __init__(self, filename):
         """
@@ -52,64 +51,89 @@ class ProcarOcc(object):
         """
         #create and return data object containing the information of a PROCAR
         self.name = ""
-        self.data = dict()
-        self.databands=""
-        self.dataenergy=""
-        self._read_file(filename)
-
-    def get_d_occupation(self, atom_num):
-        row = self.data[atom_num]
-        return row[2]
-
-    def _read_file(self, filename):
-        with zopen(filename, "r") as f:
-            lines = list(f.readlines()) #do not strip out comments
-            #lines = list(clean_lines(f.readlines()))
-        self.name = lines[0]
-        kpointexpr = re.compile("^\s*k-point\s+(\d+).*weight = ([0-9\.]+)")
-        expr = re.compile("^\s*([0-9]+)\s+")
-        dataexpr = re.compile("[\.0-9]+")
-        weight = 0
+        self.data = {}
+        self.headers = None
         myocc=0
-        myband=0
-        myenergy=0
-        mystats=lines[1].split()
-        numkpts = int(mystats[3])
-        numbands = int(mystats[7])
-        numions = int(mystats[11])
-        self.databands = np.zeros([numions+1, numbands+1, 5],float)
-        self.dataenergy = np.zeros([numions+1, numbands+1],float)
-        #pdb.set_trace()
-        for l in lines:
-            if kpointexpr.match(l):
-                m = kpointexpr.match(l)
-                currentKpoint = int(m.group(1))
-                weight = float(m.group(2))
-                if currentKpoint == 1:
-                    self.data = dict()
-            if l.find("occ.") > -1:
-                myocc=float(l.split()[7])
-                myband=int(l.split()[1])
-                myenergy=float(l.split()[4])
-            if (myocc == 1) and expr.match(l):
-                linedata = dataexpr.findall(l)
-                linefloatdata = map(float, linedata)
-                index = int(linefloatdata.pop(0))
-                if index in self.data:
-                    self.data[index] += np.array(linefloatdata) * weight
-                else:
-                    self.data[index] = np.array(linefloatdata) * weight
-                self.databands[index][myband] += np.array(linefloatdata) * weight
-                self.dataenergy[index][myband] += myenergy * weight
+        with zopen(filename, "r") as f:
+            #lines = list(clean_lines(f.readlines())) #TTM do not clean lines
+            lines = list(f.readlines())
+            self.name = lines[0]
+            kpointexpr = re.compile("^\s*k-point\s+(\d+).*weight = ([0-9\.]+)")
+            ionexpr = re.compile("^ion.*")
+            expr = re.compile("^\s*([0-9]+)\s+")
+            dataexpr = re.compile("[\.0-9]+")
+            weight = 0
 
-    def print_matrix(self):
-        for key in self.data.iterkeys():
-            print key,["{0:0.3f}".format(i) for i in self.data[key]]
-        np.set_printoptions(precision=3, suppress=True, threshold=5000)
-        print self.databands[9]
-        dect = 0
-        while dect < len(self.dataenergy[9]):
-            print self.dataenergy[9][dect]
-            dect = dect + 1
+            for l in lines:
+                if l.find("occ.")>-1:
+                    myocc=float(l.split()[7])
+                if kpointexpr.match(l):
+                    m = kpointexpr.match(l)
+                    currentKpoint = int(m.group(1))
+                    weight = float(m.group(2))
+                    if currentKpoint == 1:
+                        self.data = dict()
+                elif ionexpr.match(l) and self.headers is None:
+                    self.headers = l.split()
+                    self.headers.pop(0)
+                elif expr.match(l):
+                    linedata = dataexpr.findall(l)
+                    linefloatdata = map(float, linedata)
+                    index = int(linefloatdata.pop(0))
+                    if index in self.data:
+                        if myocc==1:
+                            self.data[index] += np.array(linefloatdata) * weight
+                    else:
+                        if myocc==1:
+                            self.data[index] = np.array(linefloatdata) * weight
+                        else:
+                            self.data[index]=0.0
+
+    def get_d_occupation(self, atom_index):
+        """
+        .. deprecated:: v2.6.4
+
+            Use get_occpuation instead.
+
+        Returns the d occupation of a particular atom.
+
+        Args:
+            atom_index:
+                Index of atom in PROCAR.
+
+        Returns:
+            d-occupation of atom at atom_index.
+        """
+        warnings.warn("get_d_occupation has been deprecated. Use "
+                      "get_occupation instead.", DeprecationWarning)
+        return self.get_occupation(atom_index, 'd')
+
+    def get_occupation(self, atom_index, orbital):
+        """
+        Returns the occupation for a particular orbital of a particular atom.
+
+        Args:
+            atom_num:
+                Index of atom in the PROCAR
+            orbital:
+                A string representing an orbital. If it is a single
+                character, e.g., s, p, d or f, the sum of all s-type,
+                p-type, d-type or f-type orbitals occupations are returned
+                respectively. If it is a specific orbital, e.g., px, dxy,
+                etc., only the occupation of that orbital is returned.
+
+        Returns:
+            Sum occupation of orbital of atom.
+        """
+        row = self.data[atom_index]
+        total = 0
+        found = False
+        for orb, data in zip(self.headers, row):
+            if orb.startswith(orbital):
+                found = True
+                total += data
+        if not found:
+            raise ValueError("Invalid orbital {}".format(orbital))
+        return total
 
 

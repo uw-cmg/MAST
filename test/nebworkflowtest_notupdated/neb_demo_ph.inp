@@ -1,0 +1,177 @@
+# Demo file for basal plane hopping
+$mast
+program vasp
+system_name basal
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Mg
+end
+
+begin lattice
+9.0000000000 0.0000000000 0.0000000000
+4.5000000000 7.7942286300 0.0000000000
+0.0000000000 0.0000000000 9.6000000000
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.0000000000 0.0000000000 0.5000000000
+X1 0.0000000000 0.3333333333 0.0000000000
+X1 0.0000000000 0.3333333333 0.5000000000
+X1 0.0000000000 0.6666666667 0.0000000000
+X1 0.0000000000 0.6666666667 0.5000000000
+X1 0.3333333333 0.0000000000 0.0000000000
+X1 0.3333333333 0.0000000000 0.5000000000
+X1 0.3333333333 0.3333333333 0.0000000000
+X1 0.3333333333 0.3333333333 0.5000000000
+X1 0.3333333333 0.6666666667 0.0000000000
+X1 0.3333333333 0.6666666667 0.5000000000
+X1 0.6666666667 0.0000000000 0.0000000000
+X1 0.6666666667 0.0000000000 0.5000000000
+X1 0.6666666667 0.3333333333 0.0000000000
+X1 0.6666666667 0.3333333333 0.5000000000
+X1 0.6666666667 0.6666666667 0.0000000000
+X1 0.6666666667 0.6666666667 0.5000000000
+X1 0.1111111111 0.1111111111 0.2500000000
+X1 0.1111111111 0.1111111111 0.7500000000
+X1 0.1111111111 0.4444444444 0.2500000000
+X1 0.1111111111 0.4444444444 0.7500000000
+X1 0.1111111111 0.7777777778 0.2500000000
+X1 0.1111111111 0.7777777778 0.7500000000
+X1 0.4444444444 0.1111111111 0.2500000000
+X1 0.4444444444 0.1111111111 0.7500000000
+X1 0.4444444444 0.4444444444 0.2500000000
+X1 0.4444444444 0.4444444444 0.7500000000
+X1 0.4444444444 0.7777777778 0.2500000000
+X1 0.4444444444 0.7777777778 0.7500000000
+X1 0.7777777778 0.1111111111 0.2500000000
+X1 0.7777777778 0.1111111111 0.7500000000
+X1 0.7777777778 0.4444444444 0.2500000000
+X1 0.7777777778 0.4444444444 0.7500000000
+X1 0.7777777778 0.7777777778 0.2500000000
+X1 0.7777777778 0.7777777778 0.7500000000
+end
+
+$end
+
+$defects
+coord_type fractional
+
+begin vac1
+vacancy 0.0 0.0 0.0 X1
+end
+
+begin vac2
+vacancy 0.0 0.33333333 0.0 X1
+end
+
+$end
+
+$neb
+begin vac1-vac2
+X1, 0 0 0, 0 .33333333 0.0
+end
+images 1
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_nodes 1
+mast_multiplyencut 1.5
+mast_ppn 1
+mast_queue default
+mast_exec //share/apps/vasp5.2_cNEB
+mast_kpoints 2x2x2 M
+mast_xc PW91
+isif 2
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+end
+
+begin optimizelowmesh
+mast_kpoints 1x1x1 G
+isif 3
+end
+
+begin optimize
+isif 3
+end
+
+begin static 
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+end
+
+begin inducedefect
+end
+
+begin optimizelowmeshdefect
+mast_kpoints 1x1x1 G
+isif 2
+end
+
+begin optimizedefect
+isif 2
+end
+
+begin staticdefectforneb
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+isif 2
+end
+
+begin performneblowmesh
+mast_kpoints 1x1x1 G
+ibrion 1
+potim 0.5
+images 1
+lclimb True
+spring -5
+end
+
+begin performneb
+ibrion 1
+potim 0.5
+lclimb True
+images 1
+spring -5
+end
+$end
+
+
+$phonon
+
+begin vac1
+phonon_center_site 0 0.33333 0
+phonon_center_radius 1
+end
+
+begin vac2
+phonon_center_site 0 0.0 0
+phonon_center_radius 1
+end
+
+begin vac1-vac2_01
+phonon_center_site 0 0.166667 0
+phonon_center_radius 1
+end
+
+$end
+
+
+
+$recipe
+recipe_file neb_ph.txt
+$end

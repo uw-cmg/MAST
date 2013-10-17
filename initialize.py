@@ -6,6 +6,7 @@ print "MAST_INSTALL_PATH: ",os.getenv("MAST_INSTALL_PATH")
 print "MAST_RECIPE_PATH: ",os.getenv("MAST_RECIPE_PATH")
 print "VASP_PSP_DIR: ",os.getenv("VASP_PSP_DIR")
 print "MAST_SCRATCH: ",os.getenv("MAST_SCRATCH")
+print "MAST_ARCHIVE: ", os.getenv("MAST_ARCHIVE")
 print "PYTHONPATH: ",os.getenv("PYTHONPATH")
 print "PATH: ",os.getenv("PATH")
 
@@ -29,3 +30,5 @@ if mypath == None:
 else:
     print "export PATH=$PATH:" + mycwd + "/bin"
 print "export MAST_SCRATCH=" + mycwd + "/SCRATCH"
+print "export MAST_ARCHIVE=" + mycwd + "/ARCHIVE"
+print "export MAST_CONTROL=" + mycwd + "/CONTROL"

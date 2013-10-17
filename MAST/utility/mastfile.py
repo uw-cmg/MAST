@@ -12,6 +12,9 @@ class MASTFile:
         self.data = list() # TTM 11/16/11 add here
         self.p = dict() # TTM 12/22/11 set in file class instead #dictionary holding a mapping of param names to param values
         if file_path != "":
+            if not os.path.isfile(file_path):
+                raise MASTError(self.__class__.__name__,
+                "No file at %s; cannot create MASTFile" % file_path)
             self.from_file(file_path)
         else:
             pass
@@ -41,7 +44,7 @@ class MASTFile:
         readf.close()    
     
     def to_file(self,file_path):
-        """Writes data to a file"""
+        """Writes data to a file (overwrites existing file)."""
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
             raise MASTError(self.__class__.__name__,

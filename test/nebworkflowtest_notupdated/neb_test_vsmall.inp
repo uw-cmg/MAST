@@ -1,0 +1,114 @@
+# Test file
+$MAST
+program VASP
+system_name smallfcc
+$end
+
+$structure
+posfile smallfcc_poscar
+$end
+
+$defects
+coord_type fractional
+
+begin vac1
+vacancy 0.0 0.0 0.0 Fe
+end
+
+begin vac2
+vacancy 0.0 0.5 0.5 Fe
+end
+
+begin int1
+interstitial 0.25 0.0 0.0 Cr
+end
+
+begin int2
+interstitial 0.0 0.25 0.0 Cr
+end
+
+$end
+
+$neb
+begin vac1-vac2
+Fe, 0 0 0, 0 .5 0.5
+end
+begin int1-int2
+Cr, 0.25 0 0, 0 0.25 0
+end
+images 1
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_nodes 1
+mast_multiplyencut 1.25
+mast_ppn 1
+mast_queue default
+mast_exec //share/apps/vasp5.2_CNEB > vasp.out
+mast_kpoints 1x1x1 G
+mast_xc PW91
+isif 2
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+end
+
+begin optimizelowmesh
+mast_kpoints 1x1x1 G
+isif 3
+end
+
+begin optimize
+isif 3
+end
+
+begin static 
+ibrion -1
+nsw 0
+mast_multiplyencut 1
+end
+
+begin inducedefect
+end
+
+begin optimizelowmeshdefect
+mast_kpoints 1x1x1 G
+end
+
+begin optimizedefect
+isif 2
+end
+
+begin staticdefect
+ibrion -1
+nsw 0
+mast_multiplyencut 1
+end
+
+begin performneblowmesh
+mast_kpoints 2x2x2 M
+ibrion 1
+potim 0.5
+images 1
+lclimb True
+spring -5
+end
+
+begin performneb
+ibrion 1
+potim 0.5
+lclimb True
+images 1
+spring -5
+end
+$end
+
+$recipe
+recipe_file recipe_neb_test.txt
+$end

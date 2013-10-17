@@ -1,0 +1,37 @@
+Recipe name: test_recipe
+Ingredients: 
+    ing1
+        Parents: 
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            ing2b:give_structure
+            ing2a:give_structure
+    ing2a
+        Parents: 
+            ing1
+        Write:    write_singlerun
+        Ready:    ready_structure
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            ing3:give_structure_and_restart_files
+    ing2b
+        Parents: 
+        Write:    write_singlerun
+        Ready:    ready_structure
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            ing3:give_structure_and_restart_files
+    ing3
+        Parents: 
+            ing2a
+            ing2b
+        Write:    write_singlerun
+        Ready:    ready_structure
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
