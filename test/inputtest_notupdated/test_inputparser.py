@@ -118,10 +118,38 @@ class TestInputparser(unittest.TestCase):
             cleanlines.append(line.strip())
         myoptions = InputOptions()
         myip.parse_defects_section('defects',cleanlines,myoptions)
-        mdict=dict()
         print myoptions.options['defects']
+        mdict=dict()
+        mdict['coord_type']='fractional'
+        mdict['num_defects']=4
         mdict['defects']=dict()
-        mdict['defects']['system_name'] = "SystemName!"
+        mdict['defects']['defect_3']=dict()
+        mdict['defects']['defect_3']['threshold']=0.0001
+        mdict['defects']['defect_3']['charge']=[3]
+        mdict['defects']['defect_3']['coord_type']='fractional'
+        mdict['defects']['defect_3']['subdefect_1']=dict()
+        mdict['defects']['defect_3']['subdefect_1']['symbol']='Al'
+        mdict['defects']['defect_3']['subdefect_1']['type']='vacancy'
+        mdict['defects']['defect_3']['subdefect_1']['coordinates']=np.array([0.,0.,0.],'float')
+        mdict['defects']['Vac@Al-Sub@Fe']=dict()
+        mdict['defects']['Vac@Al-Sub@Fe']['threshold']=0.0001
+        mdict['defects']['Vac@Al-Sub@Fe']['charge']=[-2,-1,0,1,2,3,4,5]
+        mdict['defects']['Vac@Al-Sub@Fe']['coord_type']='fractional'
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']=dict()
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['symbol']='Al'
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['type']='vacancy'
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']=np.array([0.,0.,0.],'float')
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']=dict()
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['symbol']='Fe'
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['type']='substitution'
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']=np.array([0.5,0.5,0.],'float')
+        
+
+        mdict['defects']['defect_3']['subdefect_1']=dict()
+        mdict['defects']['defect_3']['subdefect_1']=dict()
+
+        mdict['system_name'] = "SystemName!"
+        self.assertItemsEqual(myoptions.options['defects'],mdict) 
         #self.testclass.parse_defects_section(section_name, section_content, options)
 
     def test_parse_recipe_section(self):
