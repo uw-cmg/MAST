@@ -1,0 +1,30 @@
+begin ingredients_global
+mast_program       vasp
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           1
+mast_queue         default
+mast_exec          mpiexec //share/apps/vasp5.2_cNEB
+mast_kpoints       2x2x2 M
+mast_xc PW91
+ldauu              1 3 5
+isif 2
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+begin phononingredient
+ibrion 5
+mast_exec phon several words WiTh CaPs
+mast_program phon
+end
