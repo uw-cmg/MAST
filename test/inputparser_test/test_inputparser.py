@@ -14,7 +14,7 @@ from MAST.utility import MASTFile
 from MAST.utility import MASTError
 import numpy as np
 
-testname="inputtest_notupdated"
+testname="inputparser_test"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 
 class TestInputparser(unittest.TestCase):
