@@ -177,11 +177,60 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_defects_section(section_name, section_content, options)
 
     def test_parse_recipe_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/recipe_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_recipe_section('recipe',cleanlines,myoptions)
+        #print myoptions
+        mdict=dict()
+        mdict['recipe_file'] = os.path.join(os.getenv("MAST_RECIPE_PATH"),'defects_test.txt')
+        self.assertEqual(myoptions.options['recipe'],mdict)
         #self.testclass.parse_recipe_section(section_name, section_content, options)
 
     def test_parse_ingredients_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/ingredient_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_ingredients_section('ingredients',cleanlines,myoptions)
+        print myoptions
+        mdict=dict()
+        mdict['global']=dict()
+        mdict['global']['mast_complete_method']='complete_singlerun'
+        mdict['global']['mast_update_children_method']='give_structure'
+        mdict['global']['mast_queue']='default'
+        mdict['global']['mast_run_method']='run_singlerun'
+        mdict['global']['lcharg']='False'
+        mdict['global']['mast_multiplyencut']='1.5'
+        mdict['global']['mast_ppn']='1'
+        mdict['global']['ismear']='1'
+        mdict['global']['nsw']='191'
+        mdict['global']['mast_exec']='mpiexec //share/apps/vasp5.2_cNEB'
+        mdict['global']['mast_nodes']='1'
+        mdict['global']['mast_xc']='PW91'
+        mdict['global']['prec']='Accurate'
+        mdict['global']['mast_kpoints']=[2, 2, 2, 'M']
+        mdict['global']['mast_write_method']='write_singlerun'
+        mdict['global']['ldauu']='1'
+        mdict['global']['ibrion']='2'
+        mdict['global']['mast_ready_method']='ready_singlerun'
+        mdict['global']['isif']='2'
+        mdict['global']['mast_program']='vasp'
+        mdict['global']['lwave']='False'
+        mdict['global']['sigma']='0.2'
+        mdict['phononingredient']=dict()
+        mdict['phononingredient']['mast_exec']='phon several words WiTh CaPs'
+        mdict['phononingredient']['ibrion']='5'
+        mdict['phononingredient']['mast_program']='phon'
+        maxdiff=self.maxDiff
+        self.maxDiff=None
+        self.assertEqual(myoptions.options['ingredients'],mdict)
+        self.maxDiff=maxdiff
         #self.testclass.parse_ingredients_section(section_name, section_content, options)
 
     def test_parse_neb_section(self):
