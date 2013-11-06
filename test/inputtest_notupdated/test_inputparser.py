@@ -234,11 +234,42 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_ingredients_section(section_name, section_content, options)
 
     def test_parse_neb_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/neb_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_neb_section('neb',cleanlines,myoptions)
+        print myoptions
+        mdict=dict()
+        mdict['images']=3
+        mdict['neblines']=dict()
+        mdict['neblines']['vac1-vac2']=list()
+        mdict['neblines']['vac1-vac2'].append(list(['Cr',' 0.5 0.5 0.0',' 0.0 0.0 0.0']))
+        mdict['neblines']['vac1-vac2'].append(list(['Fe',' 0.2 0.1 0.3',' 0.2 0.1 0.4']))
+        mdict['neblines']['vac1-vac3']=list()
+        mdict['neblines']['vac1-vac3'].append(list(['Al',' 0.1 0.1 0.0',' 0.3 0.4 0.1']))
+        self.assertEqual(myoptions.options['neb'],mdict)
         #self.testclass.parse_neb_section(section_name, section_content, options)
 
     def test_parse_chemical_potentials_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/chemical_potential_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_chemical_potentials_section('chemical_potentials',cleanlines,myoptions)
+        print myoptions
+        mdict=dict()
+        mdict['As rich']=dict()
+        mdict['As rich']['As']=3.5
+        mdict['As rich']['Ga']=4.5
+        mdict['Ga rich']=dict()
+        mdict['Ga rich']['As']=4.5
+        mdict['Ga rich']['Ga']=3.5
+        self.assertEqual(myoptions.options['chemical_potentials'],mdict)
         #self.testclass.parse_chemical_potentials_section(section_name, section_content, options)
 
     def test_parse_phonon_section(self):
