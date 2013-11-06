@@ -119,6 +119,17 @@ class TestInputparser(unittest.TestCase):
         myoptions = InputOptions()
         myip.parse_defects_section('defects',cleanlines,myoptions)
         print myoptions.options['defects']
+        #Test coordinates first, to avoid dictionary-equal error on comparing arryas
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['defect_3']['subdefect_1']['coordinates'],np.array([0.,0.,0.],'float')))
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates'],np.array([0.,0.,0.],'float')))
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates'],np.array([0.5,0.5,0.],'float')))
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['AntiGe@Fe']['subdefect_1']['coordinates'],np.array([0.1,0.3,0.4],'float')))
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['MgInt']['subdefect_1']['coordinates'],np.array([0.,0.2,0.3],'float')))
+        myoptions.options['defects']['defects']['defect_3']['subdefect_1']['coordinates']='blank'
+        myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']='blank'
+        myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']='blank'
+        myoptions.options['defects']['defects']['AntiGe@Fe']['subdefect_1']['coordinates']='blank'
+        myoptions.options['defects']['defects']['MgInt']['subdefect_1']['coordinates']='blank'
         mdict=dict()
         mdict['coord_type']='fractional'
         mdict['num_defects']=4
@@ -130,7 +141,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['defect_3']['subdefect_1']=dict()
         mdict['defects']['defect_3']['subdefect_1']['symbol']='Al'
         mdict['defects']['defect_3']['subdefect_1']['type']='vacancy'
-        mdict['defects']['defect_3']['subdefect_1']['coordinates']=np.array([0.,0.,0.],'float')
+        mdict['defects']['defect_3']['subdefect_1']['coordinates']='blank' #np.array([0.,0.,0.],'float')
         mdict['defects']['Vac@Al-Sub@Fe']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['threshold']=0.0001
         mdict['defects']['Vac@Al-Sub@Fe']['charge']=[-2,-1,0,1,2,3,4,5]
@@ -138,18 +149,31 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['symbol']='Al'
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['type']='vacancy'
-        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']=np.array([0.,0.,0.],'float')
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']='blank' #np.array([0.,0.,0.],'float')
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['symbol']='Fe'
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['type']='substitution'
-        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']=np.array([0.5,0.5,0.],'float')
-        
-
-        mdict['defects']['defect_3']['subdefect_1']=dict()
-        mdict['defects']['defect_3']['subdefect_1']=dict()
-
-        mdict['system_name'] = "SystemName!"
-        self.assertItemsEqual(myoptions.options['defects'],mdict) 
+        mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']='blank' #np.array([0.5,0.5,0.],'float')
+        mdict['defects']['AntiGe@Fe']=dict()
+        mdict['defects']['AntiGe@Fe']['threshold']=0.0001
+        mdict['defects']['AntiGe@Fe']['charge']=[3]
+        mdict['defects']['AntiGe@Fe']['coord_type']='fractional'
+        mdict['defects']['AntiGe@Fe']['subdefect_1']=dict()
+        mdict['defects']['AntiGe@Fe']['subdefect_1']['symbol']='Ge'
+        mdict['defects']['AntiGe@Fe']['subdefect_1']['type']='antisite'
+        mdict['defects']['AntiGe@Fe']['subdefect_1']['coordinates']='blank' #np.array([0.1,0.3,0.4],'float')
+        mdict['defects']['MgInt']=dict()
+        mdict['defects']['MgInt']['threshold']=0.0001
+        mdict['defects']['MgInt']['charge']=[0,1,2,3]
+        mdict['defects']['MgInt']['coord_type']='fractional'
+        mdict['defects']['MgInt']['subdefect_1']=dict()
+        mdict['defects']['MgInt']['subdefect_1']['symbol']='Mg'
+        mdict['defects']['MgInt']['subdefect_1']['type']='interstitial'
+        mdict['defects']['MgInt']['subdefect_1']['coordinates']='blank' #np.array([0.,0.2,0.3],'float')
+        maxdiff=self.maxDiff
+        self.maxDiff=None
+        self.assertEqual(myoptions.options['defects'],mdict) 
+        self.maxDiff=maxdiff
         #self.testclass.parse_defects_section(section_name, section_content, options)
 
     def test_parse_recipe_section(self):
