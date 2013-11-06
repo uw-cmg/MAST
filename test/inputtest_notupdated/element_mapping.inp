@@ -7,7 +7,8 @@ $structure
 coord_type fractional
 
 begin elementmap
-X1 Al
+X1 Ar
+X2 Xe
 end
 
 begin lattice
@@ -18,8 +19,8 @@ end
 
 begin coordinates
 X1 0.0000000000 0.0000000000 0.0000000000
-X1 0.5000000000 0.5000000000 0.0000000000
-X1 0.0000000000 0.5000000000 0.5000000000
+X2 0.5000000000 0.5000000000 0.0000000000
+X2 0.0000000000 0.5000000000 0.5000000000
 X1 0.5000000000 0.0000000000 0.5000000000
 end
 
@@ -28,19 +29,22 @@ $end
 $defects
 coord_type fractional
 
-begin vac1
+begin group1
+interstitial 0.1 0.1 0.1 X2
 vacancy 0.0 0.0 0.0 X1
 end
 
-begin vac2
-vacancy 0.5 0.5 0.0 X1
+begin group2
+vacancy 0.5 0.0 0.5 X1
+interstitial 0.3 0.2 0.1 X2
 end
 
 $end
 
 $neb
-begin vac1-vac2
-X1, 0.5 0.5 0.0, 0.0 0.0 0.0
+begin group1-group2
+X1, 0.5 0.0 0.5, 0.0 0.0 0.0
+X2, 0.1 0.1 0.1, 0.3 0.2 0.1
 end
 images 3
 $end

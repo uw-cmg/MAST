@@ -43,6 +43,7 @@ class TestInputparser(unittest.TestCase):
     def test_parse(self):
         myip = InputParser(inputfile="long_input.inp")
         myoptions = myip.parse()
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','phonon','chemical_potentials'])
         #ofile = MASTFile()
         #ofile.data = str(myoptions)
         #ofile.to_file(os.path.join(os.getcwd(),"long_input_options_output.txt"))
@@ -273,11 +274,41 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_chemical_potentials_section(section_name, section_content, options)
 
     def test_parse_phonon_section(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        minput = MASTFile("%s/phonon_lines.txt" % testdir)
+        cleanlines = list()
+        for line in minput.data:
+            cleanlines.append(line.strip())
+        myoptions = InputOptions()
+        myip.parse_phonon_section('phonon',cleanlines,myoptions)
+        print myoptions
+        mdict=dict()
+        mdict['perfect']=dict()
+        mdict['perfect']['phonon_center_site']='0.5 0.5 0'
+        mdict['perfect']['phonon_center_radius']='1'
+        mdict['vac1']=dict()
+        mdict['vac1']['phonon_center_site']='0.5 0.5 0'
+        mdict['vac1']['phonon_center_radius']='1'
+        mdict['vac2']=dict()
+        mdict['vac2']['phonon_center_site']='0.0 0.0 0'
+        mdict['vac2']['phonon_center_radius']='1'
+        mdict['vac1-vac2']=dict()
+        mdict['vac1-vac2']['phonon_center_site']='0.25 0.25 0'
+        mdict['vac1-vac2']['phonon_center_radius']='1'
+        self.assertEqual(myoptions.options['phonon']['phonon'],mdict)
         #self.testclass.parse_phonon_section(section_name, section_content, options)
 
     def test_perform_element_mapping(self):
-        raise SkipTest
+        myip = InputParser(inputfile="element_mapping.inp")
+        myoptions = myip.parse()
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','phonon','chemical_potentials'])
+        self.assertEqual(myoptions.options['defects']['defects']['group1']['subdefect_1']['symbol'],'Xe')
+        self.assertEqual(myoptions.options['defects']['defects']['group1']['subdefect_2']['symbol'],'Ar')
+        self.assertEqual(myoptions.options['defects']['defects']['group2']['subdefect_1']['symbol'],'Ar')
+        self.assertEqual(myoptions.options['defects']['defects']['group2']['subdefect_2']['symbol'],'Xe')
+        self.assertEqual(myoptions.options['neb']['neblines']['group1-group2'][0][0],'Ar')
+        self.assertEqual(myoptions.options['neb']['neblines']['group1-group2'][1][0],'Xe')
+
         #self.testclass.perform_element_mapping(input_options)
 
     def test_validate_execs(self):
