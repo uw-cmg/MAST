@@ -312,10 +312,17 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.perform_element_mapping(input_options)
 
     def test_validate_execs(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        myoptions = myip.parse()
+        myoptions.options['ingredients']['global'].pop('mast_exec')
+        myoptions.options['ingredients']['phononparse'].pop('mast_exec')
+        self.assertRaises(MASTError,myip.validate_execs,myoptions)
         #self.testclass.validate_execs(input_options)
 
     def test_set_structure_from_inputs(self):
-        raise SkipTest
+        myip = InputParser(inputfile="long_input.inp")
+        myoptions = myip.parse()
+        compare_struct = pymatgen.io.vaspio.Poscar.from_file("longinputposcar").structure
+        self.assertEqual(myoptions.options['structure']['structure'],compare_struct)
         #self.testclass.set_structure_from_inputs(input_options)
 
