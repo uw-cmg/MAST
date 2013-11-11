@@ -55,6 +55,7 @@ def main():
         dirutil.lock_directory(dirutil.get_mast_scratch_path(), 100) 
         queue_commands.submit_from_submission_list()
         queue_commands.clear_submission_list()
+        display_recent_submissions()
         dirutil.unlock_directory(dirutil.get_mast_scratch_path())
         dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
         mycwd=os.getcwd()
@@ -101,6 +102,13 @@ def display_errors():
     print "--------------------------"
     move_log()
 
+def display_recent_submissions():
+    """Display recent submissions to the queue."""
+    print "--------------------------"
+    print "Recent submissions (%s/just_submitted):" % os.getenv("MAST_CONTROL")
+    justsubmitted=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'just_submitted'))
+    for line in justsubmitted.data:
+        print line
 
 if __name__ == '__main__':
     main()
