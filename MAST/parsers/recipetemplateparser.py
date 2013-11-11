@@ -183,7 +183,7 @@ class RecipeTemplateParser(MASTObj):
 
 
     def old_parsing(self):
-        linestr="hello"
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in linestr:
             #validate the input line
             if not line or line.startswith('#'):
@@ -230,6 +230,7 @@ class RecipeTemplateParser(MASTObj):
     def process_system_name(self, processing_lines, system_name):
         """replace <sys> with the system name from the input options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
@@ -242,6 +243,7 @@ class RecipeTemplateParser(MASTObj):
                 processing_lines <list of str>: recipe lines to process.
                 d_neblines <dict of str>: dictionary of NEB lines.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         eval_lines = []
         if not d_neblines:
@@ -291,6 +293,7 @@ class RecipeTemplateParser(MASTObj):
            lines based on the number of images found in the
            input_options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         if not n_images:
             return processing_lines
@@ -318,6 +321,7 @@ class RecipeTemplateParser(MASTObj):
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         #import inspect
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
@@ -362,6 +366,7 @@ class RecipeTemplateParser(MASTObj):
     def process_phononlines(self, processing_lines):
         """add phonon information to the metadata. Does not change line info.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line and 'phonon_' in line:
                 nameval = line.split()[1]
@@ -392,6 +397,7 @@ class RecipeTemplateParser(MASTObj):
         """Add metadata entry for all ingredients. 
             Does not change line information.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line:
                 nameval = line.split()[1]
@@ -400,4 +406,5 @@ class RecipeTemplateParser(MASTObj):
         return 
     def get_unique_ingredients(self):
         """fetches the ingredients names"""
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         return list(set(self.ingredient_list))
