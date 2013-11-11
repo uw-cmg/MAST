@@ -65,6 +65,7 @@ def main():
         mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         mysub.wait()
         os.chdir(mycwd)
+        display_displayme_lines()
         display_errors()
     if (mastopt.mode == 'input'):
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
@@ -109,6 +110,37 @@ def display_recent_submissions():
     justsubmitted=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'just_submitted'))
     for line in justsubmitted.data:
         print line
+
+def display_displayme_lines():
+    """Display all lines marked DISPLAY_ME from the mast.log logfile.
+        Each line should be in the format:
+        <logging level>:DISPLAY_ME:<recipe folder>:<message>
+    """
+    print "-------------------------"
+    print "Displaying immediate information:"
+    alllog=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'mast.log'))
+    immeddata=list()
+    immeddict=dict()
+    for line in alllog.data:
+        if "DISPLAY_ME" in line:
+            immeddata.append(line)
+    for line in immeddata:
+        displine=line.strip().split(":")
+        rname=displine[2]
+        rmsg=displine[3]
+        if not rname in immeddict.keys():
+            immeddict[rname]=list()
+        immeddict[rname].append(rmsg)
+    rkeys=immeddict.keys()
+    rkeys.sort()
+    for rkey in rkeys:
+        print "%s:" % rkey
+        for msgline in immeddict[rkey]:
+            print "    %s" % msgline
+    #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
+    #mycheck.wait()
+    print "--------------------------"
+
 
 if __name__ == '__main__':
     main()

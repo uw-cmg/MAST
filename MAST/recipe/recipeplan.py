@@ -41,6 +41,7 @@ class RecipePlan:
             self.status <str>: Recipe status
             self.working_directory <str>: Recipe working directory
             self.logger <logging logger>
+            self.display_logger <logging logger>: log entries to print to screen immediately after MAST runs
     """
     def __init__(self, name, working_directory):
         self.name            = name
@@ -56,6 +57,7 @@ class RecipePlan:
         self.working_directory = working_directory
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
+        self.display_logger=logging.getLogger("DISPLAY_ME:%s" % self.working_directory)
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
@@ -227,6 +229,8 @@ class RecipePlan:
                 totstage = totstage + 1
         self.logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
         self.logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
+        self.display_logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
+        self.display_logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
         if totcomp == total:
             self.status = "C"
         else:
