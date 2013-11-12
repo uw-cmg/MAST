@@ -37,6 +37,7 @@ class MASTFrozenJobErrorHandler(ErrorHandler):
     def correct(self): 
         backup(self.archivelist)
         actions=list()
+        actions.append("Archived files %s" % self.archivelist)
         return {"errors": ["MAST Frozen job"], "actions": actions}
 
     @property

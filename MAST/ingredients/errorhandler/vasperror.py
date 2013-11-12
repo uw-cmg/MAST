@@ -87,17 +87,13 @@ class VaspError(BaseError):
                     raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 4)" % hname)
                 if myerror.check():
                     self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
-                    self.display_logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
+                    self.display_logger.error("%s Error found! Attempting to correct." % (hname))
                     errct = errct + 1
                     c_dict = myerror.correct()
-                    self.logger.error("Errors listed:")
-                    self.logger.error("%s" % c_dict["errors"])
-                    self.logger.error("Actions taken for %s:" % self.keywords['name'])
-                    self.logger.error("%s" % c_dict["actions"])
-                    self.display_logger.error("Errors listed:")
-                    self.display_logger.error("%s" % c_dict["errors"])
-                    self.display_logger.error("Actions taken for %s:" % self.keywords['name'])
-                    self.display_logger.error("%s" % c_dict["actions"])
+                    self.logger.error("Errors: %s" % c_dict["errors"])
+                    self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
+                    self.display_logger.error("Errors %s" % c_dict["errors"])
+                    self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
                 else:
                     self.logger.info("%s No error found." % hname)
                     pass

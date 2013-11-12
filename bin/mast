@@ -52,6 +52,9 @@ def main():
         mastopt.runmode = 'run'
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'run') and (mastopt.status == None):
+        display_errors()
+        display_displayme_lines()
+        move_log()
         dirutil.lock_directory(dirutil.get_mast_scratch_path(), 100) 
         queue_commands.submit_from_submission_list()
         queue_commands.clear_submission_list()
@@ -65,12 +68,11 @@ def main():
         mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         mysub.wait()
         os.chdir(mycwd)
-        display_displayme_lines()
-        display_errors()
     if (mastopt.mode == 'input'):
+        display_errors()
+        move_log()
         mast = MAST(inputfile=mastopt.input, outputfile=mastopt.output)
         mast.check_independent_loops()
-        display_errors()
 
     if (mastopt.mode == 'interface') and (mastopt.runmode == 'check'):
         display_errors()
@@ -87,21 +89,32 @@ def move_log():
     """Move logfile to archive.timestamp.log
     """
     logfile = "%s/mast.log" % os.getenv("MAST_CONTROL")
+    errorpath = "%s/errormast" % os.getenv("MAST_CONTROL")
     if os.path.isfile(logfile):
         shutil.move(logfile, "%s/archive.log.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+    if os.path.isfile(errorpath):
+        errorfile = MASTFile(errorpath)
+        if len(errorfile.data) > 0:
+            shutil.move(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
 
 def display_errors():
     """Display errors."""
-    print "--------------------------"
-    print "ERROR lines from mast.log:"
-    mycheck = subprocess.Popen(['grep ERROR %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
-    mycheck.wait()
-    print "--------------------------"
-    print "Additional errors or explanations printed below:"
-    mycheck = subprocess.Popen(['cat %s/errormast' % os.getenv("MAST_CONTROL")],shell=True)
-    mycheck.wait()
-    print "--------------------------"
-    move_log()
+    #print "ERROR lines from mast.log:"
+    #mycheck = subprocess.Popen(['grep ERROR %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
+    #mycheck.wait()
+    #print "--------------------------"
+    #print "Additional errors or explanations printed below:"
+    myerrormast = MASTFile("%s/errormast" % os.getenv("MAST_CONTROL"))
+    if len(myerrormast.data) > 0:
+        print "--------------------------"
+        print "Errors below indicate that MAST errored out the last time it ran. Please correct the error(s) and remove the mast.write_files.lock file in %s." % os.getenv("MAST_SCRATCH")
+        for eline in myerrormast.data:
+            print eline
+        print "--------------------------"
+        raise MASTError("Fix previous MAST error before running MAST again.")
+    #mycheck = subprocess.Popen(['cat %s/errormast' % os.getenv("MAST_CONTROL")],stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    #myerrs=mycheck.communicate()[0]
+    #mycheck.wait()
 
 def display_recent_submissions():
     """Display recent submissions to the queue."""
@@ -117,7 +130,7 @@ def display_displayme_lines():
         <logging level>:DISPLAY_ME:<recipe folder>:<message>
     """
     print "-------------------------"
-    print "Displaying immediate information:"
+    print "Important information from the last time MAST ran:"
     alllog=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'mast.log'))
     immeddata=list()
     immeddict=dict()
