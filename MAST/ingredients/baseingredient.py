@@ -203,3 +203,4 @@ class BaseIngredient(MASTObj):
             statusfile=MASTFile()
         statusfile.data.append("%s:recommend:%s" % (newstatus, time.asctime()))
         statusfile.to_file(statuspath)
+        self.display_logger.info("Recommending status change to %s" % newstatus)
