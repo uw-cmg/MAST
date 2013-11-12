@@ -48,6 +48,7 @@ class BaseIngredient(MASTObj):
         
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
+        self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
         
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],
@@ -101,7 +102,9 @@ class BaseIngredient(MASTObj):
             else:
                 errct = self.errhandler.loop_through_errors()
                 if errct > 0:
-                    raise MASTError(self.__class__.__name__,"Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
+                    self.logger.error("Ingredient at %s needs resubmission." % self.keywords['name'])
+                    self.display_logger.error("Ingredient needs resubmission.")
+                    #raise MASTError(self.__class__.__name__,"Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
                     #if not self.checker.is_on_queue():
                     #    self.run()
                 return False
