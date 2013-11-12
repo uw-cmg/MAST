@@ -105,15 +105,8 @@ class VaspNEBChecker(VaspChecker):
         while imct <= numim:
             num_str = str(imct).zfill(2)
             impath = os.path.join(dirname, num_str)
-            try:
-                myoutcar = Outcar(os.path.join(impath, "OUTCAR"))
-            except (IOError):
-                return False
-            if not 'User time (sec)' in myoutcar.run_stats.keys():
-                return False
-            if myoutcar.run_stats['User time (sec)'] > 0:
-                pass
-            else:
+            singlechecker=VaspChecker(name=impath,program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            if not singlechecker.is_complete():
                 return False
             imct = imct + 1
         return True
