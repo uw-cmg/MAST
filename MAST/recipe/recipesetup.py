@@ -9,7 +9,7 @@
 ############################################################################
 import os
 import logging
-from MAST import ingredients
+#from MAST import ingredients
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
