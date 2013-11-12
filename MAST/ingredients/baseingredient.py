@@ -6,6 +6,7 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.utility import MASTFile
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import VaspNEBChecker
@@ -102,8 +103,9 @@ class BaseIngredient(MASTObj):
             else:
                 errct = self.errhandler.loop_through_errors()
                 if errct > 0:
-                    self.logger.error("Ingredient at %s needs resubmission." % self.keywords['name'])
-                    self.display_logger.error("Ingredient needs resubmission.")
+                    #self.logger.info("Ingredient at %s needs resubmission." % self.keywords['name'])
+                    #self.display_logger.info("Ingredient needs resubmission.")
+                    self.change_my_status("S")
                     #raise MASTError(self.__class__.__name__,"Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
                     #if not self.checker.is_on_queue():
                     #    self.run()
@@ -186,3 +188,30 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "No metadata for tag %s" % label)
         return mylabel[1]
+
+    def change_my_status(self, newstatus):
+        """Change an ingredient status in status.txt
+            Args:
+                newstatus <str>: New status to which to change the ingredient.
+        """
+        recipe_dir = os.path.dirname(self.keywords['name'])
+        ing_name = os.path.basename(self.keywords['name'])
+        statuspath = "%s/status.txt" % recipe_dir
+        #dirutil.lock_directory(recipe_dir)
+        if not os.path.isfile(statuspath):
+            raise MASTError(self.__class__.__name__,"No status.txt file in %s" % recipe_dir)
+        statusfile = MASTFile(statuspath)
+        newdata=list()
+        for sline in statusfile.data:
+            sname = sline.strip().split(':')[0].strip()
+            sstatus = sline.strip().split(':')[1].strip()
+            if ing_name == sname:
+                newdata.append("%s : %s" % (ing_name, newstatus))
+                self.logger.info("Changed status of ingredient %s to %s" % (self.keywords['name'], newstatus))
+                self.display_logger.info("Changed status of ingredient to %s" % (newstatus))
+            else:
+                newdata.append(sline)
+        statusfile.data = list(newdata)
+        statusfile.to_file(statuspath)
+        #dirutil.unlock_directory(recipe_dir)
+

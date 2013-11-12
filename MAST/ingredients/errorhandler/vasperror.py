@@ -50,7 +50,7 @@ class VaspError(BaseError):
         handler_input_d['FrozenJobErrorHandler']="mast_skip"
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
-        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",1000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"]]
+        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",1000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
 
         return handler_input_d
 
@@ -83,8 +83,10 @@ class VaspError(BaseError):
                     myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2])
                 elif len(hinputs) < 5:
                     myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3])
+                elif len(hinputs) < 6:
+                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3],hinputs[4])
                 else:
-                    raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 4)" % hname)
+                    raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 5)" % hname)
                 if myerror.check():
                     self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
                     self.display_logger.error("%s Error found! Attempting to correct." % (hname))
