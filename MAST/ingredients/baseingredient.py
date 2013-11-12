@@ -190,28 +190,16 @@ class BaseIngredient(MASTObj):
         return mylabel[1]
 
     def change_my_status(self, newstatus):
-        """Change an ingredient status in status.txt
+        """Change an ingredient status by writing the new status to 
+            change_status.txt in the ingredient folder, to get picked
+            up by the recipe plan.
             Args:
                 newstatus <str>: New status to which to change the ingredient.
         """
-        recipe_dir = os.path.dirname(self.keywords['name'])
-        ing_name = os.path.basename(self.keywords['name'])
-        statuspath = "%s/status.txt" % recipe_dir
-        #dirutil.lock_directory(recipe_dir)
-        if not os.path.isfile(statuspath):
-            raise MASTError(self.__class__.__name__,"No status.txt file in %s" % recipe_dir)
-        statusfile = MASTFile(statuspath)
-        newdata=list()
-        for sline in statusfile.data:
-            sname = sline.strip().split(':')[0].strip()
-            sstatus = sline.strip().split(':')[1].strip()
-            if ing_name == sname:
-                newdata.append("%s : %s" % (ing_name, newstatus))
-                self.logger.info("Changed status of ingredient %s to %s" % (self.keywords['name'], newstatus))
-                self.display_logger.info("Changed status of ingredient to %s" % (newstatus))
-            else:
-                newdata.append(sline)
-        statusfile.data = list(newdata)
+        statuspath = "%s/change_status.txt" % self.keywords['name']
+        if os.path.isfile(statuspath):
+            statusfile = MASTFile(statuspath)
+        else:
+            statusfile=MASTFile()
+        statusfile.data.append("%s:recommend:%s" % (newstatus, time.asctime()))
         statusfile.to_file(statuspath)
-        #dirutil.unlock_directory(recipe_dir)
-

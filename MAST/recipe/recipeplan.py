@@ -8,6 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import time
 import logging
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
@@ -144,11 +145,45 @@ class RecipePlan:
         """
         for iname in self.ingredients.keys():
             if self.ingredients[iname] == "P":
-                if self.complete_ingredient(iname):
-                    self.ingredients[iname] = "C"
-                    self.update_children(iname)
+                if self.status_change_recommended(iname):
+                    pass
+                else:
+                    if self.complete_ingredient(iname):
+                        self.ingredients[iname] = "C"
+                        self.update_children(iname)
         return
     
+    def status_change_recommended(self, iname):
+        """Check if a status change is recommended for the ingredient,
+            as listed in the ingredient folder/change_status.txt.
+            Args:
+                iname <str>: ingredient name
+            Returns:
+                True if a status change was recommended, and 
+                    changes the status of the ingredient in self.ingredients.
+                False otherwise
+        """
+        statuspath = os.path.join(self.working_directory, iname, "change_status.txt")
+        if not os.path.isfile(statuspath):
+            return False
+        statusfile = MASTFile(statuspath)
+        newdata=list()
+        changed=False
+        for sline in statusfile.data: #status:recommend:timestamp
+            if not "status_changed" in sline:
+                newstatus = sline.split(":")[0]
+                self.ingredients[iname]=newstatus
+                newline = sline + ":status_changed:" + time.asctime() + "\n"
+                self.logger.info("Status changed to %s" % newstatus)
+                self.display_logger.info("Status changed to %s" % newstatus)
+                changed=True
+                newdata.append(newline)
+            else:
+                newdata.append(sline)
+        statusfile.data=list(newdata)
+        statusfile.to_file(statuspath)
+        return changed
+
     def check_if_parents_are_complete(self):
         """Check if parents of waiting ingredients are
             complete.
