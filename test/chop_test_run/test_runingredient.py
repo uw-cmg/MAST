@@ -39,10 +39,11 @@ class TestRunIngredient(unittest.TestCase):
 
     def tearDown(self):
         tearlist = list()
-        tearlist.append("writedir/single_label1")
-        tearlist.append("writedir/next_ingred")
-        tearlist.append("writedir/neb_labelinit-labelfin_stat")
-        tearlist.append("writedir/single_phonon_label1")
+        #tearlist.append("writedir/single_label1")
+        #tearlist.append("writedir/next_ingred")
+        #tearlist.append("writedir/neb_labelinit-labelfin_stat")
+        #tearlist.append("writedir/single_phonon_label1")
+        tearlist.append("writedir")
         for foldername in tearlist:
             try:
                 shutil.rmtree(foldername)

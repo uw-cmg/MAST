@@ -26,7 +26,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
 
     def tearDown(self):
         tearlist = list()
-        tearlist.append("writedir/single_label1")
+        tearlist.append("writedir")
         for foldername in tearlist:
             try:
                 shutil.rmtree(foldername)

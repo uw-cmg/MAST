@@ -32,10 +32,11 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
 
     def tearDown(self):
         tearlist = list()
-        tearlist.append("writedir/single_label1")
-        tearlist.append("writedir/next_ingred")
-        tearlist.append("writedir/neb_labelinit-labelfin")
-        tearlist.append("writedir/single_phonon_label1")
+        tearlist.append("writedir")
+        #tearlist.append("writedir/single_label1")
+        #tearlist.append("writedir/next_ingred")
+        #tearlist.append("writedir/neb_labelinit-labelfin")
+        #tearlist.append("writedir/single_phonon_label1")
         for foldername in tearlist:
             try:
                 shutil.rmtree(foldername)
