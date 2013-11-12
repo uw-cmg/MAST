@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -7,7 +8,6 @@ from MAST.utility import Metadata
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
-
 class BaseError(MASTObj):
     """Base error handling class. This class switches between
         program-specific error-handling functions.
@@ -34,6 +34,7 @@ class BaseError(MASTObj):
                 False otherwise
                 False if no output file exists
         """
+        raise MASTError("Use custodian instead")
         fullfile=os.path.join(self.keywords['name'],filetocheck)
         if not os.path.isfile(fullfile):
             self.logger.warning("No file at %s for frozen check." % fullfile)
@@ -51,6 +52,3 @@ class BaseError(MASTObj):
             return True
         else:
             return False
-
-
-

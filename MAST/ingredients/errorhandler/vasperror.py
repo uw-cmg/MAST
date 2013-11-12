@@ -4,6 +4,7 @@ import logging
 import inspect
 import os
 from MAST.ingredients.errorhandler import BaseError
+from MAST.ingredients.errorhandler import masterrorhandlers 
 class VaspError(BaseError):
     """VASP error-handling functions (wraps custodian)
     """
@@ -17,6 +18,7 @@ class VaspError(BaseError):
 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
+        self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
 
     def get_error_handlers(self):
         """Get error handler list from custodian.vasp.handlers.
@@ -24,6 +26,7 @@ class VaspError(BaseError):
             continuously adding new handlers.
         """
         handlerlist = inspect.getmembers(handlers)
+        handlerlist.extend(inspect.getmembers(masterrorhandlers))
         handlerdict=dict()
         for htry in handlerlist:
             hname = htry[0]
@@ -39,14 +42,15 @@ class VaspError(BaseError):
             Use mast_skip to skip the error.
         """
         handler_input_d=dict()
-        handler_input_d['VaspErrorHandler']="OUTCAR"
-        handler_input_d['DentetErrorHandler']="OUTCAR"
-        handler_input_d['UnconvergedErrorHandler']="vasprun.xml,7200"
-        handler_input_d['PoscarErrorHandler']="OUTCAR"
-        handler_input_d['TripleProductErrorHandler']="OUTCAR"
-        handler_input_d['FrozenJobErrorHandler']="OUTCAR"
+        handler_input_d['VaspErrorHandler']=["OUTCAR"]
+        handler_input_d['DentetErrorHandler']=["OUTCAR"]
+        handler_input_d['UnconvergedErrorHandler']=["vasprun.xml"]
+        handler_input_d['PoscarErrorHandler']=["OUTCAR"]
+        handler_input_d['TripleProductErrorHandler']=["OUTCAR"]
+        handler_input_d['FrozenJobErrorHandler']="mast_skip"
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
+        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",1000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"]]
 
         return handler_input_d
 
@@ -69,11 +73,31 @@ class VaspError(BaseError):
                 pass
             else:
                 self.logger.info("Checking for %s" % hname)
-                myerror = handlerdict[hname](hinputs)
+                if len(hinputs) == 0:
+                    myerror = handlerdict[hname]()
+                elif len(hinputs) < 2:
+                    myerror = handlerdict[hname](hinputs[0])
+                elif len(hinputs) < 3:
+                    myerror = handlerdict[hname](hinputs[0],hinputs[1])
+                elif len(hinputs) < 4:
+                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2])
+                elif len(hinputs) < 5:
+                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3])
+                else:
+                    raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 4)" % hname)
                 if myerror.check():
-                    self.logger.info("%s Error found! Attempting to correct." % hname)
+                    self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
+                    self.display_logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
                     errct = errct + 1
-                    myerror.correct()
+                    c_dict = myerror.correct()
+                    self.logger.error("Errors listed:")
+                    self.logger.error("%s" % c_dict["errors"])
+                    self.logger.error("Actions taken for %s:" % self.keywords['name'])
+                    self.logger.error("%s" % c_dict["actions"])
+                    self.display_logger.error("Errors listed:")
+                    self.display_logger.error("%s" % c_dict["errors"])
+                    self.display_logger.error("Actions taken for %s:" % self.keywords['name'])
+                    self.display_logger.error("%s" % c_dict["actions"])
                 else:
                     self.logger.info("%s No error found." % hname)
                     pass
