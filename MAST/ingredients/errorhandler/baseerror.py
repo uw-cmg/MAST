@@ -1,5 +1,5 @@
 import os
-
+import time
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -22,3 +22,35 @@ class BaseError(MASTObj):
    
     def loop_through_errors(self):
         raise NotImplementedError
+
+    def check_output_frozen(self, filetocheck):
+        """Check if the output file is frozen.
+            Args:
+                filetocheck <str>: name of output file
+            Return:
+                True if the ingredient's output file has not been updated in
+                    ingredient keyword mast_frozenseconds seconds
+                    (default 7200)
+                False otherwise
+                False if no output file exists
+        """
+        fullfile=os.path.join(self.keywords['name'],filetocheck)
+        if not os.path.isfile(fullfile):
+            self.logger.warning("No file at %s for frozen check." % fullfile)
+            return False
+        fstat=os.stat(fullfile)
+        last_modified=fstat.st_mtime
+        current_time=time.now()
+        lag_time = current_time - last_modified
+        frozen_time=0
+        if not 'mast_frozenseconds' in self.program_keys.keys():
+            frozen_time=7200
+        else:
+            frozen_time=float(self.program_keys['mast_frozenseconds'])
+        if lag_time > frozen_time:
+            return True
+        else:
+            return False
+
+
+

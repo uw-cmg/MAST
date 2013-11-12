@@ -78,3 +78,6 @@ class VaspError(BaseError):
                     self.logger.info("%s No error found." % hname)
                     pass
         return errct
+    def check_output_frozen(self):
+        """Check if the output is frozen."""
+        return BaseError.check_output_frozen("OUTCAR")

@@ -84,3 +84,17 @@ class VaspNEBError(BaseError):
                         pass
             imct = imct + 1
         return errct
+    
+    def check_output_frozen(self):
+        """Check if the output is frozen."""
+        imct = 1
+        frozens=0
+        while imct <= self.keywords['program_keys']['images']:
+            imstr = str(imct).zfill(2)
+            if BaseError.check_output_frozen("%s/OUTCAR" % imstr):
+                frozens=frozens+1
+            imct=imct+1
+        if frozens > 0:
+            return True
+        else:
+            return False
