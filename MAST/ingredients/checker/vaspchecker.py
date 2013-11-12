@@ -15,6 +15,7 @@ from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import os
 import shutil
 import logging
+import subprocess
 from MAST.ingredients.checker import BaseChecker
 class VaspChecker(BaseChecker):
     """VASP checker functions
@@ -128,19 +129,46 @@ class VaspChecker(BaseChecker):
     def is_complete(self):
         """Check if single VASP non-NEB calculation is complete.
         """
-        try:
-            myoutcar = Outcar(os.path.join(self.keywords['name'], "OUTCAR"))
-        except (IOError):
+        usertime=False
+        reachedaccuracy=False
+        opath = os.path.join(self.keywords['name'],"OUTCAR")
+        if not os.path.isfile(opath):
+            self.logger.info("No OUTCAR at %s; not complete." % opath)
             return False
 
+        myoutcar = Outcar(opath)
+        
         #hw 04/19/13
         try:
             if myoutcar.run_stats['User time (sec)'] > 0:
-                return True
+                usertime=True
             else:
-                return False
+                usertime=False
         except KeyError:
-            return False
+            usertime=False
+        
+        reachgrep=subprocess.Popen('grep "reached required accuracy" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        reachrpt=reachgrep.communicate()[0]
+        reachgrep.wait()
+        if reachrpt=='':
+            reachedaccuracy=False
+        else:
+            reachedaccuracy=True
+
+        if reachedaccuracy==True:
+            if usertime==False:
+                self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
+                return False
+            else:
+                self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
+                return True
+        else:
+            if usertime==False:
+                self.logger.info("OUTCAR at %s does not show reached required accuracy or user time; still incomplete." % opath)
+                return False
+            else:
+                self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
+                return False
 
     def is_ready_to_run(self):
         """Check if single VASP non-NEB ingredient is 
