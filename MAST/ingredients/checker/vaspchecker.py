@@ -155,6 +155,17 @@ class VaspChecker(BaseChecker):
         else:
             reachedaccuracy=True
 
+        #For static runs, make an additional check for just electronic convergence.
+        if ibrion in self.keywords['program_keys'].keys():
+            if str(self.keywords['program_keys']['ibrion']) == "-1":
+                reachgrep=subprocess.Popen('grep "EDIFF is reached" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                reachrpt=reachgrep.communicate()[0]
+                reachgrep.wait()
+                if reachrpt=='':
+                    reachedaccuracy=False
+                else:
+                    reachedaccuracy=True
+
         if reachedaccuracy==True:
             if usertime==False:
                 self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
