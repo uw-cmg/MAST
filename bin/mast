@@ -32,7 +32,9 @@ def main():
 
     (mastopt, mastarg) = parser.parse_args()
 
+    print "-------------------------"
     print 'Welcome to the MAterials Simulation Toolkit (MAST), September 2013 version.'
+    print "-------------------------"
 
     logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
     logger = logging.getLogger(__name__)
@@ -112,7 +114,7 @@ def display_errors():
         print "--------------------------"
         print "Errors below indicate that MAST errored out the last time it ran. Please correct the error(s) and remove the mast.write_files.lock file in %s." % os.getenv("MAST_SCRATCH")
         for eline in myerrormast.data:
-            print eline
+            print eline.strip()
         print "--------------------------"
         move_log()
         raise MASTError("bin/mast","Fix previous MAST error before running MAST again. Remove the mast.write_files.lock file in %s." % os.getenv("MAST_SCRATCH"))
@@ -123,10 +125,11 @@ def display_errors():
 def display_recent_submissions():
     """Display recent submissions to the queue."""
     print "--------------------------"
-    print "Recent submissions (%s/just_submitted):" % os.getenv("MAST_CONTROL")
+    print "Jobs submitted to the queue: (%s/just_submitted):" % os.getenv("MAST_CONTROL")
+    print "--------------------------"
     justsubmitted=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'just_submitted'))
     for line in justsubmitted.data:
-        print line
+        print line.strip()
 
 def display_displayme_lines():
     """Display all lines marked DISPLAY_ME from the mast.log logfile.
@@ -134,7 +137,8 @@ def display_displayme_lines():
         <logging level>:DISPLAY_ME:<recipe folder>:<message>
     """
     print "-------------------------"
-    print "Important information from the last time MAST ran:"
+    print " Recipe information from previous MAST run:"
+    print "-------------------------"
     alllog=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'mast.log'))
     immeddata=list()
     immeddict=dict()
@@ -158,7 +162,6 @@ def display_displayme_lines():
             print "    %s" % msgline
     #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
     #mycheck.wait()
-    print "--------------------------"
 
 
 if __name__ == '__main__':
