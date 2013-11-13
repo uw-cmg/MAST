@@ -45,13 +45,19 @@ class MASTFrozenJobErrorHandler(ErrorHandler):
         backup(self.archivelist)
         actions.append("Archived files %s" % self.archivelist)
         for file in self.archivelist:
-            if (not file in self.copyfromlist) and (not file in self.copytolist):
-                os.remove(file)
+            if (not file in self.copyfromlist) and (not file in self.copytolist): #if it is a copy-from, don't want to delete it, and if it is a copy-to, it will be either overwritted by a copy-from file, or preserved
+                if os.path.isfile(file):
+                    os.remove(file)
+        for file in self.copyfromlist:
+            cindex = self.copyfromlist.index(file)
+            if os.path.isfile(file):
+                if os.stat(file).st_size > 0:
+                    os.rename(file, self.copytolist[cindex])
+                    actions.append("Copied file %s to %s" % (self.copyfromlist[cindex], self.copytolist[cindex]))
+                else:
+                    actions.append("Skipped file copy of %s to %s because %s was empty." % (self.copyfromlist[cindex],self.copytolist[cindex],self.copyfromlist[cindex]))
             else:
-                cindex = self.copyfromlist.index(file)
-                os.rename(file, self.copytolist[cindex])
-                actions.append("Copied file %s to %s" % (self.copyfromlist[cindex], self.copytolist[cindex]))
-                self.archivelist.remove(self.copytolist[cindex])
+                actions.append("Skipped file copy of %s to %s because %s did not exist." % (self.copyfromlist[cindex],self.copytolist[cindex],self.copyfromlist[cindex]))
         return {"errors": ["MAST Frozen job"], "actions": actions}
 
     @property
