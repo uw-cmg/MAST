@@ -24,12 +24,3 @@ class PhonError(BaseError):
         errct = 0
         return errct
     
-    def check_output_frozen(self):
-        """Check if the output is frozen."""
-        thermo=BaseError.check_output_frozen("THERMO")
-        freq=BaseError.check_output_frozen("FREQ")
-        if thermo or freq:
-            return True
-        else:
-            return False
-
