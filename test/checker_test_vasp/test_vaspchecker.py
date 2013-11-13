@@ -101,6 +101,20 @@ class TestVaspChecker(unittest.TestCase):
         self.assertFalse(vcs.is_complete())
         self.assertTrue(vcc.is_complete())
 
+    def test_is_complete_additional_cases(self):
+        kdict=dict()
+        kdict['ibrion'] = "-1"
+        vcs = VaspChecker(name="done_static",program_keys=kdict)
+        self.assertTrue(vcs.is_complete())
+        vcs = VaspChecker(name="done_static_butnotconverged",program_keys=kdict)
+        self.assertFalse(vcs.is_complete())
+        vcs = VaspChecker(name="notdone_static_notconverged",program_keys=kdict)
+        self.assertFalse(vcs.is_complete())
+        vcr = VaspChecker(name="notdone_notconverged")
+        self.assertFalse(vcr.is_complete())
+        vcr = VaspChecker(name="done_butnotconverged")
+        self.assertFalse(vcr.is_complete())
+
     def test_is_ready(self):
         vcnr1 = VaspChecker(name="notready1")
         vcnr2 = VaspChecker(name="notready2")
