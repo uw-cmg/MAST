@@ -244,9 +244,6 @@ class RecipePlan:
         self.print_status(verbose)
     def print_status(self, verbose=1):
         """Print status and set the recipe status.
-            C = complete
-            R = running
-            I = initialized
         """
 
         total = len(self.ingredients.keys())
@@ -258,6 +255,13 @@ class RecipePlan:
         ilist = self.ingredients.keys()
         ilist.sort()
         statusfile = MASTFile()
+        statusfile.data.append("#Statuses:\n")
+        statusfile.data.append("#I = Initial state\n")
+        statusfile.data.append("#W = Waiting on parents\n")
+        statusfile.data.append("#S = Staged for run prep (parents complete)\n")
+        statusfile.data.append("#P = ready to Proceed to queue; look for submission\n")
+        statusfile.data.append("#C = Complete\n")
+
         if verbose == 1:
             import time
             self.logger.info("Recipe name: %s" % self.name)
@@ -347,12 +351,15 @@ class RecipePlan:
             raise MASTError(self.__class__.__name__, "Could not get status file in %s" % statpath)
         statfile = MASTFile(statpath)
         for statline in statfile.data:
-            statsplit = statline.strip().split(':')
-            oneingred = statsplit[0].strip()
-            onestatus = statsplit[1].strip()
-            if oneingred in self.ingredients.keys():
-                self.ingredients[oneingred] = onestatus
+            if statline[0] == "#":
+                pass
             else:
-                raise MASTError(self.__class__.__name__, "Ingredient %s is not in the original recipe's ingredients list." % oneingred)
+                statsplit = statline.strip().split(':')
+                oneingred = statsplit[0].strip()
+                onestatus = statsplit[1].strip()
+                if oneingred in self.ingredients.keys():
+                    self.ingredients[oneingred] = onestatus
+                else:
+                    raise MASTError(self.__class__.__name__, "Ingredient %s is not in the original recipe's ingredients list." % oneingred)
 
             
