@@ -1,5 +1,5 @@
 import os
-
+import shutil
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -75,4 +75,23 @@ class BaseChecker(MASTObj):
                 self.display_logger.warning("%s already exists in %s. File not softlinked from %s" % (filename,childpath,parentpath))
         else:
             raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot create softlink." % (parentpath, filename))
+        dirutil.unlock_directory(childpath)
+    
+    def copy_a_file(self, childpath, pfname, cfname):
+        """Copy a parent file to an arbitrary name in the child folder.
+            Args:
+                childpath <str>: path to child ingredient
+                pfname <str>: file name in parent folder (e.g. "CONTCAR")
+                cfname <str>: file name for child folder (e.g. "POSCAR")
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        if os.path.isfile("%s/%s" % (parentpath, pfname)):
+            if not os.path.isfile("%s/%s" % (childpath, cfname)):
+                shutil.copy("%s/%s" % (parentpath, pfname),"%s/%s" % (childpath, cfname))
+            else:
+                self.logger.warning("%s already exists in %s. Parent file %s not copied from %s into child %s." % (cfname,childpath,pfname,parentpath,cfname))
+                self.display_logger.warning("%s already exists in %s. Parent file %s not copied from %s into child %s." % (cfname,childpath,pfname,parentpath,cfname))
+        else:
+            raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot copy into child path as %s." % (parentpath, pfname, cfname))
         dirutil.unlock_directory(childpath)

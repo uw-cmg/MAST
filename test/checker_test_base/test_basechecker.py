@@ -114,3 +114,48 @@ class TestBasechecker(unittest.TestCase):
         self.assertTrue("files/another_alphatest" in listres)
         self.assertTrue("childdir/alphatest" in myfiles)
         #self.testclass.softlink_a_file(childpath, filename)
+    def test_copy_a_file(self):
+        allowed=dict()
+        allowed['name']=(str,"","Directory name")
+        mybc=BaseChecker(allowed,name='files')
+        mybc.copy_a_file('childdir','alphatest','childalpha')
+        self.assertTrue(os.path.isfile('childdir/childalpha'))
+    def test_copy_a_file_emptyparentfile(self):
+        allowed=dict()
+        allowed['name']=(str,"","Directory name")
+        mybc=BaseChecker(allowed,name='files')
+        mybc.copy_a_file('childdir','emptyfile','childalpha')
+        self.assertTrue(os.path.isfile('childdir/childalpha'))
+    def test_copy_a_file_no_parent_file(self):
+        allowed=dict()
+        allowed['name']=(str,"","Directory name")
+        mybc=BaseChecker(allowed,name='files')
+        self.assertRaises(MASTError,mybc.copy_a_file,'childdir','nofile','childalpha')
+    def test_copy_a_file_child_file_exists(self):
+        allowed=dict()
+        allowed['name']=(str,"","Directory name")
+        shutil.copy('files/another_alphatest','childdir/alphatest')
+        mybc=BaseChecker(allowed,name='files')
+        mybc.copy_a_file('childdir','third_alphatest','alphatest')
+        compare=MASTFile("files/another_alphatest")
+        myfile=MASTFile("childdir/alphatest")
+        self.assertEqual(compare.data, myfile.data)
+    def test_copy_a_file_child_softlink_exists(self):
+        allowed=dict()
+        allowed['name']=(str,"","Directory name")
+        os.chdir("childdir")
+        linkme=subprocess.Popen("ln -s ../files/another_alphatest alphatest",shell=True)
+        linkme.wait()
+        os.chdir(testdir)
+        mybc=BaseChecker(allowed,name='files')
+        mybc.copy_a_file('childdir','third_alphatest','alphatest')
+        myfiles=dirutil.walkfiles("childdir")
+        print myfiles
+        #self.assertTrue("childdir/CHGCAR" in myfiles)
+        listme=subprocess.Popen("ls -l childdir",stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        listres=listme.communicate()[0]
+        listme.wait()
+        print listres
+        self.assertTrue("files/another_alphatest" in listres)
+        self.assertTrue("childdir/alphatest" in myfiles)
+        #self.testclass.softlink_a_file(childpath, filename)
