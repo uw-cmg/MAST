@@ -322,28 +322,27 @@ class TestVaspChecker(unittest.TestCase):
         listme.wait()
         print listres
         self.assertTrue("files/CHGCAR" in listres)
-    def test_softlink_charge_density_file_preexisting_link(self):
-        raise SkipTest
+    def test_softlink_wavefunction_file(self):
         import subprocess
-        linkme=subprocess.Popen("ln -s files/another_CHGCAR childdir/CHGCAR",shell=True)
-        linkme.wait()
         myvc = VaspChecker(name="files")
-        myvc.softlink_charge_density_file("childdir")
+        myvc.softlink_wavefunction_file("childdir")
         myfiles=dirutil.walkfiles("childdir")
-        #print myfiles
-        self.assertTrue("childdir/CHGCAR" in myfiles)
+        print myfiles
+        #self.assertTrue("childdir/CHGCAR" in myfiles)
         listme=subprocess.Popen("ls -l childdir",stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         listres=listme.communicate()[0]
         listme.wait()
-        self.assertTrue("files/another_CHGCAR" in listres)
+        print listres
+        self.assertTrue("files/WAVECAR" in listres)
 
-    def test_copy_charge_density_file(self):
-        raise SkipTest
+    def test_forward_charge_density_file(self):
         myvc = VaspChecker(name="files")
-        myvc.forward_extra_restart_files("childdir")
-        myfiles=dirutil.walkfiles("childdir")
-        self.assertTrue("childdir/WAVECAR" in myfiles)
-        self.assertTrue("childdir/CHGCAR" in myfiles)
+        myvc.forward_charge_density_file("childdir")
+        self.assertTrue(os.path.isfile("childdir/CHGCAR"))
+    def test_forward_wavefunction_file(self):
+        myvc = VaspChecker(name="files")
+        myvc.forward_wavefunction_file("childdir")
+        self.assertTrue(os.path.isfile("childdir/WAVECAR"))
     def test_add_selective_dynamics(self):
         mystruc = pymatgen.io.vaspio.Poscar.from_file(os.path.join(testdir,"structure","POSCAR_Al")).structure
         myvc = VaspChecker(name="childdir",structure=mystruc)
