@@ -531,9 +531,28 @@ class UpdateChildrenIngredient(BaseIngredient):
         label = BaseIngredient.get_my_label(self, "defect_label")
         self.checker.forward_final_structure_file(childname,"parent_structure_" + label)
         self.checker.forward_energy_file(childname, "parent_energy_" + label)
-    def give_structure_and_restart_files(self, childname):
+    def give_structure_and_restart_files_softlinks(self, childname):
         childname = self._fullpath_childname(childname)
         self.checker.forward_final_structure_file(childname)
-        self.checker.forward_extra_restart_files(childname)
+        self.checker.softlink_charge_density_file(childname)
+        self.checker.softlink_wavecar_file(childname)
+    
+    def give_structure_and_restart_files(self, childname):
+        self.give_structure_and_restart_files_softlinks(childname)
+
+    def give_structure_and_restart_files_full_copies(self, childname):
+        childname = self._fullpath_childname(childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.forward_charge_density_file(childname)
+        self.checker.forward_wavefunction_file(childname)
    
+    def give_structure_and_charge_density_full_copy(self, childname):
+        childname = self._fullpath_childname(childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.forward_charge_density_file(childname)
+    
+    def give_structure_and_wavefunction_full_copy(self, childname):
+        childname = self._fullpath_childname(childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.forward_wavefunction_file(childname)
 
