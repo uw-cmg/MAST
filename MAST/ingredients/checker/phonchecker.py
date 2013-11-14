@@ -24,8 +24,6 @@ class PhonChecker(BaseChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
 
     def is_complete(self):
         """Check if PHON thermo run is complete."""

@@ -28,10 +28,6 @@ class VaspNEBChecker(VaspChecker):
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-
-
     def get_path_to_write_neb_parent_energy(self, parent):
         """Get the path into which to write the NEB parent
             energy.

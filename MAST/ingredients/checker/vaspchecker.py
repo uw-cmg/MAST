@@ -28,9 +28,6 @@ class VaspChecker(BaseChecker):
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-
     def get_structure_from_file(self, myfilepath=""):
         """Get the structure from a specified file path.
             For VASP, this is a POSCAR-type file.
