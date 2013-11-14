@@ -22,6 +22,7 @@ class BaseChecker(MASTObj):
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
+        self.display_logger=logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
     
     def is_complete(self):
         raise NotImplementedError
@@ -71,6 +72,7 @@ class BaseChecker(MASTObj):
                 os.chdir(curpath)
             else:
                 self.logger.warning("%s already exists in %s. Parent %s not softlinked." % (filename,childpath,filename))
+                self.display_logger.warning("%s already exists in %s. File not softlinked from %s" % (filename,childpath,parentpath))
         else:
-            self.logger.warning("No %s to link to in parent path %s." % (filename,parentpath))
+            raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot create softlink." % (parentpath, filename))
         dirutil.unlock_directory(childpath)
