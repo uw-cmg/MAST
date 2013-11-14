@@ -367,6 +367,7 @@ class VaspChecker(BaseChecker):
             Args:
                 childpath <str>: path to child ingredient
         """
+        raise MASTError(self.__class__.__name__,"This function is obsolete. Use softlink_charge_density_file, softlink_wavefunction_file, copy_charge_density_file, and/or copy_wavefunction_file")
         parentpath = self.keywords['name']
         dirutil.lock_directory(childpath)
         import subprocess
@@ -381,6 +382,86 @@ class VaspChecker(BaseChecker):
         mylink2.wait()
         os.chdir(curpath)
         dirutil.unlock_directory(childpath)
+
+    def softlink_charge_density_file(self, childpath):
+        """Softlink the parent charge density file to the child folder
+            For VASP, this entails a softlink to CHGCAR
+            Args:
+                childpath <str>: path to child ingredient
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        import subprocess
+        #print "cwd: ", os.getcwd()
+        curpath = os.getcwd()
+        os.chdir(childpath)
+        #print parentpath
+        #print childpath
+        if os.path.isfile("%s/CHGCAR" % parentpath) and not os.path.isfile("CHGCAR"):
+            mylink=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
+            mylink.wait()
+        else:
+            self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not softlinked." % childpath)
+        os.chdir(curpath)
+        dirutil.unlock_directory(childpath)
+    def softlink_wavefunction_file(self, childpath):
+        """Softlink the parent wavefunction file to the child folder
+            For VASP, this entails a softlink to WAVECAR.
+            Args:
+                childpath <str>: path to child ingredient
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        import subprocess
+        #print "cwd: ", os.getcwd()
+        curpath = os.getcwd()
+        os.chdir(childpath)
+        #print parentpath
+        #print childpath
+        if os.path.isfile("%s/WAVECAR" % parentpath) and not os.path.isfile("WAVECAR"):
+            mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath, shell=True)
+            mylink.wait()
+        else:
+            self.logger.warning("WAVECAR already exists in %s. Parent WAVECAR not softlinked." % childpath)
+        os.chdir(curpath)
+        dirutil.unlock_directory(childpath)
+
+    def copy_charge_density_file(self, childpath):
+        """Copy the charge density file to the child folder.
+            For VASP, this is the CHGCAR.
+            Args:
+                childpath <str>: path to child ingredient
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        import subprocess
+        #print "cwd: ", os.getcwd()
+        #print parentpath
+        #print childpath
+        if os.path.isfile("%s/CHGCAR" % parentpath) and not os.path.isfile("%s/CHGCAR" % childpath):
+            shutil.copy("%s/CHGCAR" % parentpath, "%s/CHGCAR" % childpath)
+        else:
+            self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not copied." % childpath)
+        dirutil.unlock_directory(childpath)
+    def copy_wavefunction_file(self, childpath):
+        """Copy the wavefunction file to the child folder.
+            For VASP, this is the WAVECAR.
+            CHGCAR.
+            Args:
+                childpath <str>: path to child ingredient
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        import subprocess
+        #print "cwd: ", os.getcwd()
+        #print parentpath
+        #print childpath
+        if os.path.isfile("%s/WAVECAR" % parentpath) and not os.path.isfile("%s/WAVECAR" % childpath):
+            shutil.copy("%s/WAVECAR" % parentpath, "%s/WAVECAR" % childpath)
+        else:
+            self.logger.warning("WAVECAR already exists in %s. Parent WAVECAR not copied." % childpath)
+        dirutil.unlock_directory(childpath)
+    
     def add_selective_dynamics_to_structure_file(self, sdarray):
         """Add selective dynamics to a structure file.
             In the case of VASP, the structure file is 
