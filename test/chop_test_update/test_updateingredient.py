@@ -119,12 +119,18 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         myrelaxed=dict()
         myosz=dict()
+        mywav=dict()
+        mychg=dict()
         for subdir in ['00','01','02','03','04']:
             os.mkdir("writedir/neb_labelinit-labelfin/%s" % subdir)
             myrelaxed[subdir] = MASTFile("files/POSCAR_%s" % subdir)
             myrelaxed[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CONTCAR" % subdir)
             myosz[subdir] = MASTFile("files/OSZICAR_%s" % subdir)
             myosz[subdir].to_file("writedir/neb_labelinit-labelfin/%s/OSZICAR" % subdir)
+            mychg[subdir] = MASTFile("files/CHGCAR")
+            mychg[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CHGCAR" % subdir)
+            mywav[subdir] = MASTFile("files/WAVECAR")
+            mywav[subdir].to_file("writedir/neb_labelinit-labelfin/%s/WAVECAR" % subdir)
         myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_saddle_structure("next_ingred") #should be OSZ3
         saddle = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
@@ -244,3 +250,146 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
         #self.testclass.give_structure_and_restart_files(childname)
 
+    def test_give_structure_and_restart_files_full_copies(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_restart_files_full_copies("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/WAVECAR" % testdir))
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)
+
+    def test_give_structure_and_restart_files_softlinks(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_restart_files_softlinks("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/WAVECAR" % testdir))
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)
+
+    def test_give_structure_and_charge_density_softlink(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_charge_density_softlink("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)
+
+    def test_give_structure_and_wavefunction_softlink(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_wavefunction_softlink("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/WAVECAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)
+    def test_give_structure_and_wavefunction_full_copy(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_wavefunction_full_copy("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/WAVECAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)
+    def test_give_structure_and_charge_density_full_copy(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        myrelaxed = MASTFile("files/relaxed_structure")
+        myrelaxed.to_file("%s/CONTCAR" % ingdir)
+        mychg = MASTFile("files/CHGCAR")
+        mychg.to_file("%s/CHGCAR" % ingdir)
+        mywave = MASTFile("files/WAVECAR")
+        mywave.to_file("%s/WAVECAR" % ingdir)
+        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci.give_structure_and_charge_density_full_copy("next_ingred")
+        givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
+        self.assertEqual(myrelaxed.data, givenstr.data)
+        self.assertTrue(os.path.exists("%s/writedir/next_ingred/CHGCAR" % testdir))
+        #self.testclass.give_structure_and_restart_files(childname)

@@ -322,6 +322,8 @@ class TestWriteIngredient(unittest.TestCase):
         topmetad.to_file("writedir/metadata.txt")
         metad = MASTFile("files/metadata_single_phonon")
         metad.to_file("%s/metadata.txt" % ingdir)
+        shutil.copy("files/CHGCAR", ingdir)
+        shutil.copy("files/WAVECAR", ingdir)
         kdict=dict()
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'

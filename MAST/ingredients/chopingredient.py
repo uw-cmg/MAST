@@ -199,7 +199,9 @@ class WriteIngredient(BaseIngredient):
             self.checker.add_selective_dynamics_to_structure_file(sdarr)
             self.keywords['name'] = newname
             self.write_submit_script()
-            self.checker.forward_extra_restart_files(newname)
+            self.checker.keywords['name']=myname
+            self.checker.softlink_charge_density_file(newname)
+            self.checker.softlink_wavefunction_file(newname)
             sct = sct + 1
         self.checker.keywords['name'] = myname
         self.keywords['name']=myname
@@ -513,7 +515,8 @@ class UpdateChildrenIngredient(BaseIngredient):
         impath = os.path.join(self.keywords['name'], imno)
         self.checker.keywords['name'] = impath
         self.checker.forward_final_structure_file(childname)
-        self.checker.forward_extra_restart_files(childname)
+        self.checker.softlink_charge_density_file(childname)
+        self.checker.softlink_wavefunction_file(childname)
         return
     def give_phonon_multiple_forces_and_displacements(self,childname):
         self.checker.combine_dynamical_matrix_files(self.keywords['name'])
@@ -535,7 +538,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         childname = self._fullpath_childname(childname)
         self.checker.forward_final_structure_file(childname)
         self.checker.softlink_charge_density_file(childname)
-        self.checker.softlink_wavecar_file(childname)
+        self.checker.softlink_wavefunction_file(childname)
     
     def give_structure_and_restart_files(self, childname):
         self.give_structure_and_restart_files_softlinks(childname)
@@ -555,4 +558,14 @@ class UpdateChildrenIngredient(BaseIngredient):
         childname = self._fullpath_childname(childname)
         self.checker.forward_final_structure_file(childname)
         self.checker.forward_wavefunction_file(childname)
+
+    def give_structure_and_charge_density_softlink(self, childname):
+        childname = self._fullpath_childname(childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.softlink_charge_density_file(childname)
+    
+    def give_structure_and_wavefunction_softlink(self, childname):
+        childname = self._fullpath_childname(childname)
+        self.checker.forward_final_structure_file(childname)
+        self.checker.softlink_wavefunction_file(childname)
 
