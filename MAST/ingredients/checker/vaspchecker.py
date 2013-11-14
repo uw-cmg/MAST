@@ -67,10 +67,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
         """
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(self.keywords['name'], "CONTCAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
+        return self.copy_a_file(childpath, "CONTCAR", newname)
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
         """Forward the initial structure.
@@ -82,10 +79,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
         """
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(self.keywords['name'], "POSCAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
+        return self.copy_a_file(childpath, "POSCAR", newname)
 
     def forward_dynamical_matrix_file(self, childpath, newname="DYNMAT"):
         """Forward the dynamical matrix.
@@ -94,10 +88,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'DYNMAT')
         """
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(self.keywords['name'], "DYNMAT"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
+        return self.copy_a_file(childpath, "DYNMAT", newname)
 
     def forward_displacement_file(self, childpath, newname="XDATCAR"):
         """Forward displacement information.
@@ -106,10 +97,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'XDATCAR')
         """
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(self.keywords['name'], "XDATCAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
+        return self.copy_a_file(childpath, "XDATCAR", newname)
 
     def forward_energy_file(self, childpath, newname="OSZICAR"):
         """Forward the energy file.
@@ -118,10 +106,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'OSZICAR')
         """
-        dirutil.lock_directory(childpath)
-        shutil.copy(os.path.join(self.keywords['name'], "OSZICAR"),os.path.join(childpath, newname))
-        dirutil.unlock_directory(childpath)
-        return
+        return self.copy_a_file(childpath, "OSZICAR", newname)
 
     def is_complete(self):
         """Check if single VASP non-NEB calculation is complete.
@@ -364,7 +349,7 @@ class VaspChecker(BaseChecker):
             Args:
                 childpath <str>: path to child ingredient
         """
-        raise MASTError(self.__class__.__name__,"This function is obsolete. Use softlink_charge_density_file, softlink_wavefunction_file, copy_charge_density_file, and/or copy_wavefunction_file")
+        raise MASTError(self.__class__.__name__,"This function is obsolete. Use softlink_charge_density_file, softlink_wavefunction_file, forward_charge_density_file, and/or forward_wavefunction_file")
         parentpath = self.keywords['name']
         dirutil.lock_directory(childpath)
         import subprocess
@@ -386,81 +371,31 @@ class VaspChecker(BaseChecker):
             Args:
                 childpath <str>: path to child ingredient
         """
-        parentpath = self.keywords['name']
-        dirutil.lock_directory(childpath)
-        import subprocess
-        #print "cwd: ", os.getcwd()
-        #print parentpath
-        #print childpath
-        if os.path.isfile("%s/CHGCAR" % parentpath):
-            if not os.path.isfile("%s/CHGCAR" % childpath):
-                curpath = os.getcwd()
-                os.chdir(childpath)
-                mylink=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
-                mylink.wait()
-                os.chdir(curpath)
-            else:
-                self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not softlinked." % childpath)
-        else:
-            self.logger.warning("No CHGCAR to link to in parent path %s. % parentpath")
-        dirutil.unlock_directory(childpath)
+        return self.softlink_a_file(childpath, "CHGCAR")
+    
     def softlink_wavefunction_file(self, childpath):
         """Softlink the parent wavefunction file to the child folder
             For VASP, this entails a softlink to WAVECAR.
             Args:
                 childpath <str>: path to child ingredient
         """
-        parentpath = self.keywords['name']
-        dirutil.lock_directory(childpath)
-        import subprocess
-        #print "cwd: ", os.getcwd()
-        curpath = os.getcwd()
-        os.chdir(childpath)
-        #print parentpath
-        #print childpath
-        if os.path.isfile("%s/WAVECAR" % parentpath) and not os.path.isfile("WAVECAR"):
-            mylink=subprocess.Popen("ln -s %s/WAVECAR WAVECAR" % parentpath, shell=True)
-            mylink.wait()
-        else:
-            self.logger.warning("WAVECAR already exists in %s. Parent WAVECAR not softlinked." % childpath)
-        os.chdir(curpath)
-        dirutil.unlock_directory(childpath)
+        return self.softlink_a_file(childpath, "WAVECAR")
 
-    def copy_charge_density_file(self, childpath):
+    def forward_charge_density_file(self, childpath):
         """Copy the charge density file to the child folder.
             For VASP, this is the CHGCAR.
             Args:
                 childpath <str>: path to child ingredient
         """
-        parentpath = self.keywords['name']
-        dirutil.lock_directory(childpath)
-        import subprocess
-        #print "cwd: ", os.getcwd()
-        #print parentpath
-        #print childpath
-        if os.path.isfile("%s/CHGCAR" % parentpath) and not os.path.isfile("%s/CHGCAR" % childpath):
-            shutil.copy("%s/CHGCAR" % parentpath, "%s/CHGCAR" % childpath)
-        else:
-            self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not copied." % childpath)
-        dirutil.unlock_directory(childpath)
-    def copy_wavefunction_file(self, childpath):
+        return self.copy_a_file(childpath, "CHGCAR","CHGCAR")
+    def forward_wavefunction_file(self, childpath):
         """Copy the wavefunction file to the child folder.
             For VASP, this is the WAVECAR.
             CHGCAR.
             Args:
                 childpath <str>: path to child ingredient
         """
-        parentpath = self.keywords['name']
-        dirutil.lock_directory(childpath)
-        import subprocess
-        #print "cwd: ", os.getcwd()
-        #print parentpath
-        #print childpath
-        if os.path.isfile("%s/WAVECAR" % parentpath) and not os.path.isfile("%s/WAVECAR" % childpath):
-            shutil.copy("%s/WAVECAR" % parentpath, "%s/WAVECAR" % childpath)
-        else:
-            self.logger.warning("WAVECAR already exists in %s. Parent WAVECAR not copied." % childpath)
-        dirutil.unlock_directory(childpath)
+        return self.copy_a_file(childpath, "WAVECAR","WAVECAR")
     
     def add_selective_dynamics_to_structure_file(self, sdarray):
         """Add selective dynamics to a structure file.
