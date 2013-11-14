@@ -17,6 +17,8 @@ class TestVaspnebchecker(unittest.TestCase):
 
     def setUp(self):
         os.chdir(testdir)
+        if not os.path.isdir('childdir'):
+            os.mkdir('childdir')
 
     def tearDown(self):
         #return

@@ -438,16 +438,16 @@ class InputParser(MASTObj):
                         val = str().join(key[1][0].upper() + key[1][1:])
                         psp_dict[ref] = val
                     ingredient_dict[opt[0]] = psp_dict
-                elif (opt[0] == 'mast_exec'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'mast_strain'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'ptemp'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
-                elif (opt[0] == 'rwigs'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'mast_setmagmom'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_exec'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_strain'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'ptemp'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
+                #elif (opt[0] == 'rwigs'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_setmagmom'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 elif (opt[0] == 'mast_coordinates'):
                     shortsplit = opt[1].split(",")
                     filesplit=list()
@@ -465,8 +465,9 @@ class InputParser(MASTObj):
                         raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, origindir))
                     ingredient_dict[opt[0]] = filesplit
                 else:
-                    ingredient_dict[opt[0]] = opt[1]
-                if (opt[0] == 'mast_program') and opt[1] == 'vasp':
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                    #ingredient_dict[opt[0]] = opt[1] #old behavior took only the first part
+                if (opt[0] == 'mast_program') and (opt[1] == 'vasp' or opt[1] == 'vasp_neb'):
                     if os.getenv('VASP_PSP_DIR') == None:
                         raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
             elif ('end' in line):

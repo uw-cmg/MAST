@@ -18,6 +18,8 @@ class TestPhonChecker(unittest.TestCase):
 
     def setUp(self):
         os.chdir(testdir)
+        if not os.path.isdir("childdir"):
+            os.mkdir("childdir")
 
     def tearDown(self):
         for fname in ["POSCAR","POSCAR_prePHON","INPHON","FORCES","DYNMAT","XDATCAR","DYNMAT_mod_1","DYNMAT_mod_2"]:

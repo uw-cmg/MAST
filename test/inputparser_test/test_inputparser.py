@@ -217,7 +217,7 @@ class TestInputparser(unittest.TestCase):
         mdict['global']['prec']='Accurate'
         mdict['global']['mast_kpoints']=[2, 2, 2, 'M']
         mdict['global']['mast_write_method']='write_singlerun'
-        mdict['global']['ldauu']='1'
+        mdict['global']['ldauu']='1 3 5'
         mdict['global']['ibrion']='2'
         mdict['global']['mast_ready_method']='ready_singlerun'
         mdict['global']['isif']='2'
