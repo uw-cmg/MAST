@@ -393,16 +393,19 @@ class VaspChecker(BaseChecker):
         dirutil.lock_directory(childpath)
         import subprocess
         #print "cwd: ", os.getcwd()
-        curpath = os.getcwd()
-        os.chdir(childpath)
         #print parentpath
         #print childpath
-        if os.path.isfile("%s/CHGCAR" % parentpath) and not os.path.isfile("CHGCAR"):
-            mylink=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
-            mylink.wait()
+        if os.path.isfile("%s/CHGCAR" % parentpath):
+            if not os.path.isfile("%s/CHGCAR" % childpath):
+                curpath = os.getcwd()
+                os.chdir(childpath)
+                mylink=subprocess.Popen("ln -s %s/CHGCAR CHGCAR" % parentpath, shell=True)
+                mylink.wait()
+                os.chdir(curpath)
+            else:
+                self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not softlinked." % childpath)
         else:
-            self.logger.warning("CHGCAR already exists in %s. Parent CHGCAR not softlinked." % childpath)
-        os.chdir(curpath)
+            self.logger.warning("No CHGCAR to link to in parent path %s. % parentpath")
         dirutil.unlock_directory(childpath)
     def softlink_wavefunction_file(self, childpath):
         """Softlink the parent wavefunction file to the child folder
