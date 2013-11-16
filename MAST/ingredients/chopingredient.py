@@ -415,7 +415,7 @@ class IsCompleteIngredient(BaseIngredient):
             self.checker.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
-            elif not BaseIngredient.is_complete(self):
+            elif not self.is_complete():
                 notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
