@@ -438,10 +438,12 @@ class IsCompleteIngredient(BaseIngredient):
             newname = os.path.join(myname, phondir)
             self.keywords['name']=newname
             self.checker.keywords['name']=newname
-            if not BaseIngredient.is_complete(self):
+            self.errhandler.keywords['name']=newname
+            if not self.is_complete():
                 notready = notready + 1
         self.keywords['name']=myname
         self.checker.keywords['name']=myname
+        self.errhandler.keywords['name']=myname
         if notready == 0:
             return True
         else:
