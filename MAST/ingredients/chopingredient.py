@@ -413,6 +413,7 @@ class IsCompleteIngredient(BaseIngredient):
             newname = os.path.join(myname, subdir)
             self.keywords['name']=newname
             self.checker.keywords['name']=newname
+            self.errhandler.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
             elif not self.is_complete():
@@ -420,6 +421,7 @@ class IsCompleteIngredient(BaseIngredient):
             imct = imct + 1
         self.keywords['name']=myname
         self.checker.keywords['name']=myname
+        self.errhandler.keywords['name']=myname
         if notready == 0:
             return True
         else:
