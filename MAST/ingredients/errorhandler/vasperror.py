@@ -50,7 +50,7 @@ class VaspError(BaseError):
         handler_input_d['FrozenJobErrorHandler']="mast_skip"
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
-        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",1000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
+        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",21000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
 
         return handler_input_d
 
