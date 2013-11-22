@@ -137,31 +137,70 @@ class VaspChecker(BaseChecker):
         else:
             reachedaccuracy=True
 
-        #For static runs, make an additional check for just electronic convergence.
+        isstatic=False
+        isphonon=False
+        isMD=False
         if 'ibrion' in self.keywords['program_keys'].keys():
-            if str(self.keywords['program_keys']['ibrion']) == "-1":
-                reachgrep=subprocess.Popen('grep "EDIFF is reached" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                reachrpt=reachgrep.communicate()[0]
-                reachgrep.wait()
-                if reachrpt=='':
-                    reachedaccuracy=False
-                else:
-                    reachedaccuracy=True
-
-        if reachedaccuracy==True:
-            if usertime==False:
-                self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
-                return False
-            else:
-                self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
-                return True
+            ibrionval = str(self.keywords['program_keys']['ibrion'])
+            if ibrionval == "-1":
+                isstatic = True
+            elif ibrionval == "0":
+                isMD = True
+            elif ibrionval in ["5","6","7","8"]:
+                isphonon = True
+        if 'nsw' in self.keywords['program_keys'].keys():
+            nswval = str(self.keywords['program_keys']['nsw'])
+            if nswval in ["0","1"]:
+                isstatic = True
         else:
-            if usertime==False:
-                self.logger.info("OUTCAR at %s does not show reached required accuracy or user time; still incomplete." % opath)
+            isstatic = True #No NSW specified, VASP defaults to 0
+        
+        #For static runs, make an additional check for just electronic convergence.
+        if isstatic:
+            reachgrep=subprocess.Popen('grep "EDIFF is reached" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            reachrpt=reachgrep.communicate()[0]
+            reachgrep.wait()
+            if reachrpt=='':
+                reachedaccuracy=False
+            else:
+                reachedaccuracy=True
+
+
+        if (isMD) or (isphonon):
+            if usertime == False:
+                self.logger.warning("OUTCAR at %s shows no user time." % opath)
                 return False
             else:
-                self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
-                return False
+                self.logger.info("OUTCAR at %s shows user time." % opath)
+                return True
+
+        else:
+            if reachedaccuracy==True:
+                if usertime==False:
+                    if isstatic:
+                        self.logger.warning("OUTCAR at %s shows EDIFF reached for static run, but no user time." % opath)
+                    else:
+                        self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
+                    return False
+                else:
+                    if isstatic:
+                        self.logger.info("OUTCAR at %s shows EDIFF reached for static run and user time; complete." % opath)
+                    else:
+                        self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
+                    return True
+            else:
+                if usertime==False:
+                    if isstatic:
+                        self.logger.info("OUTCAR at %s does not show EDIFF reached for static run or user time; still incomplete." % opath)
+                    else:
+                        self.logger.info("OUTCAR at %s does not show reached required accuracy or user time; still incomplete." % opath)
+                    return False
+                else:
+                    if isstatic:
+                        self.logger.error("OUTCAR at %s does not show EDIFF reached for static run, but shows complete." % opath)
+                    else:
+                        self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
+                    return False
 
     def is_ready_to_run(self):
         """Check if single VASP non-NEB ingredient is 
