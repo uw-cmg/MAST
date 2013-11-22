@@ -143,16 +143,21 @@ class VaspChecker(BaseChecker):
         if 'ibrion' in self.keywords['program_keys'].keys():
             ibrionval = str(self.keywords['program_keys']['ibrion'])
             if ibrionval == "-1":
+                self.logger.info("ingredient %s IBRION -1 is static" % self.keywords['name'])
                 isstatic = True
             elif ibrionval == "0":
+                self.logger.info("ingredient %s IBRION 0 is MD" % self.keywords['name'])
                 isMD = True
             elif ibrionval in ["5","6","7","8"]:
+                self.logger.info("ingredient %s IBRION %s is phonon" % (self.keywords['name'],ibrionval))
                 isphonon = True
         if 'nsw' in self.keywords['program_keys'].keys():
             nswval = str(self.keywords['program_keys']['nsw'])
             if nswval in ["0","1"]:
+                self.logger.info("ingredient %s NSW %s is static" % (self.keywords['name'],nswval))
                 isstatic = True
         else:
+            self.logger.info("ingredient %s no NSW given is static" % self.keywords['name'])
             isstatic = True #No NSW specified, VASP defaults to 0
         
         #For static runs, make an additional check for just electronic convergence.
@@ -174,32 +179,36 @@ class VaspChecker(BaseChecker):
                 self.logger.info("OUTCAR at %s shows user time." % opath)
                 return True
 
+        if isstatic:
+            if reachedaccuracy==True:
+                if usertime==True:
+                    self.logger.info("OUTCAR at %s shows EDIFF reached for static run and user time; complete." % opath)
+                    return True
+                else:
+                    self.logger.warning("OUTCAR at %s shows EDIFF reached for static run, but no user time." % opath)
+                    return False
+            else:
+                if usertime==True:
+                    self.logger.error("OUTCAR at %s does not show EDIFF reached for static run, but shows complete." % opath)
+                    return False
+                else:
+                    self.logger.info("OUTCAR at %s does not show EDIFF reached for static run or user time; still incomplete." % opath)
+                    return False
+
         else:
             if reachedaccuracy==True:
-                if usertime==False:
-                    if isstatic:
-                        self.logger.warning("OUTCAR at %s shows EDIFF reached for static run, but no user time." % opath)
-                    else:
-                        self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
-                    return False
-                else:
-                    if isstatic:
-                        self.logger.info("OUTCAR at %s shows EDIFF reached for static run and user time; complete." % opath)
-                    else:
-                        self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
+                if usertime==True:
+                    self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
                     return True
+                else:
+                    self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
+                    return False
             else:
-                if usertime==False:
-                    if isstatic:
-                        self.logger.info("OUTCAR at %s does not show EDIFF reached for static run or user time; still incomplete." % opath)
-                    else:
-                        self.logger.info("OUTCAR at %s does not show reached required accuracy or user time; still incomplete." % opath)
+                if usertime==True:
+                    self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
                     return False
                 else:
-                    if isstatic:
-                        self.logger.error("OUTCAR at %s does not show EDIFF reached for static run, but shows complete." % opath)
-                    else:
-                        self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
+                    self.logger.info("OUTCAR at %s does not show reached required accuracy or user time; still incomplete." % opath)
                     return False
 
     def is_ready_to_run(self):
