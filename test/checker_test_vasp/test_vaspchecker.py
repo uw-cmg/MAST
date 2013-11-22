@@ -105,15 +105,33 @@ class TestVaspChecker(unittest.TestCase):
     def test_is_complete_additional_cases(self):
         kdict=dict()
         kdict['ibrion'] = "-1"
+        kdict['nsw'] = "0"
         vcs = VaspChecker(name="done_static",program_keys=kdict)
         self.assertTrue(vcs.is_complete())
         vcs = VaspChecker(name="done_static_butnotconverged",program_keys=kdict)
         self.assertFalse(vcs.is_complete())
         vcs = VaspChecker(name="notdone_static_notconverged",program_keys=kdict)
         self.assertFalse(vcs.is_complete())
-        vcr = VaspChecker(name="notdone_notconverged")
+        kdict=dict()
+        kdict['ibrion'] = "2"
+        kdict['nsw'] = "191"
+        vcr = VaspChecker(name="notdone_notconverged",program_keys=kdict)
         self.assertFalse(vcr.is_complete())
-        vcr = VaspChecker(name="done_butnotconverged")
+        vcr = VaspChecker(name="done_butnotconverged",program_keys=kdict)
+        self.assertFalse(vcr.is_complete())
+        kdict=dict()
+        kdict['ibrion'] = "0"
+        kdict['nsw'] = "191"
+        vcr = VaspChecker(name="done_butnotconverged",program_keys=kdict)
+        self.assertTrue(vcr.is_complete())
+        vcr = VaspChecker(name="notdone_notconverged",program_keys=kdict)
+        self.assertFalse(vcr.is_complete())
+        kdict=dict()
+        kdict['ibrion'] = "5"
+        kdict['nsw'] = "191"
+        vcr = VaspChecker(name="done_butnotconverged",program_keys=kdict)
+        self.assertTrue(vcr.is_complete())
+        vcr = VaspChecker(name="notdone_notconverged",program_keys=kdict)
         self.assertFalse(vcr.is_complete())
 
     def test_is_ready(self):
