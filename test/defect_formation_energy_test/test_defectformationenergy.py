@@ -25,8 +25,8 @@ class TestDefectformationenergy(unittest.TestCase):
 
     def tearDown(self):
         os.environ['MAST_ARCHIVE'] = oldarchive
-        if os.path.isdir("dferesults"):
-            shutil.rmtree("dferesults")
+        #if os.path.isdir("dferesults"):
+        #    shutil.rmtree("dferesults")
 
 
     def test___init__(self):

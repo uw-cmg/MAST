@@ -4,6 +4,7 @@ import pymatgen as pmg
 from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
 from pymatgen.io.smartio import read_structure
 from MAST.utility import MASTError
+from MAST.utility import MASTFile
 #from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 from MAST.utility.defect_formation_energy.gapplot import GapPlot
@@ -36,7 +37,7 @@ class DefectFormationEnergy:
             else:
                 if len(self.recipe_plan.update_methods[ingredient]) == 0:
                     self.final_ingredients.append(ingredient)
-        print self.final_ingredients
+        #print self.final_ingredients
 
         self.e_defects = dict()
     def _calculate_defect_formation_energies(self):
@@ -180,13 +181,17 @@ class DefectFormationEnergy:
         if not self.e_defects:
             self._calculate_defect_formation_energies()
 
+        myfile = MASTFile()
         for conditions, defects in self.e_defects.items():
-            print '\n\nDefect formation energies for %s conditions.\n' % conditions.upper()
-            print '%-20s | %10s' % ('Defect', 'DFE')
-            print '---------------------------------'
+            myfile.data.append('\n\nDefect formation energies for %s conditions.\n' % conditions.upper())
+            myfile.data.append('%-20s | %10s\n' % ('Defect', 'DFE'))
+            myfile.data.append('---------------------------------\n')
             for defect, energies in defects.items():
                 for energy in energies:
-                    print '%-14s(q=%2i) | %8.4f' % (defect, energy[0], energy[1])
-                print str() # Add a blank line here
-            print '---------------------------------'
+                    myfile.data.append('%-14s(q=%2i) | %8.4f\n' % (defect, energy[0], energy[1]))
+                myfile.data.append(str()) # Add a blank line here
+            myfile.data.append('---------------------------------\n')
+        myfile.to_file(os.path.join(os.getcwd(),"dfe.txt"))
+        for line in myfile.data:
+            print line.strip()
 

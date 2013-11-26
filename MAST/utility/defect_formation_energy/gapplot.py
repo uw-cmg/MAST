@@ -23,7 +23,11 @@ class GapPlot:
         trans = (state2[1] - state1[1]) / abs(state1[0] - state2[0])
         return label, trans
 
-    def plot_levels(self):
+    def plot_levels(self,append=""):
+        """Plot defect levels
+            Args:
+                append <str>: String to append to file name (optional)
+        """
         step = self.gap / self.bins
 
         if (self.threshold is None):
@@ -32,12 +36,12 @@ class GapPlot:
         for condition in self.dfe:
             print 'Plotting levels for %s conditions' % condition
             for defect in self.dfe[condition]:
-                print 'Analyzing leves for defect %s.' % defect
+                print 'Analyzing levels for defect %s.' % defect
                 state = self.dfe[condition][defect]
                 data = self.plot_defect(state, step)
 
-                print 'Writing energies and grid to file %s-%s.txt' % (defect, condition.replace(' ', '_'))
-                with open('%s-%s.txt' % (defect, condition.replace(' ', '_')), 'w') as datafile:
+                print 'Writing energies and grid to file %s-%s%s.txt' % (defect, condition.replace(' ', '_'), append)
+                with open('%s-%s%s.txt' % (defect, condition.replace(' ', '_'), append), 'w') as datafile:
                     for datum in data:
                         datafile.write('%10.5f%10.5f\n' % (datum[0], datum[1]))
 
