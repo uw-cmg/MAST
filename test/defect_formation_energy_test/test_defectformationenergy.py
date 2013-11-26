@@ -9,6 +9,7 @@ import time
 import MAST
 import pymatgen
 from MAST.utility import dirutil
+import shutil
 
 testname="defect_formation_energy_test"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)

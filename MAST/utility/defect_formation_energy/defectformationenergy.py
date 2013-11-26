@@ -18,7 +18,7 @@ class DefectFormationEnergy:
     def __init__(self, directory=None, plot_threshold=0.01):
         self.directory = directory
         self.plot_threshold = plot_threshold
-        ipparser = InputParser(inputfile=os.path.join(self.directory + 'input.inp'))
+        ipparser = InputParser(inputfile=os.path.join(self.directory,'input.inp'))
         self.input_options = ipparser.parse()
         #pm = PickleManager(self.directory + '/input_options.pickle')
         #self.input_options = pm.load_variable()
