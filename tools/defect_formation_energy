@@ -14,21 +14,21 @@ def main():
 
     for ndir, directory in enumerate(dir_list):
         metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
-        system = metafile.read_data('system name')
-        date = metafile.read_data('directory created')
+        system = metafile.read_data('system_name')
+        date = metafile.read_data('directory_created')
 
-        print '%i) %s ran on %s' % (ndir, system, date)
+        print '%i) %s, which ran on %s' % (ndir, system, date)
 
-    print '\nPlease select a run from the above list to calculate the defect formation energies for:'
+    print '\nPlease select a recipe from the above list to calculate the defect formation energies for:'
     index = int(sys.stdin.readline())
     #print 'Index selected:', index
 
     directory = dir_list[index]
     metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
-    system = metafile.read_data('system name')
-    date = metafile.read_data('directory created')
+    system = metafile.read_data('system_name')
+    date = metafile.read_data('directory_created')
 
-    print 'You have selected %s ran on %s.' % (system, date)
+    print 'You have selected %s, which ran on %s.' % (system, date)
     print 'Calculating defect formation energies now.'
 
     directory_path = '%s/%s/' % (archive, directory)
