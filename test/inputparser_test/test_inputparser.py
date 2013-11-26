@@ -137,7 +137,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']=dict()
         mdict['defects']['defect_3']=dict()
         mdict['defects']['defect_3']['threshold']=0.0001
-        mdict['defects']['defect_3']['charge']=[3]
+        mdict['defects']['defect_3']['charge']=[0] #charge of 0
         mdict['defects']['defect_3']['coord_type']='fractional'
         mdict['defects']['defect_3']['subdefect_1']=dict()
         mdict['defects']['defect_3']['subdefect_1']['symbol']='Al'
