@@ -39,7 +39,7 @@ class DefectFormationEnergy:
         print self.final_ingredients
 
         self.e_defects = dict()
-    def calculate_defect_formation_energies(self):
+    def _calculate_defect_formation_energies(self):
         try:
             perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
         except IndexError:

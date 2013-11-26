@@ -1,0 +1,111 @@
+Input options: 
+*********************
+*   chemical_potentials section
+*********************
+------------------
+As rich:
+------------------
+    {'As': -5.392, 'Bi': -4.565, 'Ga': -4.2543}
+------------------
+Ga rich:
+------------------
+    {'As': -6.0383, 'Bi': -4.565, 'Ga': -3.608}
+*********************
+*   defects section
+*********************
+------------------
+coord_type:
+------------------
+    fractional
+------------------
+defects:
+------------------
+    {'group1': {'threshold': 0.0001, 'charge': [-3, -2, -1, 0], 'coord_type': 'fractional', 'subdefect_1': {'symbol': 'Ga', 'type': 'vacancy', 'coordinates': array([ 0.,  0.,  0.])}}, 'group3': {'threshold': 0.0001, 'charge': [0, 1, 2], 'coord_type': 'fractional', 'subdefect_1': {'symbol': 'As', 'type': 'antisite', 'coordinates': array([ 0.,  0.,  0.])}}, 'group2': {'threshold': 0.0001, 'charge': [0], 'coord_type': 'fractional', 'subdefect_2': {'symbol': 'Ga', 'type': 'vacancy', 'coordinates': array([ 0.,  0.,  0.])}, 'subdefect_1': {'symbol': 'Bi', 'type': 'substitution', 'coordinates': array([ 0.25,  0.25,  0.25])}}}
+------------------
+num_defects:
+------------------
+    3
+*********************
+*   ingredients section
+*********************
+------------------
+global:
+------------------
+    {'mast_exec': '//share/apps/vasp5.2_cNEB > vasp.out', 'mast_pp_setup': {'Bi': 'Bi_d', 'Ga': 'Ga_d'}, 'mast_write_method': 'write_singlerun', 'mast_complete_method': 'complete_singlerun', 'mast_xc': 'PBE', 'lcharg': 'False', 'mast_ready_method': 'ready_singlerun', 'mast_queue': 'default', 'ispin': '2', 'mast_run_method': 'run_singlerun', 'encut': '313', 'mast_ppn': '1', 'mast_update_children_method': 'give_structure', 'mast_program': 'vasp', 'mast_kpoints': [2, 2, 2], 'lwave': 'False'}
+------------------
+inducedefect:
+------------------
+    {'mast_exec': '//share/apps/vasp5.2_cNEB > vasp.out', 'mast_pp_setup': {'Bi': 'Bi_d', 'Ga': 'Ga_d'}, 'mast_write_method': 'no_setup', 'mast_complete_method': 'complete_structure', 'mast_xc': 'PBE', 'mast_ready_method': 'ready_structure', 'mast_queue': 'default', 'mast_run_method': 'run_defect', 'mast_program': 'vasp', 'encut': '313', 'lcharg': 'False', 'mast_update_children_method': 'give_structure', 'mast_kpoints': [2, 2, 2], 'mast_ppn': '1', 'ispin': '2', 'lwave': 'False'}
+------------------
+optimize:
+------------------
+    {'mast_exec': '//share/apps/vasp5.2_cNEB > vasp.out', 'mast_pp_setup': {'Bi': 'Bi_d', 'Ga': 'Ga_d'}, 'mast_write_method': 'write_singlerun', 'mast_complete_method': 'complete_singlerun', 'mast_xc': 'PBE', 'mast_ready_method': 'ready_singlerun', 'mast_queue': 'default', 'mast_run_method': 'run_singlerun', 'mast_program': 'vasp', 'encut': '313', 'lcharg': 'False', 'mast_update_children_method': 'give_structure', 'ibrion': '2', 'mast_ppn': '1', 'ispin': '2', 'lwave': 'False', 'mast_kpoints': [2, 2, 2], 'nsw': '100'}
+------------------
+static:
+------------------
+    {'mast_exec': '//share/apps/vasp5.2_cNEB > vasp.out', 'mast_pp_setup': {'Bi': 'Bi_d', 'Ga': 'Ga_d'}, 'mast_write_method': 'write_singlerun', 'mast_complete_method': 'complete_singlerun', 'mast_xc': 'PBE', 'mast_ready_method': 'ready_singlerun', 'mast_queue': 'default', 'mast_run_method': 'run_singlerun', 'mast_program': 'vasp', 'encut': '313', 'lcharg': 'False', 'mast_update_children_method': 'give_structure', 'ibrion': '-1', 'mast_ppn': '1', 'ispin': '2', 'lwave': 'False', 'mast_kpoints': [2, 2, 2], 'nsw': '0'}
+*********************
+*   mast section
+*********************
+------------------
+system_name:
+------------------
+    GaAs_defects
+*********************
+*   recipe section
+*********************
+------------------
+recipe_file:
+------------------
+    /home/tam/tammast/recipe_templates/recipe_defects.txt
+*********************
+*   structure section
+*********************
+------------------
+atom_list:
+------------------
+    None
+------------------
+coord_type:
+------------------
+    cartesian
+------------------
+coordinates:
+------------------
+    None
+------------------
+lattice:
+------------------
+    None
+------------------
+posfile:
+------------------
+    /home/tam/tammast/test/defecttest_notupdated/POSCAR.ga4as4
+------------------
+primitive:
+------------------
+    False
+------------------
+spacegroup:
+------------------
+    None
+------------------
+structure:
+------------------
+    Structure Summary (As4 Ga4)
+Reduced Formula: GaAs
+abc   :   5.626600   5.626600   5.626600
+angles:  90.000000  90.000000  90.000000
+Sites (8)
+1 Ga     0.000000     0.000000     0.000000
+2 Ga     0.500000     0.500000     0.000000
+3 Ga     0.000000     0.500000     0.500000
+4 Ga     0.500000     0.000000     0.500000
+5 As     0.250000     0.250000     0.250000
+6 As     0.750000     0.750000     0.250000
+7 As     0.250000     0.750000     0.750000
+8 As     0.750000     0.250000     0.750000
+------------------
+symmetry_only:
+------------------
+    False
