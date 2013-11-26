@@ -2,7 +2,7 @@ import sys, os
 
 from pymatgen.io.vaspio.vasp_output import Vasprun
 from pymatgen.io.smartio import read_structure
-
+from MAST.utility import MASTError
 #from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 from MAST.utility import Metadata
@@ -20,16 +20,28 @@ class DefectFormationEnergy:
         self.input_options = ipparser.parse()
         #pm = PickleManager(self.directory + '/input_options.pickle')
         #self.input_options = pm.load_variable()
-        self.recipe_plan = PickleManager(self.directory + '/mast.pickle').load_variable()
+        from MAST.recipe.recipesetup import RecipeSetup
+        self.recipe_setup = RecipeSetup(inputOptions=self.input_options,recipeFile=os.path.join(self.directory,'personal_recipe.txt'),workingDirectory=self.directory)
+        self.recipe_plan = self.recipe_setup.start()
+        #PickleManager(self.directory + '/mast.pickle').load_variable()
 
         self.final_ingredients = list()
-        for ingredient in self.recipe_plan:
-            if (ingredient.children is None):
-                self.final_ingredients.append(ingredient.name)
-        #print self.final_ingredients
+        ingredientlist = self.recipe_plan.ingredients.keys()
+        updatekeys = self.recipe_plan.update_methods.keys()
+        for ingredient in ingredientlist:
+            if not (ingredient in updatekeys): # has no children
+                self.final_ingredients.append(ingredient)
+            else:
+                if len(self.recipe_plan.update_methods[ingredient]) == 0:
+                    self.final_ingredients.append(ingredient)
+        print self.final_ingredients
 
     def calculate_defect_formation_energies(self):
-        perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
+        try:
+            perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
+        except IndexError:
+            raise MASTError(self.__class__.__name__, "A perfect final directory (has no children and has the word 'perfect' in its name) could not be found. Check recipe %s for a perfect directory." % self.directory)
+
         def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
         for whatever in sorted(def_dir):
             print whatever
