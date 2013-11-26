@@ -32,6 +32,7 @@ class RecipeTemplateParser(MASTObj):
             self.personal_recipe <str>: Path to the personalized recipe.
             self.ingredient_list <list of str>: List of ingredients mentioned
                                                 in the recipe template file.
+            self.chunks <list of list>: List of chunks
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -41,13 +42,16 @@ class RecipeTemplateParser(MASTObj):
         self.ingredient_list = list()
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['working_directory'])
-
+        self.chunks = list()
     def parse(self):
         """ Parses the template recipe file and creates
             the personalized recipe file
         """
         if self.template_file is None:
             raise MASTError(self.__class__.__name__, "Template file not provided!")
+        
+        self.template_file = os.path.join(os.getenv("MAST_RECIPE_PATH"),self.template_file)
+
 
         if not os.path.exists(self.template_file):
             raise MASTError(self.__class__.__name__, "Template file not found!")
@@ -57,7 +61,7 @@ class RecipeTemplateParser(MASTObj):
 
         if self.personal_recipe is None:
             raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
-
+        
         #fetch required paramaters
         f_ptr           = open(self.template_file, "r")
         o_ptr           = open(self.personal_recipe, "w")
@@ -69,11 +73,118 @@ class RecipeTemplateParser(MASTObj):
         recipe_name     = None
 
 #        print system_name, self.input_options.get_item('mast', 'system_name')
-
+        chunkcount=0
+        mychunk=list()
+        modchunk=False
         for line in f_ptr.readlines():
-            line             = line.strip()
-            line             = line.lower()
-            processing_lines = []
+            if '{begin}' in line:
+                self.chunks.append(list(mychunk))
+                mychunk=list()
+            elif '{end}' in line:
+                pass
+            else:
+                mychunk.append(line)
+        if len(mychunk) > 0:
+            self.chunks.append(list(mychunk))
+        #for chunk in self.chunks:
+        #    print chunk
+        expandedlist=list()
+        for chunk in self.chunks:
+            expanded=self.parse_chunk(chunk)
+            expandedlist.extend(expanded)
+        o_ptr.writelines(expandedlist)
+        f_ptr.close()
+        o_ptr.close()
+        return recipe_name
+        #self.chunks[chunkcount]=dict()
+        #self.chunks[chunkcount]['modify'] = modchunk
+        #    #line             = line.strip()
+        #    #line             = line.lower()
+        #    processing_lines = []
+        #    #shortcut straight copy + 6
+        #    processing_lines.append(line)
+        #    output_str = "\n".join(processing_lines)
+        #    o_ptr.write("%s\n" % output_str)
+
+        #f_ptr.close()
+        #o_ptr.close()
+#        print 'in RecipeParser.parse():', list(set(self.ingredient_list))
+        #return recipe_name
+    def parse_chunk(self, chunk):
+        """Parse a chunk of lines.
+            Args:
+                chunk <list>: List of lines
+            Returns:
+                expandedchunk <list>: List of lines
+        """
+        origchunk = list(chunk)
+        expandedchunk=list()
+        needsdefects=0
+        needscharges=0
+        needsnebs=0
+        for line in chunk:
+            if "<N>" in line:
+                needsdefects=1
+            if "<B-E>" in line:
+                needsnebs=1
+            if "<Q>" in line:
+                needscharges=1
+            if "<B>" in line:
+                needsnebs=1
+            if "<E>" in line:
+                needsnebs=1
+        d_defects       = self.input_options.get_item("defects","defects")
+        d_neblines      = self.input_options.get_item("neb", "neblines")
+        if needsdefects == 1:
+            mydefects=d_defects.keys()
+            mydefects.sort()
+            for defectname in mydefects:
+                for charge in d_defects[defectname]['charge']:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    for line in origchunk:
+                        newline = line.replace("<N>", defectname)
+                        if needscharges == 1:
+                            newline = newline.replace("<Q>", mycharge)
+                        expandedchunk.append(newline)
+        elif needsnebs == 1:
+            mynebs=d_neblines.keys()
+            mynebs.sort()
+            for neblabel in mynebs:
+                defbegin = neblabel.split('-')[0]
+                defend = neblabel.split('-')[1]
+                chargebegin = d_defects[defbegin]['charge']
+                chargeend = d_defects[defend]['charge']
+                chargeboth = set(chargebegin) & set(chargeend)
+                for charge in chargeboth:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    for line in origchunk:
+                        newline = line.replace("<B>", defbegin)
+                        newline = newline.replace("<E>", defend)
+                        newline = newline.replace("<B-E>", neblabel)
+                        if needscharges == 1:
+                            newline = newline.replace("<Q>", mycharge)
+                        expandedchunk.append(newline)
+
+        else:
+            expandedchunk = list(origchunk)
+        return expandedchunk
+        #origchunk = list(expandedchunk)
+        #expandedchunk=list()
+        #for defectname in self.d_defects:
+        #    for line in origchunk:
+        #        newline = line.replace("<N>", defectname)
+        #        expandedchunk.append(line)
+
+
+    def old_parsing(self):
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
+        for line in linestr:
             #validate the input line
             if not line or line.startswith('#'):
                 continue
@@ -119,6 +230,7 @@ class RecipeTemplateParser(MASTObj):
     def process_system_name(self, processing_lines, system_name):
         """replace <sys> with the system name from the input options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
@@ -131,6 +243,7 @@ class RecipeTemplateParser(MASTObj):
                 processing_lines <list of str>: recipe lines to process.
                 d_neblines <dict of str>: dictionary of NEB lines.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         eval_lines = []
         if not d_neblines:
@@ -180,6 +293,7 @@ class RecipeTemplateParser(MASTObj):
            lines based on the number of images found in the
            input_options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         if not n_images:
             return processing_lines
@@ -207,6 +321,7 @@ class RecipeTemplateParser(MASTObj):
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         #import inspect
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
@@ -251,6 +366,7 @@ class RecipeTemplateParser(MASTObj):
     def process_phononlines(self, processing_lines):
         """add phonon information to the metadata. Does not change line info.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line and 'phonon_' in line:
                 nameval = line.split()[1]
@@ -281,6 +397,7 @@ class RecipeTemplateParser(MASTObj):
         """Add metadata entry for all ingredients. 
             Does not change line information.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line:
                 nameval = line.split()[1]
@@ -289,4 +406,5 @@ class RecipeTemplateParser(MASTObj):
         return 
     def get_unique_ingredients(self):
         """fetches the ingredients names"""
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         return list(set(self.ingredient_list))

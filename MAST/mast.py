@@ -9,19 +9,19 @@
 ############################################################################
 import os
 import time
+import shutil
+import logging
 
 from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
-from MAST.utility.picklemanager import PickleManager
+from MAST.utility import MASTFile
+#from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
-
-from MAST.ingredients.ingredients_loader import IngredientsLoader
-
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
-from MAST.parsers import InputPythonCreator
+#from MAST.parsers import InputPythonCreator
 from MAST.parsers.recipetemplateparser import RecipeTemplateParser
 from MAST.recipe.recipesetup import RecipeSetup
 
@@ -34,119 +34,200 @@ ALLOWED_KEYS     = {\
 
 
 class MAST(MASTObj):
-    """User interface to set up a calculation group.
-
-        Each instance of Interface sets up one calculation group.
+    """User interface to set up a calculation group or a set of
+        independently and/or pegged looped calculation groups.
 
         Attributes:
-            self.input_options <InputOptions object>: used to store the options
-                                           parsed from input file
-
+            self.input_options <InputOptions object>: Stores the
+                options parsed from the input file
+            self.recipe_plan <RecipePlan object>: Stores the
+                recipe plan parsed from self.input_options and
+                the personalized recipe file
+            self.origin_dir <str>: Original directory for the
+                                   mast -i *.inp command
+            self.timestamp <str>: Timestamp of the mast -i *.inp
+                                  command
+            self.asctime <str>: ASCII timestamp
+            self.working_directory <str>: Working directory 
+                created for new recipe from mast -i *.inp command
+            self.sysname <str>: System name (elements)
+            self.logger <logging logger>
     """
-
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
         self.input_options = None
-        #self.recipe_name = None
-        #self.structure = None
-        #self.unique_ingredients = None
+        self.origin_dir=""
+        self.timestamp=""
+        self.asctime=""
+        self.working_directory=""
+        self.sysname=""
+        self.recipe_plan = None
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,
             parse and run the input file. Otherwise, parse and run the
             generated set of input files.
         """
-        ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
-        loopfiles = ipl_obj.main()
-        #print "TTM DEBUG: loopfiles: ", loopfiles
-        if len(loopfiles) == 0:
-            self.parse_and_run_input()
-        else:
-            for ipfile in loopfiles:
-                self.keywords['inputfile']=ipfile
-                self.parse_and_run_input()
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        self.logger.info("\nMAST input started at %s with inputfile %s.\n" % (time.asctime(),self.keywords['inputfile']))
+        self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        try:
+            ipl_obj = IndepLoopInputParser(inputfile=self.keywords['inputfile'])
+            loopfiles = ipl_obj.main()
+            #print "TTM DEBUG: loopfiles: ", loopfiles
+            if len(loopfiles) == 0:
+                self.set_up_recipe()
+            else:
+                for ipfile in loopfiles:
+                    self.keywords['inputfile']=ipfile
+                    self.set_up_recipe()
+        except MASTError as errormsg:
+            self.logger.error(str(errormsg))
+        self.logger.info("%%%%%%Finished processing inputfile.%%%%%%")
 
 
-    def parse_and_run_input(self):
+    def set_input_options(self):
+        """Set input options.
         """
-            Parses the *.inp input file and fetches the options.
-            Sets an input stem name.
-            Parses the recipe template file and creates a personalized recipe.
-            Creates a *.py input script from the fetched options.
-            Runs the *.py input script.
-        """ 
-        #parse the *.inp input file
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
-        self.perform_element_mapping()
-        
-        #set an input stem name
-        ipstem, timestamp = self._initialize_input_stem()
-        self.input_options.set_item('mast', 'input_stem', ipstem)
-        self.input_options.set_item('mast', 'timestamp', timestamp)
 
-        #create the *.py input script
-        ipc_obj = InputPythonCreator(input_options=self.input_options)
-        ipc_filename = ipc_obj.write_script()
-        
-        #run the *.py input script
-        import subprocess
-        from MAST.utility import dirutil
-        oppath=ipstem + 'output'
-        opfile = open(oppath, 'ab')
-        run_input_script = subprocess.Popen(['python ' + ipc_filename], 
-                shell=True, stdout=opfile, stderr=opfile)
-        run_input_script.wait()
-        opfile.close()
-        return None
-   
-    def perform_element_mapping(self):
-        """Perform element mapping if there is an element map specified,
-            so that defects and NEB lines get the correct element name.
+
+    def set_up_recipe(self):
+        """Set up the recipe.
+            Set class attributes, 
+            create the recipe directory,
+            write recipe directory-level info,
+            create the recipe plan (which creates ingredient
+            directories), 
+            and archive the recipe plan and input options.
         """
-        #print self.input_options.get_section_keys('structure')
-        eldict=dict()
-        if 'element_map' in self.input_options.get_section_keys('structure'):
-            eldict = self.input_options.get_item('structure','element_map')
-        if len(eldict) == 0:
-            return
-        if 'defects' in self.input_options.get_sections():
-            defdict = self.input_options.get_item('defects','defects')
-            for dkey in defdict.keys():
-                for sdkey in defdict[dkey].keys():
-                    if 'subdefect' in sdkey:
-                        symbol = defdict[dkey][sdkey]['symbol'].upper()
-                        if symbol in eldict.keys():
-                            defdict[dkey][sdkey]['symbol'] = eldict[symbol]
-        if 'neb' in self.input_options.get_sections():
-            neblinedict = self.input_options.get_item('neb','neblines')
-            for nlabelkey in neblinedict.keys():
-                nlinenum = len(neblinedict[nlabelkey])
-                nlinect=0
-                while nlinect < nlinenum:
-                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
-                    if symbol in eldict.keys():
-                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
-                    nlinect = nlinect + 1
+        self.set_input_options()
+        self.set_class_attributes()
+        self.make_working_directory()
+        self.create_recipe_metadata()
+        self.copy_input_file()
+        self.parse_recipe_template()
+        self.create_recipe_plan()
+        self.create_archive_files()
+
+    def create_recipe_plan(self):
+        """Create the recipe plan object, and print its status.
+        """
+        setup_obj = RecipeSetup(recipeFile=os.path.join(self.working_directory,'personal_recipe.txt'), 
+                inputOptions=self.input_options,
+                structure=self.input_options.get_item('structure','structure'), 
+                workingDirectory=self.working_directory
+                )
+        self.recipe_plan = setup_obj.start()
+        self.recipe_plan.print_status()
         return
 
-    def _initialize_input_stem(self):
-        inp_file = self.keywords['inputfile']
-        if not ".inp" in inp_file:
-            raise MASTError(self.__class__.__name__, "File '%s' should be named with a .inp extension and formatted correctly." % inp_file)
+    def make_working_directory(self):
+        """Initialize the directory for writing the 
+            recipe and ingredient folders.
+        """
+        try:
+            os.mkdir(self.working_directory)
+        except:
+            MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % self.working_directory)
+
+    def copy_input_file(self):
+        """Copy the input file to input.inp
+            If the original file had loops, this is a single,
+            non-looped input file.
+        """
+        shutil.copy(self.keywords['inputfile'], 
+            os.path.join(self.working_directory,'input.inp'))
+
+    def create_recipe_metadata(self):
+        """Create the recipe metadata file.
+        """
+        topmeta = Metadata(metafile="%s/metadata.txt" % self.working_directory)
+        topmeta.write_data('directory_created', self.asctime)
+        topmeta.write_data('system_name', self.sysname)
+        topmeta.write_data('origin_dir', self.origin_dir)
+        topmeta.write_data('working_directory', self.working_directory)
+        topmeta.write_data('timestamp', self.timestamp)
+        return
+
+    def create_archive_files(self):
+        """Save off archive files.
+            Returns:
+                creates archive_input_options.txt
+                creates archive_recipe_plan.txt
+        """
+        inputsave = MASTFile()
+        inputsave.data = repr(self.input_options)
+        inputsave.to_file(os.path.join(self.working_directory, 'archive_input_options.txt'))
+
+        recipesave = MASTFile()
+        recipesave.data = repr(self.recipe_plan)
+        recipesave.to_file(os.path.join(self.working_directory, 'archive_recipe_plan.txt'))
+
+        #pickle_plan = os.path.join(self.working_directory, 'archive_recipe_plan.pickle')
+        #pm = PickleManager(pickle_plan)
+        #pm.save_variable(self.recipe_plan)
         
-        timestamp = time.strftime('%Y%m%dT%H%M%S')
-        tstamp = time.asctime()
+        #pickle_options = os.path.join(self.working_directory, 'archive_input_options.pickle')
+        #pm = PickleManager(pickle_options)
+        #pm.save_variable(self.input_options)
 
-        stem_dir = os.path.dirname(inp_file)
-        if len(stem_dir) == 0:
-            stem_dir = get_mast_scratch_path()
-        inp_name = os.path.basename(inp_file).split('.')[0]
-        stem_name = os.path.join(stem_dir, inp_name + '_' + timestamp + '_')
-        return stem_name, tstamp
+        #create the *.py input script
+        #ipc_obj = InputPythonCreator(input_options=self.input_options)
+        #ipc_filename = ipc_obj.write_script(self.working_directory, 'archive_input_options.py')
+        return
 
-    def _get_element_string(self):
-        """Get the element string from the structure."""
+    def parse_recipe_template(self):
+        """Parses the recipe template file."""
+
+        recipe_file = self.input_options.get_item('recipe', 'recipe_file')
+
+        parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
+            inputOptions=self.input_options,
+            personalRecipe=os.path.join(self.working_directory,'personal_recipe.txt'),
+            working_directory=self.working_directory
+            )
+        parser_obj.parse()
+
+    def set_class_attributes(self):
+        """Set class attributes, other than input options
+        """
+        self.timestamp = time.strftime('%Y%m%dT%H%M%S')
+        self.asctime = time.asctime()
+        self.set_sysname()
+        self.set_origin_dir()
+        self.set_working_directory()
+    
+    def set_origin_dir(self):
+        """Set the origin directory (input file directory)
+        """
+        self.origin_dir = os.path.dirname(self.keywords['inputfile'])
+        if self.origin_dir == "":
+            self.origin_dir = os.getcwd()
+        return
+
+    def set_sysname(self):
+        """Set system name."""
+        element_str = self.get_element_string()
+        system_name = self.input_options.get_item("mast", "system_name", "sys")
+        self.sysname = system_name + '_' + element_str
+        return
+
+    def set_working_directory(self):
+        """Get the system name and working directory.
+        """
+        recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
+        dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
+        dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
+        self.working_directory = dir_path
+        return
+
+    def get_element_string(self):
+        """Get the element string from the structure.
+        """
         mystruc = self.input_options.get_item('structure','structure')
         elemset = set(mystruc.species)
         elemstr=""
@@ -159,96 +240,3 @@ class MAST(MASTObj):
                 elemok = 0
         return elemstr
 
-    def start_from_input_options(self, input_options):
-        """Start the recipe template parsing and ingredient creation
-            once self.input_options has been set.
-        """
-        print 'in start_from_input_options'
-        self.input_options = input_options
-        
-        #parse the recipe template file and create a personal file
-        self.initialize_environment()
-        self._parse_recipe_template()
-
-        ing_loader = IngredientsLoader()
-        ing_loader.load_ingredients()
-        ingredients_dict = ing_loader.ingredients_dict
-        recipe_plan_obj = self._initialize_ingredients(ingredients_dict)
-
-        self.pickle_plan(recipe_plan_obj)
-        self.pickle_input_options() 
-
-    def initialize_environment(self):
-        """Initialize the directory information for writing the 
-            recipe and ingredient folders.
-        """
-
-        element_str = self._get_element_string()
-        ipf_name = '_'.join(os.path.basename(self.input_options.get_item('mast','input_stem')).split('_')[0:-1]).strip('_')
-              
-        system_name = self.input_options.get_item("mast", "system_name", "sys")
-
-        dir_name = "%s_%s_%s_%s" % (system_name, element_str, self.input_options.get_item('recipe','recipe_name'), ipf_name)
-        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
-
-        try:
-            os.mkdir(dir_path)
-            topmeta = Metadata(metafile='%s/metadata.txt' % dir_path)
-            topmeta.write_data('directory created', self.input_options.get_item('mast', 'timestamp'))
-            topmeta.write_data('system name', system_name)
-        except:
-            MASTError(self.__class__.__name__, "Cannot create working directory %s !!!" % dir_path)
-
-        for ingredient, options in self.input_options.get_item('ingredients').items():
-            print ingredient, options
-            if 'mast_exec' in options:
-                have_exec = True
-                break
-            else:
-                have_exec = False
-
-        if (not have_exec):
-            error = 'mast_exec keyword not found in the $ingredients section'
-            raise MASTError(self.__class__.__name__, error)
-
-        self.input_options.set_item('mast', 'working_directory', dir_path)
-        system_name = system_name + '_' + element_str
-        self.input_options.update_item('mast', 'system_name', system_name)
-
-    def pickle_plan(self, recipe_plan_obj):
-        """Pickles the reciple plan object to the respective file
-           in the scratch directory
-        """
-
-        pickle_file = os.path.join(self.input_options.get_item('mast', 'working_directory'), 'mast.pickle')
-        pm = PickleManager(pickle_file)
-        pm.save_variable(recipe_plan_obj) 
-   
-    def pickle_input_options(self):
-        """Temporary solution to input_options not being saved to the pickle correctly"""
-
-        pickle_file = os.path.join(self.input_options.get_item('mast', 'working_directory'), 'input_options.pickle')
-        pm = PickleManager(pickle_file)
-        pm.save_variable(self.input_options)
-
-    def _parse_recipe_template(self):
-        """Parses the recipe template file."""
-
-        recipe_file = self.input_options.get_item('recipe', 'recipe_file')
-
-        #print 'GRJ DEBUG: _parse_recipe_template: working_directory =', self.input_options.get_item('mast', 'working_directory')
-        parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
-                                          inputOptions=self.input_options,
-                                          personalRecipe=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt',
-                                          working_directory=self.input_options.get_item('mast', 'working_directory')
-                                         )
-        self.input_options.set_item('recipe','recipe_name', parser_obj.parse())
-        self.unique_ingredients = parser_obj.get_unique_ingredients()
-
-    def _initialize_ingredients(self, ingredients_dict):
-        setup_obj = RecipeSetup(recipeFile=self.input_options.get_item('mast','input_stem') + 'personal_recipe.txt', 
-                inputOptions=self.input_options,
-                structure=self.input_options.get_item('structure','structure'), 
-                ingredientsDict=ingredients_dict)
-        recipe_plan_obj = setup_obj.start()
-        return recipe_plan_obj

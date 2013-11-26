@@ -89,16 +89,21 @@ def print_submitted_dict(submitted):
     """
     control=dirutil.get_mast_control_path()
     subprint=os.path.join(control, "submitted")
+    subrecent=os.path.join(control, "just_submitted")
     if os.path.isfile(subprint):
         subprintfile=MASTFile(subprint)
     else:
         subprintfile=MASTFile()
+    subrecentfile=MASTFile()
     keylist=submitted.keys()
     keylist.sort()
     subprintfile.data.append(time.asctime()+ "\n")
+    subrecentfile.data.append(time.asctime()+ "\n")
     for key in keylist:
         subprintfile.data.append("%s:%s\n" % (key, submitted[key]))
+        subrecentfile.data.append("%s:%s\n" % (key, submitted[key]))
     subprintfile.to_file(subprint)
+    subrecentfile.to_file(subrecent)
     return
     
 

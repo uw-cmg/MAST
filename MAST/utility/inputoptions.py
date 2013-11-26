@@ -77,15 +77,29 @@ class InputOptions:
         self.options = dict()
 
     def __repr__(self):
-        return str(self.options)
+        rlines=""
+        rlines=rlines + "Input options: \n"
+        sections = self.get_sections()
+        sections.sort()
+        for section in sections:
+            rlines = rlines + "*********************\n"
+            rlines = rlines + "*   %s section\n" % section
+            rlines = rlines + "*********************\n"
+            skeys = self.get_section_keys(section)
+            skeys.sort()
+            for skey in skeys:
+                rlines = rlines + "------------------\n" 
+                rlines = rlines + "%s:\n" % skey
+                rlines = rlines + "------------------\n" 
+                rlines = rlines + "    %s\n" % str(self.get_item(section,skey))
+        return rlines
     
 
 
-    def print_python_section(self, prepend, secname):
+    def print_python_section(self, secname):
         """Print python commands that will recreate the InputOptions section
             when the commands are run in python.
 
-            prepend <str>: prepend string, like input_option_varname.options
             secname <str>: section name
         """
         pln=list()
@@ -213,7 +227,7 @@ class InputOptions:
                 pln.append(mystr)
                 pln.extend(self.print_fourthlevel_dict(header, val3))
             else:
-                errstr="UNSUPPORTED TYPE" + str(type(val2))
+                errstr="UNSUPPORTED TYPE" + str(type(val3))
                 raise MASTError(self.__class__.__name__, errstr)
         return pln
     

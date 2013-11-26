@@ -1,0 +1,241 @@
+from Tkinter import *
+import Tkinter as ttk
+
+
+class NEBSection:
+    def __init__(self, parent_window, grid_row, structure_section, defects_section):
+        self.parent_window = parent_window
+        self.grid_row = grid_row
+        self.structure_section = structure_section
+        self.defects_section = defects_section
+        self.has_summary = False
+        self.neb_info = {\
+                            'images'       : [None, None],\
+                            'posfiles'     : [[], []],\
+                            'startdefect'  : [{}, {}],\
+                            'enddefect'    : [{}, {}],\
+                            'elementmap'   : [{}, {}],\
+                            'startpos'     : [{}, {}],\
+                            'endpos'       : [{}, {}],\
+                        }
+        self.num_neb_fields = 1
+    
+    def summary(self):
+        #the frame which encloses all the contents
+        self.summary_frame = LabelFrame(self.parent_window, text="NEB")
+        self.summary_frame.grid_rowconfigure(0, weight=1)
+        self.summary_frame.grid_rowconfigure(1, weight=1)
+        self.summary_frame.grid_columnconfigure(0, weight=1)
+        self.summary_frame.grid_columnconfigure(1, weight=1)
+        self.summary_frame.grid_columnconfigure(2, weight=1)
+        self.summary_frame.grid_columnconfigure(3, weight=1)
+        self.summary_frame.grid_columnconfigure(4, weight=1)
+        self.summary_frame.grid_columnconfigure(5, weight=1)
+
+        #if it has summary show it
+        if self.has_summary:
+           #coord_type
+           images = Label(self.summary_frame, text="IMAGES :")   
+           images.grid(row=0, column=2, sticky=E, pady=5)
+           images_value = Label(self.summary_frame, text=self.neb_info['images'][0])
+           images_value.grid(row=0, column=3, sticky=W, pady=5)
+
+           if self.neb_info['posfiles'][0]:
+               pos_label = Label(self.summary_frame, text="POSFILES :")
+               pos_label.grid(row=1, column=2, sticky=E, pady=5)
+               pos_value = Label(self.summary_frame, text=", ".join(self.neb_info['posfiles'][0]))
+               pos_value.grid(row=1, column=3, sticky=E, pady=5)
+
+           for rownum in xrange(self.num_neb_fields + 1):
+               if rownum == 0:
+                   continue
+               if self.neb_info['startdefect'][0]['N' + str(rownum)].strip() == "":
+                   continue
+               id_label = Label(self.summary_frame, text='N'+ str(rownum))
+               id_label.grid(row=2 + rownum, column=0, padx=10, pady=2, sticky=E)
+               s_defect_label = Label(self.summary_frame, text=self.neb_info['startdefect'][0]['N'+str(rownum)])
+               s_defect_label.grid(row=2 + rownum, column=1, padx=10, pady=2, sticky=E)
+               e_defect_label = Label(self.summary_frame, text=self.neb_info['enddefect'][0]['N'+str(rownum)])
+               e_defect_label.grid(row=2 + rownum, column=2, padx=10, pady=2, sticky=E)
+               element_label = Label(self.summary_frame, text=self.neb_info['elementmap'][0]['N'+str(rownum)])
+               element_label.grid(row=2 + rownum, column=3, padx=10, pady=2, sticky=E)
+               s_pos_label = Label(self.summary_frame, text=self.neb_info['startpos'][0]['N'+str(rownum)])
+               s_pos_label.grid(row=2 + rownum, column=4, padx=10, pady=2, sticky=E)
+               e_pos_label = Label(self.summary_frame, text=self.neb_info['endpos'][0]['N'+str(rownum)])
+               e_pos_label.grid(row=2 + rownum, column=5, padx=10, pady=2, sticky=E)
+
+        #the frame contents
+        add_button = Button(self.summary_frame, text="Add NEB properties", command=self.create_window)
+        add_button.grid(row=3 + self.num_neb_fields, column=0, columnspan=7, pady=20, padx=20)
+
+        self.summary_frame.grid(row=self.grid_row, column=0, sticky=W+E, padx=20, pady=5)
+
+    def create_window_with_posfiles(self):
+        self.neb_info['images'][0] = self.neb_info['images'][1].get()
+        self.neb_window.destroy()
+        self.neb_window = None
+        self.create_window()
+
+    def create_window(self):
+        self.neb_window = ttk.Toplevel(self.parent_window)
+        self.neb_window.title("NEB Information")
+        self.neb_window.minsize(200, 200)
+        self.neb_window.grid_rowconfigure(0, weight=1)
+        self.neb_window.grid_columnconfigure(0, weight=1)
+
+
+        neb_frame = LabelFrame(self.neb_window, text="NEB")
+        neb_frame.grid(row=0, column=0, padx=20, pady=20)
+        neb_frame.grid_rowconfigure(0, weight=1)
+        neb_frame.grid_rowconfigure(1, weight=1)
+        neb_frame.grid_columnconfigure(0, weight=1)
+        neb_frame.grid_columnconfigure(1, weight=1)
+
+        #add images 
+        label = Label(neb_frame, text="IMAGES")
+        label.grid(row=0, column=0, sticky=E, pady=10, padx=10)
+        images_val = StringVar(neb_frame)
+        if self.neb_info['images'][0] is not None:
+            images_val.set(self.neb_info['images'][0])
+        images_menu  = Entry(neb_frame, textvariable=images_val)
+        images_menu.grid(row=0, column=1, sticky=W, pady=10, padx=10)
+        self.neb_info["images"] = [images_val.get(), images_val]
+        images_btn = Button(neb_frame, text="Add Posfiles", command=self.create_window_with_posfiles)
+        images_btn.grid(row=0, column=2, sticky=W, pady=10, padx=10)
+
+        #add posfiles if needed
+        if self.neb_info['images'][0] is not None and self.neb_info['images'][0] != "" and int(self.neb_info['images'][0]) > 0:
+            label = Label(neb_frame, text="POSFILES")
+            label.grid(row=1, column=0, sticky=E, pady=10, padx=10)
+            pos_files_frame = Frame(neb_frame)
+            pos_files_frame.grid(row=1, column=1, columnspan=2, sticky=W, pady=10, padx=10)
+            #create boxes
+            for i in xrange(int(self.neb_info['images'][0])):
+                entry_val = StringVar(pos_files_frame)
+                if len(self.neb_info['posfiles'][0]) >= i + 1:
+                    entry_val.set(self.neb_info['posfiles'][0][i])
+                    self.neb_info['posfiles'][1][i] = entry_val
+                else:
+                    self.neb_info['posfiles'][1].append(entry_val)
+                pos_entry = Entry(pos_files_frame, textvariable=entry_val)
+                pos_entry.grid(row=i, column=0, sticky=W)
+
+
+        #a label frame to add neb related information
+        self.neb_entities_frame = LabelFrame(neb_frame, text="NEB ENTITIES")  
+        self.neb_entities_frame.grid(row=2, column=0, columnspan=3, padx=10, pady=10) 
+        #create field headers 
+        id_label = Label(self.neb_entities_frame, text="ID")
+        id_label.grid(row=0, column=0, padx=10, pady=10, sticky=W)
+        start_label = Label(self.neb_entities_frame, text="START DEFECT")
+        start_label.grid(row=0, column=1, padx=10, pady=10, sticky=W)
+        end_label = Label(self.neb_entities_frame, text="END DEFECT")
+        end_label.grid(row=0, column=2, padx=10, pady=10, sticky=W)
+        element_label = Label(self.neb_entities_frame, text="ELEMENT")
+        element_label.grid(row=0, column=3, padx=10, pady=10, sticky=W)
+        start_pos = Label(self.neb_entities_frame, text="START POSITION")
+        start_pos.grid(row=0, column=4, padx=10, pady=10, sticky=W)
+        end_pos = Label(self.neb_entities_frame, text="END POSITION")
+        end_pos.grid(row=0, column=5, padx=10, pady=10, sticky=W)
+        
+         
+        for rownum in xrange(self.num_neb_fields + 1):
+            if rownum == 0:
+                continue
+            self.create_neb_fields(self.neb_entities_frame, rownum)  
+
+        self.add_button = Button(self.neb_entities_frame, text="Add more neb", command=self.add_elements)
+        self.add_button.grid(row=self.num_neb_fields + 1, column=0, columnspan=6, pady=10, padx=10)
+
+        #save button
+        save_button = Button(neb_frame, text="Save", command=self.save)
+        save_button.grid(row=3, column=0, columnspan=2, padx=20, pady=10)
+
+    def add_elements(self):
+        self.num_neb_fields += 1
+        self.add_button.grid_remove()
+        self.create_neb_fields(self.neb_entities_frame, self.num_neb_fields)
+        self.add_button = Button(self.neb_entities_frame, text="Add more neb", command=self.add_elements)
+        self.add_button.grid(row=self.num_neb_fields + 1, column=0, columnspan=6, pady=10, padx=10)
+
+    def save(self):
+        self.neb_info['images'][0] = self.neb_info['images'][1].get()
+        self.neb_info['posfiles'][0] = [''] * len(self.neb_info['posfiles'][1])
+        for i in xrange(len(self.neb_info['posfiles'][1])):
+            self.neb_info['posfiles'][0][i] = self.neb_info['posfiles'][1][i].get()
+        for rownum in xrange(self.num_neb_fields + 1):
+            if rownum == 0:
+                continue
+            self.neb_info['startdefect'][0]['N'+str(rownum)]    = self.neb_info['startdefect'][1]['N'+str(rownum)].get()
+            self.neb_info['enddefect'][0]['N'+str(rownum)]      = self.neb_info['enddefect'][1]['N'+str(rownum)].get()
+            self.neb_info['elementmap'][0]['N'+str(rownum)]     = self.neb_info['elementmap'][1]['N'+str(rownum)].get()
+            self.neb_info['startpos'][0]['N'+str(rownum)]       = self.neb_info['startpos'][1]['N'+str(rownum)].get()
+            self.neb_info['endpos'][0]['N'+str(rownum)]         = self.neb_info['endpos'][1]['N'+str(rownum)].get()
+
+        self.neb_window.destroy()
+        self.neb_window = None
+        self.has_summary = True
+        self.summary_frame.grid_remove()
+        self.summary()
+
+        
+
+
+    def create_neb_fields(self, frame, rownum):
+        elements_map = self.structure_section.get_elements_map()
+        elements_options = ["%s (%s)" % (value, key) for key, value in elements_map.iteritems()]
+        defects_map = self.defects_section.get_defects_map()
+        defects_options = ["%s (%s)" % (value, key) for key, value in defects_map.iteritems()]
+
+        id_label = Label(frame, text="N" + str(rownum))
+        id_label.grid(row=rownum, column=0, padx=10, pady=10, sticky=W)
+
+        start_defect = StringVar(frame)
+        start_defect_val = None
+        if self.neb_info['startdefect'][0] and ('N' + str(rownum)) in self.neb_info['startdefect'][0]:
+            start_defect_val = self.neb_info['startdefect'][0]['N' + str(rownum)]
+        s_option_menu = OptionMenu(frame, start_defect, ())
+        s_option_menu.grid(row=rownum, column=1, sticky=W, pady=10, padx=10)
+        self.add_options(s_option_menu, defects_options, start_defect, start_defect_val)
+        self.neb_info['startdefect'][1]['N' + str(rownum)] = start_defect
+
+        end_defect = StringVar(frame)
+        end_defect_val = None
+        if self.neb_info['enddefect'][0] and ('N' + str(rownum)) in self.neb_info['enddefect'][0]:
+            end_defect_val = self.neb_info['enddefect'][0]['N' + str(rownum)]
+        e_option_menu = OptionMenu(frame, end_defect, ())
+        e_option_menu.grid(row=rownum, column=2, sticky=W, pady=10, padx=10)
+        self.add_options(e_option_menu, defects_options, end_defect, end_defect_val)
+        self.neb_info['enddefect'][1]['N' + str(rownum)] = end_defect
+
+        element = StringVar(frame)
+        element_val = None
+        if self.neb_info['elementmap'][0] and ('N' + str(rownum)) in self.neb_info['elementmap'][0]:
+            element_val = self.neb_info['elementmap'][0]['N' + str(rownum)]
+        option_menu = OptionMenu(frame, element, ())
+        option_menu.grid(row=rownum, column=3, sticky=W, pady=10, padx=10)
+        self.add_options(option_menu, elements_options, element, element_val)
+        self.neb_info['elementmap'][1]['N' + str(rownum)] = element
+         
+        startpos_text = StringVar()
+        if self.neb_info['startpos'][0] and ('N' + str(rownum)) in self.neb_info['startpos'][0]:
+            startpos_text.set(self.neb_info['startpos'][0]['N'+str(rownum)])
+        startpos_val  = Entry(frame, textvariable=startpos_text)
+        startpos_val.grid(row=rownum, column=4, pady=10, padx=10, sticky=W)
+        self.neb_info['startpos'][1]['N' + str(rownum)] = startpos_text
+
+        endpos_text = StringVar()
+        if self.neb_info['endpos'][0] and ('N' + str(rownum)) in self.neb_info['endpos'][0]:
+            endpos_text.set(self.neb_info['endpos'][0]['N'+str(rownum)])
+        endpos_val  = Entry(frame, textvariable=endpos_text)
+        endpos_val.grid(row=rownum, column=5, pady=10, padx=10, sticky=W)
+        self.neb_info['endpos'][1]['N' + str(rownum)] = endpos_text
+
+
+    def add_options(self, option_menu, options, element_var, index_val):
+        menu = option_menu["menu"]
+        menu.delete(0, "end")
+        for string in options:
+            menu.add_command(label=string, command=lambda value=string:element_var.set(value))
+        if index_val is not None:
+            element_var.set(index_val)

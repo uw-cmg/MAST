@@ -8,7 +8,9 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
+import time
 import fnmatch
+import logging
 
 import numpy as np
 import pymatgen as pmg
@@ -17,15 +19,13 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-from MAST.utility import PickleManager
-
+from MAST.utility import dirutil
+from MAST.utility import Metadata
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
-
-MAST_KEYWORDS = {'program': 'vasp',
-                 'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
+MAST_KEYWORDS = {
+                 'system_name': 'mast'
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
@@ -75,6 +75,9 @@ class InputParser(MASTObj):
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                 'phonon'   : self.parse_phonon_section,
                                }
+        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+
 
     def parse(self):
         """Parses information from the *.inp style input file.
@@ -109,16 +112,21 @@ class InputParser(MASTObj):
                     return
 
                 section_content = list()
-                print '\nFound section %s.  Reading in options.' % section_name
+                self.logger.info('Found section %s.  Reading in options.' % section_name)
             elif (self.section_end in line) and (section_name):
                 self.section_parsers[section_name](section_name, 
                         section_content, options)
-                print 'Finished parsing the %s section.' % section_name
+                self.logger.info('Finished parsing the %s section.' % section_name)
             else:
                 line = line.strip()
                 if (line):
                     section_content.append(line)
         infile.close()
+
+        self.perform_element_mapping(options)
+        self.set_structure_from_inputs(options)
+        self.logger.info(options)
+        self.validate_execs(options)
 
         return options
 
@@ -138,10 +146,6 @@ class InputParser(MASTObj):
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
         
-        if options.get_item(section_name,'program') == 'vasp':
-            if os.getenv('VASP_PSP_DIR') == None:
-                raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
-
     def parse_structure_section(self, section_name, section_content, options):
         """Parses the structure section and populate the options.
             Does not create the structure.
@@ -173,8 +177,8 @@ class InputParser(MASTObj):
         structure_dict = STRUCTURE_KEYWORDS.copy() 
 
         subsection_dict = dict()
-        for line in section_content:
-            line = line.split(self.delimiter)
+        for myline in section_content:
+            line = myline.split(self.delimiter, 1)
 
             if (line[0] in structure_dict):
                 structure_dict[line[0]] = line[1]
@@ -182,7 +186,13 @@ class InputParser(MASTObj):
                 subsection = line[1]
                 subsection_list = list()
             elif ('end' not in line):
-                subsection_list.append(line)
+                lsplit = myline.split(self.delimiter)
+                lineval = list()
+                for lval in lsplit:
+                    lval.strip()
+                    if len(lval) > 0:
+                        lineval.append(lval)
+                subsection_list.append(lineval)
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
@@ -192,15 +202,26 @@ class InputParser(MASTObj):
         # an error.
         if (structure_dict['posfile'] is not None): # Do we have a geometry file?
             # First build a list of likely files
-            file_list = [file for file in os.listdir('.') if fnmatch.fnmatch(file, structure_dict['posfile'])]
+            origindir = os.getcwd()
+            metatry = os.path.join(os.getcwd(), 'metadata.txt')
+            if os.path.isfile(metatry):
+                myrecipemeta = Metadata(metafile=metatry)
+                origindir = myrecipemeta.search_data('origin_dir')[1]
+            myfiles = dirutil.walkfiles(origindir)
+            file_list=list()
+            for myfile in myfiles:
+                if structure_dict['posfile'] in myfile:
+                    file_list.append(myfile)
             if (len(file_list) > 1):
                 # If we have multiple files with the same name, but different capitalization, throw an error here
-                print 'Found mutliple files with the name %s' % structure_dict['posfile']
-                print 'Found the files:'
+                self.logger.warning('Found multiple files with the name %s' % structure_dict['posfile'])
+                self.logger.warning('Found the files:')
                 for file in file_list:
-                    print file
-                error = 'Found ambiguous file names'
-                MASTError(self.__class__.__name__, error)
+                    self.logger.warning(file)
+                error='Found ambiguous file names'
+                raise MASTError(self.__class__.__name__, error)
+            elif len(file_list) == 0:
+                raise MASTError(self.__class__.__name__, "No structure file %s found in %s" % (structure_dict['posfile'], origindir))
             else:
                 structure_dict['posfile'] = file_list[0]
 
@@ -219,6 +240,7 @@ class InputParser(MASTObj):
                 coordinates = np.array(value[:, 1:], dtype='float')
                 structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
+                #print "VALUE: ", value
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
             if (key == 'elementmap'):
@@ -351,7 +373,7 @@ class InputParser(MASTObj):
                 return
             elif (line[0] == 'recipe_file'):
                 try:
-                    recipe_path = os.environ['MAST_RECIPE_PATH']
+                    recipe_path = os.getenv('MAST_RECIPE_PATH')
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
                     MASTError(self.__class__.__name__, error) 
@@ -417,16 +439,38 @@ class InputParser(MASTObj):
                         val = str().join(key[1][0].upper() + key[1][1:])
                         psp_dict[ref] = val
                     ingredient_dict[opt[0]] = psp_dict
-                elif (opt[0] == 'mast_exec'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'ptemp'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
-                elif (opt[0] == 'rwigs'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'mast_setmagmom'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_exec'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_strain'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'ptemp'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
+                #elif (opt[0] == 'rwigs'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_setmagmom'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                elif (opt[0] == 'mast_coordinates'):
+                    shortsplit = opt[1].split(",")
+                    filesplit=list()
+                    origindir = os.getcwd()
+                    metatry = os.path.join(os.getcwd(), 'metadata.txt')
+                    if os.path.isfile(metatry):
+                        myrecipemeta = Metadata(metafile=metatry)
+                        origindir = myrecipemeta.search_data('origin_dir')[1]
+                    myfiles = dirutil.walkfiles(origindir)
+                    for shortname in shortsplit:
+                        for fullfile in myfiles:
+                            if shortname.strip() in os.path.basename(fullfile):
+                                filesplit.append(fullfile)
+                    if not (len(filesplit) == len(shortsplit)):
+                        raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, origindir))
+                    ingredient_dict[opt[0]] = filesplit
                 else:
-                    ingredient_dict[opt[0]] = opt[1]
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                    #ingredient_dict[opt[0]] = opt[1] #old behavior took only the first part
+                if (opt[0] == 'mast_program') and (opt[1] == 'vasp' or opt[1] == 'vasp_neb'):
+                    if os.getenv('VASP_PSP_DIR') == None:
+                        raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
             elif ('end' in line):
                 # Each ingredient section ends with "end", if present finish 
                 # that current section and assign
@@ -479,10 +523,8 @@ class InputParser(MASTObj):
         """
         neblines = dict()
         images = 0
-        phonon = dict()
         neblabel=""
         for line in section_content:
-            type_dict = dict()
             line = line.strip()
             if 'images' in line:
                 line = line.split(self.delimiter)
@@ -500,8 +542,7 @@ class InputParser(MASTObj):
         options.set_item(section_name, 'images', images)
         options.set_item(section_name, 'neblines', neblines)
 
-    def parse_chemical_potentials_section(self, section_name, section_content,
-                                          options):
+    def parse_chemical_potentials_section(self, section_name, section_content, options):
         """Parses the chemical_potentials section and populates the options.
             Section uses the standard begin...end subsection structure, but with
             a modification: instead of strict subsection titles (i.e. structure,
@@ -584,19 +625,95 @@ class InputParser(MASTObj):
         phonon = dict()
         label=""
         for line in section_content:
-            type_dict = dict()
             line = line.strip()
-            if 'images' in line:
-                line = line.split(self.delimiter)
-                images = int(line[1])
-            elif 'begin' in line:
+            if 'begin' in line:
                 line = line.split(self.delimiter)
                 label = line[1].strip()
                 phonon[label]=dict()
             elif 'end' in line:
-                neblabel = ""
+                pass
             else:
                 line = line.split(self.delimiter, 1)
                 phonon[label][line[0]] = line[1]
 
         options.set_item(section_name, 'phonon', phonon)
+
+
+    def perform_element_mapping(self, input_options):
+        """Perform element mapping if there is an element map specified,
+            so that defects and NEB lines get the correct element name.
+            Args:
+                input_options <InputOptions>
+            Returns:
+                modifies input_options dictionary entries in place.
+        """
+        #print self.input_options.get_section_keys('structure')
+        eldict=dict()
+        if 'element_map' in input_options.get_section_keys('structure'):
+            eldict = input_options.get_item('structure','element_map')
+        if len(eldict) == 0:
+            return
+        if 'defects' in input_options.get_sections():
+            defdict = input_options.get_item('defects','defects')
+            for dkey in defdict.keys():
+                for sdkey in defdict[dkey].keys():
+                    if 'subdefect' in sdkey:
+                        symbol = defdict[dkey][sdkey]['symbol'].upper()
+                        if symbol in eldict.keys():
+                            defdict[dkey][sdkey]['symbol'] = eldict[symbol]
+        if 'neb' in input_options.get_sections():
+            neblinedict = input_options.get_item('neb','neblines')
+            for nlabelkey in neblinedict.keys():
+                nlinenum = len(neblinedict[nlabelkey])
+                nlinect=0
+                while nlinect < nlinenum:
+                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
+                    if symbol in eldict.keys():
+                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
+                    nlinect = nlinect + 1
+        return
+
+
+
+    def validate_execs(self, input_options):
+        """Make sure each ingredient has a mast_exec line.
+            Args:
+                input_options <InputOptions>
+        """
+        have_exec = False
+        for ingredient, options in input_options.get_item('ingredients').items():
+            if 'mast_exec' in options:
+                have_exec = True
+                break
+            else:
+                have_exec = False
+
+        if (not have_exec):
+            error = 'mast_exec keyword not found in the $ingredients section'
+            raise MASTError(self.__class__.__name__, error)
+    def set_structure_from_inputs(self, input_options):
+        """Make a pymatgen structure and update the
+            structure key.
+            Args:
+                input_options <InputOptions>
+        """
+        strposfile = input_options.get_item('structure','posfile')
+        if strposfile is None:
+            iopscoords=input_options.get_item('structure','coordinates')
+            iopslatt=input_options.get_item('structure','lattice')
+            iopsatoms=input_options.get_item('structure','atom_list')
+            iopsctype=input_options.get_item('structure','coord_type')
+            structure = MAST2Structure(lattice=iopslatt,
+                coordinates=iopscoords, atom_list=iopsatoms,
+                coord_type=iopsctype)
+        elif ('poscar' in strposfile.lower()):
+            from pymatgen.io.vaspio import Poscar
+            structure = Poscar.from_file(strposfile).structure
+        elif ('cif' in strposfile.lower()):
+            from pymatgen.io.cifio import CifParser
+            structure = CifParser(strposfile).get_structures()[0]
+        else:
+            error = 'Cannot build structure from file %s' % strposfile
+            raise MASTError(self.__class__.__name__, error)
+        input_options.update_item('structure','structure',structure)
+

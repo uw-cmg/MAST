@@ -4,10 +4,11 @@ import pymatgen as pmg
 from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
 from pymatgen.io.smartio import read_structure
 
-from MAST.utility import PickleManager
+#from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 from MAST.utility.defect_formation_energy.gapplot import GapPlot
 from MAST.utility import Metadata
+from MAST.parsers import InputParser
 
 class DefectFormationEnergy:
     """Class for calculating the defect formation energy for a completed MAST
@@ -17,9 +18,10 @@ class DefectFormationEnergy:
     def __init__(self, directory=None, plot_threshold=0.01):
         self.directory = directory
         self.plot_threshold = plot_threshold
-
-        pm = PickleManager(self.directory + '/input_options.pickle')
-        self.input_options = pm.load_variable()
+        ipparser = InputParser(inputfile=os.path.join(self.directory + 'input.inp'))
+        self.input_options = ipparser.parse()
+        #pm = PickleManager(self.directory + '/input_options.pickle')
+        #self.input_options = pm.load_variable()
         self.recipe_plan = PickleManager(self.directory + '/mast.pickle').load_variable()
 
         self.final_ingredients = list()

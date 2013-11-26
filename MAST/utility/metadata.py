@@ -16,7 +16,7 @@ class Metadata(MASTObj):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
 
     def write_data(self, keyword, data):
-        """Writes a keyword and it's associated data to the metafile"""
+        """Writes a keyword and its associated data to the metafile"""
         with open(self.keywords['metafile'], 'a') as metafile:
             # First check to see if the keyword already exists in the metadata file
             if None in self.search_data(keyword):
@@ -30,6 +30,10 @@ class Metadata(MASTObj):
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
             and data for that keyword.
+            Returns:
+                [line_number, data]
+                line_number <int>: line number found
+                data <str>: data found
         """
         line_number = None
         data = None

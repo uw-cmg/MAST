@@ -6,7 +6,7 @@ Writes to a new file.
 Args:
     [$1] <str>: script name for which to create unit tests
 """
-from MAST.mastfile.mastfile import MASTFile
+from MAST.utility import MASTFile
 import os
 import sys
 
@@ -26,12 +26,21 @@ newfile.data.append("\"\"\"Tests for " + basename.title() + "\"\"\"" + '\n')
 newfile.data.append("\n")
 newfile.data.append("from MAST.." +basename+ " import "+ basename.title()+ "\n")
 newfile.data.append("\n")
-newfile.data.append("from nose.plugins.skip import SkipTest\n")
+newfile.data.append("import unittest\n")
+newfile.data.append("from unittest import SkipTest\n")
+newfile.data.append("import os\n")
+newfile.data.append("import time\n")
+newfile.data.append("import MAST\n")
+newfile.data.append("import pymatgen\n")
+newfile.data.append("from MAST.utility import dirutil\n")
 newfile.data.append("\n")
-newfile.data.append("class Test"+ basename.title() + ":" + "\n")
+newfile.data.append("testname=\"<test_folder_here>\"\n")
+newfile.data.append("testdir = os.path.join(os.getenv(\"MAST_INSTALL_PATH\"),\'test\',testname)\n")
+newfile.data.append("\n")
+newfile.data.append("class Test"+ basename.title() + "(unittest.TestCase):" + "\n")
 newfile.data.append("\n")
 newfile.data.append("    def setUp(self):" + '\n')
-newfile.data.append("        self.testclass = " +basename.title()+ "()"+'\n')
+newfile.data.append("        os.chdir(testdir)\n")
 newfile.data.append("\n")
 newfile.data.append("    def tearDown(self):" + '\n')
 newfile.data.append("        pass" + '\n')
