@@ -174,6 +174,10 @@ class WriteIngredient(BaseIngredient):
     def write_singlerun(self):
         self.checker.set_up_program_input()
         self.write_submit_script()
+    def write_singlerun_automesh(self):
+        self.checker.scale_mesh(1000)
+        self.checker.set_up_program_input()
+        self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
         """
@@ -383,6 +387,27 @@ class RunIngredient(BaseIngredient):
         return
 
 
+    def run_scale_defect(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory() 
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalextend = StructureExtensions(struc_work1=base_structure)
+        if not 'mast_scale' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
+        scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
+        defect_label = BaseIngredient.get_my_label(self, "defect_label")
+        defect = self.keywords['program_keys'][defect_label]
+        for key in defect:
+            if 'subdefect' in key:
+                subdefect = defect[key]
+                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=base_structure)
+                scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
+            else:
+                pass
+        self.checker.write_final_structure_file(scaled)
+        return
 
 class IsCompleteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
