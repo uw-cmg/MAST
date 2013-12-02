@@ -955,3 +955,19 @@ class VaspChecker(BaseChecker):
             structure file. For VASP, this is a CONTCAR.
         """
         return os.path.isfile(os.path.join(self.keywords['name'], 'CONTCAR'))
+    def scale_mesh(self, newstr, density):
+        """Scale the kpoint mesh.
+            Args:
+                newstr <structure>: new structure
+                density <float>: kpoint density
+            Returns:
+                newkmesh <pymatgen Kpoints>: new kpoint mesh
+                sets program_keys 'mast_kpoints' to new mesh
+        """
+        newkmesh = Kpoints.automatic_density(newstr, density)
+        klist = list()
+        klist = newkmesh.to_dict['kpoints'][0]
+        klist.append(newkmesh.to_dict['generation_style'][0])
+        self.keywords['program_keys']['mast_kpoints'] = klist
+        return newkmesh
+

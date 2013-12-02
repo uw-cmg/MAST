@@ -505,3 +505,8 @@ class TestVaspChecker(unittest.TestCase):
         self.assertFalse(myvc.has_ending_structure_file())
         myvc = VaspChecker(name="done")
         self.assertTrue(myvc.has_ending_structure_file())
+    def test_scale_mesh(self):
+        myvc = VaspChecker()
+        mystr = pymatgen.io.vaspio.Poscar.from_file("ready/POSCAR").structure
+        myk=myvc.scale_mesh(mystr, 2000)
+        self.assertEqual(myvc.keywords['program_keys']['mast_kpoints'],[8,8,8,'M'])
