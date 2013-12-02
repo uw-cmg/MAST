@@ -407,3 +407,24 @@ class TestWriteIngredient(unittest.TestCase):
         self.assertEqual(myrad,"1")
         #self.testclass.get_my_phonon_params()
 
+    def test_write_singlerun_automesh(self):
+        ingdir="writedir/single_label1"
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_kpoints']=[3,3,3,"G"]
+        kdict['mast_xc']='pbe'
+        kdict['mast_program']='vasp'
+        kdict['mast_kpoint_density']='1000'
+        mypos=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
+        mypos.write_file("writedir/single_label1/POSCAR")
+        mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=mypos.structure)
+        mywi.write_singlerun_automesh()
+        mykpts = pymatgen.io.vaspio.Kpoints.from_file("writedir/single_label1/KPOINTS")
+        self.assertEqual(mykpts.to_dict['kpoints'][0],[6,6,6])
+        #print mykpts
+        self.assertTrue(mywi.checker.is_ready_to_run())
+        #self.testclass.write_singlerun()

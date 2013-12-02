@@ -175,7 +175,11 @@ class WriteIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
     def write_singlerun_automesh(self):
-        self.checker.scale_mesh(1000)
+        if not self.checker.has_starting_structure_file():
+            raise MASTError(self.__class__.__name__,"No starting structure file for ingredient %s; write_singlerun_automesh cannot be used." % self.keywords['name']) 
+        if not 'mast_kpoint_density' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__,"No mast_kpoint_density ingredient keyword found for ingredient %s; write_singlerun_automesh cannot be used." % self.keywords['name'])
+        self.checker.scale_mesh(self.checker.get_initial_structure_from_directory(self.keywords['name']),int(self.keywords['program_keys']['mast_kpoint_density']))
         self.checker.set_up_program_input()
         self.write_submit_script()
     def write_phonon_multiple(self):
