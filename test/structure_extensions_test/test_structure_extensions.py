@@ -193,4 +193,10 @@ class TestSE(unittest.TestCase):
         self.assertEqual(strained, strain_compare)
         self.assertEqual(strained.lattice, strain_compare.lattice)
         self.assertEqual(strained.sites, strain_compare.sites)
-
+    def test_scale_structure(self):
+        hcp = pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP").structure
+        sxtend = StructureExtensions(struc_work1=hcp)
+        scaled = sxtend.scale_structure(2)
+        self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
+        self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())

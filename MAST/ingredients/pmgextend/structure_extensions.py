@@ -345,3 +345,15 @@ class StructureExtensions(MASTObj):
         newstructure = mystructure.copy()
         newstructure.modify_lattice(newlattice)
         return newstructure
+
+    def scale_structure(self, scale):
+        """Scale the structure.
+            Args:
+                oldstr <structure>: old structure to be scaled
+                scale <int>: scale parameter; should be >= 2
+            Returns:
+                scaledstr <structure>
+        """
+        scaledstr = self.keywords['struc_work1'].copy()
+        scaledstr.make_supercell(scale)
+        return scaledstr
