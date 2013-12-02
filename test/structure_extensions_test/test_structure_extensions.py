@@ -200,3 +200,17 @@ class TestSE(unittest.TestCase):
         self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
         self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
         self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+    def test_scale_defect(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        scaled = sxtend.scale_structure(2)
+        sxtend2 = StructureExtensions(struc_work1=scaled, struc_work2=perfect)
+        vac1={'symbol':'O', 'type': 'vacancy', 'coordinates':  np.array([0.25, 0.75, 0.25])}
+        defected =  sxtend2.scale_defect(vac1,'fractional',0.0001)
+        int1={'symbol':'Ni', 'type': 'interstitial', 'coordinates': np.array([0.3, 0.3, 0.3])}
+        sxtend3 = StructureExtensions(struc_work1=defected, struc_work2=perfect)
+        defected2 = sxtend3.scale_defect(int1,'fractional',0.0001)
+        sub1={'symbol':'Fe', 'type': 'substitution','coordinates':np.array([0.25, 0.25,0.75])}
+        sxtend4 = StructureExtensions(struc_work1=defected2, struc_work2=perfect)
+        defected3 = sxtend4.scale_defect(sub1,'fractional',0.0001)
+        self.assertEqual(pymatgen.io.vaspio.Poscar.from_file("POSCAR_scaled_defected").structure, defected3)

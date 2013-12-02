@@ -357,3 +357,37 @@ class StructureExtensions(MASTObj):
         scaledstr = self.keywords['struc_work1'].copy()
         scaledstr.make_supercell(scale)
         return scaledstr
+    def scale_defect(self, defect, coord_type, threshold):
+        """Scales the defect dictionary and returns the modified structure
+            Args:
+                keyword struc_work1: scaled-up structure
+                keyword struc_work2: original structure
+                defect <dict>: Defect subdictionary (single 
+                               defect) of the form:
+                        {'symbol': 'cr', 'type': 'interstitial', 
+                    'coordinates': array([ 0. ,  0.5,  0. ])}}
+                coord_type <str>: cartesian or fractional
+                threshold <float>: Threshold for finding the
+                                   defect position in what may
+                                   be a relaxed, imperfect 
+                                   structure.
+            Returns:
+                defected structure <Structure>
+        """
+        mycoords = defect['coordinates']
+        origstr = self.keywords['struc_work2']
+        scaledstr = self.keywords['struc_work1']
+        olda = origstr.lattice.a
+        oldb = origstr.lattice.b
+        oldc = origstr.lattice.c
+        newa = scaledstr.lattice.a
+        newb = scaledstr.lattice.b
+        newc = scaledstr.lattice.c
+        #if newa is twice as big as olda, coordinate should be half as big
+        coorda = mycoords[0]*(olda/newa)
+        coordb = mycoords[1]*(oldb/newb)
+        coordc = mycoords[2]*(oldc/newc)
+        newdict = dict(defect)
+        newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
+        returnstr = self.induce_defect(newdict, coord_type, threshold)
+        return returnstr
