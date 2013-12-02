@@ -412,6 +412,18 @@ class RunIngredient(BaseIngredient):
                 pass
         self.checker.write_final_structure_file(scaled)
         return
+    def run_scale(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory() 
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalextend = StructureExtensions(struc_work1=base_structure)
+        if not 'mast_scale' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
+        scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
+        self.checker.write_final_structure_file(scaled)
+        return
 
 class IsCompleteIngredient(BaseIngredient):
     def __init__(self, **kwargs):

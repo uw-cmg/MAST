@@ -322,3 +322,23 @@ class TestRunIngredient(unittest.TestCase):
         my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
         defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled_defected").structure.get_sorted_structure()
         self.assertEquals(my_defected, defected_compare)
+    def test_run_scale(self):
+        ingdir="%s/writedir/single_label1" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = label1\n")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        kdict=dict()
+        kdict['mast_program'] = 'vasp'
+        kdict['mast_scale'] = 2
+        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        myperf = MASTFile("files/POSCAR_perfect")
+        myperf.to_file("%s/POSCAR" % ingdir)
+        myri = RunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myri.run_scale()
+        my_scaled = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
+        scaled_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled").structure.get_sorted_structure()
+        self.assertEquals(my_scaled, scaled_compare)
