@@ -44,6 +44,8 @@ ispin 2
 lwave False
 lcharg False
 encut 313
+ibrion 2
+nsw 191
 mast_program vasp
 mast_write_method write_singlerun
 mast_ready_method ready_singlerun
@@ -55,12 +57,8 @@ end
 begin static
 ibrion -1
 nsw 0
-end
-
-begin optimize
-encut 313
-ibrion 2
-nsw 100
+mast_write_method write_singlerun_automesh
+mast_kpoint_density 500
 end
 
 begin scaledefect_1
