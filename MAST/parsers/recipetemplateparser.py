@@ -121,6 +121,7 @@ class RecipeTemplateParser(MASTObj):
         expandedchunk=list()
         needsdefects=0
         needscharges=0
+        needsphonons=0
         needsnebs=0
         for line in chunk:
             if "<N>" in line:
@@ -148,7 +149,12 @@ class RecipeTemplateParser(MASTObj):
                         newline = line.replace("<N>", defectname)
                         if needscharges == 1:
                             newline = newline.replace("<Q>", mycharge)
-                        expandedchunk.append(newline)
+                        if "<P>" in newline:
+                            for phonon in d_defects[defectname]['phonon']:
+                                pline = newline.replace("<P>", phonon)
+                                expandedchunk.append(pline)
+                        else:        
+                            expandedchunk.append(newline)
         elif needsnebs == 1:
             mynebs=d_neblines.keys()
             mynebs.sort()
@@ -169,7 +175,12 @@ class RecipeTemplateParser(MASTObj):
                         newline = newline.replace("<B-E>", neblabel)
                         if needscharges == 1:
                             newline = newline.replace("<Q>", mycharge)
-                        expandedchunk.append(newline)
+                        if "<P>" in newline:
+                            for phonon in d_neblines[neblabel]['phonon']:
+                                pline = newline.replace("<P>", phonon)
+                                expandedchunk.append(pline)
+                        else:
+                            expandedchunk.append(newline)
 
         else:
             expandedchunk = list(origchunk)

@@ -272,6 +272,7 @@ class InputParser(MASTObj):
         count = 1
         coord_type = 'cartesian'
         threshold = 1.e-4
+        phonon = dict()
 
         for line in section_content:
             line = line.split(self.delimiter)
@@ -311,7 +312,8 @@ class InputParser(MASTObj):
                 defect = {'charge': charge,
                           'subdefect_1': type_dict,
                           'coord_type': coord_type,
-                          'threshold': threshold}
+                          'threshold': threshold,
+                          'phonon': phonon}
 
                 #defect_types['defect_%s' % label] = defect
                 defect_types[label] = defect
@@ -324,6 +326,7 @@ class InputParser(MASTObj):
                 defect['charge'] = charge
                 defect['coord_type'] = coord_type
                 defect['threshold'] = threshold
+                defect['phonon'] = phonon
 
                 try:
                     label = line[1]
@@ -340,6 +343,13 @@ class InputParser(MASTObj):
                 charge_range = line[0].split('=')[-1].split(',')
                 defect['charge'] = range(int(charge_range[0]),
                                          int(charge_range[1])+1)
+            elif ('phonon' in line[0]):
+                plabel = line[1]
+                p_center = np.array([float(line[2]),float(line[3]),float(line[4])])
+                p_radius = float(line[5])
+                defect['phonon'][plabel]=dict()
+                defect['phonon'][plabel]['phonon_center_site'] = p_center
+                defect['phonon'][plabel]['phonon_center_radius'] = p_radius
             else:
                 type_dict = dict()
 
@@ -526,20 +536,33 @@ class InputParser(MASTObj):
         neblabel=""
         for line in section_content:
             line = line.strip()
-            if 'images' in line:
-                line = line.split(self.delimiter)
-                images = int(line[1])
-            elif 'begin' in line:
+            #if 'images' in line:
+            #    line = line.split(self.delimiter)
+            #    images = int(line[1])
+            if 'begin' in line:
                 line = line.split(self.delimiter)
                 neblabel = line[1].strip()
-                neblines[neblabel]=list()
+                neblines[neblabel]=dict()
+                neblines[neblabel]['lines']=list()
+                neblines[neblabel]['phonon']=dict()
             elif 'end' in line:
                 neblabel = ""
             else:
-                line = line.split(',') #use commas for elementl ines
-                neblines[neblabel].append(line)
+                line = line.split(',') #use commas for element lines
+                if 'phonon' in line[0]:
+                    sline = line[0].split()
+                    plabel = sline[1]
+                    p_center = np.array([float(sline[2]),float(sline[3]),float(sline[4])])
+                    p_radius = float(sline[5])
+                    neblines[neblabel]['phonon'][plabel]=dict()
+                    neblines[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center
+                    neblines[neblabel]['phonon'][plabel]['phonon_center_radius'] = p_radius
+                elif 'images' in line[0]:
+                    neblines[neblabel]['images'] = int(line[0].split()[1])
+                else:
+                    neblines[neblabel]['lines'].append(line)
 
-        options.set_item(section_name, 'images', images)
+        #options.set_item(section_name, 'images', images)
         options.set_item(section_name, 'neblines', neblines)
 
     def parse_chemical_potentials_section(self, section_name, section_content, options):
