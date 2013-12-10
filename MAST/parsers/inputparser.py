@@ -272,7 +272,6 @@ class InputParser(MASTObj):
         count = 1
         coord_type = 'cartesian'
         threshold = 1.e-4
-        phonon = dict()
 
         for line in section_content:
             line = line.split(self.delimiter)
@@ -313,7 +312,7 @@ class InputParser(MASTObj):
                           'subdefect_1': type_dict,
                           'coord_type': coord_type,
                           'threshold': threshold,
-                          'phonon': phonon}
+                          'phonon': dict()}
 
                 #defect_types['defect_%s' % label] = defect
                 defect_types[label] = defect
@@ -326,7 +325,7 @@ class InputParser(MASTObj):
                 defect['charge'] = charge
                 defect['coord_type'] = coord_type
                 defect['threshold'] = threshold
-                defect['phonon'] = phonon
+                defect['phonon'] = dict()
 
                 try:
                     label = line[1]
