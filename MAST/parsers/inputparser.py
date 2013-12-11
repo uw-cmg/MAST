@@ -530,7 +530,7 @@ class InputParser(MASTObj):
             antisites. The neb section allows us to unambiguously match up 
             the atoms and determine which atoms are moving, and where. 
         """
-        neblines = dict()
+        nebs = dict()
         images = 0
         neblabel=""
         for line in section_content:
@@ -541,9 +541,9 @@ class InputParser(MASTObj):
             if 'begin' in line:
                 line = line.split(self.delimiter)
                 neblabel = line[1].strip()
-                neblines[neblabel]=dict()
-                neblines[neblabel]['lines']=list()
-                neblines[neblabel]['phonon']=dict()
+                nebs[neblabel]=dict()
+                nebs[neblabel]['lines']=list()
+                nebs[neblabel]['phonon']=dict()
             elif 'end' in line:
                 neblabel = ""
             else:
@@ -553,16 +553,17 @@ class InputParser(MASTObj):
                     plabel = sline[1]
                     p_center = np.array([float(sline[2]),float(sline[3]),float(sline[4])])
                     p_radius = float(sline[5])
-                    neblines[neblabel]['phonon'][plabel]=dict()
-                    neblines[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center
-                    neblines[neblabel]['phonon'][plabel]['phonon_center_radius'] = p_radius
+                    nebs[neblabel]['phonon'][plabel]=dict()
+                    nebs[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center
+                    nebs[neblabel]['phonon'][plabel]['phonon_center_radius'] = p_radius
                 elif 'images' in line[0]:
-                    neblines[neblabel]['images'] = int(line[0].split()[1])
+                    nebs[neblabel]['images'] = int(line[0].split()[1])
                 else:
-                    neblines[neblabel]['lines'].append(line)
+                    nebs[neblabel]['lines'].append(line)
 
         #options.set_item(section_name, 'images', images)
-        options.set_item(section_name, 'neblines', neblines)
+        for nebkey in nebs.keys():
+            options.set_item(section_name, nebkey, dict(nebs[nebkey]))
 
     def parse_chemical_potentials_section(self, section_name, section_content, options):
         """Parses the chemical_potentials section and populates the options.
@@ -684,14 +685,15 @@ class InputParser(MASTObj):
                         if symbol in eldict.keys():
                             defdict[dkey][sdkey]['symbol'] = eldict[symbol]
         if 'neb' in input_options.get_sections():
-            neblinedict = input_options.get_item('neb','neblines')
-            for nlabelkey in neblinedict.keys():
-                nlinenum = len(neblinedict[nlabelkey])
+            nebkeys = input_options.get_section_keys('neb')
+            for nebkey in nebkeys:
+                nebdict = input_options.get_item('neb', nebkey)
+                nlinenum = len(nebdict['lines'])
                 nlinect=0
                 while nlinect < nlinenum:
-                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
+                    symbol = nebdict['lines'][nlinect][0].upper()
                     if symbol in eldict.keys():
-                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
+                        nebdict['lines'][nlinect][0] = eldict[symbol]
                     nlinect = nlinect + 1
         return
 
