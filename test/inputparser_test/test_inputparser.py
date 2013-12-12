@@ -126,11 +126,18 @@ class TestInputparser(unittest.TestCase):
         self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates'],np.array([0.5,0.5,0.],'float')))
         self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['AntiGe@Fe']['subdefect_1']['coordinates'],np.array([0.1,0.3,0.4],'float')))
         self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['MgInt']['subdefect_1']['coordinates'],np.array([0.,0.2,0.3],'float')))
+        self.assertItemsEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon'].keys(),['host1','sub2'])
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_site'],np.array([0.1,0.2,0.3])))
+        self.assertEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_radius'],3.0)
+        self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['phonon_center_site'],np.array([0.2,0.4,0.0])))
+        self.assertEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['sub']['phonon_center_radius'],1.0)
+        #Have to blank out the numpy arrays so that the rest of the diff'ing will work
         myoptions.options['defects']['defects']['defect_3']['subdefect_1']['coordinates']='blank'
         myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']='blank'
         myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']='blank'
         myoptions.options['defects']['defects']['AntiGe@Fe']['subdefect_1']['coordinates']='blank'
         myoptions.options['defects']['defects']['MgInt']['subdefect_1']['coordinates']='blank'
+        myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']=dict()
         mdict=dict()
         mdict['coord_type']='fractional'
         mdict['num_defects']=4
@@ -143,6 +150,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['defect_3']['subdefect_1']['symbol']='Al'
         mdict['defects']['defect_3']['subdefect_1']['type']='vacancy'
         mdict['defects']['defect_3']['subdefect_1']['coordinates']='blank' #np.array([0.,0.,0.],'float')
+        mdict['defects']['defect_3']['phonon']={}
         mdict['defects']['Vac@Al-Sub@Fe']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['threshold']=0.0001
         mdict['defects']['Vac@Al-Sub@Fe']['charge']=[-2,-1,0,1,2,3,4,5]
@@ -155,6 +163,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['symbol']='Fe'
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['type']='substitution'
         mdict['defects']['Vac@Al-Sub@Fe']['subdefect_2']['coordinates']='blank' #np.array([0.5,0.5,0.],'float')
+        mdict['defects']['Vac@Al-Sub@Fe']['phonon']={}
         mdict['defects']['AntiGe@Fe']=dict()
         mdict['defects']['AntiGe@Fe']['threshold']=0.0001
         mdict['defects']['AntiGe@Fe']['charge']=[3]
@@ -163,6 +172,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['AntiGe@Fe']['subdefect_1']['symbol']='Ge'
         mdict['defects']['AntiGe@Fe']['subdefect_1']['type']='antisite'
         mdict['defects']['AntiGe@Fe']['subdefect_1']['coordinates']='blank' #np.array([0.1,0.3,0.4],'float')
+        mdict['defects']['AntiGe@Fe']['phonon']={}
         mdict['defects']['MgInt']=dict()
         mdict['defects']['MgInt']['threshold']=0.0001
         mdict['defects']['MgInt']['charge']=[0,1,2,3]
@@ -171,6 +181,7 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['MgInt']['subdefect_1']['symbol']='Mg'
         mdict['defects']['MgInt']['subdefect_1']['type']='interstitial'
         mdict['defects']['MgInt']['subdefect_1']['coordinates']='blank' #np.array([0.,0.2,0.3],'float')
+        mdict['defects']['MgInt']['phonon']={}
         maxdiff=self.maxDiff
         self.maxDiff=None
         self.assertEqual(myoptions.options['defects'],mdict) 
@@ -244,13 +255,29 @@ class TestInputparser(unittest.TestCase):
         myip.parse_neb_section('neb',cleanlines,myoptions)
         print myoptions
         mdict=dict()
-        mdict['images']=3
-        mdict['neblines']=dict()
-        mdict['neblines']['vac1-vac2']=list()
-        mdict['neblines']['vac1-vac2'].append(list(['Cr',' 0.5 0.5 0.0',' 0.0 0.0 0.0']))
-        mdict['neblines']['vac1-vac2'].append(list(['Fe',' 0.2 0.1 0.3',' 0.2 0.1 0.4']))
-        mdict['neblines']['vac1-vac3']=list()
-        mdict['neblines']['vac1-vac3'].append(list(['Al',' 0.1 0.1 0.0',' 0.3 0.4 0.1']))
+        mdict['nebs']=dict()
+        mdict['nebs']['vac1-vac2']=dict()
+        mdict['nebs']['vac1-vac2']['images']=3
+        mdict['nebs']['vac1-vac2']['lines']=list()
+        mdict['nebs']['vac1-vac2']['phonon']=dict()
+        mdict['nebs']['vac1-vac2']['lines'].append(list(['Cr',' 0.5 0.5 0.0',' 0.0 0.0 0.0']))
+        mdict['nebs']['vac1-vac2']['lines'].append(list(['Fe',' 0.2 0.1 0.3',' 0.2 0.1 0.4']))
+        mdict['nebs']['vac1-vac3']=dict()
+        mdict['nebs']['vac1-vac3']['images']=5
+        mdict['nebs']['vac1-vac3']['lines']=list()
+        mdict['nebs']['vac1-vac3']['lines'].append(list(['Al',' 0.1 0.1 0.0',' 0.3 0.4 0.1']))
+        mdict['nebs']['vac1-vac3']['phonon']=dict()
+        #check phonons
+        self.assertItemsEqual(myoptions.options['neb']['nebs']['vac1-vac3']['phonon'].keys(),['solvent1','solute1'])
+        self.assertTrue(np.array_equal(myoptions.options['neb']['nebs']['vac1-vac3']['phonon']['solvent1']['phonon_center_site'],np.array([0.3, 0.2, 0.1])))
+        self.assertEqual(myoptions.options['neb']['nebs']['vac1-vac3']['phonon']['solvent1']['phonon_center_radius'],3.0)
+        self.assertTrue(np.array_equal(myoptions.options['neb']['nebs']['vac1-vac3']['phonon']['solute1']['phonon_center_site'],np.array([0.2, 0.1, 0.5])))
+        self.assertEqual(myoptions.options['neb']['nebs']['vac1-vac3']['phonon']['solute1']['phonon_center_radius'],0.1)
+        #blank out numpy arrays for diff comparison purposes
+        mdict['nebs']['vac1-vac2']['phonon']=dict()
+        mdict['nebs']['vac1-vac3']['phonon']=dict()
+        myoptions.options['neb']['nebs']['vac1-vac2']['phonon']=dict()
+        myoptions.options['neb']['nebs']['vac1-vac3']['phonon']=dict()
         self.assertEqual(myoptions.options['neb'],mdict)
         #self.testclass.parse_neb_section(section_name, section_content, options)
 

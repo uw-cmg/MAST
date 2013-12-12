@@ -79,28 +79,59 @@ class RecipeSetup(MASTObj):
 
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
+        mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
+        defect_label=""
+        neb_label=""
+        charge=""
 
+        if 'defect_' in name.lower():
+            for datum in mydata:
+                if 'defect_label' in datum:
+                    defect_label = datum.split(':')[-1].strip()
+                    if not 'defects' in self.input_options.options.keys():
+                        raise MASTError(self.__class__.__name__, "No defects section in input file. Error setting up recipe %s." % self.work_dir)
+                    defdict = self.input_options.get_item('defects','defects')
+                    if not defect_label in defdict.keys():
+                        raise MASTError(self.__class__.__name__, "No such label %s found in the defects section dictionary." % defect_label)
+                    mydefdict = dict()
+                    mydefdict['mast_defect_settings'] = defdict[defect_label]
+                    pkey_d.update(mydefdict)
+                    break
+            if defect_label == "":
+                raise MASTError(self.__class__.__name__, "No defect label for %s found in recipe's metadata.txt" % ingredient_name)
+                    
+        if 'inducedefect' not in ingredient_type:
+            if 'q=' in name.lower():
+                for datum in mydata:
+                    if 'charge' in datum:
+                        charge = int(datum.split(':')[-1])
+                        pkey_d['mast_charge'] = charge
+                        break
 
-        if 'defects' in self.input_options.options.keys():
-            if 'defect_' in name.lower():
-                for key in self.input_options.get_item('defects','defects'):
-                    self.logger.info("%s, %s" % (key, ingredient_name))
+        if 'neb_' in name.lower():
+            for datum in mydata:
+                if 'neb_label' in datum:
+                    neb_label = datum.split(':')[-1].strip()
+                    if not 'neb' in self.input_options.options.keys():
+                        raise MASTError(self.__class__.__name__, "No neb section in input file. Error setting up recipe %s." % self.work_dir)
+                    nebdict = self.input_options.get_item('neb','nebs')
+                    if not neb_label in defdict.keys():
+                        raise MASTError(self.__class__.__name__, "No such label %s found in the neb section dictionary." % neb_label)
+                    mynebdict = dict()
+                    mynebdict['mast_neb_settings'] = nebdict[neb_label]
+                    pkey_d.update(mynebdict)
+                    break
+            if neb_label == "":
+                raise MASTError(self.__class__.__name__, "No neb label for %s found in recipe's metadata.txt" % ingredient_name)
 
-                pkey_d.update(self.input_options.get_item('defects','defects'))
-                if 'inducedefect' not in ingredient_type:
-                    data = self.metafile.read_data(ingredient_name.split('/')[-1]).split(',')
-                    for datum in data:
-                        if 'charge' in datum:
-                            charge = int(datum.split(':')[-1])
-                            pkey_d['mast_charge'] = charge
-
-        if 'neb' in self.input_options.options.keys():
             if 'neb' in name.lower():
                 pkey_d.update(self.input_options.options['neb'])
-        if 'phonon' in self.input_options.options.keys():
-            pkey_d.update(self.input_options.options['phonon'])
+        #if 'phonon' in self.input_options.options.keys():
+        #    pkey_d.update(self.input_options.options['phonon'])
         if 'chemical_potentials' in self.input_options.options.keys():
-            pkey_d.update(self.input_options.options['chemical_potentials'])
+            chempotdict=dict()
+            chempotdict['mast_chemical_potentials']=self.input_options.options['chemical_potentials']
+            pkey_d.update(chempotdict)
 
         allopt=dict()
         allopt['name'] = ingredient_name
