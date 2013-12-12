@@ -130,7 +130,7 @@ class TestInputparser(unittest.TestCase):
         self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_site'],np.array([0.1,0.2,0.3])))
         self.assertEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_radius'],3.0)
         self.assertTrue(np.array_equal(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['phonon_center_site'],np.array([0.2,0.4,0.0])))
-        self.assertEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['sub']['phonon_center_radius'],1.0)
+        self.assertEqual(myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['phonon_center_radius'],1.0)
         #Have to blank out the numpy arrays so that the rest of the diff'ing will work
         myoptions.options['defects']['defects']['defect_3']['subdefect_1']['coordinates']='blank'
         myoptions.options['defects']['defects']['Vac@Al-Sub@Fe']['subdefect_1']['coordinates']='blank'
@@ -333,8 +333,8 @@ class TestInputparser(unittest.TestCase):
         self.assertEqual(myoptions.options['defects']['defects']['group1']['subdefect_2']['symbol'],'Ar')
         self.assertEqual(myoptions.options['defects']['defects']['group2']['subdefect_1']['symbol'],'Ar')
         self.assertEqual(myoptions.options['defects']['defects']['group2']['subdefect_2']['symbol'],'Xe')
-        self.assertEqual(myoptions.options['neb']['neblines']['group1-group2'][0][0],'Ar')
-        self.assertEqual(myoptions.options['neb']['neblines']['group1-group2'][1][0],'Xe')
+        self.assertEqual(myoptions.options['neb']['nebs']['group1-group2']['lines'][0][0],'Ar')
+        self.assertEqual(myoptions.options['neb']['nebs']['group1-group2']['lines'][1][0],'Xe')
 
         #self.testclass.perform_element_mapping(input_options)
 
