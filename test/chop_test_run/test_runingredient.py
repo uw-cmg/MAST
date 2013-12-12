@@ -181,7 +181,6 @@ class TestRunIngredient(unittest.TestCase):
         metad.data.append("defect_label = label1\n")
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
-        kdict['mast_program'] = 'vasp'
         kdict['label1']=dict()
         kdict['label1']['subdefect1']=dict()
         kdict['label1']['subdefect1']['symbol']='Cr'
@@ -218,10 +217,14 @@ class TestRunIngredient(unittest.TestCase):
         kdict['label1']['coord_type'] = 'fractional'
         kdict['label1']['threshold'] = 0.01
         kdict['label1']['charge'] = '2'
+        ddict=dict()
+        ddict['mast_defect_settings']=dict()
+        ddict['mast_defect_settings'].update(kdict['label1']) #single defect grouping
+        ddict['mast_program'] = 'vasp'
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
-        myri = RunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myri = RunIngredient(name=ingdir,program_keys=ddict, structure=my_structure)
         myri.run_defect()
         #
         #defect = kdict['label1']
