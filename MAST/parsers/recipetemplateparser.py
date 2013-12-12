@@ -148,13 +148,18 @@ class RecipeTemplateParser(MASTObj):
                     else:
                         mycharge = 'q=p' + str(int(charge))
                     if needsphonons == 1:
-                        for phonon in d_defects[defectname]['phonon']:
-                            for line in origchunk:
-                                newline = line.replace("<N>", defectname)
-                                if needscharges == 1:
-                                    newline = newline.replace("<Q>", mycharge)
-                                newline = newline.replace("<P>", phonon)
-                                expandedchunk.append(newline)
+                        if len(d_defects[defectname]['phonon'].keys()) > 0:
+                            phononkeys = d_defects[defectname]['phonon'].keys()
+                            phononkeys.sort()
+                            for phonon in phononkeys:
+                                for line in origchunk:
+                                    newline = line.replace("<N>", defectname)
+                                    if needscharges == 1:
+                                        newline = newline.replace("<Q>", mycharge)
+                                    newline = newline.replace("<P>", phonon)
+                                    expandedchunk.append(newline)
+                        else:
+                            pass
                     else:
                         for line in origchunk:
                             newline = line.replace("<N>", defectname)
@@ -175,16 +180,21 @@ class RecipeTemplateParser(MASTObj):
                         mycharge = 'q=n' + str(int(math.fabs(charge)))
                     else:
                         mycharge = 'q=p' + str(int(charge))
-                    if needsphonons ==1 :
-                        for phonon in d_nebs[neblabel]['phonon']:
-                            for line in origchunk:
-                                newline = line.replace("<B>", defbegin)
-                                newline = newline.replace("<E>", defend)
-                                newline = newline.replace("<B-E>", neblabel)
-                                if needscharges == 1:
-                                    newline = newline.replace("<Q>", mycharge)
-                                newline = newline.replace("<P>", phonon)
-                                expandedchunk.append(newline)
+                    if needsphonons == 1:
+                        if len(d_nebs[neblabel]['phonon'].keys()) > 0:
+                            phononkeys = d_nebs[neblabel]['phonon'].keys()
+                            phononkeys.sort()
+                            for phonon in phononkeys:
+                                for line in origchunk:
+                                    newline = line.replace("<B>", defbegin)
+                                    newline = newline.replace("<E>", defend)
+                                    newline = newline.replace("<B-E>", neblabel)
+                                    if needscharges == 1:
+                                        newline = newline.replace("<Q>", mycharge)
+                                    newline = newline.replace("<P>", phonon)
+                                    expandedchunk.append(newline)
+                        else:
+                            pass
                     else:
                         for line in origchunk:
                             newline = line.replace("<B>", defbegin)

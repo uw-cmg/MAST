@@ -8,16 +8,22 @@ perfect_opt1 (volrelax_lowmesh)
             defect_<N>_<Q>_opt1 (singlerun_lowmesh)
                 defect_<N>_<Q>_opt2
                     defect_<N>_<Q>_stat (singlerun_to_phonon)
-                        phonon_<N>_<Q> (phonon_to_phononparse)
-                            phonon_<N>_<Q>_parse (phononparse)
+{end}
+{begin}
+defect_<N>_<Q>_stat (singlerun_to_phonon)
+    phonon_<N>_<Q>_<P> (phonon_to_phononparse)
+        phonon_<N>_<Q>_<P>_parse (phononparse)
 {end}
 {begin}
 defect_<B>_<Q>_stat (singlerun_to_neb), defect_<E>_<Q>_stat (singlerun_to_neb)
     neb_<B-E>_<Q>_opt1 (neb_to_neb_<B-E>_<Q>)
         neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
             neb_<B-E>_<Q>_stat (nebstat_to_nebphonon)
-                phonon_<B-E>_<Q> (phonon_to_phononparse)
-                    phonon_<B-E>_<Q>_parse (phononparse)
     neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
     neb_<B-E>_<Q>_stat (nebstat_to_nebphonon)
+{end}
+{begin}
+neb_<B-E>_<Q>_stat (nebstat_to_nebphonon)
+    phonon_<B-E>_<Q>_<P> (phonon_to_phononparse)
+        phonon_<B-E>_<Q>_<P>_parse (phononparse)
 {end}
