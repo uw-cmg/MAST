@@ -562,8 +562,7 @@ class InputParser(MASTObj):
                     nebs[neblabel]['lines'].append(line)
 
         #options.set_item(section_name, 'images', images)
-        for nebkey in nebs.keys():
-            options.set_item(section_name, nebkey, dict(nebs[nebkey]))
+        options.set_item(section_name, 'nebs', nebs)
 
     def parse_chemical_potentials_section(self, section_name, section_content, options):
         """Parses the chemical_potentials section and populates the options.
@@ -685,15 +684,14 @@ class InputParser(MASTObj):
                         if symbol in eldict.keys():
                             defdict[dkey][sdkey]['symbol'] = eldict[symbol]
         if 'neb' in input_options.get_sections():
-            nebkeys = input_options.get_section_keys('neb')
-            for nebkey in nebkeys:
-                nebdict = input_options.get_item('neb', nebkey)
-                nlinenum = len(nebdict['lines'])
+            nebdict = input_options.get_item('neb','nebs')
+            for nebkey in nebdict.keys():
+                nlinenum = len(nebdict[nebkey]['lines'])
                 nlinect=0
                 while nlinect < nlinenum:
-                    symbol = nebdict['lines'][nlinect][0].upper()
+                    symbol = nebdict[nebkey]['lines'][nlinect][0].upper()
                     if symbol in eldict.keys():
-                        nebdict['lines'][nlinect][0] = eldict[symbol]
+                        nebdict[nebkey]['lines'][nlinect][0] = eldict[symbol]
                     nlinect = nlinect + 1
         return
 
