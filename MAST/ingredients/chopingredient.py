@@ -52,7 +52,7 @@ class WriteIngredient(BaseIngredient):
         parentimagestructures = self.get_parent_image_structures()
         if len(parentimagestructures) == 0:
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1])
-            image_structures = sxtend.do_interpolation(self.keywords['program_keys']['images'])
+            image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
         else:
             image_structures = list()
             image_structures.append(parentstructures[0])
@@ -91,12 +91,12 @@ class WriteIngredient(BaseIngredient):
         struct_init = self.checker.get_structure_from_file(pfpath_init)
         struct_fin = self.checker.get_structure_from_file(pfpath_fin)
         base_struct = self.keywords['structure']
-        mylabel = BaseIngredient.get_my_label(self, "neb_label")
-        neblines = self.keywords['program_keys']['neblines'][mylabel]
+        myimages = self.keywords['program_keys']['mast_neb_settings']['images']
+        neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
         sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct)
-        sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', self.keywords['program_keys']['images']) 
+        sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
         sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct)
-        sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(self.keywords['program_keys']['images'] + 1).zfill(2), self.keywords['program_keys']['images'])
+        sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
@@ -107,7 +107,7 @@ class WriteIngredient(BaseIngredient):
                 list of <Structure>: list of pymatgen Structure objects
         """
         header = "parent_structure_"
-        numim = self.keywords['program_keys']['images']
+        numim = self.keywords['program_keys']['mast_neb_settings']['images']
         imct = 1
         imstrs=list()
         while imct <= numim:
@@ -120,10 +120,9 @@ class WriteIngredient(BaseIngredient):
             else:
                 struct_im = self.checker.get_structure_from_file(pfpath)
                 base_struct = self.keywords['structure']
-                mylabel = BaseIngredient.get_my_label(self, "neb_label")
-                neblines = self.keywords['program_keys']['neblines'][mylabel]
+                neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
                 sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct)
-                sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['images']) 
+                sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
                 imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
@@ -151,7 +150,7 @@ class WriteIngredient(BaseIngredient):
         """
         myname=self.keywords['name']
         mystr=self.keywords['structure']
-        numim = int(self.keywords['program_keys']['images'])
+        numim = int(self.keywords['program_keys']['mast_neb_settings']['images'])
         singlechecker = self.checker
         if self.program == 'vasp':
             nebchecker = VaspNEBChecker(name=self.checker.keywords['name'], program_keys = dict(self.checker.keywords['program_keys']), structure = self.checker.keywords['structure'].copy())
@@ -277,7 +276,7 @@ class IsReadyToRunIngredient(BaseIngredient):
         """Make sure all subfolders are ready to run."""
         myname=self.keywords['name']
         notready=0
-        numim = int(self.keywords['program_keys']['images'])
+        numim = int(self.keywords['program_keys']['mast_neb_settings']['images'])
         for imct in range(0,numim+2):
             subdir = str(imct).zfill(2)
             newname = os.path.join(myname, subdir)
@@ -333,7 +332,7 @@ class RunIngredient(BaseIngredient):
         myname=self.keywords['name']
         subdirs = dirutil.walkdirs(myname,1,1)
         imct = 0
-        numim = int(self.keywords['program_keys']['images'])
+        numim = int(self.keywords['program_keys']['mast_neb_settings']['images'])
         for subdir in subdirs:
             if imct == 0 or imct > numim:
                 pass
@@ -362,8 +361,7 @@ class RunIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
 
-        defect_label = BaseIngredient.get_my_label(self, "defect_label")
-        defect = self.keywords['program_keys'][defect_label]
+        defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
@@ -401,8 +399,7 @@ class RunIngredient(BaseIngredient):
         if not 'mast_scale' in self.keywords['program_keys'].keys():
             raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
         scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
-        defect_label = BaseIngredient.get_my_label(self, "defect_label")
-        defect = self.keywords['program_keys'][defect_label]
+        defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
@@ -449,7 +446,7 @@ class IsCompleteIngredient(BaseIngredient):
             return False
         notready=0
         imct = 0
-        numim = int(self.keywords['program_keys']['images'])
+        numim = int(self.keywords['program_keys']['mast_neb_settings']['images'])
         for subdir in subdirs:
             newname = os.path.join(myname, subdir)
             self.keywords['name']=newname
@@ -521,7 +518,7 @@ class UpdateChildrenIngredient(BaseIngredient):
         """Update to ANOTHER NEB."""
         childname = self._fullpath_childname(childname)
         myct=1
-        while myct <= self.keywords['program_keys']['images']:
+        while myct <= self.keywords['program_keys']['mast_neb_settings']['images']:
             imno = str(myct).zfill(2)
             impath = os.path.join(self.keywords['name'], imno)
             self.checker.keywords['name'] = impath
