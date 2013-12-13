@@ -62,7 +62,7 @@ class VaspNEBChecker(VaspChecker):
             coordstrucs=self.get_coordinates_only_structure_from_input()
             newstrucs=list()
             sidx = 0 #ex. coordstrucs 0, 1, 2 for 3 images
-            while sidx < self.keywords['program_keys']['images']:
+            while sidx < self.keywords['program_keys']['mast_neb_settings']['images']:
                 sxtend = StructureExtensions(struc_work1=image_structures[sidx+1].copy())
                 newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
                 sidx = sidx + 1
@@ -152,7 +152,7 @@ class VaspNEBChecker(VaspChecker):
         return my_incar
 
     def set_up_program_input(self):
-        image_structures = self.keywords['program_keys']['image_structures']
+        image_structures = self.keywords['program_keys']['mast_neb_settings']['image_structures']
         self.set_up_neb_folders(image_structures)
         self._vasp_kpoints_setup()
         mypotcar = self._vasp_potcar_setup(Poscar(image_structures[0]))
@@ -173,7 +173,7 @@ class VaspNEBChecker(VaspChecker):
         """
         myct=0
         mystr=""
-        while myct <= self.keywords['program_keys']['images']+1:
+        while myct <= self.keywords['program_keys']['mast_neb_settings']['images']+1:
             fullpath = os.path.join(self.keywords['name'], str(myct).zfill(2), "OSZICAR")
             if not os.path.isfile(fullpath):
                 raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % fullpath)

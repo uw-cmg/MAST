@@ -60,7 +60,7 @@ class WriteIngredient(BaseIngredient):
             image_structures.append(parentstructures[1])
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
-        self.checker.keywords['program_keys']['image_structures']=image_structures
+        self.checker.keywords['program_keys']['mast_neb_settings']['image_structures']=image_structures
         self.checker.set_up_program_input()
         self.place_parent_energy_files()
         self.write_submit_script()

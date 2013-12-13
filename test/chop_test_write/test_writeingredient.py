@@ -56,7 +56,6 @@ class TestWriteIngredient(unittest.TestCase):
         psfin = MASTFile("files/parent_structure_labelfin")
         psfin.to_file("%s/parent_structure_labelfin" % ingdir)
         kdict=dict()
-        kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp_neb'
@@ -65,8 +64,9 @@ class TestWriteIngredient(unittest.TestCase):
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
+        kdict['mast_neb_settings']['lines']=neblines
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb()
@@ -103,7 +103,6 @@ class TestWriteIngredient(unittest.TestCase):
         psfin = MASTFile("files/parent_structure_labelfin")
         psfin.to_file("%s/parent_structure_labelfin" % ingdir)
         kdict=dict()
-        kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp_neb'
@@ -116,8 +115,9 @@ class TestWriteIngredient(unittest.TestCase):
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
+        kdict['mast_neb_settings']['lines']=neblines
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb()
@@ -141,14 +141,14 @@ class TestWriteIngredient(unittest.TestCase):
     def test_get_parent_structures(self):
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
-        kdict['images'] = 3
         neblines = list()
         neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
+        kdict['mast_neb_settings']['lines']=neblines
         ingdir = "writedir/neb_labelinit-labelfin"
         topmetad = MASTFile("files/top_metadata_neb")
         topmetad.to_file("writedir/metadata.txt")
@@ -177,14 +177,14 @@ class TestWriteIngredient(unittest.TestCase):
     def test_get_parent_image_structures(self):
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
-        kdict['images'] = 3
         neblines = list()
         neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
+        kdict['mast_neb_settings']['lines']=neblines
         ingdir = "writedir/neb_labelinit-labelfin"
         topmetad = MASTFile("files/top_metadata_neb")
         topmetad.to_file("writedir/metadata.txt")
@@ -222,10 +222,11 @@ class TestWriteIngredient(unittest.TestCase):
         pefin = MASTFile("files/parent_energy_labelfin")
         pefin.to_file("%s/parent_energy_labelfin" % ingdir)
         kdict=dict()
-        kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp_neb'
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         os.mkdir(ingdir + '/00')
@@ -261,7 +262,6 @@ class TestWriteIngredient(unittest.TestCase):
         pefin = MASTFile("statfiles/parent_energy_labelfin")
         pefin.to_file("%s/parent_energy_labelfin" % ingdir)
         kdict=dict()
-        kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
@@ -270,8 +270,9 @@ class TestWriteIngredient(unittest.TestCase):
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
+        kdict['mast_neb_settings']['lines']=neblines
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb_subfolders()
