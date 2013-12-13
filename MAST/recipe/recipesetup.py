@@ -8,14 +8,13 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
-import logging
 #from MAST import ingredients
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
-
+from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
 from MAST.recipe import recipeutility as ru
 from MAST.recipe.recipeplan import RecipePlan
@@ -42,8 +41,7 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.work_dir    = self.keywords['workingDirectory']
         self.delimiter      = '::'
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
 

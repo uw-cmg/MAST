@@ -10,7 +10,6 @@
 import os
 import time
 import fnmatch
-import logging
 
 import numpy as np
 import pymatgen as pmg
@@ -21,6 +20,7 @@ from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.utility import loggerutils
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
@@ -75,8 +75,7 @@ class InputParser(MASTObj):
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
 
     def parse(self):

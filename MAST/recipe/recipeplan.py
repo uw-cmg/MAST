@@ -9,7 +9,6 @@
 ############################################################################
 import os
 import time
-import logging
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 from MAST.ingredients.chopingredient import RunIngredient
@@ -17,6 +16,7 @@ from MAST.ingredients.chopingredient import IsCompleteIngredient
 from MAST.ingredients.chopingredient import UpdateChildrenIngredient
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
+from MAST.utility import loggerutils
 class RecipePlan:
     """Contains the entire recipe plan.
         Attributes:
@@ -42,7 +42,6 @@ class RecipePlan:
             self.status <str>: Recipe status
             self.working_directory <str>: Recipe working directory
             self.logger <logging logger>
-            self.display_logger <logging logger>: log entries to print to screen immediately after MAST runs
     """
     def __init__(self, name, working_directory):
         self.name            = name
@@ -56,9 +55,7 @@ class RecipePlan:
         self.ingred_input_options = dict()
         self.status="I"
         self.working_directory = working_directory
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.display_logger=logging.getLogger("DISPLAY_ME:%s" % self.working_directory)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
@@ -121,7 +118,6 @@ class RecipePlan:
             if not (self.ingredients[iname] in ["C", "E"]):
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
-                    self.display_logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.update_children(iname)
         return
@@ -138,11 +134,9 @@ class RecipePlan:
                 plen = len(ptc)
                 if plen > 0:
                     self.ingredients[iname] = "W"
-                    self.display_logger.info("Status of %s changed to %s" % (iname, "W"))
                     self.logger.info("Status of %s changed to %s" % (iname, "W"))
                 else:
                     self.ingredients[iname] = "S"
-                    self.display_logger.info("Status of %s changed to %s" % (iname, "S"))
                     self.logger.info("Status of %s changed to %s" % (iname, "S"))
 
 
@@ -181,7 +175,6 @@ class RecipePlan:
                 self.ingredients[iname]=newstatus
                 newline = sline + ":status_changed:" + time.asctime() + "\n"
                 self.logger.info("Status of %s changed to %s" % (iname, newstatus))
-                self.display_logger.info("Status of %s changed to %s" % (iname, newstatus))
                 changed=True
                 newdata.append(newline)
             else:
@@ -201,12 +194,10 @@ class RecipePlan:
                 plen = len(ptc)
                 for parent in ptc:
                     if self.ingredients[parent] == "C":
-                        self.display_logger.info("Status of %s changed to %s" % (parent, "C"))
                         self.logger.info("Status of %s changed to %s" % (parent, "C"))
                         okay = okay + 1
                 if okay == plen:
                     self.ingredients[iname] = "S"
-                    self.display_logger.info("Status of %s changed to %s" % (iname, "S"))
                     self.logger.info("Status of %s changed to %s" % (iname, "S"))
 
     def run_staged_ingredients(self):
@@ -216,7 +207,6 @@ class RecipePlan:
             if self.ingredients[iname] == "S":
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
-                    self.display_logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.update_children(iname)
                 else:
@@ -225,7 +215,6 @@ class RecipePlan:
                     if self.ready_ingredient(iname):
                         self.run_ingredient(iname)
                         self.ingredients[iname] = "P"
-                        self.display_logger.info("Status of %s changed to %s" % (iname, "P"))
                         self.logger.info("Status of %s changed to %s" % (iname, "P"))
 
     def check_recipe_status(self, verbose=1):
@@ -282,8 +271,6 @@ class RecipePlan:
                 totstage = totstage + 1
         self.logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
         self.logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
-        self.display_logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
-        self.display_logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
         if totcomp == total:
             self.status = "C"
         else:

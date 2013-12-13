@@ -19,6 +19,7 @@ from MAST.utility import MASTFile
 #from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
+from MAST.utility import loggerutils
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
 #from MAST.parsers import InputPythonCreator
@@ -62,8 +63,7 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,

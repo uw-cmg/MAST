@@ -3,9 +3,9 @@ import time
 import shutil
 from MAST.utility import MASTError
 from MAST.utility import dirutil
+from MAST.utility import loggerutils
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
-import logging
 
 
 class MASTmon(object):
@@ -21,8 +21,7 @@ class MASTmon(object):
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
