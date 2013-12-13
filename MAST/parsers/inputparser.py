@@ -73,7 +73,6 @@ class InputParser(MASTObj):
                 'recipe'   : self.parse_recipe_section,
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
-                'phonon'   : self.parse_phonon_section,
                                }
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
@@ -644,6 +643,7 @@ class InputParser(MASTObj):
 
             $end
         """
+        raise MASTError(self.__class__.__name__,"Phonon section in input files *.inp is obsolete. Phonons now go in the defects and neb sections.")
         phonon = dict()
         label=""
         for line in section_content:

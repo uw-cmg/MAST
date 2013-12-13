@@ -99,7 +99,8 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        kdict['images'] = 3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images'] = 3
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         myoutcar = MASTFile("files/OUTCAR_completed")

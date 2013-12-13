@@ -65,7 +65,8 @@ class TestVaspnebchecker(unittest.TestCase):
         #self.testclass.set_up_neb_folders(image_structures)
     def test_set_up_neb_folders_with_mast_coordinates(self):
         kdict=dict()
-        kdict['images']=3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         kdict['mast_coordinates']=["structures/POSCAR_coords_01","structures/POSCAR_coords_02","structures/POSCAR_coords_03"]
         mystrs=list()
         pos=dict()
@@ -159,7 +160,7 @@ class TestVaspnebchecker(unittest.TestCase):
         kdict['mast_xc']="pw91"
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images']=3
-        kdict['image_structures'] = mystrs
+        kdict['mast_neb_settings']['image_structures'] = mystrs
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_program_input()
         submitscript = MASTFile()
@@ -174,7 +175,8 @@ class TestVaspnebchecker(unittest.TestCase):
 
     def test_get_energy_from_energy_file(self):
         kdict=dict()
-        kdict['images']=3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         myvcneb=VaspNEBChecker(name="done",program_keys=kdict)
         estr = myvcneb.get_energy_from_energy_file()
         estr_compare="-99.860;-99.649;-99.538;-99.649;-99.860"

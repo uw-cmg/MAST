@@ -35,7 +35,6 @@ class TestInputparser(unittest.TestCase):
                 'recipe' : myip.parse_recipe_section,
                 'neb' : myip.parse_neb_section,
                 'chemical_potentials' : myip.parse_chemical_potentials_section,
-                'phonon' : myip.parse_phonon_section,
                                })
         self.assertItemsEqual(myip.section_parsers, s_dict)
         #self.testclass.__init__(**kwargs)
@@ -43,7 +42,7 @@ class TestInputparser(unittest.TestCase):
     def test_parse(self):
         myip = InputParser(inputfile="long_input.inp")
         myoptions = myip.parse()
-        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','phonon','chemical_potentials'])
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','chemical_potentials'])
         #ofile = MASTFile()
         #ofile.data = str(myoptions)
         #ofile.to_file(os.path.join(os.getcwd(),"long_input_options_output.txt"))
@@ -301,6 +300,8 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_chemical_potentials_section(section_name, section_content, options)
 
     def test_parse_phonon_section(self):
+        raise SkipTest
+        #Phonon section in input file is now obsolete!
         myip = InputParser(inputfile="long_input.inp")
         minput = MASTFile("%s/phonon_lines.txt" % testdir)
         cleanlines = list()
@@ -328,7 +329,7 @@ class TestInputparser(unittest.TestCase):
     def test_perform_element_mapping(self):
         myip = InputParser(inputfile="element_mapping.inp")
         myoptions = myip.parse()
-        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','phonon','chemical_potentials'])
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','chemical_potentials'])
         self.assertEqual(myoptions.options['defects']['defects']['group1']['subdefect_1']['symbol'],'Xe')
         self.assertEqual(myoptions.options['defects']['defects']['group1']['subdefect_2']['symbol'],'Ar')
         self.assertEqual(myoptions.options['defects']['defects']['group2']['subdefect_1']['symbol'],'Ar')

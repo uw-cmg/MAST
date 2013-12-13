@@ -91,7 +91,8 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
-        kdict['images'] = 3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images'] = 3
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         myrelaxed=dict()
         for subdir in ['00','01','02','03','04']:
