@@ -49,6 +49,9 @@ class MASTmon(object):
         """
         if not os.path.exists(fulldir):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
+        if os.path.exists(os.path.join(fulldir, "MAST_SKIP")):
+            self.logger.info("Skipping recipe at %s due to the presence of a MAST_SKIP file" % fulldir)
+            return
         os.chdir(fulldir) #need to change directories in order to submit jobs?
         myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
         myinputoptions = myipparser.parse()
