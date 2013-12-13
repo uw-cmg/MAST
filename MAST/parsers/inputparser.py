@@ -25,7 +25,8 @@ ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
 MAST_KEYWORDS = {
-                 'system_name': 'mast'
+                 'system_name': 'mast',
+                 'mast_auto_correct': 'True'
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,

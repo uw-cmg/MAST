@@ -118,7 +118,7 @@ class RecipePlan:
     def fast_forward_check_complete(self):
         """Check if runs are complete."""
         for iname in self.ingredients.keys():
-            if not (self.ingredients[iname] == "C"):
+            if not (self.ingredients[iname] in ["C", "E"]):
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
                     self.display_logger.info("Status of %s changed to %s" % (iname, "C"))

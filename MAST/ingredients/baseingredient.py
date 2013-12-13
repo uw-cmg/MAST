@@ -103,12 +103,13 @@ class BaseIngredient(MASTObj):
             else:
                 errct = self.errhandler.loop_through_errors()
                 if errct > 0:
-                    #self.logger.info("Ingredient at %s needs resubmission." % self.keywords['name'])
-                    #self.display_logger.info("Ingredient needs resubmission.")
-                    self.change_my_status("S")
-                    #raise MASTError(self.__class__.__name__,"Error found for %s. Please correct this error or move this recipe out of $MAST_SCRATCH. Delete the $MAST_SCRATCH/mast.write_files.lock file if necessary." % self.keywords['name'])
-                    #if not self.checker.is_on_queue():
-                    #    self.run()
+                    if 'mast_auto_correct' in self.keywords['program_keys'].keys():
+                        if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
+                            self.change_my_status("E")
+                        else:
+                            self.change_my_status("S")
+                    else:
+                        self.change_my_status("S")
                 return False
 
     def directory_is_locked(self):

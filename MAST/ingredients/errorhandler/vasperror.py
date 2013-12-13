@@ -5,6 +5,7 @@ import inspect
 import os
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import masterrorhandlers 
+from MAST.utility import MASTFile
 class VaspError(BaseError):
     """VASP error-handling functions (wraps custodian)
     """
