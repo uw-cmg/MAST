@@ -487,8 +487,6 @@ class UpdateChildrenIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
     def _fullpath_childname(self, childname):
         """Make sure the childname has a full path.
             Args:

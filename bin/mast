@@ -135,30 +135,27 @@ def display_displayme_lines():
         Each line should be in the format:
         <logging level>:DISPLAY_ME:<recipe folder>:<message>
     """
+    logpath = os.path.join(os.getenv("MAST_CONTROL"),'mast.log')
+    if not os.path.isfile(logpath):
+        return
     print "-------------------------"
     print " Recipe information from previous MAST run:"
     print "-------------------------"
     alllog=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'mast.log'))
-    immeddata=list()
-    immeddict=dict()
     for line in alllog.data:
-        if "DISPLAY_ME" in line:
-            immeddata.append(line)
-    if len(immeddata) == 0:
-        print "(None; see %s/mast.log for all information.)" % os.getenv("MAST_CONTROL")
-    for line in immeddata:
-        displine=line.strip().split(":")
-        rname=displine[2]
-        rmsg=displine[3]
-        if not rname in immeddict.keys():
-            immeddict[rname]=list()
-        immeddict[rname].append(rmsg)
-    rkeys=immeddict.keys()
-    rkeys.sort()
-    for rkey in rkeys:
-        print "%s:" % rkey
-        for msgline in immeddict[rkey]:
-            print "    %s" % msgline
+        displine=line.strip()
+        print displine
+    #    rname=displine[2]
+    #    rmsg=displine[3]
+    #    if not rname in immeddict.keys():
+    #        immeddict[rname]=list()
+    #    immeddict[rname].append(rmsg)
+    #rkeys=immeddict.keys()
+    #rkeys.sort()
+    #for rkey in rkeys:
+    #    print "%s:" % rkey
+    #    for msgline in immeddict[rkey]:
+    #        print "    %s" % msgline
     #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
     #mycheck.wait()
 

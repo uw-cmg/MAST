@@ -25,8 +25,7 @@ def read_recipe(filename, verbose=0):
                 [childname]['method']=[method group]
             rname <str>: Recipe name
     """
-    logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
+    logger=logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     rfile = MASTFile(filename)
     rdata = list()
