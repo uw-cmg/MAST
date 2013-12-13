@@ -115,7 +115,7 @@ class RecipeSetup(MASTObj):
                     if not 'neb' in self.input_options.options.keys():
                         raise MASTError(self.__class__.__name__, "No neb section in input file. Error setting up recipe %s." % self.work_dir)
                     nebdict = self.input_options.get_item('neb','nebs')
-                    if not neb_label in defdict.keys():
+                    if not neb_label in nebdict.keys():
                         raise MASTError(self.__class__.__name__, "No such label %s found in the neb section dictionary." % neb_label)
                     mynebdict = dict()
                     mynebdict['mast_neb_settings'] = nebdict[neb_label]
