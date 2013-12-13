@@ -10,6 +10,7 @@
 import os
 import time
 import fnmatch
+import logging
 
 import numpy as np
 import pymatgen as pmg
@@ -75,7 +76,7 @@ class InputParser(MASTObj):
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
 
     def parse(self):

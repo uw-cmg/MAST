@@ -63,7 +63,7 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,

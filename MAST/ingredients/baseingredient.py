@@ -49,7 +49,7 @@ class BaseIngredient(MASTObj):
         self.program = self.keywords['program_keys']['mast_program'].lower()
         
         #logging.basicConfig(filename=os.path.join(os.getenv("MAST_CONTROL"),"mast.log"), level=logging.DEBUG)
-        self.logger = loggerutils.initialize_logger(os.path.join(os.path.dirname(self.keywords['name']),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
         #self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
         
         if self.program == 'vasp':

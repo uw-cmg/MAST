@@ -1,5 +1,6 @@
 import os
 import shutil
+import logging
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -20,7 +21,7 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-        self.logger = loggerutils.initialize_logger(os.path.join(os.path.dirname(self.keywords['name']),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
     
     def is_complete(self):
         raise NotImplementedError

@@ -14,7 +14,7 @@ from MAST.parsers import InputParser
 from submit import queue_commands
 from MAST.utility import dirutil
 from MAST.utility import MASTError
-
+from MAST.utility import loggerutils
 def main():
     parser = optparse.OptionParser()
     parser.add_option('-m', '--mode', dest='mode', default='interface',
@@ -36,8 +36,7 @@ def main():
     print 'Welcome to the MAterials Simulation Toolkit (MAST), September 2013 version.'
     print "-------------------------"
 
-    logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
+    logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"bin_mast.log"))
 
     # Set mode to input if an input file is given
     if (mastopt.input is not None):

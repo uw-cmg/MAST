@@ -9,6 +9,7 @@
 ############################################################################
 import os
 import time
+import logging
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 from MAST.ingredients.chopingredient import RunIngredient
@@ -55,7 +56,7 @@ class RecipePlan:
         self.ingred_input_options = dict()
         self.status="I"
         self.working_directory = working_directory
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 

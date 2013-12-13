@@ -8,8 +8,7 @@
 # Add additional programmers and schools as necessary.
 ############################################################################
 import os
-#from MAST import ingredients
-
+import logging
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
@@ -41,7 +40,7 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.work_dir    = self.keywords['workingDirectory']
         self.delimiter      = '::'
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
 

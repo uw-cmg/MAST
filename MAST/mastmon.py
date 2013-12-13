@@ -1,6 +1,7 @@
 import os
 import time
 import shutil
+import logging
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import loggerutils
@@ -15,13 +16,15 @@ class MASTmon(object):
             self.scratch <str>: MAST_SCRATCH
             self._ARCHIVE <str>: MAST_ARCHIVE
             self.logger <logging logger>
+            self.loggerdict <dictionary of recipe-level loggers>
     """ 
     def __init__(self):
 
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.loggerdict=dict()
+        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -48,6 +51,7 @@ class MASTmon(object):
         """
         if not os.path.exists(fulldir):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
+        self.loggerdict[fulldir] = loggerutils.initialize_logger(os.path.join(fulldir, "mast_recipe.log"))
         if os.path.exists(os.path.join(fulldir, "MAST_SKIP")):
             self.logger.info("Skipping recipe at %s due to the presence of a MAST_SKIP file" % fulldir)
             return

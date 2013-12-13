@@ -1,5 +1,6 @@
 from pymatgen.io.vaspio import *
 import numpy as np
+import logging
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
@@ -22,8 +23,7 @@ class StructureExtensions(MASTObj):
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
