@@ -60,8 +60,9 @@ class TestInputparser(unittest.TestCase):
         mdict['mast']=dict()
         mdict['mast']['system_name'] = "SystemName!"
         self.assertItemsEqual(myoptions.options.keys(), ['mast'])
-        self.assertItemsEqual(myoptions.options['mast'].keys(), ['system_name'])
+        self.assertItemsEqual(myoptions.options['mast'].keys(), ['system_name','mast_auto_correct'])
         self.assertEqual(myoptions.options['mast']['system_name'],mdict['mast']['system_name']) 
+        self.assertEqual(myoptions.get_item('mast', 'mast_auto_correct'), "True")
         #print myoptions.options['mast']
         #self.testclass.parse_mast_section(section_name, section_content, options)
 

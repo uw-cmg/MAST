@@ -15,6 +15,7 @@ from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
 from MAST.ingredients.errorhandler import VaspNEBError
+from MAST.utility import loggerutils
 
 class BaseIngredient(MASTObj):
     """Base Ingredient class
@@ -47,9 +48,9 @@ class BaseIngredient(MASTObj):
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
         
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
+        #logging.basicConfig(filename=os.path.join(os.getenv("MAST_CONTROL"),"mast.log"), level=logging.DEBUG)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.path.dirname(self.keywords['name']),"mast.log"))
+        #self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
         
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],
@@ -204,4 +205,4 @@ class BaseIngredient(MASTObj):
             statusfile=MASTFile()
         statusfile.data.append("%s:recommend:%s" % (newstatus, time.asctime()))
         statusfile.to_file(statuspath)
-        self.display_logger.info("Recommending status change to %s" % newstatus)
+        self.logger.info("Recommending status change to %s" % newstatus)
