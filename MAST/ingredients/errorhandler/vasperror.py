@@ -50,7 +50,10 @@ class VaspError(BaseError):
         handler_input_d['FrozenJobErrorHandler']="mast_skip"
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
-        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",21000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
+        frozensec=21000
+        if "mast_frozen_seconds" in self.keywords['program_keys'].keys():
+            frozensec = int(self.keywords['program_keys']['mast_frozen_seconds'])
+        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",frozensec,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
 
         return handler_input_d
 
@@ -91,11 +94,27 @@ class VaspError(BaseError):
                     self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
                     self.display_logger.error("%s Error found! Attempting to correct." % (hname))
                     errct = errct + 1
-                    c_dict = myerror.correct()
-                    self.logger.error("Errors: %s" % c_dict["errors"])
-                    self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
-                    self.display_logger.error("Errors %s" % c_dict["errors"])
-                    self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
+                    if "mast_auto_correct" in self.keywords['program_keys'].keys():
+                        if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
+                            skippath = os.path.join(os.path.dirname(mydir), "MAST_SKIP")
+                            if not os.path.isfile(skippath):
+                                skipfile = MASTFile()
+                            else:
+                                skipfile = MASTFile(skippath)
+                            skipfile.data.append("Error %s found in error handling for ingredient %s! Writing MAST_SKIP file for recipe.\n" % (hname, mydir))
+                            skipfile.to_file(skippath)
+                        else:
+                            c_dict = myerror.correct()
+                            self.logger.error("Errors: %s" % c_dict["errors"])
+                            self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
+                            self.display_logger.error("Errors %s" % c_dict["errors"])
+                            self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
+                    else: 
+                        c_dict = myerror.correct()
+                        self.logger.error("Errors: %s" % c_dict["errors"])
+                        self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
+                        self.display_logger.error("Errors %s" % c_dict["errors"])
+                        self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
                 else:
                     self.logger.info("%s No error found." % hname)
                     pass

@@ -133,6 +133,9 @@ class RecipeSetup(MASTObj):
             chempotdict['mast_chemical_potentials']=self.input_options.options['chemical_potentials']
             pkey_d.update(chempotdict)
 
+        if 'mast_auto_correct' in self.input_options.get_section_keys("mast"):
+            pkey_d['mast_auto_correct'] = self.input_options.get("mast","mast_auto_errors")
+
         allopt=dict()
         allopt['name'] = ingredient_name
         #allopt['program'] = self.program
