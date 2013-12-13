@@ -96,7 +96,7 @@ class VaspNEBChecker(VaspChecker):
         """Check if all images in a VASP NEB calculation are complete.
         """
         dirname = self.keywords['name']
-        numim = int(self.keywords['program_keys']['images'])
+        numim = int(self.keywords['program_keys']['mast_neb_settings']['images'])
         imct=1
         while imct <= numim:
             num_str = str(imct).zfill(2)
@@ -121,7 +121,7 @@ class VaspNEBChecker(VaspChecker):
             notready = notready + 1
         else: #INCAR exists. Now check POSCARs.
             subdirs = dirutil.walkdirs(dirname)
-            if not (len(subdirs) == self.keywords['program_keys']['images'] + 2):
+            if not (len(subdirs) == self.keywords['program_keys']['mast_neb_settings']['images'] + 2):
                 notready = notready + 1 #bad number of subdirs
             subdirs.sort()
             if len(subdirs) == 0: #This is an NEB without folders yet

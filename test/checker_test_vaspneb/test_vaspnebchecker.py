@@ -32,7 +32,8 @@ class TestVaspnebchecker(unittest.TestCase):
 
     def test_get_path_to_write_neb_parent_energy(self):
         kdict=dict()
-        kdict['images']=3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         myvcneb=VaspNEBChecker(name="childdir",program_keys = kdict)
         mypath = myvcneb.get_path_to_write_neb_parent_energy(1)
         self.assertEqual(mypath, "childdir/00/OSZICAR")
@@ -88,7 +89,8 @@ class TestVaspnebchecker(unittest.TestCase):
 
     def test_is_complete(self):
         kdict=dict()
-        kdict['images']=3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         myvcneb=VaspNEBChecker(name="notready1",program_keys=kdict)
         self.assertFalse(myvcneb.is_complete())
         myvcneb=VaspNEBChecker(name="ready",program_keys=kdict)
@@ -101,7 +103,8 @@ class TestVaspnebchecker(unittest.TestCase):
 
     def test_is_ready_to_run(self):
         kdict=dict()
-        kdict['images']=3
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         myvcneb=VaspNEBChecker(name="notready1",program_keys=kdict)
         self.assertFalse(myvcneb.is_ready_to_run())
         myvcneb=VaspNEBChecker(name="notready2",program_keys=kdict)
@@ -130,8 +133,9 @@ class TestVaspnebchecker(unittest.TestCase):
         kdict=dict()
         kdict['mast_xc'] = "pw91"
         kdict['mast_pp_setup']={'Cr':'Cr_pv','Fe':'Fe_sv','Ni':'Ni_pv'}
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         kdict['IBRION'] = '1'
-        kdict['IMAGES'] = '3'
         kdict['POTIM'] = '0.5'
         kdict['LCLIMB'] = 'True'
         kdict['SPRING'] ='-5'
@@ -151,9 +155,10 @@ class TestVaspnebchecker(unittest.TestCase):
             pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
             mystrs.append(pos[posstr].structure)
         kdict=dict()
-        kdict['images']=3
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']="pw91"
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['images']=3
         kdict['image_structures'] = mystrs
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_program_input()
