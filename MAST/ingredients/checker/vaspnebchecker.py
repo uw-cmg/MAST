@@ -40,7 +40,7 @@ class VaspNEBChecker(VaspChecker):
                               a string, e.g. "03"
         """
         myname = self.keywords['name']
-        myimages = self.keywords['program_keys']['images']
+        myimages = self.keywords['program_keys']['mast_neb_settings']['images']
         if parent == 1:
             return os.path.join(myname, "00", "OSZICAR")
         elif parent == 2:
@@ -145,12 +145,9 @@ class VaspNEBChecker(VaspChecker):
         """Modify the INCAR to add the IMAGES tag back in.
         """
         name=self.keywords['name']
-        myd_with_images = dict()
-        myd_with_images = self._vasp_incar_get_non_mast_keywords()
-        if not 'IMAGES' in myd_with_images.keys():
-            raise MASTError("IMAGES keyword not found in program keys for NEB ingredient at %s" % name)
+        images = str(self.keywords['program_keys']['mast_neb_settings']['images'])
         my_incar = MASTFile(self.keywords['name'] + "/INCAR")
-        my_incar.data.append("IMAGES=%s\n" % str(myd_with_images['IMAGES']))
+        my_incar.data.append("IMAGES=%s\n" % images)
         my_incar.to_file(self.keywords['name'] + "/INCAR")
         return my_incar
 

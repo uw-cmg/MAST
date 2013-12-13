@@ -96,14 +96,14 @@ class TestRunIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        kdict['images'] = 3
         neblines = list()
         neblines.append(["Cr","0.0 0.9 0.8","0.0 0.8 0.7"])
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        kdict['neblines']=dict()
-        kdict['neblines']['labelinit-labelfin']=neblines
+        kdict['mast_neb_settings']=dict()
+        kdict['mast_neb_settings']['lines']=neblines
+        kdict['mast_neb_settings']['images']=3
         str_00 = MASTFile("files/POSCAR_00")
         str_00.to_file("%s/parent_structure_labelinit" % ingdir) 
         str_04 = MASTFile("files/POSCAR_04")
@@ -279,7 +279,6 @@ class TestRunIngredient(unittest.TestCase):
         metad.data.append("defect_label = label1\n")
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
-        kdict['mast_program'] = 'vasp'
         kdict['label1']=dict()
         kdict['label1']['subdefect1']=dict()
         kdict['label1']['subdefect1']['symbol']='Cr'
@@ -316,11 +315,15 @@ class TestRunIngredient(unittest.TestCase):
         kdict['label1']['coord_type'] = 'fractional'
         kdict['label1']['threshold'] = 0.01
         kdict['label1']['charge'] = '2'
-        kdict['mast_scale'] = 2
+        mdict=dict()
+        mdict['mast_scale'] = 2
+        mdict['mast_program'] = 'vasp'
+        mdict['mast_defect_settings']=dict()
+        mdict['mast_defect_settings'].update(kdict['label1'])
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
-        myri = RunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myri = RunIngredient(name=ingdir,program_keys=mdict, structure=my_structure)
         myri.run_scale_defect()
         my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
         defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled_defected").structure.get_sorted_structure()
