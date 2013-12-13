@@ -15,9 +15,6 @@ class PhonError(BaseError):
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-
     def loop_through_errors(self):
         """Loop through all errors in the error handlers.
         """

@@ -244,7 +244,7 @@ class VaspChecker(BaseChecker):
             my_poscar = Poscar(self.keywords['structure'])
             self.logger.info("No POSCAR found from a parent; base structure used for %s" % self.keywords['name'])
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
-            sxtend = StructureExtensions(struc_work1=my_poscar.structure)
+            sxtend = StructureExtensions(struc_work1=my_poscar.structure, name=self.keywords['name'])
             coordstrucs=self.get_coordinates_only_structure_from_input()
             newstruc = sxtend.graft_coordinates_onto_structure(coordstrucs[0])
             my_poscar.structure=newstruc.copy()

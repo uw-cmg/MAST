@@ -17,8 +17,6 @@ class VaspNEBError(BaseError):
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
 
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
 
     def get_error_handlers(self):
         """Get error handler list from custodian.vasp.handlers.

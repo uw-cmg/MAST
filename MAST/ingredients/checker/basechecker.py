@@ -4,10 +4,10 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
-import logging
 
 class BaseChecker(MASTObj):
     """Base checker class. This class switches between
@@ -20,9 +20,7 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.display_logger=logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
+        self.logger = loggerutils.initialize_logger(os.path.join(os.path.dirname(self.keywords['name']),"mast.log"))
     
     def is_complete(self):
         raise NotImplementedError
@@ -72,7 +70,6 @@ class BaseChecker(MASTObj):
                 os.chdir(curpath)
             else:
                 self.logger.warning("%s already exists in %s. Parent %s not softlinked." % (filename,childpath,filename))
-                self.display_logger.warning("%s already exists in %s. File not softlinked from %s" % (filename,childpath,parentpath))
         else:
             raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot create softlink." % (parentpath, filename))
         dirutil.unlock_directory(childpath)
@@ -91,7 +88,6 @@ class BaseChecker(MASTObj):
                 shutil.copy("%s/%s" % (parentpath, pfname),"%s/%s" % (childpath, cfname))
             else:
                 self.logger.warning("%s already exists in %s. Parent file %s not copied from %s into child %s." % (cfname,childpath,pfname,parentpath,cfname))
-                self.display_logger.warning("%s already exists in %s. Parent file %s not copied from %s into child %s." % (cfname,childpath,pfname,parentpath,cfname))
         else:
             raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot copy into child path as %s." % (parentpath, pfname, cfname))
         dirutil.unlock_directory(childpath)

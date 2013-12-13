@@ -6,6 +6,7 @@ import os
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import masterrorhandlers 
 from MAST.utility import MASTFile
+#from MAST.utility import loggerutils
 class VaspError(BaseError):
     """VASP error-handling functions (wraps custodian)
     """
@@ -16,10 +17,6 @@ class VaspError(BaseError):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
-
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
 
     def get_error_handlers(self):
         """Get error handler list from custodian.vasp.handlers.
@@ -93,7 +90,6 @@ class VaspError(BaseError):
                     raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 5)" % hname)
                 if myerror.check():
                     self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
-                    self.display_logger.error("%s Error found! Attempting to correct." % (hname))
                     errct = errct + 1
                     if "mast_auto_correct" in self.keywords['program_keys'].keys():
                         if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
@@ -108,14 +104,10 @@ class VaspError(BaseError):
                             c_dict = myerror.correct()
                             self.logger.error("Errors: %s" % c_dict["errors"])
                             self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
-                            self.display_logger.error("Errors %s" % c_dict["errors"])
-                            self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
                     else: 
                         c_dict = myerror.correct()
                         self.logger.error("Errors: %s" % c_dict["errors"])
                         self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
-                        self.display_logger.error("Errors %s" % c_dict["errors"])
-                        self.display_logger.error("Actions taken %s" % (c_dict["actions"]))
                 else:
                     self.logger.info("%s No error found." % hname)
                     pass

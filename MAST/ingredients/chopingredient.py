@@ -36,8 +36,6 @@ class WriteIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
 
     def no_setup(self):
         """No setup is needed."""
@@ -51,7 +49,7 @@ class WriteIngredient(BaseIngredient):
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
         if len(parentimagestructures) == 0:
-            sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1])
+            sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
             image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
         else:
             image_structures = list()
@@ -93,9 +91,9 @@ class WriteIngredient(BaseIngredient):
         base_struct = self.keywords['structure']
         myimages = self.keywords['program_keys']['mast_neb_settings']['images']
         neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-        sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct)
+        sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct, name=self.keywords['name'])
         sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
-        sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct)
+        sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct, name=self.keywords['name'])
         sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
         return [sorted_init, sorted_fin]
 
@@ -121,7 +119,7 @@ class WriteIngredient(BaseIngredient):
                 struct_im = self.checker.get_structure_from_file(pfpath)
                 base_struct = self.keywords['structure']
                 neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-                sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct)
+                sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct, name=self.keywords['name'])
                 sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
                 imstrs.append(sorted_im)
             imct = imct + 1
@@ -188,7 +186,7 @@ class WriteIngredient(BaseIngredient):
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
         [pcs,pcr] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure)
+        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
         sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
@@ -221,7 +219,7 @@ class WriteIngredient(BaseIngredient):
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
         [pcs,pcr] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure)
+        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
         sdarr = sxtend.get_sd_array(pcs, pcr)
         if sdarr == None:
             return
@@ -259,8 +257,6 @@ class IsReadyToRunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
     def ready_singlerun(self):
         return BaseIngredient.is_ready_to_run(self)
     def ready_structure(self):
@@ -323,8 +319,6 @@ class RunIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
     def run_singlerun(self, mode='serial'):
         return BaseIngredient.run(self, mode)
     def run_neb_subfolders(self):
@@ -365,7 +359,7 @@ class RunIngredient(BaseIngredient):
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=base_structure)
+                sxtend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
                 base_structure = sxtend.induce_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
@@ -383,7 +377,7 @@ class RunIngredient(BaseIngredient):
         """
         mystructure = self.checker.get_initial_structure_from_directory()
         mystrain = self.keywords['program_keys']['mast_strain']
-        sxtend = StructureExtensions(struc_work1 = mystructure)
+        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
         strained_structure = sxtend.strain_lattice(mystrain)
         self.checker.write_final_structure_file(strained_structure)
         return
@@ -395,7 +389,7 @@ class RunIngredient(BaseIngredient):
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure)
+        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         if not 'mast_scale' in self.keywords['program_keys'].keys():
             raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
         scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
@@ -403,7 +397,7 @@ class RunIngredient(BaseIngredient):
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=base_structure)
+                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=base_structure, name=self.keywords['name'])
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
@@ -415,7 +409,7 @@ class RunIngredient(BaseIngredient):
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure)
+        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         if not 'mast_scale' in self.keywords['program_keys'].keys():
             raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
         scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
@@ -430,8 +424,6 @@ class IsCompleteIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
     def complete_structure(self):
         if self.directory_is_locked():
             return False

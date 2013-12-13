@@ -4,11 +4,11 @@ from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import MASTObj
+from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 from pymatgen.core.sites import PeriodicSite
-import logging
 
 class StructureExtensions(MASTObj):
     """Structure extensions
@@ -17,12 +17,13 @@ class StructureExtensions(MASTObj):
         allowed_keys = {
             'struc_work1': (Structure, None, 'First working Pymatgen Structure object (e.g. create a defect, or use work1 and work2 to interpolate positions)'),
             'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
-            'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe')
+            'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe'),
+            'name': (str, os.getenv("MAST_CONTROL"), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
 
         logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
