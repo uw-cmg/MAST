@@ -7,3 +7,15 @@ MAST_SCRATCH:  Scratch directory for storing temporary files related to running 
 MAST_INSTALL_PATH:  Top level MAST directory
 MAST_RECIPE_PATH: Path for MAST recipes
 VASP_PSP_DIRS:  Location of the VASP pseudopotential library (required for PyMatGen)
+
+MAST version "canoe" (nominally 2013_12_16, but not yet finished).
+* Reorganized phonons - multiple phonons for defects and nebs
+* Each NEB may have a different number of images
+* Improved MAST error handling (for mastmon detected errors) and directory locking
+* Improved and split mast-level logging (MAST_CONTROL/mast.log) and recipe-level logging (recipe directory, mast_recipe.log)
+* Ability to skip recipes (MAST_SKIP file in recipe directory) and ingredients within recipes 
+      ("skip" status in status.txt file in recipe directory)
+* Ability to set mast_frozen_seconds for each ingredient type
+* Ability to specify auto-error-correction or the writing of MAST_ERROR with the ingredient-level error message
+      encountered. MAST_ERROR will also cause the recipe to be skipped over by MAST.
+      Use mast_auto_correct in input file as True or False.
