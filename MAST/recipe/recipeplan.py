@@ -118,7 +118,7 @@ class RecipePlan:
     def fast_forward_check_complete(self):
         """Check if runs are complete."""
         for iname in self.ingredients.keys():
-            if not (self.ingredients[iname] in ["C", "E"]):
+            if not (self.ingredients[iname] in ["C", "E", "skip"]):
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
                     self.recipe_logger.info("Status of %s changed to %s" % (iname, "C"))
@@ -245,6 +245,7 @@ class RecipePlan:
         totinit=0
         totstage=0
         toterr=0
+        totskip=0
         ilist = self.ingredients.keys()
         ilist.sort()
         statusfile = MASTFile()
@@ -255,6 +256,8 @@ class RecipePlan:
         statusfile.data.append("#P = ready to Proceed to queue; look for submission\n")
         statusfile.data.append("#C = Complete\n")
         statusfile.data.append("#E = Error\n")
+        statusfile.data.append("#skip = Skip (from user)\n")
+
 
         if verbose == 1:
             import time
@@ -281,10 +284,12 @@ class RecipePlan:
                 totstage = totstage + 1
             elif self.ingredients[iname] == "E":
                 toterr = toterr + 1
-        headerstring = "%8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "TOTAL")
+            elif self.ingredients[iname] == "skip":
+                totskip = totskip + 1
+        headerstring = "%8s %8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "USERSKIP", "TOTAL")
         self.logger.info(headerstring)
         self.recipe_logger.info(headerstring)
-        valuestring = "%8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, total)
+        valuestring = "%8i %8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, totskip, total)
         self.logger.info(valuestring)
         self.recipe_logger.info(valuestring)
         if totcomp == total:
