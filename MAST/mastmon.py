@@ -71,7 +71,10 @@ class MASTmon(object):
                 workingDirectory=fulldir)
         recipe_plan_obj = rsetup.start()
         recipe_plan_obj.get_statuses_from_file()
-        recipe_plan_obj.check_recipe_status(verbose)
+        try:
+            recipe_plan_obj.check_recipe_status(verbose)
+        except Exception as errortext:
+            raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s" % (shortdir, errortext))
         os.chdir(self.scratch)
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)

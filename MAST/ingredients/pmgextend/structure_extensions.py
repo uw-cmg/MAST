@@ -53,9 +53,9 @@ class StructureExtensions(MASTObj):
                                        defect['coordinates'],
                                        atol=threshold)
             if len(index) > 1:
-                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance." % (index, threshold))
+                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance for ingredient %s" % (index, threshold,self.keywords['name']))
             if len(index) == 0:
-                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance." % threshold)
+                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance for ingredient %s" % (threshold,self.keywords['name']))
             struct_ed.remove_sites([index])
         elif (defect['type'] == 'interstitial'):
             self.logger.info('Creating a %s interstitial at %s' % (symbol, str(defect['coordinates'])))
@@ -69,9 +69,9 @@ class StructureExtensions(MASTObj):
                                        defect['coordinates'],
                                        atol=threshold)
             if len(index) > 1:
-                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance." % (index, threshold))
+                raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance for ingredient %s" % (index, threshold, self.keywords['name']))
             if len(index) == 0:
-                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance." % threshold)
+                raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance for ingredient %s" % (threshold, self.keywords['name']))
             struct_ed.replace(index, symbol)
             struct_ed = struct_ed.get_sorted_structure()
         else:
@@ -133,7 +133,7 @@ class StructureExtensions(MASTObj):
                 if sortedstruc.species[indexentry] == temp_start.species[lastidx]:
                     index.append(indexentry)
             if len(index) == 0:
-                raise MASTError("pmgextend/structure_extensions", "No coordinate found matching %s" % mycoord)
+                raise MASTError("pmgextend/structure_extensions", "No coordinate found matching %s for %s" % (mycoord, self.keywords['name']))
             nebidx.append(index[0]) #only take first site?
             mysite = sortedstruc.sites[index[0]]
             myelem = MAST.data.atomic_number[mysite.species_string]
@@ -142,7 +142,7 @@ class StructureExtensions(MASTObj):
                                     mysite.frac_coords)
             sortedstruc = struct_ed.copy() #get new ordering
         if not len(nebidx) == len(neblines):
-            raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found.")
+            raise MASTError("pmgextend/structure_extensions", "Not all NEB lines found for %s" % self.keywords['name'])
         return struct_ed
 
     def _get_element_indices(self, sortedstruc):
@@ -201,9 +201,9 @@ class StructureExtensions(MASTObj):
                  structures, including the two endpoints
         """
         if self.keywords['struc_work1'] == None:
-            raise MASTError(self.__class__.__name__, "No initial state structure")
+            raise MASTError(self.__class__.__name__, "No initial state structure for %s" % self.keywords['name'])
         if self.keywords['struc_work2'] == None:
-            raise MASTError(self.__class__.__name__, "No final state structure")
+            raise MASTError(self.__class__.__name__, "No final state structure for %s" % self.keywords['name'])
         structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
@@ -237,7 +237,7 @@ class StructureExtensions(MASTObj):
         uniqsites = np.unique(pcsarr)
 
         if len(uniqsites) == 0:
-            raise MASTError("pmgextend/structure_extensions", "No sites found for phonon centering.")
+            raise MASTError("pmgextend/structure_extensions", "No sites found for phonon centering for %s" % self.keywords['name'])
 
         if phonon_center_radius == None:
             return uniqsites
@@ -246,7 +246,7 @@ class StructureExtensions(MASTObj):
         if nrad == 0:
             return uniqsites
         if nrad < 0:
-            raise MASTError("pmgextend/structure_extensions", "Phonon center radius should not be less than zero!")
+            raise MASTError("pmgextend/structure_extensions", "Phonon center radius should not be less than zero for %s!" % self.keywords['name'])
 
         nbtotarr=None
         for pcs in uniqsites:
@@ -301,7 +301,7 @@ class StructureExtensions(MASTObj):
         lengoodsites=len(goodstruc.sites)
         lencoordsites=len(coordstruc.sites)
         if not (lengoodsites == lencoordsites):
-            raise MASTError(self.__class__.__name__, "Original and coordinate structures do not have the same amount of sites.")
+            raise MASTError(self.__class__.__name__, "Original and coordinate structures do not have the same amount of sites in %s" % self.keywords['name'])
         cct=0
         newsites=list()
         mylattice=goodstruc.lattice
