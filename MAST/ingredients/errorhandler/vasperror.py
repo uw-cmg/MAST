@@ -93,13 +93,13 @@ class VaspError(BaseError):
                     errct = errct + 1
                     if "mast_auto_correct" in self.keywords['program_keys'].keys():
                         if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
-                            skippath = os.path.join(os.path.dirname(mydir), "MAST_SKIP")
-                            if not os.path.isfile(skippath):
-                                skipfile = MASTFile()
+                            errpath = os.path.join(os.path.dirname(mydir), "MAST_ERROR")
+                            if not os.path.isfile(errpath):
+                                errfile = MASTFile()
                             else:
-                                skipfile = MASTFile(skippath)
-                            skipfile.data.append("Error %s found in error handling for ingredient %s! Writing MAST_SKIP file for recipe.\n" % (hname, mydir))
-                            skipfile.to_file(skippath)
+                                errfile = MASTFile(errpath)
+                            errfile.data.append("Error %s found in error handling for ingredient %s! Writing MAST_ERROR file for recipe.\n" % (hname, mydir))
+                            errfile.to_file(errpath)
                         else:
                             c_dict = myerror.correct()
                             self.logger.error("Errors: %s" % c_dict["errors"])

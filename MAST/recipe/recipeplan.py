@@ -244,6 +244,7 @@ class RecipePlan:
         totproceed=0
         totinit=0
         totstage=0
+        toterr=0
         ilist = self.ingredients.keys()
         ilist.sort()
         statusfile = MASTFile()
@@ -278,10 +279,12 @@ class RecipePlan:
                 totwait = totwait + 1
             elif self.ingredients[iname] == "S":
                 totstage = totstage + 1
-        headerstring = "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL")
+            elif self.ingredients[iname] == "E":
+                toterr = toterr + 1
+        headerstring = "%8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "TOTAL")
         self.logger.info(headerstring)
         self.recipe_logger.info(headerstring)
-        valuestring = "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total)
+        valuestring = "%8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, total)
         self.logger.info(valuestring)
         self.recipe_logger.info(valuestring)
         if totcomp == total:
@@ -290,6 +293,8 @@ class RecipePlan:
             self.status = "R"
         #print "Recipe status: %s" % self.status
         statusfile.to_file(os.path.join(self.working_directory,"status.txt"))
+        if toterr > 0:
+            self.logger.error("ATTENTION: Recipe at %s has one or more ingredient errors. Please check the MAST_ERROR file and or mast_recipe.log file, in the recipe directory." % self.working_directory)
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name

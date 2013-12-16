@@ -16,6 +16,6 @@ def initialize_logger(filename="default.log", formatstr=""):
     return logger
 
 def initialize_short_logger(filename="default.log"):
-    format = "%(module)10s: %(message)s"
+    format = "%(levelname)8s: %(message)s"
     #format = "%(asctime)s %(levelname)8s : %(message)s"
     return initialize_logger(filename, format)

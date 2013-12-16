@@ -53,11 +53,14 @@ class MASTmon(object):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
         self.loggerdict[fulldir] = loggerutils.initialize_logger(os.path.join(fulldir, "mast_recipe.log"))
         if os.path.exists(os.path.join(fulldir, "MAST_SKIP")):
-            self.logger.info("Skipping recipe at %s due to the presence of a MAST_SKIP file" % fulldir)
+            self.logger.warning("Skipping recipe at %s due to the presence of a MAST_SKIP file" % fulldir)
             return
         if os.path.exists(os.path.join(fulldir, "MAST_ERROR")):
-            self.logger.info("Skipping recipe at %s due to the presence of a MAST_ERROR file" % fulldir)
+            self.logger.error("Skipping recipe at %s due to the presence of a MAST_ERROR file" % fulldir)
             return
+        self.logger.info("--------------------------------")
+        self.logger.info("Processing recipe %s" % recipe_dir)
+        self.logger.info("--------------------------------")
         os.chdir(fulldir) #need to change directories in order to submit jobs?
         myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
         myinputoptions = myipparser.parse()
@@ -71,6 +74,9 @@ class MASTmon(object):
         os.chdir(self.scratch)
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
+        self.logger.info("-----------------------------")
+        self.logger.info("Recipe %s processed." % recipe_dir)
+        self.logger.info("-----------------------------")
 
 
     def run(self, verbose=0):
@@ -97,13 +103,7 @@ class MASTmon(object):
             self.logger.info("================================")
 
         for recipe_dir in recipe_dirs:
-            self.logger.info("--------------------------------")
-            self.logger.info("Processing recipe %s" % recipe_dir)
-            self.logger.info("--------------------------------")
             self.check_recipe_dir(recipe_dir, verbose)
-            self.logger.info("-----------------------------")
-            self.logger.info("Recipe %s processed." % recipe_dir)
-            self.logger.info("-----------------------------")
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
