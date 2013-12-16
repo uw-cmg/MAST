@@ -232,13 +232,14 @@ class WriteIngredient(BaseIngredient):
             Returns:
                 [phonon_center_site, phonon_center_radius]
         """
-        if not 'phonon' in self.keywords['program_keys'].keys():
-            return [None, None]
-        mylabel = BaseIngredient.get_my_label(self, "phonon_label")
-        if not mylabel in self.keywords['program_keys']['phonon'].keys():
-            raise MASTError(self.__class__.__name__, "Label %s for phonons not found in phonon input dict for %s" % (mylabel, self.keywords['name']))
-
-        myphdict = dict(self.keywords['program_keys']['phonon'][mylabel])
+        fulllabel = BaseIngredient.get_my_label(self, "phonon_label")
+        mylabel = fulllabel.split("_")[-1] # get last piece
+        if 'mast_defect_settings' in self.keywords['program_keys'].keys():
+            myphdict = dict(self.keywords['program_keys']['mast_defect_settings']['phonon'][mylabel])
+        elif 'mast_neb_settings' in self.keywords['program_keys'].keys():
+            myphdict = dict(self.keywords['program_keys']['mast_neb_settings']['phonon'][mylabel])
+        else:
+            raise MASTError(self.__class__.__name__, "Neither defect nor NEB settings dictionary was found for phonons.")
         if not 'phonon_center_site' in myphdict.keys():
             return [None, None]
         phonon_center_site = myphdict['phonon_center_site']

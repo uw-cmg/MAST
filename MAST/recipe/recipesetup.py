@@ -219,7 +219,10 @@ class RecipeSetup(MASTObj):
             datalist.append("neb_label: %s" % neblabel)
         if 'phonon_' in myingred:
             labels = myingred.split('phonon_')[1].split('_')
-            phononlabel = '_'.join([labels[0],labels[1],labels[2]])
+            if labels[-1] == 'parse':
+                phononlabel = '_'.join(labels[0:-1])
+            else:
+                phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
         data=','.join(datalist)
         self.metafile.write_data(myingred, data)
