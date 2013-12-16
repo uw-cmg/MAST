@@ -49,17 +49,18 @@ class MASTmon(object):
                 fulldir <str>: full path of recipe directory
                 verbose <int>: verbosity
         """
+        shortdir = os.path.basename(fulldir) #only the recipe directory name
         if not os.path.exists(fulldir):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
         self.loggerdict[fulldir] = loggerutils.initialize_logger(os.path.join(fulldir, "mast_recipe.log"))
         if os.path.exists(os.path.join(fulldir, "MAST_SKIP")):
-            self.logger.warning("Skipping recipe at %s due to the presence of a MAST_SKIP file" % fulldir)
+            self.logger.warning("Skipping recipe %s due to the presence of a MAST_SKIP file in the recipe directory." % shortdir)
             return
         if os.path.exists(os.path.join(fulldir, "MAST_ERROR")):
-            self.logger.error("Skipping recipe at %s due to the presence of a MAST_ERROR file" % fulldir)
+            self.logger.error("ATTENTION!: Skipping recipe %s due to the presence of a MAST_ERROR file in the recipe directory." % shortdir)
             return
         self.logger.info("--------------------------------")
-        self.logger.info("Processing recipe %s" % recipe_dir)
+        self.logger.info("Processing recipe %s" % shortdir)
         self.logger.info("--------------------------------")
         os.chdir(fulldir) #need to change directories in order to submit jobs?
         myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
@@ -75,7 +76,7 @@ class MASTmon(object):
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
         self.logger.info("-----------------------------")
-        self.logger.info("Recipe %s processed." % recipe_dir)
+        self.logger.info("Recipe %s processed." % shortdir)
         self.logger.info("-----------------------------")
 
 
