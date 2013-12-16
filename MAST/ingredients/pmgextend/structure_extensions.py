@@ -224,25 +224,16 @@ class StructureExtensions(MASTObj):
             Get a neighbor-index array.
             Use program_keywords 'phonon_center_site' and
             'phonon_center_radius' to limit the number of phonons calculated.
-            ['program_keys']['phonon'][label]['phonon_center_site']
-                    should be a coordinate
-                    If the key is missing, all atoms will be taken into account.
-            ['program_keys']['phonon'][label]['phonon_center_radius']
-                    should be a positive float in ANGSTROMS (Not fractional.)
-                    If the key is missing or 0, nothing extra happens.
-                    If the key is present and nonzero, then all atoms in a
-                        radius around EACH site found in phonon_center_site
-                        will also be taken into account.
             Args:
                 phonon_center_site <str>: phonon center site (coordinate)
-                phonon_center_radius <float>: phonon center radius
+                phonon_center_radius <float>: phonon center radius in Angstroms. If nonzero, all atoms in a radius around EACH site found in phonon_center_site will also be taken into account
                 mystruc <Structure>: pymatgen Structure
                 tol <float>: Tolerance for match-searching.
         """
         if phonon_center_site == None:
             return None
         pcscoord = np.array(phonon_center_site.strip().split(), float)
-        pcsarr = find_in_coord_list(mystruc.frac_coords, pcscoord,tol)
+        pcsarr = find_in_coord_list_pbc(mystruc.frac_coords, pcscoord,tol)
         uniqsites = np.unique(pcsarr)
 
         if len(uniqsites) == 0:
