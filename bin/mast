@@ -35,10 +35,12 @@ def main():
     # Set a default file name
     if (mastopt.mode == 'input') and (mastopt.input is None):
         mastopt.input = 'mast.inp'
-        process_input_file()
 
     if (mastopt.mode == 'interface'):
         submit_and_monitor()
+    
+    if (mastopt.mode == 'input'):
+        process_input_file(mastopt.input)
 
 def submit_and_monitor():
     myerrors = display_errors()
@@ -64,12 +66,12 @@ def submit_and_monitor():
     mysub.wait()
     os.chdir(mycwd)
 
-def process_input_file():
+def process_input_file(myinputfile):
     myerrors = display_errors()
     if myerrors == -1:
         return
     move_log()
-    mast = MAST(inputfile=mastopt.input, outputfile="mastoutput.txt")
+    mast = MAST(inputfile=myinputfile, outputfile="mastoutput.txt")
     mast.check_independent_loops()
     print "Finished processing input file. Check $MAST_CONTROL/mast.log for logged information."
 
