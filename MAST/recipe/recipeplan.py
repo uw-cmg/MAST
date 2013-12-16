@@ -42,7 +42,8 @@ class RecipePlan:
                        ingredient input options
             self.status <str>: Recipe status
             self.working_directory <str>: Recipe working directory
-            self.logger <logging logger>
+            self.logger <logging logger>: MAST Monitor logger
+            self.recipe_logger <logging logger>: Recipe-directory logger
     """
     def __init__(self, name, working_directory):
         self.name            = name
@@ -57,6 +58,7 @@ class RecipePlan:
         self.status="I"
         self.working_directory = working_directory
         self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.recipe_logger = logging.getLogger(os.path.join(self.working_directory,"mast_recipe.log"))
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
@@ -119,7 +121,7 @@ class RecipePlan:
             if not (self.ingredients[iname] in ["C", "E"]):
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
-                    self.logger.info("Status of %s changed to %s" % (iname, "C"))
+                    self.recipe_logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.update_children(iname)
         return
 
@@ -135,10 +137,10 @@ class RecipePlan:
                 plen = len(ptc)
                 if plen > 0:
                     self.ingredients[iname] = "W"
-                    self.logger.info("Status of %s changed to %s" % (iname, "W"))
+                    self.recipe_logger.info("Status of %s changed to %s" % (iname, "W"))
                 else:
                     self.ingredients[iname] = "S"
-                    self.logger.info("Status of %s changed to %s" % (iname, "S"))
+                    self.recipe_logger.info("Status of %s changed to %s" % (iname, "S"))
 
 
     def check_if_ready_to_proceed_are_complete(self):
@@ -175,7 +177,7 @@ class RecipePlan:
                 newstatus = sline.split(":")[0]
                 self.ingredients[iname]=newstatus
                 newline = sline + ":status_changed:" + time.asctime() + "\n"
-                self.logger.info("Status of %s changed to %s" % (iname, newstatus))
+                self.recipe_logger.info("Status of %s changed to %s" % (iname, newstatus))
                 changed=True
                 newdata.append(newline)
             else:
@@ -195,11 +197,11 @@ class RecipePlan:
                 plen = len(ptc)
                 for parent in ptc:
                     if self.ingredients[parent] == "C":
-                        self.logger.info("Status of %s changed to %s" % (parent, "C"))
+                        self.recipe_logger.info("Status of %s changed to %s" % (parent, "C"))
                         okay = okay + 1
                 if okay == plen:
                     self.ingredients[iname] = "S"
-                    self.logger.info("Status of %s changed to %s" % (iname, "S"))
+                    self.recipe_logger.info("Status of %s changed to %s" % (iname, "S"))
 
     def run_staged_ingredients(self):
         """Run staged ingredients.
@@ -208,7 +210,7 @@ class RecipePlan:
             if self.ingredients[iname] == "S":
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
-                    self.logger.info("Status of %s changed to %s" % (iname, "C"))
+                    self.recipe_logger.info("Status of %s changed to %s" % (iname, "C"))
                     self.update_children(iname)
                 else:
                     if not (self.ready_ingredient(iname)):
@@ -216,7 +218,7 @@ class RecipePlan:
                     if self.ready_ingredient(iname):
                         self.run_ingredient(iname)
                         self.ingredients[iname] = "P"
-                        self.logger.info("Status of %s changed to %s" % (iname, "P"))
+                        self.recipe_logger.info("Status of %s changed to %s" % (iname, "P"))
 
     def check_recipe_status(self, verbose=1):
         """Check ingredient statuses, and get recipe status
@@ -251,14 +253,20 @@ class RecipePlan:
         statusfile.data.append("#S = Staged for run prep (parents complete)\n")
         statusfile.data.append("#P = ready to Proceed to queue; look for submission\n")
         statusfile.data.append("#C = Complete\n")
+        statusfile.data.append("#E = Error\n")
 
         if verbose == 1:
             import time
-            self.logger.info("Recipe name: %s" % self.name)
+            namestring = "Recipe name: %s" % self.name
+            self.recipe_logger.info(namestring)
+            self.logger.info(namestring)
+            self.recipe_logger.info(time.asctime())
             self.logger.info(time.asctime())
         for iname in ilist:
             if verbose == 1:
-                self.logger.info("%30s : %4s" % (iname, self.ingredients[iname]))
+                ingstring = "%30s : %4s" % (iname, self.ingredients[iname])
+                self.logger.info(ingstring)
+                self.recipe_logger.info(ingstring)
             statusfile.data.append("%30s : %4s\n" % (iname, self.ingredients[iname]))
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
@@ -270,8 +278,12 @@ class RecipePlan:
                 totwait = totwait + 1
             elif self.ingredients[iname] == "S":
                 totstage = totstage + 1
-        self.logger.info("%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL"))
-        self.logger.info("%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total))
+        headerstring = "%8s %8s %8s %8s %8s = %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE","TOTAL")
+        self.logger.info(headerstring)
+        self.recipe_logger.info(headerstring)
+        valuestring = "%8i %8i %8i %8i %8i = %8i" % (totinit, totwait, totstage, totproceed, totcomp, total)
+        self.logger.info(valuestring)
+        self.recipe_logger.info(valuestring)
         if totcomp == total:
             self.status = "C"
         else:

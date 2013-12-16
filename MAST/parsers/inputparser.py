@@ -62,6 +62,7 @@ class InputParser(MASTObj):
             self.section_end <str>: delimiter for the end of a section
             self.delimiter <str>: character(s) for breaking up each line
             self.section_parsers <dict>: supported sections
+            self.logger <logging Logger>: logger, either recipe-level or MAST input level
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -76,7 +77,15 @@ class InputParser(MASTObj):
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                                }
-        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        scratchpath = os.getenv("MAST_SCRATCH").strip('/')
+        inputlocation = os.path.dirname(self.keywords['inputfile'])
+        if (inputlocation == ""):
+            self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        elif scratchpath not in inputlocation:
+            self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        else:
+            self.logger = logging.getLogger(os.path.join(inputlocation,"mast_recipe.log"))
+
 
 
     def parse(self):

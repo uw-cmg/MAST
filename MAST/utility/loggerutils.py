@@ -5,7 +5,8 @@ def initialize_logger(filename="default.log", formatstr=""):
     if not getattr(logger, 'handler_set', None):
         handler    = logging.FileHandler(filename)
         if formatstr == "":
-            formatter  = logging.Formatter('%(asctime)s : %(module)15s:%(lineno)4d> : %(levelname)8s : %(message)s')
+            #formatter  = logging.Formatter('%(asctime)s : %(module)15s:%(lineno)4d> : %(levelname)8s : %(message)s')
+            formatter  = logging.Formatter('%(asctime)s : %(module)10s: %(levelname)8s : %(message)s')
         else:
             formatter = logging.Formatter(formatstr)
         handler.setFormatter(formatter)
@@ -15,5 +16,6 @@ def initialize_logger(filename="default.log", formatstr=""):
     return logger
 
 def initialize_short_logger(filename="default.log"):
-    format = "%(asctime)s %(levelname)8s : %(message)s"
+    format = "%(module)10s: %(message)s"
+    #format = "%(asctime)s %(levelname)8s : %(message)s"
     return initialize_logger(filename, format)
