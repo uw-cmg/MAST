@@ -329,11 +329,9 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
-        kdict['mast_defect_settings']=dict()
-        kdict['mast_defect_settings']['phonon']=dict()
-        kdict['mast_defect_settings']['phonon']['label1']=dict()
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_site']="0.33 0.25 0.0"
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_radius']="1"
+        kdict['mast_phonon_settings']=dict()
+        kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
+        kdict['mast_phonon_settings']['phonon_center_radius']="1"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_multiple()
@@ -368,11 +366,9 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
-        kdict['mast_defect_settings']=dict()
-        kdict['mast_defect_settings']['phonon']=dict()
-        kdict['mast_defect_settings']['phonon']['label1']=dict()
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_site']="0.33 0.25 0.0"
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_radius']="1"
+        kdict['mast_phonon_settings']=dict()
+        kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
+        kdict['mast_phonon_settings']['phonon_center_radius']="1"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_single()
@@ -393,17 +389,9 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
-        kdict['mast_defect_settings']=dict()
-        kdict['mast_defect_settings']['phonon']=dict()
-        kdict['mast_defect_settings']['phonon']['extralabel']=dict()
-        kdict['mast_defect_settings']['phonon']['extralabel']['phonon_center_site']="99 100 101"
-        kdict['mast_defect_settings']['phonon']['extralabel']['phonon_center_radius']="-3"
-        kdict['mast_defect_settings']['phonon']['label1']=dict()
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_site']="0.33 0.25 0.0"
-        kdict['mast_defect_settings']['phonon']['label1']['phonon_center_radius']="1"
-        kdict['mast_defect_settings']['phonon']['another']=dict()
-        kdict['mast_defect_settings']['phonon']['another']['phonon_center_site']="0.11 0.11 0.11"
-        kdict['mast_defect_settings']['phonon']['another']['phonon_center_radius']="5"
+        kdict['mast_phonon_settings']=dict()
+        kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
+        kdict['mast_phonon_settings']['phonon_center_radius']="1"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         [mysite, myrad] = mywi.get_my_phonon_params()

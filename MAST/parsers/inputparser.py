@@ -353,7 +353,7 @@ class InputParser(MASTObj):
                                          int(charge_range[1])+1)
             elif ('phonon' in line[0]):
                 plabel = line[1]
-                p_center = line[2:5]
+                p_center = ' '.join(line[2:5])
                 p_radius = float(line[5])
                 defect['phonon'][plabel]=dict()
                 defect['phonon'][plabel]['phonon_center_site'] = p_center
@@ -560,7 +560,7 @@ class InputParser(MASTObj):
                 if 'phonon' in line[0]:
                     sline = line[0].split()
                     plabel = sline[1]
-                    p_center = np.array([float(sline[2]),float(sline[3]),float(sline[4])])
+                    p_center = ' '.join(sline[2:5])
                     p_radius = float(sline[5])
                     nebs[neblabel]['phonon'][plabel]=dict()
                     nebs[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center

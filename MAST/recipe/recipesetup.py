@@ -138,15 +138,16 @@ class RecipeSetup(MASTObj):
                 if 'phonon_label' in datum:
                     phonon_label = datum.split(':')[-1].strip()
                     def_or_neb_label = phonon_label.split('_')[0]
+                    phonon_key = phonon_label.split('_')[-1]
                     defdict = self.input_options.get_item('defects','defects')
                     nebdict = self.input_options.get_item('neb','nebs')
                     phdict=dict()
                     if def_or_neb_label in defdict.keys():
-                        phdict['mast_phonon_settings'] = defdict[def_or_neb_label]['phonon'][phonon_label]
+                        phdict['mast_phonon_settings'] = defdict[def_or_neb_label]['phonon'][phonon_key]
                     elif def_or_neb_label in nebdict.keys():
-                        phdict['mast_phonon_settings'] = nebdict[def_or_neb_label]['phonon'][phonon_label]
+                        phdict['mast_phonon_settings'] = nebdict[def_or_neb_label]['phonon'][phonon_key]
                     else:
-                        raise MASTError(self.__class__.__name__, "Neither defect nor neb dictionaries have phonon label %s for ingredient %s." % (phonon_label, name))
+                        raise MASTError(self.__class__.__name__, "Neither defect nor neb dictionaries have phonon key %s for ingredient %s." % (phonon_key, name))
                     pkey_d.update(phdict)
                     break
             if phonon_label == "":

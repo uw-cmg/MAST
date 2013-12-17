@@ -23,8 +23,9 @@ class TestRecipeSetup(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
-        if os.path.isdir(os.path.join(testdir,'workdir')):
-            shutil.rmtree('workdir')
+        #if os.path.isdir(os.path.join(testdir,'workdir')):
+        #    shutil.rmtree('workdir')
+        pass
 
     def test___init__(self):
         rfile=os.path.join(testdir,'personalized')
@@ -82,18 +83,16 @@ class TestRecipeSetup(unittest.TestCase):
         compare_dirlist.append('defect_group1_q=n1_opt1')
         compare_dirlist.append('defect_group1_q=n1_opt2')
         compare_dirlist.append('defect_group1_q=n1_stat')
-        compare_dirlist.append('phonon_group1_q=n1')
-        compare_dirlist.append('phonon_group1_q=n1_parse')
+        compare_dirlist.append('phonon_group1_q=n1_int')
+        compare_dirlist.append('phonon_group1_q=n1_int_parse')
         compare_dirlist.append('defect_group3_q=n1_opt1')
         compare_dirlist.append('defect_group3_q=n1_opt2')
         compare_dirlist.append('defect_group3_q=n1_stat')
-        compare_dirlist.append('phonon_group3_q=n1')
-        compare_dirlist.append('phonon_group3_q=n1_parse')
         compare_dirlist.append('neb_group1-group3_q=n1_opt1')
         compare_dirlist.append('neb_group1-group3_q=n1_opt2')
         compare_dirlist.append('neb_group1-group3_q=n1_stat')
-        compare_dirlist.append('phonon_group1-group3_q=n1')
-        compare_dirlist.append('phonon_group1-group3_q=n1_parse')
+        compare_dirlist.append('phonon_group1-group3_q=n1_host1')
+        compare_dirlist.append('phonon_group1-group3_q=n1_host1_parse')
         compare_dirlist_withpath=list()
         for diritem in compare_dirlist:
             compare_dirlist_withpath.append(os.path.join(wdir,diritem))

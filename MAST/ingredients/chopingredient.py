@@ -227,27 +227,13 @@ class WriteIngredient(BaseIngredient):
 
     def get_my_phonon_params(self):
         """Get phonon parameters from 
-            ['program_keys']['phonon'][label]['phonon_center_site'] and
-            ['program_keys']['phonon'][label]['phonon_center_radius'] 
+            ['program_keys']['mast_phonon_settings']['phonon_center_site'] and
+            ['program_keys']['mast_phonon_settings']['phonon_center_radius'] 
             Returns:
                 [phonon_center_site, phonon_center_radius]
         """
-        fulllabel = BaseIngredient.get_my_label(self, "phonon_label")
-        mylabel = fulllabel.split("_")[-1] # get last piece
-        if 'mast_defect_settings' in self.keywords['program_keys'].keys():
-            myphdict = dict(self.keywords['program_keys']['mast_defect_settings']['phonon'][mylabel])
-        elif 'mast_neb_settings' in self.keywords['program_keys'].keys():
-            myphdict = dict(self.keywords['program_keys']['mast_neb_settings']['phonon'][mylabel])
-        else:
-            raise MASTError(self.__class__.__name__, "Neither defect nor NEB settings dictionary was found for phonons of ingredient %s" % self.keywords['name'])
-        if not 'phonon_center_site' in myphdict.keys():
-            return [None, None]
-        phonon_center_site = myphdict['phonon_center_site']
-        if not 'phonon_center_radius' in myphdict.keys():
-            phonon_center_radius = None
-        else:
-            phonon_center_radius = myphdict['phonon_center_radius']
-        return [phonon_center_site,phonon_center_radius]
+        myphdict = dict(self.keywords['program_keys']['mast_phonon_settings'])
+        return [myphdict['phonon_center_site'],myphdict['phonon_center_radius']]
 
 
 class IsReadyToRunIngredient(BaseIngredient):
