@@ -87,6 +87,7 @@ class RecipeSetup(MASTObj):
         defect_label=""
         neb_label=""
         charge=""
+        phonon_label=""
 
         if 'defect_' in name.lower():
             for datum in mydata:
@@ -102,7 +103,7 @@ class RecipeSetup(MASTObj):
                     pkey_d.update(mydefdict)
                     break
             if defect_label == "":
-                raise MASTError(self.__class__.__name__, "No defect label for %s found in recipe's metadata.txt" % ingredient_name)
+                raise MASTError(self.__class__.__name__, "No defect label for %s found in ingredient's metadata.txt" % ingredient_name)
                     
         if 'inducedefect' not in ingredient_type:
             if 'q=' in name.lower():
@@ -126,25 +127,41 @@ class RecipeSetup(MASTObj):
                     pkey_d.update(mynebdict)
                     break
             if neb_label == "":
-                raise MASTError(self.__class__.__name__, "No neb label for %s found in recipe's metadata.txt" % ingredient_name)
+                raise MASTError(self.__class__.__name__, "No neb label for %s found in ingredient's metadata.txt" % ingredient_name)
 
             if 'neb' in name.lower():
                 pkey_d.update(self.input_options.options['neb'])
         #if 'phonon' in self.input_options.options.keys():
         #    pkey_d.update(self.input_options.options['phonon'])
+        if 'phonon_' in name.lower():
+            for datum in mydata:
+                if 'phonon_label' in datum:
+                    phonon_label = datum.split(':')[-1].strip()
+                    def_or_neb_label = phonon_label.split('_')[0]
+                    defdict = self.input_options.get_item('defects','defects')
+                    nebdict = self.input_options.get_item('neb','nebs')
+                    phdict=dict()
+                    if def_or_neb_label in defdict.keys():
+                        phdict['mast_phonon_settings'] = defdict[def_or_neb_label]['phonon'][phonon_label]
+                    elif def_or_neb_label in nebdict.keys():
+                        phdict['mast_phonon_settings'] = nebdict[def_or_neb_label]['phonon'][phonon_label]
+                    else:
+                        raise MASTError(self.__class__.__name__, "Neither defect nor neb dictionaries have phonon label %s for ingredient %s." % (phonon_label, name))
+                    pkey_d.update(phdict)
+                    break
+            if phonon_label == "":
+                raise MASTError(self.__class__.__name__, "No phonon label for %s found in ingredient's metadata.txt" % ingredient_name)
         if 'chemical_potentials' in self.input_options.options.keys():
             chempotdict=dict()
             chempotdict['mast_chemical_potentials']=self.input_options.options['chemical_potentials']
             pkey_d.update(chempotdict)
-
-        if 'mast_auto_correct' in self.input_options.get_section_keys("mast"):
-            pkey_d['mast_auto_correct'] = self.input_options.get_item("mast","mast_auto_correct")
 
         allopt=dict()
         allopt['name'] = ingredient_name
         #allopt['program'] = self.program
         allopt['structure'] = self.structure
         allopt['program_keys'] = pkey_d
+        self.recipe_logger.info(pkey_d)
         return allopt
     def get_method_from_ingredient_type(self, ingredtype, methodtype=""):
         """Get write, ready, run, complete, and update methods from

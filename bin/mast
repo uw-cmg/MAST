@@ -105,6 +105,11 @@ def display_errors():
         for eline in myerrormast.data:
             print eline.strip()
         print "--------------------------"
+        print "Please take the following steps:"
+        print "1. Correct the error(s)."
+        print "2. Remove the $MAST_CONTROL/errormast file."
+        print "3. Re-run MAST."
+        print ""
         if dirutil.directory_is_locked(mastscratch):
             dirutil.unlock_directory(mastscratch)
         return -1

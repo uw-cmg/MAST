@@ -239,7 +239,7 @@ class WriteIngredient(BaseIngredient):
         elif 'mast_neb_settings' in self.keywords['program_keys'].keys():
             myphdict = dict(self.keywords['program_keys']['mast_neb_settings']['phonon'][mylabel])
         else:
-            raise MASTError(self.__class__.__name__, "Neither defect nor NEB settings dictionary was found for phonons.")
+            raise MASTError(self.__class__.__name__, "Neither defect nor NEB settings dictionary was found for phonons of ingredient %s" % self.keywords['name'])
         if not 'phonon_center_site' in myphdict.keys():
             return [None, None]
         phonon_center_site = myphdict['phonon_center_site']
