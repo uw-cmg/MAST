@@ -23,9 +23,8 @@ class TestRecipeSetup(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
-        #if os.path.isdir(os.path.join(testdir,'workdir')):
-        #    shutil.rmtree('workdir')
-        pass
+        if os.path.isdir(os.path.join(testdir,'workdir')):
+            shutil.rmtree('workdir')
 
     def test___init__(self):
         rfile=os.path.join(testdir,'personalized')
