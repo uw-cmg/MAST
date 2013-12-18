@@ -46,14 +46,6 @@ class VaspNEBError(BaseError):
         """
         raise NotImplementedError()
         handler_input_d=dict()
-        handler_input_d['VaspErrorHandler']=["OUTCAR"]
-        handler_input_d['DentetErrorHandler']=["OUTCAR"]
-        handler_input_d['UnconvergedErrorHandler']=["vasprun.xml"]
-        handler_input_d['PoscarErrorHandler']=["OUTCAR"]
-        handler_input_d['TripleProductErrorHandler']=["OUTCAR"]
-        handler_input_d['FrozenJobErrorHandler']="mast_skip"
-        handler_input_d['NonConvergingErrorHandler']="mast_skip"
-        handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
         handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",1000,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
 
         return handler_input_d
@@ -63,6 +55,7 @@ class VaspNEBError(BaseError):
             Currently uses only VASP single-run error handlers,
             per image.
         """
+        return 0 #VaspErrors are not meant to be in image folders.
         mydir = self.keywords['name']
         errct = 0
         #handlerdict = self.get_error_handlers() 
