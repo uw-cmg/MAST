@@ -69,7 +69,7 @@ class VaspNEBError(BaseError):
         #handler_input_d = self.set_handler_inputs()
         self.logger.info("Checking errors for: %s" % mydir)
         imct = 1
-        while imct <= self.keywords['program_keys']['images']:
+        while imct <= self.keywords['program_keys']['mast_neb_settings']['images']:
             imstr = str(imct).zfill(2)
             self.logger.info("Checking errors for: %s" % imstr)
             impath = os.path.join(mydir, imstr)
