@@ -299,7 +299,7 @@ class RecipePlan:
         #print "Recipe status: %s" % self.status
         statusfile.to_file(os.path.join(self.working_directory,"status.txt"))
         if toterr > 0:
-            self.logger.error("ATTENTION: Recipe at %s has one or more ingredient errors. Please check the MAST_ERROR file and or mast_recipe.log file, in the recipe directory." % self.working_directory)
+            self.logger.error("ATTENTION: Recipe at %s has one or more ingredient errors. Please check the MAST_ERROR file and or mast_recipe.log file, in the recipe directory. Change status 'E' in status.txt to 'W' when the error has been resolved." % self.working_directory)
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name
