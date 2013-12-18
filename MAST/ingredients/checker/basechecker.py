@@ -21,7 +21,11 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
+        try:
+            self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
+        except:
+            self.logger = logging.getLogger(os.path.join(os.path.dirname(os.path.dirname(self.keywords['name'])),"mast_recipe.log"))
+
     
     def is_complete(self):
         raise NotImplementedError
