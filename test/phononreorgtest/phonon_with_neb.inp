@@ -88,6 +88,15 @@ begin lowmesh
 mast_kpoints 1x1x1 G
 end  
 
+begin lowmesh_defect
+mast_kpoints 1x1x1 T
+isif 2
+end
+
+begin defect_relax
+isif 2
+end
+
 begin static
 ibrion -1
 nsw 0
@@ -123,11 +132,13 @@ end
 begin neb_to_neb
 mast_kpoints 1 1 1 G
 mast_program   vasp_neb
+mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
 end
 
 begin neb_to_nebstat
 mast_program   vasp_neb
+mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
 end
 

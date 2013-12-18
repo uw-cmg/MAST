@@ -48,11 +48,11 @@ class WriteIngredient(BaseIngredient):
         """
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
+        image_structures = list()
         if len(parentimagestructures) == 0:
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
             image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
         else:
-            image_structures = list()
             image_structures.append(parentstructures[0])
             image_structures.extend(parentimagestructures)
             image_structures.append(parentstructures[1])
