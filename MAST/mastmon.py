@@ -73,8 +73,12 @@ class MASTmon(object):
         recipe_plan_obj.get_statuses_from_file()
         try:
             recipe_plan_obj.check_recipe_status(verbose)
-        except Exception as errortext:
-            raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s" % (shortdir, errortext))
+        except Exception:
+            import sys,traceback
+            ex_type, ex, trbck = sys.exc_info()
+            errortext = traceback.print_tb(trbck)
+            del trbck
+            raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s %s %s" % (shortdir, ex_type, ex, errortext))
         os.chdir(self.scratch)
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
