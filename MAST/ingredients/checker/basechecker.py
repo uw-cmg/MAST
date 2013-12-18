@@ -23,7 +23,7 @@ class BaseChecker(MASTObj):
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         try:
             self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
-        except:
+        except: #if no logger is found, may be in subfolder. Move up one level.
             self.logger = logging.getLogger(os.path.join(os.path.dirname(os.path.dirname(self.keywords['name'])),"mast_recipe.log"))
 
     
