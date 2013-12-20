@@ -14,22 +14,10 @@ Subpackages
 Submodules
 ----------
 
-MAST.ingredients.baseingredient module
---------------------------------------
+.. toctree::
 
-.. automodule:: MAST.ingredients.baseingredient
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.chopingredient module
---------------------------------------
-
-.. automodule:: MAST.ingredients.chopingredient
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   MAST.ingredients.baseingredient
+   MAST.ingredients.chopingredient
 
 Module contents
 ---------------

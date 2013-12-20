@@ -10,7 +10,7 @@ Welcome to the MAST documentation site!
 .. toctree::
    :maxdepth: 3
 
-   introduction
+   0_0_introduction
    installation
    tutorial
 

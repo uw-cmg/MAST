@@ -4,14 +4,9 @@ test package
 Submodules
 ----------
 
-test.testclass module
----------------------
+.. toctree::
 
-.. automodule:: test.testclass
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   test.testclass
 
 Module contents
 ---------------

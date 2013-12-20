@@ -1,29 +1,26 @@
-MAST package
-============
+MastGui package
+===============
 
 Subpackages
 -----------
 
 .. toctree::
 
-    MAST.data
-    MAST.ingredients
-    MAST.parsers
-    MAST.recipe
-    MAST.utility
+    MastGui.sections
 
 Submodules
 ----------
 
 .. toctree::
 
-   MAST.mast
-   MAST.mastmon
+   MastGui.canvas
+   MastGui.mastgui
+   MastGui.verticalScrolledFrame
 
 Module contents
 ---------------
 
-.. automodule:: MAST
+.. automodule:: MastGui
     :members:
     :undoc-members:
     :show-inheritance:

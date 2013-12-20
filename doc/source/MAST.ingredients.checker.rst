@@ -4,38 +4,12 @@ MAST.ingredients.checker package
 Submodules
 ----------
 
-MAST.ingredients.checker.basechecker module
--------------------------------------------
+.. toctree::
 
-.. automodule:: MAST.ingredients.checker.basechecker
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.checker.phonchecker module
--------------------------------------------
-
-.. automodule:: MAST.ingredients.checker.phonchecker
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.checker.vaspchecker module
--------------------------------------------
-
-.. automodule:: MAST.ingredients.checker.vaspchecker
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.checker.vaspnebchecker module
-----------------------------------------------
-
-.. automodule:: MAST.ingredients.checker.vaspnebchecker
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   MAST.ingredients.checker.basechecker
+   MAST.ingredients.checker.phonchecker
+   MAST.ingredients.checker.vaspchecker
+   MAST.ingredients.checker.vaspnebchecker
 
 Module contents
 ---------------

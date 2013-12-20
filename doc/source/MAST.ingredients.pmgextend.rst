@@ -4,30 +4,11 @@ MAST.ingredients.pmgextend package
 Submodules
 ----------
 
-MAST.ingredients.pmgextend.procar_parse_occ module
---------------------------------------------------
+.. toctree::
 
-.. automodule:: MAST.ingredients.pmgextend.procar_parse_occ
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.pmgextend.procar_parse_occ_spin module
--------------------------------------------------------
-
-.. automodule:: MAST.ingredients.pmgextend.procar_parse_occ_spin
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-MAST.ingredients.pmgextend.structure_extensions module
-------------------------------------------------------
-
-.. automodule:: MAST.ingredients.pmgextend.structure_extensions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   MAST.ingredients.pmgextend.procar_parse_occ
+   MAST.ingredients.pmgextend.procar_parse_occ_spin
+   MAST.ingredients.pmgextend.structure_extensions
 
 Module contents
 ---------------
