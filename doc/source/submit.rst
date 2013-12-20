@@ -1,23 +1,10 @@
-submit Package
+submit package
 ==============
 
-:mod:`old_queue_commands` Module
---------------------------------
+Submodules
+----------
 
-.. automodule:: submit.old_queue_commands
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`old_script_commands` Module
----------------------------------
-
-.. automodule:: submit.old_script_commands
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`queue_commands` Module
+submit.queue_commands module
 ----------------------------
 
 .. automodule:: submit.queue_commands
@@ -25,15 +12,15 @@ submit Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`queue_commands_example` Module
-------------------------------------
+submit.runmast module
+---------------------
 
-.. automodule:: submit.queue_commands_example
+.. automodule:: submit.runmast
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`script_commands` Module
+submit.script_commands module
 -----------------------------
 
 .. automodule:: submit.script_commands
@@ -41,19 +28,11 @@ submit Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`script_commands_example` Module
--------------------------------------
 
-.. automodule:: submit.script_commands_example
+Module contents
+---------------
+
+.. automodule:: submit
     :members:
     :undoc-members:
     :show-inheritance:
-
-:mod:`script_commands_pbs` Module
----------------------------------
-
-.. automodule:: submit.script_commands_pbs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-

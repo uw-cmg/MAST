@@ -1,32 +1,41 @@
-MAST Package
+MAST package
 ============
-
-:mod:`MAST` Package
--------------------
-
-.. automodule:: MAST
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`mast` Module
-------------------
-
-.. automodule:: MAST.mast
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Subpackages
 -----------
 
 .. toctree::
 
-    MAST.DAG
     MAST.data
     MAST.ingredients
     MAST.parsers
     MAST.recipe
-    MAST.relish
     MAST.utility
 
+Submodules
+----------
+
+MAST.mast module
+----------------
+
+.. automodule:: MAST.mast
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+MAST.mastmon module
+-------------------
+
+.. automodule:: MAST.mastmon
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: MAST
+    :members:
+    :undoc-members:
+    :show-inheritance:

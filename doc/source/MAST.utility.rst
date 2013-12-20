@@ -1,75 +1,85 @@
-utility Package
-===============
+MAST.utility package
+====================
 
-:mod:`utility` Package
-----------------------
+Subpackages
+-----------
 
-.. automodule:: MAST.utility
+.. toctree::
+
+    MAST.utility.defect_formation_energy
+
+Submodules
+----------
+
+MAST.utility.diffusioncoefficient module
+----------------------------------------
+
+.. automodule:: MAST.utility.diffusioncoefficient
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`dirutil` Module
----------------------
+MAST.utility.dirutil module
+---------------------------
 
 .. automodule:: MAST.utility.dirutil
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`filemanager` Module
--------------------------
-
-.. automodule:: MAST.utility.filemanager
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`inputoptions` Module
---------------------------
+MAST.utility.inputoptions module
+--------------------------------
 
 .. automodule:: MAST.utility.inputoptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`loggerutils` Module
--------------------------
+MAST.utility.loggerutils module
+-------------------------------
 
 .. automodule:: MAST.utility.loggerutils
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`masterror` Module
------------------------
+MAST.utility.masterror module
+-----------------------------
 
 .. automodule:: MAST.utility.masterror
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`mastfile` Module
-----------------------
+MAST.utility.mastfile module
+----------------------------
 
 .. automodule:: MAST.utility.mastfile
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`mastobj` Module
----------------------
+MAST.utility.mastobj module
+---------------------------
 
 .. automodule:: MAST.utility.mastobj
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`picklemanager` Module
----------------------------
+MAST.utility.metadata module
+----------------------------
 
-.. automodule:: MAST.utility.picklemanager
+.. automodule:: MAST.utility.metadata
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: MAST.utility
+    :members:
+    :undoc-members:
+    :show-inheritance:

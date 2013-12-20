@@ -1,4 +1,4 @@
-initialize Module
+initialize module
 =================
 
 .. automodule:: initialize

@@ -1,11 +1,10 @@
-data Package
-============
+MAST.data package
+=================
 
-:mod:`data` Package
--------------------
+Module contents
+---------------
 
 .. automodule:: MAST.data
     :members:
     :undoc-members:
     :show-inheritance:
-

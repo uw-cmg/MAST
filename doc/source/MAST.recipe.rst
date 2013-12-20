@@ -1,27 +1,38 @@
-recipe Package
-==============
+MAST.recipe package
+===================
 
-:mod:`ingredient` Module
-------------------------
+Submodules
+----------
 
-.. automodule:: MAST.recipe.ingredient
+MAST.recipe.recipeplan module
+-----------------------------
+
+.. automodule:: MAST.recipe.recipeplan
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`recipe_plan` Module
--------------------------
-
-.. automodule:: MAST.recipe.recipe_plan
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`recipesetup` Module
--------------------------
+MAST.recipe.recipesetup module
+------------------------------
 
 .. automodule:: MAST.recipe.recipesetup
     :members:
     :undoc-members:
     :show-inheritance:
 
+MAST.recipe.recipeutility module
+--------------------------------
+
+.. automodule:: MAST.recipe.recipeutility
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: MAST.recipe
+    :members:
+    :undoc-members:
+    :show-inheritance:

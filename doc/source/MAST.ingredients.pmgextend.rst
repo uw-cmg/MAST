@@ -1,19 +1,38 @@
-pmgextend Package
-=================
+MAST.ingredients.pmgextend package
+==================================
 
-:mod:`procar_parse_occ` Module
-------------------------------
+Submodules
+----------
+
+MAST.ingredients.pmgextend.procar_parse_occ module
+--------------------------------------------------
 
 .. automodule:: MAST.ingredients.pmgextend.procar_parse_occ
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`vasp_extensions` Module
------------------------------
+MAST.ingredients.pmgextend.procar_parse_occ_spin module
+-------------------------------------------------------
 
-.. automodule:: MAST.ingredients.pmgextend.vasp_extensions
+.. automodule:: MAST.ingredients.pmgextend.procar_parse_occ_spin
     :members:
     :undoc-members:
     :show-inheritance:
 
+MAST.ingredients.pmgextend.structure_extensions module
+------------------------------------------------------
+
+.. automodule:: MAST.ingredients.pmgextend.structure_extensions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: MAST.ingredients.pmgextend
+    :members:
+    :undoc-members:
+    :show-inheritance:

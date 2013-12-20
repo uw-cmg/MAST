@@ -1,11 +1,22 @@
-test Package
+test package
 ============
 
-:mod:`oldfcntsts` Module
-------------------------
+Submodules
+----------
 
-.. automodule:: test.oldfcntsts
+test.testclass module
+---------------------
+
+.. automodule:: test.testclass
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: test
+    :members:
+    :undoc-members:
+    :show-inheritance:
