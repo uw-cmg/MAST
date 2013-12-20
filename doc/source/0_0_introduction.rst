@@ -15,7 +15,7 @@ MAST uses kitchen terminology to organize the materials simulation workflow.
 * A :doc:`Recipe <4_0_recipe>` is a collection of several ingredients and information about how the ingredients are combined together. 
 
     * As in a cooking recipe, ingredients may need to be addressed in a certain logical order. This temporal order of how ingredients work together is the workflow.
-    * The `Recipe Template <4_1_recipetemplate>` and `Input File <3_0_inputfile>` together describe the order of the ingredients and the way they are combined together. 
+    * The :doc:`Recipe Template <4_1_recipetemplate>` and :doc:`Input File <3_0_inputfile>` together describe the order of the ingredients and the way they are combined together. 
 
 For more information, see the MAST introductory powerpoint **need to add ppt here**
 
@@ -52,9 +52,3 @@ Computing in the MAST Kitchen
 For general examples on how to use MAST, see the presentations here **need presentations**
 Please check your output carefully, especially when setting up a new workflow using MAST.
 
-.. toctree::
-    :maxdepth: 2
-    
-    2_0_ingredients
-    3_0_inputfile
-    4_0_recipe

@@ -8,11 +8,14 @@ MAterials Simulation Toolkit (MAST) Documentation
 Welcome to the MAST documentation site!
 
 .. toctree::
-   :maxdepth: 3
+    :maxdepth: 3
 
-   0_0_introduction
-   installation
-   tutorial
+    0_0_introduction
+    1_0_installation
+    2_0_ingredients
+    3_0_inputfile
+    4_0_recipe
+    tutorial
 
 * :ref:`Method index <genindex>`
 * :ref:`Module index <modindex>`
@@ -21,8 +24,8 @@ Welcome to the MAST documentation site!
 MAST team contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
    
-   reference
-   howtobuild
+    reference
+    howtobuild
 
