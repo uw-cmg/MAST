@@ -5,8 +5,8 @@ Installation
 ------------------------
 Installation on bardeen
 ------------------------
-1. MAST is installed in ``//share/apps/MAST``.
-2. Set the MAST environment variables. Add the following lines to your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. The environment variables are::
+#. MAST is installed in ``//share/apps/MAST``.
+#. Set the MAST environment variables. Add the following lines to your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. The environment variables are::
     
     export MAST_INSTALL_PATH=//share/apps/MAST
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
@@ -20,65 +20,102 @@ Installation on bardeen
 
 #.   Explanation of environment variables:
 
-    * MAST_INSTALL_PATH: This variable should be set to the installation directory::
+    *  MAST_INSTALL_PATH: This variable should be set to the installation directory. ::
 
         export MAST_INSTALL_PATH=//share/apps/MAST
 
-    b.  MAST_RECIPE_PATH: Initially, this variable should be set to the existing recipe_templates folder. As you develop additional recipes, you may want to change this variable to reflect your customized organization of recipes.:
-        i.  export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
-    c.  MAST_SCRATCH: This variable may be set to any directory. Default behavior is to generate ingredients under this MAST_SCRATCH directory, unless the match_scratch keyword is specified with an overriding path in the input file.
-        i.  export MAST_SCRATCH=//home/username/MAST/SCRATCH
-        ii. export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-    d.  MAST_CONTROL: This variable may be set to any directory. The directory must contain a submit.sh submission script and runmast.py file which together create a mastmon instance which runs on a node. See the default $MAST_INSTALL_PATH/CONTROL directory for an example.
-        i.  export MAST_CONTROL=//home/username/MAST/CONTROL
-    e.  PYTHONPATH: If this environment variable already exists, the installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables):
-        i.  export PYTHONPATH=$PYTHONPATH://share/apps/MAST
-    f.  VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the Materials Project.s pymatgen code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91).
-        i.  export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
-    g.  PATH: This variable should be appended with the MAST bin directory, for example:
-        i.  export PATH=$PATH://share/apps/MAST/bin
-        h.  PATH: Also, make sure that the correct version of python is defaulted to be used first. If you already use python for something else and this next line interferes with your other python calls (for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3), please see Tam.
-        i.  export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
-        1.  This python has pymatgen, numpy, and scipy in the appropriate libraries, which we need.
-    2.  Type .which python. and you should get: /share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python
-4.  Create all directories which do not yet exist (e.g., mkdir //home/username/MAST, mkdir //home/username/MAST/recipe_templates, ARCHIVE, CONTROL, and SCRATCH)
-5.  Make an empty file //home/username/MAST/CONTROL/submitlist
-6.  Log out of all bardeen terminals and log back in. (You may also run .source ~/.bashrc. but sometimes this doesn.t quite set everything.)
-7.  (There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in $MAST_INSTALL_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of $MAST_INSTALL_PATH/submit/platforms and into $MAST_INSTALL_PATH/submit, omitting the platform name, and modify the new queue_commands.py, script_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)
+    *  MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You may want to copy recipes from the ``$MAST_INSTALL_PATH/recipe_templates`` directory into this folder and modify them. ::
+    
+        export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
+
+    *  MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory. ::
+    
+        export MAST_SCRATCH=//home/username/MAST/SCRATCH
+
+    *  MAST_ARCHIVE: This variable may be set to any directory. MAST will move completed recipes from ``$MAST_SCRATCH`` into this directory. ::
+    
+        export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
+
+    *  MAST_CONTROL: This variable may be set to any directory. MAST monitor log files, MAST monitor error files, and other MAST monitor output will be written to this directory. ::
+    
+        export MAST_CONTROL=//home/username/MAST/CONTROL
+
+    *  PYTHONPATH: If this environment variable already exists, the MAST installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables)::
+    
+        export PYTHONPATH=$PYTHONPATH://share/apps/MAST
+
+    *  VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the `Materials Project's <http://materialsproject.org>` `pymatgen <http://pymatgen.org>` code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
+    
+        export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
+
+    *  PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` directory, for example::
+    
+        export PATH=$PATH://share/apps/MAST/bin:PATH
+
+    
+        *  Also, make sure that the correct version of python is defaulted to be used first. If you already use python for something else and this next line interferes with your other python calls (for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3), please see Tam. ::
+        
+        export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
+    
+
+        *  This python has pymatgen, numpy, and scipy in the appropriate libraries, which we need.
+        *  Type ``which python`` and you should get: ``/share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python``
+        *  Type ``which mast`` and you should get: ``/share/apps/MAST/bin/mast``
+
+#.  Create all directories which do not yet exist (e.g., ``mkdir //home/username/MAST``, ``mkdir //home/username/MAST/recipe_templates``, ARCHIVE, CONTROL, and SCRATCH)
+#.  Make an empty file at ``//home/username/MAST/CONTROL/submitlist``
+#.  Log out of all bardeen terminals and log back in. (You may also run ``source ~/.bashrc``, but sometimes this doesn't quite set everything.)
+#.  (There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in $MAST_INSTALL_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of $MAST_INSTALL_PATH/submit/platforms and into $MAST_INSTALL_PATH/submit, omitting the platform name, and modify the new queue_commands.py, script_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)
 
 ---------------------------------
 Test that MAST can run on bardeen
 ---------------------------------
-8.  Copy the test recipe template to your recipe_templates folder
-a.  cp //share/apps/MAST/recipe_templates/optimize_workflow_test.txt //home/username/MAST/recipe_templates/.
-9.  Make a test directory, like //home/username/MAST/test
-10. Copy the test input file to your test folder
-a.  cp //share/apps/MAST/test/optimize_workflow_test/optimize_workflow_test.inp //home/username/MAST/test/test.inp
-11. Go to your test directory cd //home/username/MAST/test
-12. Try to parse the input file, entering the following command as one line.
-a.  nice -n 19 mast -i test.inp 
-b.  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but is not too intensive).
-c.  the -i signals to MAST that it is processing an input file.
-13. Your //home/username/MAST/SCRATCH directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
-14. Go to that long recipe directory. (OptimizeWorfklowTest_.)
-a.  To see the input options:
-i.  cat input.inp (should be identical to test.inp since no looping was used)
-1.  Note that you can use other viewing commands, not just .cat., but be careful not to edit any of these files.
-ii. cat archive_input_options.txt (should show .Al. instead of element X1)
-b.  To see information about the ingredient relationships MAST detected from the recipe template:
-i.  cat personal_recipe.txt
-ii. cat archive_recipe_plan.txt
-c.  To see ingredient statuses at a glance:
-i.  cat status.txt
-15. Run mast once: nice -n 19 mast
-16. You should see a .mastmon. appear on morganshort.
-17. MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: nice -n 19 mast
-18. Now you should see perfect_opt1 appear on the queue.
-19. status.txt in the recipe directory in SCRATCH should show that perfect_opt1 is queued.
-20. If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the OptimizeWorkflowTest... folder and start again from the beginning of this section.
-21. The CONTROL folder gives you errors and other information. See Troubleshooting for tips.
+#.  Copy the test recipe template to your recipe_templates folder::
 
+        cp //share/apps/MAST/recipe_templates/phonon_test_neb.txt //home/username/MAST/recipe_templates/.
+
+#.  Make a test directory, like ``//home/username/MAST/test``
+#.  Copy the test input file to your test folder::
+
+        cp //share/apps/MAST/test/phononreorgtest/phonon_with_neb.inp //home/username/MAST/test/test.inp
+
+#.  Go to your test directory, ``cd //home/username/MAST/test``
+#.  Try to parse the input file, entering the following command as one line::
+
+        nice -n 19 mast -i test.inp 
+
+    *  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
+    *  The -i signals to MAST that it is processing an input file.
+#. Your ``//home/username/MAST/SCRATCH`` directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
+#. Go to that long recipe directory. (PhononNebTest...)
+
+    *  To see the input options:
+
+        *  ``cat input.inp`` (should be identical to test.inp since no looping was used)
+        
+            *  Note that you can use other viewing commands, not just .cat., but be careful not to edit any of these files.
+
+        *  ``cat archive_input_options.txt`` (should show Al instead of element X1)
+    *  To see information about the ingredient relationships MAST detected from the recipe template:
+
+        *  ``cat personal_recipe.txt``
+        *  ``cat archive_recipe_plan.txt``
+
+    *  To see ingredient statuses at a glance:
+
+        *  ``cat status.txt``
+
+#. Run mast once: ``nice -n 19 mast``
+#. You should see a `mastmon` job appear on morganshort.
+#. MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
+#. Now you should see ``perfect_opt1`` appear on the queue.
+#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
+#. If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
+#. The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Troubleshooting <5_0_troubleshooting>` for tips.
+
+---------------------------------
 Installation on another cluster
+---------------------------------
 1.  (On ACI/HPC, make sure you are using the compile node for all installation tasks. Use the submit node only to submit jobs.)
 2.  Have the owner of //tmp/pip-build remove the directory if it exists (https://github.com/pypa/pip/issues/729
 a.  cd //tmp
