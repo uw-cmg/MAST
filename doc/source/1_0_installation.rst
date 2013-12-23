@@ -129,7 +129,7 @@ Test that MAST can run on bardeen
 #.  Now you should see ``perfect_opt1`` appear on the queue.
 #. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
 #.  If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
-#.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Troubleshooting <5_0_troubleshooting>` for tips.
+#.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
  
 *********************************
 Installation on another cluster
