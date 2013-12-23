@@ -1,69 +1,141 @@
-===============
+###################################
 Input File
-===============
-The input file contains several sections denoted by ``$sectionname`` and ``$end``
-Here is a sample input file, ``test.inp``::
-    
-    # Test file
-    $mast
-    program VASP
-    system_name MgAl
-    $end
+###################################
+
+**********************************
+Introduction to the Input File
+**********************************
+
+The MAST program is driven by two main files: an input file which contains all the various keywords required for setting up the recipe (i.e. workflow), and a :doc:`Recipe Template <4_0_recipe>` which organizes all the ingredients (i.e. calculations) in the recipe. In this section, we will discuss the input file
+
+The input file contains several sections and subsections.
+Bounds of sections are denoted by ``$sectionname`` and ``$end``.
+Bounds of subsections within a section are denoted by ``begin subsectionname`` and ``end``.
+
+*Comments in the input file are allowed only as separate lines starting with .#.. A comment may not be appended to a line.*
+
+Example of the ``$structure`` section, with three subsections, .elementmap., .coordinates., and .lattice.::
 
     $structure
     coord_type fractional
-    begin coordinates
-    Mg 0.000000 0.000000 0.000000
-    Al 0.500000 0.500000 0.500000
+    
+    begin elementmap
+    X1 Ga
+    X2 As
     end
+    
+    begin coordinates
+    X1 0.000000 0.000000 0.000000
+    X1 0.500000 0.500000 0.000000
+    X2 0.250000 0.250000 0.250000
+    X2 0.750000 0.750000 0.250000
+    end
+    
+    begin lattice
+    6.0 0.0 0.0
+    0.0 6.0 0.0
+    0.0 0.0 6.0
+    end
+    $end
+
+Each section is described in detail below.
+
+************************
+The MAST section
+************************
+The ``$mast`` section contains this keyword:
+
+*  system_name: Specify a single descriptive word here, like EpitaxialStrain. This keyword will become part of the recipe directory.s name and allow you to spot the recipe in the ``$MAST_SCRATCH`` directory::
+
+    system_name EpitaxialStrain
+
+
+*****************************
+The Structure section
+*****************************
+
+The ``$structure`` section contains the coordinate type, coordinates, and lattice, or, optionally, the name of a structure file (either CIF or VASP POSCAR-type).
+
+====================================
+Structure by file
+====================================
+
+Using the keyword ``posfile``, a VASP POSCAR-type file or a CIF file can be inserted here in this section::
+
+    $structure
+    posfile POSCAR_fcc
+    $end
+
+The file should be located in the same directory as the input file.
+
+A CIF file should end with *.cif.
+
+A POSCAR-type filename must start with ``POSCAR_`` or ``CONTCAR_`` in order for pymatgen to recognize it. The elements will be obtained from the POSCAR unless you also have a POTCAR in the directory, in which case, check your output carefully because the elements might be given by the POTCAR instead, no matter what elements are written in the POSCAR file.
+
+====================================
+Structure by specification
+====================================
+
+To specify a structure, use the following subsections:
+
+**``coord_type``**: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.
+
+**``lattice``**: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
+
+**``elementmap``**: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
+
+The elementmap subsection works in conjunction with the coordinates subsection.
+
+**``coordinates``**: The coordinates subsection specifies the coordinates in order. 
+
+Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.
+
+Each fractional coordinate must be preceded by either an element symbol or an X# symbol corresponding to the symbols assigned in the elementmap section.
+
+
+Example::
+    
+begin $structure
+
+    coord_type fractional    
 
     begin lattice
-    3.0 0.0 0.0
-    0.0 3.0 0.0
-    0.0 0.0 3.0
-    end
-    $end
-
-    $ingredients
-    begin ingredients_global
-    mast_kpoints 3x3x3
-    mast_xc pbe
+    6.0 0.0 0.0
+    0.0 6.0 0.0
+    0.0 0.0 6.0
     end
 
-    begin optimize
-    encut 300
-    ibrion 2
+    begin elementmap
+    X1 Ga
+    X2 As
     end
-    $end
-
-    $recipe
-    recipe_file recipe_test.txt
-    $end
-
-The ``$mast`` section contains the program and system name. An optional mast_scratch keyword and path to a directory may be given to write the recipe and ingredients under this directory rather than under the directory given in $MAST_SCRATCH.
-
-The ``$structure`` section contains the coordinate type, coordinates, and lattice. Optionally, the name of a VASP POSCAR-type file can be inserted here using the keyword posfile, e.g. ``posfile fcc_POSCAR``. The coordinates are given with element name and then three fractional coordinates along the lattice vectors.
-
-The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each ingredient type. VASP INCAR keywords are included in these sections. All other keywords are prefaced with ``mast_``. A listing of available keywords is in the :doc:`Ingredients <ingredients>`. Each ingredient type in the recipe should have a begin ingredienttype, end section, even if there are no keywords within that section.
-
-The ``$recipe`` section contains a section for the recipe template to be used.
-
-Other sections include:
-
-* The ``$defects`` section, which includes the defect type (vacancy or interstitial), the defect coordinates, and the defect element symbol::
     
-    $defects
-    vacancy 0 0 0 Mg
-    vacancy 0.5 0.5 0.5 Mg
-    interstitial 0.25 0.25 0 Mg
-    interstitial 0.25 0.75 0 Mg
+    begin coordinates
+    X1 0.000000 0.000000 0.000000
+    X1 0.500000 0.500000 0.000000
+    X1 0.000000 0.500000 0.500000
+    X1 0.500000 0.000000 0.500000
+    X2 0.250000 0.250000 0.250000
+    X2 0.750000 0.750000 0.250000
+    X2 0.250000 0.750000 0.750000
+    X2 0.750000 0.250000 0.750000
+    end
+    
     $end
 
-* The ``$neb`` section, which includes a list of nudged-elastic-band hops, corresponding to the defects listed in the ``$defects`` section, and the number of interpolated images for each hop. For example,::
+*************************
+The Ingredients section
+*************************
 
-    $neb
-    hops 1-2 1-3 3-4
-    images 3
-    $end
+The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each ingredient type. 
 
-.. _recipe:
+Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with ``mast_``. 
+
+Each ingredient type in the recipe should have a subsection denoted by ::
+
+begin ingredient_type
+    (keywords here)
+end
+
+even if there are no keywords within that section, in which case the ``end`` line directly follows the ``begin`` line.
+

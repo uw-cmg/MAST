@@ -1,47 +1,35 @@
-===============
-The Ingredients
-===============
+########################
+Ingredients
+########################
+
 Each ingredient is a separate calculation. Ingredients make up recipes.
 
-Each ingredient is responsible for updating its child ingredients through an ``update_children`` method.
+Each ingredient is responsible for updating its child ingredients through an update_children method.
 
 Each ingredient is given:
 
-* A name, which is the full path to the ingredient's directory and is automatically generated using the system name and the recipe template.
-* The name of the program running (e.g. vasp)
-* A dictionary of program_keys, which contain all program-specific keywords (see :ref:`ingredient-keys`) and come from each ingredient's section in the ``$ingredients`` section of the :doc:`input file <inputfile>`.
-* A dictionary of the names of any child ingredients.
-* A pymatgen structure object representing the very first structure created from the ``$structure`` section in the input file.
+*  A name, which is the full path to the ingredient.s directory and is automatically generated using the system name and the recipe template. (Do not use parentheses in ingredient names.) Some ingredient names must be structured specifically. For examples of naming conventions, see the :doc:`Recipe  <4_0_recipe>`. In particular:
 
-.. _ingredient-keys:
+*  An ingredient which is supposed to correspond to values given by the ``$defects`` section of the :doc:`Input File <3_0_inputfile>` should always be named with ``inducedefect_`` (for the structural creation of the defect) or ``defect_`` (for an actual defect calcualtion)
+*  An ingredient which is supposed to correspond to values in the ``$neb`` section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with ``neb_``
+    *  A phonon calculation should always be named with ``phonon_``, and a subsequent calculation of phonon results should be named with ``phonon_...parse``
+*  The letters .q=. are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name
+    
 
-===================
-Ingredient Keywords
-===================
-VASP keywords such as IBRION, ISIF, and so on, can be specified under each ingredient in the ``$ingredients`` section of the :doc:`input file <inputfile>`.
+*  A dictionary of program-specific keywords, which come from each ingredient.s section in the ``$ingredients`` section of the :doc:`Input File <3_0_inputfile>`.
+*  A pymatgen structure object representing the very first structure created from the ``$structure`` section in the input file.
+*  A type, which is specified in the recipe, next to the ingredient name, in parentheses. The ingredient type corresponds to the ingredient type subsection in the ``$ingredients`` section of the input file. The information given in these subsections includes:
 
-Any keyword prepended by ``mast_`` is considered a special keyword and will not be written into the VASP INCAR.
+    *  Program-specific keywords
+*  Other MAST keywords, including:
 
+    *  The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)
+        *  The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
+        *  The .run. method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
+        *  The .complete. method: how MAST can tell if the ingredient is considered complete
+        *  The .update children. method: what information an ingredient passes on to its children, and how this information is passed on
 
-* mast_kpoints: specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. ``mast_kpoints = 3x3x3 G``
-    * required for VASP
+The same ingredient in a recipe may be listed more than once, with several different ingredient types. In this case, the first four methods and all the ingredient keywords are given by the first ingredient type encountered. Only the .update_children. method is changed for all subsequent positions. This situation indicates that the ingredient has many children, which must be updated in different ways and thus needs different update_children methods for those different situations.
 
-* mast_xc: specify an exchange correlation functional; for VASP, follow the convetions of pymatgen.
-    * required for VASP
+More detail on ingredients is given in the ``$ingredients`` section of the :doc:`Input File <3_0_inputfile>`.
 
-* mast_multiplyencut: specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP take 1.5; otherwise 1.25 is sufficient.
-    * defaults to 1.5
-
-* mast_setmagmom: specify a string to use for setting the initial magnetic moment. A short string will result in multipliers, ex: 1 5 1 = 2*1 2*5 8*1 for a 12-atom unit cell. A string of the number of atoms in the POSCAR will be printed as entered, for example, 1 -1 1 -1 1 -1 1 -1.
-
-* mast_adjustnelect: specify an adjustment to the total number of electrons. For example, -2 to remove two electrons, and +2 to add two electrons
-
-The following queue-submission keywords are discussed more in :ref:`platforms`. 
-
-* mast_processors: the total number of processors requested. Use this or use mast_nodes and mast_ppn.
-* mast_nodes: the number of nodes requested.
-* mast_ppn: the number of processors per node requested.
-* mast_queue: the queue requested.
-* mast_exec: the full executable line, including any mpi commands. Remember that all input file options are turned into lowercase, with the exception of mast_xc, which is turned into all uppercase in the INCAR file.
-* mast_walltime: the walltime requested, in whole number of hours
-* mast_memory: the memory per processor requested.
