@@ -234,7 +234,7 @@ If numpy is not available, try pip installation::
 
 If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
 
-    *  Grab the most recent stable release of numpy from :ref:`<http://www.scipy.org/install.html>`
+    *  Grab the most recent stable release of numpy from :ref:`<http://www.scipy.org/install.html>`_
     *  Untar with command ``tar -zxvf numpy-<version>.tar.gz``
     *  ``cd numpy-<version>``
     *  Put the following in your command line::

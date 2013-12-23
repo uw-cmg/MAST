@@ -24,11 +24,3 @@ Welcome to the MAST documentation site!
 * :ref:`Module index <modindex>`
 * :ref:`search` 
 
-MAST team contents:
-
-.. toctree::
-    :maxdepth: 2
-   
-    reference
-    howtobuild
-

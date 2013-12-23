@@ -167,43 +167,43 @@ Special MAST ingredient keywords:
 
 Some of these special MAST keywords are only appropriate for VASP calculations.
 
-**``mast_program``**: Specify which program to run (.vasp., .vasp_neb., or .phon. are currently supported) ::
+**mast_program**: Specify which program to run (.vasp., .vasp_neb., or .phon. are currently supported) ::
 
     mast_program vasp
 
 *  This keyword must be in lowercase (.vasp., .phon.)
 
-**``mast_kpoints``**: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. :: 
+**mast_kpoints**: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. :: 
 
 mast_kpoints = 3x3x3 G
 
 *  Either this keyword or ``mast_kpoint_density`` is required for VASP calculations.
 
-**``mast_kpoint_density``**: A number for the desired kpoint mesh density. Only works with ``mast_write_method`` of ``write_singlerun_automesh``
+**mast_kpoint_density**: A number for the desired kpoint mesh density. Only works with ``mast_write_method`` of ``write_singlerun_automesh``
 
 *  Either this keyword or ``mast_kpoints`` is required for VASP calculations.
 
-**``mast_pp_setup``**: Specify which pseudopotential goes to which element::
+**mast_pp_setup**: Specify which pseudopotential goes to which element::
 
 mast_pp_setup La=La Mn=Mn_pv O=O_s
 
-**``mast_xc``**: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)
+**mast_xc**: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)
 
 *  This keyword is required for VASP calculations.
 
-**``mast_multiplyencut``**: Specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP often take 1.5; otherwise 1.25 is sufficient.
+**mast_multiplyencut**: Specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP often take 1.5; otherwise 1.25 is sufficient.
 
 *  Default is 1.5
 *  If ``encut`` is given as a program keyword, then that value will be used and ``mast_multiplyencut`` should have no effect
 
-**``mast_setmagmom``**: Specify a string to use for setting the initial magnetic moment. A short string will result in multipliers. For example, ``mast_setmagmom 1 5 1`` will produce ``2*1 2*5 8*1`` for a 12-atom unit cell with 2A, 2B, and 8C atoms. A string of the number of atoms in the ``POSCAR`` file will be printed as entered, for example, ``mast_setmagmom 1 -1 1 -1 1 -1 1 -1``.
+**mast_setmagmom**: Specify a string to use for setting the initial magnetic moment. A short string will result in multipliers. For example, ``mast_setmagmom 1 5 1`` will produce ``2*1 2*5 8*1`` for a 12-atom unit cell with 2A, 2B, and 8C atoms. A string of the number of atoms in the ``POSCAR`` file will be printed as entered, for example, ``mast_setmagmom 1 -1 1 -1 1 -1 1 -1``.
 
-**``mast_charge``**: Specify the charge on the system (total system)
+**mast_charge**: Specify the charge on the system (total system)
 
 *  -1 charge means the ADDITION of one electron. For example, O2- has two more electrons than O neutral. 
 *  A positive charge is the REMOVAL of electrons. For example, Na+ with a +1 charge has one FEWER electron than Na neutral.
 
-**``mast_coordinates``**: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the $structure section of the input file. The coordinates must be fractional coordinates. ::
+**mast_coordinates**: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the $structure section of the input file. The coordinates must be fractional coordinates. ::
 
     mast_coordinates coordposcar
 
@@ -215,49 +215,49 @@ mast_coordinates im1poscar,im2poscar,im3poscar
 
 *  This keyword cannot be used with programs other than VASP, cartesian coordinates, and special ingredients like inducedefect-type ingredients, whose write or run methods are different.
 
-**``mast_strain``**: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with ``mast_run_method`` of ``run_strain`` ::
+**mast_strain**: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with ``mast_run_method`` of ``run_strain`` ::
 
 mast_strain 1.01 1.03 0.98 
 
 This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%
 
-**``mast_scale``**: A number for which to scale all dimensions of a supercell. Only works with ``mast_run_method`` of ``run_scale`` or ``run_scale_defect``
+**mast_scale**: A number for which to scale all dimensions of a supercell. Only works with ``mast_run_method`` of ``run_scale`` or ``run_scale_defect``
 
-**``mast_frozen_seconds``**: A number of seconds before a job is considered frozen, if its output file has not been updated within this amount of time. If not set, 21000 seconds is used.
+**mast_frozen_seconds**: A number of seconds before a job is considered frozen, if its output file has not been updated within this amount of time. If not set, 21000 seconds is used.
 
-**``mast_auto_correct``**: Specify whether mast should automatically correct errors.
+**mast_auto_correct**: Specify whether mast should automatically correct errors.
 
 *  The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.
 *  If set to False, MAST will attempt to find errors, then write them into a ``MAST_ERROR`` file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the ``MAST_ERROR`` file is manually deleted by the user.
 
 The following queue-submission keywords are platform dependent and are used along to create the submission script:
 
-**``mast_exec``**: The command used in the submission script to execute the program. Note that this is a specific command rather than the .class. of program, given in ``mast_program``, and it should include any MPI commands. ::
+**mast_exec**: The command used in the submission script to execute the program. Note that this is a specific command rather than the .class. of program, given in ``mast_program``, and it should include any MPI commands. ::
 
     mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
 
-**``mast_nodes``**: The number of nodes requested.
+**mast_nodes**: The number of nodes requested.
 
-**``mast_ppn``**: The number of processors per node requested.
+**mast_ppn**: The number of processors per node requested.
 
-**``mast_queue``**: The queue requested.
+**mast_queue**: The queue requested.
 
-**``mast_walltime``**: The walltime requested, in whole number of hours
+**mast_walltime**: The walltime requested, in whole number of hours
 
-**``mast_memory``**: The memory per processor requested.
+**mast_memory**: The memory per processor requested.
 
 
 The following keywords have individual sections:
 
-**``mast_write_method``**: The .write. method, which specifies files the ingredient should write out before running (e.g., create the INCAR) 
+**mast_write_method**: The .write. method, which specifies files the ingredient should write out before running (e.g., create the INCAR) 
 
-**``mast_ready_method``**: The .ready. method, which specifies how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
+**mast_ready_method**: The .ready. method, which specifies how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
 
-**``mast_run_method``**: The .run. method, which specifies what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
+**mast_run_method**: The .run. method, which specifies what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
 
-**``mast_complete_method``**: The .complete. method, which specifies how MAST can tell if the ingredient is considered complete
+**mast_complete_method**: The .complete. method, which specifies how MAST can tell if the ingredient is considered complete
 
-**``mast_update_children_method``**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
+**mast_update_children_method**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
 
 ----------------------------------
 mast_write_method keyword values
@@ -456,146 +456,147 @@ give_structure_and_wavefunction_softlink
 Example Ingredients section
 -------------------------------
 
-Here is an example ingredients section:
-$ingredients
-begin ingredients_global
-mast_program    vasp
-mast_nodes      1
-mast_multiplyencut 1.5
-mast_ppn        1
-mast_queue      default
-mast_exec       mpiexec //home/mayeshiba/bin/vasp.5.3.3_vtst_static
-mast_kpoints    2x2x2 M
-mast_xc PW91
-isif 2
-ibrion 2
-nsw 191
-ismear 1
-sigma 0.2
-lwave False
-lcharg False
-prec Accurate
-mast_program   vasp
-mast_write_method           write_singlerun
-mast_ready_method           ready_singlerun
-mast_run_method             run_singlerun
-mast_complete_method        complete_singlerun
-mast_update_children_method  give_structure
-end
+Here is an example ingredients section::
 
-begin volrelax_to_singlerun
-isif 3
-end
+    $ingredients
+    begin ingredients_global
+    mast_program    vasp
+    mast_nodes      1
+    mast_multiplyencut 1.5
+    mast_ppn        1
+    mast_queue      default
+    mast_exec       mpiexec //home/mayeshiba/bin/vasp.5.3.3_vtst_static
+    mast_kpoints    2x2x2 M
+    mast_xc PW91
+    isif 2
+    ibrion 2
+    nsw 191
+    ismear 1
+    sigma 0.2
+    lwave False
+    lcharg False
+    prec Accurate
+    mast_program   vasp
+    mast_write_method           write_singlerun
+    mast_ready_method           ready_singlerun
+    mast_run_method             run_singlerun
+    mast_complete_method        complete_singlerun
+    mast_update_children_method  give_structure
+    end
 
-begin singlerun_to_phonon
-ibrion -1
-nsw 0
-mast_update_children_method  give_structure_and_restart_files
-mast_multiplyencut 1.25
-lwave True
-lcharge True
-end
+    begin volrelax_to_singlerun
+    isif 3
+    end
 
-begin inducedefect
-mast_write_method           no_setup
-mast_ready_method           ready_defect
-mast_run_method             run_defect
-mast_complete_method        complete_structure
-end
+    begin singlerun_to_phonon
+    ibrion -1
+    nsw 0
+    mast_update_children_method  give_structure_and_restart_files
+    mast_multiplyencut 1.25
+    lwave True
+    lcharge True
+    end
 
-begin singlerun_vac1
-mast_coordinates            vac1poscar
-end
+    begin inducedefect
+    mast_write_method           no_setup
+    mast_ready_method           ready_defect
+    mast_run_method             run_defect
+    mast_complete_method        complete_structure
+    end
 
-begin singlerun_vac2
-mast_coordinates            vac2poscar
-end
+    begin singlerun_vac1
+    mast_coordinates            vac1poscar
+    end
 
-begin singlerun_to_neb
-ibrion -1
-nsw 0
-mast_update_children_method  give_structure_and_energy_to_neb
-lwave True
-lcharge True
-end
+    begin singlerun_vac2
+    mast_coordinates            vac2poscar
+    end
 
-begin neb_to_neb_vac1-vac2
-mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
-mast_write_method           write_neb
-mast_update_children_method  give_neb_structures_to_neb
-mast_nodes                  3
-mast_kpoints                1x1x1 G
-ibrion 1
-potim 0.5
-images 3
-lclimb True
-spring -5
-end
+    begin singlerun_to_neb
+    ibrion -1
+    nsw 0
+    mast_update_children_method  give_structure_and_energy_to_neb
+    lwave True
+    lcharge True
+    end
 
-begin neb_to_neb_vac1-vac3
-mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
-mast_write_method           write_neb
-mast_update_children_method  give_neb_structures_to_neb
-mast_nodes                  3
-mast_kpoints                1x1x1 G
-ibrion 1
-potim 0.5
-images 3
-lclimb True
-spring -5
-end
+    begin neb_to_neb_vac1-vac2
+    mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+    mast_write_method           write_neb
+    mast_update_children_method  give_neb_structures_to_neb
+    mast_nodes                  3
+    mast_kpoints                1x1x1 G
+    ibrion 1
+    potim 0.5
+    images 3
+    lclimb True
+    spring -5
+    end
 
-begin neb_to_nebstat
-mast_write_method           write_neb
-mast_update_children_method  give_neb_structures_to_neb
-mast_nodes                  3
-ibrion 1
-potim 0.5
-images 3
-lclimb True
-spring -5
-end
+    begin neb_to_neb_vac1-vac3
+    mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+    mast_write_method           write_neb
+    mast_update_children_method  give_neb_structures_to_neb
+    mast_nodes                  3
+    mast_kpoints                1x1x1 G
+    ibrion 1
+    potim 0.5
+    images 3
+    lclimb True
+    spring -5
+    end
 
-begin nebstat_to_nebphonon
-ibrion -1
-nsw 0
-mast_write_method           write_neb_subfolders
-mast_ready_method           ready_neb_subfolders
-mast_run_method             run_neb_subfolders
-mast_complete_method        complete_neb_subfolders
-mast_update_children_method  give_saddle_structure
-end
+    begin neb_to_nebstat
+    mast_write_method           write_neb
+    mast_update_children_method  give_neb_structures_to_neb
+    mast_nodes                  3
+    ibrion 1
+    potim 0.5
+    images 3
+    lclimb True
+    spring -5
+    end
 
-begin phonon_to_phononparse
-mast_write_method           write_phonon_multiple
-mast_ready_method           ready_subfolders
-mast_run_method             run_subfolders
-mast_complete_method        complete_subfolders
-mast_update_children_method  give_phonon_multiple_forces_and_displacements
-ibrion 5
-nfree 2
-potim 0.01
-istart 1
-icharg 1
-end
+    begin nebstat_to_nebphonon
+    ibrion -1
+    nsw 0
+    mast_write_method           write_neb_subfolders
+    mast_ready_method           ready_neb_subfolders
+    mast_run_method             run_neb_subfolders
+    mast_complete_method        complete_neb_subfolders
+    mast_update_children_method  give_saddle_structure
+    end
 
-begin phononparse
-mast_program                phon
-lfree .True.
-temperature 273
-ptemp 10 110
-nd 3
-qa 11
-qb 11
-qc 11
-lnosym .True.
-ldrift .False.
-lsuper .False.
-mast_exec $MAST_INSTALL_PATH/bin/phon_henry
-mast_multiplyencut 1.25
-end
-
-$end
+    begin phonon_to_phononparse
+    mast_write_method           write_phonon_multiple
+    mast_ready_method           ready_subfolders
+    mast_run_method             run_subfolders
+    mast_complete_method        complete_subfolders
+    mast_update_children_method  give_phonon_multiple_forces_and_displacements
+    ibrion 5
+    nfree 2
+    potim 0.01
+    istart 1
+    icharg 1
+    end
+    
+    begin phononparse
+    mast_program                phon
+    lfree .True.
+    temperature 273
+    ptemp 10 110
+    nd 3
+    qa 11
+    qb 11
+    qc 11
+    lnosym .True.
+    ldrift .False.
+    lsuper .False.
+    mast_exec $MAST_INSTALL_PATH/bin/phon_henry
+    mast_multiplyencut 1.25
+    end
+    
+    $end
 
 
 ********************
@@ -854,209 +855,210 @@ In the example below, four input files would be created, corresponding to four d
 Full example
 *******************************
 
+Recipe::
 
-[tam@korczak source]$ cat ~/tammast/recipe_templates/phonon_test_neb.txt
-Recipe OptimizeWorkflow
-perfect_opt1 (lowmesh)
-    perfect_opt2
-        perfect_stat (static)
-        {begin}
-        inducedefect_<N> (inducedefect)
-            defect_<N>_<Q>_opt1 (lowmesh_defect)
-                defect_<N>_<Q>_opt2 (defect_relax)
-                    defect_<N>_<Q>_stat (static)
-        {end}
-{begin}
-defect_<N>_<Q>_stat (static)
-    phonon_<N>_<Q>_<P> (phonon)
-        phonon_<N>_<Q>_<P>_parse (phononparse)
-{end}
-{begin}
-defect_<B>_<Q>_stat (static_to_neb), defect_<E>_<Q>_stat (static_to_neb)
-    neb_<B-E>_<Q>_opt1 (neb_to_neb)
+    Recipe OptimizeWorkflow
+    perfect_opt1 (lowmesh)
+        perfect_opt2
+            perfect_stat (static)
+            {begin}
+            inducedefect_<N> (inducedefect)
+                defect_<N>_<Q>_opt1 (lowmesh_defect)
+                    defect_<N>_<Q>_opt2 (defect_relax)
+                        defect_<N>_<Q>_stat (static)
+            {end}
+    {begin}
+    defect_<N>_<Q>_stat (static)
+        phonon_<N>_<Q>_<P> (phonon)
+            phonon_<N>_<Q>_<P>_parse (phononparse)
+    {end}
+    {begin}
+    defect_<B>_<Q>_stat (static_to_neb), defect_<E>_<Q>_stat (static_to_neb)
+        neb_<B-E>_<Q>_opt1 (neb_to_neb)
+            neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+                neb_<B-E>_<Q>_stat (nebstat_to_phonon)
         neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
-            neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-    neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+        neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+    {end}
+    {begin}
     neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-{end}
-{begin}
-neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-    phonon_<B-E>_<Q>_<P> (phonon)
-        phonon_<B-E>_<Q>_<P>_parse (phononparse)
-{end}
+        phonon_<B-E>_<Q>_<P> (phonon)
+            phonon_<B-E>_<Q>_<P>_parse (phononparse)
+    {end}
 
-source]$ cat ../../test/phononreorgtest/phonon_with_neb.inp
-# Small demo for NEB workflow
-$mast
-system_name PhononNebTest
-$end
+Input file::
 
-$structure
-coord_type fractional
+    # Small demo for NEB workflow
+    $mast
+    system_name PhononNebTest
+    $end
 
-begin elementmap
-X1 Al
-X2 Mg
-end
+    $structure
+    coord_type fractional
 
-begin lattice
-3.5 0 0
-0 3.5 0
-0 0 3.5
-end
+    begin elementmap
+    X1 Al
+    X2 Mg
+    end
 
-begin coordinates
-X1 0.0000000000 0.0000000000 0.0000000000
-X1 0.5000000000 0.5000000000 0.0000000000
-X1 0.0000000000 0.5000000000 0.5000000000
-X1 0.5000000000 0.0000000000 0.5000000000
-end
+    begin lattice
+    3.5 0 0
+    0 3.5 0
+    0 0 3.5
+    end
 
-$end
+    begin coordinates
+    X1 0.0000000000 0.0000000000 0.0000000000
+    X1 0.5000000000 0.5000000000 0.0000000000
+    X1 0.0000000000 0.5000000000 0.5000000000
+    X1 0.5000000000 0.0000000000 0.5000000000
+    end
 
-$defects
-threshold 1e-4
-coord_type fractional
+    $end
 
-begin int1
-interstitial 0.25 0.25 0.25 X2
-phonon host 0.0 0.5 0.5 0.5
-charge=-3,-2
-end
+    $defects
+    threshold 1e-4
+    coord_type fractional
 
-begin int2
-interstitial 0.25 0.25 0.75 X2
-phonon host 0.0 0.0 0.0 0.5
-phonon int 0.25 0.25 0.75 0.5
-charge=-2,-2
-end
+    begin int1
+    interstitial 0.25 0.25 0.25 X2
+    phonon host 0.0 0.5 0.5 0.5
+    charge=-3,-2
+    end
 
-begin int3
-interstitial 0.75 0.25 0.25 X2
-phonon host 0.0 0.0 0.0 0.5
-phonon int 0.75 0.25 0.25 0.5
-charge=-3,-3
-end
+    begin int2
+    interstitial 0.25 0.25 0.75 X2
+    phonon host 0.0 0.0 0.0 0.5
+    phonon int 0.25 0.25 0.75 0.5
+    charge=-2,-2
+    end
 
-$end
+    begin int3
+    interstitial 0.75 0.25 0.25 X2
+    phonon host 0.0 0.0 0.0 0.5
+    phonon int 0.75 0.25 0.25 0.5
+    charge=-3,-3
+    end
 
-$ingredients
-begin ingredients_global
-mast_nodes         1
-mast_multiplyencut 1.5
-mast_ppn           1
-mast_queue         default
-mast_exec          //share/apps/vasp5.2_cNEB
-mast_kpoints       2x2x2 M
-mast_xc            PBE
-isif 3
-ibrion 2
-nsw 191
-ismear 1
-sigma 0.2
-lwave False
-lcharg False
-prec Accurate
-mast_program   vasp
-mast_write_method            write_singlerun
-mast_ready_method            ready_singlerun
-mast_run_method              run_singlerun
-mast_complete_method         complete_singlerun
-mast_update_children_method  give_structure
-end
+    $end
 
-begin inducedefect
-mast_write_method            no_setup
-mast_ready_method            ready_defect
-mast_run_method              run_defect
-mast_complete_method         complete_structure
-end
+    $ingredients
+    begin ingredients_global
+    mast_nodes         1
+    mast_multiplyencut 1.5
+    mast_ppn           1
+    mast_queue         default
+    mast_exec          //share/apps/vasp5.2_cNEB
+    mast_kpoints       2x2x2 M
+    mast_xc            PBE
+    isif 3
+    ibrion 2
+    nsw 191
+    ismear 1
+    sigma 0.2
+    lwave False
+    lcharg False
+    prec Accurate
+    mast_program   vasp
+    mast_write_method            write_singlerun
+    mast_ready_method            ready_singlerun
+    mast_run_method              run_singlerun
+    mast_complete_method         complete_singlerun
+    mast_update_children_method  give_structure
+    end
 
-begin lowmesh
-mast_kpoints 1x1x1 G
-end
+    begin inducedefect
+    mast_write_method            no_setup
+    mast_ready_method            ready_defect
+    mast_run_method              run_defect
+    mast_complete_method         complete_structure
+    end
 
-begin lowmesh_defect
-mast_kpoints 1x1x1 G
-isif 2
-end
+    begin lowmesh
+    mast_kpoints 1x1x1 G
+    end
 
-begin defect_relax
-isif 2
-end
+    begin lowmesh_defect
+    mast_kpoints 1x1x1 G
+    isif 2
+    end
 
-begin static
-ibrion -1
-nsw 0
-mast_multiplyencut 1.25
-mast_update_children_method give_structure
-end
+    begin defect_relax
+    isif 2
+    end
 
-begin static_to_neb
-ibrion -1
-nsw 0
-mast_multiplyencut 1.25
-mast_update_children_method give_structure_and_energy_to_neb
-end
+    begin static
+    ibrion -1
+    nsw 0
+    mast_multiplyencut 1.25
+    mast_update_children_method give_structure
+    end
 
-begin phonon
-ibrion 5
-mast_write_method write_phonon_single
-mast_update_children_method give_phonon_single_forces_and_displacements
-end
+    begin static_to_neb
+    ibrion -1
+    nsw 0
+    mast_multiplyencut 1.25
+    mast_update_children_method give_structure_and_energy_to_neb
+    end
 
-begin phononparse
-mast_program phon
-lfree .True.
-temperature 1173
-nd 3
-qa 11
-qb 11
-qc 11
-lsuper .False.
-mast_exec //home/tam/tammast/bin/phon_henry
-end
+    begin phonon
+    ibrion 5
+    mast_write_method write_phonon_single
+    mast_update_children_method give_phonon_single_forces_and_displacements
+    end
 
-begin neb_to_neb
-mast_kpoints 1x1x1 G
-mast_program   vasp_neb
-mast_write_method            write_neb
-mast_update_children_method  give_neb_structures_to_neb
-end
+    begin phononparse
+    mast_program phon
+    lfree .True.
+    temperature 1173
+    nd 3
+    qa 11
+    qb 11
+    qc 11
+    lsuper .False.
+    mast_exec //home/tam/tammast/bin/phon_henry
+    end
 
-begin neb_to_nebstat
-mast_program   vasp_neb
-mast_write_method            write_neb
-mast_update_children_method  give_neb_structures_to_neb
-end
+    begin neb_to_neb
+    mast_kpoints 1x1x1 G
+    mast_program   vasp_neb
+    mast_write_method            write_neb
+    mast_update_children_method  give_neb_structures_to_neb
+    end
 
-begin nebstat_to_phonon
-mast_program   vasp
-mast_write_method            write_neb_subfolders
-mast_ready_method            ready_neb_subfolders
-mast_run_method              run_neb_subfolders
-mast_complete_method         complete_neb_subfolders
-mast_update_children_method  give_saddle_structure
-end
+    begin neb_to_nebstat
+    mast_program   vasp_neb
+    mast_write_method            write_neb
+    mast_update_children_method  give_neb_structures_to_neb
+    end
 
-$end
+    begin nebstat_to_phonon
+    mast_program   vasp
+    mast_write_method            write_neb_subfolders
+    mast_ready_method            ready_neb_subfolders
+    mast_run_method              run_neb_subfolders
+    mast_complete_method         complete_neb_subfolders
+    mast_update_children_method  give_saddle_structure
+    end
 
-$neb
-begin int1-int2
-X2, 0.25 0.25 0.25, 0.25 0.25 0.75
-images 1
-phonon int 0.25 0.25 0.5 0.5
-phonon host 0.0 0.0 0.0 0.5
-end
-begin int1-int3
-X2, 0.25 0.25 0.25, 0.75 0.25 0.25
-images 1
-phonon int 0.5 0.25 0.25 0.5
-phonon host 0.0 0.0 0.0 0.5
-end
-$end
+    $end
 
-$recipe
-recipe_file phonon_test_neb.txt
-$end
+    $neb
+    begin int1-int2
+    X2, 0.25 0.25 0.25, 0.25 0.25 0.75
+    images 1
+    phonon int 0.25 0.25 0.5 0.5
+    phonon host 0.0 0.0 0.0 0.5
+    end
+    begin int1-int3
+    X2, 0.25 0.25 0.25, 0.75 0.25 0.25
+    images 1
+    phonon int 0.5 0.25 0.25 0.5
+    phonon host 0.0 0.0 0.0 0.5
+    end
+    $end
+
+    $recipe
+    recipe_file phonon_test_neb.txt
+    $end
 
