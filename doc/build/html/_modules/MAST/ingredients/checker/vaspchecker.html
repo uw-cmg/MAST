@@ -1,0 +1,1067 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.ingredients.checker.vaspchecker &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.ingredients.checker.vaspchecker</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Poscar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Outcar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Potcar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Incar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Kpoints</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.cifio</span> <span class="kn">import</span> <span class="n">CifParser</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.sites</span> <span class="kn">import</span> <span class="n">PeriodicSite</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">dirutil</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.mastfile</span> <span class="kn">import</span> <span class="n">MASTFile</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.metadata</span> <span class="kn">import</span> <span class="n">Metadata</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.pmgextend.structure_extensions</span> <span class="kn">import</span> <span class="n">StructureExtensions</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.checker</span> <span class="kn">import</span> <span class="n">BaseChecker</span>
+<div class="viewcode-block" id="VaspChecker"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker">[docs]</a><span class="k">class</span> <span class="nc">VaspChecker</span><span class="p">(</span><span class="n">BaseChecker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;VASP checker functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseChecker</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VaspChecker.get_structure_from_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_structure_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">get_structure_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">myfilepath</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the structure from a specified file path.</span>
+<span class="sd">            For VASP, this is a POSCAR-type file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                myfilepath &lt;str&gt;: File path for structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">myfilepath</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.get_initial_structure_from_directory"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_initial_structure_from_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_initial_structure_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the initial structure.</span>
+<span class="sd">            For VASP, this is the POSCAR file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: Directory. If no directory is given,</span>
+<span class="sd">                    use current ingredient directory given as</span>
+<span class="sd">                    keyword &#39;name&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">/POSCAR&quot;</span> <span class="o">%</span> <span class="n">mydir</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
+    </div>
+<div class="viewcode-block" id="VaspChecker.get_final_structure_from_directory"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_final_structure_from_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_final_structure_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the final structure.</span>
+<span class="sd">            For VASP, this is the CONTCAR file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: Directory. If no directory is given,</span>
+<span class="sd">                    use current ingredient directory given</span>
+<span class="sd">                    as keyword &#39;name&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">/CONTCAR&quot;</span> <span class="o">%</span> <span class="n">mydir</span><span class="p">)</span><span class="o">.</span><span class="n">structure</span>
+    </div>
+<div class="viewcode-block" id="VaspChecker.forward_final_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_final_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_final_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="s">&quot;POSCAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward the final structure.</span>
+<span class="sd">            For VASP, this is the CONTCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: Path of child ingredient</span>
+<span class="sd">                newname &lt;str&gt;: new name (default &#39;POSCAR&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;CONTCAR&quot;</span><span class="p">,</span> <span class="n">newname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_initial_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_initial_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_initial_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="s">&quot;POSCAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward the initial structure.</span>
+<span class="sd">            For VASP, this is the POSCAR. This function is</span>
+<span class="sd">            used after phonon calculations, where the CONTCAR</span>
+<span class="sd">            contains the last displacement. To forward to PHON,</span>
+<span class="sd">            the POSCAR (without displacements) should be used.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: Path of child ingredient</span>
+<span class="sd">                newname &lt;str&gt;: new name (default &#39;POSCAR&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">,</span> <span class="n">newname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_dynamical_matrix_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_dynamical_matrix_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_dynamical_matrix_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="s">&quot;DYNMAT&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward the dynamical matrix.</span>
+<span class="sd">            For VASP, this is the DYNMAT file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: Path of child ingredient</span>
+<span class="sd">                newname &lt;str&gt;: new name (default &#39;DYNMAT&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;DYNMAT&quot;</span><span class="p">,</span> <span class="n">newname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_displacement_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_displacement_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_displacement_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="s">&quot;XDATCAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward displacement information.</span>
+<span class="sd">            For VASP, this is the XDATCAR file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: Path of child ingredient</span>
+<span class="sd">                newname &lt;str&gt;: new name (default &#39;XDATCAR&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;XDATCAR&quot;</span><span class="p">,</span> <span class="n">newname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_energy_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_energy_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_energy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="s">&quot;OSZICAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward the energy file.</span>
+<span class="sd">            For VASP, this is the OSZICAR file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: Path of child ingredient</span>
+<span class="sd">                newname &lt;str&gt;: new name (default &#39;OSZICAR&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;OSZICAR&quot;</span><span class="p">,</span> <span class="n">newname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.is_complete"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.is_complete">[docs]</a>    <span class="k">def</span> <span class="nf">is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if single VASP non-NEB calculation is complete.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">usertime</span><span class="o">=</span><span class="bp">False</span>
+        <span class="n">reachedaccuracy</span><span class="o">=</span><span class="bp">False</span>
+        <span class="n">opath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="s">&quot;OUTCAR&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">opath</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;No OUTCAR at </span><span class="si">%s</span><span class="s">; not complete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">myoutcar</span> <span class="o">=</span> <span class="n">Outcar</span><span class="p">(</span><span class="n">opath</span><span class="p">)</span>
+        
+        <span class="c">#hw 04/19/13</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">myoutcar</span><span class="o">.</span><span class="n">run_stats</span><span class="p">[</span><span class="s">&#39;User time (sec)&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">usertime</span><span class="o">=</span><span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">usertime</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">usertime</span><span class="o">=</span><span class="bp">False</span>
+        
+        <span class="n">reachgrep</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s">&#39;grep &quot;reached required accuracy&quot; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">reachrpt</span><span class="o">=</span><span class="n">reachgrep</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">reachgrep</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">reachrpt</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">reachedaccuracy</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reachedaccuracy</span><span class="o">=</span><span class="bp">True</span>
+
+        <span class="n">isstatic</span><span class="o">=</span><span class="bp">False</span>
+        <span class="n">isphonon</span><span class="o">=</span><span class="bp">False</span>
+        <span class="n">isMD</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">if</span> <span class="s">&#39;ibrion&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">ibrionval</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;ibrion&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ibrionval</span> <span class="o">==</span> <span class="s">&quot;-1&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ingredient </span><span class="si">%s</span><span class="s"> IBRION -1 is static&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">isstatic</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">ibrionval</span> <span class="o">==</span> <span class="s">&quot;0&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ingredient </span><span class="si">%s</span><span class="s"> IBRION 0 is MD&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">isMD</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">ibrionval</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;5&quot;</span><span class="p">,</span><span class="s">&quot;6&quot;</span><span class="p">,</span><span class="s">&quot;7&quot;</span><span class="p">,</span><span class="s">&quot;8&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ingredient </span><span class="si">%s</span><span class="s"> IBRION </span><span class="si">%s</span><span class="s"> is phonon&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">ibrionval</span><span class="p">))</span>
+                <span class="n">isphonon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="s">&#39;nsw&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">nswval</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;nsw&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">nswval</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;0&quot;</span><span class="p">,</span><span class="s">&quot;1&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ingredient </span><span class="si">%s</span><span class="s"> NSW </span><span class="si">%s</span><span class="s"> is static&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">nswval</span><span class="p">))</span>
+                <span class="n">isstatic</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;ingredient </span><span class="si">%s</span><span class="s"> no NSW given is static&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">isstatic</span> <span class="o">=</span> <span class="bp">True</span> <span class="c">#No NSW specified, VASP defaults to 0</span>
+        
+        <span class="c">#For static runs, make an additional check for just electronic convergence.</span>
+        <span class="k">if</span> <span class="n">isstatic</span><span class="p">:</span>
+            <span class="n">reachgrep</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s">&#39;grep &quot;EDIFF is reached&quot; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">reachrpt</span><span class="o">=</span><span class="n">reachgrep</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">reachgrep</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">reachrpt</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">reachedaccuracy</span><span class="o">=</span><span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">reachedaccuracy</span><span class="o">=</span><span class="bp">True</span>
+
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">isMD</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">isphonon</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">usertime</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows no user time.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows user time.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">isstatic</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reachedaccuracy</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">usertime</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows EDIFF reached for static run and user time; complete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows EDIFF reached for static run, but no user time.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">usertime</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> does not show EDIFF reached for static run, but shows complete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> does not show EDIFF reached for static run or user time; still incomplete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reachedaccuracy</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">usertime</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows reached required accuracy and user time; complete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> shows reached required accuracy, but no user time.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">usertime</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> does not show reached required accuracy, but shows complete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OUTCAR at </span><span class="si">%s</span><span class="s"> does not show reached required accuracy or user time; still incomplete.&quot;</span> <span class="o">%</span> <span class="n">opath</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.is_ready_to_run"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.is_ready_to_run">[docs]</a>    <span class="k">def</span> <span class="nf">is_ready_to_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if single VASP non-NEB ingredient is </span>
+<span class="sd">            ready to run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">notready</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/KPOINTS&quot;</span><span class="p">)):</span>
+            <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/POTCAR&quot;</span><span class="p">)):</span>
+            <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/INCAR&quot;</span><span class="p">)):</span>
+            <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/POSCAR&quot;</span><span class="p">)):</span>
+            <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/submit.sh&quot;</span><span class="p">)):</span>
+            <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">notready</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
+    <span class="k">def</span> <span class="nf">_vasp_poscar_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the POSCAR file for a single VASP run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">pospath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pospath</span><span class="p">):</span>
+            <span class="n">my_poscar</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">pospath</span><span class="p">)</span> 
+            <span class="c">#parent should have given a structure</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c">#this is an originating run; mast should give it a structure</span>
+            <span class="n">my_poscar</span> <span class="o">=</span> <span class="n">Poscar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;No POSCAR found from a parent; base structure used for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s">&#39;mast_coordinates&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">my_poscar</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">coordstrucs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_coordinates_only_structure_from_input</span><span class="p">()</span>
+            <span class="n">newstruc</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">graft_coordinates_onto_structure</span><span class="p">(</span><span class="n">coordstrucs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">my_poscar</span><span class="o">.</span><span class="n">structure</span><span class="o">=</span><span class="n">newstruc</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">my_poscar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">pospath</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">my_poscar</span>
+
+    <span class="k">def</span> <span class="nf">_vasp_kpoints_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse mast_kpoints string, which should take the format:</span>
+<span class="sd">            number, number, number designation</span>
+<span class="sd">            examples: &quot;3x3x3 M&quot;, &quot;1x1x1 G&quot;. If no designation is given,</span>
+<span class="sd">            Monkhorst-Pack is assumed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s">&#39;mast_kpoints&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">kptlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_kpoints&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;k-point instructions need to be set in ingredients keyword mast_kpoints&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kptlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">desig</span> <span class="o">=</span> <span class="s">&quot;M&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desig</span> <span class="o">=</span> <span class="n">kptlist</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">desig</span> <span class="o">==</span> <span class="s">&quot;M&quot;</span><span class="p">:</span>
+            <span class="n">my_kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">monkhorst_automatic</span><span class="p">(</span><span class="n">kpts</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span><span class="n">shift</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">desig</span> <span class="o">==</span> <span class="s">&quot;G&quot;</span><span class="p">:</span>
+            <span class="n">my_kpoints</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">gamma_automatic</span><span class="p">(</span><span class="n">kpts</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">kptlist</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span><span class="n">shift</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;kpoint designation &quot;</span> <span class="o">+</span> <span class="n">desig</span> <span class="o">+</span> <span class="s">&quot; not recognized.&quot;</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">my_kpoints</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;/KPOINTS&quot;</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">my_kpoints</span>
+
+    <span class="k">def</span> <span class="nf">_vasp_potcar_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">my_poscar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the POTCAR file.&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;mast_xc&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">myxc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_xc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="c">#Uppercase</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;vasp_checker, _vasp_potcar_setup&quot;</span><span class="p">,</span><span class="s">&quot;Exchange correlation functional needs to be specified in ingredients keyword mast_xc&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;mast_pp_setup&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">sites</span> <span class="o">=</span> <span class="n">my_poscar</span><span class="o">.</span><span class="n">site_symbols</span>
+            <span class="n">setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_pp_setup&#39;</span><span class="p">]</span>
+            <span class="n">pp_sites</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pp_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">setup</span><span class="p">[</span><span class="n">site</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">pp_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+            <span class="n">my_potcar</span> <span class="o">=</span> <span class="n">Potcar</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">pp_sites</span><span class="p">,</span> <span class="n">functional</span><span class="o">=</span><span class="n">myxc</span><span class="p">,</span> <span class="n">sym_potcar_map</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">my_potcar</span> <span class="o">=</span> <span class="n">Potcar</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">my_poscar</span><span class="o">.</span><span class="n">site_symbols</span><span class="p">,</span> <span class="n">functional</span><span class="o">=</span><span class="n">myxc</span><span class="p">,</span> <span class="n">sym_potcar_map</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">my_potcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;/POTCAR&quot;</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">my_potcar</span>
+
+    <span class="k">def</span> <span class="nf">_vasp_incar_get_non_mast_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the non-VASP keywords and make a dictionary.&quot;&quot;&quot;</span>
+        <span class="n">incar_dict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">allowedpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_install_path</span><span class="p">(),</span> <span class="s">&#39;MAST&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;ingredients&#39;</span><span class="p">,</span><span class="s">&#39;programkeys&#39;</span><span class="p">,</span><span class="s">&#39;vasp_allowed_keywords.py&#39;</span><span class="p">)</span>
+        <span class="n">allowed_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_incar_get_allowed_keywords</span><span class="p">(</span><span class="n">allowedpath</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;mast_&quot;</span><span class="p">:</span>
+                <span class="n">keytry</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">keytry</span> <span class="ow">in</span> <span class="n">allowed_list</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Ignoring program key </span><span class="si">%s</span><span class="s"> for INCAR. To allow this keyword, add it to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">keytry</span><span class="p">,</span> <span class="n">allowedpath</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+                        <span class="n">incar_dict</span><span class="p">[</span><span class="n">keytry</span><span class="p">]</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="c">#First letter cap</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">incar_dict</span><span class="p">[</span><span class="n">keytry</span><span class="p">]</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">return</span> <span class="n">incar_dict</span>
+
+
+    <span class="k">def</span> <span class="nf">_vasp_incar_get_allowed_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowedpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get allowed vasp keywords.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                allowedpath &lt;str&gt;: file path for allowed vasp keywords</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allowed</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">(</span><span class="n">allowedpath</span><span class="p">)</span>
+        <span class="n">allowed_list</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">allowed</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">allowed_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">allowed_list</span>
+
+    <span class="k">def</span> <span class="nf">_vasp_incar_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">my_potcar</span><span class="p">,</span> <span class="n">my_poscar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the INCAR, including MAGMOM string, ENCUT, and NELECT.&quot;&quot;&quot;</span>
+        <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">myd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">myd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_incar_get_non_mast_keywords</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">myd</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;IMAGES&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="s">&#39;mast_multiplyencut&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">mymult</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_multiplyencut&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mymult</span> <span class="o">=</span> <span class="mf">1.5</span>
+        <span class="k">if</span> <span class="s">&#39;ENCUT&#39;</span> <span class="ow">in</span> <span class="n">myd</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">myd</span><span class="p">[</span><span class="s">&#39;ENCUT&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_max_enmax_from_potcar</span><span class="p">(</span><span class="n">my_potcar</span><span class="p">)</span><span class="o">*</span><span class="n">mymult</span>
+        <span class="k">if</span> <span class="s">&#39;mast_setmagmom&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">magstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_setmagmom&#39;</span><span class="p">])</span>
+            <span class="n">magmomstr</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+            <span class="n">maglist</span> <span class="o">=</span> <span class="n">magstr</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">numatoms</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">my_poscar</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maglist</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">numatoms</span><span class="p">:</span>
+                <span class="n">magct</span><span class="o">=</span><span class="mi">0</span>
+                <span class="k">while</span> <span class="n">magct</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">maglist</span><span class="p">):</span>
+                    <span class="n">magmomstr</span> <span class="o">=</span> <span class="n">magmomstr</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">my_poscar</span><span class="o">.</span><span class="n">natoms</span><span class="p">[</span><span class="n">magct</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;*&quot;</span> <span class="o">+</span> <span class="n">maglist</span><span class="p">[</span><span class="n">magct</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> 
+                    <span class="n">magct</span> <span class="o">=</span> <span class="n">magct</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">magmomstr</span> <span class="o">=</span> <span class="n">magstr</span>
+            <span class="n">myd</span><span class="p">[</span><span class="s">&#39;MAGMOM&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">magmomstr</span>
+        <span class="k">if</span> <span class="s">&#39;mast_charge&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">myelectrons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_total_electrons</span><span class="p">(</span><span class="n">my_poscar</span><span class="p">,</span> <span class="n">my_potcar</span><span class="p">)</span>
+            <span class="n">newelectrons</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">adjustment</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_charge&#39;</span><span class="p">])</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;vasp_checker, vasp_incar_setup&quot;</span><span class="p">,</span><span class="s">&quot;Could not parse adjustment&quot;</span><span class="p">)</span>
+            <span class="c">#newelectrons = myelectrons + adjustment</span>
+            <span class="n">newelectrons</span> <span class="o">=</span> <span class="n">myelectrons</span> <span class="o">-</span> <span class="n">adjustment</span>
+            <span class="n">myd</span><span class="p">[</span><span class="s">&#39;NELECT&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">newelectrons</span><span class="p">)</span>
+        <span class="n">my_incar</span> <span class="o">=</span> <span class="n">Incar</span><span class="p">(</span><span class="n">myd</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">my_incar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&quot;/INCAR&quot;</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">my_incar</span>
+
+<div class="viewcode-block" id="VaspChecker.set_up_program_input"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.set_up_program_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_up_program_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the program input files.&quot;&quot;&quot;</span>
+        <span class="n">myposcar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_poscar_setup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_kpoints_setup</span><span class="p">()</span>
+        <span class="n">mypotcar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_potcar_setup</span><span class="p">(</span><span class="n">myposcar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vasp_incar_setup</span><span class="p">(</span><span class="n">mypotcar</span><span class="p">,</span> <span class="n">myposcar</span><span class="p">)</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_extra_restart_files"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_extra_restart_files">[docs]</a>    <span class="k">def</span> <span class="nf">forward_extra_restart_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward extra restart files: </span>
+<span class="sd">            For VASP, this entails a softlink to WAVECAR and </span>
+<span class="sd">            CHGCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: path to child ingredient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;This function is obsolete. Use softlink_charge_density_file, softlink_wavefunction_file, forward_charge_density_file, and/or forward_wavefunction_file&quot;</span><span class="p">)</span>
+        <span class="n">parentpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">childpath</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">subprocess</span>
+        <span class="c">#print &quot;cwd: &quot;, os.getcwd()</span>
+        <span class="n">curpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">childpath</span><span class="p">)</span>
+        <span class="c">#print parentpath</span>
+        <span class="c">#print childpath</span>
+        <span class="n">mylink</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s">&quot;ln -s </span><span class="si">%s</span><span class="s">/WAVECAR WAVECAR&quot;</span> <span class="o">%</span> <span class="n">parentpath</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">mylink</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">mylink2</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="s">&quot;ln -s </span><span class="si">%s</span><span class="s">/CHGCAR CHGCAR&quot;</span> <span class="o">%</span> <span class="n">parentpath</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">mylink2</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curpath</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">childpath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.softlink_charge_density_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.softlink_charge_density_file">[docs]</a>    <span class="k">def</span> <span class="nf">softlink_charge_density_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Softlink the parent charge density file to the child folder</span>
+<span class="sd">            For VASP, this entails a softlink to CHGCAR</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: path to child ingredient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">softlink_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;CHGCAR&quot;</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VaspChecker.softlink_wavefunction_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.softlink_wavefunction_file">[docs]</a>    <span class="k">def</span> <span class="nf">softlink_wavefunction_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Softlink the parent wavefunction file to the child folder</span>
+<span class="sd">            For VASP, this entails a softlink to WAVECAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: path to child ingredient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">softlink_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;WAVECAR&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.forward_charge_density_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_charge_density_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_charge_density_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy the charge density file to the child folder.</span>
+<span class="sd">            For VASP, this is the CHGCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: path to child ingredient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;CHGCAR&quot;</span><span class="p">,</span><span class="s">&quot;CHGCAR&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="VaspChecker.forward_wavefunction_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.forward_wavefunction_file">[docs]</a>    <span class="k">def</span> <span class="nf">forward_wavefunction_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy the wavefunction file to the child folder.</span>
+<span class="sd">            For VASP, this is the WAVECAR.</span>
+<span class="sd">            CHGCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childpath &lt;str&gt;: path to child ingredient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_a_file</span><span class="p">(</span><span class="n">childpath</span><span class="p">,</span> <span class="s">&quot;WAVECAR&quot;</span><span class="p">,</span><span class="s">&quot;WAVECAR&quot;</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VaspChecker.add_selective_dynamics_to_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.add_selective_dynamics_to_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">add_selective_dynamics_to_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sdarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add selective dynamics to a structure file.</span>
+<span class="sd">            In the case of VASP, the structure file is </span>
+<span class="sd">            POSCAR-like</span>
+<span class="sd">            Args:</span>
+<span class="sd">                sdarray &lt;numpy array of bool&gt;: Numpy array of</span>
+<span class="sd">                    booleans for T F F etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">pname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="s">&quot;POSCAR&quot;</span><span class="p">)</span>
+        <span class="n">phposcar</span> <span class="o">=</span> <span class="n">Poscar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
+        <span class="n">phposcar</span><span class="o">.</span><span class="n">selective_dynamics</span> <span class="o">=</span> <span class="n">sdarray</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">lock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">pname</span><span class="p">,</span> <span class="n">pname</span> <span class="o">+</span> <span class="s">&quot;_no_sd&quot;</span><span class="p">)</span>
+        <span class="n">phposcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.get_energy"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the energy.</span>
+<span class="sd">            For VASP, this is E0 energy from vasprun.xml</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/vasprun.xml&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;electronic_steps&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;e_0_energy&quot;</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">_get_max_enmax_from_potcar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mypotcar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get maximum enmax value (float) from Potcar </span>
+<span class="sd">            (combined list)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enmax_list</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">potcarct</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">onepotcar</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">while</span> <span class="n">potcarct</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">mypotcar</span><span class="p">):</span>
+            <span class="n">onepotcar</span> <span class="o">=</span> <span class="n">mypotcar</span><span class="p">[</span><span class="n">potcarct</span><span class="p">]</span> <span class="c">#A PotcarSingle object</span>
+            <span class="n">enmax_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">onepotcar</span><span class="o">.</span><span class="n">enmax</span><span class="p">)</span>
+            <span class="n">potcarct</span> <span class="o">=</span> <span class="n">potcarct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">enmax_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_one_unfrozen_atom_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">myposcar</span><span class="p">,</span> <span class="n">natom</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use selective dynamics to make a poscar with one unfrozen atom.</span>
+<span class="sd">            myposcar = Poscar</span>
+<span class="sd">            natom = the number of the atom to unfreeze</span>
+<span class="sd">            Returns: Poscar (use write_file function on it).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This method is abandoned and should not be used.&quot;</span><span class="p">)</span>
+        <span class="n">mysd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span><span class="p">),</span><span class="mi">3</span><span class="p">],</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">mysd</span><span class="p">[</span><span class="n">natom</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span> <span class="c">#indexing starts at 0</span>
+        <span class="n">mysd</span><span class="p">[</span><span class="n">natom</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+        <span class="n">mysd</span><span class="p">[</span><span class="n">natom</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+        <span class="n">myposcar</span><span class="o">.</span><span class="n">selective_dynamics</span> <span class="o">=</span> <span class="n">mysd</span>
+        <span class="k">return</span> <span class="n">myposcar</span>
+
+    <span class="k">def</span> <span class="nf">_make_one_unfrozen_direction_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">myposcar</span><span class="p">,</span> <span class="n">natom</span><span class="p">,</span> <span class="n">ndir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use selective dynamics to make a poscar with one unfrozen atom.</span>
+<span class="sd">            myposcar = Poscar</span>
+<span class="sd">            natom = the number of the atom to unfreeze</span>
+<span class="sd">            ndir = the direction to freeze (0, 1, 2 for x, y, z)</span>
+<span class="sd">            Returns: Poscar (use write_file function on it).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This method is abandoned and should not be used.&quot;</span><span class="p">)</span>
+        <span class="n">mysd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">sum</span><span class="p">(</span><span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span><span class="p">),</span><span class="mi">3</span><span class="p">],</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="n">mysd</span><span class="p">[</span><span class="n">natom</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">ndir</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span> <span class="c">#indexing starts at 0</span>
+        <span class="n">myposcar</span><span class="o">.</span><span class="n">selective_dynamics</span> <span class="o">=</span> <span class="n">mysd</span>
+        <span class="k">return</span> <span class="n">myposcar</span>
+
+
+<div class="viewcode-block" id="VaspChecker.read_my_dynamical_matrix_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.read_my_dynamical_matrix_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_my_dynamical_matrix_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s">&quot;DYNMAT&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read a dynamical matrix file.</span>
+<span class="sd">            For VASP this is DYNMAT.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: directory; use ingredient directory</span>
+<span class="sd">                             if null is given</span>
+<span class="sd">                fname &lt;str&gt;: file name (default &#39;DYNMAT&#39;)</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                dyndict &lt;dict&gt;: dictionary structured like this:</span>
+<span class="sd">                    [&#39;numspec&#39;] = &lt;int&gt; number of species</span>
+<span class="sd">                    [&#39;numatoms&#39;] = &lt;int&gt; number of atoms</span>
+<span class="sd">                    [&#39;numdisp&#39;] = &lt;int&gt; number of displacements</span>
+<span class="sd">                    [&#39;massline&#39;] = &lt;str&gt; masses line</span>
+<span class="sd">                    [&#39;atoms&#39;][atom &lt;int&gt;][disp &lt;int&gt;][&#39;displine&#39;] =</span>
+<span class="sd">                        displacement</span>
+<span class="sd">                        vector (part of first line in dynmat block,</span>
+<span class="sd">                        e.g. &quot;0.01 0 0&quot;)</span>
+<span class="sd">                    [&#39;atoms&#39;][atom &lt;int&gt;][disp &lt;int&gt;][&#39;dynmat&#39;] =</span>
+<span class="sd">                            &lt;list&gt;</span>
+<span class="sd">                            list of dynmat lines for this atom</span>
+<span class="sd">                            and this displacement</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">mydyn</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+        <span class="n">mydata</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mydyn</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="c">#whole new copy</span>
+        <span class="n">dyndict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">firstline</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c">#pop first value</span>
+        <span class="n">firstspl</span> <span class="o">=</span> <span class="n">firstline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numspec&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">firstspl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">numatoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">firstspl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">numatoms</span>
+        <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numdisp&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">firstspl</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;massline&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">atom</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">disp</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">thirdline</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">thirdline</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">thirdspl</span> <span class="o">=</span> <span class="n">thirdline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">atom</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">thirdspl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">disp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">thirdspl</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">displine</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">thirdspl</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+            <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+            <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;displine&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">displine</span>
+            <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numatoms</span><span class="p">):</span>
+                <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dyndict</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.write_my_dynamical_matrix_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.write_my_dynamical_matrix_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_my_dynamical_matrix_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyndict</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s">&quot;DYNMAT&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a dynamical matrix file based on a dictionary.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                dyndict &lt;dict&gt;: Dictionary of dynmat (see read_my_dynmat)</span>
+<span class="sd">                mydir &lt;str&gt;: Directory in which to write;</span>
+<span class="sd">                             use ingredient directory if null</span>
+<span class="sd">                fname &lt;str&gt;: filename (default DYNMAT)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">dynwrite</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">firstline</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numspec&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numdisp&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">firstline</span><span class="p">)</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;massline&#39;</span><span class="p">])</span>
+        <span class="n">atomlist</span><span class="o">=</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">atomlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atomlist</span><span class="p">:</span>
+            <span class="n">displist</span> <span class="o">=</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">displist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">displist</span><span class="p">:</span>
+                <span class="n">thirdline</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">disp</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;displine&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thirdline</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">]:</span>
+                    <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="VaspChecker.write_my_dynmat_without_disp_or_mass"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.write_my_dynmat_without_disp_or_mass">[docs]</a>    <span class="k">def</span> <span class="nf">write_my_dynmat_without_disp_or_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyndict</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s">&quot;DYNMAT&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a dynamical matrix file without the displacement indicators 1, 2, 3</span>
+<span class="sd">            and without the masses line, and with first line having only</span>
+<span class="sd">            the total number of displacements, for PHON.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                dyndict &lt;dict&gt;: Dictionary of dynmat (see read_my_dynmat)</span>
+<span class="sd">                mydir &lt;str&gt;: Directory in which to write; use </span>
+<span class="sd">                             ingredient directory if null</span>
+<span class="sd">                fname &lt;str&gt;: filename (default DYNMAT)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">dynwrite</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">firstline</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;numdisp&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">firstline</span><span class="p">)</span>
+        <span class="n">atomlist</span><span class="o">=</span><span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">atomlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atomlist</span><span class="p">:</span>
+            <span class="n">displist</span> <span class="o">=</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">displist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">displist</span><span class="p">:</span>
+                <span class="n">thirdline</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;displine&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+                <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thirdline</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dyndict</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">]:</span>
+                    <span class="n">dynwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">dynwrite</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.read_my_displacement_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.read_my_displacement_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_my_displacement_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s">&quot;XDATCAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read a displacement file. For VASP this is XDATCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: Directory. Use ingredient directory</span>
+<span class="sd">                             if null.</span>
+<span class="sd">                fname &lt;str&gt;: Filename to read. Default is</span>
+<span class="sd">                             XDATCAR</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                xdatdict &lt;dict&gt;: Dictionary of configurations</span>
+<span class="sd">                    xdatdict[&#39;descline&#39;] = &lt;str&gt; description line</span>
+<span class="sd">                    xdatdict[&#39;specline&#39;] = &lt;str&gt; species line</span>
+<span class="sd">                    xdatdict[&#39;numline&#39;] = &lt;str&gt; numbers lines</span>
+<span class="sd">                    xdatdict[&#39;type&#39;] = &lt;str&gt; Direct or not</span>
+<span class="sd">                    xdatdict[&#39;numatoms&#39;] = &lt;int&gt; number of atoms</span>
+<span class="sd">                    xdatdict[&#39;configs&#39;][config &lt;int&gt;] = &lt;list&gt;</span>
+<span class="sd">                            list of lines in this configuration</span>
+<span class="sd">                    xdatdict[&#39;scale&#39;] = &lt;str&gt; scale</span>
+<span class="sd">                    xdatdict[&#39;latta&#39;] = &lt;str&gt; lattice vector a</span>
+<span class="sd">                    xdatdict[&#39;lattb&#39;] = &lt;str&gt; lattice vector b</span>
+<span class="sd">                    xdatdict[&#39;lattc&#39;] = &lt;str&gt; lattice vector c</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">myxdat</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+        <span class="n">mydata</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">myxdat</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="c">#whole new copy</span>
+        <span class="n">xdatdict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;descline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c">#pop first value</span>
+        <span class="n">tryspec</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tryspecstrip</span> <span class="o">=</span> <span class="n">tryspec</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">tryspecstrip</span> <span class="o">=</span> <span class="n">tryspecstrip</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tryspecstrip</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span> <span class="c"># version 5.2.11 and on</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tryspec</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;latta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;specline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;latta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;specline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tryspec</span>
+        <span class="n">numline</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;numline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numline</span>
+        <span class="n">numatoms</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">numline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+        <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numatoms</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tryspecstrip</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span> <span class="c">#version 5.2.11 and on</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">kfgct</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c"># Konfig line, or a blank line</span>
+            <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="n">kfgct</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numatoms</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="n">kfgct</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mydata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">kfgct</span><span class="o">=</span><span class="n">kfgct</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">xdatdict</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.write_my_displacement_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.write_my_displacement_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_my_displacement_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xdatdict</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s">&quot;XDATCAR&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a displacement file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                xdatdict &lt;dict&gt;: Dictionary of XDATCAR (see read_my_xdatcar)</span>
+<span class="sd">                mydir &lt;str&gt;: Directory in which to write.</span>
+<span class="sd">                             Use ingredient directory if null.</span>
+<span class="sd">                fname &lt;str&gt;: filename (default DYNMAT)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">xdatwrite</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+        <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;descline&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">])</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;latta&#39;</span><span class="p">])</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattb&#39;</span><span class="p">])</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;lattc&#39;</span><span class="p">])</span>
+        <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;specline&#39;</span><span class="p">])</span>
+        <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;numline&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">])</span>
+        <span class="n">configlist</span> <span class="o">=</span> <span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">configlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">configlist</span><span class="p">:</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;Konfig=</span><span class="si">%1i</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">cfg</span><span class="p">)</span>
+            <span class="n">xdatwrite</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">xdatdict</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="n">cfg</span><span class="p">])</span>
+        <span class="n">xdatwrite</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.combine_dynamical_matrix_files"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.combine_dynamical_matrix_files">[docs]</a>    <span class="k">def</span> <span class="nf">combine_dynamical_matrix_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Combine dynamical matrix files into one file.</span>
+<span class="sd">            The subfiles should be in subfolders under</span>
+<span class="sd">            the top directory.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: top directory for DYNMAT files.</span>
+<span class="sd">                             Use ingredient directory if null.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                Creates a single DYNMAT file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">dynmatlist</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s">&quot;*DYNMAT*&quot;</span><span class="p">)</span> <span class="c">#start one level below</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dynmatlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;pmgextend combine_dynmats&quot;</span><span class="p">,</span> <span class="s">&quot;No DYNMATs found under &quot;</span> <span class="o">+</span> <span class="n">mydir</span><span class="p">)</span>
+        <span class="n">totnumdisp</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">largedyn</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">onedynmat</span> <span class="ow">in</span> <span class="n">dynmatlist</span><span class="p">:</span>
+            <span class="n">dyndir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">onedynmat</span><span class="p">)</span>
+            <span class="n">onedyn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_my_dynamical_matrix_file</span><span class="p">(</span><span class="n">dyndir</span><span class="p">)</span>
+            <span class="n">totnumdisp</span> <span class="o">=</span> <span class="n">totnumdisp</span> <span class="o">+</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;numdisp&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">mydisp</span><span class="o">=</span><span class="mi">1</span> <span class="c">#start at 1</span>
+                <span class="k">for</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">disp</span> <span class="ow">in</span> <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">mydisp</span><span class="o">=</span><span class="n">mydisp</span> <span class="o">+</span> <span class="mi">1</span> <span class="c">#increment</span>
+                    <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">mydisp</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">mydisp</span><span class="p">][</span><span class="s">&#39;displine&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;displine&#39;</span><span class="p">])</span>
+                    <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">mydisp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;atoms&#39;</span><span class="p">][</span><span class="n">atom</span><span class="p">][</span><span class="n">disp</span><span class="p">][</span><span class="s">&#39;dynmat&#39;</span><span class="p">])</span>
+        <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;numspec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;numspec&#39;</span><span class="p">]</span> <span class="c">#should all be the same</span>
+        <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span>
+        <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;massline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onedyn</span><span class="p">[</span><span class="s">&#39;massline&#39;</span><span class="p">]</span>
+        <span class="n">largedyn</span><span class="p">[</span><span class="s">&#39;numdisp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totnumdisp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_my_dynamical_matrix_file</span><span class="p">(</span><span class="n">largedyn</span><span class="p">,</span> <span class="n">mydir</span><span class="p">,</span> <span class="s">&quot;DYNMAT_combined&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_my_dynamical_matrix_file</span><span class="p">(</span><span class="n">largedyn</span><span class="p">,</span> <span class="n">mydir</span><span class="p">,</span> <span class="s">&quot;DYNMAT&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.combine_displacement_files"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.combine_displacement_files">[docs]</a>    <span class="k">def</span> <span class="nf">combine_displacement_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mydir</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Combine displacement files (here XDATCARs) into one file.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: top directory for DYNMAT files.</span>
+<span class="sd">                             Use ingredient directory if null.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mydir</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">mydir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">xdatlist</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkfiles</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s">&quot;*XDATCAR*&quot;</span><span class="p">)</span> <span class="c">#start one level below</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xdatlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;pmgextend combine_displacements&quot;</span><span class="p">,</span> <span class="s">&quot;No XDATCARs found under &quot;</span> <span class="o">+</span> <span class="n">mydir</span><span class="p">)</span>
+        <span class="n">kfgct</span><span class="o">=</span><span class="mi">1</span> <span class="c"># skip config 1 until the end</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">xdatlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="c">#get them in order</span>
+        <span class="k">for</span> <span class="n">onexdatmat</span> <span class="ow">in</span> <span class="n">xdatlist</span><span class="p">:</span>
+            <span class="n">xdatdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">onexdatmat</span><span class="p">)</span>
+            <span class="n">onexdat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_my_displacement_file</span><span class="p">(</span><span class="n">xdatdir</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">kfg</span> <span class="ow">in</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">kfg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c">#skip config 1 until the end</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kfgct</span> <span class="o">=</span> <span class="n">kfgct</span> <span class="o">+</span> <span class="mi">1</span> <span class="c">#start at 2</span>
+                    <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="n">kfgct</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="n">kfg</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;configs&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="c">#get one of the first configs (the first should be the same for all the XDATCARs)</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;descline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;descline&#39;</span><span class="p">]</span> <span class="c">#should all be the same</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;specline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;specline&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;latta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;latta&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;lattb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;lattb&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;lattc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;lattc&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;numline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;numline&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;numatoms&#39;</span><span class="p">]</span>
+        <span class="n">largexdat</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">onexdat</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_my_displacement_file</span><span class="p">(</span><span class="n">largexdat</span><span class="p">,</span> <span class="n">mydir</span><span class="p">,</span> <span class="s">&quot;XDATCAR_combined&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_my_displacement_file</span><span class="p">(</span><span class="n">largexdat</span><span class="p">,</span> <span class="n">mydir</span><span class="p">,</span> <span class="s">&quot;XDATCAR&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="VaspChecker.make_hessian"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.make_hessian">[docs]</a>    <span class="k">def</span> <span class="nf">make_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">myposcar</span><span class="p">,</span> <span class="n">mydir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Combine DYNMATs into one hessian and solve for frequencies.</span>
+<span class="sd">            myposcar = Poscar</span>
+<span class="sd">            mydir = top directory for DYNMAT files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This method is abandoned and should not be used.&quot;</span><span class="p">)</span>
+        <span class="n">natoms</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+        <span class="n">myhess</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c">#arrange as x1, y1, z1, x2, y2, z2, etc.</span>
+        <span class="n">dynmatlist</span> <span class="o">=</span> <span class="n">walkfiles</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s">&quot;*DYNMAT*&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dynmatlist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;pmgextend combine_dynmats&quot;</span><span class="p">,</span> <span class="s">&quot;No DYNMATs found under &quot;</span> <span class="o">+</span> <span class="n">mydir</span><span class="p">)</span>
+        <span class="n">opendyn</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;DYNMATLIST:&quot;</span>
+        <span class="k">print</span> <span class="n">dynmatlist</span>
+        <span class="n">datoms</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">onedynmat</span> <span class="ow">in</span> <span class="n">dynmatlist</span><span class="p">:</span>
+            <span class="n">dynlines</span><span class="o">=</span><span class="p">[]</span>
+            <span class="n">opendyn</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">onedynmat</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="n">dynlines</span><span class="o">=</span><span class="n">opendyn</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="n">opendyn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">datoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dynlines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">dmats</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dynlines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">mycount</span><span class="o">=</span><span class="mi">2</span> <span class="c">#starting line</span>
+            <span class="k">while</span> <span class="n">mycount</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dynlines</span><span class="p">)</span><span class="o">-</span><span class="n">datoms</span><span class="p">:</span>
+                <span class="n">littlemat</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">topatom</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dynlines</span><span class="p">[</span><span class="n">mycount</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">whichdir</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dynlines</span><span class="p">[</span><span class="n">mycount</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">littlemat</span> <span class="o">=</span> <span class="n">dynlines</span><span class="p">[</span><span class="n">mycount</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">mycount</span><span class="o">+</span><span class="n">datoms</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">print</span> <span class="n">littlemat</span>
+                <span class="n">act</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">act</span> <span class="o">&lt;</span> <span class="n">datoms</span><span class="p">:</span>
+                    <span class="n">dactx</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">littlemat</span><span class="p">[</span><span class="n">act</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">dacty</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">littlemat</span><span class="p">[</span><span class="n">act</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">dactz</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">littlemat</span><span class="p">[</span><span class="n">act</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">colidx</span> <span class="o">=</span> <span class="p">(</span><span class="n">topatom</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="p">(</span><span class="n">whichdir</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="c">#so 2  3  on first line means atom 2&#39;s z direction</span>
+                    <span class="c">#then with atom 1x, 1y, 1z; 2x, 2y, 2z, etc.</span>
+                    <span class="n">myhess</span><span class="p">[</span><span class="n">colidx</span><span class="p">][</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">dactx</span>
+                    <span class="n">myhess</span><span class="p">[</span><span class="n">colidx</span><span class="p">][</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">dacty</span>
+                    <span class="n">myhess</span><span class="p">[</span><span class="n">colidx</span><span class="p">][</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">dactz</span>
+                    <span class="n">act</span> <span class="o">=</span> <span class="n">act</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">mycount</span> <span class="o">=</span> <span class="n">mycount</span> <span class="o">+</span> <span class="n">datoms</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">print</span> <span class="n">mycount</span>
+        <span class="k">print</span> <span class="s">&quot;UNALTERED HESSIAN:&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">myhess</span><span class="p">)</span>
+        <span class="c">#create mass matrix</span>
+        <span class="n">masses</span><span class="o">=</span><span class="n">dynlines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">&quot;MASSES:&quot;</span><span class="p">,</span> <span class="n">masses</span>
+        <span class="n">massarr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">datoms</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">act</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">print</span> <span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span>
+        <span class="n">nspec</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+        <span class="n">totatoms</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">while</span> <span class="n">act</span> <span class="o">&lt;</span> <span class="n">datoms</span><span class="p">:</span>
+            <span class="n">mymass</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">nct</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">totatoms</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">mymass</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">nct</span> <span class="o">&lt;</span> <span class="n">nspec</span><span class="p">:</span>
+                <span class="n">totatoms</span> <span class="o">=</span> <span class="n">totatoms</span> <span class="o">+</span> <span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span><span class="p">[</span><span class="n">nct</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">act</span> <span class="o">&lt;</span> <span class="n">totatoms</span><span class="p">:</span>
+                    <span class="n">mymass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">masses</span><span class="p">[</span><span class="n">nct</span><span class="p">])</span>
+                <span class="n">nct</span> <span class="o">=</span> <span class="n">nct</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">print</span> <span class="n">mymass</span>
+            <span class="n">massarr</span><span class="p">[</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">mymass</span>
+            <span class="n">massarr</span><span class="p">[</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">mymass</span>
+            <span class="n">massarr</span><span class="p">[</span><span class="n">act</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">mymass</span>
+            <span class="n">act</span> <span class="o">=</span> <span class="n">act</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">massmat</span> <span class="o">=</span> <span class="n">massarr</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">massarr</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;MASS MAT:&quot;</span>
+        <span class="k">print</span> <span class="n">massmat</span>
+        <span class="k">print</span> <span class="s">&quot;STEP:&quot;</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dynlines</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">print</span> <span class="n">step</span>
+        <span class="k">print</span> <span class="s">&quot;HESSIAN * -1 / step / sqrt(mass1*mass2)&quot;</span>
+        <span class="n">normhess</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span><span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">cidx</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">while</span> <span class="n">cidx</span> <span class="o">&lt;</span> <span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">:</span>
+            <span class="n">ridx</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">while</span> <span class="n">ridx</span> <span class="o">&lt;</span> <span class="n">natoms</span><span class="o">*</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">normhess</span><span class="p">[</span><span class="n">ridx</span><span class="p">][</span><span class="n">cidx</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span><span class="o">*</span><span class="n">myhess</span><span class="p">[</span><span class="n">ridx</span><span class="p">][</span><span class="n">cidx</span><span class="p">]</span><span class="o">/</span><span class="n">step</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">massmat</span><span class="p">[</span><span class="n">ridx</span><span class="p">][</span><span class="n">cidx</span><span class="p">])</span>
+                <span class="n">ridx</span> <span class="o">=</span> <span class="n">ridx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">cidx</span> <span class="o">=</span> <span class="n">cidx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">print</span> <span class="n">normhess</span>
+        <span class="k">print</span> <span class="s">&quot;EIGENVALUES:&quot;</span>
+        <span class="n">myeig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">normhess</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">print</span> <span class="n">myeig</span>
+        <span class="k">print</span> <span class="s">&quot;SQRT of EIGENVALUES in sqrt(eV/AMU)/Angstrom/2pi:&quot;</span>
+        <span class="n">myfreq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">myeig</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">myfreq</span>
+        <span class="k">print</span> <span class="s">&quot;SQRT OF EIGENVALUES in THz:&quot;</span>
+        <span class="n">myfreqThz</span> <span class="o">=</span> <span class="n">myfreq</span><span class="o">*</span><span class="mf">15.633302</span>
+        <span class="k">print</span> <span class="n">myfreqThz</span>
+        <span class="n">myfreqThzsorted</span> <span class="o">=</span> <span class="n">myfreqThz</span>
+        <span class="n">myfreqThzsorted</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">myfreqThzsorted</span>
+        <span class="k">return</span> <span class="n">myfreqThzsorted</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.get_total_electrons"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_total_electrons">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">myposcar</span><span class="p">,</span> <span class="n">mypotcar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the total number of considered electrons in the system.&quot;&quot;&quot;</span>
+        <span class="n">atomlist</span> <span class="o">=</span> <span class="n">myposcar</span><span class="o">.</span><span class="n">natoms</span>
+        <span class="n">zvallist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valence_list</span><span class="p">(</span><span class="n">mypotcar</span><span class="p">)</span>
+        <span class="n">totzval</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">atomct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zvallist</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomlist</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;Number of species and number of POTCARs do not match.&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">atomct</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomlist</span><span class="p">):</span>
+            <span class="n">totzval</span> <span class="o">=</span> <span class="n">totzval</span> <span class="o">+</span> <span class="p">(</span><span class="n">atomlist</span><span class="p">[</span><span class="n">atomct</span><span class="p">]</span> <span class="o">*</span> <span class="n">zvallist</span><span class="p">[</span><span class="n">atomct</span><span class="p">])</span>
+            <span class="n">atomct</span> <span class="o">=</span> <span class="n">atomct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">totzval</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.get_valence_list"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_valence_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_valence_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mypotcar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get list of number of valence electrons for species.</span>
+<span class="sd">            For VASP, this is a list of zvals from POTCAR.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mypotcar &lt;list of PotcarSingle objects&gt;</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                zval_list &lt;list of int&gt;: List of number of</span>
+<span class="sd">                                        valence electrons</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">zval_list</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">potcarct</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">onepotcar</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">while</span> <span class="n">potcarct</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">mypotcar</span><span class="p">):</span>
+            <span class="n">onepotcar</span> <span class="o">=</span> <span class="n">mypotcar</span><span class="p">[</span><span class="n">potcarct</span><span class="p">]</span> <span class="c">#A PotcarSingle object</span>
+            <span class="n">zval_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">onepotcar</span><span class="o">.</span><span class="n">zval</span><span class="p">)</span>
+            <span class="n">potcarct</span> <span class="o">=</span> <span class="n">potcarct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">zval_list</span></div>
+<div class="viewcode-block" id="VaspChecker.get_energy_from_energy_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.get_energy_from_energy_file">[docs]</a>    <span class="k">def</span> <span class="nf">get_energy_from_energy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the energy from the energy file.</span>
+<span class="sd">            For VASP, this is the last E0 energy from OSZICAR,</span>
+<span class="sd">            and this function should be used if vasprun.xml</span>
+<span class="sd">            is corrupted or not available.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                mydir &lt;str&gt;: Directory in which to look.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                &lt;float&gt;: last E0 energy from OSZICAR</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fullpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="s">&quot;OSZICAR&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fullpath</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;No OSZICAR file at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">myosz</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">(</span><span class="n">fullpath</span><span class="p">)</span>
+        <span class="n">mye0</span> <span class="o">=</span> <span class="n">myosz</span><span class="o">.</span><span class="n">get_segment_from_last_line_match</span><span class="p">(</span><span class="s">&quot;E0&quot;</span><span class="p">,</span> <span class="s">&quot;E0=&quot;</span><span class="p">,</span><span class="s">&quot;d E =&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">mye0</span><span class="p">)</span></div>
+<div class="viewcode-block" id="VaspChecker.is_started"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.is_started">[docs]</a>    <span class="k">def</span> <span class="nf">is_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See if the ingredient has been started on</span>
+<span class="sd">            the queue.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="s">&#39;OUTCAR&#39;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.write_final_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.write_final_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_final_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mystruc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the final structure to a file.</span>
+<span class="sd">            For VASP, this is CONTCAR.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mycontcar</span> <span class="o">=</span> <span class="n">Poscar</span><span class="p">(</span><span class="n">mystruc</span><span class="p">)</span>
+        <span class="n">mycontcar</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="s">&#39;CONTCAR&#39;</span><span class="p">))</span></div>
+<div class="viewcode-block" id="VaspChecker.has_starting_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.has_starting_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">has_starting_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate whether the ingredient has a starting</span>
+<span class="sd">            structure file. For VASP, this is a POSCAR.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="s">&#39;POSCAR&#39;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="VaspChecker.has_ending_structure_file"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.has_ending_structure_file">[docs]</a>    <span class="k">def</span> <span class="nf">has_ending_structure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate whether the ingredient has a starting</span>
+<span class="sd">            structure file. For VASP, this is a CONTCAR.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="s">&#39;CONTCAR&#39;</span><span class="p">))</span></div>
+<div class="viewcode-block" id="VaspChecker.scale_mesh"><a class="viewcode-back" href="../../../../MAST.ingredients.checker.vaspchecker.html#MAST.ingredients.checker.vaspchecker.VaspChecker.scale_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">scale_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newstr</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scale the kpoint mesh.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                newstr &lt;structure&gt;: new structure</span>
+<span class="sd">                density &lt;float&gt;: kpoint density</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                newkmesh &lt;pymatgen Kpoints&gt;: new kpoint mesh</span>
+<span class="sd">                sets program_keys &#39;mast_kpoints&#39; to new mesh</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newkmesh</span> <span class="o">=</span> <span class="n">Kpoints</span><span class="o">.</span><span class="n">automatic_density</span><span class="p">(</span><span class="n">newstr</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+        <span class="n">klist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">klist</span> <span class="o">=</span> <span class="n">newkmesh</span><span class="o">.</span><span class="n">to_dict</span><span class="p">[</span><span class="s">&#39;kpoints&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">klist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newkmesh</span><span class="o">.</span><span class="n">to_dict</span><span class="p">[</span><span class="s">&#39;generation_style&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_kpoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">klist</span>
+        <span class="k">return</span> <span class="n">newkmesh</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

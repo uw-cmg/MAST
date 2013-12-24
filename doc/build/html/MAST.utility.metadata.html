@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.metadata module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.utility.metadata">
+<span id="mast-utility-metadata-module"></span><h1>MAST.utility.metadata module<a class="headerlink" href="#module-MAST.utility.metadata" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.utility.metadata.Metadata">
+<em class="property">class </em><tt class="descclassname">MAST.utility.metadata.</tt><tt class="descname">Metadata</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj" title="MAST.utility.mastobj.MASTObj"><tt class="xref py py-class docutils literal"><span class="pre">MAST.utility.mastobj.MASTObj</span></tt></a></p>
+<p>Class to handle the metadata file
+Fields are composed of a keyword and a value, separated by a &#8216;=&#8217;.</p>
+<dl class="method">
+<dt id="MAST.utility.metadata.Metadata.clear_data">
+<tt class="descname">clear_data</tt><big>(</big><em>keyword</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata.clear_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata.clear_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the specified data and keyword from the file.
+This is inefficient, as what we do is basically reading in the file
+then iterating through the file, do if..else check, clear the file,
+then re-write it.</p>
+<p>But it works!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.utility.metadata.Metadata.clear_file">
+<tt class="descname">clear_file</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata.clear_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata.clear_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empties the metafile</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.utility.metadata.Metadata.read_data">
+<tt class="descname">read_data</tt><big>(</big><em>keyword</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata.read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches the metadata file for a specific keyword and returns the
+data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.utility.metadata.Metadata.search_data">
+<tt class="descname">search_data</tt><big>(</big><em>keyword</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata.search_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata.search_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches the file for a keyword, and if found returns the line number
+and data for that keyword.
+Returns:</p>
+<blockquote>
+<div>[line_number, data]
+line_number &lt;int&gt;: line number found
+data &lt;str&gt;: data found</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.utility.metadata.Metadata.write_data">
+<tt class="descname">write_data</tt><big>(</big><em>keyword</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/metadata.html#Metadata.write_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.metadata.Metadata.write_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a keyword and its associated data to the metafile</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

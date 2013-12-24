@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.defect_formation_energy.potential_alignment &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../../index.html" />
+    <link rel="up" title="MAST.utility" href="../../utility.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../utility.html" accesskey="U">MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.utility.defect_formation_energy.potential_alignment</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">PotentialAlignment</span><span class="p">:</span>
+<div class="viewcode-block" id="PotentialAlignment"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.potential_alignment.html#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment">[docs]</a><span class="c">#    def __init__(self):</span>
+<span class="c">#        self.outcar_perf = outcar_perf</span>
+<span class="c">#        self.outcar_def = outcar_def</span>
+
+    <span class="k">def</span> <span class="nf">read_outcar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcar</span><span class="p">):</span>
+<div class="viewcode-block" id="PotentialAlignment.read_outcar"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.potential_alignment.html#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.read_outcar">[docs]</a>        <span class="sd">&quot;&quot;&quot;Reads a VASP OUTCAR file, and extracts out some useful information.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                outcar:  OUTCAR file name</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                elst_pot:  average electrostatic potential for each atomic center</span>
+<span class="sd">                atom_list:  list of each atom type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outcar</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="n">atom_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">atom_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">atom_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="n">eof</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">eof</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">line</span><span class="p">):</span>
+                <span class="n">eof</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="s">&#39;average (electrostatic) potential at core&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">raw_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="c"># Read in Junk line</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="c"># Read in Junk line</span>
+
+                <span class="n">pot_line</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">pot_line</span><span class="p">):</span>
+                    <span class="n">pot_line</span> <span class="o">=</span> <span class="n">outfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">line</span><span class="p">):</span>
+                        <span class="n">pot_line</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">raw_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pot_line</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s">&#39;ions per type&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">atom_numbers</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="s">&#39;VRHFIN&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">atom_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s">&#39; E-fermi :&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">efermi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">elst_pot</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="c">#        print raw_data</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">elst_pot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">datum</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">elst_pot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atom_numbers</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">atom_numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                <span class="n">atom_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom_types</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">elst_pot</span><span class="p">,</span> <span class="n">atom_list</span><span class="p">,</span> <span class="n">efermi</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_potential_alignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perfect_info</span><span class="p">,</span> <span class="n">defect_info</span><span class="p">):</span></div>
+<div class="viewcode-block" id="PotentialAlignment.get_potential_alignment"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.potential_alignment.html#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.get_potential_alignment">[docs]</a>        <span class="sd">&quot;&quot;&quot;Gets the shift.  Assumes all atoms in the perfect cell are symmetry</span>
+<span class="sd">            equivalent, i.e. for Sc2O3, by symmetry we have two different Sc</span>
+<span class="sd">            atoms (8b and 24d Wycoff positions) with two different potentials.</span>
+
+<span class="sd">            In reality the best way to do this is to match up the symmetry</span>
+<span class="sd">            positions of the perfect with that in the defected and do the </span>
+<span class="sd">            alignment that way.  However, a quick and dirty way is to average</span>
+<span class="sd">            over each symmetry position, which allows us to account for the </span>
+<span class="sd">            different symmetry environments in an effective way without having</span>
+<span class="sd">            to dig into the underlying unit cell symmetry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">perf_elst_pot</span><span class="p">,</span> <span class="n">perf_atom_list</span><span class="p">,</span> <span class="n">perf_efermi</span> <span class="o">=</span> <span class="n">perfect_info</span>
+        <span class="n">def_elst_pot</span><span class="p">,</span> <span class="n">def_atom_list</span><span class="p">,</span> <span class="n">def_efermi</span> <span class="o">=</span> <span class="n">defect_info</span>
+
+        <span class="n">unique_perf</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">perf_atom_list</span><span class="p">))</span>
+        <span class="n">ave_pot</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">unique</span> <span class="ow">in</span> <span class="n">unique_perf</span><span class="p">:</span>
+            <span class="n">nunique</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">unique_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perf_atom_list</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">perf_atom_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">unique</span><span class="p">):</span>
+                    <span class="n">unique_sum</span> <span class="o">+=</span> <span class="n">perf_elst_pot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">nunique</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">ave_pot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unique_sum</span> <span class="o">/</span> <span class="n">nunique</span><span class="p">)</span>
+
+<span class="c">#        print ave_pot</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ave_pot</span><span class="p">)):</span>
+            <span class="n">perf_pot</span> <span class="o">=</span> <span class="n">ave_pot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">atom</span> <span class="o">=</span> <span class="n">unique_perf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">def_elst_pot</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">atom</span> <span class="o">==</span> <span class="n">def_atom_list</span><span class="p">[</span><span class="n">j</span><span class="p">]):</span>
+                    <span class="n">shift</span> <span class="o">+=</span> <span class="p">(</span><span class="n">def_elst_pot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">perf_pot</span><span class="p">)</span>
+
+<span class="c">#        print perf_efermi</span>
+        <span class="k">return</span> <span class="n">shift</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">def_elst_pot</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../utility.html" >MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

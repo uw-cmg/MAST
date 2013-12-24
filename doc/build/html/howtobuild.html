@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>How to Build Sphinx Document &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-to-build-sphinx-document">
+<h1>How to Build Sphinx Document<a class="headerlink" href="#how-to-build-sphinx-document" title="Permalink to this headline">¶</a></h1>
+<p>Here is brief introduction for sphinx documentation.
+Let me start with my awful mistake. Because of that, my first impression of sphinx is horrible.</p>
+<p>Even virtical space is important to compile html.</p>
+<p>The toctree directive initially is empty, and looks like this:</p>
+<div class="highlight-python"><pre>.. toctree::
+    :maxdepth: 2</pre>
+</div>
+<p>I added title of MAST document and add one file(document) howtobuild.rst like the following:</p>
+<div class="highlight-python"><pre>Welcome to MAST's documentation!
+================================
+
+Contents:
+
+.. toctree::
+    :maxdepth: 2
+    howtobuild</pre>
+</div>
+<p>After wasting quite long time, I took a look at tutorial again. I realized that there is vertical space:</p>
+<div class="highlight-python"><pre>Welcome to MAST's documentation!
+================================
+
+Contents:
+
+.. toctree::
+    :maxdepth: 2
+
+    howtobuild</pre>
+</div>
+<p>Then you can compile it. The compile command is this:</p>
+<div class="highlight-python"><pre>~/MAST4pymatgen/doc/make html</pre>
+</div>
+<p>You may already have noticed this. Indent is also very important to get correct output. So for me it&#8217;s literally annoying. You can think learning how to write sphinx document is same as learning how write code. As we did in python code, for one indent level, I used four whitespaces.</p>
+<p>As you can see, most of Sphinx Document has &#8216;&#8217;<strong>Show Source</strong>&#8216;&#8217; link. In other words, all Sphinx document can be good example for you. One thing I want to tell you, in order to use all functions multiple extensions are required. Don&#8217;t be frustrated even though your copied document doesn&#8217;t work well.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

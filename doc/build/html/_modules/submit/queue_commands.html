@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>submit.queue_commands &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for submit.queue_commands</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># Purpose: Submit a job to the queue. This function is highly platform-specific and may need to be modified.</span>
+<span class="c"># Authors: Tam Mayeshiba</span>
+<span class="c"># 10/25/12 TTM created</span>
+<span class="c"># 12/6/12 TTM added UKY DLX commands</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">dirutil</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTFile</span>
+<span class="n">system</span> <span class="o">=</span> <span class="s">&quot;bardeen&quot;</span> <span class="c">#dlx, curie, bardeen, nersc, ranger</span>
+<span class="n">compute_node</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="direct_shell_command"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.direct_shell_command">[docs]</a><span class="k">def</span> <span class="nf">direct_shell_command</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&quot;//share/apps/vasp5.2_cNEB&quot;</span>
+</div>
+<div class="viewcode-block" id="queue_submission_command"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.queue_submission_command">[docs]</a><span class="k">def</span> <span class="nf">queue_submission_command</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">&quot;qsub submit.sh&quot;</span>
+</div>
+<div class="viewcode-block" id="write_to_submit_list"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.write_to_submit_list">[docs]</a><span class="k">def</span> <span class="nf">write_to_submit_list</span><span class="p">(</span><span class="n">mydir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write an entry to the submission list in </span>
+<span class="sd">        $MAST_CONTROL/submitlist</span>
+<span class="sd">        Args:</span>
+<span class="sd">            mydir &lt;str&gt;: Directory which includes submission</span>
+<span class="sd">                        script submit.sh for a single </span>
+<span class="sd">                        calculation to be submitted to the</span>
+<span class="sd">                        queue</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">control</span><span class="o">=</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_control_path</span><span class="p">()</span>
+    <span class="n">submitlist</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="s">&quot;submitlist&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">):</span>
+        <span class="n">submitfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">submitfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+    <span class="n">submitfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mydir</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">submitfile</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">submitlist</span><span class="p">)</span>
+    <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="submit_from_submission_list"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.submit_from_submission_list">[docs]</a><span class="k">def</span> <span class="nf">submit_from_submission_list</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Submit all entries from the submission list at</span>
+<span class="sd">        $MAST_CONTROL/submitlist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">control</span><span class="o">=</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_control_path</span><span class="p">()</span>
+    <span class="n">submitlist</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="s">&quot;submitlist&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;No submission list at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">submitlist</span>
+        <span class="k">return</span>
+    <span class="n">submitfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">)</span>
+    <span class="n">subentries</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">submitfile</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">subentries</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">submitted</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">subcommand</span> <span class="o">=</span> <span class="n">queue_submission_command</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">subentry</span> <span class="ow">in</span> <span class="n">subentries</span><span class="p">:</span> <span class="c"># each entry is a directory name</span>
+        <span class="n">subentry</span> <span class="o">=</span> <span class="n">subentry</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">subentry</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">subentry</span> <span class="ow">in</span> <span class="n">submitted</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">subentry</span><span class="p">)</span>
+            <span class="n">subme</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">subcommand</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+            <span class="n">subme</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">subme</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">submitted</span><span class="p">[</span><span class="n">subentry</span><span class="p">]</span><span class="o">=</span><span class="n">status</span>
+    <span class="n">print_submitted_dict</span><span class="p">(</span><span class="n">submitted</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="clear_submission_list"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.clear_submission_list">[docs]</a><span class="k">def</span> <span class="nf">clear_submission_list</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Clear all entries from the submission list at</span>
+<span class="sd">        $MAST_CONTROL/submitlist</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">control</span><span class="o">=</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_control_path</span><span class="p">()</span>
+    <span class="n">submitlist</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="s">&quot;submitlist&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;No submission list at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">submitlist</span>
+        <span class="k">return</span>
+    <span class="n">submitfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">submitlist</span><span class="p">)</span>
+    <span class="n">submitfile</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">submitfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">submitfile</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">submitlist</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="print_submitted_dict"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.print_submitted_dict">[docs]</a><span class="k">def</span> <span class="nf">print_submitted_dict</span><span class="p">(</span><span class="n">submitted</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a dictionary of all runs submitted into</span>
+<span class="sd">        $MAST_CONTROL/submitted</span>
+<span class="sd">        Args:</span>
+<span class="sd">            submitted &lt;dict&gt;: Dictionary of submitted runs,</span>
+<span class="sd">                with key as the directory name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">control</span><span class="o">=</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_control_path</span><span class="p">()</span>
+    <span class="n">subprint</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="s">&quot;submitted&quot;</span><span class="p">)</span>
+    <span class="n">subrecent</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="s">&quot;just_submitted&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">subprint</span><span class="p">):</span>
+        <span class="n">subprintfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">subprint</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">subprintfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+    <span class="n">subrecentfile</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">()</span>
+    <span class="n">keylist</span><span class="o">=</span><span class="n">submitted</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">keylist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">subprintfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">()</span><span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">subrecentfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">()</span><span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keylist</span><span class="p">:</span>
+        <span class="n">subprintfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">submitted</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+        <span class="n">subrecentfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">submitted</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+    <span class="n">subprintfile</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">subprint</span><span class="p">)</span>
+    <span class="n">subrecentfile</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">subrecent</span><span class="p">)</span>
+    <span class="k">return</span>
+    
+
+</div>
+<div class="viewcode-block" id="queue_status_from_text"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.queue_status_from_text">[docs]</a><span class="k">def</span> <span class="nf">queue_status_from_text</span><span class="p">(</span><span class="n">jobid</span><span class="p">,</span> <span class="n">queuetext</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the queue status from a line with the job ID information</span>
+<span class="sd">        INPUTS:</span>
+<span class="sd">            jobid &lt;int&gt; = job ID</span>
+<span class="sd">            qstr &lt;str&gt; = queue snapshot line containing job ID</span>
+<span class="sd">        OUTPUTS:</span>
+<span class="sd">            &lt;str&gt; = queue status </span>
+<span class="sd">            &#39;E&#39;: Error</span>
+<span class="sd">            &#39;X&#39;: Not found</span>
+<span class="sd">            &#39;R&#39;: Running</span>
+<span class="sd">            &#39;W&#39;: Waiting</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">queuetext</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="s">&#39;X&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queuetext</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;X&#39;</span>
+    <span class="n">begin</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">jobid</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">begin</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;X&#39;</span>
+    <span class="n">queuetext</span> <span class="o">=</span> <span class="n">queuetext</span><span class="p">[</span><span class="n">begin</span><span class="p">:]</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">queuetext</span> <span class="o">=</span> <span class="n">queuetext</span><span class="p">[:</span><span class="n">end</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;ranger&quot;</span><span class="p">:</span><span class="c">####Ranger</span>
+        <span class="n">ranger_out</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ranger_out</span> <span class="o">==</span> <span class="s">&#39;wq&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ranger_out</span> <span class="o">==</span> <span class="s">&#39;qw&#39;</span><span class="p">):</span>
+            <span class="n">final_out</span> <span class="o">=</span> <span class="s">&#39;Q&#39;</span>
+        <span class="k">elif</span> <span class="n">ranger_out</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">:</span>
+            <span class="n">final_out</span> <span class="o">=</span> <span class="s">&#39;R&#39;</span>
+        <span class="k">return</span> <span class="n">final_out</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;bardeen&quot;</span> <span class="ow">or</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;curie&quot;</span><span class="p">:</span><span class="c">###Bardeen, Curie, etc.</span>
+        <span class="n">qmat</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">qmat</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;E&#39;</span>
+        <span class="k">return</span> <span class="n">qmat</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="c">#TTM 1/17/12 qstat returns differently than qstat -a does</span>
+    
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;dlx&quot;</span><span class="p">:</span><span class="c">####UKy DLX</span>
+        <span class="n">queuetext</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">dlx_out</span> <span class="o">=</span> <span class="n">queuetext</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span> <span class="c">#indexing starts at 0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">dlx_out</span> <span class="o">==</span> <span class="s">&#39;PD&#39;</span><span class="p">):</span>
+            <span class="n">final_out</span> <span class="o">=</span> <span class="s">&#39;Q&#39;</span>
+        <span class="k">elif</span> <span class="n">dlx_out</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;CG&#39;</span><span class="p">,</span><span class="s">&#39;CD&#39;</span><span class="p">,</span><span class="s">&#39;R&#39;</span><span class="p">]:</span>
+            <span class="n">final_out</span> <span class="o">=</span> <span class="s">&#39;R&#39;</span>
+        <span class="k">return</span> <span class="n">final_out</span>
+</div>
+<div class="viewcode-block" id="extract_submitted_jobid"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.extract_submitted_jobid">[docs]</a><span class="k">def</span> <span class="nf">extract_submitted_jobid</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the job ID from a string returned when the job is submitted</span>
+<span class="sd">        INPUTS:</span>
+<span class="sd">            string &lt;str&gt; = string with job ID somewhere in it</span>
+<span class="sd">        OUTPUTS:</span>
+<span class="sd">            &lt;int&gt; = job ID as integer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">####Bardeen and Curie:</span>
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;bardeen&quot;</span> <span class="ow">or</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;curie&quot;</span><span class="p">:</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">char</span> <span class="o">!=</span> <span class="s">&#39;.&#39;</span><span class="p">):</span>
+                <span class="n">final</span> <span class="o">+=</span> <span class="n">char</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">final</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;ranger&quot;</span><span class="p">:</span><span class="c">####Ranger:</span>
+        <span class="n">findme</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">findstr</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="n">findme</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;Your job&quot;</span><span class="p">)</span> <span class="c"># ..... Your job 12345678 has been submitted.</span>
+        <span class="k">if</span> <span class="n">findme</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c">#TTM+1 2/11/12 if not found, return negative 1</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">findstr</span> <span class="o">=</span> <span class="n">string</span><span class="p">[</span><span class="n">findme</span><span class="o">+</span><span class="mi">9</span><span class="p">:]</span>
+        <span class="n">splitstr</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">splitstr</span> <span class="o">=</span> <span class="n">findstr</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">splitstr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s">&quot;dlx&quot;</span><span class="p">:</span><span class="c">###UKY DLX:</span>
+        <span class="n">findstr</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">findstr</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="queue_snap_command"><a class="viewcode-back" href="../../submit.queue_commands.html#submit.queue_commands.queue_snap_command">[docs]</a><span class="k">def</span> <span class="nf">queue_snap_command</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the command for producing a queue snapshot.</span>
+<span class="sd">        INPUTS:</span>
+<span class="sd">            None</span>
+<span class="sd">        OUTPUTS:</span>
+<span class="sd">            Command for producing a queue snapshot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">qcmd</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">compute_node</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">system</span> <span class="o">==</span> <span class="s">&quot;ranger&quot;</span><span class="p">):</span><span class="c">####Ranger, from compute node</span>
+            <span class="c">#</span>
+            <span class="n">qcmd</span> <span class="o">=</span> <span class="s">&quot;ssh -f ranger &#39;qstat&#39;&quot;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">system</span> <span class="o">==</span> <span class="s">&quot;bardeen&quot;</span><span class="p">):</span><span class="c">####Bardeen, from compute node</span>
+            <span class="n">qcmd</span> <span class="o">=</span> <span class="s">&quot;ssh -f bardeen &#39;qstat&#39;&quot;</span> 
+    
+        <span class="k">if</span><span class="p">(</span><span class="n">system</span> <span class="o">==</span> <span class="s">&quot;curie&quot;</span><span class="p">):</span><span class="c">####Curie, from compute node</span>
+            <span class="n">qcmd</span> <span class="o">=</span> <span class="s">&quot;ssh -f curie &#39;qstat&#39;&quot;</span>
+    <span class="k">else</span><span class="p">:</span><span class="c">###Direct from headnode</span>
+        <span class="n">qcmd</span> <span class="o">=</span> <span class="s">&#39;qstat 2&gt; /dev/null&#39;</span> <span class="c">#TTM 052212 sometimes requires /bin/bash</span>
+    <span class="c">###Direct from headnode, UKY DLX:</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">system</span> <span class="o">==</span> <span class="s">&quot;dlx&quot;</span><span class="p">):</span>
+            <span class="n">uname</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;USER&quot;</span><span class="p">)</span>
+            <span class="n">qcmd</span> <span class="o">=</span> <span class="s">&quot;squeue -u &quot;</span> <span class="o">+</span> <span class="n">uname</span>
+    <span class="k">return</span> <span class="n">qcmd</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

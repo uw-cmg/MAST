@@ -1,0 +1,560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" />
+    <link rel="next" title="Ingredients" href="2_0_ingredients.html" />
+    <link rel="prev" title="Introduction" href="0_0_introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="2_0_ingredients.html" title="Ingredients"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="0_0_introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation-on-bardeen">
+<span id="id1"></span><h2>Installation on bardeen<a class="headerlink" href="#installation-on-bardeen" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="environment-variables">
+<h3>1. Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this headline">¶</a></h3>
+<p>MAST is installed in <tt class="docutils literal"><span class="pre">//share/apps/MAST</span></tt>.</p>
+<p>Set the MAST environment variables. Add the following lines to your setup profile, such as <tt class="docutils literal"><span class="pre">//home/username/.bashrc</span></tt>, where <tt class="docutils literal"><span class="pre">username</span></tt> is your username. Replace all instances of <tt class="docutils literal"><span class="pre">//home/username</span></tt> with your actual username, like <tt class="docutils literal"><span class="pre">//home/janedoe</span></tt>.</p>
+<p>The environment variables are:</p>
+<div class="highlight-python"><pre>export MAST_INSTALL_PATH=//share/apps/MAST
+export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
+export MAST_SCRATCH=//home/username/MAST/SCRATCH
+export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
+export MAST_CONTROL=//home/username/MAST/CONTROL
+export PYTHONPATH=$PYTHONPATH://share/apps/MAST
+export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
+export PATH=$PATH://share/apps/MAST/bin
+export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH</pre>
+</div>
+<p>An explanation of each variable appears below.</p>
+<p>MAST_INSTALL_PATH: This variable should be set to the installation directory.</p>
+<div class="highlight-python"><pre>export MAST_INSTALL_PATH=//share/apps/MAST</pre>
+</div>
+<p>MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You may want to copy recipes from the <tt class="docutils literal"><span class="pre">$MAST_INSTALL_PATH/recipe_templates</span></tt> directory into this folder and modify them.</p>
+<div class="highlight-python"><pre>export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates</pre>
+</div>
+<p>MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory.</p>
+<div class="highlight-python"><pre>export MAST_SCRATCH=//home/username/MAST/SCRATCH</pre>
+</div>
+<p>MAST_ARCHIVE: This variable may be set to any directory. MAST will move completed recipes from <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> into this directory.</p>
+<div class="highlight-python"><pre>export MAST_ARCHIVE=//home/username/MAST/ARCHIVE</pre>
+</div>
+<p>MAST_CONTROL: This variable may be set to any directory. MAST monitor log files, MAST monitor error files, and other MAST monitor output will be written to this directory.</p>
+<div class="highlight-python"><pre>export MAST_CONTROL=//home/username/MAST/CONTROL</pre>
+</div>
+<p>PYTHONPATH: If this environment variable already exists, the MAST installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables):</p>
+<div class="highlight-python"><pre>export PYTHONPATH=$PYTHONPATH://share/apps/MAST</pre>
+</div>
+<p>VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the <a href="#id2"><span class="problematic" id="id3">:ref:`Materials Project&#8217;s &lt;http://materialsproject.org&gt;`_</span></a> <a href="#id4"><span class="problematic" id="id5">:ref:`pymatgen &lt;http://pymatgen.org&gt;`_</span></a> code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91).</p>
+<div class="highlight-python"><pre>export VASP_PSP_DIR=//share/apps/MAST/vasp_pps</pre>
+</div>
+<p>PATH: This variable should be appended with the <tt class="docutils literal"><span class="pre">$MAST_INSTALL_PATH/bin</span></tt> directory, for example:</p>
+<div class="highlight-python"><pre>export PATH=$PATH://share/apps/MAST/bin:PATH</pre>
+</div>
+</div>
+<div class="section" id="python-version">
+<h3>2. Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h3>
+<p>Make sure that the correct version of python is defaulted to be used first. If you already use python for something else and this next line interferes with your other python calls (for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3), please see Tam.</p>
+<div class="highlight-python"><pre>export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH</pre>
+</div>
+<p>This version of python has pymatgen, numpy, and scipy in the appropriate versions.</p>
+<ul class="simple">
+<li>Type <tt class="docutils literal"><span class="pre">which</span> <span class="pre">python</span></tt> and you should get: <tt class="docutils literal"><span class="pre">/share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python</span></tt></li>
+<li>Type <tt class="docutils literal"><span class="pre">which</span> <span class="pre">mast</span></tt> and you should get: <tt class="docutils literal"><span class="pre">/share/apps/MAST/bin/mast</span></tt></li>
+</ul>
+</div>
+<div class="section" id="additional-setup">
+<h3>3. Additional setup<a class="headerlink" href="#additional-setup" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Create all directories which do not yet exist (e.g., <tt class="docutils literal"><span class="pre">mkdir</span> <span class="pre">//home/username/MAST</span></tt>, <tt class="docutils literal"><span class="pre">mkdir</span> <span class="pre">//home/username/MAST/recipe_templates</span></tt>, ARCHIVE, CONTROL, and SCRATCH)</li>
+<li>Make an empty file at <tt class="docutils literal"><span class="pre">//home/username/MAST/CONTROL/submitlist</span></tt></li>
+<li>Log out of all bardeen terminals and log back in. (You may also run <tt class="docutils literal"><span class="pre">source</span> <span class="pre">~/.bashrc</span></tt>, but sometimes this doesn&#8217;t quite set everything.)</li>
+<li>(There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in $MAST_INSTALL_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of $MAST_INSTALL_PATH/submit/platforms and into $MAST_INSTALL_PATH/submit, omitting the platform name, and modify the new queue_commands.py, script_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)</li>
+</ol>
+</div>
+</div>
+<div class="section" id="test-that-mast-can-run-on-bardeen">
+<span id="test-on-bardeen"></span><h2>Test that MAST can run on bardeen<a class="headerlink" href="#test-that-mast-can-run-on-bardeen" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Copy the test recipe template to your recipe_templates folder:</p>
+<div class="highlight-python"><pre>cp //share/apps/MAST/recipe_templates/phonon_test_neb.txt //home/username/MAST/recipe_templates/.</pre>
+</div>
+</li>
+<li><p class="first">Make a test directory, like <tt class="docutils literal"><span class="pre">//home/username/MAST/test</span></tt></p>
+</li>
+<li><p class="first">Copy the test input file to your test folder:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cp</span> <span class="o">//</span><span class="n">share</span><span class="o">/</span><span class="n">apps</span><span class="o">/</span><span class="n">MAST</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">phononreorgtest</span><span class="o">/</span><span class="n">phonon_with_neb</span><span class="o">.</span><span class="n">inp</span> <span class="o">//</span><span class="n">home</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">MAST</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">inp</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Go to your test directory, <tt class="docutils literal"><span class="pre">cd</span> <span class="pre">//home/username/MAST/test</span></tt></p>
+</li>
+<li><p class="first">Try to parse the input file, entering the following command as one line:</p>
+<div class="highlight-python"><pre>nice -n 19 mast -i test.inp</pre>
+</div>
+<ul class="simple">
+<li>The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).</li>
+<li>The -i signals to MAST that it is processing an input file.</li>
+</ul>
+</li>
+<li><p class="first">Your <tt class="docutils literal"><span class="pre">//home/username/MAST/SCRATCH</span></tt> directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).</p>
+</li>
+<li><p class="first">Go to that long recipe directory. (PhononNebTest...)</p>
+<blockquote>
+<div><ul>
+<li><p class="first">To see the input options:</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">input.inp</span></tt> (should be identical to test.inp since no looping was used)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Note that you can use other viewing commands, not just .cat., but be careful not to edit any of these files.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_input_options.txt</span></tt> (should show Al instead of element X1)</p>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">To see information about the ingredient relationships MAST detected from the recipe template:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">personal_recipe.txt</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_recipe_plan.txt</span></tt></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">To see ingredient statuses at a glance:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">status.txt</span></tt></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Run mast once: <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></tt></p>
+</li>
+<li><p class="first">You should see a <cite>mastmon</cite> job appear on morganshort.</p>
+</li>
+<li><p class="first">MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></tt></p>
+</li>
+<li><p class="first">Now you should see <tt class="docutils literal"><span class="pre">perfect_opt1</span></tt> appear on the queue.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">status.txt</span></tt> in the recipe directory in <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> should show that <tt class="docutils literal"><span class="pre">perfect_opt1</span></tt> is queued.</p>
+</li>
+<li><p class="first">If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> and start again from the beginning of this section.</p>
+</li>
+<li><p class="first">The <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt> folder gives you error messages and other information. See <a class="reference internal" href="5_0_runningmast.html"><em>Running MAST</em></a> for tips.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="installation-on-another-cluster">
+<h2>Installation on another cluster<a class="headerlink" href="#installation-on-another-cluster" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pre-steps">
+<h3>0. Pre-steps<a class="headerlink" href="#pre-steps" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.</p>
+</li>
+<li><p class="first">Have the owner of //tmp/pip-build remove the directory if it exists (see <a href="#id6"><span class="problematic" id="id7">:ref:`pip issue 729 &lt;https://github.com/pypa/pip/issues/729&gt;`_</span></a>):</p>
+<div class="highlight-python"><pre>cd //tmp
+rm -r pip-build</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="verify-your-python-version">
+<h3>1. Verify your Python version<a class="headerlink" href="#verify-your-python-version" title="Permalink to this headline">¶</a></h3>
+<p>Check your version of python: <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt>
+If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.</p>
+<ul class="simple">
+<li>On platforms with modules, it is probably something like <tt class="docutils literal"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">python</span></tt>, but get the correct version (<tt class="docutils literal"><span class="pre">module</span> <span class="pre">avail</span></tt> to see available modules). Type <tt class="docutils literal"><span class="pre">which</span> <span class="pre">python</span></tt> to make sure you have the right version, or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt>.</li>
+<li>DLX has python 2.6.6 normally. <tt class="docutils literal"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">Python</span></tt>, even though it is 2.7.3, has some difficulties installing pymatgen, possibly because of the way the module system works. Follow the <tt class="docutils literal"><span class="pre">install</span> <span class="pre">python</span></tt> directions instead.</li>
+<li>On bardeen it is //share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64</li>
+</ul>
+<p>If you do not have python 2.7.3, install it.</p>
+<div class="section" id="installing-python">
+<h4>Installing python<a class="headerlink" href="#installing-python" title="Permalink to this headline">¶</a></h4>
+<p>The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from here: <a href="#id8"><span class="problematic" id="id9">:ref:`EPD Free Canopy &lt;https://www.enthought.com/downloads/&gt;`_</span></a></p>
+<ul class="simple">
+<li>Version 2.7.5 is okay</li>
+<li>On DLX, go into interactive setup with the command <tt class="docutils literal"><span class="pre">srun</span> <span class="pre">-u</span> <span class="pre">bash</span> <span class="pre">-i</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">bash</span> <span class="pre">./canopy-1.0.3-rh5-64.sh</span></tt></li>
+<li>Follow the prompts (use spacebar to scroll through the license file)</li>
+</ul>
+<p>Add lines to your profile to make this python installation your default python:</p>
+<div class="highlight-python"><pre>vi ~/.bashrc
+#EPD (Canopy) python
+export PATH=//home/tma249/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH</pre>
+</div>
+<ul class="simple">
+<li>Do not just use the .Canopy/bin. directory - python modules will not load properly</li>
+<li>Log out and log in</li>
+</ul>
+<p>Check your version of python: <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt></p>
+<p>The version given must be the correct version. If not, for all subsequent commands that say <em>python</em>, give the full path to your version of python, e.g. <tt class="docutils literal"><span class="pre">//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python</span></tt></p>
+</div>
+</div>
+<div class="section" id="verify-setuptools-easy-install-and-pip">
+<h3>2. Verify setuptools (easy_install) and pip<a class="headerlink" href="#verify-setuptools-easy-install-and-pip" title="Permalink to this headline">¶</a></h3>
+<p>Check if easy_install and pip are available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">which</span> <span class="pre">pip</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">which</span> <span class="pre">easy_install</span></tt></li>
+</ul>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-python"><pre>[username@aci-service-2 ~]$ which pip
+//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin/pip
+[username@aci-service-2 ~]$ which easy_install
+//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin/easy_install</pre>
+</div>
+<p>pip must be version 1.3 or later (pip &#8211;version)</p>
+<p>If either easy_install or pip is missing, install them as follows.</p>
+<p>Get setuptools (easy_install)</p>
+<blockquote>
+<div><ul class="simple">
+<li><a href="#id10"><span class="problematic" id="id11">:ref:`setuptools &lt;https://pypi.python.org/pypi/setuptools&gt;`_</span></a></li>
+<li><tt class="docutils literal"><span class="pre">wget</span> <span class="pre">https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">python</span> <span class="pre">ez_setup.py</span></tt></li>
+</ul>
+</div></blockquote>
+<p>Get pip</p>
+<blockquote>
+<div><ul class="simple">
+<li><a href="#id12"><span class="problematic" id="id13">:ref:`pip &lt;https://pypi.python.org/pypi/pip&gt;`_</span></a></li>
+<li><tt class="docutils literal"><span class="pre">curl</span> <span class="pre">-O</span> <span class="pre">https://raw.github.com/pypa/pip/master/contrib/get-pip.py</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">python</span> <span class="pre">get-pip.py</span></tt></li>
+</ul>
+</div></blockquote>
+<p>easy_install and pip should now be located wherever your installed python is.
+Check their locations and the pip version again.</p>
+</div>
+<div class="section" id="verify-numpy-and-scipy">
+<h3>3. Verify numpy and scipy<a class="headerlink" href="#verify-numpy-and-scipy" title="Permalink to this headline">¶</a></h3>
+<p>Check if numpy and scipy available:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+</pre></div>
+</div>
+<p>If numpy is not available, try pip installation:</p>
+<div class="highlight-python"><pre>pip install --user numpy</pre>
+</div>
+<p>(Use the pip in the bin directory of the correct version of python)</p>
+<p>If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Grab the most recent stable release of numpy from <a href="#id14"><span class="problematic" id="id15">:ref:`&lt;http://www.scipy.org/install.html&gt;`_</span></a></p>
+</li>
+<li><p class="first">Untar with command <tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-zxvf</span> <span class="pre">numpy-&lt;version&gt;.tar.gz</span></tt></p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">cd</span> <span class="pre">numpy-&lt;version&gt;</span></tt></p>
+</li>
+<li><p class="first">Put the following in your command line:</p>
+<div class="highlight-python"><pre>BLAS=None LAPACK=None ATLAS=None python setup.py config build install --prefix=&lt;location where you want numpy installed, recommend $HOME/lib&gt;</pre>
+</div>
+</li>
+<li><p class="first">Get something to drink; this&#8217;ll take about 5-10 minutes.</p>
+</li>
+<li><p class="first">Add to your .bashrc:</p>
+<div class="highlight-python"><pre>NUMPY=&lt;location you specified above&gt;
+export PYTHONPATH=$NUMPY:$PYTHONPATH</pre>
+</div>
+</li>
+<li><p class="first">source $HOME/.bashrc</p>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="install-pymatgen-and-custodian">
+<h3>4. Install pymatgen and custodian<a class="headerlink" href="#install-pymatgen-and-custodian" title="Permalink to this headline">¶</a></h3>
+<p>Make sure you explicitly use the correct pip and easy_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy_install or other such paths, corresponding to the correct version of python</p>
+<p>Use the <tt class="docutils literal"><span class="pre">--user</span></tt> tag if you are not using the easy_install and pip from your own installation of python. Otherwise, you can omit this tag.</p>
+<p>Upgrade the <em>distribute</em> package. You <strong>MUST</strong> upgrade this package, even if it is freshly installed. (8/9/13)</p>
+<div class="highlight-python"><pre>nice -n 19 easy_install --user --upgrade distribute</pre>
+</div>
+<p>pip install pymatgen and custodian:</p>
+<div class="highlight-python"><pre>nice -n 19 pip install --user pymatgen
+nice -n 19 pip install --user custodian</pre>
+</div>
+<p>If pip does not work, try making your own temp directory.</p>
+<div class="highlight-python"><pre>mkdir //home/&lt;username&gt;/tmp
+export TMPDIR=.//home/&lt;username&gt;/tmp.</pre>
+</div>
+<p>Then try running the pip commands again.</p>
+<p>Remove any pip directory if it exists.</p>
+<div class="highlight-python"><pre>cd //tmp
+rm -r pip-build</pre>
+</div>
+</div>
+<div class="section" id="set-up-the-pymatgen-vasp-psp-dir">
+<h3>5. Set up the pymatgen VASP_PSP_DIR<a class="headerlink" href="#set-up-the-pymatgen-vasp-psp-dir" title="Permalink to this headline">¶</a></h3>
+<p>Locate the VASP pseudopotentials</p>
+<ul>
+<li><p class="first">On bardeen, this is <tt class="docutils literal"><span class="pre">//share/apps/vasp_pseudopotentials</span></tt></p>
+</li>
+<li><p class="first">On DLX it is <tt class="docutils literal"><span class="pre">//home/adozier/VASP</span></tt></p>
+<blockquote>
+<div><ul class="simple">
+<li>On DLX, SKIP TO THE NEXT NUMBERED STEP</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Run pymatgen&#8217;s python setup tool. This tool should be located wherever pymatgen was installed, either <tt class="docutils literal"><span class="pre">~/.local/bin/potcar_setup.py</span></tt> if you installed it with <tt class="docutils literal"><span class="pre">--user</span></tt>, or wherever python is, otherwise.</p>
+<div class="highlight-python"><pre>python .local/bin/potcar_setup.py or python potcar_setup.py or simply potcar_setup.py</pre>
+</div>
+<p>(Remember to use the correct version of python, determined in step 2, e.g. //share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python .local/bin/potcar_setup.py)</p>
+<p>Take the paw directory if you are using PAW. Do not take the top directory, or the GGA/LDA/etc folders will overwrite.</p>
+<p>Example of running the python setup tool:</p>
+<div class="highlight-python"><pre>Please enter full path where the POT_GGA_PAW_PBE, etc. subdirs are present. If you obtained the PSPs directly from VASP, this should typically be the directory that you untar the files to : //share/apps/vasp_pseudopotentials/paw
+Please enter the fullpath of the where you want to create your pymatgen resources directory:
+//home/&lt;username&gt;/.local/vasp_pps</pre>
+</div>
+<p>Rename the folders under <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.local/vasp_pps</span></tt>:</p>
+<ul class="simple">
+<li>Rename the PBE folder POT_GGA_PAW_PBE to correspond to mast_xc pbe</li>
+<li>Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91</li>
+</ul>
+<p>Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR to this VASP directory.</p>
+<ul>
+<li><p class="first">On bardeen, it should look something like:</p>
+<div class="highlight-python"><pre>export VASP_PSP_DIR=//home/&lt;username&gt;/.local/vasp_pps</pre>
+</div>
+</li>
+<li><p class="first">On DLX, use the directories already created:</p>
+<div class="highlight-python"><pre>export VASP_PSP_DIR=//home/adozier/VASP/resources
+export VASP_PSP_DIR=&lt;whichever path you used in the potcar_setup.py script&gt;</pre>
+</div>
+</li>
+<li><p class="first">Remember to save your .bashrc file. Test the change:</p>
+<div class="highlight-python"><pre>source ~/.bashrc
+cd $VASP_PSP_DIR</pre>
+</div>
+</li>
+<li><p class="first">Make sure you are getting to the right directory, which has POT_GGA_POW_PBE etc. folders inside it.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="get-mast">
+<h3>6. Get MAST<a class="headerlink" href="#get-mast" title="Permalink to this headline">¶</a></h3>
+<p>Get the MAST.tar.gz file from MaterialsHub.org and untar it:</p>
+<div class="highlight-python"><pre>nice -n 19 tar -xzvf MAST.tar.gz</pre>
+</div>
+<p>(or run this command over interactive submission, which is better)</p>
+<p>Make the bin executables runnable. Supposing the uncompressed path was //home/username/MAST, then run the following command:</p>
+<div class="highlight-python"><pre>chmod -R a+x //home/username/MAST/bin</pre>
+</div>
+<p>Modify the submission details for your platform:</p>
+<div class="highlight-python"><pre>cd //home/username/MAST/submit
+cp platforms/script_commands_&lt;yourplatform&gt;.py script_commands.py
+cp platforms/queue_commands_&lt;yourplatform&gt;.py queue_commands.py
+cp platforms/submit_&lt;yourplatform&gt;.sh submit.sh</pre>
+</div>
+<p>Modify submit.sh as necessary for your platform.</p>
+<ul>
+<li><p class="first">The submit.sh script should be set up to run mastmon.py on the shortest wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)</p>
+</li>
+<li><p class="first">Examples of special modifications for submit.sh:</p>
+<blockquote>
+<div><ul class="simple">
+<li>ACI/HPC, add line: <tt class="docutils literal"><span class="pre">#SBATCH</span> <span class="pre">--partition=univ</span></tt></li>
+<li>Bardeen, add a line to tell control where to run the monitor: <tt class="docutils literal"><span class="pre">#PBS</span> <span class="pre">-q</span> <span class="pre">morganshort</span></tt></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Modify script_commands.py as necessary for your platform.</p>
+<ul class="simple">
+<li>ACI/HPC: in script_commands.py, near line 95, add line: <tt class="docutils literal"><span class="pre">myscript.data.append(&quot;#SBATCH</span> <span class="pre">--partition=univ</span> <span class="pre">&quot;</span> <span class="pre">+</span> <span class="pre">&quot;\n&quot;)</span></tt></li>
+<li>Bardeen: in script_commands.py near line 95 add line: <tt class="docutils literal"><span class="pre">myscript.data.append(&quot;#PBS</span> <span class="pre">-q</span> <span class="pre">&quot;</span> <span class="pre">+</span> <span class="pre">mast_queue</span> <span class="pre">+</span> <span class="pre">&quot;\n&quot;)</span></tt></li>
+</ul>
+<p>Modify queue_commands.py as necessary for your platform. (On DLX, ACI, and bardeen, no modification should be necessary.)</p>
+<p>Figure out the correct mast_exec calls for your system, to be used in the <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>. Examples are below.</p>
+<ul>
+<li><p class="first">Bardeen: <tt class="docutils literal"><span class="pre">mast_exec</span> <span class="pre">//opt/mpiexec/bin/mpiexec</span> <span class="pre">//share/apps/bin/vasp5.2_par_opt1</span></tt>  (or any of the other vasp executables)</p>
+</li>
+<li><p class="first">DLX: <tt class="docutils literal"><span class="pre">mast_exec</span> <span class="pre">//home/username/bin/vaspmpirun</span></tt>, where vaspmpirun is the following script:</p>
+<div class="highlight-python"><pre>#!/bin/bash
+export PERL5LIB=/opt/moab/lib/perl5
+export MIC_LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/compiler/lib/mic
+export LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/lib:/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/compiler/lib/intel64:/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
+export INTEL_MKL_LIBS=/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
+export QTLIB=/usr/lib64/qt-3.3/lib
+PATH=$PATH:$HOME/bin:$HOME/bin/convaspTest
+export PATH
+VaspPath=//home/adozier/VASP/vasp.5.2
+export OMP_NUM_THREADS=1
+ulimit -s unlimited
+ulimit -l unlimited
+#mpirun $VaspPath/vasp
+//share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/bin/mpirun $VaspPath/vasp</pre>
+</div>
+</li>
+</ul>
+<p>Modify ~/.bashrc if necessary</p>
+<ul class="simple">
+<li>ACI/HPC, add line: <tt class="docutils literal"><span class="pre">export</span> <span class="pre">LD_LIBRARY_PATH=$LD_LIBRARY_PATH://opt/intel/lib/intel64</span></tt></li>
+</ul>
+<p>To ensure recipes are created correctly, add python whitespace tab stops to your ~/.vimrc file:</p>
+<div class="highlight-python"><pre>" VIM settings for python in a group below:
+set tabstop=4
+set shiftwidth=4
+set smarttab
+set expandtab
+set softtabstop=4
+set autoindent</pre>
+</div>
+<p>Follow the environment variable setup in a similar fashion to <a class="reference internal" href="#installation-on-bardeen"><em>Installation on bardeen</em></a>
+Follow the testing instructions from <a class="reference internal" href="#test-on-bardeen"><em>Test that MAST can run on bardeen</em></a></p>
+</div>
+</div>
+<div class="section" id="platform-support">
+<span id="platforms"></span><h2>Platform Support<a class="headerlink" href="#platform-support" title="Permalink to this headline">¶</a></h2>
+<p>Queue and submission script commands are in <tt class="docutils literal"><span class="pre">//home/user/topmast/submit</span></tt> and may need to be heavily modified depending on the platform used.
+To customize the queue submission behavior, copy a queue_commands.py, script_commands.py and submit.sh from <tt class="docutils literal"><span class="pre">$MAST_INSTALL_PATH/submit/platforms</span></tt> to <tt class="docutils literal"><span class="pre">$MAST_INSTALL_PATH/submit/</span></tt>. Remove the platform name from the file names.</p>
+<p>The out-of-the-box PBS submission script is built using the following input file keywords (see <a class="reference internal" href="2_0_ingredients.html"><em>Ingredients</em></a>):</p>
+<ul class="simple">
+<li>mast_processors or a combination of mast_ppn and mast_nodes</li>
+<li>mast_queue</li>
+<li>mast_exec</li>
+<li>mast_walltime</li>
+<li>mast_memory</li>
+<li>the ingredient name</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#installation-on-bardeen">Installation on bardeen</a><ul>
+<li><a class="reference internal" href="#environment-variables">1. Environment variables</a></li>
+<li><a class="reference internal" href="#python-version">2. Python version</a></li>
+<li><a class="reference internal" href="#additional-setup">3. Additional setup</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-that-mast-can-run-on-bardeen">Test that MAST can run on bardeen</a></li>
+<li><a class="reference internal" href="#installation-on-another-cluster">Installation on another cluster</a><ul>
+<li><a class="reference internal" href="#pre-steps">0. Pre-steps</a></li>
+<li><a class="reference internal" href="#verify-your-python-version">1. Verify your Python version</a><ul>
+<li><a class="reference internal" href="#installing-python">Installing python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#verify-setuptools-easy-install-and-pip">2. Verify setuptools (easy_install) and pip</a></li>
+<li><a class="reference internal" href="#verify-numpy-and-scipy">3. Verify numpy and scipy</a></li>
+<li><a class="reference internal" href="#install-pymatgen-and-custodian">4. Install pymatgen and custodian</a></li>
+<li><a class="reference internal" href="#set-up-the-pymatgen-vasp-psp-dir">5. Set up the pymatgen VASP_PSP_DIR</a></li>
+<li><a class="reference internal" href="#get-mast">6. Get MAST</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#platform-support">Platform Support</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="0_0_introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="2_0_ingredients.html"
+                        title="next chapter">Ingredients</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="2_0_ingredients.html" title="Ingredients"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="0_0_introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

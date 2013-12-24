@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Ingredients &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" />
+    <link rel="next" title="Input File" href="3_0_inputfile.html" />
+    <link rel="prev" title="Installation" href="1_0_installation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="3_0_inputfile.html" title="Input File"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ingredients">
+<h1>Ingredients<a class="headerlink" href="#ingredients" title="Permalink to this headline">¶</a></h1>
+<p>Each ingredient is a separate calculation. Ingredients make up recipes.</p>
+<p>Each ingredient is responsible for updating its child ingredients through an update_children method.</p>
+<p>Each ingredient is given:</p>
+<ul>
+<li><p class="first">A name, which is the full path to the ingredient.s directory and is automatically generated using the system name and the recipe template. (Do not use parentheses in ingredient names.) Some ingredient names must be structured specifically. For examples of naming conventions, see the <a class="reference internal" href="4_0_recipe.html"><em>Recipe</em></a>. In particular:</p>
+</li>
+<li><p class="first">An ingredient which is supposed to correspond to values given by the <tt class="docutils literal"><span class="pre">$defects</span></tt> section of the <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a> should always be named with <tt class="docutils literal"><span class="pre">inducedefect_</span></tt> (for the structural creation of the defect) or <tt class="docutils literal"><span class="pre">defect_</span></tt> (for an actual defect calcualtion)</p>
+</li>
+<li><dl class="first docutils">
+<dt>An ingredient which is supposed to correspond to values in the <tt class="docutils literal"><span class="pre">$neb</span></tt> section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with <tt class="docutils literal"><span class="pre">neb_</span></tt></dt>
+<dd><ul class="first last simple">
+<li>A phonon calculation should always be named with <tt class="docutils literal"><span class="pre">phonon_</span></tt>, and a subsequent calculation of phonon results should be named with <tt class="docutils literal"><span class="pre">phonon_...parse</span></tt></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">The letters .q=. are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name</p>
+</li>
+<li><p class="first">A dictionary of program-specific keywords, which come from each ingredient.s section in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>.</p>
+</li>
+<li><p class="first">A pymatgen structure object representing the very first structure created from the <tt class="docutils literal"><span class="pre">$structure</span></tt> section in the input file.</p>
+</li>
+<li><p class="first">A type, which is specified in the recipe, next to the ingredient name, in parentheses. The ingredient type corresponds to the ingredient type subsection in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file. The information given in these subsections includes:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Program-specific keywords</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Other MAST keywords, including:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)</dt>
+<dd><ul class="first last simple">
+<li>The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)).</li>
+<li>The .run. method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)</li>
+<li>The .complete. method: how MAST can tell if the ingredient is considered complete</li>
+<li>The .update children. method: what information an ingredient passes on to its children, and how this information is passed on</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>The same ingredient in a recipe may be listed more than once, with several different ingredient types. In this case, the first four methods and all the ingredient keywords are given by the first ingredient type encountered. Only the .update_children. method is changed for all subsequent positions. This situation indicates that the ingredient has many children, which must be updated in different ways and thus needs different update_children methods for those different situations.</p>
+<p>More detail on ingredients is given in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="1_0_installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="3_0_inputfile.html"
+                        title="next chapter">Input File</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="3_0_inputfile.html" title="Input File"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

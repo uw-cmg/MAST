@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.recipe.recipesetup module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.recipe.recipesetup">
+<span id="mast-recipe-recipesetup-module"></span><h1>MAST.recipe.recipesetup module<a class="headerlink" href="#module-MAST.recipe.recipesetup" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.recipe.recipesetup.RecipeSetup">
+<em class="property">class </em><tt class="descclassname">MAST.recipe.recipesetup.</tt><tt class="descname">RecipeSetup</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj" title="MAST.utility.mastobj.MASTObj"><tt class="xref py py-class docutils literal"><span class="pre">MAST.utility.mastobj.MASTObj</span></tt></a></p>
+<p>Parses the personalized recipe file,
+creates the recipe plan object,
+and prepares the ingredient directories.
+Attributes:</p>
+<blockquote>
+<div>self.recipe_file &lt;str&gt;: Recipe file name
+self.input_options &lt;InputOptions&gt;: Input options for recipe
+self.structure &lt;pymatgen Structure&gt;: Initial structure in recipe
+self.work_dir &lt;str&gt;: Working (recipe) directory)
+self.logger &lt;logging Logger&gt;: MAST monitor and MAST setup-level log
+self.recipe_logger &lt;logging Logger&gt;: Recipe-level log</div></blockquote>
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.create_ingredient">
+<tt class="descname">create_ingredient</tt><big>(</big><em>my_ingred_input_options</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.create_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.create_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the ingredient directory and metadata file.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>my_ingred_input_options &lt;Input Options&gt;: single ingredient</dt>
+<dd>input options</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.create_recipe_plan">
+<tt class="descname">create_recipe_plan</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.create_recipe_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.create_recipe_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a recipe object which has the ingredients and dependency information</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.get_method_from_ingredient_type">
+<tt class="descname">get_method_from_ingredient_type</tt><big>(</big><em>ingredtype</em>, <em>methodtype=''</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.get_method_from_ingredient_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.get_method_from_ingredient_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get write, ready, run, complete, and update methods from
+an ingredient type like volrelax_to_singlerun
+Args:</p>
+<blockquote>
+<div>ingredtype &lt;str&gt;: ingredient type
+methodtype &lt;str&gt;: method type (&#8220;mast_write_method&#8221;, etc.)</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>methodname &lt;str&gt;: method name (&#8220;write_default&#8221;, etc.)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.get_my_ingredient_options">
+<tt class="descname">get_my_ingredient_options</tt><big>(</big><em>name</em>, <em>ingredient_type</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.get_my_ingredient_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.get_my_ingredient_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the ingredient based on the ingredient type.
+Notes:</p>
+<dl class="docutils">
+<dt>GRJ 6/19/2013: If the ingredient has not be specified in the input</dt>
+<dd>file we create it here, and append on the defaults.
+In addition, the defaults are appended on here, rather
+than in InputParser (since each ingredient is made here
+this makes more sense).</dd>
+</dl>
+<p>TTM 8/19/13: Unspecified ingredient is &#8220;default&#8221;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the setup process, parse the recipe file
+Use the input options and recipe info to
+create directories and classes required</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipesetup.RecipeSetup.update_top_meta_for_ingred">
+<tt class="descname">update_top_meta_for_ingred</tt><big>(</big><em>myingred</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipesetup.html#RecipeSetup.update_top_meta_for_ingred"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipesetup.RecipeSetup.update_top_meta_for_ingred" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the top metafile for an ingredient.
+Args:</p>
+<blockquote>
+<div>myingred &lt;str&gt;: ingredient name</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

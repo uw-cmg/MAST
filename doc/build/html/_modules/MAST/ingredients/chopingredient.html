@@ -1,0 +1,684 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.ingredients.chopingredient &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.ingredients.chopingredient</h1><div class="highlight"><pre>
+<span class="c">############################################################################</span>
+<span class="c"># MAterials Simulation Toolbox (MAST)</span>
+<span class="c"># Version: January 2013</span>
+<span class="c"># Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,</span>
+<span class="c">#              Kumaresh Visakan Murugan, Parker Sear</span>
+<span class="c"># Created at the University of Wisconsin-Madison.</span>
+<span class="c"># Replace this section with appropriate license text before shipping.</span>
+<span class="c"># Add additional programmers and schools as necessary.</span>
+<span class="c">############################################################################</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.sites</span> <span class="kn">import</span> <span class="n">PeriodicSite</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Lattice</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core.structure_modifier</span> <span class="kn">import</span> <span class="n">StructureEditor</span>
+<span class="kn">from</span> <span class="nn">pymatgen.util.coord_utils</span> <span class="kn">import</span> <span class="n">find_in_coord_list</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio</span> <span class="kn">import</span> <span class="n">Poscar</span>
+
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTObj</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">Metadata</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTFile</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">dirutil</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.baseingredient</span> <span class="kn">import</span> <span class="n">BaseIngredient</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.pmgextend.structure_extensions</span> <span class="kn">import</span> <span class="n">StructureExtensions</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.checker</span> <span class="kn">import</span> <span class="n">VaspNEBChecker</span>
+<span class="kn">from</span> <span class="nn">MAST.ingredients.checker</span> <span class="kn">import</span> <span class="n">VaspChecker</span>
+
+<div class="viewcode-block" id="WriteIngredient"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient">[docs]</a><span class="k">class</span> <span class="nc">WriteIngredient</span><span class="p">(</span><span class="n">BaseIngredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Program, e.g. &quot;vasp&quot;&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WriteIngredient.no_setup"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.no_setup">[docs]</a>    <span class="k">def</span> <span class="nf">no_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;No setup is needed.&quot;&quot;&quot;</span>
+        <span class="k">return</span>
+
+    </div>
+<div class="viewcode-block" id="WriteIngredient.write_neb"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_neb">[docs]</a>    <span class="k">def</span> <span class="nf">write_neb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the parent structures, sort and match atoms, and interpolate.</span>
+<span class="sd">            Write images to the appropriate folders.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parentstructures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_structures</span><span class="p">()</span>
+        <span class="n">parentimagestructures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parent_image_structures</span><span class="p">()</span>
+        <span class="n">image_structures</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parentimagestructures</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">parentstructures</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">struc_work2</span><span class="o">=</span><span class="n">parentstructures</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">image_structures</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">do_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">image_structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parentstructures</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">image_structures</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parentimagestructures</span><span class="p">)</span>
+            <span class="n">image_structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parentstructures</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">image_structures</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;Bad number of images&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;image_structures&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">image_structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">place_parent_energy_files</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span>
+        <span class="k">return</span>
+
+
+
+
+
+        </div>
+<div class="viewcode-block" id="WriteIngredient.get_parent_structures"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.get_parent_structures">[docs]</a>    <span class="k">def</span> <span class="nf">get_parent_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assume that parents have written files</span>
+<span class="sd">            named &#39;parent_structure_&lt;N&gt;&#39;. </span>
+<span class="sd">            For VASP these are CONTCAR-type files.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                [struct_init, struct_fin]: pymatgen Structure objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="s">&quot;parent_structure_&quot;</span><span class="p">)</span>
+        <span class="n">mylabel</span> <span class="o">=</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">get_my_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;neb_label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">pfpath_init</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">mylabel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pfpath_fin</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">mylabel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pfpath_init</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;Error: no parent file at&quot;</span> <span class="o">+</span> <span class="n">pfpath_init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pfpath_fin</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="s">&quot;Error: no parent file at&quot;</span> <span class="o">+</span> <span class="n">pfpath_fin</span><span class="p">)</span>
+        <span class="n">struct_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_structure_from_file</span><span class="p">(</span><span class="n">pfpath_init</span><span class="p">)</span>
+        <span class="n">struct_fin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_structure_from_file</span><span class="p">(</span><span class="n">pfpath_fin</span><span class="p">)</span>
+        <span class="n">base_struct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span>
+        <span class="n">myimages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">]</span>
+        <span class="n">neblines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;lines&#39;</span><span class="p">]</span>
+        <span class="n">sxtendi</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">struct_init</span><span class="p">,</span> <span class="n">struc_init</span> <span class="o">=</span> <span class="n">base_struct</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">sorted_init</span> <span class="o">=</span> <span class="n">sxtendi</span><span class="o">.</span><span class="n">sort_structure_and_neb_lines</span><span class="p">(</span><span class="n">neblines</span><span class="p">,</span> <span class="s">&#39;00&#39;</span><span class="p">,</span> <span class="n">myimages</span><span class="p">)</span> 
+        <span class="n">sxtendf</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">struct_fin</span><span class="p">,</span> <span class="n">struc_init</span> <span class="o">=</span> <span class="n">base_struct</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">sorted_fin</span> <span class="o">=</span> <span class="n">sxtendf</span><span class="o">.</span><span class="n">sort_structure_and_neb_lines</span><span class="p">(</span><span class="n">neblines</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myimages</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">myimages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">sorted_init</span><span class="p">,</span> <span class="n">sorted_fin</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="WriteIngredient.get_parent_image_structures"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.get_parent_image_structures">[docs]</a>    <span class="k">def</span> <span class="nf">get_parent_image_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A low-mesh NEB may have written files</span>
+<span class="sd">            named &#39;parent_structure_&lt;N-N&gt;_0N&#39;. </span>
+<span class="sd">            For VASP these are CONTCAR-type files.</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                list of &lt;Structure&gt;: list of pymatgen Structure objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s">&quot;parent_structure_&quot;</span>
+        <span class="n">numim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">]</span>
+        <span class="n">imct</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">imstrs</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">imct</span> <span class="o">&lt;=</span> <span class="n">numim</span><span class="p">:</span>
+            <span class="n">pfpath</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">myfile</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">header</span> <span class="ow">in</span> <span class="n">myfile</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">imct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">myfile</span><span class="p">):</span>
+                    <span class="n">pfpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">myfile</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pfpath</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">struct_im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_structure_from_file</span><span class="p">(</span><span class="n">pfpath</span><span class="p">)</span>
+                <span class="n">base_struct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span>
+                <span class="n">neblines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;lines&#39;</span><span class="p">]</span>
+                <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">struct_im</span><span class="p">,</span> <span class="n">struc_init</span> <span class="o">=</span> <span class="n">base_struct</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">sorted_im</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">sort_structure_and_neb_lines</span><span class="p">(</span><span class="n">neblines</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">imct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span> 
+                <span class="n">imstrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sorted_im</span><span class="p">)</span>
+            <span class="n">imct</span> <span class="o">=</span> <span class="n">imct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imstrs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imstrs</span><span class="p">)</span> <span class="o">==</span> <span class="n">numim</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Incomplete number of forwared images found!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">imstrs</span>
+</div>
+<div class="viewcode-block" id="WriteIngredient.place_parent_energy_files"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.place_parent_energy_files">[docs]</a>    <span class="k">def</span> <span class="nf">place_parent_energy_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assume parents have written files parent_energy_&lt;N&gt;.</span>
+<span class="sd">            Copy these files into the 00 and 0N directories.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="s">&quot;parent_energy_&quot;</span><span class="p">)</span>
+        <span class="n">mylabel</span><span class="o">=</span><span class="n">BaseIngredient</span><span class="o">.</span><span class="n">get_my_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;neb_label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">pfpath1</span><span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">mylabel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pfpath2</span><span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">mylabel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">pffile1</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">pfpath1</span><span class="p">)</span>
+        <span class="n">pffile2</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">pfpath2</span><span class="p">)</span>
+        <span class="n">pffile1</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_path_to_write_neb_parent_energy</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="c">#MASTFile contains directory locking.</span>
+        <span class="n">pffile2</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_path_to_write_neb_parent_energy</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span>
+
+
+</div>
+<div class="viewcode-block" id="WriteIngredient.write_neb_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_neb_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">write_neb_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the static runs to each subfolder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">mystr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span>
+        <span class="n">numim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span>
+        <span class="n">singlechecker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">==</span> <span class="s">&#39;vasp&#39;</span><span class="p">:</span>
+            <span class="n">nebchecker</span> <span class="o">=</span> <span class="n">VaspNEBChecker</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">program_keys</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]),</span> <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;NEB checker not supported for program </span><span class="si">%s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span> <span class="o">=</span> <span class="n">nebchecker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_neb</span><span class="p">()</span> <span class="c">#Write the POSCAR and OSZICAR files from existing parent-given structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span> <span class="o">=</span> <span class="n">singlechecker</span>
+        <span class="k">for</span> <span class="n">imct</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">numim</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">imct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">mystr</span>
+        <span class="k">return</span></div>
+<div class="viewcode-block" id="WriteIngredient.write_singlerun"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_singlerun">[docs]</a>    <span class="k">def</span> <span class="nf">write_singlerun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span></div>
+<div class="viewcode-block" id="WriteIngredient.write_singlerun_automesh"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_singlerun_automesh">[docs]</a>    <span class="k">def</span> <span class="nf">write_singlerun_automesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">has_starting_structure_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;No starting structure file for ingredient </span><span class="si">%s</span><span class="s">; write_singlerun_automesh cannot be used.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span> 
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;mast_kpoint_density&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;No mast_kpoint_density ingredient keyword found for ingredient </span><span class="si">%s</span><span class="s">; write_singlerun_automesh cannot be used.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">scale_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_kpoint_density&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span></div>
+<div class="viewcode-block" id="WriteIngredient.write_phonon_multiple"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_phonon_multiple">[docs]</a>    <span class="k">def</span> <span class="nf">write_phonon_multiple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the multiple phonon files, one for each atom and each direction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span>
+        <span class="n">mystructure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span>
+        <span class="p">[</span><span class="n">pcs</span><span class="p">,</span><span class="n">pcr</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_my_phonon_params</span><span class="p">()</span>
+        <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">mystructure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">sdarrlist</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">get_multiple_sd_array</span><span class="p">(</span><span class="n">pcs</span><span class="p">,</span> <span class="n">pcr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sdarrlist</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;No phonons to run!&quot;</span><span class="p">)</span>
+        <span class="n">sct</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">sdarr</span> <span class="ow">in</span> <span class="n">sdarrlist</span><span class="p">:</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="s">&quot;phon_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newname</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">mystructure</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">add_selective_dynamics_to_structure_file</span><span class="p">(</span><span class="n">sdarr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_charge_density_file</span><span class="p">(</span><span class="n">newname</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_wavefunction_file</span><span class="p">(</span><span class="n">newname</span><span class="p">)</span>
+            <span class="n">sct</span> <span class="o">=</span> <span class="n">sct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        
+</div>
+<div class="viewcode-block" id="WriteIngredient.write_phonon_single"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.write_phonon_single">[docs]</a>    <span class="k">def</span> <span class="nf">write_phonon_single</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write the phonon files to a directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">set_up_program_input</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_submit_script</span><span class="p">()</span>
+        <span class="n">mystructure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span>
+        <span class="p">[</span><span class="n">pcs</span><span class="p">,</span><span class="n">pcr</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_my_phonon_params</span><span class="p">()</span>
+        <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">mystructure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">sdarr</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">get_sd_array</span><span class="p">(</span><span class="n">pcs</span><span class="p">,</span> <span class="n">pcr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sdarr</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">add_selective_dynamics_to_structure_file</span><span class="p">(</span><span class="n">sdarr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="WriteIngredient.get_my_phonon_params"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.WriteIngredient.get_my_phonon_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_my_phonon_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get phonon parameters from </span>
+<span class="sd">            [&#39;program_keys&#39;][&#39;mast_phonon_settings&#39;][&#39;phonon_center_site&#39;] and</span>
+<span class="sd">            [&#39;program_keys&#39;][&#39;mast_phonon_settings&#39;][&#39;phonon_center_radius&#39;] </span>
+<span class="sd">            Returns:</span>
+<span class="sd">                [phonon_center_site, phonon_center_radius]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myphdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_phonon_settings&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">myphdict</span><span class="p">[</span><span class="s">&#39;phonon_center_site&#39;</span><span class="p">],</span><span class="n">myphdict</span><span class="p">[</span><span class="s">&#39;phonon_center_radius&#39;</span><span class="p">]]</span>
+
+</div></div>
+<div class="viewcode-block" id="IsReadyToRunIngredient"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient">[docs]</a><span class="k">class</span> <span class="nc">IsReadyToRunIngredient</span><span class="p">(</span><span class="n">BaseIngredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="IsReadyToRunIngredient.ready_singlerun"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient.ready_singlerun">[docs]</a>    <span class="k">def</span> <span class="nf">ready_singlerun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">is_ready_to_run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="IsReadyToRunIngredient.ready_structure"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient.ready_structure">[docs]</a>    <span class="k">def</span> <span class="nf">ready_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory_is_locked</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">has_starting_structure_file</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="IsReadyToRunIngredient.ready_defect"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient.ready_defect">[docs]</a>    <span class="k">def</span> <span class="nf">ready_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;ready_defect is deprecated. use ready_structure instead&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ready_structure</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="IsReadyToRunIngredient.ready_neb_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient.ready_neb_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">ready_neb_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure all subfolders are ready to run.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">notready</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">numim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">imct</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numim</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">imct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="k">if</span> <span class="n">imct</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">imct</span> <span class="o">&gt;</span> <span class="n">numim</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">directory_is_locked</span><span class="p">(</span><span class="n">newname</span><span class="p">):</span>
+                    <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">is_ready_to_run</span><span class="p">():</span>
+                    <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">imct</span> <span class="o">=</span> <span class="n">imct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">if</span> <span class="n">notready</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="IsReadyToRunIngredient.ready_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsReadyToRunIngredient.ready_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">ready_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure all subfolders are ready to run.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">subdirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">notready</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subdirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="k">if</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">directory_is_locked</span><span class="p">(</span><span class="n">newname</span><span class="p">):</span>
+                <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">is_ready_to_run</span><span class="p">():</span>
+                <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">if</span> <span class="n">notready</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div></div>
+<div class="viewcode-block" id="RunIngredient"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient">[docs]</a><span class="k">class</span> <span class="nc">RunIngredient</span><span class="p">(</span><span class="n">BaseIngredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="RunIngredient.run_singlerun"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_singlerun">[docs]</a>    <span class="k">def</span> <span class="nf">run_singlerun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;serial&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
+<div class="viewcode-block" id="RunIngredient.run_neb_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_neb_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">run_neb_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run all image subfolders.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">subdirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">imct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">imct</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">imct</span> <span class="o">&gt;</span> <span class="n">numim</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+                <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;serial&quot;</span><span class="p">)</span>
+            <span class="n">imct</span> <span class="o">=</span> <span class="n">imct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">return</span></div>
+<div class="viewcode-block" id="RunIngredient.run_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">run_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run all subfolders.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">phondirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">phondir</span> <span class="ow">in</span> <span class="n">phondirs</span><span class="p">:</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">phondir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&quot;serial&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="RunIngredient.run_defect"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_defect">[docs]</a>    <span class="k">def</span> <span class="nf">run_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span> 
+        <span class="k">except</span><span class="p">:</span> <span class="c">#no initial structure</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;No parent structure detected for induce defect ingredient </span><span class="si">%s</span><span class="s">. Using initial structure of the recipe.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+
+        <span class="n">defect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_defect_settings&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">defect</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;subdefect&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">subdefect</span> <span class="o">=</span> <span class="n">defect</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">base_structure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">base_structure</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">induce_defect</span><span class="p">(</span><span class="n">subdefect</span><span class="p">,</span> <span class="n">defect</span><span class="p">[</span><span class="s">&#39;coord_type&#39;</span><span class="p">],</span> <span class="n">defect</span><span class="p">[</span><span class="s">&#39;threshold&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">write_final_structure_file</span><span class="p">(</span><span class="n">base_structure</span><span class="p">)</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="RunIngredient.run_strain"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_strain">[docs]</a>    <span class="k">def</span> <span class="nf">run_strain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Strain the lattice.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                Looks for mast_strain in input file, for </span>
+<span class="sd">                percent strains.</span>
+<span class="sd">                mast_strain 1.01 1.01 -0.98</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                Creates structure file in directory </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mystructure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span>
+        <span class="n">mystrain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_strain&#39;</span><span class="p">]</span>
+        <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span> <span class="o">=</span> <span class="n">mystructure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">strained_structure</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">strain_lattice</span><span class="p">(</span><span class="n">mystrain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">write_final_structure_file</span><span class="p">(</span><span class="n">strained_structure</span><span class="p">)</span>
+        <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="RunIngredient.run_scale_defect"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_scale_defect">[docs]</a>    <span class="k">def</span> <span class="nf">run_scale_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span> 
+        <span class="k">except</span><span class="p">:</span> <span class="c">#no initial structure</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;No parent structure detected for induce defect ingredient </span><span class="si">%s</span><span class="s">. Using initial structure of the recipe.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">scalextend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">base_structure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;mast_scale&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;No mast_scale ingredient keyword for scaling ingredient </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">scalextend</span><span class="o">.</span><span class="n">scale_structure</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_scale&#39;</span><span class="p">]))</span>
+        <span class="n">defect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_defect_settings&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">defect</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;subdefect&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">subdefect</span> <span class="o">=</span> <span class="n">defect</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">sxtend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">scaled</span><span class="p">,</span> <span class="n">struc_work2</span><span class="o">=</span><span class="n">base_structure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                <span class="n">scaled</span> <span class="o">=</span> <span class="n">sxtend</span><span class="o">.</span><span class="n">scale_defect</span><span class="p">(</span><span class="n">subdefect</span><span class="p">,</span> <span class="n">defect</span><span class="p">[</span><span class="s">&#39;coord_type&#39;</span><span class="p">],</span> <span class="n">defect</span><span class="p">[</span><span class="s">&#39;threshold&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">write_final_structure_file</span><span class="p">(</span><span class="n">scaled</span><span class="p">)</span>
+        <span class="k">return</span></div>
+<div class="viewcode-block" id="RunIngredient.run_scale"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.RunIngredient.run_scale">[docs]</a>    <span class="k">def</span> <span class="nf">run_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">get_initial_structure_from_directory</span><span class="p">()</span> 
+        <span class="k">except</span><span class="p">:</span> <span class="c">#no initial structure</span>
+            <span class="n">base_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;No parent structure detected for induce defect ingredient </span><span class="si">%s</span><span class="s">. Using initial structure of the recipe.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">scalextend</span> <span class="o">=</span> <span class="n">StructureExtensions</span><span class="p">(</span><span class="n">struc_work1</span><span class="o">=</span><span class="n">base_structure</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;mast_scale&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;No mast_scale ingredient keyword for scaling ingredient </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">scalextend</span><span class="o">.</span><span class="n">scale_structure</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_scale&#39;</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">write_final_structure_file</span><span class="p">(</span><span class="n">scaled</span><span class="p">)</span>
+        <span class="k">return</span>
+</div></div>
+<div class="viewcode-block" id="IsCompleteIngredient"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsCompleteIngredient">[docs]</a><span class="k">class</span> <span class="nc">IsCompleteIngredient</span><span class="p">(</span><span class="n">BaseIngredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="IsCompleteIngredient.complete_structure"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsCompleteIngredient.complete_structure">[docs]</a>    <span class="k">def</span> <span class="nf">complete_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory_is_locked</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">has_ending_structure_file</span><span class="p">()</span></div>
+<div class="viewcode-block" id="IsCompleteIngredient.complete_singlerun"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsCompleteIngredient.complete_singlerun">[docs]</a>    <span class="k">def</span> <span class="nf">complete_singlerun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<div class="viewcode-block" id="IsCompleteIngredient.complete_neb_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsCompleteIngredient.complete_neb_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">complete_neb_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure all subfolders are complete.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">subdirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subdirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">notready</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">imct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">numim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">subdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">errhandler</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="k">if</span> <span class="n">imct</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">imct</span> <span class="o">&gt;</span> <span class="n">numim</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
+                <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">imct</span> <span class="o">=</span> <span class="n">imct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errhandler</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">if</span> <span class="n">notready</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="IsCompleteIngredient.complete_subfolders"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.IsCompleteIngredient.complete_subfolders">[docs]</a>    <span class="k">def</span> <span class="nf">complete_subfolders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure all subfolders are complete.&quot;&quot;&quot;</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">phondirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">notready</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">phondirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">phondir</span> <span class="ow">in</span> <span class="n">phondirs</span><span class="p">:</span>
+            <span class="n">newname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span> <span class="n">phondir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">errhandler</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">newname</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
+                <span class="n">notready</span> <span class="o">=</span> <span class="n">notready</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errhandler</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">myname</span>
+        <span class="k">if</span> <span class="n">notready</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div></div>
+<div class="viewcode-block" id="UpdateChildrenIngredient"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient">[docs]</a><span class="k">class</span> <span class="nc">UpdateChildrenIngredient</span><span class="p">(</span><span class="n">BaseIngredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(),</span> <span class="s">&#39;Name of directory&#39;</span><span class="p">),</span>
+            <span class="s">&#39;program_keys&#39;</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s">&#39;Dictionary of program keywords&#39;</span><span class="p">),</span>
+            <span class="s">&#39;structure&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Structure</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Pymatgen Structure object&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_fullpath_childname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make sure the childname has a full path.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                childname &lt;str&gt;: child name, like defect_1</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                fullpathchild &lt;str&gt;: full path to child, e.g.</span>
+<span class="sd">                $MAST_SCRATCH/recipefolder/defect_1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fullpathchild</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="n">mydirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">fullpathchild</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mydirname</span><span class="p">,</span> <span class="n">childname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fullpathchild</span>
+
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_neb_structures_to_neb"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_neb_structures_to_neb">[docs]</a>    <span class="k">def</span> <span class="nf">give_neb_structures_to_neb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update to ANOTHER NEB.&quot;&quot;&quot;</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="n">myct</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">while</span> <span class="n">myct</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_neb_settings&#39;</span><span class="p">][</span><span class="s">&#39;images&#39;</span><span class="p">]:</span>
+            <span class="n">imno</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">myct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">impath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">imno</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">impath</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">,</span><span class="s">&quot;parent_structure_&quot;</span> <span class="o">+</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">get_my_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;neb_label&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">imno</span><span class="p">)</span>
+            <span class="n">myct</span> <span class="o">=</span> <span class="n">myct</span> <span class="o">+</span> <span class="mi">1</span>
+    
+
+
+
+
+
+</div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_saddle_structure"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_saddle_structure">[docs]</a>    <span class="k">def</span> <span class="nf">give_saddle_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward the middle image structure.&quot;&quot;&quot;</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="n">myname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">subdirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="n">myname</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">highenergyimct</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">imct</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">highenergy</span><span class="o">=-</span><span class="mf">1000000000000.0</span>
+        <span class="c">#numim = int(self.keywords[&#39;program_keys&#39;][&#39;images&#39;])</span>
+        <span class="c">#middleim = int(numim/2)+1 #returns 1 for 1, 2 for 3 im, 3 for 5 im, etc</span>
+        <span class="n">subdirs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">==</span> <span class="s">&#39;vasp_neb&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">==</span> <span class="s">&#39;vasp&#39;</span><span class="p">:</span>
+            <span class="n">singlechecker</span> <span class="o">=</span> <span class="n">VaspChecker</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span><span class="n">program_keys</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]),</span><span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;structure&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Program </span><span class="si">%s</span><span class="s"> not supported&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+            <span class="n">singlechecker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subdir</span>
+            <span class="n">myenergy</span> <span class="o">=</span> <span class="n">singlechecker</span><span class="o">.</span><span class="n">get_energy_from_energy_file</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">myenergy</span> <span class="o">&gt;</span> <span class="n">highenergy</span><span class="p">:</span>
+                <span class="n">highenergyimct</span> <span class="o">=</span> <span class="n">imct</span>
+                <span class="n">highenergy</span> <span class="o">=</span> <span class="n">myenergy</span>
+            <span class="n">imct</span> <span class="o">=</span> <span class="n">imct</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">imno</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">highenergyimct</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">impath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">imno</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">impath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_charge_density_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_wavefunction_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="k">return</span></div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_phonon_multiple_forces_and_displacements"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_phonon_multiple_forces_and_displacements">[docs]</a>    <span class="k">def</span> <span class="nf">give_phonon_multiple_forces_and_displacements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">childname</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">combine_dynamical_matrix_files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">combine_displacement_files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">give_phonon_single_forces_and_displacements</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span></div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_phonon_single_forces_and_displacements"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_phonon_single_forces_and_displacements">[docs]</a>    <span class="k">def</span> <span class="nf">give_phonon_single_forces_and_displacements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="c">#Do NOT forward the CONTCAR structure, since the ending CONTCAR contains a displacement in it. Instead, forward the POSCAR</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_dynamical_matrix_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_displacement_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_initial_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">,</span> <span class="s">&quot;POSCAR_prePHON&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_energy_to_neb"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_energy_to_neb">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_energy_to_neb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">BaseIngredient</span><span class="o">.</span><span class="n">get_my_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;defect_label&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">,</span><span class="s">&quot;parent_structure_&quot;</span> <span class="o">+</span> <span class="n">label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_energy_file</span><span class="p">(</span><span class="n">childname</span><span class="p">,</span> <span class="s">&quot;parent_energy_&quot;</span> <span class="o">+</span> <span class="n">label</span><span class="p">)</span></div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_restart_files_softlinks"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_restart_files_softlinks">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_restart_files_softlinks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_charge_density_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_wavefunction_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_restart_files"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_restart_files">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_restart_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">give_structure_and_restart_files_softlinks</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_restart_files_full_copies"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_restart_files_full_copies">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_restart_files_full_copies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_charge_density_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_wavefunction_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+   </div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_charge_density_full_copy"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_charge_density_full_copy">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_charge_density_full_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_charge_density_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_wavefunction_full_copy"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_wavefunction_full_copy">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_wavefunction_full_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_wavefunction_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_charge_density_softlink"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_charge_density_softlink">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_charge_density_softlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_charge_density_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="UpdateChildrenIngredient.give_structure_and_wavefunction_softlink"><a class="viewcode-back" href="../../../MAST.ingredients.chopingredient.html#MAST.ingredients.chopingredient.UpdateChildrenIngredient.give_structure_and_wavefunction_softlink">[docs]</a>    <span class="k">def</span> <span class="nf">give_structure_and_wavefunction_softlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">childname</span><span class="p">):</span>
+        <span class="n">childname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fullpath_childname</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">forward_final_structure_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">softlink_wavefunction_file</span><span class="p">(</span><span class="n">childname</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

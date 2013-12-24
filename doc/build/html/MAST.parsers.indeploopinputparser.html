@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.parsers.indeploopinputparser module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.parsers.indeploopinputparser">
+<span id="mast-parsers-indeploopinputparser-module"></span><h1>MAST.parsers.indeploopinputparser module<a class="headerlink" href="#module-MAST.parsers.indeploopinputparser" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser">
+<em class="property">class </em><tt class="descclassname">MAST.parsers.indeploopinputparser.</tt><tt class="descname">IndepLoopInputParser</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj" title="MAST.utility.mastobj.MASTObj"><tt class="xref py py-class docutils literal"><span class="pre">MAST.utility.mastobj.MASTObj</span></tt></a></p>
+<p>Scans an input file for &#8220;indeploop&#8221; keyword and copies it into
+many input files.
+Attributes:</p>
+<blockquote>
+<div>self.indeploop &lt;str&gt;: flag for independent looping
+self.loop_delim &lt;str&gt;: character for delimiting loops
+self.loop_start &lt;str&gt;: character indicating start of loop
+self.loop_end &lt;str&gt;: character indicating end of loop
+self.baseinput &lt;MASTFile&gt;: MASTFile created from <a href="#id1"><span class="problematic" id="id2">*</span></a>.inp input file
+self.pegloop1 &lt;str&gt;: flag for one pegged loop
+self.pegloop2 &lt;str&gt;: flag for second pegged loop</div></blockquote>
+<p>Looping must be indicated at the beginning of the line, and the
+text to be looped must be complete:
+indeploop mast_kpoints (3x3x3 G, 5x5x5 G, 2x2x2 M, 4x4x4 M)</p>
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.combine_combo_lists">
+<tt class="descname">combine_combo_lists</tt><big>(</big><em>indeplist</em>, <em>peggedlist</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.combine_combo_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.combine_combo_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine combination lists.
+Args:</p>
+<blockquote>
+<div>indeplist &lt;list of list&gt;: List of indeploop combinations.
+peggedlist &lt;list of list&gt;: List of pegged loop combinations</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>alllist &lt;list of list&gt;: List of all combinations</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.combine_three_combo_lists">
+<tt class="descname">combine_three_combo_lists</tt><big>(</big><em>indeplist</em>, <em>peglist1</em>, <em>peglist2</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.combine_three_combo_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.combine_three_combo_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine two pegged lists and one independent list.
+Args:</p>
+<blockquote>
+<div>indeplist &lt;list of list&gt;: List of indeploop combinations.
+peglist1 &lt;list of list&gt;: List of pegged loop 1 combinations
+peglist2 &lt;list of list&gt;: List of pegged loop 2 combinations</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>alllist &lt;list of list&gt;: List of all combinations</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.create_input_files">
+<tt class="descname">create_input_files</tt><big>(</big><em>datasets_dict</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.create_input_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.create_input_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create independently looped input files.
+Args:</p>
+<blockquote>
+<div>datasets_dict &lt;dict of list&gt;</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>createdfiles &lt;list of str&gt;: list of newly-created file names</dd>
+</dl>
+<p>Creates an input file for each entry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.get_combo_list">
+<tt class="descname">get_combo_list</tt><big>(</big><em>loopdict</em>, <em>pegged=0</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.get_combo_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.get_combo_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare a combination list of looping indices.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>loopdict &lt;dict&gt;: dictionary of looping items from</dt>
+<dd>scan_for_loop</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>combolist &lt;list of str&gt;: list of strings, like [&#8220;3-0&#8221;,&#8221;5-1&#8221;]</dt>
+<dd>representing combinations</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.main">
+<tt class="descname">main</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan for independent loops and set up dictionaries.
+Return:</p>
+<blockquote>
+<div>createdfiles &lt;list of str&gt;: list of created input files</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.prepare_looped_datasets">
+<tt class="descname">prepare_looped_datasets</tt><big>(</big><em>alldict</em>, <em>allcombs</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.prepare_looped_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.prepare_looped_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare looped datasets from looping lines.
+Args:</p>
+<blockquote>
+<div>alldict &lt;dict&gt;: line dictionary for looping
+allcombs &lt;list of list&gt;: index combinations for looping</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>datasets_dict &lt;dict of list&gt;: full datasets for new input files</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.prepare_looped_lines">
+<tt class="descname">prepare_looped_lines</tt><big>(</big><em>alldict</em>, <em>comblist</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.prepare_looped_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.prepare_looped_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare looped lines from looping dictionary.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>loopdict &lt;dict&gt;: dictionary of looping items from</dt>
+<dd>scan_for_loop</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>loopline_dict &lt;dict of dict&gt;: dictionary of different lines for</dt>
+<dd>input files, with keys being
+the looped line index</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.print_list">
+<tt class="descname">print_list</tt><big>(</big><em>mylist</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.print_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.print_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a list.
+Args:</p>
+<blockquote>
+<div>mylist &lt;list of str&gt;</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.indeploopinputparser.IndepLoopInputParser.scan_for_loop">
+<tt class="descname">scan_for_loop</tt><big>(</big><em>loopkey</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/indeploopinputparser.html#IndepLoopInputParser.scan_for_loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.indeploopinputparser.IndepLoopInputParser.scan_for_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan for loops.
+Args:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>loopkey &lt;str&gt;: string for searching for loops. This is</dt>
+<dd>either &#8220;indeploop&#8221; or &#8220;pegloop&#8221;</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>Return:</dt>
+<dd><dl class="first last docutils">
+<dt>loopdict &lt;dict&gt;: Dictionary where loop line indices in the file</dt>
+<dd><blockquote class="first">
+<div>are keys, with values
+&#8216;looplist&#8217;, containing a list of strings, and
+&#8216;prepend&#8217;, containing any text to prepend
+&#8216;append&#8217;, containing any text to append</div></blockquote>
+<dl class="last docutils">
+<dt>e.g. loopdict[12][&#8216;looplist&#8217;]=[&#8216;3x3x3 G&#8217;,&#8216;5x5x5 G&#8217;]</dt>
+<dd>[&#8216;prepend&#8217;]=&#8217;mast_kpoints &#8216;
+[&#8216;append&#8217;]=&#8217;&#8216;</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

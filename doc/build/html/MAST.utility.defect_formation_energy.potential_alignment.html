@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.defect_formation_energy.potential_alignment module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.utility.defect_formation_energy.potential_alignment">
+<span id="mast-utility-defect-formation-energy-potential-alignment-module"></span><h1>MAST.utility.defect_formation_energy.potential_alignment module<a class="headerlink" href="#module-MAST.utility.defect_formation_energy.potential_alignment" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment">
+<em class="property">class </em><tt class="descclassname">MAST.utility.defect_formation_energy.potential_alignment.</tt><tt class="descname">PotentialAlignment</tt><a class="reference internal" href="_modules/MAST/utility/defect_formation_energy/potential_alignment.html#PotentialAlignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.get_potential_alignment">
+<tt class="descname">get_potential_alignment</tt><big>(</big><em>perfect_info</em>, <em>defect_info</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/defect_formation_energy/potential_alignment.html#PotentialAlignment.get_potential_alignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.get_potential_alignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the shift.  Assumes all atoms in the perfect cell are symmetry
+equivalent, i.e. for Sc2O3, by symmetry we have two different Sc
+atoms (8b and 24d Wycoff positions) with two different potentials.</p>
+<p>In reality the best way to do this is to match up the symmetry
+positions of the perfect with that in the defected and do the 
+alignment that way.  However, a quick and dirty way is to average
+over each symmetry position, which allows us to account for the 
+different symmetry environments in an effective way without having
+to dig into the underlying unit cell symmetry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.read_outcar">
+<tt class="descname">read_outcar</tt><big>(</big><em>outcar</em><big>)</big><a class="reference internal" href="_modules/MAST/utility/defect_formation_energy/potential_alignment.html#PotentialAlignment.read_outcar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.utility.defect_formation_energy.potential_alignment.PotentialAlignment.read_outcar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a VASP OUTCAR file, and extracts out some useful information.
+Args:</p>
+<blockquote>
+<div>outcar:  OUTCAR file name</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>elst_pot:  average electrostatic potential for each atomic center
+atom_list:  list of each atom type</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

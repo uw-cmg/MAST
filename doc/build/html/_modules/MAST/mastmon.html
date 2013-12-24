@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.mastmon &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.mastmon</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">dirutil</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">loggerutils</span>
+<span class="kn">from</span> <span class="nn">MAST.parsers.inputparser</span> <span class="kn">import</span> <span class="n">InputParser</span>
+<span class="kn">from</span> <span class="nn">MAST.recipe.recipesetup</span> <span class="kn">import</span> <span class="n">RecipeSetup</span>
+
+
+<div class="viewcode-block" id="MASTmon"><a class="viewcode-back" href="../../MAST.mastmon.html#MAST.mastmon.MASTmon">[docs]</a><span class="k">class</span> <span class="nc">MASTmon</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The MAST monitor runs on a submission node and checks</span>
+<span class="sd">        the status of each recipe in the MAST_SCRATCH directory.</span>
+<span class="sd">        Attributes:</span>
+<span class="sd">            self.scratch &lt;str&gt;: MAST_SCRATCH</span>
+<span class="sd">            self._ARCHIVE &lt;str&gt;: MAST_ARCHIVE</span>
+<span class="sd">            self.logger &lt;logging logger&gt;</span>
+<span class="sd">            self.loggerdict &lt;dictionary of recipe-level loggers&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scratch</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_scratch_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ARCHIVE</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_archive_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_directories</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggerdict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">loggerutils</span><span class="o">.</span><span class="n">initialize_short_logger</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;MAST_CONTROL&quot;</span><span class="p">),</span><span class="s">&quot;mast.log&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span><span class="s">%&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">MAST monitor started at </span><span class="si">%s</span><span class="s">.</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span><span class="s">%&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MASTmon.make_directories"><a class="viewcode-back" href="../../MAST.mastmon.html#MAST.mastmon.MASTmon.make_directories">[docs]</a>    <span class="k">def</span> <span class="nf">make_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attempt to make scratch and archive directories</span>
+<span class="sd">            if they do not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ARCHIVE</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ARCHIVE</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="s">&quot;Error making directory for MASTmon and completed recipes&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MASTmon.check_recipe_dir"><a class="viewcode-back" href="../../MAST.mastmon.html#MAST.mastmon.MASTmon.check_recipe_dir">[docs]</a>    <span class="k">def</span> <span class="nf">check_recipe_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fulldir</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check a recipe directory.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                fulldir &lt;str&gt;: full path of recipe directory</span>
+<span class="sd">                verbose &lt;int&gt;: verbosity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shortdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fulldir</span><span class="p">)</span> <span class="c">#only the recipe directory name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fulldir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;No recipe directory at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">fulldir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggerdict</span><span class="p">[</span><span class="n">fulldir</span><span class="p">]</span> <span class="o">=</span> <span class="n">loggerutils</span><span class="o">.</span><span class="n">initialize_logger</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span> <span class="s">&quot;mast_recipe.log&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span> <span class="s">&quot;MAST_SKIP&quot;</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Skipping recipe </span><span class="si">%s</span><span class="s"> due to the presence of a MAST_SKIP file in the recipe directory.&quot;</span> <span class="o">%</span> <span class="n">shortdir</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span> <span class="s">&quot;MAST_ERROR&quot;</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;ATTENTION!: Skipping recipe </span><span class="si">%s</span><span class="s"> due to the presence of a MAST_ERROR file in the recipe directory.&quot;</span> <span class="o">%</span> <span class="n">shortdir</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;--------------------------------&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Processing recipe </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">shortdir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;--------------------------------&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">fulldir</span><span class="p">)</span> <span class="c">#need to change directories in order to submit jobs?</span>
+        <span class="n">myipparser</span> <span class="o">=</span> <span class="n">InputParser</span><span class="p">(</span><span class="n">inputfile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span> <span class="s">&#39;input.inp&#39;</span><span class="p">))</span>
+        <span class="n">myinputoptions</span> <span class="o">=</span> <span class="n">myipparser</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="n">rsetup</span> <span class="o">=</span> <span class="n">RecipeSetup</span><span class="p">(</span><span class="n">recipeFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span><span class="s">&#39;personal_recipe.txt&#39;</span><span class="p">),</span>
+                <span class="n">inputOptions</span><span class="o">=</span><span class="n">myinputoptions</span><span class="p">,</span>
+                <span class="n">structure</span><span class="o">=</span><span class="n">myinputoptions</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&#39;structure&#39;</span><span class="p">,</span><span class="s">&#39;structure&#39;</span><span class="p">),</span>
+                <span class="n">workingDirectory</span><span class="o">=</span><span class="n">fulldir</span><span class="p">)</span>
+        <span class="n">recipe_plan_obj</span> <span class="o">=</span> <span class="n">rsetup</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">recipe_plan_obj</span><span class="o">.</span><span class="n">get_statuses_from_file</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">recipe_plan_obj</span><span class="o">.</span><span class="n">check_recipe_status</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">traceback</span>
+            <span class="n">ex_type</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">trbck</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+            <span class="n">errortext</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_tb</span><span class="p">(</span><span class="n">trbck</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">trbck</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span><span class="s">&quot;Error in recipe </span><span class="si">%s</span><span class="s"> as follows: </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">shortdir</span><span class="p">,</span> <span class="n">ex_type</span><span class="p">,</span> <span class="n">ex</span><span class="p">,</span> <span class="n">errortext</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">recipe_plan_obj</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">&quot;C&quot;</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">fulldir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ARCHIVE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;-----------------------------&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Recipe </span><span class="si">%s</span><span class="s"> processed.&quot;</span> <span class="o">%</span> <span class="n">shortdir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;-----------------------------&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MASTmon.run"><a class="viewcode-back" href="../../MAST.mastmon.html#MAST.mastmon.MASTmon.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the MAST monitor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">curdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">)</span>    
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curdir</span><span class="p">)</span>
+            <span class="n">errorstr</span> <span class="o">=</span> <span class="s">&quot;Could not change directories to MAST_SCRATCH at </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">scratch</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">errorstr</span><span class="p">)</span>
+        
+        <span class="c">#dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds</span>
+        <span class="c">#Directory is now locked by mast initially, but gets</span>
+        <span class="c">#unlocked at the end of the mastmon run.</span>
+        
+        <span class="n">recipe_dirs</span> <span class="o">=</span> <span class="n">dirutil</span><span class="o">.</span><span class="n">walkdirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;================================&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Recipe directories:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">recipe_dir</span> <span class="ow">in</span> <span class="n">recipe_dirs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;================================&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">recipe_dir</span> <span class="ow">in</span> <span class="n">recipe_dirs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_recipe_dir</span><span class="p">(</span><span class="n">recipe_dir</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                
+        <span class="n">dirutil</span><span class="o">.</span><span class="n">unlock_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch</span><span class="p">)</span> <span class="c">#unlock directory</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curdir</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

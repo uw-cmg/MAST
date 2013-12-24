@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>submit.script_commands &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for submit.script_commands</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># Purpose: Modify and get information out of submission scripts.</span>
+<span class="c"># Authors: Tam Mayeshiba</span>
+<span class="c"># 11/9/12 created</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span> <span class="c">#TA to calc num_nodes</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.mastfile</span> <span class="kn">import</span> <span class="n">MASTFile</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Script commands</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="get_script"><a class="viewcode-back" href="../../submit.script_commands.html#submit.script_commands.get_script">[docs]</a><span class="k">def</span> <span class="nf">get_script</span><span class="p">(</span><span class="n">templatepath</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">templatepath</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;submit script_commands&quot;</span><span class="p">,</span>
+            <span class="s">&quot;Could not find file at &quot;</span> <span class="o">+</span> <span class="n">templatepath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">templatepath</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">==</span> <span class="s">&#39;.sh&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;submit script_commands&quot;</span><span class="p">,</span> 
+        <span class="s">&quot;Script name does not end with .sh to signify a submission script.&quot;</span><span class="p">)</span>
+    <span class="n">script</span><span class="o">=</span><span class="n">MASTFile</span><span class="p">(</span><span class="n">templatepath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">script</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;submit script_commands&quot;</span><span class="p">,</span>
+        <span class="s">&quot;Script empty at &quot;</span> <span class="o">+</span> <span class="n">templatepath</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">script</span>
+</div>
+<div class="viewcode-block" id="modify_jobname"><a class="viewcode-back" href="../../submit.script_commands.html#submit.script_commands.modify_jobname">[docs]</a><span class="k">def</span> <span class="nf">modify_jobname</span><span class="p">(</span><span class="n">templatepath</span><span class="p">,</span> <span class="n">writepath</span><span class="p">,</span> <span class="n">jobname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the jobname in the submission script.</span>
+<span class="sd">        INPUTS:</span>
+<span class="sd">            writepath &lt;str&gt; = full path to submission script file</span>
+<span class="sd">            jobname &lt;str&gt; = new job name to use</span>
+<span class="sd">        OUTPUTS:</span>
+<span class="sd">            Modifies the file at writepath to use the new jobname.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">myscript</span> <span class="o">=</span> <span class="n">get_script</span><span class="p">(</span><span class="n">templatepath</span><span class="p">)</span>
+    
+    <span class="c">#begin platform specific:</span>
+    <span class="n">namenum</span><span class="o">=</span><span class="n">myscript</span><span class="o">.</span><span class="n">get_line_match_number</span><span class="p">(</span><span class="s">&quot;PBS -N&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">modify_file_by_line_number</span><span class="p">(</span><span class="n">namenum</span><span class="p">,</span> <span class="s">&quot;R&quot;</span><span class="p">,</span> <span class="s">&quot;#PBS -N &quot;</span> <span class="o">+</span> <span class="n">jobname</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="c">#end platform specific</span>
+    
+    <span class="n">myscript</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">writepath</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="write_submit_script"><a class="viewcode-back" href="../../submit.script_commands.html#submit.script_commands.write_submit_script">[docs]</a><span class="k">def</span> <span class="nf">write_submit_script</span><span class="p">(</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This script example is built on the following ingredient keywords,</span>
+<span class="sd">        and may require significant customization.</span>
+<span class="sd">        mast_processors</span>
+<span class="sd">        mast_ppn</span>
+<span class="sd">        mast_queue</span>
+<span class="sd">        mast_nodes</span>
+<span class="sd">        mast_exec</span>
+<span class="sd">        mast_walltime</span>
+<span class="sd">        mast_memory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="c">#set defaults</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_processors</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_processors&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_processors</span> <span class="o">=</span> <span class="s">&quot;8&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_ppn</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_ppn&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_ppn</span> <span class="o">=</span> <span class="s">&quot;8&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_queue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_queue&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_queue</span> <span class="o">=</span> <span class="s">&#39;default&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_nodes</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_nodes&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_nodes</span> <span class="o">=</span> <span class="s">&quot;1&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_exec</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_exec&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s">&quot;$MAST_INSTALL_PATH&quot;</span> <span class="ow">in</span> <span class="n">mast_exec</span><span class="p">:</span>
+            <span class="n">startpos</span><span class="o">=</span><span class="n">mast_exec</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;$MAST_INSTALL_PATH&quot;</span><span class="p">)</span>
+            <span class="n">newexec</span> <span class="o">=</span> <span class="n">mast_exec</span><span class="p">[:</span><span class="n">startpos</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;MAST_INSTALL_PATH&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">mast_exec</span><span class="p">[</span><span class="n">startpos</span><span class="o">+</span><span class="mi">18</span><span class="p">:]</span> 
+            <span class="n">mast_exec</span> <span class="o">=</span> <span class="n">newexec</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_exec</span> <span class="o">=</span> <span class="s">&quot;mpiexec vasp&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_walltime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_walltime&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;:00:00&quot;</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_walltime</span> <span class="o">=</span> <span class="s">&quot;24:00:00&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mast_memory</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;mast_memory&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">mast_memory</span> <span class="o">=</span> <span class="s">&quot;1000&quot;</span>
+    <span class="c">#create submission script</span>
+    <span class="n">myscript</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">()</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#!/bin/bash&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#PBS -N &quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#PBS -l nodes=&quot;</span> <span class="o">+</span> <span class="n">mast_nodes</span> <span class="o">+</span> <span class="s">&quot;:ppn=&quot;</span> <span class="o">+</span> <span class="n">mast_ppn</span> <span class="o">+</span> <span class="s">&quot;,pvmem=&quot;</span> <span class="o">+</span> <span class="n">mast_memory</span> <span class="o">+</span> <span class="s">&quot;mb&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;#PBS -l walltime=&quot;</span> <span class="o">+</span> <span class="n">mast_walltime</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;NN=`cat $PBS_NODEFILE | wc -l`&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;echo &quot;Processors received = &quot;$NN&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;echo &quot;script running on host `hostname`&quot;&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;cd $PBS_O_WORKDIR&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;echo &quot;PBS_NODEFILE&quot;&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;cat $PBS_NODEFILE&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mast_exec</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="n">myscript</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;/submit.sh&#39;</span><span class="p">))</span>
+ 
+</div>
+<div class="viewcode-block" id="write_submit_script_from_template"><a class="viewcode-back" href="../../submit.script_commands.html#submit.script_commands.write_submit_script_from_template">[docs]</a><span class="k">def</span> <span class="nf">write_submit_script_from_template</span><span class="p">(</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s">&#39;script&#39;</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">templatename</span> <span class="o">=</span> <span class="s">&#39;submitscript.sh&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">templatename</span> <span class="o">=</span> <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;program_keys&#39;</span><span class="p">][</span><span class="s">&#39;script&#39;</span><span class="p">]</span>
+    <span class="n">templatepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirutil</span><span class="o">.</span><span class="n">get_mast_install_path</span><span class="p">(),</span>
+                    <span class="s">&#39;submit&#39;</span><span class="p">,</span><span class="n">templatename</span><span class="p">)</span>
+    <span class="n">bname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+    <span class="n">wpath</span> <span class="o">=</span> <span class="n">keywords</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;/submit.sh&#39;</span>
+    <span class="c">#print wpath</span>
+    <span class="c">#print bname</span>
+    <span class="n">modify_jobname</span><span class="p">(</span><span class="n">templatepath</span><span class="p">,</span> <span class="n">wpath</span><span class="p">,</span> <span class="n">bname</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

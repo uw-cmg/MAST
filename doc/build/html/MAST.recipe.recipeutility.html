@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.recipe.recipeutility module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.recipe.recipeutility">
+<span id="mast-recipe-recipeutility-module"></span><h1>MAST.recipe.recipeutility module<a class="headerlink" href="#module-MAST.recipe.recipeutility" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.get_indent_level">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">get_indent_level</tt><big>(</big><em>myline</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#get_indent_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.get_indent_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the indentation level of a line.
+Every 4 spaces is an indentation level.
+Args:</p>
+<blockquote>
+<div>line &lt;str&gt;: Line to get the indentation level of.</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>ilevel &lt;int&gt;: Indentation level. 0 = &#8220;writing&#8221;</dt>
+<dd><blockquote class="first">
+<div>1 = &#8221;    writing&#8221;
+2 = &#8221;        writing&#8221; 
+etc.</div></blockquote>
+<p class="last">-1 if indentation level was not determined.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.make_indentation_dictionary">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">make_indentation_dictionary</tt><big>(</big><em>subrlist</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#make_indentation_dictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.make_indentation_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a single subrecipe into an indentation dictionary:
+idict[indentlevel]=list of [linenumber,name,instructions]
+Args:</p>
+<blockquote>
+<div>subrlist &lt;list&gt;: List of subrecipe lines</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>idict &lt;dict&gt;: Dictionary of indentations</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.parse_for_name_and_instructions">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">parse_for_name_and_instructions</tt><big>(</big><em>myline</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#parse_for_name_and_instructions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.parse_for_name_and_instructions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse line for name(s) and instruction name(s).
+Args:</p>
+<blockquote>
+<div>myline &lt;str&gt;: Line to parse. Should look something like:
+defect1_stat (singlerun_to_phonon)
+OR
+defect1_stat (singlerun_to_neb), defect2_stat (singlerun_to_neb)</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>pdict &lt;dict&gt;: Dictionary of name = instructions</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.parse_indentation_dict">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">parse_indentation_dict</tt><big>(</big><em>idict</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#parse_indentation_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.parse_indentation_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an indentation dictionary into three parts. 
+Args:</p>
+<blockquote>
+<div>idict &lt;dict&gt;: Indentation dictionary</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>how_to_update &lt;dict&gt;: Dictionary of how to update</dt>
+<dd><p class="first">from the parent to the child:
+how_to_update[&#8216;perfect_opt1&#8217;][&#8216;perfect_opt2&#8217;]=</p>
+<blockquote class="last">
+<div>[&#8216;volrelax_to_singlerun&#8217;]</div></blockquote>
+</dd>
+<dt>parents_to_check &lt;dict&gt;: Dictionary of parents</dt>
+<dd><p class="first">for the child to check (as a list)
+parents_to_check[&#8216;neb_1-2_opt1&#8217;]=</p>
+<blockquote class="last">
+<div>[&#8216;defect1_stat&#8217;,&#8217;defect2_stat&#8217;]</div></blockquote>
+</dd>
+<dt>how_to_run &lt;dict&gt;: Dictionary of how to write,</dt>
+<dd>evaluate run readiness, run, and evaluate
+completion of the ingredient:
+how_to_run[&#8216;perfect_opt1&#8217;]=[&#8216;volrelax_to_singlerun&#8217;]</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.read_recipe">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">read_recipe</tt><big>(</big><em>filename</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#read_recipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.read_recipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the indented recipe.
+&#8220;Recipe&#8221; is a protected keyword signaling the recipe name.
+Args:</p>
+<blockquote>
+<div>filename &lt;str&gt;: Full path to recipe file</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first docutils">
+<dt>totpdict &lt;dict&gt;: Dictionary of </dt>
+<dd>[parentname][child]=[parent method group]</dd>
+<dt>totcdict &lt;dict&gt;: Dictionary of</dt>
+<dd>[childname][&#8216;parents&#8217;]=[parent,parent,...]
+[childname][&#8216;method&#8217;]=[method group]</dd>
+</dl>
+<p class="last">rname &lt;str&gt;: Recipe name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="MAST.recipe.recipeutility.split_into_subrecipes">
+<tt class="descclassname">MAST.recipe.recipeutility.</tt><tt class="descname">split_into_subrecipes</tt><big>(</big><em>mydata</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeutility.html#split_into_subrecipes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeutility.split_into_subrecipes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split an entire recipe into subrecipes. Each new zero-level 
+indentation starts a new subrecipe.
+Args:</p>
+<blockquote>
+<div>mydata &lt;list&gt;: List of lines</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>subrecipes &lt;dict&gt;: Dictionary of subrecipe lines (lists)</dt>
+<dd>subrecipe[1]=list()</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

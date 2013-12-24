@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.parsers.inputparser module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.parsers.inputparser">
+<span id="mast-parsers-inputparser-module"></span><h1>MAST.parsers.inputparser module<a class="headerlink" href="#module-MAST.parsers.inputparser" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.parsers.inputparser.InputParser">
+<em class="property">class </em><tt class="descclassname">MAST.parsers.inputparser.</tt><tt class="descname">InputParser</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj" title="MAST.utility.mastobj.MASTObj"><tt class="xref py py-class docutils literal"><span class="pre">MAST.utility.mastobj.MASTObj</span></tt></a></p>
+<p>Class for parsing a <a href="#id1"><span class="problematic" id="id2">*</span></a>.inp format input file.
+Attributes:</p>
+<blockquote>
+<div>self.section_end &lt;str&gt;: delimiter for the end of a section
+self.delimiter &lt;str&gt;: character(s) for breaking up each line
+self.section_parsers &lt;dict&gt;: supported sections
+self.logger &lt;logging Logger&gt;: logger, either recipe-level or MAST input level</div></blockquote>
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse">
+<tt class="descname">parse</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses information from the <a href="#id3"><span class="problematic" id="id4">*</span></a>.inp style input file.
+Returns:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>options &lt;InputOptions&gt;: a dictionary of sections and values,</dt>
+<dd>where each section is its own
+dictionary:
+options.options[&#8216;section&#8217;] = dict()</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_chemical_potentials_section">
+<tt class="descname">parse_chemical_potentials_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_chemical_potentials_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_chemical_potentials_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the chemical_potentials section and populates the options.
+Section uses the standard begin...end subsection structure, but with
+a modification: instead of strict subsection titles (i.e. structure,
+lattice etc.), subsection titles are the conditions under which the
+chemical potentials are for.  Any combination of white spacing is
+allowed, however note that all conditions will be converted to lower
+case first!</p>
+<p>Using a GaAs example, hypothetically we could have a 
+chemical_potential section like the following:</p>
+<blockquote>
+<div><p>$chemical_potentials
+begin As rich
+Ga 4.5
+As 3.5
+end</p>
+<p>begin Ga rich
+Ga 3.5
+As 4.5
+end
+$end</p>
+</div></blockquote>
+<p>For charged defects, note that the chemical potential of the
+electron will be calculated automatically from the Fermi level and
+appropiate potential shift correction.  However, if one desires to
+manually give an electron chemical potential (for whatever reason!)
+this can be done by specifiying &#8216;electron&#8217; in the appropiate
+condition.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_defects_section">
+<tt class="descname">parse_defects_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_defects_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_defects_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the defects section and populates the options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_ingredients_section">
+<tt class="descname">parse_ingredients_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_ingredients_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_ingredients_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the ingredients section and populates the options.
+Section takes the form of:</p>
+<blockquote>
+<div><p>$ingredients
+begin ingredients_global
+mast_kpoints 3x3x3
+mast_xc pbe
+end</p>
+<p>begin singlepoint
+encut 400
+end</p>
+<p>begin optimize
+encut 300
+ibrion 2
+end</p>
+<p>$end</p>
+</div></blockquote>
+<p>mast_kpoints are parsed out as a 3 index list of integers. 
+Everything else is parsed out as a string.</p>
+<p>Anything in ingredients_global is then appended onto each 
+individual ingredient.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_mast_section">
+<tt class="descname">parse_mast_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_mast_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_mast_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the mast section and populate the options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_neb_section">
+<tt class="descname">parse_neb_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_neb_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_neb_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the neb section and populates the options.</p>
+<p>The number of images is specified and must be the same
+throughout the recipe.</p>
+<p>Each neb gets a label which should correspond to a defect group
+or defect group number.</p>
+<p>Within each subsection, each line specifies which atom is moving,
+giving its element name and its approximate coordinates from
+the starting unrelaxed structure.</p>
+<p>$neb</p>
+<p>images 3</p>
+<p>begin crowdion1-crowdion2
+Cr, 0 0.3 0, 0 0 0
+Ni, 0 0.6 0, 0 0.3 0
+end</p>
+<p>begin int1-int2
+Mg, 0 0 0.5, 0.3 0.1 2
+end</p>
+<p>$end</p>
+<p>In the crowdion example, the starting undefected structure is
+defected three times in each defect group: 1 vacancy and two
+antisites. The neb section allows us to unambiguously match up 
+the atoms and determine which atoms are moving, and where.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_phonon_section">
+<tt class="descname">parse_phonon_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_phonon_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_phonon_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the phonon section and populates the options.</p>
+<dl class="docutils">
+<dt>The phonon_center_site is a coordinate (as a string, like &#8220;0 0 0&#8221;)</dt>
+<dd>for the center of the phonon calculations. Give a coordinate
+of an atom for that atom.
+Do not set this value in order to calculate phonons for all
+atoms.</dd>
+<dt>The phonon_center_radius is a radius in ANGSTROMS to search for</dt>
+<dd>neighbors to the phonon_center_site, and also take into account
+their vibrations.
+Do not set this value or set to 0 to only calculate phonons
+for the atom given in phonon_center_site.</dd>
+</dl>
+<p>All phonons must be enclosed in a begin and end tag within the 
+phonon section. Phonons should be labeled
+xxxx_phonon_label and the label should correspond to the 
+auto-generation of the
+recipe (e.g. corresponding exactly to defect group names like vac1
+or to neb image names like vac1-vac2_02)</p>
+<p>$phonon</p>
+<p>begin crowdion1
+phonon_center_site 0 0.3 0
+phonon_center_radius 2
+end</p>
+<p>begin crowdion1-crowdion2_02
+phonon_center_site 0 0.15 0
+phonon_center_radius 2
+end</p>
+<p>$end</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_recipe_section">
+<tt class="descname">parse_recipe_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_recipe_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_recipe_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the recipe section and populates the options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.parse_structure_section">
+<tt class="descname">parse_structure_section</tt><big>(</big><em>section_name</em>, <em>section_content</em>, <em>options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.parse_structure_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.parse_structure_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the structure section and populate the options.
+Does not create the structure.</p>
+<dl class="docutils">
+<dt>Format is along the lines of:</dt>
+<dd><p class="first">coord_type fractional</p>
+<p>begin coordinates
+Ga 0.000000 0.000000 0.000000
+Ga 0.500000 0.500000 0.000000
+Ga 0.000000 0.500000 0.500000
+Ga 0.500000 0.000000 0.500000
+As 0.250000 0.250000 0.250000
+As 0.750000 0.750000 0.250000
+As 0.250000 0.750000 0.750000
+As 0.750000 0.250000 0.750000
+end</p>
+<p class="last">begin lattice
+2.0 0.0 0.0
+0.0 2.0 0.0
+0.0 0.0 2.0
+end</p>
+</dd>
+</dl>
+<p>Note that coord_type will default to &#8220;cartesian&#8221; if not specified.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.perform_element_mapping">
+<tt class="descname">perform_element_mapping</tt><big>(</big><em>input_options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.perform_element_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.perform_element_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform element mapping if there is an element map specified,
+so that defects and NEB lines get the correct element name.
+Args:</p>
+<blockquote>
+<div>input_options &lt;InputOptions&gt;</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>modifies input_options dictionary entries in place.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.set_structure_from_inputs">
+<tt class="descname">set_structure_from_inputs</tt><big>(</big><em>input_options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.set_structure_from_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.set_structure_from_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a pymatgen structure and update the
+structure key.
+Args:</p>
+<blockquote>
+<div>input_options &lt;InputOptions&gt;</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.parsers.inputparser.InputParser.validate_execs">
+<tt class="descname">validate_execs</tt><big>(</big><em>input_options</em><big>)</big><a class="reference internal" href="_modules/MAST/parsers/inputparser.html#InputParser.validate_execs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.parsers.inputparser.InputParser.validate_execs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure each ingredient has a mast_exec line.
+Args:</p>
+<blockquote>
+<div>input_options &lt;InputOptions&gt;</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

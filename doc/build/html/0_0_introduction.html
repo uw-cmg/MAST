@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" />
+    <link rel="next" title="Installation" href="1_0_installation.html" />
+    <link rel="prev" title="MAterials Simulation Toolkit (MAST) Documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MAterials Simulation Toolkit (MAST) Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to the MAterials Simulation Toolkit (MAST)!</p>
+<p><strong>link to whitepaper here??</strong>
+MAST is intended to be an easy-to-use wrapper to facilitate complex sequences of calculations.</p>
+<div class="section" id="the-mast-kitchen">
+<h2>The MAST Kitchen<a class="headerlink" href="#the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
+<p>MAST uses kitchen terminology to organize the materials simulation workflow.</p>
+<ul>
+<li><p class="first">An <a class="reference internal" href="2_0_ingredients.html"><em>Ingredient</em></a> is a single calculation, like a single VASP calculation resulting in a relaxed structure and energy.</p>
+</li>
+<li><p class="first">A <a class="reference internal" href="4_0_recipe.html"><em>Recipe</em></a> is a collection of several ingredients and information about how the ingredients are combined together.</p>
+<blockquote>
+<div><ul class="simple">
+<li>As in a cooking recipe, ingredients may need to be addressed in a certain logical order. This temporal order of how ingredients work together is the workflow.</li>
+<li>The <tt class="xref doc docutils literal"><span class="pre">Recipe</span> <span class="pre">Template</span></tt> and <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a> together describe the order of the ingredients and the way they are combined together.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>For more information, see the MAST introductory powerpoint <strong>need to add ppt here</strong></p>
+</div>
+<div class="section" id="computing-in-the-mast-kitchen">
+<h2>Computing in the MAST Kitchen<a class="headerlink" href="#computing-in-the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Plan your workflow.<ul>
+<li>What are the single calculations you will need (Ingredients)?</li>
+<li>Which calculations depend on each other and should be grouped into a Recipe?</li>
+<li>What are all of the conditions for each calculation (e.g. which ones can have volume change, and which ones should be at fixed volume? How fine a kpoint mesh does each calculation need? etc.)?</li>
+</ul>
+</li>
+<li>Start with some of the standard recipes in your $MAST_RECIPE_PATH directory or use a new template.</li>
+<li>Create an input file, for example, test.inp.</li>
+<li>Run the command <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt> to parse the input file.</li>
+<li>Under <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt>, MAST creates a timestamped recipe directory.</li>
+<li>Within the recipe directory:<ol class="arabic">
+<li>Each ingredient gets its own directory within the system_recipe_timestamp directory.</li>
+<li>Additional files are created, including:<ol class="arabic">
+<li><tt class="docutils literal"><span class="pre">personal_recipe.txt</span></tt>, which is your recipe template file filled in with information gathered from the input <tt class="docutils literal"><span class="pre">.inp</span></tt> file.</li>
+<li><tt class="docutils literal"><span class="pre">archive_input_options.txt</span></tt>, so you can see what the input options originally were</li>
+<li><tt class="docutils literal"><span class="pre">archive_recipe_plan.txt</span></tt>, which tells you how MAST interpreted the recipe file. You can check this file to see which ingredients are considered parents of which other ingredients, for troubleshootin</li>
+<li><tt class="docutils literal"><span class="pre">status.txt</span></tt>, which tells the status of all the ingredients.</li>
+<li><tt class="docutils literal"><span class="pre">input.inp</span></tt>, which is a copy of the input file (or an individual loop of a looped input file)</li>
+<li><tt class="docutils literal"><span class="pre">metadata.txt</span></tt>, which stores metadata information</li>
+<li><tt class="docutils literal"><span class="pre">mast_recipe.log</span></tt>, which stores recipe-level logging information.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Run the command <tt class="docutils literal"><span class="pre">mast</span></tt> to start the MAST scheduling arm. The MAST scheduler will get information from the personal_recipe.txt, input.inp, and status.txt file in the recipe folder.</li>
+<li>When all ingredients in the recipe are complete, the recipe directory is moved into a <tt class="docutils literal"><span class="pre">$MAST_ARCHIVE</span></tt> directory.</li>
+</ol>
+<p>For general examples on how to use MAST, see the presentations here <strong>need presentations</strong>
+Please check your output carefully, especially when setting up a new workflow using MAST.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#the-mast-kitchen">The MAST Kitchen</a></li>
+<li><a class="reference internal" href="#computing-in-the-mast-kitchen">Computing in the MAST Kitchen</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">MAterials Simulation Toolkit (MAST) Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="1_0_installation.html"
+                        title="next chapter">Installation</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MAterials Simulation Toolkit (MAST) Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

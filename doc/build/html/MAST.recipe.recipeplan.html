@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.recipe.recipeplan module &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-MAST.recipe.recipeplan">
+<span id="mast-recipe-recipeplan-module"></span><h1>MAST.recipe.recipeplan module<a class="headerlink" href="#module-MAST.recipe.recipeplan" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="MAST.recipe.recipeplan.RecipePlan">
+<em class="property">class </em><tt class="descclassname">MAST.recipe.recipeplan.</tt><tt class="descname">RecipePlan</tt><big>(</big><em>name</em>, <em>working_directory</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the entire recipe plan.
+Attributes:</p>
+<blockquote>
+<div><p>self.name &lt;str&gt;: Recipe name
+self.ingredients &lt;dict&gt;: Dictionary of ingredients</p>
+<blockquote>
+<div>and their statuses</div></blockquote>
+<dl class="docutils">
+<dt>self.update_methods &lt;dict&gt;: Dictionary of each</dt>
+<dd>ingredient&#8217;s update method, per child
+[ingredient][child] = update method for child</dd>
+<dt>self.parents_to_check &lt;dict&gt;: Dictionary of parents</dt>
+<dd>to check for completion before each ingredient
+may be run</dd>
+<dt>self.run_methods &lt;dict&gt;: Dictionary of ingredient</dt>
+<dd>run methods</dd>
+<dt>self.write_methods &lt;dict&gt;: Dictionary of ingredient</dt>
+<dd>write methods</dd>
+<dt>self.ready_methods &lt;dict&gt;: Dictionary of ingredient</dt>
+<dd>ready methods</dd>
+<dt>self.complete_methods &lt;dict&gt;: Dictionary of ingred.</dt>
+<dd>complete methods</dd>
+<dt>self.ingred_input_options &lt;dict&gt;: Dictionary of </dt>
+<dd>ingredient input options</dd>
+</dl>
+<p>self.status &lt;str&gt;: Recipe status
+self.working_directory &lt;str&gt;: Recipe working directory
+self.logger &lt;logging logger&gt;: MAST Monitor logger
+self.recipe_logger &lt;logging logger&gt;: Recipe-directory logger</p>
+</div></blockquote>
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.add_ingredient">
+<tt class="descname">add_ingredient</tt><big>(</big><em>ingredient_name</em>, <em>ingredient</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.add_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.add_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to add an ingredient_object corresponding to an ingredient name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.check_if_have_parents">
+<tt class="descname">check_if_have_parents</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.check_if_have_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.check_if_have_parents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if runs at &#8220;Initialized&#8221; status have parents 
+and switch them to &#8220;Wait&#8221; if so; otherwise,
+switch them to &#8220;Stage&#8221;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.check_if_parents_are_complete">
+<tt class="descname">check_if_parents_are_complete</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.check_if_parents_are_complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.check_if_parents_are_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if parents of waiting ingredients are
+complete.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.check_if_ready_to_proceed_are_complete">
+<tt class="descname">check_if_ready_to_proceed_are_complete</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.check_if_ready_to_proceed_are_complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.check_if_ready_to_proceed_are_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if ready-to-proceed ingredients are complete</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.check_recipe_status">
+<tt class="descname">check_recipe_status</tt><big>(</big><em>verbose=1</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.check_recipe_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.check_recipe_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check ingredient statuses, and get recipe status
+I = Initialized
+W = Waiting on parents
+S = Staged
+P = ready to Proceed
+C = Complete</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.complete_ingredient">
+<tt class="descname">complete_ingredient</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.complete_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.complete_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if an ingredient is complete</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.fast_forward_check_complete">
+<tt class="descname">fast_forward_check_complete</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.fast_forward_check_complete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.fast_forward_check_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if runs are complete.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.get_ingredient">
+<tt class="descname">get_ingredient</tt><big>(</big><em>ingredient_name</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.get_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.get_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to get an ingredient_object corresponding to an ingredient name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.get_statuses_from_file">
+<tt class="descname">get_statuses_from_file</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.get_statuses_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.get_statuses_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get status of each ingredient from a status.txt
+file in the recipe directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.ingredient_iterator">
+<tt class="descname">ingredient_iterator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.ingredient_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.ingredient_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates through the ingredients dict and returns the ingredients one by one</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.print_status">
+<tt class="descname">print_status</tt><big>(</big><em>verbose=1</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.print_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.print_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print status and set the recipe status.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.ready_ingredient">
+<tt class="descname">ready_ingredient</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.ready_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.ready_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if an ingredient is ready</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.run_ingredient">
+<tt class="descname">run_ingredient</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.run_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.run_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run ingredient</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.run_staged_ingredients">
+<tt class="descname">run_staged_ingredients</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.run_staged_ingredients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.run_staged_ingredients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run staged ingredients.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.status_change_recommended">
+<tt class="descname">status_change_recommended</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.status_change_recommended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.status_change_recommended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a status change is recommended for the ingredient,
+as listed in the ingredient folder/change_status.txt.
+Args:</p>
+<blockquote>
+<div>iname &lt;str&gt;: ingredient name</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first docutils">
+<dt>True if a status change was recommended, and </dt>
+<dd>changes the status of the ingredient in self.ingredients.</dd>
+</dl>
+<p class="last">False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.update_children">
+<tt class="descname">update_children</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.update_children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.update_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the children of an ingredient</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MAST.recipe.recipeplan.RecipePlan.write_ingredient">
+<tt class="descname">write_ingredient</tt><big>(</big><em>iname</em><big>)</big><a class="reference internal" href="_modules/MAST/recipe/recipeplan.html#RecipePlan.write_ingredient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MAST.recipe.recipeplan.RecipePlan.write_ingredient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the ingredient files according to the 
+correct method</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">MAST 20131216.canoe documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

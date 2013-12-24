@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.dirutil &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../index.html" />
+    <link rel="up" title="MAST.utility" href="../utility.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../utility.html" accesskey="U">MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.utility.dirutil</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.metadata</span> <span class="kn">import</span> <span class="n">Metadata</span>
+
+<div class="viewcode-block" id="walkdirs"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.walkdirs">[docs]</a><span class="k">def</span> <span class="nf">walkdirs</span><span class="p">(</span><span class="n">existdir</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">matchme</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Walk through directory and return list of subdirectories.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">existdir</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility&quot;</span><span class="p">,</span><span class="s">&quot;No directory at &quot;</span> <span class="o">+</span><span class="n">existdir</span><span class="p">)</span>
+<span class="c">#   walk and make main list</span>
+    <span class="n">walkme</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">walkentry</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">walkme</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">existdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">walkme</span> <span class="o">==</span> <span class="p">():</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility walkdirs&quot;</span><span class="p">,</span><span class="s">&quot;No folders found in &quot;</span> <span class="o">+</span> <span class="n">existdir</span><span class="p">)</span>
+    <span class="n">bigdirlist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">walkentry</span> <span class="ow">in</span> <span class="n">walkme</span><span class="p">:</span>
+        <span class="n">bigdirlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">walkentry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="c">#   sort list and pare down according to min/max depth</span>
+    <span class="n">numsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">minnumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">maxnumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">numsep</span> <span class="o">=</span> <span class="n">existdir</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="c"># find base number of forward slashes</span>
+    <span class="n">minnumsep</span> <span class="o">=</span> <span class="n">numsep</span> <span class="o">+</span> <span class="n">mindepth</span>
+    <span class="n">maxnumsep</span> <span class="o">=</span> <span class="n">numsep</span> <span class="o">+</span> <span class="n">maxdepth</span>
+    <span class="n">onedir</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">onenumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">smalldirlist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">onedir</span> <span class="ow">in</span> <span class="n">bigdirlist</span><span class="p">:</span>
+        <span class="n">onenumsep</span> <span class="o">=</span> <span class="n">onedir</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">onenumsep</span> <span class="o">&gt;=</span> <span class="n">minnumsep</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">onenumsep</span> <span class="o">&lt;=</span> <span class="n">maxnumsep</span><span class="p">):</span>
+            <span class="n">smalldirlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">onedir</span><span class="p">)</span>
+    <span class="n">smalldirlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matchme</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">matchdirlist</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mydir</span> <span class="ow">in</span> <span class="n">smalldirlist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">matchme</span><span class="p">):</span>
+                <span class="n">matchdirlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mydir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matchdirlist</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">smalldirlist</span>
+</div>
+<div class="viewcode-block" id="walkfiles"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.walkfiles">[docs]</a><span class="k">def</span> <span class="nf">walkfiles</span><span class="p">(</span><span class="n">existdir</span><span class="p">,</span> <span class="n">mindepth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">matchme</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Walk through directory and subdirectories and return list of files.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            existdir &lt;str&gt;: directory under which to search.</span>
+<span class="sd">            mindepth &lt;int&gt;: minimum depth of folders to search;</span>
+<span class="sd">                            default 1 = within that directory</span>
+<span class="sd">            maxdepth &lt;int&gt;: maximum depth of folders to search; default 5</span>
+<span class="sd">            matchme &lt;str&gt;: string to match; every file ending in matchme</span>
+<span class="sd">                            will be found, since a * is required at the front</span>
+<span class="sd">                            to match the full paths.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            &lt;list of str&gt;: list of full file paths</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">existdir</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility&quot;</span><span class="p">,</span><span class="s">&quot;No directory at &quot;</span> <span class="o">+</span><span class="n">existdir</span><span class="p">)</span>
+<span class="c">#   walk and make main list</span>
+    <span class="n">walkme</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">walkme</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">existdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">walkme</span> <span class="o">==</span> <span class="p">():</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility walkfiles&quot;</span><span class="p">,</span><span class="s">&quot;No folders found in &quot;</span> <span class="o">+</span> <span class="n">existdir</span><span class="p">)</span>
+    <span class="n">filetree</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">diritem</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">fileitem</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">fullfile</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">filelist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">filetree</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">existdir</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">diritem</span> <span class="ow">in</span> <span class="n">filetree</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fileitem</span> <span class="ow">in</span> <span class="n">diritem</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">fullfile</span> <span class="o">=</span> <span class="n">diritem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fileitem</span>
+            <span class="n">filelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullfile</span><span class="p">)</span>
+    <span class="c">#for fullfile in filelist:</span>
+    <span class="c">#    print fullfile</span>
+<span class="c">#   #   sort and pare file list</span>
+    <span class="n">paredfilelist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">numsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">minnumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">maxnumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">numsep</span> <span class="o">=</span> <span class="n">existdir</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="c"># find base number of forward slashes</span>
+    <span class="n">minnumsep</span> <span class="o">=</span> <span class="n">numsep</span> <span class="o">+</span> <span class="n">mindepth</span>
+    <span class="n">maxnumsep</span> <span class="o">=</span> <span class="n">numsep</span> <span class="o">+</span> <span class="n">maxdepth</span>
+    <span class="n">onefile</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+    <span class="n">onenumsep</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">onefile</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+        <span class="n">onenumsep</span> <span class="o">=</span> <span class="n">onefile</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">onenumsep</span> <span class="o">&gt;=</span> <span class="n">minnumsep</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">onenumsep</span> <span class="o">&lt;=</span> <span class="n">maxnumsep</span><span class="p">):</span>
+            <span class="n">paredfilelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">onefile</span><span class="p">)</span>
+    <span class="n">paredfilelist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matchme</span> <span class="o">==</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">matchfilelist</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">matchme</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;*&quot;</span><span class="p">:</span>
+            <span class="n">matchme</span><span class="o">=</span><span class="s">&quot;*&quot;</span><span class="o">+</span><span class="n">matchme</span>
+        <span class="k">for</span> <span class="n">myfile</span> <span class="ow">in</span> <span class="n">paredfilelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">myfile</span><span class="p">,</span> <span class="n">matchme</span><span class="p">):</span>
+                <span class="n">matchfilelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myfile</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matchfilelist</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">paredfilelist</span>
+</div>
+<div class="viewcode-block" id="get_mast_install_path"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.get_mast_install_path">[docs]</a><span class="k">def</span> <span class="nf">get_mast_install_path</span><span class="p">():</span>
+    <span class="n">getpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;MAST_INSTALL_PATH&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">getpath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility dirutil&quot;</span><span class="p">,</span><span class="s">&quot;No path set in environment variable MAST_INSTALL_PATH&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">getpath</span></div>
+<div class="viewcode-block" id="get_mast_scratch_path"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.get_mast_scratch_path">[docs]</a><span class="k">def</span> <span class="nf">get_mast_scratch_path</span><span class="p">():</span>
+    <span class="n">getpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;MAST_SCRATCH&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">getpath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility dirutil&quot;</span><span class="p">,</span><span class="s">&quot;No path set in environment variable MAST_SCRATCH&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">getpath</span>
+</div>
+<div class="viewcode-block" id="get_mast_archive_path"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.get_mast_archive_path">[docs]</a><span class="k">def</span> <span class="nf">get_mast_archive_path</span><span class="p">():</span>
+    <span class="n">getpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;MAST_ARCHIVE&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">getpath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility dirutil&quot;</span><span class="p">,</span><span class="s">&quot;No path set in environment variable MAST_ARCHIVE&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">getpath</span>
+</div>
+<div class="viewcode-block" id="get_mast_control_path"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.get_mast_control_path">[docs]</a><span class="k">def</span> <span class="nf">get_mast_control_path</span><span class="p">():</span>
+    <span class="n">getpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;MAST_CONTROL&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">getpath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility dirutil&quot;</span><span class="p">,</span><span class="s">&quot;No path set in environment variable MAST_CONTROL&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">getpath</span></div>
+<div class="viewcode-block" id="directory_is_locked"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.directory_is_locked">[docs]</a><span class="k">def</span> <span class="nf">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/mast.write_files.lock&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="lock_directory"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.lock_directory">[docs]</a><span class="k">def</span> <span class="nf">lock_directory</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">waitmax</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lock a directory using a lockfile.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dirname &lt;str&gt;: Directory name</span>
+<span class="sd">            waitmax &lt;int&gt;: maximum number of 5-second waits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+        <span class="n">wait_to_write</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">waitmax</span><span class="p">)</span>
+    <span class="n">lockfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/mast.write_files.lock&quot;</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="n">lockfile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="n">lockfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="unlock_directory"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.unlock_directory">[docs]</a><span class="k">def</span> <span class="nf">unlock_directory</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">waitmax</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unlock a directory by removing the lockfile.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dirname &lt;str&gt;: Directory name</span>
+<span class="sd">            waitmax &lt;int&gt;: maximum number of 5-second waits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/mast.write_files.lock&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">waitct</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">okay</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">waitct</span> <span class="o">&lt;=</span> <span class="n">waitmax</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">dirname</span> <span class="o">+</span> <span class="s">&quot;/mast.write_files.lock&quot;</span><span class="p">)</span>
+                <span class="n">okay</span><span class="o">=</span><span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">waitct</span><span class="o">=</span><span class="n">waitct</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">okay</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility unlock_directory&quot;</span><span class="p">,</span>
+                <span class="s">&quot;Tried to unlock directory </span><span class="si">%s</span><span class="s"> which was not locked.&quot;</span> <span class="o">%</span> <span class="n">dirname</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="wait_to_write"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.wait_to_write">[docs]</a><span class="k">def</span> <span class="nf">wait_to_write</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">waitmax</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wait to write to directory.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dirname &lt;str&gt;: Directory name</span>
+<span class="sd">            waitmax &lt;int&gt;: maximum number of 5-second waits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">waitmax</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">waitmax</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">waitcount</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">waitcount</span> <span class="o">&lt;</span> <span class="n">waitmax</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">waitcount</span> <span class="o">=</span> <span class="n">waitcount</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">directory_is_locked</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility wait_to_write&quot;</span><span class="p">,</span> 
+            <span class="s">&quot;Timed out waiting to obtain lock on directory </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dirname</span><span class="p">)</span></div>
+<div class="viewcode-block" id="search_for_metadata_file"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.search_for_metadata_file">[docs]</a><span class="k">def</span> <span class="nf">search_for_metadata_file</span><span class="p">(</span><span class="n">metastring</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">dirname</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">metafilename</span><span class="o">=</span><span class="s">&quot;metadata.txt&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Match a metadata file based on input.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            metastring &lt;str&gt;: equals-sign-separated metatag=value pairs with</span>
+<span class="sd">                                commas separating the meta sections.</span>
+<span class="sd">                Example: &quot;ingredtype=phonon, neblabel=vac1-vac2, charge=0&quot;</span>
+<span class="sd">            dirname &lt;str&gt;: directory name to start. Default &quot;&quot; goes to ARCHIVE.</span>
+<span class="sd">            metafilename &lt;str&gt;: metadata file name. Default &quot;metadata.txt&quot;</span>
+<span class="sd">            verbose &lt;int&gt;: 1 for verbose messages, 0 otherwise</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dlist &lt;list of str&gt;: list of directories containing matching</span>
+<span class="sd">                                    metadata files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dirname</span><span class="o">==</span><span class="s">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">dirname</span> <span class="o">=</span> <span class="n">get_mast_archive_path</span><span class="p">()</span>
+    <span class="n">allmetas</span> <span class="o">=</span> <span class="n">walkfiles</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">metafilename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allmetas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="s">&quot;utility dirutil, search_for_metadata_file&quot;</span><span class="p">,</span> <span class="s">&quot;No matching metafiles found in </span><span class="si">%s</span><span class="s"> for tags </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">metastring</span><span class="p">))</span>
+    <span class="n">metaparse</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">metasplit</span> <span class="o">=</span> <span class="n">metastring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">metaitem</span> <span class="ow">in</span> <span class="n">metasplit</span><span class="p">:</span>
+        <span class="n">onesplit</span><span class="o">=</span><span class="n">metaitem</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+        <span class="n">metaparse</span><span class="p">[</span><span class="n">onesplit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span><span class="o">=</span><span class="n">onesplit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">metamatch</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">mustmatch</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">metaparse</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">mtry</span> <span class="ow">in</span> <span class="n">allmetas</span><span class="p">:</span>
+        <span class="n">mokay</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">mymeta</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">metafile</span><span class="o">=</span><span class="n">mtry</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metatag</span><span class="p">,</span><span class="n">metaval</span> <span class="ow">in</span> <span class="n">metaparse</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">searchresult</span> <span class="o">=</span> <span class="n">mymeta</span><span class="o">.</span><span class="n">search_data</span><span class="p">(</span><span class="n">metatag</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">searchresult</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">metaval</span><span class="p">:</span>
+                <span class="n">mokay</span><span class="o">=</span><span class="n">mokay</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="n">metatag</span><span class="p">,</span> <span class="n">searchresult</span>
+        <span class="k">if</span> <span class="n">mokay</span> <span class="o">==</span> <span class="n">mustmatch</span><span class="p">:</span>
+            <span class="n">metamatch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mtry</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">allmetas</span>
+        <span class="k">print</span> <span class="n">metaparse</span>
+        <span class="k">print</span> <span class="n">metamatch</span>
+    <span class="k">return</span> <span class="n">metamatch</span>
+</div>
+<div class="viewcode-block" id="list_methods"><a class="viewcode-back" href="../../../MAST.utility.dirutil.html#MAST.utility.dirutil.list_methods">[docs]</a><span class="k">def</span> <span class="nf">list_methods</span><span class="p">(</span><span class="n">myclass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">printout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;List the methods in a class.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            myclass &lt;Class&gt;: Class, like BaseIngredient</span>
+<span class="sd">            printout &lt;int&gt;: Print the list to screen</span>
+<span class="sd">                            1 - print (default)</span>
+<span class="sd">                            0 - do not print to screen</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">inspect</span>
+    <span class="n">mylist</span><span class="o">=</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">myclass</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)</span>
+    <span class="n">parsedlist</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">myentry</span> <span class="ow">in</span> <span class="n">mylist</span><span class="p">:</span>
+        <span class="n">parsedlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myentry</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">printout</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">myentry</span> <span class="ow">in</span> <span class="n">parsedlist</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">myentry</span>
+    <span class="k">return</span> <span class="n">parsedlist</span>
+
+                </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../utility.html" >MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

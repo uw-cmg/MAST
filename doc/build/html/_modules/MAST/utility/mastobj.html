@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.mastobj &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../index.html" />
+    <link rel="up" title="MAST.utility" href="../utility.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../utility.html" accesskey="U">MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.utility.mastobj</h1><div class="highlight"><pre>
+<span class="c">############################################################################</span>
+<span class="c"># MAterials Simulation Toolbox (MAST)</span>
+<span class="c"># Version: January 2013</span>
+<span class="c"># Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,</span>
+<span class="c">#              Kumaresh Visakan Murugan, Parker Sear</span>
+<span class="c"># Created at the University of Wisconsin-Madison.</span>
+<span class="c"># Replace this section with appropriate license text before shipping.</span>
+<span class="c"># Add additional programmers and schools as necessary.</span>
+<span class="c">############################################################################</span>
+
+<span class="c">#import numpy as np</span>
+
+<span class="c">#import os</span>
+<span class="c">#import warnings</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.masterror</span> <span class="kn">import</span> <span class="n">MASTError</span>
+
+
+<div class="viewcode-block" id="MASTObj"><a class="viewcode-back" href="../../../MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj">[docs]</a><span class="k">class</span> <span class="nc">MASTObj</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base MAST class.  Used to handle keyword input into MAST classes in a </span>
+<span class="sd">    uniform fashion.</span>
+
+<span class="sd">    For examples see:</span>
+<span class="sd">        MAST/interface/interface</span>
+<span class="sd">        MAST/defects/defecttype</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        allowed_keys &lt;dict&gt;: Each key in this dictionary is a keyword for that</span>
+<span class="sd">                             class, with each keyvalue being a tuple containing</span>
+<span class="sd">                             the keyword type, default value, and doc string</span>
+<span class="sd">        keywords &lt;dict&gt;: The **kwargs passed into the class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_keys</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializer for MASTobj.</span>
+<span class="sd">        Calls:</span>
+<span class="sd">           self.set_keywords</span>
+
+<span class="sd">        Sets:</span>
+<span class="sd">           self.keywords</span>
+<span class="sd">           self.allowed_keys</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           Nothing </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span> <span class="o">=</span> <span class="n">allowed_keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_keywords</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MASTObj.set_keywords"><a class="viewcode-back" href="../../../MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj.set_keywords">[docs]</a>    <span class="k">def</span> <span class="nf">set_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the self.allowed_keys dictionary, and sets appropiate defaults</span>
+<span class="sd">        for keywords given in **kwargs and checks to make sure all keywords in</span>
+<span class="sd">        **kwargs are valid</span>
+
+<span class="sd">        Calls:</span>
+<span class="sd">            Nothing</span>
+
+<span class="sd">        Sets:</span>
+<span class="sd">            Nothing</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Keywords</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">keywords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="s">&#39;Keyword </span><span class="si">%s</span><span class="s"> for </span><span class="si">%s</span><span class="s"> object not found&#39;</span> <span class="o">%</span> \
+                                   <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+                <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+<span class="c">#                raise RuntimeError(&#39;Keyword %s for %s object not found&#39; % \</span>
+<span class="c">#                                   (key, self.__class__.__name__))</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">keywords</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="s">&#39;Keyword </span><span class="si">%s</span><span class="s"> value </span><span class="si">%s</span><span class="s"> invalid; expected type </span><span class="si">%s</span><span class="s">, got type </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<span class="c">#                raise RuntimeError(&#39;Keyword %s value invalid&#39; % key)</span>
+
+        <span class="k">return</span> <span class="n">keywords</span>
+</div>
+<div class="viewcode-block" id="MASTObj.help"><a class="viewcode-back" href="../../../MAST.utility.mastobj.html#MAST.utility.mastobj.MASTObj.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyword</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints a help message listing all the allowed keywords and any relevant information&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">keyword</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">):</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%-20s%-20s%-20s%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Keyword&#39;</span><span class="p">,</span> <span class="s">&#39;Type&#39;</span><span class="p">,</span> <span class="s">&#39;Default&#39;</span><span class="p">,</span> <span class="s">&#39;Comment&#39;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">string</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%-20s%-20s%-20s%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">print</span> <span class="n">string</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../utility.html" >MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

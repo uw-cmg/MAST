@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.utility.defect_formation_energy.defectformationenergy &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../../index.html" />
+    <link rel="up" title="MAST.utility" href="../../utility.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../utility.html" accesskey="U">MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.utility.defect_formation_energy.defectformationenergy</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">pymatgen</span> <span class="kn">as</span> <span class="nn">pmg</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vaspio.vasp_output</span> <span class="kn">import</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Outcar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.smartio</span> <span class="kn">import</span> <span class="n">read_structure</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTFile</span>
+<span class="c">#from MAST.utility import PickleManager</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.defect_formation_energy.potential_alignment</span> <span class="kn">import</span> <span class="n">PotentialAlignment</span>
+<span class="kn">from</span> <span class="nn">MAST.utility.defect_formation_energy.gapplot</span> <span class="kn">import</span> <span class="n">GapPlot</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">Metadata</span>
+<span class="kn">from</span> <span class="nn">MAST.parsers</span> <span class="kn">import</span> <span class="n">InputParser</span>
+
+<div class="viewcode-block" id="DefectFormationEnergy"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy">[docs]</a><span class="k">class</span> <span class="nc">DefectFormationEnergy</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for calculating the defect formation energy for a completed MAST</span>
+<span class="sd">        run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">plot_threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_threshold</span> <span class="o">=</span> <span class="n">plot_threshold</span>
+        <span class="n">ipparser</span> <span class="o">=</span> <span class="n">InputParser</span><span class="p">(</span><span class="n">inputfile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span><span class="s">&#39;input.inp&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span> <span class="o">=</span> <span class="n">ipparser</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="c">#pm = PickleManager(self.directory + &#39;/input_options.pickle&#39;)</span>
+        <span class="c">#self.input_options = pm.load_variable()</span>
+        <span class="kn">from</span> <span class="nn">MAST.recipe.recipesetup</span> <span class="kn">import</span> <span class="n">RecipeSetup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recipe_setup</span> <span class="o">=</span> <span class="n">RecipeSetup</span><span class="p">(</span><span class="n">inputOptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="p">,</span><span class="n">recipeFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span><span class="s">&#39;personal_recipe.txt&#39;</span><span class="p">),</span><span class="n">workingDirectory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recipe_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recipe_setup</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="c">#PickleManager(self.directory + &#39;/mast.pickle&#39;).load_variable()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_ingredients</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">ingredientlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recipe_plan</span><span class="o">.</span><span class="n">ingredients</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">updatekeys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recipe_plan</span><span class="o">.</span><span class="n">update_methods</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ingredient</span> <span class="ow">in</span> <span class="n">ingredientlist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ingredient</span> <span class="ow">in</span> <span class="n">updatekeys</span><span class="p">):</span> <span class="c"># has no children</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">final_ingredients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ingredient</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recipe_plan</span><span class="o">.</span><span class="n">update_methods</span><span class="p">[</span><span class="n">ingredient</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">final_ingredients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ingredient</span><span class="p">)</span>
+        <span class="c">#print self.final_ingredients</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_calculate_defect_formation_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">perf_dir</span> <span class="o">=</span> <span class="p">[</span><span class="n">ingredient</span> <span class="k">for</span> <span class="n">ingredient</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_ingredients</span> <span class="k">if</span> <span class="p">(</span><span class="s">&#39;perfect&#39;</span> <span class="ow">in</span> <span class="n">ingredient</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;A perfect final directory (has no children and has the word &#39;perfect&#39; in its name) could not be found. Check recipe </span><span class="si">%s</span><span class="s"> for a perfect directory.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">)</span>
+
+        <span class="n">def_dir</span> <span class="o">=</span> <span class="p">[</span><span class="n">ingredient</span> <span class="k">for</span> <span class="n">ingredient</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_ingredients</span> <span class="k">if</span> <span class="s">&#39;perfect&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ingredient</span><span class="p">]</span> 
+        <span class="c">#for whatever in sorted(def_dir):</span>
+            <span class="c">#print whatever</span>
+
+        <span class="n">defects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&#39;defects&#39;</span><span class="p">,</span> <span class="s">&#39;defects&#39;</span><span class="p">)</span>
+        <span class="n">chempot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&#39;chemical_potentials&#39;</span><span class="p">)</span>
+
+        <span class="n">perf_meta</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">metafile</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/metadata.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">perf_dir</span><span class="p">))</span>
+        <span class="n">e_perf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">perf_meta</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="s">&#39;energy&#39;</span><span class="p">))</span>
+        <span class="n">efermi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fermi_energy</span><span class="p">(</span><span class="n">perf_dir</span><span class="p">)</span>
+        <span class="n">struct_perf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">perf_dir</span><span class="p">)</span>
+
+        <span class="n">perf_species</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">struct_perf</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">perf_species</span><span class="p">):</span>
+                <span class="n">perf_species</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">perf_species</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c">#print &#39;Perfect composition: &#39;, perf_species</span>
+
+        <span class="c"># First loop through the conditions for the defects</span>
+        <span class="k">for</span> <span class="n">conditions</span><span class="p">,</span> <span class="n">potentials</span> <span class="ow">in</span> <span class="n">chempot</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">print</span> <span class="s">&#39;Conditions:  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">conditions</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">[</span><span class="n">conditions</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="c"># Loop through each defect</span>
+            <span class="k">for</span> <span class="n">ddir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">def_dir</span><span class="p">):</span>
+                <span class="n">def_meta</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">metafile</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/metadata.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">ddir</span><span class="p">))</span>
+                <span class="c">#print def_meta</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">def_meta</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="s">&#39;defect_label&#39;</span><span class="p">)</span>
+                <span class="n">charge</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">def_meta</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="s">&#39;charge&#39;</span><span class="p">))</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">def_meta</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="s">&#39;energy&#39;</span><span class="p">))</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">ddir</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">[</span><span class="n">conditions</span><span class="p">]):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">[</span><span class="n">conditions</span><span class="p">][</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+                <span class="k">print</span> <span class="s">&#39;Calculating DFEs for defect </span><span class="si">%s</span><span class="s"> with charge </span><span class="si">%3i</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">charge</span><span class="p">)</span>
+
+                <span class="c"># Find out how many atoms of each type are in the defects</span>
+                <span class="n">def_species</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">def_species</span><span class="p">):</span>
+                        <span class="n">def_species</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">def_species</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c"># Find the differences in the number of each atom type</span>
+                <span class="c"># between the perfect and the defect</span>
+                <span class="n">struct_diff</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">specie</span><span class="p">,</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">def_species</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">nperf</span> <span class="o">=</span> <span class="n">perf_species</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="p">)]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">nperf</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">struct_diff</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="p">)]</span> <span class="o">=</span> <span class="n">number</span> <span class="o">-</span> <span class="n">nperf</span>
+
+                <span class="c"># Get the potential alignment correction</span>
+                <span class="n">alignment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_potential_alignment</span><span class="p">(</span><span class="n">perf_dir</span><span class="p">,</span> <span class="n">ddir</span><span class="p">)</span>
+
+                <span class="c"># Calculate the base DFE energy</span>
+                <span class="n">e_def</span> <span class="o">=</span> <span class="n">energy</span> <span class="o">-</span> <span class="n">e_perf</span> <span class="c"># E_defect - E_perf</span>
+                <span class="k">for</span> <span class="n">specie</span><span class="p">,</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">struct_diff</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">mu</span> <span class="o">=</span> <span class="n">potentials</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="p">)]</span>
+                    <span class="c">#print str(specie), mu, number</span>
+                    <span class="n">e_def</span> <span class="o">-=</span> <span class="p">(</span><span class="n">number</span> <span class="o">*</span> <span class="n">mu</span><span class="p">)</span>
+                <span class="n">e_def</span> <span class="o">+=</span> <span class="n">charge</span> <span class="o">*</span> <span class="p">(</span><span class="n">efermi</span> <span class="o">+</span> <span class="n">alignment</span><span class="p">)</span> <span class="c"># Add in the shift here!</span>
+                <span class="c">#print &#39;%-15s%-5i%12.5f%12.5f%12.5f%12.5f&#39; % (label.split(&#39;_&#39;)[1], charge, energy, e_perf, efermi, alignment)</span>
+                <span class="k">print</span> <span class="s">&#39;DFE = </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">e_def</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">[</span><span class="n">conditions</span><span class="p">][</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">charge</span><span class="p">,</span> <span class="n">e_def</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="c">#print e_defects</span>
+        <span class="c">#return e_defects</span>
+
+<div class="viewcode-block" id="DefectFormationEnergy.get_total_energy"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.get_total_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the total energy from a directory&quot;&quot;&quot;</span>
+
+        <span class="n">abspath</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;vasprun.xml&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">)):</span>
+        <span class="c"># Modified from the PyMatGen Vasprun.final_energy() function to return E_0</span>
+            <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/vasprun.xml&#39;</span> <span class="o">%</span> <span class="n">abspath</span><span class="p">)</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;electronic_steps&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;e_0_energy&quot;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="DefectFormationEnergy.get_fermi_energy"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.get_fermi_energy">[docs]</a>    <span class="k">def</span> <span class="nf">get_fermi_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the Fermi energy from a directory&quot;&quot;&quot;</span>
+        <span class="n">abspath</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;vasprun.xml&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/vasprun.xml&#39;</span> <span class="o">%</span> <span class="n">abspath</span><span class="p">)</span><span class="o">.</span><span class="n">efermi</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="s">&#39;OUTCAR&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">Outcar</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/OUTCAR&#39;</span> <span class="o">%</span> <span class="n">abspath</span><span class="p">)</span><span class="o">.</span><span class="n">efermi</span>
+</div>
+<div class="viewcode-block" id="DefectFormationEnergy.get_structure"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.get_structure">[docs]</a>    <span class="k">def</span> <span class="nf">get_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the final structure from an optimization&quot;&quot;&quot;</span>
+
+        <span class="n">abspath</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;vasprun.xml&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/vasprun.xml&#39;</span> <span class="o">%</span> <span class="n">abspath</span><span class="p">)</span><span class="o">.</span><span class="n">final_structure</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="s">&#39;CONTCAR&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abspath</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">pmg</span><span class="o">.</span><span class="n">read_structure</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/CONTCAR&#39;</span> <span class="o">%</span> <span class="n">abspath</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DefectFormationEnergy.get_potential_alignment"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.get_potential_alignment">[docs]</a>    <span class="k">def</span> <span class="nf">get_potential_alignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perf_dir</span><span class="p">,</span> <span class="n">def_dir</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the potential alignment correction used in charge defects&quot;&quot;&quot;</span>
+
+        <span class="n">abs_path_perf</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">perf_dir</span><span class="p">)</span>
+        <span class="n">abs_path_def</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">def_dir</span><span class="p">)</span>
+
+        <span class="n">pa</span> <span class="o">=</span> <span class="n">PotentialAlignment</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;OUTCAR&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">abs_path_perf</span><span class="p">)):</span>
+            <span class="n">perfect_info</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">read_outcar</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">abs_path_perf</span><span class="p">,</span> <span class="s">&#39;OUTCAR&#39;</span><span class="p">))</span>
+            <span class="n">defect_info</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">read_outcar</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">abs_path_def</span><span class="p">,</span> <span class="s">&#39;OUTCAR&#39;</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">get_potential_alignment</span><span class="p">(</span><span class="n">perfect_info</span><span class="p">,</span> <span class="n">defect_info</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DefectFormationEnergy.get_defect_formation_energies"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.get_defect_formation_energies">[docs]</a>    <span class="k">def</span> <span class="nf">get_defect_formation_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_defect_formation_energies</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DefectFormationEnergy.defect_formation_energies"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.defect_formation_energies">[docs]</a>    <span class="k">def</span> <span class="nf">defect_formation_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_defect_formation_energies</span><span class="p">()</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DefectFormationEnergy.dfe"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.dfe">[docs]</a>    <span class="k">def</span> <span class="nf">dfe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_defect_formation_energies</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DefectFormationEnergy.print_table"><a class="viewcode-back" href="../../../../MAST.utility.defect_formation_energy.defectformationenergy.html#MAST.utility.defect_formation_energy.defectformationenergy.DefectFormationEnergy.print_table">[docs]</a>    <span class="k">def</span> <span class="nf">print_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_defect_formation_energies</span><span class="p">()</span>
+
+        <span class="n">myfile</span> <span class="o">=</span> <span class="n">MASTFile</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">conditions</span><span class="p">,</span> <span class="n">defects</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_defects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n\n</span><span class="s">Defect formation energies for </span><span class="si">%s</span><span class="s"> conditions.</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">conditions</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%-20s</span><span class="s"> | </span><span class="si">%10s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Defect&#39;</span><span class="p">,</span> <span class="s">&#39;DFE&#39;</span><span class="p">))</span>
+            <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;---------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">defect</span><span class="p">,</span> <span class="n">energies</span> <span class="ow">in</span> <span class="n">defects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">energy</span> <span class="ow">in</span> <span class="n">energies</span><span class="p">:</span>
+                    <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%-14s</span><span class="s">(q=</span><span class="si">%2i</span><span class="s">) | </span><span class="si">%8.4f</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">defect</span><span class="p">,</span> <span class="n">energy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">energy</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">())</span> <span class="c"># Add a blank line here</span>
+            <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;---------------------------------</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">myfile</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s">&quot;dfe.txt&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">myfile</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../utility.html" >MAST.utility</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST.parsers.recipetemplateparser &mdash; MAST 20131216.canoe documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '20131216.canoe',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="MAST 20131216.canoe documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for MAST.parsers.recipetemplateparser</h1><div class="highlight"><pre>
+<span class="c">############################################################################</span>
+<span class="c"># MAterials Simulation Toolbox (MAST)</span>
+<span class="c"># Version: January 2013</span>
+<span class="c"># Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,</span>
+<span class="c">#              Kumaresh Visakan Murugan, Parker Sear</span>
+<span class="c"># Created at the University of Wisconsin-Madison.</span>
+<span class="c"># Replace this section with appropriate license text before shipping.</span>
+<span class="c"># Add additional programmers and schools as necessary.</span>
+<span class="c">############################################################################</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTObj</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">InputOptions</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">MASTError</span>
+<span class="kn">from</span> <span class="nn">MAST.utility</span> <span class="kn">import</span> <span class="n">Metadata</span>
+
+<span class="n">ALLOWED_KEYS</span> <span class="o">=</span> <span class="p">{</span>\
+                 <span class="s">&#39;templateFile&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;template file name&#39;</span><span class="p">),</span>\
+                 <span class="s">&#39;inputOptions&#39;</span>    <span class="p">:</span> <span class="p">(</span><span class="n">InputOptions</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;input options parsed using input parser&#39;</span><span class="p">),</span>\
+                 <span class="s">&#39;personalRecipe&#39;</span>  <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;personalized recipe file&#39;</span><span class="p">),</span>\
+                 <span class="s">&#39;working_directory&#39;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Working directory&#39;</span><span class="p">),</span>
+               <span class="p">}</span>
+
+<div class="viewcode-block" id="RecipeTemplateParser"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser">[docs]</a><span class="k">class</span> <span class="nc">RecipeTemplateParser</span><span class="p">(</span><span class="n">MASTObj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for parsing the template recipe file in the input file and</span>
+<span class="sd">        creating a &quot;personalized&quot; recipe file where any &lt;sys&gt; and &lt;N&gt; from</span>
+<span class="sd">        the recipe template have been filled in according to information</span>
+<span class="sd">        from the input file.</span>
+<span class="sd">        Attributes:</span>
+<span class="sd">            self.input_options &lt;InputOptions&gt;: Input options from input file.</span>
+<span class="sd">            self.template_file &lt;str&gt;: Path to the recipe template file</span>
+<span class="sd">            self.personal_recipe &lt;str&gt;: Path to the personalized recipe.</span>
+<span class="sd">            self.ingredient_list &lt;list of str&gt;: List of ingredients mentioned</span>
+<span class="sd">                                                in the recipe template file.</span>
+<span class="sd">            self.chunks &lt;list of list&gt;: List of chunks</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MASTObj</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ALLOWED_KEYS</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;inputOptions&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_file</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;templateFile&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">personal_recipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;personalRecipe&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ingredient_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">metafile</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/metadata.txt&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">[</span><span class="s">&#39;working_directory&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<div class="viewcode-block" id="RecipeTemplateParser.parse"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Parses the template recipe file and creates</span>
+<span class="sd">            the personalized recipe file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Template file not provided!&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;MAST_RECIPE_PATH&quot;</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">template_file</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_file</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Template file not found!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Input Options not provided!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">personal_recipe</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;Personal recipe file not provided!&quot;</span><span class="p">)</span>
+        
+        <span class="c">#fetch required paramaters</span>
+        <span class="n">f_ptr</span>           <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_file</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">o_ptr</span>           <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">personal_recipe</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">system_name</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;mast&quot;</span><span class="p">,</span> <span class="s">&quot;system_name&quot;</span><span class="p">,</span> <span class="s">&quot;sys&quot;</span><span class="p">)</span>
+        <span class="n">n_defects</span>       <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;defects&quot;</span><span class="p">,</span> <span class="s">&quot;num_defects&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">d_defects</span>       <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;defects&quot;</span><span class="p">,</span><span class="s">&quot;defects&quot;</span><span class="p">)</span>
+        <span class="n">n_images</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;neb&quot;</span><span class="p">,</span> <span class="s">&quot;images&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">d_neblines</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;neb&quot;</span><span class="p">,</span> <span class="s">&quot;neblines&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">recipe_name</span>     <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c">#        print system_name, self.input_options.get_item(&#39;mast&#39;, &#39;system_name&#39;)</span>
+        <span class="n">chunkcount</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">mychunk</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">modchunk</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f_ptr</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s">&#39;{begin}&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mychunk</span><span class="p">))</span>
+                <span class="n">mychunk</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="s">&#39;{end}&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mychunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mychunk</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mychunk</span><span class="p">))</span>
+        <span class="c">#for chunk in self.chunks:</span>
+        <span class="c">#    print chunk</span>
+        <span class="n">expandedlist</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunks</span><span class="p">:</span>
+            <span class="n">expanded</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_chunk</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">expandedlist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">expanded</span><span class="p">)</span>
+        <span class="n">o_ptr</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">expandedlist</span><span class="p">)</span>
+        <span class="n">f_ptr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">o_ptr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">recipe_name</span>
+        <span class="c">#self.chunks[chunkcount]=dict()</span>
+        <span class="c">#self.chunks[chunkcount][&#39;modify&#39;] = modchunk</span>
+        <span class="c">#    #line             = line.strip()</span>
+        <span class="c">#    #line             = line.lower()</span>
+        <span class="c">#    processing_lines = []</span>
+        <span class="c">#    #shortcut straight copy + 6</span>
+        <span class="c">#    processing_lines.append(line)</span>
+        <span class="c">#    output_str = &quot;\n&quot;.join(processing_lines)</span>
+        <span class="c">#    o_ptr.write(&quot;%s\n&quot; % output_str)</span>
+
+        <span class="c">#f_ptr.close()</span>
+        <span class="c">#o_ptr.close()</span>
+<span class="c">#        print &#39;in RecipeParser.parse():&#39;, list(set(self.ingredient_list))</span>
+        <span class="c">#return recipe_name</span></div>
+<div class="viewcode-block" id="RecipeTemplateParser.parse_chunk"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.parse_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">parse_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse a chunk of lines.</span>
+<span class="sd">            Args:</span>
+<span class="sd">                chunk &lt;list&gt;: List of lines</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                expandedchunk &lt;list&gt;: List of lines</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">origchunk</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">expandedchunk</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">needsdefects</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">needscharges</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">needsphonons</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">needsnebs</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;N&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needsdefects</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;B-E&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needsnebs</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;P&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needsphonons</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;Q&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needscharges</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;B&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needsnebs</span><span class="o">=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;E&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">needsnebs</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">d_defects</span>       <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;defects&quot;</span><span class="p">,</span><span class="s">&quot;defects&quot;</span><span class="p">)</span>
+        <span class="n">d_nebs</span>         <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_options</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="s">&quot;neb&quot;</span><span class="p">,</span><span class="s">&quot;nebs&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">needsdefects</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">mydefects</span><span class="o">=</span><span class="n">d_defects</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">mydefects</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">defectname</span> <span class="ow">in</span> <span class="n">mydefects</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">d_defects</span><span class="p">[</span><span class="n">defectname</span><span class="p">][</span><span class="s">&#39;charge&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">charge</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">mycharge</span> <span class="o">=</span> <span class="s">&#39;q=n&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">charge</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">mycharge</span> <span class="o">=</span> <span class="s">&#39;q=p&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">charge</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">needsphonons</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d_defects</span><span class="p">[</span><span class="n">defectname</span><span class="p">][</span><span class="s">&#39;phonon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">phononkeys</span> <span class="o">=</span> <span class="n">d_defects</span><span class="p">[</span><span class="n">defectname</span><span class="p">][</span><span class="s">&#39;phonon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                            <span class="n">phononkeys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">phonon</span> <span class="ow">in</span> <span class="n">phononkeys</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">origchunk</span><span class="p">:</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;N&gt;&quot;</span><span class="p">,</span> <span class="n">defectname</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">needscharges</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                        <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;Q&gt;&quot;</span><span class="p">,</span> <span class="n">mycharge</span><span class="p">)</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;P&gt;&quot;</span><span class="p">,</span> <span class="n">phonon</span><span class="p">)</span>
+                                    <span class="n">expandedchunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">origchunk</span><span class="p">:</span>
+                            <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;N&gt;&quot;</span><span class="p">,</span> <span class="n">defectname</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">needscharges</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;Q&gt;&quot;</span><span class="p">,</span> <span class="n">mycharge</span><span class="p">)</span>
+                            <span class="n">expandedchunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">needsnebs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">nebkeys</span> <span class="o">=</span> <span class="n">d_nebs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">nebkeys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">neblabel</span> <span class="ow">in</span> <span class="n">nebkeys</span><span class="p">:</span>
+                <span class="n">defbegin</span> <span class="o">=</span> <span class="n">neblabel</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">defend</span> <span class="o">=</span> <span class="n">neblabel</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">chargebegin</span> <span class="o">=</span> <span class="n">d_defects</span><span class="p">[</span><span class="n">defbegin</span><span class="p">][</span><span class="s">&#39;charge&#39;</span><span class="p">]</span>
+                <span class="n">chargeend</span> <span class="o">=</span> <span class="n">d_defects</span><span class="p">[</span><span class="n">defend</span><span class="p">][</span><span class="s">&#39;charge&#39;</span><span class="p">]</span>
+                <span class="n">chargeboth</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">chargebegin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">chargeend</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">chargeboth</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">charge</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">mycharge</span> <span class="o">=</span> <span class="s">&#39;q=n&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">charge</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">mycharge</span> <span class="o">=</span> <span class="s">&#39;q=p&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">charge</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">needsphonons</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d_nebs</span><span class="p">[</span><span class="n">neblabel</span><span class="p">][</span><span class="s">&#39;phonon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">phononkeys</span> <span class="o">=</span> <span class="n">d_nebs</span><span class="p">[</span><span class="n">neblabel</span><span class="p">][</span><span class="s">&#39;phonon&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                            <span class="n">phononkeys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">phonon</span> <span class="ow">in</span> <span class="n">phononkeys</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">origchunk</span><span class="p">:</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;B&gt;&quot;</span><span class="p">,</span> <span class="n">defbegin</span><span class="p">)</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;E&gt;&quot;</span><span class="p">,</span> <span class="n">defend</span><span class="p">)</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;B-E&gt;&quot;</span><span class="p">,</span> <span class="n">neblabel</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">needscharges</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                        <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;Q&gt;&quot;</span><span class="p">,</span> <span class="n">mycharge</span><span class="p">)</span>
+                                    <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;P&gt;&quot;</span><span class="p">,</span> <span class="n">phonon</span><span class="p">)</span>
+                                    <span class="n">expandedchunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">origchunk</span><span class="p">:</span>
+                            <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;B&gt;&quot;</span><span class="p">,</span> <span class="n">defbegin</span><span class="p">)</span>
+                            <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;E&gt;&quot;</span><span class="p">,</span> <span class="n">defend</span><span class="p">)</span>
+                            <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;B-E&gt;&quot;</span><span class="p">,</span> <span class="n">neblabel</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">needscharges</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">newline</span> <span class="o">=</span> <span class="n">newline</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;Q&gt;&quot;</span><span class="p">,</span> <span class="n">mycharge</span><span class="p">)</span>
+                            <span class="n">expandedchunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expandedchunk</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">origchunk</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expandedchunk</span>
+        <span class="c">#origchunk = list(expandedchunk)</span>
+        <span class="c">#expandedchunk=list()</span>
+        <span class="c">#for defectname in self.d_defects:</span>
+        <span class="c">#    for line in origchunk:</span>
+        <span class="c">#        newline = line.replace(&quot;&lt;N&gt;&quot;, defectname)</span>
+        <span class="c">#        expandedchunk.append(line)</span>
+
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.old_parsing"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.old_parsing">[docs]</a>    <span class="k">def</span> <span class="nf">old_parsing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">linestr</span><span class="p">:</span>
+            <span class="c">#validate the input line</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c">#collect recipe name</span>
+            <span class="n">line2</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;recipe&#39;</span><span class="p">):</span>
+                <span class="n">recipe_name</span> <span class="o">=</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
+
+            <span class="c">#collect ingredents</span>
+            <span class="n">line2</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;ingredient&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ingredient_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+
+            <span class="c">#replace line params&lt;N&gt;</span>
+            <span class="c">#step 1 : replace &lt;sys&gt; with system_name</span>
+            <span class="c">#step 2 : replace &lt;n-n&gt; with appropriate hop combinations</span>
+            <span class="c">#step 3 : replace &lt;img-n&gt; with appropriate image numbers</span>
+            <span class="c">#step 4 : replace &lt;n&gt; with appropriate defect numbers</span>
+            <span class="n">processing_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="c">#step 1</span>
+            <span class="n">processing_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_system_name</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">,</span> <span class="n">system_name</span><span class="p">)</span>
+            <span class="c">#step 4</span>
+            <span class="n">processing_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_defects</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">,</span> <span class="n">n_defects</span><span class="p">,</span> <span class="n">d_defects</span><span class="p">)</span>
+            <span class="c">#step 2</span>
+            <span class="n">processing_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_hop_combinations</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">,</span> <span class="n">d_neblines</span><span class="p">)</span>
+            <span class="c">#step 3</span>
+            <span class="n">processing_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_images</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">,</span> <span class="n">n_images</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_metadata_entries</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_phononlines</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">)</span>
+            <span class="c">#dump the processed lines to file</span>
+            <span class="n">output_str</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">)</span>
+            <span class="n">o_ptr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">output_str</span><span class="p">)</span>
+
+        <span class="n">f_ptr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">o_ptr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="c">#        print &#39;in RecipeParser.parse():&#39;, list(set(self.ingredient_list))</span>
+        <span class="k">return</span> <span class="n">recipe_name</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.process_system_name"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.process_system_name">[docs]</a>    <span class="k">def</span> <span class="nf">process_system_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">,</span> <span class="n">system_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;replace &lt;sys&gt; with the system name from the input options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processing_lines</span><span class="p">)):</span>
+            <span class="n">processing_lines</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">processing_lines</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;sys&gt;&#39;</span><span class="p">,</span> <span class="n">system_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">processing_lines</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.process_hop_combinations"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.process_hop_combinations">[docs]</a>    <span class="k">def</span> <span class="nf">process_hop_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">,</span> <span class="n">d_neblines</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;replace &lt;n-n&gt; with neb labels which are keys of the</span>
+<span class="sd">           neblines dict of the input options.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                processing_lines &lt;list of str&gt;: recipe lines to process.</span>
+<span class="sd">                d_neblines &lt;dict of str&gt;: dictionary of NEB lines.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="n">new_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">eval_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">d_neblines</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">processing_lines</span>
+        <span class="n">line</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">processing_lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&quot;&lt;n-n&gt;&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">neblabel</span> <span class="ow">in</span> <span class="n">d_neblines</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">n_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;n-n&gt;&#39;</span><span class="p">,</span> <span class="n">neblabel</span><span class="p">)</span>
+                    <span class="n">eval_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_line</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="s">&#39;ingredient&#39;</span> <span class="ow">in</span> <span class="n">n_line</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s">&#39;&lt;&#39;</span> <span class="ow">in</span> <span class="n">n_line</span><span class="p">:</span> 
+                        <span class="n">keyword</span> <span class="o">=</span> <span class="n">n_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;neblabel: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">neblabel</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">eval_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">line</span><span class="o">=</span><span class="s">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">eval_lines</span><span class="p">:</span>
+            <span class="c">#print &quot;TTM DEBUG line: &quot;, line</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;neb&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+                <span class="c">#print &quot;TTM DEBUG line safe&quot;</span>
+                <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">evalsplit</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;child&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">evalsplit</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">childsplit</span><span class="o">=</span><span class="n">evalsplit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+                    <span class="n">parsplit</span><span class="o">=</span><span class="n">evalsplit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+                    <span class="n">okay</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">neblabel</span> <span class="ow">in</span> <span class="n">d_neblines</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">okay</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">neblabel</span> <span class="ow">in</span> <span class="n">childsplit</span><span class="p">):</span>
+                            <span class="n">parlabels</span> <span class="o">=</span> <span class="n">neblabel</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span>
+                            <span class="c">#print &quot;TTM DEBUG: parlabels: &quot;,parlabels</span>
+                            <span class="c">#print &quot;TTM DEBUG: parsplit: &quot;,parsplit</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">parlabels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">parsplit</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">parlabels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">parsplit</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">neblabel</span> <span class="ow">in</span> <span class="n">parsplit</span><span class="p">:</span> <span class="c">#image static</span>
+                                    <span class="n">okay</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="k">if</span> <span class="n">okay</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_lines</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.process_images"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.process_images">[docs]</a>    <span class="k">def</span> <span class="nf">process_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">,</span> <span class="n">n_images</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;replace &lt;img-n&gt; with the equivalent number of </span>
+<span class="sd">           lines based on the number of images found in the</span>
+<span class="sd">           input_options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="n">new_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_images</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">processing_lines</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">processing_lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;&lt;img-n&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_images</span><span class="p">):</span>
+                    <span class="n">n_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;img-n&gt;&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="s">&#39;ingredient&#39;</span> <span class="ow">in</span> <span class="n">n_line</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s">&#39;&lt;&#39;</span> <span class="ow">in</span> <span class="n">n_line</span><span class="p">:</span> 
+                        <span class="n">keyword</span> <span class="o">=</span> <span class="n">n_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;name: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">keyword</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_line</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                 <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_lines</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.process_defects"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.process_defects">[docs]</a>    <span class="k">def</span> <span class="nf">process_defects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">,</span> <span class="n">n_defects</span><span class="p">,</span> <span class="n">d_defects</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;replace &lt;N&gt; with the equivalent number of lines</span>
+<span class="sd">           based on the number of defects given in the</span>
+<span class="sd">           input options</span>
+
+<span class="sd">           Args:</span>
+<span class="sd">            processing_lines &lt;list of str&gt;: recipe lines to proceess</span>
+<span class="sd">            n_defects &lt;int&gt;: number of defected systems</span>
+<span class="sd">            d_defects &lt;dict&gt;: dictionary of defects, including labels and </span>
+<span class="sd">                                positions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="c">#import inspect</span>
+        <span class="c">#print &#39;GRJ DEBUG: %s.%s&#39; % (self.__class__.__name__, inspect.stack()[0][3])</span>
+        <span class="c">#print d_defects</span>
+
+        <span class="c">#print &#39;GRJ DEBUG: parse_defects() working_directory =&#39;, self.keywords[&#39;working_directory&#39;]</span>
+        <span class="n">new_lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_defects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">processing_lines</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">processing_lines</span><span class="p">:</span>
+            <span class="c">#print &#39;GRJ DEBUG: line =&#39;, line</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s">&#39;&lt;n&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s">&#39;&lt;q&gt;&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">defect_key</span> <span class="ow">in</span> <span class="n">d_defects</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="c">#print &#39;GRJ DEBUG: defect_key =&#39;, defect_key</span>
+                    <span class="c">#defect_label = defect_key.split(&#39;_&#39;)[1] #defect_1, etc.</span>
+                    <span class="n">def_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;n&gt;&quot;</span><span class="p">,</span> <span class="n">defect_key</span><span class="p">)</span>
+
+                    <span class="n">charge_list</span> <span class="o">=</span> <span class="n">d_defects</span><span class="p">[</span><span class="n">defect_key</span><span class="p">][</span><span class="s">&#39;charge&#39;</span><span class="p">]</span>
+                    <span class="c">#print &#39;GRJ DEBUG: charge_list =&#39;, charge_list</span>
+                    <span class="c">#print &#39;GRJ DEBUG: def_line before charges:&#39;, def_line</span>
+                    <span class="k">for</span> <span class="n">charge</span> <span class="ow">in</span> <span class="n">charge_list</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">charge</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">clabel</span> <span class="o">=</span> <span class="s">&#39;q=n&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">charge</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">clabel</span> <span class="o">=</span> <span class="s">&#39;q=p&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">charge</span><span class="p">)</span>
+                        <span class="c">#print &#39;GRJ DEBUG: clabel =&#39;, clabel</span>
+                        <span class="n">new_def_line</span> <span class="o">=</span> <span class="n">def_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;q&gt;&#39;</span><span class="p">,</span> <span class="n">clabel</span><span class="p">)</span>
+                        <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_def_line</span><span class="p">)</span>
+                        <span class="c">#new_lines.append(def_line.replace(&#39;&lt;q&gt;&#39;, clabel))</span>
+
+                        <span class="k">if</span> <span class="s">&#39;ingredient&#39;</span> <span class="ow">in</span> <span class="n">def_line</span><span class="p">:</span>
+                            <span class="n">keyword</span> <span class="o">=</span> <span class="n">new_def_line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;defect_label: </span><span class="si">%s</span><span class="s">, charge: </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">defect_key</span><span class="p">,</span> <span class="n">charge</span><span class="p">)</span>
+                            <span class="c">#print &#39;GRJ DEBUG: def_line, keyword, charge&#39;, new_def_line, keyword, charge</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_lines</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.process_phononlines"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.process_phononlines">[docs]</a>    <span class="k">def</span> <span class="nf">process_phononlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;add phonon information to the metadata. Does not change line info.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">processing_lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;ingredient&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="s">&#39;phonon_&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">nameval</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">[</span><span class="n">dataline</span><span class="p">,</span><span class="n">dataval</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">search_data</span><span class="p">(</span><span class="n">nameval</span><span class="p">)</span>
+                <span class="n">okay</span><span class="o">=</span><span class="mi">0</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dataval</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">datapcs</span> <span class="o">=</span> <span class="n">dataval</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">datapc</span> <span class="ow">in</span> <span class="n">datapcs</span><span class="p">:</span>
+                        <span class="n">dlabel</span> <span class="o">=</span> <span class="n">datapc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="n">dval</span> <span class="o">=</span> <span class="n">datapc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">dlabel</span> <span class="o">==</span> <span class="s">&#39;neblabel&#39;</span> <span class="ow">or</span> <span class="n">dlabel</span> <span class="o">==</span> <span class="s">&#39;defect_label&#39;</span><span class="p">:</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;phononlabel: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">dval</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">nameval</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                            <span class="n">okay</span><span class="o">=</span><span class="mi">1</span>
+                            <span class="k">break</span>
+                <span class="k">if</span> <span class="n">okay</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;perfect&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;phononlabel: perfect&#39;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">nameval</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="n">okay</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;phononlabel: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nameval</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">nameval</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="n">okay</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">return</span>
+</div>
+<div class="viewcode-block" id="RecipeTemplateParser.make_metadata_entries"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.make_metadata_entries">[docs]</a>    <span class="k">def</span> <span class="nf">make_metadata_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processing_lines</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add metadata entry for all ingredients. </span>
+<span class="sd">            Does not change line information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">processing_lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;ingredient&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">nameval</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="s">&#39;name: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">nameval</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metafile</span><span class="o">.</span><span class="n">write_data</span><span class="p">(</span><span class="n">nameval</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> </div>
+<div class="viewcode-block" id="RecipeTemplateParser.get_unique_ingredients"><a class="viewcode-back" href="../../../MAST.parsers.recipetemplateparser.html#MAST.parsers.recipetemplateparser.RecipeTemplateParser.get_unique_ingredients">[docs]</a>    <span class="k">def</span> <span class="nf">get_unique_ingredients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;fetches the ingredients names&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">MASTError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&quot;This function is obsolete.&quot;</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient_list</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">MAST 20131216.canoe documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, CMG.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
