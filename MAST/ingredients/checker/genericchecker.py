@@ -23,7 +23,7 @@ class GenericChecker(BaseChecker):
             mast_input_delimiter =
             The default is mast_input_delimiter None
         The generic program should be run as:
-            <mast_exec value> input.txt,
+            <mast_exec value>
             for example, "python myscript.py input.txt"
         The generic starting signal should be given by the presence of a file:
             mast_started_file <filename>
