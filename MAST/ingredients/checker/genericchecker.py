@@ -25,10 +25,12 @@ class GenericChecker(BaseChecker):
         The generic program should be run as:
             <mast_exec value> input.txt,
             for example, "python myscript.py input.txt"
+        The generic starting signal should be given by the presence of a file:
+            mast_started_file <filename>
         The generic completion signal should be given in the ingredient
         subsection in the $ingredients section of the input file as:
-            mast_check_file <filename>
-            mast_check_search <string to search for, for completion>
+            mast_complete_file <filename>
+            mast_complete_search <string to search for, for completion>
                               OR, use the value None in order to check
                               just the existence of the file.
                               Defaults to None.
@@ -42,15 +44,15 @@ class GenericChecker(BaseChecker):
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
     def is_complete(self):
-        """Check for the existence of mast_check_file (default), or
-            for a certain string, given by mast_check_search"""
-        if not 'mast_check_file' in self.keywords['program_keys'].keys():
-            raise MASTError(self.__class__.__name__, "No check file indicated by mast_check_file keyword for %s. Cannot determine whether run is complete." % self.keywords['name'])
+        """Check for the existence of mast_complete_file (default), or
+            for a certain string, given by mast_complete_search"""
+        if not 'mast_complete_file' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__, "No completion file indicated by mast_complete_file keyword for %s. Cannot determine whether run is complete." % self.keywords['name'])
             return False
-        checkfile = os.path.join(self.keywords['name'],self.keywords['program_keys']['mast_check_file'])
+        checkfile = os.path.join(self.keywords['name'],self.keywords['program_keys']['mast_complete_file'])
         searchstr = None
-        if 'mast_check_search' in self.keywords['program_keys'].keys():
-            searchstr = self.keywords['program_keys']['mast_check_search']
+        if 'mast_complete_search' in self.keywords['program_keys'].keys():
+            searchstr = self.keywords['program_keys']['mast_complete_search']
         if searchstr == "None":
             searchstr = None
         if os.path.isfile(checkfile):
@@ -67,16 +69,12 @@ class GenericChecker(BaseChecker):
             return False
 
     def is_ready_to_run(self):
-        """Check if PHON is ready to run."""
+        """Generic program is ready to run if the input.txt file
+            has been written.
+        """
         dirname = self.keywords['name']
         notready=0
-        if not(os.path.isfile(dirname + "/FORCES")):
-            notready = notready + 1
-        if not(os.path.isfile(dirname + "/POSCAR")):
-            notready = notready + 1
-        if not(os.path.isfile(dirname + "/INPHON")):
-            notready = notready + 1
-        if not(os.path.isfile(dirname + "/submit.sh")):
+        if not(os.path.isfile(dirname + "/input.txt")):
             notready = notready + 1
         if notready > 0:
             return False
@@ -109,176 +107,57 @@ class GenericChecker(BaseChecker):
 
 
 
-    def _phon_inphon_get_non_mast_keywords(self):
-        """Sort out the non-PHON keywords and make a dictionary."""
-        inphon_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
-                        'ingredients','programkeys','phon_allowed_keywords.py')
-        allowed_list = self._phon_inphon_get_allowed_keywords(allowedpath)
+    def _input_get_non_mast_keywords(self):
+        """Sort out the non-mast keywords and make a dictionary."""
+        input_dict=dict()
+        #allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
+        #                'ingredients','programkeys','phon_allowed_keywords.py')
+        #allowed_list = self._phon_inphon_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
                 keytry = key.upper()
-                if not (keytry in allowed_list):
-                    self.logger.warning("Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath))
-                else:
-                    if type(value)==str and value.isalpha():
-                        inphon_dict[keytry]=value.capitalize() #First letter cap
-                    else:
-                        inphon_dict[keytry]=value
-        return inphon_dict
+                #if not (keytry in allowed_list):
+                #    self.logger.warning("Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath))
+                #else:
+                input_dict[keytry]=value
+        return input_dict
 
-    def _phon_inphon_get_allowed_keywords(self, allowedpath):
-        """Get allowed PHON keywords.
-            Args:
-                allowedpath <str>: file path for allowed PHON keywords
+    def _input_setup(self):
+        """Set up the input.txt file. Note that this is not the recipe
+            input file, it is the ingredient input file.
         """
-        allowed = MASTFile(allowedpath)
-        allowed_list=list()
-        for entry in allowed.data:
-            allowed_list.append(entry.strip())
-        return allowed_list
-
-    def _phon_inphon_setup(self):
-        """Set up the INPHON file."""
         name=self.keywords['name']
         myd = dict()
-        myd = self._phon_inphon_get_non_mast_keywords()
-        my_inphon = MASTFile()
+        myd = self._input_get_non_mast_keywords()
+        my_input = MASTFile()
+        if not 'mast_delimiter' in self.keywords['program_keys'].keys():
+            delim = ""
+        else:
+            delim = self.keywords['program_keys']['mast_delimiter']
         for key, value in myd.iteritems():
-            my_inphon.data.append(str(key) + "=" + str(value).upper() + "\n")
-        if not ("NTYPES" in myd.keys()) and not ("MASS" in myd.keys()):
-            [nline,massline] = self._phon_inphon_get_masses()
-            my_inphon.data.append(nline + "\n")
-            my_inphon.data.append(massline + "\n")
-        my_inphon.to_file(name + "/INPHON")
+            my_input.data.append(str(key) + delim + str(value).upper() + "\n")
+        my_input.to_file(name + "/input.txt")
         return 
 
-    def _phon_inphon_get_masses(self):
-        """Get the ntypes and masses line for INPHON.
-            Returns:
-                nline, massline
-                nline <str>: NYTPES = <number of atomic types in POSCAR>
-                massline <str>: MASS = <mass1> <mass2> ...
-        """
-        name=self.keywords['name']
-        if os.path.isfile(name + "/POSCAR_prePHON"):
-            mypos = Poscar.from_file(name + "/POSCAR_prePHON")
-        else: #not yet modified to strip out the species line.
-            mypos = Poscar.from_file(name + "/POSCAR")
-        sitesym = mypos.site_symbols
-        nline="NTYPES=" + str(len(sitesym))
-        massline="MASS="
-        for sym in sitesym:
-            el = pymatgen.core.periodic_table.Element(sym)
-            massline = massline + str(float(el.atomic_mass)) + " "
-        return [nline, massline]
-
-    def _phon_forces_setup(self):
-        """Set up the FORCES file. This is like the DYNMAT but with the mass
-            line stripped out and no direction indicators. Also, a block must
-            be present for every atom, with a displacement, even if all entries
-            are zero (e.g. fake block for selective dynamics). First line contains
-            only the number of total displacements.
-        """
-        self._replace_my_displacements()
-        self._nosd_my_dynmat()
-        name=self.keywords['name']
-        if not os.path.isfile(name + "/DYNMAT_mod_2"):
-            raise MASTError("checker/phon_checker", "No DYNMAT_mod_2 found in %s." % name)
-        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
-        mydyn=myvc.read_my_dynamical_matrix_file(name, "DYNMAT_mod_2")
-        myvc.write_my_dynmat_without_disp_or_mass(mydyn, name, "FORCES")
-
-    def _nosd_my_dynmat(self):
-        """Creates fake blocks in DYNMAT for filling back in the atoms and 
-            directions skipped through selective dynamics.
-        """
-        name=self.keywords['name']
-        if not os.path.isfile(name + "/DYNMAT_mod_1"):
-            raise MASTError("checker/phon_checker", "No DYNMAT_mod_1 found in %s." % name)
-        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
-        myforces=myvc.read_my_dynamical_matrix_file(name,"DYNMAT_mod_1")
-        numatoms = myforces['numatoms']
-        myforces['numdisp'] = numatoms * 3 #full set of all blocks
-        for atom in range(1, numatoms+1):
-            if not atom in myforces['atoms'].keys():
-                myforces['atoms'][atom]=dict()
-            for dispct in range(1, 4):
-                if not dispct in myforces['atoms'][atom].keys():
-                    myforces['atoms'][atom][dispct]=dict()
-                    if dispct == 1:
-                        displine = "0.0001 0 0"
-                    elif dispct == 2:
-                        displine = "0 0.0001 0"
-                    else:
-                        displine = "0 0 0.0001"
-                    myforces['atoms'][atom][dispct]['displine']=displine
-                    myforces['atoms'][atom][dispct]['dynmat']=list()
-                    for act in range(0, numatoms):
-                        myforces['atoms'][atom][dispct]['dynmat'].append("0.000 0.000 0.000\n")
-        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
-
-        myvc.write_my_dynamical_matrix_file(myforces, name, "DYNMAT_mod_2")
-
-    def _replace_my_displacements(self):
-        """
-            In VASP, 0.01 0 0 in DYNMAT from phonons is 1/Angstroms in the 
-            x-direction (XDATCAR shows that it makes fractional coord 
-            displacements for all 3 lattice vectors in a non-cubic system to get 
-            this strictly-x-direction) 
-            In PHON, 0.01 0 0 means 0.01 multiplied by lattice vector a.
-            Back out the fractional displacements used by VASP from the XDATCAR, 
-            match them up, and use them.
-            Konfig =1 is the un-displaced cell.
-            Now for NFREE=2,
-            there are two Konfigs for each displacment; the first is positive
-            POTIM in the x-direction (for example, POTIM = 0.01), then negative
-            POTIM in the x-direction, then y, then z.
-            So one unfrozen atom has seven Konfigs.
-            DYNMAT, however, reports the AVERAGE force from each Konfig pair.
-            So we only want Konfigs 2, 4, and 6, corresponding to POTIM 0 0, 
-            0 POTIM 0, and 0 0 POTIM
-        """
-        name=self.keywords['name']
-        if not os.path.isfile(name + "/XDATCAR"):
-            raise MASTError("checker/phon_checker", "No XDATCAR found in %s." % name)
-        myvc = VaspChecker(name=self.keywords['name'],program_keys = self.keywords['program_keys'], structure = self.keywords['structure'])
-        myxdat=myvc.read_my_displacement_file(name)
-        if not os.path.isfile(name + "/DYNMAT"):
-            raise MASTError("checker/phon_checker", "No DYNMAT found in %s." % name)
-        myforces=myvc.read_my_dynamical_matrix_file(name)
-        atomlist = myforces['atoms'].keys()
-        atomlist.sort()
-        #first disp needs kfg 2
-        #second disp needs kfg 4
-        #third disp needs kfg 6...
-        dispct=0
-        for atom in atomlist:
-            displist = myforces['atoms'][atom].keys()
-            displist.sort()
-            for disp in displist:
-                dispct = dispct + 1
-                kfgidx = dispct * 2
-                atomline = myxdat['configs'][kfgidx][atom-1] #indexing of atoms starts at config list entry 0 for atom 1
-                baseline = myxdat['configs'][1][atom-1]
-                atomcoords = np.array(atomline.strip().split(), float)
-                basecoords = np.array(baseline.strip().split(), float)
-                dispcoords = atomcoords - basecoords
-                displine = str(dispcoords[0]) + " " + str(dispcoords[1]) + " " + str(dispcoords[2])
-                myforces['atoms'][atom][disp]['displine'] = displine
-        myvc.write_my_dynamical_matrix_file(myforces, name, "DYNMAT_mod_1")
-
     def set_up_program_input(self):
-        self._phon_poscar_setup()
-        self._phon_inphon_setup()
-        self._phon_forces_setup()
+        """For the generic program, MAST will only set up the input.txt
+            file. All other necessary files must be previously set up and
+            located in the input.txt file, for example:
+                 StartingFile = ~/structurebank/startingstructure.xyz 
+            in input.txt. This file will not be created by MAST.
+        """
+        self._input_setup()
         return
     def is_started(self):
         """See if the ingredient has been started on
-            the queue.
+            the queue. For the generic program, a signal file must
+            be specified in the ingredients keywords as mast_started_file
         """
-        if os.path.isfile(os.path.join(self.keywords['name'],'QPOINTS')):
+        if not 'mast_started_file' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__, "No file indicated by mast_started_file keyword for %s. Cannot determine whether run has started." % self.keywords['name'])
+            return False
+        checkfile = os.path.join(self.keywords['name'],self.keywords['program_keys']['mast_started_file'])
+        if os.path.isfile(checkfile):
             return True
         else:
             return False
-        return
