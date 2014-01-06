@@ -21,7 +21,7 @@ class GenericChecker(BaseChecker):
             keyword <delimiter> value
         The delimiter should be set in mast_input_delimiter:
             mast_input_delimiter =
-            The default is mast_input_delimiter None
+            The default is mast_input_delimiter None, which corresponds to a space.
         The generic program should be run as:
             <mast_exec value>
             for example, "python myscript.py input.txt"
@@ -115,7 +115,7 @@ class GenericChecker(BaseChecker):
         #allowed_list = self._phon_inphon_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
-                input_dict[keytry]=value
+                input_dict[key]=value
         return input_dict
 
     def _input_setup(self):
@@ -127,11 +127,13 @@ class GenericChecker(BaseChecker):
         myd = self._input_get_non_mast_keywords()
         my_input = MASTFile()
         if not 'mast_delimiter' in self.keywords['program_keys'].keys():
-            delim = ""
+            delim = " "
         else:
             delim = self.keywords['program_keys']['mast_delimiter']
+            if delim == "None":
+                delim = " "
         for key, value in myd.iteritems():
-            my_input.data.append(str(key) + delim + str(value).upper() + "\n")
+            my_input.data.append(str(key) + delim + str(value) + "\n")
         my_input.to_file(name + "/input.txt")
         return 
 

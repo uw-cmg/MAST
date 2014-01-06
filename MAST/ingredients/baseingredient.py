@@ -73,8 +73,8 @@ class BaseIngredient(MASTObj):
             self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
             allowed_keys={'name','program_keys','structure'}
-            self.checker = GenericChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
-            self.errhandler = GenericError(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.checker = GenericChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
     def write_directory(self):
         try:
