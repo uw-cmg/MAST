@@ -115,10 +115,6 @@ class GenericChecker(BaseChecker):
         #allowed_list = self._phon_inphon_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
-                keytry = key.upper()
-                #if not (keytry in allowed_list):
-                #    self.logger.warning("Ignoring program key %s for INPHON. To allow this keyword, add it to %s" % (keytry, allowedpath))
-                #else:
                 input_dict[keytry]=value
         return input_dict
 
