@@ -11,10 +11,12 @@ from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
+from MAST.ingredients.checker import GenericChecker
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
 from MAST.ingredients.errorhandler import VaspNEBError
+from MAST.ingredients.errorhandler import GenericError
 from MAST.utility import loggerutils
 
 class BaseIngredient(MASTObj):
@@ -71,8 +73,8 @@ class BaseIngredient(MASTObj):
             self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
             allowed_keys={'name','program_keys','structure'}
-            self.checker = BaseChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
-            self.errhandler = BaseError(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.checker = GenericChecker(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(allowed_keys, name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
     def write_directory(self):
         try:
