@@ -40,25 +40,27 @@ begin generictest
 # Amy's GAv14 is currently treated as closed-source
 mast_program                 None
 mast_exec                    python //home/tam/test_amy_GA/GAv14.py input.txt
-mast_complete_file           generictest/Bests.xyz
-mast_complete_search         None
-mast_started_file            generictest.txt
+mast_complete_file           GAoutput.txt
+mast_complete_search         End of Execution
+mast_started_file            GAoutput.txt
+mast_copy_files //home/tam/tammast/test/gatest/SiC.tersoff //home/tam/tammast/test/gatest/cBulk.xyz
 mast_delimiter               =
 type  Defect
 atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
-filename   generictest
+filename   GAoutput
 nclust   5
 maxgen   5
 supercell   (3,3,3)
-SolidFile   //home/tam/test_amy_GA/cBulk.xyz
+SolidFile   cBulk.xyz
 SolidCell   [13.092,13.092,13.092]
 convergence_scheme   Max-Gen
 MUTPB  0.1
 mutation_options  ['Lattice_Alteration_small', 'Lattice_Alteration_Group', 'Rotation_geo']
 CALC_Method   LAMMPS
 pair_style  tersoff
-pot_file  //home/tam/test_amy_GA/SiC.tersoff
+pot_file    SiC.tersoff
 LammpsMin   1e-25 1e-25 5000 10000
+keep_Lammps_files True
 Lmin_style   cg
 genealogy   True
 allenergyfile  True

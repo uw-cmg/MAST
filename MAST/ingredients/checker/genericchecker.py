@@ -14,6 +14,7 @@ import logging
 import pymatgen
 import numpy as np
 import time
+import shutil
 class GenericChecker(BaseChecker):
     """Generic checker functions
         The generic program should accept an input file named "input.txt"
@@ -70,16 +71,38 @@ class GenericChecker(BaseChecker):
 
     def is_ready_to_run(self):
         """Generic program is ready to run if the input.txt file
-            has been written.
+            has been written, and if any files in 
+            mast_copy_files are present.
+            The mast_copy_files keyword must be a space-delimited list of full file paths.
         """
         dirname = self.keywords['name']
         notready=0
         if not(os.path.isfile(dirname + "/input.txt")):
             notready = notready + 1
+        if 'mast_copy_files' in self.keywords['program_keys'].keys():
+            myfiles = self.keywords['program_keys']['mast_copy_files'].split()
+            for myfile in myfiles:
+                fname = os.path.basename(myfile)
+                if not os.path.isfile(os.path.join(dirname, fname)):
+                    notready = notready + 1
         if notready > 0:
             return False
         else:
             return True
+
+    def _copy_over_any_files(self):
+        """
+            The mast_copy_files ingredient keyword must be a 
+            space-delimited list of full file paths:
+            mast_copy_files //home/user/f1 //home/user/f2
+        """
+        dirname = self.keywords['name']
+        if 'mast_copy_files' in self.keywords['program_keys'].keys():
+            myfiles = self.keywords['program_keys']['mast_copy_files'].split()
+            for myfile in myfiles:
+                fname = os.path.basename(myfile)
+                if not os.path.isfile(os.path.join(dirname, fname)):
+                    shutil.copy(myfile, os.path.join(dirname, fname))
 
     def _phon_poscar_setup(self):
         """Set up a PHON POSCAR file. Strip out the "elements" line (that is,
@@ -135,6 +158,7 @@ class GenericChecker(BaseChecker):
         for key, value in myd.iteritems():
             my_input.data.append(str(key) + delim + str(value) + "\n")
         my_input.to_file(name + "/input.txt")
+        self._copy_over_any_files()
         return 
 
     def set_up_program_input(self):
