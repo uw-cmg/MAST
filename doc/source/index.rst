@@ -15,6 +15,7 @@ Welcome to the MAST documentation site!
     2_0_ingredients
     3_0_inputfile
     4_0_recipe
+    9_0_examples
     5_0_runningmast
     6_0_tools
     7_0_externalpackages

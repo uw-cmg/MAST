@@ -173,7 +173,7 @@ lwave False</p>
 <div class="section" id="special-mast-ingredient-keywords">
 <h3>Special MAST ingredient keywords:<a class="headerlink" href="#special-mast-ingredient-keywords" title="Permalink to this headline">¶</a></h3>
 <p>Some of these special MAST keywords are only appropriate for VASP calculations.</p>
-<p><strong>mast_program</strong>: Specify which program to run (.vasp., .vasp_neb., or .phon. are currently supported)</p>
+<p><strong>mast_program</strong>: Specify which program to run (.vasp., .vasp_neb., .phon., or .None. for a generic program, are currently supported)</p>
 <div class="highlight-python"><pre>mast_program vasp</pre>
 </div>
 <ul class="simple">
@@ -211,7 +211,7 @@ lwave False</p>
 <ul class="simple">
 <li>For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images:</li>
 </ul>
-<p>mast_coordinates im1poscar,im2poscar,im3poscar</p>
+<p>mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3</p>
 <ul class="simple">
 <li>The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt>); once the <tt class="docutils literal"><span class="pre">input.inp</span></tt> file is created in the recipe directory, it will store a full path back to these poscar-type files.</li>
 <li>This keyword cannot be used with programs other than VASP, cartesian coordinates, and special ingredients like inducedefect-type ingredients, whose write or run methods are different.</li>
@@ -226,6 +226,24 @@ lwave False</p>
 <li>The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.</li>
 <li>If set to False, MAST will attempt to find errors, then write them into a <tt class="docutils literal"><span class="pre">MAST_ERROR</span></tt> file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the <tt class="docutils literal"><span class="pre">MAST_ERROR</span></tt> file is manually deleted by the user.</li>
 </ul>
+<p>The following keywords are used only for generic programs (not VASP, PHON, or any other named programs). The <tt class="docutils literal"><span class="pre">mast_exec</span></tt> keyword must be self-contained, and can optionally take in an input file named <tt class="docutils literal"><span class="pre">input.txt</span></tt>:</p>
+<div class="highlight-python"><pre>mast_exec python myscript.py input.txt</pre>
+</div>
+<p><strong>mast_complete_file</strong>: A file name in the ingredient directory which can be used to signal that the ingredient is complete. This keyword is used in conjunction with <tt class="docutils literal"><span class="pre">mast_complete_search</span></tt>.</p>
+<p><strong>mast_complete_search</strong>: A string for which to search in the <tt class="docutils literal"><span class="pre">mast_complete_file</span></tt> file. Use None to indicate that the presence of the file, alone, signifies that the ingredient is complete.</p>
+<div class="highlight-python"><pre>mast_complete_file       GAoutput.txt
+mast_complete_search     End of Execution</pre>
+</div>
+<p><strong>mast_started_file</strong>: A file name in the ingredient directory whose presence signals that the ingredient run has been started.</p>
+<div class="highlight-python"><pre>mast_started_file        GAoutput.txt</pre>
+</div>
+<p><strong>mast_copy_files</strong>: Absolute paths to files which should be copied into the ingredient directory prior to running the ingredient.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mast_copy_files</span> <span class="o">//</span><span class="n">home</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">MAST</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">gatest</span><span class="o">/</span><span class="n">SiC</span><span class="o">.</span><span class="n">tersoff</span> <span class="o">//</span><span class="n">home</span><span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">MAST</span><span class="o">/</span><span class="n">test</span><span class="o">/</span><span class="n">gatest</span><span class="o">/</span><span class="n">cBulk</span><span class="o">.</span><span class="n">xyz</span>
+</pre></div>
+</div>
+<p><strong>mast_delimiter</strong>: A character to use as a delimiter when building an input file. The input file will be named &#8220;input.txt&#8221;.</p>
+<div class="highlight-python"><pre>mast_delimiter               =</pre>
+</div>
 <p>The following queue-submission keywords are platform dependent and are used along to create the submission script:</p>
 <p><strong>mast_exec</strong>: The command used in the submission script to execute the program. Note that this is a specific command rather than the .class. of program, given in <tt class="docutils literal"><span class="pre">mast_program</span></tt>, and it should include any MPI commands.</p>
 <div class="highlight-python"><pre>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2</pre>

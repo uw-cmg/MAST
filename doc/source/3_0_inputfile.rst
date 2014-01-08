@@ -167,7 +167,7 @@ Special MAST ingredient keywords:
 
 Some of these special MAST keywords are only appropriate for VASP calculations.
 
-**mast_program**: Specify which program to run (.vasp., .vasp_neb., or .phon. are currently supported) ::
+**mast_program**: Specify which program to run (.vasp., .vasp_neb., .phon., or .None. for a generic program, are currently supported) ::
 
     mast_program vasp
 
@@ -209,7 +209,7 @@ mast_pp_setup La=La Mn=Mn_pv O=O_s
 
 *  For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images::
     
-mast_coordinates im1poscar,im2poscar,im3poscar
+mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
 
 *  The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run ``mast -i test.inp``); once the ``input.inp`` file is created in the recipe directory, it will store a full path back to these poscar-type files.
 
@@ -229,6 +229,29 @@ This example will stretch the lattice along lattice vector a by 1%, stretch the 
 
 *  The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.
 *  If set to False, MAST will attempt to find errors, then write them into a ``MAST_ERROR`` file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the ``MAST_ERROR`` file is manually deleted by the user.
+
+The following keywords are used only for generic programs (not VASP, PHON, or any other named programs). The ``mast_exec`` keyword must be self-contained, and can optionally take in an input file named ``input.txt``::
+
+    mast_exec python myscript.py input.txt
+
+**mast_complete_file**: A file name in the ingredient directory which can be used to signal that the ingredient is complete. This keyword is used in conjunction with ``mast_complete_search``.
+
+**mast_complete_search**: A string for which to search in the ``mast_complete_file`` file. Use None to indicate that the presence of the file, alone, signifies that the ingredient is complete. ::
+
+    mast_complete_file       GAoutput.txt
+    mast_complete_search     End of Execution
+
+**mast_started_file**: A file name in the ingredient directory whose presence signals that the ingredient run has been started. ::
+
+    mast_started_file        GAoutput.txt
+
+**mast_copy_files**: Absolute paths to files which should be copied into the ingredient directory prior to running the ingredient. ::
+
+    mast_copy_files //home/user/MAST/test/gatest/SiC.tersoff //home/user/MAST/test/gatest/cBulk.xyz
+
+**mast_delimiter**: A character to use as a delimiter when building an input file. The input file will be named "input.txt". ::
+
+    mast_delimiter               =
 
 The following queue-submission keywords are platform dependent and are used along to create the submission script:
 

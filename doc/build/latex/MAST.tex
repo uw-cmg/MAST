@@ -14,7 +14,7 @@
 
 
 \title{MAST Documentation}
-\date{December 23, 2013}
+\date{January 08, 2014}
 \release{20131216.canoe}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
@@ -1111,7 +1111,7 @@ Any keyword that starts with \code{mast\_} is considered a special keyword utili
 \label{3_0_inputfile:special-mast-ingredient-keywords}
 Some of these special MAST keywords are only appropriate for VASP calculations.
 
-\textbf{mast\_program}: Specify which program to run (.vasp., .vasp\_neb., or .phon. are currently supported)
+\textbf{mast\_program}: Specify which program to run (.vasp., .vasp\_neb., .phon., or .None. for a generic program, are currently supported)
 
 \begin{Verbatim}[commandchars=\\\{\}]
 mast\_program vasp
@@ -1182,7 +1182,7 @@ For an NEB calculation, use a comma-delimited list of poscar files corresponding
 
 \end{itemize}
 
-mast\_coordinates im1poscar,im2poscar,im3poscar
+mast\_coordinates POSCAR\_im1,POSCAR\_im2,POSCAR\_im3
 \begin{itemize}
 \item {} 
 The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run \code{mast -i test.inp}); once the \code{input.inp} file is created in the recipe directory, it will store a full path back to these poscar-type files.
@@ -1211,6 +1211,39 @@ The default is True, so if this keyword is set to True, or if this keyword is no
 If set to False, MAST will attempt to find errors, then write them into a \code{MAST\_ERROR} file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the \code{MAST\_ERROR} file is manually deleted by the user.
 
 \end{itemize}
+
+The following keywords are used only for generic programs (not VASP, PHON, or any other named programs). The \code{mast\_exec} keyword must be self-contained, and can optionally take in an input file named \code{input.txt}:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_exec python myscript.py input.txt
+\end{Verbatim}
+
+\textbf{mast\_complete\_file}: A file name in the ingredient directory which can be used to signal that the ingredient is complete. This keyword is used in conjunction with \code{mast\_complete\_search}.
+
+\textbf{mast\_complete\_search}: A string for which to search in the \code{mast\_complete\_file} file. Use None to indicate that the presence of the file, alone, signifies that the ingredient is complete.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_complete\_file       GAoutput.txt
+mast\_complete\_search     End of Execution
+\end{Verbatim}
+
+\textbf{mast\_started\_file}: A file name in the ingredient directory whose presence signals that the ingredient run has been started.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_started\_file        GAoutput.txt
+\end{Verbatim}
+
+\textbf{mast\_copy\_files}: Absolute paths to files which should be copied into the ingredient directory prior to running the ingredient.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{mast\PYGZus{}copy\PYGZus{}files} \PYG{o}{/}\PYG{o}{/}\PYG{n}{home}\PYG{o}{/}\PYG{n}{user}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{gatest}\PYG{o}{/}\PYG{n}{SiC}\PYG{o}{.}\PYG{n}{tersoff} \PYG{o}{/}\PYG{o}{/}\PYG{n}{home}\PYG{o}{/}\PYG{n}{user}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{gatest}\PYG{o}{/}\PYG{n}{cBulk}\PYG{o}{.}\PYG{n}{xyz}
+\end{Verbatim}
+
+\textbf{mast\_delimiter}: A character to use as a delimiter when building an input file. The input file will be named ``input.txt''.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_delimiter               =
+\end{Verbatim}
 
 The following queue-submission keywords are platform dependent and are used along to create the submission script:
 
@@ -2436,6 +2469,302 @@ neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to
     phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
         phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
 \PYGZob{}end\PYGZcb{}
+\end{Verbatim}
+
+
+\chapter{Examples}
+\label{9_0_examples::doc}\label{9_0_examples:examples}
+
+\section{Full example: defects, charges, NEB, phonons}
+\label{9_0_examples:full-example-defects-charges-neb-phonons}
+Recipe:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+Recipe OptimizeWorkflow
+perfect\_opt1 (lowmesh)
+    perfect\_opt2
+        perfect\_stat (static)
+        \PYGZob{}begin\PYGZcb{}
+        inducedefect\_\textless{}N\textgreater{} (inducedefect)
+            defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (lowmesh\_defect)
+                defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (defect\_relax)
+                    defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
+        \PYGZob{}end\PYGZcb{}
+\PYGZob{}begin\PYGZcb{}
+defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
+    phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
+        phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
+\PYGZob{}end\PYGZcb{}
+\PYGZob{}begin\PYGZcb{}
+defect\_\textless{}B\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}E\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb)
+    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (neb\_to\_neb)
+        neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
+            neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
+    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
+    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
+\PYGZob{}end\PYGZcb{}
+\PYGZob{}begin\PYGZcb{}
+neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
+    phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
+        phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
+\PYGZob{}end\PYGZcb{}
+\end{Verbatim}
+
+Input file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\# Small demo for NEB workflow
+\$mast
+system\_name PhononNebTest
+\$end
+
+\$structure
+coord\_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+\$end
+
+\$defects
+threshold 1e-4
+coord\_type fractional
+
+begin int1
+interstitial 0.25 0.25 0.25 X2
+phonon host 0.0 0.5 0.5 0.5
+charge=-3,-2
+end
+
+begin int2
+interstitial 0.25 0.25 0.75 X2
+phonon host 0.0 0.0 0.0 0.5
+phonon int 0.25 0.25 0.75 0.5
+charge=-2,-2
+end
+
+begin int3
+interstitial 0.75 0.25 0.25 X2
+phonon host 0.0 0.0 0.0 0.5
+phonon int 0.75 0.25 0.25 0.5
+charge=-3,-3
+end
+
+\$end
+
+\$ingredients
+begin ingredients\_global
+mast\_nodes         1
+mast\_multiplyencut 1.5
+mast\_ppn           1
+mast\_queue         default
+mast\_exec          //share/apps/vasp5.2\_cNEB
+mast\_kpoints       2x2x2 M
+mast\_xc            PBE
+isif 3
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast\_program   vasp
+mast\_write\_method            write\_singlerun
+mast\_ready\_method            ready\_singlerun
+mast\_run\_method              run\_singlerun
+mast\_complete\_method         complete\_singlerun
+mast\_update\_children\_method  give\_structure
+end
+
+begin inducedefect
+mast\_write\_method            no\_setup
+mast\_ready\_method            ready\_defect
+mast\_run\_method              run\_defect
+mast\_complete\_method         complete\_structure
+end
+
+begin lowmesh
+mast\_kpoints 1x1x1 G
+end
+
+begin lowmesh\_defect
+mast\_kpoints 1x1x1 G
+isif 2
+end
+
+begin defect\_relax
+isif 2
+end
+
+begin static
+ibrion -1
+nsw 0
+mast\_multiplyencut 1.25
+mast\_update\_children\_method give\_structure
+end
+
+begin static\_to\_neb
+ibrion -1
+nsw 0
+mast\_multiplyencut 1.25
+mast\_update\_children\_method give\_structure\_and\_energy\_to\_neb
+end
+
+begin phonon
+ibrion 5
+mast\_write\_method write\_phonon\_single
+mast\_update\_children\_method give\_phonon\_single\_forces\_and\_displacements
+end
+
+begin phononparse
+mast\_program phon
+lfree .True.
+temperature 1173
+nd 3
+qa 11
+qb 11
+qc 11
+lsuper .False.
+mast\_exec //home/tam/tammast/bin/phon\_henry
+end
+
+begin neb\_to\_neb
+mast\_kpoints 1x1x1 G
+mast\_program   vasp\_neb
+mast\_write\_method            write\_neb
+mast\_update\_children\_method  give\_neb\_structures\_to\_neb
+end
+
+begin neb\_to\_nebstat
+mast\_program   vasp\_neb
+mast\_write\_method            write\_neb
+mast\_update\_children\_method  give\_neb\_structures\_to\_neb
+end
+
+begin nebstat\_to\_phonon
+mast\_program   vasp
+mast\_write\_method            write\_neb\_subfolders
+mast\_ready\_method            ready\_neb\_subfolders
+mast\_run\_method              run\_neb\_subfolders
+mast\_complete\_method         complete\_neb\_subfolders
+mast\_update\_children\_method  give\_saddle\_structure
+end
+
+\$end
+
+\$neb
+begin int1-int2
+X2, 0.25 0.25 0.25, 0.25 0.25 0.75
+images 1
+phonon int 0.25 0.25 0.5 0.5
+phonon host 0.0 0.0 0.0 0.5
+end
+\$end
+
+\$recipe
+recipe\_file phonon\_test\_neb.txt
+\$end
+\end{Verbatim}
+
+
+\section{Small example: generic program (here, Genetic Algorithm)}
+\label{9_0_examples:small-example-generic-program-here-genetic-algorithm}
+Recipe file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+Recipe GenericTest
+generictest (generictest)
+\end{Verbatim}
+
+More lines could be added to the recipe, and more ingredient types (e.g. test1, test2, etc.), with minor modifications to the keywords given for each ingredient type.
+
+Input file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\$mast
+system\_name GATest
+\$end
+
+\$structure
+\#The structure actually does not make a difference for this
+\#example, as it is not passed into any structure file.
+coord\_type fractional
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+begin coordinates
+Al 0.0000000000 0.0000000000 0.0000000000
+end
+\$end
+
+\$ingredients
+begin ingredients\_global
+mast\_nodes         1
+mast\_multiplyencut 1.5
+mast\_ppn           1
+mast\_queue         default
+mast\_exec          //share/apps/vasp5.2\_cNEB
+end
+
+begin generictest
+\# need to add mastlib to python path to get lammps3.py
+\# Amy's GAv14 is currently treated as closed-source
+mast\_program                 None
+mast\_exec                    python //home/tam/test\_amy\_GA/GAv14.py input.txt
+mast\_complete\_file           GAoutput.txt
+mast\_complete\_search         End of Execution
+mast\_started\_file            GAoutput.txt
+mast\_copy\_files //home/tam/tammast/test/gatest/SiC.tersoff //home/tam/tammast/test/gatest/cBulk.xyz
+mast\_delimiter               =
+type  Defect
+atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
+filename   GAoutput
+nclust   5
+maxgen   5
+supercell   (3,3,3)
+SolidFile   cBulk.xyz
+SolidCell   [13.092,13.092,13.092]
+convergence\_scheme   Max-Gen
+MUTPB  0.1
+mutation\_options  ['Lattice\_Alteration\_small', 'Lattice\_Alteration\_Group', 'Rotation\_geo']
+CALC\_Method   LAMMPS
+pair\_style  tersoff
+pot\_file    SiC.tersoff
+LammpsMin   1e-25 1e-25 5000 10000
+keep\_Lammps\_files True
+Lmin\_style   cg
+genealogy   True
+allenergyfile  True
+BestIndsList   True
+mast\_write\_method            write\_singlerun
+mast\_ready\_method            ready\_singlerun
+mast\_run\_method              run\_singlerun
+mast\_complete\_method         complete\_singlerun
+mast\_update\_children\_method  give\_structure
+end
+\$end
+
+\$recipe
+recipe\_file generic\_test.txt
+\$end
 \end{Verbatim}
 
 
