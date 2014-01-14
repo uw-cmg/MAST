@@ -93,6 +93,7 @@ setfile.close()
 
 shutil.copy("%s/submit/platforms/mastmon_submit_%s.sh" % (mycwd,my_platform), "%s/MAST/CONTROL/mastmon_submit.sh" % myhome)
 
+shutil.copy("%s/submit/runmast.py" % mycwd, "%s/MAST/CONTROL/runmast.py" % myhome)
 #Print out environment variables
 print "==============================================="
 print "Add the following lines to your //home/user/.bashrc file"
