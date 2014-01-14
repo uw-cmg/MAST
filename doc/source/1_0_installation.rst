@@ -2,145 +2,17 @@
 Installation
 #############
 
-.. _installation-on-bardeen:
 
-************************
-Installation on bardeen
-************************
-
-========================
-1. Environment variables
-========================
-
-MAST is installed in ``//share/apps/MAST``.
-Go to ``//share/apps/MAST`` and run ::
-
-    python initialize.py
-
-This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
-
-Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
-
-Also add the following line::
-
-    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
-
-The environment variables should therefore be::
-   
-    export MAST_INSTALL_PATH=//share/apps/MAST
-    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
-    export MAST_SCRATCH=//home/username/MAST/SCRATCH
-    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-    export MAST_CONTROL=//home/username/MAST/CONTROL
-    export PYTHONPATH=$PYTHONPATH://share/apps/MAST
-    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
-    export PATH=$PATH://share/apps/MAST/bin
-    export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
-
-An explanation of each variable appears below.
-
-MAST_INSTALL_PATH: This variable should be set to the installation directory. ::
-
-    export MAST_INSTALL_PATH=//share/apps/MAST
-
-MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You may want to copy recipes from the ``$MAST_INSTALL_PATH/recipe_templates`` directory into this folder and modify them. ::
-    
-    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
-
-MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory. ::
-    
-    export MAST_SCRATCH=//home/username/MAST/SCRATCH
-
-MAST_ARCHIVE: This variable may be set to any directory. MAST will move completed recipes from ``$MAST_SCRATCH`` into this directory. ::
-    
-    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-
-MAST_CONTROL: This variable may be set to any directory. MAST monitor log files, MAST monitor error files, and other MAST monitor output will be written to this directory. ::
-    
-    export MAST_CONTROL=//home/username/MAST/CONTROL
-
-PYTHONPATH: If this environment variable already exists, the MAST installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables)::
-    
-    export PYTHONPATH=$PYTHONPATH://share/apps/MAST
-
-VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the :ref:`Materials Project's <http://materialsproject.org>`_ :ref:`pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
-    
-    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
-
-PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` directory, for example::
-    
-    export PATH=$PATH://share/apps/MAST/bin:PATH
-
-====================
-2. Python version
-====================
-
-Make sure that the correct version of python is defaulted to be used first. If you already use python for something else and this next line interferes with your other python calls (for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3), please see Tam. ::
-        
-    export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
-    
-This version of python has pymatgen, numpy, and scipy in the appropriate versions.
-    
-*  Type ``which python`` and you should get: ``/share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python``
-*  Type ``which mast`` and you should get: ``/share/apps/MAST/bin/mast``
-
-=====================
-3. Additional setup
-=====================
-#.  Log out of all bardeen terminals and log back in. (You may also run ``source ~/.bashrc``, but sometimes this doesn't quite set everything.)
-#.  (There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in $MAST_INSTALL_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of $MAST_INSTALL_PATH/submit/platforms and into $MAST_INSTALL_PATH/submit, omitting the platform name, and modify the new queue_commands.py, script_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)
-
-.. _test-on-bardeen:
-
-*********************************
-Test that MAST can run on bardeen
-*********************************
-#.  Make a test directory, like ``//home/username/MAST/test``
-#.  Copy the test input file to your test folder::
-
-        cp //share/apps/MAST/test/phononreorgtest/phonon_with_neb.inp //home/username/MAST/test/test.inp
-
-#.  Go to your test directory, ``cd //home/username/MAST/test``
-#.  Try to parse the input file, entering the following command as one line::
-
-        nice -n 19 mast -i test.inp 
-
-    *  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
-    *  The -i signals to MAST that it is processing an input file.
-#. Your ``//home/username/MAST/SCRATCH`` directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
-#. Go to that long recipe directory. (PhononNebTest...)
-
-    *  To see the input options:
-
-        *  ``cat input.inp`` (should be identical to test.inp since no looping was used)
-        
-            *  Note that you can use other viewing commands, not just .cat., but be careful not to edit any of these files.
-
-        *  ``cat archive_input_options.txt`` (should show Al instead of element X1)
-    *  To see information about the ingredient relationships MAST detected from the recipe template:
-
-        *  ``cat personal_recipe.txt``
-        *  ``cat archive_recipe_plan.txt``
-
-    *  To see ingredient statuses at a glance:
-
-        *  ``cat status.txt``
-
-#.  Run mast once: ``nice -n 19 mast``
-#.  You should see a `mastmon` job appear on morganshort.
-#.  MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
-#.  Now you should see ``perfect_opt1`` appear on the queue.
-#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
-#.  If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
-#.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
  
 *********************************
-Installation on another cluster
+Installation
 *********************************
 
 ===========================
-0. Pre-steps
+0. Pre-steps 
 ===========================
+Go directly to step 1 if you are on bardeen.
+
 *  If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
 
 *  Have the owner of //tmp/pip-build remove the directory if it exists (see :ref:`pip issue 729 <https://github.com/pypa/pip/issues/729>`_)::
@@ -152,15 +24,27 @@ Installation on another cluster
 1. Verify your Python version
 ================================
 Check your version of python: ``python --version``
+
 If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.
+Then, make sure that this version of python is defaulted to be used first. You may need to add a line similar to your user profile, such as ``//home/username/.bashrc``
+Then, log out and log back in. 
 
-*  On platforms with modules, it is probably something like ``module load python``, but get the correct version (``module avail`` to see available modules). Type ``which python`` to make sure you have the right version, or ``python --version``.
+For bardeen, the line you need to add is::
+    
+    export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
 
-*  DLX has python 2.6.6 normally. ``module load Python``, even though it is 2.7.3, has some difficulties installing pymatgen, possibly because of the way the module system works. Follow the ``install python`` directions instead.
+For platforms with the "module" system like stampede or DLX, add the line::
 
-*  On bardeen it is //share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64
+    module load python
+    module load Python
 
-If you do not have python 2.7.3, install it. 
+Then, log out and log back in.
+
+Type ``which python`` to make sure you have the right version, or ``python --version``.
+
+If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact the development team. ::
+        
+If you do not have or cannot find Python 2.7.3, then you must install it. 
 
 ---------------------
 Installing python
@@ -200,7 +84,7 @@ Example::
     [username@aci-service-2 ~]$ which easy_install
     //home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin/easy_install
     
-pip must be version 1.3 or later (pip --version)
+pip must be version 1.3 or later (``pip --version``)
 
 If either easy_install or pip is missing, install them as follows.
 
@@ -208,32 +92,39 @@ Get setuptools (easy_install)
 
     *  :ref:`setuptools <https://pypi.python.org/pypi/setuptools>`_
     *  ``wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py``
-    *  ``python ez_setup.py``
+    *  ``python ez_setup.py`` if you are using your own locally-installed python
+    *  ``python ez_setup.py --user`` if you are using a root-installed python
 
 Get pip
 
     *  :ref:`pip <https://pypi.python.org/pypi/pip>`_
     *  ``curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py``
-    *  ``python get-pip.py``
+    *  ``python get-pip.py`` if you are using your own locally-installed python
+    *  ``python get-pip.py --user`` if you are using a root-installed python
 
-easy_install and pip should now be located wherever your installed python is.
+easy_install and pip should now be located either wherever your installed python is, or in the ``$HOME/.local/bin`` directory
 Check their locations and the pip version again.
 
-=================================
-3. Verify numpy and scipy
-=================================
+=========================================
+3. Verify or install numpy and scipy
+=========================================
 Check if numpy and scipy available::
 
     python
     import numpy
     import scipy
 
-  
+If numpy and scipy are not available, we recommend that you go back to step 1 and install a local version of python which already includes numpy and scipy.
+
+Scipy is optional at this stage (used in the MAST defect finder).
+--------------------------------------------
+Install numpy (not recommended)
+--------------------------------------------  
 If numpy is not available, try pip installation::
 
     pip install --user numpy
 
-(Use the pip in the bin directory of the correct version of python)
+(If you are using a user-installed pip with a root-installed python, use the command ``$HOME/.local/bin/pip`` instead of ``pip``.)
 
 If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
 
@@ -252,10 +143,22 @@ If pip does not work, follow Quick install of numpy here. This will install Nump
 
     *  source $HOME/.bashrc
 
-==================================
-4. Install pymatgen and custodian
-==================================    
-Make sure you explicitly use the correct pip and easy_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy_install or other such paths, corresponding to the correct version of python
+============================================
+4. Verify or install pymatgen and custodian
+============================================   
+Check if pymatgen and custodian available::
+
+    python
+    import numpy
+    import scipy
+
+If pymatgen and custodian are not available, install them.
+
+--------------------------------
+Install pymatgen and custodian
+--------------------------------
+
+Make sure you explicitly use the correct pip and easy_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy_install or other such paths, corresponding to the correct version of python.
 
 Use the ``--user`` tag if you are not using the easy_install and pip from your own installation of python. Otherwise, you can omit this tag.
 
@@ -267,6 +170,11 @@ pip install pymatgen and custodian::
 
     nice -n 19 pip install --user pymatgen
     nice -n 19 pip install --user custodian
+
+If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system::
+
+    cd $HOME/.local/lib/python2.7/site-packages/setuptools-2.1-py2.7.egg
+    python ./easy_install.py --user https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
 
 If pip does not work, try making your own temp directory. ::
             
@@ -283,13 +191,12 @@ Remove any pip directory if it exists. ::
 ======================================
 5. Set up the pymatgen VASP_PSP_DIR
 ======================================
+On DLX and bardeen, skip to the NEXT NUMBERED STEP
 
 Locate the VASP pseudopotentials
 
 *  On bardeen, this is ``//share/apps/vasp_pseudopotentials``
 *  On DLX it is ``//home/adozier/VASP``
-
-    *  On DLX, SKIP TO THE NEXT NUMBERED STEP
     
 Run pymatgen's python setup tool. This tool should be located wherever pymatgen was installed, either ``~/.local/bin/potcar_setup.py`` if you installed it with ``--user``, or wherever python is, otherwise. ::
 
@@ -310,6 +217,9 @@ Rename the folders under ``//home/<username>/.local/vasp_pps``:
 *  Rename the PBE folder POT_GGA_PAW_PBE to correspond to mast_xc pbe
 *  Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91
 
+==============================================
+6. Add the VASP_PSP_DIR to your user profile
+==============================================
 Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR to this VASP directory.
 
 *  On bardeen, it should look something like::
@@ -328,42 +238,129 @@ Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR 
 *  Make sure you are getting to the right directory, which has POT_GGA_POW_PBE etc. folders inside it.
 
 ===============================
-6. Get MAST
+7. Get MAST
 ===============================
+Get the MAST tar.gz file from MaterialsHub.org and untar it::
 
-Get the MAST.tar.gz file from MaterialsHub.org and untar it::
-
-    nice -n 19 tar -xzvf MAST.tar.gz
+    nice -n 19 tar -xzvf mast_version.tar.gz
 
 
 (or run this command over interactive submission, which is better)
 
-Make the bin executables runnable. Supposing the uncompressed path was //home/username/MAST, then run the following command::
+======================================
+8. Set up the environment variables
+======================================
+Go to the MAST installation path, for example ``//home/username/mast_version``
 
-    chmod -R a+x //home/username/MAST/bin
+Run the command ::
 
-Modify the submission details for your platform::
+    python initialize.py
 
-    cd //home/username/MAST/submit
-    cp platforms/script_commands_<yourplatform>.py script_commands.py
-    cp platforms/queue_commands_<yourplatform>.py queue_commands.py
+This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
+It should also make the MAST bin executables executable.
+
+Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
+
+-----------------------------------
+Environment variable explanations
+-----------------------------------
+An explanation of each variable appears in the next section
+
+MAST_INSTALL_PATH: This variable should be set to the installation directory. ::
+
+    export MAST_INSTALL_PATH=//share/apps/MAST
+
+MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You may want to copy recipes from the ``$MAST_INSTALL_PATH/recipe_templates`` directory into this folder and modify them. ::
+    
+    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
+
+MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory. ::
+    
+    export MAST_SCRATCH=//home/username/MAST/SCRATCH
+
+MAST_ARCHIVE: This variable may be set to any directory. MAST will move completed recipes from ``$MAST_SCRATCH`` into this directory. ::
+    
+    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
+
+MAST_CONTROL: This variable may be set to any directory. MAST monitor log files, MAST monitor error files, and other MAST monitor output will be written to this directory. ::
+    
+    export MAST_CONTROL=//home/username/MAST/CONTROL
+
+PYTHONPATH: If this environment variable already exists, the MAST installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables)::
+    
+    export PYTHONPATH=$PYTHONPATH://share/apps/MAST
+
+VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the :ref:`Materials Project's <http://materialsproject.org>`_ :ref:`pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
+    
+    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
+
+PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` directory, for example::
+    
+    export PATH=$PATH://share/apps/MAST/bin:PATH
+=================================================
+9. Modify submission details for your platform
+=================================================
+The following files should reside in ``$MAST_INSTALL_PATH/submit``
+---------------------------------
+submit.sh
+---------------------------------
+This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time ``mast`` is called.
+It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
+
+    cd $MAST_INSTALL_PATH/submit
     cp platforms/submit_<yourplatform>.sh submit.sh
 
 Modify submit.sh as necessary for your platform.
 
-*  The submit.sh script should be set up to run mastmon.py on the shortest wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
 *  Examples of special modifications for submit.sh:
         
     *  ACI/HPC, add line: ``#SBATCH --partition=univ``
     *  Bardeen, add a line to tell control where to run the monitor: ``#PBS -q morganshort``
 
+Test submit.sh by submitting it to the queue. A "mastmon" process should briefly appear on the queue. Continue to modify submit.sh until the "mastmon" process successfully runs on the queue.
+
+Use ::
+
+    qsub submit.sh
+    sbatch submit.sh
+
+or another command, depending on your platform.
+
+------------------------------------------
+script_commands.py
+------------------------------------------
+Copy the correct script_commands.py file for your platform into the $MAST_INSTALL_PATH/submit directory::
+    
+    cd $MAST_INSTALL_PATH/submit
+    cp platforms/script_commands_<yourplatform>.py script_commands.py
+
+
 Modify script_commands.py as necessary for your platform.
 
 *  ACI/HPC: in script_commands.py, near line 95, add line: ``myscript.data.append("#SBATCH --partition=univ " + "\n")``
 *  Bardeen: in script_commands.py near line 95 add line: ``myscript.data.append("#PBS -q " + mast_queue + "\n")``
+*  Stampede: in script_commands.py near line 95, add lines::
 
-Modify queue_commands.py as necessary for your platform. (On DLX, ACI, and bardeen, no modification should be necessary.)
+    myscript.data.append("#SBATCH -t " + mast_walltime + "\n")
+    myscript.data.append("#SBATCH -p normal" + "\n")
+    myscript.data.append("module load python" + "\n")
+    myscript.data.append("module load vasp" + "\n")
 
+Examine the write_submit_script function carefully, as an error here will prevent your ingredients from running successfully on the queue.
+
+-----------------------------
+queue_commands.py
+-----------------------------
+Copy the correct queue_commands.py file for your platform into the $MAST_INSTALL_PATH/submit directory::
+    
+    cd $MAST_INSTALL_PATH/submit
+    cp platforms/queue_commands_<yourplatform>.py queue_commands.py
+
+Modify queue_commands.py as necessary for your platform. (On DLX, ACI, Stampede, and bardeen, no modification should be necessary.)
+
+================================
+10. Additional setup
+================================
 Figure out the correct mast_exec calls for your system, to be used in the :doc:`Input File<3_0_inputfile>`. Examples are below.
 
 *  Bardeen: ``mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1``  (or any of the other vasp executables) 
@@ -398,9 +395,52 @@ To ensure recipes are created correctly, add python whitespace tab stops to your
     set softtabstop=4
     set autoindent
 
-Follow the environment variable setup in a similar fashion to :ref:`installation-on-bardeen`
-Follow the testing instructions from :ref:`test-on-bardeen`
+Follow the testing instructions from :ref:`test-on-cluster`
 
+.. _test-on-cluster:
+
+*********************************
+Test that MAST can run
+*********************************
+#.  Make a test directory, like ``//home/username/MAST/test``
+#.  Copy the test input file to your test folder::
+
+        cp //share/apps/MAST/test/phononreorgtest/phonon_with_neb.inp //home/username/MAST/test/test.inp
+
+#.  Go to your test directory, ``cd //home/username/MAST/test``
+#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, and other settings described in :ref:`platforms`
+#.  Try to parse the input file, entering the following command as one line::
+
+        nice -n 19 mast -i test.inp 
+
+    *  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
+    *  The -i signals to MAST that it is processing an input file.
+#. Your ``//home/username/MAST/SCRATCH`` directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
+#. Go to that long recipe directory. (PhononNebTest...)
+
+    *  To see the input options:
+
+        *  ``cat input.inp`` (should be identical to test.inp since no looping was used)
+        
+            *  Note that you can use other viewing commands, not just .cat., but be careful not to edit any of these files.
+
+        *  ``cat archive_input_options.txt`` (should show Al instead of element X1)
+    *  To see information about the ingredient relationships MAST detected from the recipe template:
+
+        *  ``cat personal_recipe.txt``
+        *  ``cat archive_recipe_plan.txt``
+
+    *  To see ingredient statuses at a glance:
+
+        *  ``cat status.txt``
+
+#.  Run mast once: ``nice -n 19 mast``
+#.  You should see a `mastmon` job appear on morganshort.
+#.  MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
+#.  Now you should see ``perfect_opt1`` appear on the queue.
+#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
+#.  If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
+#.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
 
 
 .. _platforms:
