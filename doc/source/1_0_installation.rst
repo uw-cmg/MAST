@@ -13,10 +13,19 @@ Installation on bardeen
 ========================
 
 MAST is installed in ``//share/apps/MAST``.
+Go to ``//share/apps/MAST`` and run ::
 
-Set the MAST environment variables. Add the following lines to your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
+    python initialize.py
 
-The environment variables are::
+This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
+
+Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
+
+Also add the following line::
+
+    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
+
+The environment variables should therefore be::
    
     export MAST_INSTALL_PATH=//share/apps/MAST
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
@@ -78,8 +87,6 @@ This version of python has pymatgen, numpy, and scipy in the appropriate version
 =====================
 3. Additional setup
 =====================
-#.  Create all directories which do not yet exist (e.g., ``mkdir //home/username/MAST``, ``mkdir //home/username/MAST/recipe_templates``, ARCHIVE, CONTROL, and SCRATCH)
-#.  Make an empty file at ``//home/username/MAST/CONTROL/submitlist``
 #.  Log out of all bardeen terminals and log back in. (You may also run ``source ~/.bashrc``, but sometimes this doesn't quite set everything.)
 #.  (There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in $MAST_INSTALL_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of $MAST_INSTALL_PATH/submit/platforms and into $MAST_INSTALL_PATH/submit, omitting the platform name, and modify the new queue_commands.py, script_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)
 
@@ -88,10 +95,6 @@ This version of python has pymatgen, numpy, and scipy in the appropriate version
 *********************************
 Test that MAST can run on bardeen
 *********************************
-#.  Copy the test recipe template to your recipe_templates folder::
-
-        cp //share/apps/MAST/recipe_templates/phonon_test_neb.txt //home/username/MAST/recipe_templates/.
-
 #.  Make a test directory, like ``//home/username/MAST/test``
 #.  Copy the test input file to your test folder::
 
