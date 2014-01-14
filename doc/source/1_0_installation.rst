@@ -1,8 +1,6 @@
 #############
 Installation
 #############
-
-
  
 *********************************
 Installation
@@ -260,7 +258,7 @@ Run the command ::
 This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
 It should also make the MAST bin executables executable.
 
-Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, later you may modify or copy the files in ``$MAST_INSTALL_PATH/submit/platforms`` and change the value in ``$MAST_CONTROL/set_platform`` if necessary.
+Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, choose something anyway, complete the rest of this step, and go on to the following step.
 
 Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
 
@@ -302,7 +300,7 @@ PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` direc
     export PATH=$PATH://share/apps/MAST/bin:PATH
 
 =================================================
-9. Modify submission details for your platform
+Modify submission details for your platform
 =================================================
 If your platform was not matched exactly, you should go to ``$MAST_INSTALL_PATH/submit/platforms``.
 
@@ -339,7 +337,14 @@ Use commands similar to these (``sbatch`` instead of ``qsub`` for slurm)::
 ------------------------------------------
 submit_template.sh
 ------------------------------------------
-This submission script template will be used to build submission scripts for the ingredients. Use ``?mast_keyword?`` to denote a place where MAST keywords (see :ref:`platforms`) may be substituted in.
+This submission script template will be used to build submission scripts for the ingredients. Use ``?mast_keyword?`` to denote a place where the following MAST keywords (see :doc:`Input File <3_0_inputfile>` for more information on keywords) may be substituted in.
+
+* mast_processors or a combination of mast_ppn and mast_nodes
+* mast_queue
+* mast_exec
+* mast_walltime
+* mast_memory
+* the ingredient name
 
 Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
@@ -433,22 +438,6 @@ Test that MAST can run
 #.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
 
 
-.. _platforms:
-
-****************
-Platform Support
-****************
-Queue and submission script commands are in ``//home/user/topmast/submit`` and may need to be heavily modified depending on the platform used. 
-To customize the queue submission behavior, copy a queue_commands.py, script_commands.py and submit.sh from ``$MAST_INSTALL_PATH/submit/platforms`` to ``$MAST_INSTALL_PATH/submit/``. Remove the platform name from the file names.
- 
-The out-of-the-box PBS submission script is built using the following input file keywords (see :doc:`Ingredients <2_0_ingredients>`):
-
-* mast_processors or a combination of mast_ppn and mast_nodes
-* mast_queue
-* mast_exec
-* mast_walltime
-* mast_memory
-* the ingredient name
 
 *************************
 Unit testing
