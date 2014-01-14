@@ -593,7 +593,7 @@ python initialize.py
 This command should create the \code{home/username/MAST} directory in your home directory, as well as necessary subdirectories and files.
 It should also make the MAST bin executables executable.
 
-Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, later you may modify or copy the files in \code{\$MAST\_INSTALL\_PATH/submit/platforms} and change the value in \code{\$MAST\_CONTROL/set\_platform} if necessary.
+Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, choose something anyway, complete the rest of this step, and go on to the following step.
 
 Copy the environment variables which are printed out into your setup profile, such as \code{//home/username/.bashrc}, where \code{username} is your username. Replace all instances of \code{//home/username} with your actual username, like \code{//home/janedoe}.
 
@@ -651,7 +651,7 @@ export PATH=\$PATH://share/apps/MAST/bin:PATH
 \end{Verbatim}
 
 
-\subsection{9. Modify submission details for your platform}
+\subsection{Modify submission details for your platform}
 \label{1_0_installation:modify-submission-details-for-your-platform}
 If your platform was not matched exactly, you should go to \code{\$MAST\_INSTALL\_PATH/submit/platforms}.
 
@@ -693,7 +693,27 @@ qsub mastmon\_submit.sh
 
 \subsubsection{submit\_template.sh}
 \label{1_0_installation:submit-template-sh}
-This submission script template will be used to build submission scripts for the ingredients. Use \code{?mast\_keyword?} to denote a place where MAST keywords (see {\hyperref[1_0_installation:platforms]{\emph{Platform Support}}}) may be substituted in.
+This submission script template will be used to build submission scripts for the ingredients. Use \code{?mast\_keyword?} to denote a place where the following MAST keywords (see {\hyperref[3_0_inputfile::doc]{\emph{Input File}}} for more information on keywords) may be substituted in.
+\begin{itemize}
+\item {} 
+mast\_processors or a combination of mast\_ppn and mast\_nodes
+
+\item {} 
+mast\_queue
+
+\item {} 
+mast\_exec
+
+\item {} 
+mast\_walltime
+
+\item {} 
+mast\_memory
+
+\item {} 
+the ingredient name
+
+\end{itemize}
 
 Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
@@ -770,7 +790,7 @@ Copy the test input file to your test folder:
 Go to your test directory, \code{cd //home/username/MAST/test}
 
 \item {} 
-Modify the test.inp file with the correct \code{mast\_exec}, \code{mast\_ppn}, \code{mast\_queue}, and other settings described in {\hyperref[1_0_installation:platforms]{\emph{Platform Support}}}
+Modify the test.inp file with the correct \code{mast\_exec}, \code{mast\_ppn}, \code{mast\_queue}, and other settings described in \emph{platforms}
 
 \item {} 
 Try to parse the input file, entering the following command as one line:
@@ -854,34 +874,6 @@ The \code{\$MAST\_CONTROL} folder gives you error messages and other information
 \end{enumerate}
 
 
-\section{Platform Support}
-\label{1_0_installation:platforms}\label{1_0_installation:platform-support}
-Queue and submission script commands are in \code{//home/user/topmast/submit} and may need to be heavily modified depending on the platform used.
-To customize the queue submission behavior, copy a queue\_commands.py, script\_commands.py and submit.sh from \code{\$MAST\_INSTALL\_PATH/submit/platforms} to \code{\$MAST\_INSTALL\_PATH/submit/}. Remove the platform name from the file names.
-
-The out-of-the-box PBS submission script is built using the following input file keywords (see {\hyperref[2_0_ingredients::doc]{\emph{Ingredients}}}):
-\begin{itemize}
-\item {} 
-mast\_processors or a combination of mast\_ppn and mast\_nodes
-
-\item {} 
-mast\_queue
-
-\item {} 
-mast\_exec
-
-\item {} 
-mast\_walltime
-
-\item {} 
-mast\_memory
-
-\item {} 
-the ingredient name
-
-\end{itemize}
-
-
 \section{Unit testing}
 \label{1_0_installation:unit-testing}
 To run unit tests and verify that the MAST code is sound, go to
@@ -946,8 +938,9 @@ Program-specific keywords
 \item {} 
 Other MAST keywords, including:
 \begin{itemize}
-\item {} \begin{description}
-\item[{The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)}] \leavevmode\begin{itemize}
+\item {} 
+The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)i
+
 \item {} 
 The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)).
 
@@ -959,10 +952,6 @@ The .complete. method: how MAST can tell if the ingredient is considered complet
 
 \item {} 
 The .update children. method: what information an ingredient passes on to its children, and how this information is passed on
-
-\end{itemize}
-
-\end{description}
 
 \end{itemize}
 
