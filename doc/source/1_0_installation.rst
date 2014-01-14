@@ -11,7 +11,7 @@ Installation
 ===========================
 Pre-steps 
 ===========================
-Go directly to step 1 if you are on bardeen.
+Skip this step if you are on bardeen.
 
 *  If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
 
@@ -260,6 +260,8 @@ Run the command ::
 This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
 It should also make the MAST bin executables executable.
 
+Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, later you may modify or copy the files in ``$MAST_INSTALL_PATH/submit/platforms`` and change the value in ``$MAST_CONTROL/set_platform`` if necessary.
+
 Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
 
 -----------------------------------
@@ -302,10 +304,22 @@ PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` direc
 =================================================
 9. Modify submission details for your platform
 =================================================
-The following files should all reside in ``$MAST_INSTALL_PATH/submit``
+If your platform was not matched exactly, you should set a new value inside ``$MAST_CONTROL/set_platform``
+
+Then, create the following files in ``$MAST_INSTALL_PATH/submit/platforms``::
+
+    submit_template_xxx.sh
+    mastmon_submit_xxx.sh
+    queue_commands_xxx.py
+
+where ``xxx`` is the value in the ``$MAST_CONTROL/set_platform`` file.
+
+Go to $MAST_INSTALL_PATH and again run ::
+
+    python initialize.py
 
 ---------------------------------
-submit.sh
+mastmon_submit_xxx.sh
 ---------------------------------
 This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time ``mast`` is called.
 It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
@@ -330,36 +344,16 @@ Use ::
 or another command, depending on your platform.
 
 ------------------------------------------
-script_commands.py
+submit_template_xxx.sh
 ------------------------------------------
-Copy the correct script_commands.py file for your platform into the $MAST_INSTALL_PATH/submit directory::
-    
-    cd $MAST_INSTALL_PATH/submit
-    cp platforms/script_commands_<yourplatform>.py script_commands.py
+This submission script template will be used to build submission scripts for the ingredients. Use ``?mast_keyword?`` to denote a place where MAST keywords (see :ref:`platforms`) may be substituted in.
 
-
-Modify script_commands.py as necessary for your platform.
-
-*  ACI/HPC: in script_commands.py, near line 95, add line: ``myscript.data.append("#SBATCH --partition=univ " + "\n")``
-*  Bardeen: in script_commands.py near line 95 add line: ``myscript.data.append("#PBS -q " + mast_queue + "\n")``
-*  Stampede: in script_commands.py near line 95, add lines::
-
-    myscript.data.append("#SBATCH -t " + mast_walltime + "\n")
-    myscript.data.append("#SBATCH -p normal" + "\n")
-    myscript.data.append("module load python" + "\n")
-    myscript.data.append("module load vasp" + "\n")
-
-Examine the write_submit_script function carefully, as an error here will prevent your ingredients from running successfully on the queue.
+Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
 -----------------------------
-queue_commands.py
+queue_commands_xxx.py
 -----------------------------
-Copy the correct queue_commands.py file for your platform into the $MAST_INSTALL_PATH/submit directory::
-    
-    cd $MAST_INSTALL_PATH/submit
-    cp platforms/queue_commands_<yourplatform>.py queue_commands.py
-
-Modify queue_commands.py as necessary for your platform. (On DLX, ACI, Stampede, and bardeen, no modification should be necessary.)
+These queue commands will be used to submit ingredients to the queue.
 
 ================================
 10. Additional setup

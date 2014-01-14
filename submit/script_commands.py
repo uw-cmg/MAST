@@ -19,8 +19,6 @@ mast_platform = platform_file.data[0].strip()
 #mysc = "submit.platforms.script_commands_%s" % mast_platform
 #my_script_commands = importlib.import_module(mysc)
 
-myqc = "submit.platforms.queue_commands_%s" % mast_platform
-my_queue_commands = importlib.import_module(myqc)
 
 
 """
@@ -84,7 +82,7 @@ def write_submit_script(keywords):
     newkey['mast_processors'] = mast_processors
     newkey['mast_name'] = name
     
-    my_template = MASTFile("%s/submit/platforms/submit_template_%s.sh" % (mast_install, mast_platform))
+    my_template = MASTFile("%s/submit/platforms/%s/submit_template.sh" % (mast_install, mast_platform))
     newdata = list()
     for myline in my_template.data:
         for mykey in newkey.keys():

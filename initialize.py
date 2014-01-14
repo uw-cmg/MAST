@@ -91,7 +91,7 @@ setfile = open("%s/MAST/CONTROL/set_platform" % myhome, "wb")
 setfile.write(my_platform)
 setfile.close()
 
-shutil.copy("%s/submit/platforms/mastmon_submit_%s.sh" % (mycwd,my_platform), "%s/MAST/CONTROL/mastmon_submit.sh" % myhome)
+shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (mycwd,my_platform), "%s/MAST/CONTROL/mastmon_submit.sh" % myhome)
 
 shutil.copy("%s/submit/runmast.py" % mycwd, "%s/MAST/CONTROL/runmast.py" % myhome)
 #Print out environment variables
