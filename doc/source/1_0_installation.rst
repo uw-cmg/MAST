@@ -416,3 +416,21 @@ The out-of-the-box PBS submission script is built using the following input file
 * mast_walltime
 * mast_memory
 * the ingredient name
+
+*************************
+Unit testing
+*************************
+
+To run unit tests and verify that the MAST code is sound, go to
+``$MAST_INSTALL_PATH/test`` and run the command ::
+
+    nosetests -v --nocapture
+
+Or, optionally, run the command ::
+
+    nosetests -v --nocapture
+
+The ``nocapture`` option allows print statements.
+The ``verbose`` option gives verbose results.
+
+The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
