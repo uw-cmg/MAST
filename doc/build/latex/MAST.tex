@@ -231,7 +231,7 @@ Please check your output carefully, especially when setting up a new workflow us
 
 \subsection{Pre-steps}
 \label{1_0_installation:pre-steps}
-Go directly to step 1 if you are on bardeen.
+Skip this step if you are on bardeen.
 \begin{itemize}
 \item {} 
 If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
@@ -593,6 +593,8 @@ python initialize.py
 This command should create the \code{home/username/MAST} directory in your home directory, as well as necessary subdirectories and files.
 It should also make the MAST bin executables executable.
 
+Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, later you may modify or copy the files in \code{\$MAST\_INSTALL\_PATH/submit/platforms} and change the value in \code{\$MAST\_CONTROL/set\_platform} if necessary.
+
 Copy the environment variables which are printed out into your setup profile, such as \code{//home/username/.bashrc}, where \code{username} is your username. Replace all instances of \code{//home/username} with your actual username, like \code{//home/janedoe}.
 
 
@@ -651,88 +653,54 @@ export PATH=\$PATH://share/apps/MAST/bin:PATH
 
 \subsection{9. Modify submission details for your platform}
 \label{1_0_installation:modify-submission-details-for-your-platform}
-The following files should all reside in \code{\$MAST\_INSTALL\_PATH/submit}
+If your platform was not matched exactly, you should go to \code{\$MAST\_INSTALL\_PATH/submit/platforms}.
+
+Copy the closest-matching set of files into a new directory inside the \code{platforms} folder.
+Then, modify each of the following files as necessary for your platform:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{submit\PYGZus{}template}\PYG{o}{.}\PYG{n}{sh}
+\PYG{n}{mastmon\PYGZus{}submit}\PYG{o}{.}\PYG{n}{sh}
+\PYG{n}{queue\PYGZus{}commands}\PYG{o}{.}\PYG{n}{py}
+\end{Verbatim}
+
+Go to \$MAST\_INSTALL\_PATH and again run
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python initialize.py
+\end{Verbatim}
+
+This time, select your new platform.
 
 
-\subsubsection{submit.sh}
-\label{1_0_installation:submit-sh}
+\subsubsection{mastmon\_submit.sh}
+\label{1_0_installation:mastmon-submit-sh}
 This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time \code{mast} is called.
+
 It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
-\begin{quote}
 
-cd \$MAST\_INSTALL\_PATH/submit
-cp platforms/submit\_\textless{}yourplatform\textgreater{}.sh submit.sh
-\end{quote}
+The script is copied into the \$MAST\_CONTROL directory by the \code{initialize.py} script and will be run from there.
 
-Modify submit.sh as necessary for your platform.
-\begin{itemize}
-\item {} 
-Examples of special modifications for submit.sh:
-\begin{itemize}
-\item {} 
-ACI/HPC, add line: \code{\#SBATCH -{-}partition=univ}
+Test mastmon\_submit.sh by submitting it to the queue. A ``mastmon'' process should briefly appear on the queue. Continue to modify submit.sh until the ``mastmon'' process successfully runs on the queue.
 
-\item {} 
-Bardeen, add a line to tell control where to run the monitor: \code{\#PBS -q morganshort}
-
-\end{itemize}
-
-\end{itemize}
-
-Test submit.sh by submitting it to the queue. A ``mastmon'' process should briefly appear on the queue. Continue to modify submit.sh until the ``mastmon'' process successfully runs on the queue.
-
-Use
+Use commands similar to these (\code{sbatch} instead of \code{qsub} for slurm):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-qsub submit.sh
-sbatch submit.sh
+cd \$MAST\_CONTROL
+qsub mastmon\_submit.sh
 \end{Verbatim}
 
-or another command, depending on your platform.
 
+\subsubsection{submit\_template.sh}
+\label{1_0_installation:submit-template-sh}
+This submission script template will be used to build submission scripts for the ingredients. Use \code{?mast\_keyword?} to denote a place where MAST keywords (see {\hyperref[1_0_installation:platforms]{\emph{Platform Support}}}) may be substituted in.
 
-\subsubsection{script\_commands.py}
-\label{1_0_installation:script-commands-py}
-Copy the correct script\_commands.py file for your platform into the \$MAST\_INSTALL\_PATH/submit directory:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-cd \$MAST\_INSTALL\_PATH/submit
-cp platforms/script\_commands\_\textless{}yourplatform\textgreater{}.py script\_commands.py
-\end{Verbatim}
-
-Modify script\_commands.py as necessary for your platform.
-\begin{itemize}
-\item {} 
-ACI/HPC: in script\_commands.py, near line 95, add line: \code{myscript.data.append("\#SBATCH -{-}partition=univ " + "\textbackslash{}n")}
-
-\item {} 
-Bardeen: in script\_commands.py near line 95 add line: \code{myscript.data.append("\#PBS -q " + mast\_queue + "\textbackslash{}n")}
-
-\item {} 
-Stampede: in script\_commands.py near line 95, add lines:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{\PYGZsh{}SBATCH -t }\PYG{l+s}{"} \PYG{o}{+} \PYG{n}{mast\PYGZus{}walltime} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
-\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{\PYGZsh{}SBATCH -p normal}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
-\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{module load python}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
-\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{module load vasp}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
-\end{Verbatim}
-
-\end{itemize}
-
-Examine the write\_submit\_script function carefully, as an error here will prevent your ingredients from running successfully on the queue.
+Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
 
 \subsubsection{queue\_commands.py}
 \label{1_0_installation:queue-commands-py}
-Copy the correct queue\_commands.py file for your platform into the \$MAST\_INSTALL\_PATH/submit directory:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-cd \$MAST\_INSTALL\_PATH/submit
-cp platforms/queue\_commands\_\textless{}yourplatform\textgreater{}.py queue\_commands.py
-\end{Verbatim}
-
-Modify queue\_commands.py as necessary for your platform. (On DLX, ACI, Stampede, and bardeen, no modification should be necessary.)
+These queue commands will be used to submit ingredients to the queue.
 
 
 \subsection{10. Additional setup}
