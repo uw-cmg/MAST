@@ -14,8 +14,8 @@
 
 
 \title{MAST Documentation}
-\date{January 08, 2014}
-\release{20131216.canoe}
+\date{January 14, 2014}
+\release{20140113.canoe}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
 \renewcommand{\releasename}{Release}
@@ -226,30 +226,374 @@ Please check your output carefully, especially when setting up a new workflow us
 \chapter{Installation}
 \label{1_0_installation:installation}\label{1_0_installation::doc}
 
-\section{Installation on bardeen}
-\label{1_0_installation:installation-on-bardeen}\label{1_0_installation:id1}
+\section{Installation}
+\label{1_0_installation:id1}
 
-\subsection{1. Environment variables}
-\label{1_0_installation:environment-variables}
-MAST is installed in \code{//share/apps/MAST}.
+\subsection{0. Pre-steps}
+\label{1_0_installation:pre-steps}
+Go directly to step 1 if you are on bardeen.
+\begin{itemize}
+\item {} 
+If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
 
-Set the MAST environment variables. Add the following lines to your setup profile, such as \code{//home/username/.bashrc}, where \code{username} is your username. Replace all instances of \code{//home/username} with your actual username, like \code{//home/janedoe}.
-
-The environment variables are:
+\item {} 
+Have the owner of //tmp/pip-build remove the directory if it exists (see {\color{red}\bfseries{}:ref:{}`pip issue 729 \textless{}https://github.com/pypa/pip/issues/729\textgreater{}{}`\_}):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export MAST\_INSTALL\_PATH=//share/apps/MAST
-export MAST\_RECIPE\_PATH=//home/username/MAST/recipe\_templates
-export MAST\_SCRATCH=//home/username/MAST/SCRATCH
-export MAST\_ARCHIVE=//home/username/MAST/ARCHIVE
-export MAST\_CONTROL=//home/username/MAST/CONTROL
-export PYTHONPATH=\$PYTHONPATH://share/apps/MAST
-export VASP\_PSP\_DIR=//share/apps/MAST/vasp\_pps
-export PATH=\$PATH://share/apps/MAST/bin
+cd //tmp
+rm -r pip-build
+\end{Verbatim}
+
+\end{itemize}
+
+
+\subsection{1. Verify your Python version}
+\label{1_0_installation:verify-your-python-version}
+Check your version of python: \code{python -{-}version}
+
+If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.
+Then, make sure that this version of python is defaulted to be used first. You may need to add a line similar to your user profile, such as \code{//home/username/.bashrc}
+Then, log out and log back in.
+
+For bardeen, the line you need to add is:
+
+\begin{Verbatim}[commandchars=\\\{\}]
 export PATH=//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin:\$PATH
 \end{Verbatim}
 
-An explanation of each variable appears below.
+For platforms with the ``module'' system like stampede or DLX, add the line:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+module load python
+module load Python
+\end{Verbatim}
+
+Then, log out and log back in.
+
+Type \code{which python} to make sure you have the right version, or \code{python -{-}version}.
+
+If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact the development team.
+
+If you do not have or cannot find Python 2.7.3, then you must install it.
+
+
+\subsubsection{Installing python}
+\label{1_0_installation:installing-python}
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from here: {\color{red}\bfseries{}:ref:{}`EPD Free Canopy \textless{}https://www.enthought.com/downloads/\textgreater{}{}`\_}
+\begin{itemize}
+\item {} 
+Version 2.7.5 is okay
+
+\item {} 
+On DLX, go into interactive setup with the command \code{srun -u bash -i}
+
+\item {} 
+\code{bash ./canopy-1.0.3-rh5-64.sh}
+
+\item {} 
+Follow the prompts (use spacebar to scroll through the license file)
+
+\end{itemize}
+
+Add lines to your profile to make this python installation your default python:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+vi \textasciitilde{}/.bashrc
+\#EPD (Canopy) python
+export PATH=//home/tma249/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin:\$PATH
+\end{Verbatim}
+\begin{itemize}
+\item {} 
+Do not just use the .Canopy/bin. directory - python modules will not load properly
+
+\item {} 
+Log out and log in
+
+\end{itemize}
+
+Check your version of python: \code{python -{-}version}
+
+The version given must be the correct version. If not, for all subsequent commands that say \emph{python}, give the full path to your version of python, e.g. \code{//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python}
+
+
+\subsection{2. Verify setuptools (easy\_install) and pip}
+\label{1_0_installation:verify-setuptools-easy-install-and-pip}
+Check if easy\_install and pip are available:
+\begin{itemize}
+\item {} 
+\code{which pip}
+
+\item {} 
+\code{which easy\_install}
+
+\end{itemize}
+
+Example:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+[username@aci-service-2 \textasciitilde{}]\$ which pip
+//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin/pip
+[username@aci-service-2 \textasciitilde{}]\$ which easy\_install
+//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin/easy\_install
+\end{Verbatim}
+
+pip must be version 1.3 or later (\code{pip -{-}version})
+
+If either easy\_install or pip is missing, install them as follows.
+
+Get setuptools (easy\_install)
+\begin{itemize}
+\item {} 
+{\color{red}\bfseries{}:ref:{}`setuptools \textless{}https://pypi.python.org/pypi/setuptools\textgreater{}{}`\_}
+
+\item {} 
+\code{wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez\_setup.py}
+
+\item {} 
+\code{python ez\_setup.py} if you are using your own locally-installed python
+
+\item {} 
+\code{python ez\_setup.py -{-}user} if you are using a root-installed python
+
+\end{itemize}
+
+Get pip
+\begin{itemize}
+\item {} 
+{\color{red}\bfseries{}:ref:{}`pip \textless{}https://pypi.python.org/pypi/pip\textgreater{}{}`\_}
+
+\item {} 
+\code{curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py}
+
+\item {} 
+\code{python get-pip.py} if you are using your own locally-installed python
+
+\item {} 
+\code{python get-pip.py -{-}user} if you are using a root-installed python
+
+\end{itemize}
+
+easy\_install and pip should now be located either wherever your installed python is, or in the \code{\$HOME/.local/bin} directory
+Check their locations and the pip version again.
+
+
+\subsection{3. Verify or install numpy and scipy}
+\label{1_0_installation:verify-or-install-numpy-and-scipy}
+Check if numpy and scipy available:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{python}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy}
+\end{Verbatim}
+
+If numpy and scipy are not available, we recommend that you go back to step 1 and install a local version of python which already includes numpy and scipy.
+
+If numpy is not available, try pip installation:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+pip install --user numpy
+\end{Verbatim}
+
+(If you are using a user-installed pip with a root-installed python, use the command \code{\$HOME/.local/bin/pip} instead of \code{pip}.)
+
+If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
+\begin{itemize}
+\item {} 
+Grab the most recent stable release of numpy from {\color{red}\bfseries{}:ref:{}`\textless{}http://www.scipy.org/install.html\textgreater{}{}`\_}
+
+\item {} 
+Untar with command \code{tar -zxvf numpy-\textless{}version\textgreater{}.tar.gz}
+
+\item {} 
+\code{cd numpy-\textless{}version\textgreater{}}
+
+\item {} 
+Put the following in your command line:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+BLAS=None LAPACK=None ATLAS=None python setup.py config build install --prefix=\textless{}location where you want numpy installed, recommend \$HOME/lib\textgreater{}
+\end{Verbatim}
+
+\item {} 
+Get something to drink; this'll take about 5-10 minutes.
+
+\item {} 
+Add to your .bashrc:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+NUMPY=\textless{}location you specified above\textgreater{}
+export PYTHONPATH=\$NUMPY:\$PYTHONPATH
+\end{Verbatim}
+
+\item {} 
+source \$HOME/.bashrc
+
+\end{itemize}
+
+
+\subsection{4. Verify or install pymatgen and custodian}
+\label{1_0_installation:verify-or-install-pymatgen-and-custodian}
+Check if pymatgen and custodian available:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{python}
+\PYG{k+kn}{import} \PYG{n+nn}{numpy}
+\PYG{k+kn}{import} \PYG{n+nn}{scipy}
+\end{Verbatim}
+
+If pymatgen and custodian are not available, install them.
+
+
+\subsubsection{Install pymatgen and custodian}
+\label{1_0_installation:install-pymatgen-and-custodian}
+Make sure you explicitly use the correct pip and easy\_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy\_install or other such paths, corresponding to the correct version of python.
+
+Use the \code{-{-}user} tag if you are not using the easy\_install and pip from your own installation of python. Otherwise, you can omit this tag.
+
+Upgrade the \emph{distribute} package. You \textbf{MUST} upgrade this package, even if it is freshly installed. (8/9/13)
+
+\begin{Verbatim}[commandchars=\\\{\}]
+nice -n 19 easy\_install --user --upgrade distribute
+\end{Verbatim}
+
+pip install pymatgen and custodian:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+nice -n 19 pip install --user pymatgen
+nice -n 19 pip install --user custodian
+\end{Verbatim}
+
+If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+cd \$HOME/.local/lib/python2.7/site-packages/setuptools-2.1-py2.7.egg
+python ./easy\_install.py --user https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
+\end{Verbatim}
+
+If pip does not work, try making your own temp directory.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mkdir //home/\textless{}username\textgreater{}/tmp
+export TMPDIR=.//home/\textless{}username\textgreater{}/tmp.
+\end{Verbatim}
+
+Then try running the pip commands again.
+
+Remove any pip directory if it exists.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+cd //tmp
+rm -r pip-build
+\end{Verbatim}
+
+
+\subsection{5. Set up the pymatgen VASP\_PSP\_DIR}
+\label{1_0_installation:set-up-the-pymatgen-vasp-psp-dir}
+On DLX and bardeen, skip to the NEXT NUMBERED STEP
+
+Locate the VASP pseudopotentials
+\begin{itemize}
+\item {} 
+On bardeen, this is \code{//share/apps/vasp\_pseudopotentials}
+
+\item {} 
+On DLX it is \code{//home/adozier/VASP}
+
+\end{itemize}
+
+Run pymatgen's python setup tool. This tool should be located wherever pymatgen was installed, either \code{\textasciitilde{}/.local/bin/potcar\_setup.py} if you installed it with \code{-{-}user}, or wherever python is, otherwise.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python .local/bin/potcar\_setup.py or python potcar\_setup.py or simply potcar\_setup.py
+\end{Verbatim}
+
+(Remember to use the correct version of python, determined in step 2, e.g. //share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python .local/bin/potcar\_setup.py)
+
+Take the paw directory if you are using PAW. Do not take the top directory, or the GGA/LDA/etc folders will overwrite.
+
+Example of running the python setup tool:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+Please enter full path where the POT\_GGA\_PAW\_PBE, etc. subdirs are present. If you obtained the PSPs directly from VASP, this should typically be the directory that you untar the files to : //share/apps/vasp\_pseudopotentials/paw
+Please enter the fullpath of the where you want to create your pymatgen resources directory:
+//home/\textless{}username\textgreater{}/.local/vasp\_pps
+\end{Verbatim}
+
+Rename the folders under \code{//home/\textless{}username\textgreater{}/.local/vasp\_pps}:
+\begin{itemize}
+\item {} 
+Rename the PBE folder POT\_GGA\_PAW\_PBE to correspond to mast\_xc pbe
+
+\item {} 
+Rename the GGA folder POT\_GGA\_PAW\_PW91 to correspond to mast\_xc pw91
+
+\end{itemize}
+
+
+\subsection{6. Add the VASP\_PSP\_DIR to your user profile}
+\label{1_0_installation:add-the-vasp-psp-dir-to-your-user-profile}
+Add a line to your .bashrc file exporting the environment variable VASP\_PSP\_DIR to this VASP directory.
+\begin{itemize}
+\item {} 
+On bardeen, it should look something like:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+export VASP\_PSP\_DIR=//home/\textless{}username\textgreater{}/.local/vasp\_pps
+\end{Verbatim}
+
+\item {} 
+On DLX, use the directories already created:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+export VASP\_PSP\_DIR=//home/adozier/VASP/resources
+export VASP\_PSP\_DIR=\textless{}whichever path you used in the potcar\_setup.py script\textgreater{}
+\end{Verbatim}
+
+\item {} 
+Remember to save your .bashrc file. Test the change:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+source \textasciitilde{}/.bashrc
+cd \$VASP\_PSP\_DIR
+\end{Verbatim}
+
+\item {} 
+Make sure you are getting to the right directory, which has POT\_GGA\_POW\_PBE etc. folders inside it.
+
+\end{itemize}
+
+
+\subsection{7. Get MAST}
+\label{1_0_installation:get-mast}
+Get the MAST tar.gz file from MaterialsHub.org and untar it:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+nice -n 19 tar -xzvf mast\_version.tar.gz
+\end{Verbatim}
+
+(or run this command over interactive submission, which is better)
+
+
+\subsection{8. Set up the environment variables}
+\label{1_0_installation:set-up-the-environment-variables}
+Go to the MAST installation path, for example \code{//home/username/mast\_version}
+
+Run the command
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python initialize.py
+\end{Verbatim}
+
+This command should create the \code{home/username/MAST} directory in your home directory, as well as necessary subdirectories and files.
+It should also make the MAST bin executables executable.
+
+Copy the environment variables which are printed out into your setup profile, such as \code{//home/username/.bashrc}, where \code{username} is your username. Replace all instances of \code{//home/username} with your actual username, like \code{//home/janedoe}.
+
+
+\subsubsection{Environment variable explanations}
+\label{1_0_installation:environment-variable-explanations}
+An explanation of each variable appears in the next section
 
 MAST\_INSTALL\_PATH: This variable should be set to the installation directory.
 
@@ -300,51 +644,140 @@ export PATH=\$PATH://share/apps/MAST/bin:PATH
 \end{Verbatim}
 
 
-\subsection{2. Python version}
-\label{1_0_installation:python-version}
-Make sure that the correct version of python is defaulted to be used first. If you already use python for something else and this next line interferes with your other python calls (for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3), please see Tam.
+\subsection{9. Modify submission details for your platform}
+\label{1_0_installation:modify-submission-details-for-your-platform}
+This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time \code{mast} is called.
+It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
+\begin{quote}
 
-\begin{Verbatim}[commandchars=\\\{\}]
-export PATH=//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin:\$PATH
-\end{Verbatim}
+cd \$MAST\_INSTALL\_PATH/submit
+cp platforms/submit\_\textless{}yourplatform\textgreater{}.sh submit.sh
+\end{quote}
 
-This version of python has pymatgen, numpy, and scipy in the appropriate versions.
+Modify submit.sh as necessary for your platform.
 \begin{itemize}
 \item {} 
-Type \code{which python} and you should get: \code{/share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python}
+Examples of special modifications for submit.sh:
+\begin{itemize}
+\item {} 
+ACI/HPC, add line: \code{\#SBATCH -{-}partition=univ}
 
 \item {} 
-Type \code{which mast} and you should get: \code{/share/apps/MAST/bin/mast}
+Bardeen, add a line to tell control where to run the monitor: \code{\#PBS -q morganshort}
 
 \end{itemize}
 
+\end{itemize}
 
-\subsection{3. Additional setup}
-\label{1_0_installation:additional-setup}\begin{enumerate}
-\item {} 
-Create all directories which do not yet exist (e.g., \code{mkdir //home/username/MAST}, \code{mkdir //home/username/MAST/recipe\_templates}, ARCHIVE, CONTROL, and SCRATCH)
+Test submit.sh by submitting it to the queue. A ``mastmon'' process should briefly appear on the queue. Continue to modify submit.sh until the ``mastmon'' process successfully runs on the queue.
 
-\item {} 
-Make an empty file at \code{//home/username/MAST/CONTROL/submitlist}
-
-\item {} 
-Log out of all bardeen terminals and log back in. (You may also run \code{source \textasciitilde{}/.bashrc}, but sometimes this doesn't quite set everything.)
-
-\item {} 
-(There are some additional Platform Support steps which have already been taken: Queue and submission script commands are in \$MAST\_INSTALL\_PATH/submit and may need to be heavily modified depending on the platform used. To customize the queue submission behavior, copy the appropriate files out of \$MAST\_INSTALL\_PATH/submit/platforms and into \$MAST\_INSTALL\_PATH/submit, omitting the platform name, and modify the new queue\_commands.py, script\_commands.py, and submit.sh accordingly. This has already been done on bardeen. No step here.)
-
-\end{enumerate}
-
-
-\section{Test that MAST can run on bardeen}
-\label{1_0_installation:test-that-mast-can-run-on-bardeen}\label{1_0_installation:test-on-bardeen}\begin{enumerate}
-\item {} 
-Copy the test recipe template to your recipe\_templates folder:
+Use
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cp //share/apps/MAST/recipe\_templates/phonon\_test\_neb.txt //home/username/MAST/recipe\_templates/.
+qsub submit.sh
+sbatch submit.sh
 \end{Verbatim}
 
+or another command, depending on your platform.
+
+
+\subsubsection{script\_commands.py}
+\label{1_0_installation:script-commands-py}
+Copy the correct script\_commands.py file for your platform into the \$MAST\_INSTALL\_PATH/submit directory:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+cd \$MAST\_INSTALL\_PATH/submit
+cp platforms/script\_commands\_\textless{}yourplatform\textgreater{}.py script\_commands.py
+\end{Verbatim}
+
+Modify script\_commands.py as necessary for your platform.
+\begin{itemize}
+\item {} 
+ACI/HPC: in script\_commands.py, near line 95, add line: \code{myscript.data.append("\#SBATCH -{-}partition=univ " + "\textbackslash{}n")}
+
+\item {} 
+Bardeen: in script\_commands.py near line 95 add line: \code{myscript.data.append("\#PBS -q " + mast\_queue + "\textbackslash{}n")}
+
+\item {} 
+Stampede: in script\_commands.py near line 95, add lines:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{\PYGZsh{}SBATCH -t }\PYG{l+s}{"} \PYG{o}{+} \PYG{n}{mast\PYGZus{}walltime} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
+\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{\PYGZsh{}SBATCH -p normal}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
+\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{module load python}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
+\PYG{n}{myscript}\PYG{o}{.}\PYG{n}{data}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{module load vasp}\PYG{l+s}{"} \PYG{o}{+} \PYG{l+s}{"}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{)}
+\end{Verbatim}
+
+\end{itemize}
+
+Examine the write\_submit\_script function carefully, as an error here will prevent your ingredients from running successfully on the queue.
+
+
+\subsubsection{queue\_commands.py}
+\label{1_0_installation:queue-commands-py}
+Copy the correct queue\_commands.py file for your platform into the \$MAST\_INSTALL\_PATH/submit directory:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+cd \$MAST\_INSTALL\_PATH/submit
+cp platforms/queue\_commands\_\textless{}yourplatform\textgreater{}.py queue\_commands.py
+\end{Verbatim}
+
+Modify queue\_commands.py as necessary for your platform. (On DLX, ACI, Stampede, and bardeen, no modification should be necessary.)
+
+
+\subsection{10. Additional setup}
+\label{1_0_installation:additional-setup}
+Figure out the correct mast\_exec calls for your system, to be used in the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}. Examples are below.
+\begin{itemize}
+\item {} 
+Bardeen: \code{mast\_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_par\_opt1}  (or any of the other vasp executables)
+
+\item {} 
+DLX: \code{mast\_exec //home/username/bin/vaspmpirun}, where vaspmpirun is the following script:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\#!/bin/bash
+export PERL5LIB=/opt/moab/lib/perl5
+export MIC\_LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/mic
+export LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/lib:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/intel64:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
+export INTEL\_MKL\_LIBS=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
+export QTLIB=/usr/lib64/qt-3.3/lib
+PATH=\$PATH:\$HOME/bin:\$HOME/bin/convaspTest
+export PATH
+VaspPath=//home/adozier/VASP/vasp.5.2
+export OMP\_NUM\_THREADS=1
+ulimit -s unlimited
+ulimit -l unlimited
+\#mpirun \$VaspPath/vasp
+//share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/bin/mpirun \$VaspPath/vasp
+\end{Verbatim}
+
+\end{itemize}
+
+Modify \textasciitilde{}/.bashrc if necessary
+\begin{itemize}
+\item {} 
+ACI/HPC, add line: \code{export LD\_LIBRARY\_PATH=\$LD\_LIBRARY\_PATH://opt/intel/lib/intel64}
+
+\end{itemize}
+
+To ensure recipes are created correctly, add python whitespace tab stops to your \textasciitilde{}/.vimrc file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+" VIM settings for python in a group below:
+set tabstop=4
+set shiftwidth=4
+set smarttab
+set expandtab
+set softtabstop=4
+set autoindent
+\end{Verbatim}
+
+Follow the testing instructions from {\hyperref[1_0_installation:test-on-cluster]{\emph{Test that MAST can run}}}
+
+
+\section{Test that MAST can run}
+\label{1_0_installation:test-that-mast-can-run}\label{1_0_installation:test-on-cluster}\begin{enumerate}
 \item {} 
 Make a test directory, like \code{//home/username/MAST/test}
 
@@ -357,6 +790,9 @@ Copy the test input file to your test folder:
 
 \item {} 
 Go to your test directory, \code{cd //home/username/MAST/test}
+
+\item {} 
+Modify the test.inp file with the correct \code{mast\_exec}, \code{mast\_ppn}, \code{mast\_queue}, and other settings described in {\hyperref[1_0_installation:platforms]{\emph{Platform Support}}}
 
 \item {} 
 Try to parse the input file, entering the following command as one line:
@@ -440,408 +876,6 @@ The \code{\$MAST\_CONTROL} folder gives you error messages and other information
 \end{enumerate}
 
 
-\section{Installation on another cluster}
-\label{1_0_installation:installation-on-another-cluster}
-
-\subsection{0. Pre-steps}
-\label{1_0_installation:pre-steps}\begin{itemize}
-\item {} 
-If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
-
-\item {} 
-Have the owner of //tmp/pip-build remove the directory if it exists (see {\color{red}\bfseries{}:ref:{}`pip issue 729 \textless{}https://github.com/pypa/pip/issues/729\textgreater{}{}`\_}):
-
-\begin{Verbatim}[commandchars=\\\{\}]
-cd //tmp
-rm -r pip-build
-\end{Verbatim}
-
-\end{itemize}
-
-
-\subsection{1. Verify your Python version}
-\label{1_0_installation:verify-your-python-version}
-Check your version of python: \code{python -{-}version}
-If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.
-\begin{itemize}
-\item {} 
-On platforms with modules, it is probably something like \code{module load python}, but get the correct version (\code{module avail} to see available modules). Type \code{which python} to make sure you have the right version, or \code{python -{-}version}.
-
-\item {} 
-DLX has python 2.6.6 normally. \code{module load Python}, even though it is 2.7.3, has some difficulties installing pymatgen, possibly because of the way the module system works. Follow the \code{install python} directions instead.
-
-\item {} 
-On bardeen it is //share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64
-
-\end{itemize}
-
-If you do not have python 2.7.3, install it.
-
-
-\subsubsection{Installing python}
-\label{1_0_installation:installing-python}
-The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from here: {\color{red}\bfseries{}:ref:{}`EPD Free Canopy \textless{}https://www.enthought.com/downloads/\textgreater{}{}`\_}
-\begin{itemize}
-\item {} 
-Version 2.7.5 is okay
-
-\item {} 
-On DLX, go into interactive setup with the command \code{srun -u bash -i}
-
-\item {} 
-\code{bash ./canopy-1.0.3-rh5-64.sh}
-
-\item {} 
-Follow the prompts (use spacebar to scroll through the license file)
-
-\end{itemize}
-
-Add lines to your profile to make this python installation your default python:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-vi \textasciitilde{}/.bashrc
-\#EPD (Canopy) python
-export PATH=//home/tma249/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin:\$PATH
-\end{Verbatim}
-\begin{itemize}
-\item {} 
-Do not just use the .Canopy/bin. directory - python modules will not load properly
-
-\item {} 
-Log out and log in
-
-\end{itemize}
-
-Check your version of python: \code{python -{-}version}
-
-The version given must be the correct version. If not, for all subsequent commands that say \emph{python}, give the full path to your version of python, e.g. \code{//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python}
-
-
-\subsection{2. Verify setuptools (easy\_install) and pip}
-\label{1_0_installation:verify-setuptools-easy-install-and-pip}
-Check if easy\_install and pip are available:
-\begin{itemize}
-\item {} 
-\code{which pip}
-
-\item {} 
-\code{which easy\_install}
-
-\end{itemize}
-
-Example:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-[username@aci-service-2 \textasciitilde{}]\$ which pip
-//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin/pip
-[username@aci-service-2 \textasciitilde{}]\$ which easy\_install
-//home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin/easy\_install
-\end{Verbatim}
-
-pip must be version 1.3 or later (pip --version)
-
-If either easy\_install or pip is missing, install them as follows.
-
-Get setuptools (easy\_install)
-\begin{itemize}
-\item {} 
-{\color{red}\bfseries{}:ref:{}`setuptools \textless{}https://pypi.python.org/pypi/setuptools\textgreater{}{}`\_}
-
-\item {} 
-\code{wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez\_setup.py}
-
-\item {} 
-\code{python ez\_setup.py}
-
-\end{itemize}
-
-Get pip
-\begin{itemize}
-\item {} 
-{\color{red}\bfseries{}:ref:{}`pip \textless{}https://pypi.python.org/pypi/pip\textgreater{}{}`\_}
-
-\item {} 
-\code{curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py}
-
-\item {} 
-\code{python get-pip.py}
-
-\end{itemize}
-
-easy\_install and pip should now be located wherever your installed python is.
-Check their locations and the pip version again.
-
-
-\subsection{3. Verify numpy and scipy}
-\label{1_0_installation:verify-numpy-and-scipy}
-Check if numpy and scipy available:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{python}
-\PYG{k+kn}{import} \PYG{n+nn}{numpy}
-\PYG{k+kn}{import} \PYG{n+nn}{scipy}
-\end{Verbatim}
-
-If numpy is not available, try pip installation:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-pip install --user numpy
-\end{Verbatim}
-
-(Use the pip in the bin directory of the correct version of python)
-
-If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
-\begin{itemize}
-\item {} 
-Grab the most recent stable release of numpy from {\color{red}\bfseries{}:ref:{}`\textless{}http://www.scipy.org/install.html\textgreater{}{}`\_}
-
-\item {} 
-Untar with command \code{tar -zxvf numpy-\textless{}version\textgreater{}.tar.gz}
-
-\item {} 
-\code{cd numpy-\textless{}version\textgreater{}}
-
-\item {} 
-Put the following in your command line:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-BLAS=None LAPACK=None ATLAS=None python setup.py config build install --prefix=\textless{}location where you want numpy installed, recommend \$HOME/lib\textgreater{}
-\end{Verbatim}
-
-\item {} 
-Get something to drink; this'll take about 5-10 minutes.
-
-\item {} 
-Add to your .bashrc:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-NUMPY=\textless{}location you specified above\textgreater{}
-export PYTHONPATH=\$NUMPY:\$PYTHONPATH
-\end{Verbatim}
-
-\item {} 
-source \$HOME/.bashrc
-
-\end{itemize}
-
-
-\subsection{4. Install pymatgen and custodian}
-\label{1_0_installation:install-pymatgen-and-custodian}
-Make sure you explicitly use the correct pip and easy\_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy\_install or other such paths, corresponding to the correct version of python
-
-Use the \code{-{-}user} tag if you are not using the easy\_install and pip from your own installation of python. Otherwise, you can omit this tag.
-
-Upgrade the \emph{distribute} package. You \textbf{MUST} upgrade this package, even if it is freshly installed. (8/9/13)
-
-\begin{Verbatim}[commandchars=\\\{\}]
-nice -n 19 easy\_install --user --upgrade distribute
-\end{Verbatim}
-
-pip install pymatgen and custodian:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-nice -n 19 pip install --user pymatgen
-nice -n 19 pip install --user custodian
-\end{Verbatim}
-
-If pip does not work, try making your own temp directory.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-mkdir //home/\textless{}username\textgreater{}/tmp
-export TMPDIR=.//home/\textless{}username\textgreater{}/tmp.
-\end{Verbatim}
-
-Then try running the pip commands again.
-
-Remove any pip directory if it exists.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-cd //tmp
-rm -r pip-build
-\end{Verbatim}
-
-
-\subsection{5. Set up the pymatgen VASP\_PSP\_DIR}
-\label{1_0_installation:set-up-the-pymatgen-vasp-psp-dir}
-Locate the VASP pseudopotentials
-\begin{itemize}
-\item {} 
-On bardeen, this is \code{//share/apps/vasp\_pseudopotentials}
-
-\item {} 
-On DLX it is \code{//home/adozier/VASP}
-\begin{itemize}
-\item {} 
-On DLX, SKIP TO THE NEXT NUMBERED STEP
-
-\end{itemize}
-
-\end{itemize}
-
-Run pymatgen's python setup tool. This tool should be located wherever pymatgen was installed, either \code{\textasciitilde{}/.local/bin/potcar\_setup.py} if you installed it with \code{-{-}user}, or wherever python is, otherwise.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-python .local/bin/potcar\_setup.py or python potcar\_setup.py or simply potcar\_setup.py
-\end{Verbatim}
-
-(Remember to use the correct version of python, determined in step 2, e.g. //share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python .local/bin/potcar\_setup.py)
-
-Take the paw directory if you are using PAW. Do not take the top directory, or the GGA/LDA/etc folders will overwrite.
-
-Example of running the python setup tool:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-Please enter full path where the POT\_GGA\_PAW\_PBE, etc. subdirs are present. If you obtained the PSPs directly from VASP, this should typically be the directory that you untar the files to : //share/apps/vasp\_pseudopotentials/paw
-Please enter the fullpath of the where you want to create your pymatgen resources directory:
-//home/\textless{}username\textgreater{}/.local/vasp\_pps
-\end{Verbatim}
-
-Rename the folders under \code{//home/\textless{}username\textgreater{}/.local/vasp\_pps}:
-\begin{itemize}
-\item {} 
-Rename the PBE folder POT\_GGA\_PAW\_PBE to correspond to mast\_xc pbe
-
-\item {} 
-Rename the GGA folder POT\_GGA\_PAW\_PW91 to correspond to mast\_xc pw91
-
-\end{itemize}
-
-Add a line to your .bashrc file exporting the environment variable VASP\_PSP\_DIR to this VASP directory.
-\begin{itemize}
-\item {} 
-On bardeen, it should look something like:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-export VASP\_PSP\_DIR=//home/\textless{}username\textgreater{}/.local/vasp\_pps
-\end{Verbatim}
-
-\item {} 
-On DLX, use the directories already created:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-export VASP\_PSP\_DIR=//home/adozier/VASP/resources
-export VASP\_PSP\_DIR=\textless{}whichever path you used in the potcar\_setup.py script\textgreater{}
-\end{Verbatim}
-
-\item {} 
-Remember to save your .bashrc file. Test the change:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-source \textasciitilde{}/.bashrc
-cd \$VASP\_PSP\_DIR
-\end{Verbatim}
-
-\item {} 
-Make sure you are getting to the right directory, which has POT\_GGA\_POW\_PBE etc. folders inside it.
-
-\end{itemize}
-
-
-\subsection{6. Get MAST}
-\label{1_0_installation:get-mast}
-Get the MAST.tar.gz file from MaterialsHub.org and untar it:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-nice -n 19 tar -xzvf MAST.tar.gz
-\end{Verbatim}
-
-(or run this command over interactive submission, which is better)
-
-Make the bin executables runnable. Supposing the uncompressed path was //home/username/MAST, then run the following command:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-chmod -R a+x //home/username/MAST/bin
-\end{Verbatim}
-
-Modify the submission details for your platform:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-cd //home/username/MAST/submit
-cp platforms/script\_commands\_\textless{}yourplatform\textgreater{}.py script\_commands.py
-cp platforms/queue\_commands\_\textless{}yourplatform\textgreater{}.py queue\_commands.py
-cp platforms/submit\_\textless{}yourplatform\textgreater{}.sh submit.sh
-\end{Verbatim}
-
-Modify submit.sh as necessary for your platform.
-\begin{itemize}
-\item {} 
-The submit.sh script should be set up to run mastmon.py on the shortest wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
-
-\item {} 
-Examples of special modifications for submit.sh:
-\begin{itemize}
-\item {} 
-ACI/HPC, add line: \code{\#SBATCH -{-}partition=univ}
-
-\item {} 
-Bardeen, add a line to tell control where to run the monitor: \code{\#PBS -q morganshort}
-
-\end{itemize}
-
-\end{itemize}
-
-Modify script\_commands.py as necessary for your platform.
-\begin{itemize}
-\item {} 
-ACI/HPC: in script\_commands.py, near line 95, add line: \code{myscript.data.append("\#SBATCH -{-}partition=univ " + "\textbackslash{}n")}
-
-\item {} 
-Bardeen: in script\_commands.py near line 95 add line: \code{myscript.data.append("\#PBS -q " + mast\_queue + "\textbackslash{}n")}
-
-\end{itemize}
-
-Modify queue\_commands.py as necessary for your platform. (On DLX, ACI, and bardeen, no modification should be necessary.)
-
-Figure out the correct mast\_exec calls for your system, to be used in the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}. Examples are below.
-\begin{itemize}
-\item {} 
-Bardeen: \code{mast\_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_par\_opt1}  (or any of the other vasp executables)
-
-\item {} 
-DLX: \code{mast\_exec //home/username/bin/vaspmpirun}, where vaspmpirun is the following script:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\#!/bin/bash
-export PERL5LIB=/opt/moab/lib/perl5
-export MIC\_LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/mic
-export LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/lib:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/intel64:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
-export INTEL\_MKL\_LIBS=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
-export QTLIB=/usr/lib64/qt-3.3/lib
-PATH=\$PATH:\$HOME/bin:\$HOME/bin/convaspTest
-export PATH
-VaspPath=//home/adozier/VASP/vasp.5.2
-export OMP\_NUM\_THREADS=1
-ulimit -s unlimited
-ulimit -l unlimited
-\#mpirun \$VaspPath/vasp
-//share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/bin/mpirun \$VaspPath/vasp
-\end{Verbatim}
-
-\end{itemize}
-
-Modify \textasciitilde{}/.bashrc if necessary
-\begin{itemize}
-\item {} 
-ACI/HPC, add line: \code{export LD\_LIBRARY\_PATH=\$LD\_LIBRARY\_PATH://opt/intel/lib/intel64}
-
-\end{itemize}
-
-To ensure recipes are created correctly, add python whitespace tab stops to your \textasciitilde{}/.vimrc file:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-" VIM settings for python in a group below:
-set tabstop=4
-set shiftwidth=4
-set smarttab
-set expandtab
-set softtabstop=4
-set autoindent
-\end{Verbatim}
-
-Follow the environment variable setup in a similar fashion to {\hyperref[1_0_installation:installation-on-bardeen]{\emph{Installation on bardeen}}}
-Follow the testing instructions from {\hyperref[1_0_installation:test-on-bardeen]{\emph{Test that MAST can run on bardeen}}}
-
-
 \section{Platform Support}
 \label{1_0_installation:platforms}\label{1_0_installation:platform-support}
 Queue and submission script commands are in \code{//home/user/topmast/submit} and may need to be heavily modified depending on the platform used.
@@ -868,6 +902,27 @@ mast\_memory
 the ingredient name
 
 \end{itemize}
+
+
+\section{Unit testing}
+\label{1_0_installation:unit-testing}
+To run unit tests and verify that the MAST code is sound, go to
+\code{\$MAST\_INSTALL\_PATH/test} and run the command
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
+\end{Verbatim}
+
+Or, optionally, run the command
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
+\end{Verbatim}
+
+The \code{nocapture} option allows print statements.
+The \code{verbose} option gives verbose results.
+
+The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
 
 
 \chapter{Ingredients}
