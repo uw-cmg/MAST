@@ -9,7 +9,7 @@ Installation
 *********************************
 
 ===========================
-0. Pre-steps 
+Pre-steps 
 ===========================
 Go directly to step 1 if you are on bardeen.
 
@@ -21,7 +21,7 @@ Go directly to step 1 if you are on bardeen.
     rm -r pip-build
 
 ================================
-1. Verify your Python version
+Verify your Python version
 ================================
 Check your version of python: ``python --version``
 
@@ -33,7 +33,7 @@ For bardeen, the line you need to add is::
     
     export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
 
-For platforms with the "module" system like stampede or DLX, add the line::
+For platforms with the "module" system like stampede or DLX, check which modules are available (``module avail``) and add a line something like::
 
     module load python
     module load Python
@@ -47,9 +47,9 @@ If you already use python for something else and shifting python versions will i
 If you do not have or cannot find Python 2.7.3, then you must install it. 
 
 ---------------------
-Installing python
+Install python
 ---------------------
-The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from here: :ref:`EPD Free Canopy <https://www.enthought.com/downloads/>`_
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from :ref:`EPD Free Canopy <https://www.enthought.com/downloads/>`_
 
 *  Version 2.7.5 is okay
 *  On DLX, go into interactive setup with the command ``srun -u bash -i``
@@ -70,7 +70,7 @@ Check your version of python: ``python --version``
 The version given must be the correct version. If not, for all subsequent commands that say *python*, give the full path to your version of python, e.g. ``//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python``
         
 ==============================================
-2. Verify setuptools (easy_install) and pip
+Verify setuptools (easy_install) and pip
 ==============================================
 Check if easy_install and pip are available:
 
@@ -106,7 +106,7 @@ easy_install and pip should now be located either wherever your installed python
 Check their locations and the pip version again.
 
 =========================================
-3. Verify or install numpy and scipy
+Verify or install numpy and scipy
 =========================================
 Check if numpy and scipy available::
 
@@ -114,9 +114,10 @@ Check if numpy and scipy available::
     import numpy
     import scipy
 
-If numpy and scipy are not available, we recommend that you go back to step 1 and install a local version of python which already includes numpy and scipy.
+If numpy and scipy are not available, we recommend that you go back and install a local version of python which already includes numpy and scipy.
 
 Scipy is optional at this stage (used in the MAST defect finder).
+
 --------------------------------------------
 Install numpy (not recommended)
 --------------------------------------------  
@@ -149,8 +150,8 @@ If pip does not work, follow Quick install of numpy here. This will install Nump
 Check if pymatgen and custodian available::
 
     python
-    import numpy
-    import scipy
+    import pymatgen
+    import custodian
 
 If pymatgen and custodian are not available, install them.
 
@@ -297,10 +298,12 @@ VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files 
 PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` directory, for example::
     
     export PATH=$PATH://share/apps/MAST/bin:PATH
+
 =================================================
 9. Modify submission details for your platform
 =================================================
-The following files should reside in ``$MAST_INSTALL_PATH/submit``
+The following files should all reside in ``$MAST_INSTALL_PATH/submit``
+
 ---------------------------------
 submit.sh
 ---------------------------------
