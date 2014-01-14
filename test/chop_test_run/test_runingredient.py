@@ -15,6 +15,9 @@ import shutil
 import numpy as np
 testname="chop_test_run"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+old_control = os.getenv("MAST_CONTROL")
+old_recipe = os.getenv("MAST_RECIPE_PATH")
+old_scratch = os.getenv("MAST_SCRATCH")
 
 class TestRunIngredient(unittest.TestCase):
 
@@ -36,6 +39,8 @@ class TestRunIngredient(unittest.TestCase):
             os.mkdir("writedir/neb_labelinit-labelfin_stat")
         if not os.path.isdir("writedir/single_phonon_label1"):
             os.mkdir("writedir/single_phonon_label1")
+        if not os.path.isfile("test_control/set_platform"):
+            shutil.copy(old_control + "/set_platform", "test_control/set_platform")
 
     def tearDown(self):
         tearlist = list()
@@ -56,6 +61,9 @@ class TestRunIngredient(unittest.TestCase):
                 os.remove(ritem)
             except OSError:
                 pass
+        os.environ['MAST_CONTROL'] = old_control
+        os.environ['MAST_RECIPE_PATH'] = old_recipe
+        os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):
         self.assertTrue(True)

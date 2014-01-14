@@ -1,9 +1,10 @@
 #!/bin/bash
 #PBS -N mastmon
-#PBS -l nodes=1:ppn=1,pvmem=1000mb
-#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1,pvmem=2000mb
+#PBS -q morganshort
+#PBS -l walltime=4:00:00
 ##export all environment variables. 
-#PBS -V 
+#PBS -V
 #PBS -o mastmon_submission_output
 #PBS -e mastmon_submission_errors
 NN=`cat $PBS_NODEFILE | wc -l`

@@ -65,6 +65,34 @@ for onefile in filelist:
     else:
         print "...File %s found; not creating." % onefile
 
+#Get platform
+print "Setting up platform."
+platform_choices = list()
+platform_choices.append("bardeen")
+platform_choices.append("stampede")
+platform_choices.append("dlx")
+platform_choices.append("korczak")
+platform_choices.append("slurm_generic")
+platform_choices.append("pbs_generic")
+plask = "What is your platform?\n\n"
+plask = plask + "If your exact platform is not found (and even if it is), you may need to modify the files in $MAST_INSTALL_PATH/submit/platforms to conform to your platform.\n\n"
+plask = plask + "Choose from:\n"
+for platform in platform_choices:
+    plask = plask + platform + '\n'
+plask = plask + ">>> "
+
+my_platform = "Not picked yet."
+while not my_platform in platform_choices:
+    my_platform = raw_input(plask)
+    my_platform = my_platform.lower()
+    if not my_platform in platform_choices:
+        print "Platform choice %s not found. Please try again."
+setfile = open("%s/MAST/CONTROL/set_platform" % myhome, "wb")
+setfile.write(my_platform)
+setfile.close()
+
+shutil.copy("%s/submit/platforms/mastmon_submit_%s.sh" % (mycwd,my_platform), "%s/MAST/CONTROL/mastmon_submit.sh" % myhome)
+
 #Print out environment variables
 print "==============================================="
 print "Add the following lines to your //home/user/.bashrc file"

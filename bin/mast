@@ -59,8 +59,8 @@ def submit_and_monitor():
     dirutil.unlock_directory(dirutil.get_mast_scratch_path())
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
     mycwd=os.getcwd()
-    subdir = os.path.join(dirutil.get_mast_install_path(),'submit')
-    os.chdir(subdir)
+    mast_control = os.getenv("MAST_CONTROL")
+    os.chdir(mast_control)
     mycommand=queue_commands.queue_submission_command() #run the submit.sh script in $MAST_SCRATCH/submit which creates a mastmon in order to do status checking on a compute node
     mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     mysub.wait()

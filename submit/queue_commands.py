@@ -5,18 +5,28 @@
 # 12/6/12 TTM added UKY DLX commands
 import os
 import sys
+import math #TA to calc num_nodes
+import importlib
+
+from MAST.utility.mastfile import MASTFile
+from MAST.utility import MASTError
 from MAST.utility import dirutil
-import subprocess
-import time
-from MAST.utility import MASTFile
-system = "bardeen" #dlx, curie, bardeen, nersc, ranger
-compute_node = True
 
-def direct_shell_command():
-    return "//share/apps/vasp5.2_cNEB"
+mast_control = os.getenv("MAST_CONTROL")
+mast_install = os.getenv("MAST_INSTALL_PATH")
+platform_file = MASTFile("%s/set_platform" % mast_control)
+mast_platform = platform_file.data[0].strip()
 
-def queue_submission_command():
-    return "qsub submit.sh"
+myqc = "submit.platforms.queue_commands_%s" % mast_platform
+my_queue_commands = importlib.import_module(myqc)
+
+def direct_shell_command(scriptname="submit.sh"):
+    myds = my_queue_commands.direct_shell_command()
+    return "%s %s" % (myds, scriptname)
+
+def queue_submission_command(scriptname="submit.sh"):
+    myqs = my_queue_commands.queue_submission_command()
+    return "%s %s" % (myqs, scriptname)
 
 def write_to_submit_list(mydir):
     """Write an entry to the submission list in 

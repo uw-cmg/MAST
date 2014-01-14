@@ -8,18 +8,19 @@ import os
 import time
 import MAST
 import pymatgen
+import shutil
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
 testname="recipeplan_test"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+old_control = os.getenv("MAST_CONTROL")
+old_scratch = os.getenv("MAST_SCRATCH")
+old_recipe = os.getenv("MAST_RECIPE_PATH")
 
 class TestRecipeplan(unittest.TestCase):
 
     def setUp(self):
-        os.environ['MAST_CONTROL'] = testdir + "/test_control"
-        os.environ['MAST_RECIPE_PATH'] = testdir
-        os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
         if not os.path.isdir("test_control"):
             os.mkdir("test_control")
@@ -31,6 +32,11 @@ class TestRecipeplan(unittest.TestCase):
             os.mkdir("recipedir/ing2b")
         if not os.path.isdir("recipedir/ing3"):
             os.mkdir("recipedir/ing3")
+        if not os.path.isfile("test_control/set_platform"):
+            shutil.copy(old_control + "/set_platform", "test_control/set_platform")
+        os.environ['MAST_CONTROL'] = testdir + "/test_control"
+        os.environ['MAST_RECIPE_PATH'] = testdir
+        os.environ['MAST_SCRATCH'] = testdir
 
     def tearDown(self):
         removelist=list()
@@ -45,11 +51,15 @@ class TestRecipeplan(unittest.TestCase):
         removelist.append("recipedir/ing2a/POSCAR")
         removelist.append("recipedir/printed.txt")
         removelist.append("test_control/submitlist")
+        removelist.append("test_control/set_platform")
         for myfile in removelist:
             try:
                 os.remove(myfile)
             except OSError:
                 pass
+        os.environ['MAST_CONTROL'] = old_control
+        os.environ['MAST_RECIPE_PATH'] = old_recipe
+        os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):
         rp = RecipePlan("test_recipe","recipedir")
