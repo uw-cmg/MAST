@@ -69,6 +69,7 @@ for onefile in filelist:
 print "==============================================="
 print "Add the following lines to your //home/user/.bashrc file"
 print "or a similar configuration file."
+print "Then, log out and log back in."
 print "See the MAST manual for more information."
 print "==============================================="
 
