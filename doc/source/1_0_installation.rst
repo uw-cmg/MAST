@@ -304,54 +304,47 @@ PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` direc
 =================================================
 9. Modify submission details for your platform
 =================================================
-If your platform was not matched exactly, you should set a new value inside ``$MAST_CONTROL/set_platform``
+If your platform was not matched exactly, you should go to ``$MAST_INSTALL_PATH/submit/platforms``.
 
-Then, create the following files in ``$MAST_INSTALL_PATH/submit/platforms``::
+Copy the closest-matching set of files into a new directory inside the ``platforms`` folder.
+Then, modify each of the following files as necessary for your platform::
 
-    submit_template_xxx.sh
-    mastmon_submit_xxx.sh
-    queue_commands_xxx.py
+    submit_template.sh
+    mastmon_submit.sh
+    queue_commands.py
 
-where ``xxx`` is the value in the ``$MAST_CONTROL/set_platform`` file.
 
 Go to $MAST_INSTALL_PATH and again run ::
 
     python initialize.py
 
+This time, select your new platform.
+
 ---------------------------------
-mastmon_submit_xxx.sh
+mastmon_submit.sh
 ---------------------------------
 This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time ``mast`` is called.
+
 It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
 
-    cd $MAST_INSTALL_PATH/submit
-    cp platforms/submit_<yourplatform>.sh submit.sh
+The script is copied into the $MAST_CONTROL directory by the ``initialize.py`` script and will be run from there.
 
-Modify submit.sh as necessary for your platform.
+Test mastmon_submit.sh by submitting it to the queue. A "mastmon" process should briefly appear on the queue. Continue to modify submit.sh until the "mastmon" process successfully runs on the queue.
 
-*  Examples of special modifications for submit.sh:
-        
-    *  ACI/HPC, add line: ``#SBATCH --partition=univ``
-    *  Bardeen, add a line to tell control where to run the monitor: ``#PBS -q morganshort``
+Use commands similar to these (``sbatch`` instead of ``qsub`` for slurm)::
 
-Test submit.sh by submitting it to the queue. A "mastmon" process should briefly appear on the queue. Continue to modify submit.sh until the "mastmon" process successfully runs on the queue.
-
-Use ::
-
-    qsub submit.sh
-    sbatch submit.sh
-
-or another command, depending on your platform.
+    cd $MAST_CONTROL
+    qsub mastmon_submit.sh
 
 ------------------------------------------
-submit_template_xxx.sh
+submit_template.sh
 ------------------------------------------
 This submission script template will be used to build submission scripts for the ingredients. Use ``?mast_keyword?`` to denote a place where MAST keywords (see :ref:`platforms`) may be substituted in.
 
 Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
 -----------------------------
-queue_commands_xxx.py
+queue_commands.py
 -----------------------------
 These queue commands will be used to submit ingredients to the queue.
 

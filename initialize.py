@@ -67,13 +67,13 @@ for onefile in filelist:
 
 #Get platform
 print "Setting up platform."
+platform_choices_raw = list()
+platform_choices_raw = os.listdir("%s/submit/platforms" % mycwd)
 platform_choices = list()
-platform_choices.append("bardeen")
-platform_choices.append("stampede")
-platform_choices.append("dlx")
-platform_choices.append("korczak")
-platform_choices.append("slurm_generic")
-platform_choices.append("pbs_generic")
+for platform in platform_choices_raw:
+    if os.path.isdir("%s/submit/platforms/%s" % (mycwd,platform)):
+        platform_choices.append(platform)
+platform_choices.sort()
 plask = "What is your platform?\n\n"
 plask = plask + "If your exact platform is not found (and even if it is), you may need to modify the files in $MAST_INSTALL_PATH/submit/platforms to conform to your platform.\n\n"
 plask = plask + "Choose from:\n"
