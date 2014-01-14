@@ -23,11 +23,15 @@ Each ingredient is given:
     *  Program-specific keywords
 *  Other MAST keywords, including:
 
-    *  The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)
-        *  The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
-        *  The .run. method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
-        *  The .complete. method: how MAST can tell if the ingredient is considered complete
-        *  The .update children. method: what information an ingredient passes on to its children, and how this information is passed on
+    *  The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)i
+
+    *  The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
+        
+    *  The .run. method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
+        
+    *  The .complete. method: how MAST can tell if the ingredient is considered complete
+        
+    *  The .update children. method: what information an ingredient passes on to its children, and how this information is passed on
 
 The same ingredient in a recipe may be listed more than once, with several different ingredient types. In this case, the first four methods and all the ingredient keywords are given by the first ingredient type encountered. Only the .update_children. method is changed for all subsequent positions. This situation indicates that the ingredient has many children, which must be updated in different ways and thus needs different update_children methods for those different situations.
 
