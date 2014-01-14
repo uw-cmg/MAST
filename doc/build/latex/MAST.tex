@@ -229,7 +229,7 @@ Please check your output carefully, especially when setting up a new workflow us
 \section{Installation}
 \label{1_0_installation:id1}
 
-\subsection{0. Pre-steps}
+\subsection{Pre-steps}
 \label{1_0_installation:pre-steps}
 Go directly to step 1 if you are on bardeen.
 \begin{itemize}
@@ -247,7 +247,7 @@ rm -r pip-build
 \end{itemize}
 
 
-\subsection{1. Verify your Python version}
+\subsection{Verify your Python version}
 \label{1_0_installation:verify-your-python-version}
 Check your version of python: \code{python -{-}version}
 
@@ -261,7 +261,7 @@ For bardeen, the line you need to add is:
 export PATH=//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin:\$PATH
 \end{Verbatim}
 
-For platforms with the ``module'' system like stampede or DLX, add the line:
+For platforms with the ``module'' system like stampede or DLX, check which modules are available (\code{module avail}) and add a line something like:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 module load python
@@ -277,9 +277,9 @@ If you already use python for something else and shifting python versions will i
 If you do not have or cannot find Python 2.7.3, then you must install it.
 
 
-\subsubsection{Installing python}
-\label{1_0_installation:installing-python}
-The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from here: {\color{red}\bfseries{}:ref:{}`EPD Free Canopy \textless{}https://www.enthought.com/downloads/\textgreater{}{}`\_}
+\subsubsection{Install python}
+\label{1_0_installation:install-python}
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from {\color{red}\bfseries{}:ref:{}`EPD Free Canopy \textless{}https://www.enthought.com/downloads/\textgreater{}{}`\_}
 \begin{itemize}
 \item {} 
 Version 2.7.5 is okay
@@ -316,7 +316,7 @@ Check your version of python: \code{python -{-}version}
 The version given must be the correct version. If not, for all subsequent commands that say \emph{python}, give the full path to your version of python, e.g. \code{//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin/python}
 
 
-\subsection{2. Verify setuptools (easy\_install) and pip}
+\subsection{Verify setuptools (easy\_install) and pip}
 \label{1_0_installation:verify-setuptools-easy-install-and-pip}
 Check if easy\_install and pip are available:
 \begin{itemize}
@@ -377,7 +377,7 @@ easy\_install and pip should now be located either wherever your installed pytho
 Check their locations and the pip version again.
 
 
-\subsection{3. Verify or install numpy and scipy}
+\subsection{Verify or install numpy and scipy}
 \label{1_0_installation:verify-or-install-numpy-and-scipy}
 Check if numpy and scipy available:
 
@@ -387,8 +387,13 @@ Check if numpy and scipy available:
 \PYG{k+kn}{import} \PYG{n+nn}{scipy}
 \end{Verbatim}
 
-If numpy and scipy are not available, we recommend that you go back to step 1 and install a local version of python which already includes numpy and scipy.
+If numpy and scipy are not available, we recommend that you go back and install a local version of python which already includes numpy and scipy.
 
+Scipy is optional at this stage (used in the MAST defect finder).
+
+
+\subsubsection{Install numpy (not recommended)}
+\label{1_0_installation:install-numpy-not-recommended}
 If numpy is not available, try pip installation:
 
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -438,8 +443,8 @@ Check if pymatgen and custodian available:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{n}{python}
-\PYG{k+kn}{import} \PYG{n+nn}{numpy}
-\PYG{k+kn}{import} \PYG{n+nn}{scipy}
+\PYG{k+kn}{import} \PYG{n+nn}{pymatgen}
+\PYG{k+kn}{import} \PYG{n+nn}{custodian}
 \end{Verbatim}
 
 If pymatgen and custodian are not available, install them.
@@ -646,6 +651,11 @@ export PATH=\$PATH://share/apps/MAST/bin:PATH
 
 \subsection{9. Modify submission details for your platform}
 \label{1_0_installation:modify-submission-details-for-your-platform}
+The following files should all reside in \code{\$MAST\_INSTALL\_PATH/submit}
+
+
+\subsubsection{submit.sh}
+\label{1_0_installation:submit-sh}
 This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time \code{mast} is called.
 It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
 \begin{quote}
