@@ -161,6 +161,17 @@ class TestSE(unittest.TestCase):
             myarr[idx-1][1]=True
             myarr[idx-1][2]=True
         self.assertEqual(sum(np.fabs(sum(mysd-myarr))),0)
+    def test_get_sd_array_periodic_boundary(self):
+        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        sxtend = StructureExtensions(struc_work1=perfect)
+        mysd = sxtend.get_sd_array("0.95 0.95 0.95", 1, 0.07)
+        #print mysd
+        myarr=np.zeros([40,3],bool)
+        for idx in [1]:
+            myarr[idx-1][0]=True
+            myarr[idx-1][1]=True
+            myarr[idx-1][2]=True
+        self.assertEqual(sum(np.fabs(sum(mysd-myarr))),0)
     def test_multiple_sd_array(self):
         perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
         sxtend = StructureExtensions(struc_work1=perfect)

@@ -207,7 +207,7 @@ class StructureExtensions(MASTObj):
         structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
-    def get_sd_array(self, phonon_center_site, phonon_center_radius, threshold=1e-2):
+    def get_sd_array(self, phonon_center_site, phonon_center_radius, threshold=1e-1):
         """Create a selective dynamics array.
             Args:
                 phonon_center_site <str>: phonon center site (coordinate)
@@ -268,7 +268,7 @@ class StructureExtensions(MASTObj):
         return allsites
 
 
-    def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius,threshold=1e-2):
+    def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius,threshold=1e-1):
         """Create a selective dynamics array, for use when every atom and every
             direction is a separate calculation (T F F, etc.)
             Args:
