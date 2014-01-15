@@ -162,9 +162,11 @@ class TestInputparser(unittest.TestCase):
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['host1']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_site']='0.1 0.2 0.3'
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['phonon_center_radius']=3.0
+        mdict['defects']['Vac@Al-Sub@Fe']['phonon']['host1']['threshold']=0.07
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']=dict()
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['phonon_center_site']='0.2 0.4 0.0'
         mdict['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['phonon_center_radius']=1.0
+        mdict['defects']['Vac@Al-Sub@Fe']['phonon']['sub2']['threshold']=0.1
         mdict['defects']['AntiGe@Fe']=dict()
         mdict['defects']['AntiGe@Fe']['threshold']=0.0001
         mdict['defects']['AntiGe@Fe']['charge']=[3]
@@ -271,9 +273,11 @@ class TestInputparser(unittest.TestCase):
         mdict['nebs']['vac1-vac3']['phonon']['solvent1']=dict()
         mdict['nebs']['vac1-vac3']['phonon']['solvent1']['phonon_center_site']='0.3 0.2 0.1'
         mdict['nebs']['vac1-vac3']['phonon']['solvent1']['phonon_center_radius']=3.0
+        mdict['nebs']['vac1-vac3']['phonon']['solvent1']['threshold']=0.1
         mdict['nebs']['vac1-vac3']['phonon']['solute1']=dict()
         mdict['nebs']['vac1-vac3']['phonon']['solute1']['phonon_center_site']='0.2 0.1 0.5'
         mdict['nebs']['vac1-vac3']['phonon']['solute1']['phonon_center_radius']=0.1
+        mdict['nebs']['vac1-vac3']['phonon']['solute1']['threshold']=0.05
         self.assertEqual(myoptions.options['neb'],mdict)
         #self.testclass.parse_neb_section(section_name, section_content, options)
 

@@ -715,15 +715,17 @@ For VASP, this inclusion takes the form of selective dynamics T T T for the atom
 
 If the phonon center radius is 0, only the atom found at the phonon center site point will be considered.
 
-To use phonons in the defects section, use the subsection keyword .phonon. followed by a label for the phonon, the fractional coordinates for the phonon center site, and a float value for the phonon center radius. Multiple separate phonon calculations may be obtained for each defect, for example::
+To use phonons in the defects section, use the subsection keyword .phonon. followed by a label for the phonon, the fractional coordinates for the phonon center site, a float value for the phonon center radius, and an optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used). Multiple separate phonon calculations may be obtained for each defect, for example::
 
     begin int1
     interstitial 0.25 0.25 0.25 X2
-    phonon host3 0.3 0.3 0.4 2.5
+    phonon host3 0.3 0.3 0.4 2.5 0.01
     phonon solute 0.1 0.1 0.2 0.5
     end
 
-In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates.
+In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site. 
+
+In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
 
 The recipe template file for phonons may include either the explicit phonon labels and their charge and defect label, or <N>_<Q>_<P> (defect label _ charge label _ phonon label).
 

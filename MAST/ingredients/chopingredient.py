@@ -185,9 +185,9 @@ class WriteIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr] = self.get_my_phonon_params()
+        [pcs,pcr,thresh] = self.get_my_phonon_params()
         sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr)
+        sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr, thresh)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
         sct=1
@@ -218,9 +218,9 @@ class WriteIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr] = self.get_my_phonon_params()
+        [pcs,pcr,thresh] = self.get_my_phonon_params()
         sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarr = sxtend.get_sd_array(pcs, pcr)
+        sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
         if sdarr == None:
             return
         self.checker.add_selective_dynamics_to_structure_file(sdarr)
@@ -229,11 +229,12 @@ class WriteIngredient(BaseIngredient):
         """Get phonon parameters from 
             ['program_keys']['mast_phonon_settings']['phonon_center_site'] and
             ['program_keys']['mast_phonon_settings']['phonon_center_radius'] 
+            ['program_keys']['mast_phonon_settings']['threshold'] 
             Returns:
-                [phonon_center_site, phonon_center_radius]
+                [phonon_center_site, phonon_center_radius, threshold]
         """
         myphdict = dict(self.keywords['program_keys']['mast_phonon_settings'])
-        return [myphdict['phonon_center_site'],myphdict['phonon_center_radius']]
+        return [myphdict['phonon_center_site'],myphdict['phonon_center_radius'],myphdict['threshold']]
 
 
 class IsReadyToRunIngredient(BaseIngredient):

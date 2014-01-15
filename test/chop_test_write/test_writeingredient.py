@@ -332,6 +332,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']=dict()
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
+        kdict['mast_phonon_settings']['threshold']="0.075"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_multiple()
@@ -369,6 +370,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']=dict()
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
+        kdict['mast_phonon_settings']['threshold']="0.075"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_single()
@@ -392,11 +394,13 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']=dict()
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
+        kdict['mast_phonon_settings']['threshold']="0.075"
         my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         mywi = WriteIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
-        [mysite, myrad] = mywi.get_my_phonon_params()
+        [mysite, myrad, mythresh] = mywi.get_my_phonon_params()
         self.assertEqual(mysite,"0.33 0.25 0.0")
         self.assertEqual(myrad,"1")
+        self.assertEqual(mythresh,"0.075")
         #self.testclass.get_my_phonon_params()
 
     def test_write_singlerun_automesh(self):

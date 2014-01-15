@@ -355,9 +355,13 @@ class InputParser(MASTObj):
                 plabel = line[1]
                 p_center = ' '.join(line[2:5])
                 p_radius = float(line[5])
+                p_thresh = 0.1
+                if len(line) > 6:
+                    p_thresh = float(line[6])
                 defect['phonon'][plabel]=dict()
                 defect['phonon'][plabel]['phonon_center_site'] = p_center
                 defect['phonon'][plabel]['phonon_center_radius'] = p_radius
+                defect['phonon'][plabel]['threshold'] = p_thresh
             else:
                 type_dict = dict()
 
@@ -562,9 +566,13 @@ class InputParser(MASTObj):
                     plabel = sline[1]
                     p_center = ' '.join(sline[2:5])
                     p_radius = float(sline[5])
+                    p_thresh = 0.1
+                    if len(sline) > 6:
+                        p_thresh = float(sline[6])
                     nebs[neblabel]['phonon'][plabel]=dict()
                     nebs[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center
                     nebs[neblabel]['phonon'][plabel]['phonon_center_radius'] = p_radius
+                    nebs[neblabel]['phonon'][plabel]['threshold'] = p_thresh
                 elif 'images' in line[0]:
                     nebs[neblabel]['images'] = int(line[0].split()[1])
                 else:

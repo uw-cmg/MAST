@@ -207,13 +207,16 @@ class StructureExtensions(MASTObj):
         structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
-    def get_sd_array(self, phonon_center_site, phonon_center_radius):
+    def get_sd_array(self, phonon_center_site, phonon_center_radius, threshold=1e-2):
         """Create a selective dynamics array.
             Args:
                 phonon_center_site <str>: phonon center site (coordinate)
                 phonon_center_radius <float>: phonon center radius
+                threshold <float>: absolute matching threshold for coordinates; 
+                    e.g. if this value is 0.1 then both (0.1,0,0) and (0.3,0,0) 
+                    will match for a search on center_site of (0.2,0,0)
         """
-        mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'])
+        mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'], threshold)
         mysd = np.zeros([self.keywords['struc_work1'].num_sites,3],bool)
         for myn in mynbarr:
             mysd[myn]=np.ones(3,bool)
@@ -233,6 +236,7 @@ class StructureExtensions(MASTObj):
         if phonon_center_site == None:
             return None
         pcscoord = np.array(phonon_center_site.strip().split(), float)
+        tol = float(tol)
         pcsarr = find_in_coord_list_pbc(mystruc.frac_coords, pcscoord,tol)
         uniqsites = np.unique(pcsarr)
 
@@ -264,18 +268,19 @@ class StructureExtensions(MASTObj):
         return allsites
 
 
-    def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius):
+    def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius,threshold=1e-2):
         """Create a selective dynamics array, for use when every atom and every
             direction is a separate calculation (T F F, etc.)
             Args:
                 phonon_center_site <str>: phonon center site (coordinate)
                 phonon_center_radius <float>: phonon center radius, in Angstroms
+                threshold <float>: absolute matching threshold for coordinates; e.g. if this value is 0.1, then both (0.1,0,0) and (0.3,0,0) will match for a search on center_site of (0.2,0,0)
             Returns:
                 mysdlist <list>: list of SD arrays
         """
         if phonon_center_site == None:
             return None
-        mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'])
+        mynbarr = self._get_neighbor_array(phonon_center_site, phonon_center_radius, self.keywords['struc_work1'], threshold)
         mysdlist=list()
         for myn in mynbarr:
             for myct in range(0,3):
