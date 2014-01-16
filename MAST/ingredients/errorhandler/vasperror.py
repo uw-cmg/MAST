@@ -49,7 +49,7 @@ class VaspError(BaseError):
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
         handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
-        handler_input_d['MASTInsufficientVirtualMemoryErrorHandler']=[self.keywords['name']]
+        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name']]
 
         return handler_input_d
 

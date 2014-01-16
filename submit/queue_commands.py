@@ -10,7 +10,7 @@ import time
 import importlib
 import subprocess
 import shutil
-
+import logging
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -233,9 +233,12 @@ def get_job_error_file(ingpath):
     tryitems = list()
     for diritem in dircontents:
         if tryfile in diritem:
-            tryitems.append = os.path.join(ingpath, tryfile)
+            tryitems.append(os.path.join(ingpath, tryfile))
+    if len(tryitems) == 0:
+        logger.warning("No job error file found for %s" % ingpath)
+        return None
     if len(tryitems) > 1:
-        logger.warning("More than one job error file found. Using first file %s" % tryitems[0])
+        logger.warning("More than one job error file found for %s. Using first file %s" % (ingpath, tryitems[0]))
     return tryitems[0]
     
 

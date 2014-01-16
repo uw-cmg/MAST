@@ -32,7 +32,7 @@ class MASTWalltimeErrorHandler(ErrorHandler):
         self.copyfromlist = list(copyfromlist)
         self.copytolist = list(copytolist)
     
-    def check():
+    def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
         if errfilepath == None:
             return False
@@ -67,7 +67,7 @@ class MASTWalltimeErrorHandler(ErrorHandler):
     @property
     def to_dict(self): return {"@module": self.__class__.__module__, "@class": self.__class__.__name__, "output_filename": self.output_filename, "timeout": self.timeout}
 
-class MASTInsufficientVirtualMemoryErrorHandler(ErrorHandler):
+class MASTMemoryErrorHandler(ErrorHandler):
     """Check if a job has insufficient virtual memory.
         If found, increases number of nodes and processors; typically
         the virtual memory requested is already at a max (at least for
@@ -81,11 +81,8 @@ class MASTInsufficientVirtualMemoryErrorHandler(ErrorHandler):
                 modifies submission script to add more nodes
         """
         self.ingpath = ingpath
-        self.archivelist = list(archivelist)
-        self.copyfromlist = list(copyfromlist)
-        self.copytolist = list(copytolist)
     
-    def check():
+    def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
         if errfilepath == None:
             return False

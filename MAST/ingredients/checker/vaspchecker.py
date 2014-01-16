@@ -933,7 +933,12 @@ class VaspChecker(BaseChecker):
             raise MASTError(self.__class__.__name__, "No OSZICAR file at %s" % self.keywords['name'])
         myosz = MASTFile(fullpath)
         mye0 = myosz.get_segment_from_last_line_match("E0", "E0=","d E =")
-        return float(mye0)
+        mye0float=""
+        try:
+            mye0float=float(mye0)
+        except TypeError:
+            self.logger.error("Failed to log energy %s" % str(mye0))
+        return mye0float
     def is_started(self):
         """See if the ingredient has been started on
             the queue.

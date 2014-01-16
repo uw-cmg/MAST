@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import time
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
