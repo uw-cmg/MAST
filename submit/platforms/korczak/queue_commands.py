@@ -40,29 +40,28 @@ def queue_status_from_text(jobid, queuetext):
     end = queuetext.find('\n')
     if end > -1:
         queuetext = queuetext[:end]
-
-    if system == "ranger":####Ranger
-        ranger_out = queuetext.split()[4]
-        if (ranger_out == 'wq') or (ranger_out == 'qw'):
-            final_out = 'Q'
-        elif ranger_out == 'r':
-            final_out = 'R'
-        return final_out
-
-    if system == "bardeen" or system == "curie":###Bardeen, Curie, etc.
-        qmat = queuetext.split()
-        if len(qmat) < 5:
-            return 'E'
-        return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
     
-    if system == "dlx":####UKy DLX
-        queuetext = queuetext.strip()
-        dlx_out = queuetext.split()[4] #indexing starts at 0
-        if (dlx_out == 'PD'):
-            final_out = 'Q'
-        elif dlx_out in ['CG','CD','R']:
-            final_out = 'R'
-        return final_out
+    qmat = queuetext.split()
+    if len(qmat) < 5:
+        return 'E'
+    return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
+
+    #if system == "ranger":####Ranger
+    #    ranger_out = queuetext.split()[4]
+    #    if (ranger_out == 'wq') or (ranger_out == 'qw'):
+    #        final_out = 'Q'
+    #    elif ranger_out == 'r':
+    #        final_out = 'R'
+    #    return final_out
+
+    #if system == "dlx":####UKy DLX
+    #    queuetext = queuetext.strip()
+    #    dlx_out = queuetext.split()[4] #indexing starts at 0
+    #    if (dlx_out == 'PD'):
+    #        final_out = 'Q'
+    #    elif dlx_out in ['CG','CD','R']:
+    #        final_out = 'R'
+    #    return final_out
 
 def extract_submitted_jobid(string):
     """
@@ -72,6 +71,7 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
+    return int(string.split('.')[0])
     ####Bardeen and Curie:
     if system == "bardeen" or system == "curie":
         final = ""
@@ -104,6 +104,8 @@ def queue_snap_command():
         OUTPUTS:
             Command for producing a queue snapshot
     """
+    return "qstat"
+
     qcmd=""
     if(compute_node):
         if(system == "ranger"):####Ranger, from compute node

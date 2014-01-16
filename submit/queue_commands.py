@@ -9,6 +9,7 @@ import math #TA to calc num_nodes
 import time
 import importlib
 import subprocess
+import shutil
 
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
@@ -52,6 +53,8 @@ def write_to_submit_list(mydir):
 def submit_from_submission_list():
     """Submit all entries from the submission list at
         $MAST_CONTROL/submitlist
+        Adds a job number to the top of the "jobids" file in each
+        ingredient directory.
     """
     control=dirutil.get_mast_control_path()
     submitlist=os.path.join(control, "submitlist")
@@ -64,20 +67,78 @@ def submit_from_submission_list():
     submitted=dict()
     subcommand = queue_submission_command()
     for subentry in subentries: # each entry is a directory name
+        if len(subentry) == 0:
+            continue
         subentry = subentry.strip()
         if not os.path.isdir(subentry):
-            pass
+            continue
         elif subentry in submitted.keys():
-            pass
+            continue
+        lastjobid = get_last_jobid(subentry)
+        jstatus="not yet determined"
+        if not (lastjobid == None):
+            jstatus = get_job_status_from_queue_snapshot(subentry, lastjobid)
+            if jstatus.lower() in ['r','q','h','e']: #running, queued, held, error
+                submitted[subentry]="Already on queue with status %s" % jstatus
+                continue
         else:
             os.chdir(subentry)
             subme=subprocess.Popen(subcommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             subme.wait()
             status=subme.communicate()[0]
+            write_to_jobids_file(subentry, status)
             submitted[subentry]=status
     print_submitted_dict(submitted)
     os.chdir(control)
-        
+
+def write_to_jobids_file(subentry, status):
+    """Write the job id to a jobids file in the ingredient directory.
+        Args:
+            subentry <str>: Folder from which the job was submitted 
+                            (ingredient folder)
+            status <str>: Job submission response from queueing system
+    """
+    jobid = extract_submitted_jobid(status)
+    jpath = "%s/jobids" % subentry
+    if not os.path.isfile(jpath):
+        jfile = MASTFile()
+    else:
+        jfile = MASTFile(jpath)
+    jfile.data.insert(0,str(jobid) + '\n')
+    jfile.to_file(jpath)
+    return
+
+def get_job_status_from_queue_snapshot(ingpath, jobid):
+    """Match a jobid to the queue_snapshot
+        Args:
+            ingpath <str>: ingredient path
+            jobid <int>: job id
+        Returns:
+            Queue status for the job, according to $MAST_CONTROL/queue_snapshot
+    """
+    myqs = MASTFile("%s/queue_snapshot" % os.getenv("MAST_CONTROL"))
+    jobstatus = ""
+    for qsline in myqs.data:
+        if str(jobid) in qsline:
+            jobstatus = queue_status_from_text(jobid, qsline)
+    return jobstatus
+
+def get_last_jobid(ingpath):
+    """Get the last job id from the jobids file in the ingredient path
+        Args:
+            ingpath <str>: ingredient path
+        Returns:
+            jobid <int>: job id, if available
+            None if no jobids file was found
+    """
+    jpath = "%s/jobids" % ingpath
+    if not os.path.isfile(jpath):
+        return None
+    jfile = MASTFile(jpath)
+    if len(jfile.data) == 0:
+        return None
+    return int(jfile.data[0].strip())
+
 def clear_submission_list():
     """Clear all entries from the submission list at
         $MAST_CONTROL/submitlist
@@ -133,40 +194,7 @@ def queue_status_from_text(jobid, queuetext):
             'R': Running
             'W': Waiting
     """
-    if (queuetext == None): 
-        return 'X'
-    if len(queuetext) == 0:
-        return 'X'
-    begin = queuetext.find(str(jobid))
-    if begin == -1:
-        return 'X'
-    queuetext = queuetext[begin:]
-    end = queuetext.find('\n')
-    if end > -1:
-        queuetext = queuetext[:end]
-
-    if system == "ranger":####Ranger
-        ranger_out = queuetext.split()[4]
-        if (ranger_out == 'wq') or (ranger_out == 'qw'):
-            final_out = 'Q'
-        elif ranger_out == 'r':
-            final_out = 'R'
-        return final_out
-
-    if system == "bardeen" or system == "curie":###Bardeen, Curie, etc.
-        qmat = queuetext.split()
-        if len(qmat) < 5:
-            return 'E'
-        return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
-    
-    if system == "dlx":####UKy DLX
-        queuetext = queuetext.strip()
-        dlx_out = queuetext.split()[4] #indexing starts at 0
-        if (dlx_out == 'PD'):
-            final_out = 'Q'
-        elif dlx_out in ['CG','CD','R']:
-            final_out = 'R'
-        return final_out
+    return my_queue_commands.queue_status_from_text(jobid, queuetext)
 
 def extract_submitted_jobid(string):
     """
@@ -176,29 +204,7 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
-    ####Bardeen and Curie:
-    if system == "bardeen" or system == "curie":
-        final = ""
-        for char in string:
-            if(char != '.'):
-                final += char
-            else:
-                return int(final)
-
-    if system == "ranger":####Ranger:
-        findme=0
-        findstr=""
-        findme = string.find("Your job") # ..... Your job 12345678 has been submitted.
-        if findme == -1: #TTM+1 2/11/12 if not found, return negative 1
-            return -1
-        findstr = string[findme+9:]
-        splitstr=[]
-        splitstr = findstr.split()
-        return int(splitstr[0])
-
-    if system == "dlx":###UKY DLX:
-        findstr = string.strip()
-        return int(findstr.split()[3])
+    return my_queue_commands.extract_submitted_jobid(string)
 
 def queue_snap_command():
     """
@@ -208,22 +214,6 @@ def queue_snap_command():
         OUTPUTS:
             Command for producing a queue snapshot
     """
-    qcmd=""
-    if(compute_node):
-        if(system == "ranger"):####Ranger, from compute node
-            #
-            qcmd = "ssh -f ranger 'qstat'"
+    return my_queue_commands.queue_snap_command()
 
-        if(system == "bardeen"):####Bardeen, from compute node
-            qcmd = "ssh -f bardeen 'qstat'" 
-    
-        if(system == "curie"):####Curie, from compute node
-            qcmd = "ssh -f curie 'qstat'"
-    else:###Direct from headnode
-        qcmd = 'qstat 2> /dev/null' #TTM 052212 sometimes requires /bin/bash
-    ###Direct from headnode, UKY DLX:
-        if(system == "dlx"):
-            uname=os.getenv("USER")
-            qcmd = "squeue -u " + uname
-    return qcmd
 
