@@ -9,6 +9,7 @@
 ############################################################################
 import os
 import logging
+from MAST.utility import loggerutils
 from MAST.utility import MASTFile
 
 """Utility to read the indented recipe file."""
@@ -25,7 +26,8 @@ def read_recipe(filename, verbose=0):
                 [childname]['method']=[method group]
             rname <str>: Recipe name
     """
-    logger=logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+    logger=logging.getLogger('mast')
+    logger=loggerutils.add_handler_for_control(logger)
 
     rfile = MASTFile(filename)
     rdata = list()

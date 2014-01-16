@@ -7,6 +7,7 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
+from MAST.utility import loggerutils
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import VaspNEBChecker
@@ -50,9 +51,8 @@ class BaseIngredient(MASTObj):
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
         
-        #logging.basicConfig(filename=os.path.join(os.getenv("MAST_CONTROL"),"mast.log"), level=logging.DEBUG)
-        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
-        #self.display_logger = logging.getLogger("DISPLAY_ME:%s" % self.keywords['name'])
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
         
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],

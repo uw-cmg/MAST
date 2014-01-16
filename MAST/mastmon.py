@@ -16,15 +16,14 @@ class MASTmon(object):
             self.scratch <str>: MAST_SCRATCH
             self._ARCHIVE <str>: MAST_ARCHIVE
             self.logger <logging logger>
-            self.loggerdict <dictionary of recipe-level loggers>
     """ 
     def __init__(self):
 
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
-        self.loggerdict=dict()
-        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = logging.getLogger('mastmon')
+        self.logger = loggerutils.add_handler_for_control(self.logger)
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -52,7 +51,6 @@ class MASTmon(object):
         shortdir = os.path.basename(fulldir) #only the recipe directory name
         if not os.path.exists(fulldir):
             raise MASTError(self.__class__.__name__, "No recipe directory at %s" % fulldir)
-        self.loggerdict[fulldir] = loggerutils.initialize_logger(os.path.join(fulldir, "mast_recipe.log"))
         if os.path.exists(os.path.join(fulldir, "MAST_SKIP")):
             self.logger.warning("Skipping recipe %s due to the presence of a MAST_SKIP file in the recipe directory." % shortdir)
             return

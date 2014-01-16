@@ -21,7 +21,8 @@ class BaseError(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
    
     def loop_through_errors(self):
         raise NotImplementedError

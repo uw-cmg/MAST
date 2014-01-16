@@ -42,8 +42,8 @@ class RecipePlan:
                        ingredient input options
             self.status <str>: Recipe status
             self.working_directory <str>: Recipe working directory
-            self.logger <logging logger>: MAST Monitor logger
-            self.recipe_logger <logging logger>: Recipe-directory logger
+            self.logger <logging logger>: Control-level logger
+            self.recipe_logger <logging logger>: Recipe-level logger
     """
     def __init__(self, name, working_directory):
         self.name            = name
@@ -57,8 +57,10 @@ class RecipePlan:
         self.ingred_input_options = dict()
         self.status="I"
         self.working_directory = working_directory
-        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
-        self.recipe_logger = logging.getLogger(os.path.join(self.working_directory,"mast_recipe.log"))
+        self.logger = logging.getLogger('mastmon')
+        self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.recipe_logger = logging.getLogger(self.working_directory)
+        self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
 
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
@@ -263,14 +265,14 @@ class RecipePlan:
             import time
             namestring = "Recipe name: %s" % self.name
             self.recipe_logger.info(namestring)
-            self.logger.info(namestring)
             self.recipe_logger.info(time.asctime())
+            self.logger.info(namestring)
             self.logger.info(time.asctime())
         for iname in ilist:
             if verbose == 1:
                 ingstring = "%30s : %4s" % (iname, self.ingredients[iname])
-                self.logger.info(ingstring)
                 self.recipe_logger.info(ingstring)
+                self.logger.info(ingstring)
             statusfile.data.append("%30s : %4s\n" % (iname, self.ingredients[iname]))
             if self.ingredients[iname] == "C":
                 totcomp = totcomp + 1
@@ -287,11 +289,11 @@ class RecipePlan:
             elif self.ingredients[iname] == "skip":
                 totskip = totskip + 1
         headerstring = "%8s %8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "USERSKIP", "TOTAL")
-        self.logger.info(headerstring)
         self.recipe_logger.info(headerstring)
+        self.logger.info(headerstring)
         valuestring = "%8i %8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, totskip, total)
-        self.logger.info(valuestring)
         self.recipe_logger.info(valuestring)
+        self.logger.info(valuestring)
         if totcomp == total:
             self.status = "C"
         else:

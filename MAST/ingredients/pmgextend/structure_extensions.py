@@ -22,8 +22,8 @@ class StructureExtensions(MASTObj):
             'name': (str, os.getenv("MAST_CONTROL"), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
-
-        self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure

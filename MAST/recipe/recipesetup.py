@@ -46,8 +46,10 @@ class RecipeSetup(MASTObj):
         self.input_options  = self.keywords['inputOptions']
         self.structure      = self.keywords['structure']
         self.work_dir    = self.keywords['workingDirectory']
-        self.logger = logging.getLogger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
-        self.recipe_logger = logging.getLogger(os.path.join(self.work_dir, "mast_recipe.log"))
+        self.logger = logging.getLogger('mastmon')
+        self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.recipe_logger = logging.getLogger(self.work_dir)
+        self.recipe_logger = loggerutils.add_handler_for_recipe(self.work_dir, self.recipe_logger)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
 

@@ -21,10 +21,8 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
-        try:
-            self.logger = logging.getLogger(os.path.join(os.path.dirname(self.keywords['name']),"mast_recipe.log"))
-        except: #if no logger is found, may be in subfolder. Move up one level.
-            self.logger = logging.getLogger(os.path.join(os.path.dirname(os.path.dirname(self.keywords['name'])),"mast_recipe.log"))
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
 
     
     def is_complete(self):
