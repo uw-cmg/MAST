@@ -94,6 +94,16 @@ def display_errors():
     if not os.path.isfile(errorpath):
         return
     myerrormast = MASTFile(errorpath)
+    has_traceback = False
+    for line in myerrormast.data:
+        if "traceback" in line.lower():
+            has_traceback = True
+            break
+    if has_traceback == False:
+        shutil.move(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+        if dirutil.directory_is_locked(mastscratch):
+            dirutil.unlock_directory(mastscratch)
+        return 0
     if len(myerrormast.data) > 0:
         print "--------------------------"
         print "Errors below indicate that MAST errored out the last time it ran."
@@ -110,6 +120,7 @@ def display_errors():
         print "2. Remove the $MAST_CONTROL/errormast file."
         print "3. Re-run MAST."
         print ""
+        shutil.copy(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
         if dirutil.directory_is_locked(mastscratch):
             dirutil.unlock_directory(mastscratch)
         return -1
