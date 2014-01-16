@@ -125,3 +125,10 @@ def queue_snap_command():
             qcmd = "squeue -u " + uname
     return qcmd
 
+def get_approx_job_error_file(jobid):
+    """
+        Return the approximate job error file name
+            Args:
+                jobid <int>: Job ID
+    """
+    return ".e%s" % str(jobid)

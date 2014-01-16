@@ -14,6 +14,7 @@ import shutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility import dirutil
+from MAST.utility import loggerutils
 
 mast_control = os.getenv("MAST_CONTROL")
 mast_install = os.getenv("MAST_INSTALL_PATH")
@@ -216,4 +217,25 @@ def queue_snap_command():
     """
     return my_queue_commands.queue_snap_command()
 
+def get_job_error_file(ingpath):
+    """
+        Return the job error file full path
+            Args:
+                ingpath <str>: ingredient path
+    """
+    logger = logging.getLogger('mast')
+    logger = loggerutils.add_handler_for_control(logger)
+    jobid = get_last_jobid(ingpath)
+    tryfile = my_queue_commands.get_approx_job_error_file(jobid)
+    if not os.path.isdir(ingpath):
+        return None
+    dircontents = os.listdir(ingpath)
+    tryitems = list()
+    for diritem in dircontents:
+        if tryfile in diritem:
+            tryitems.append = os.path.join(ingpath, tryfile)
+    if len(tryitems) > 1:
+        logger.warning("More than one job error file found. Using first file %s" % tryitems[0])
+    return tryitems[0]
+    
 

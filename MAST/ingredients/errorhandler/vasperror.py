@@ -48,10 +48,8 @@ class VaspError(BaseError):
         handler_input_d['FrozenJobErrorHandler']="mast_skip"
         handler_input_d['NonConvergingErrorHandler']="mast_skip"
         handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
-        frozensec=21000
-        if "mast_frozen_seconds" in self.keywords['program_keys'].keys():
-            frozensec = int(self.keywords['program_keys']['mast_frozen_seconds'])
-        handler_input_d['MASTFrozenJobErrorHandler']=["OUTCAR",frozensec,["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
+        handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
+        handler_input_d['MASTInsufficientVirtualMemoryErrorHandler']=[self.keywords['name']]
 
         return handler_input_d
 
