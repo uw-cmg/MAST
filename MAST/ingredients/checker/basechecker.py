@@ -24,7 +24,27 @@ class BaseChecker(MASTObj):
         self.logger = logging.getLogger(self.keywords['name'])
         self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
 
-    
+    def is_frozen(self, output_filename=""):
+        """Check if the ingredient is frozen.
+            Args:
+                output_filename <str>: Output filename to check (not full path)
+                    e.g. OUTCAR
+            Returns:
+                True if frozen, False otherwise
+        """
+        if output_filename == "":
+            self.logger.error("No output filename given for is_frozen check")
+            return False
+        frozensec=21000
+        if "mast_frozen_seconds" in self.keywords['program_keys'].keys():
+            frozensec = int(self.keywords['program_keys']['mast_frozen_seconds'])
+        st = os.stat(os.path.join(self.keywords['name'], output_filename)) 
+        if time.time() - st.st_mtime > frozensec: 
+            self.logger.warning("Ingredient appears frozen based on file %s" % output_filename)
+            return True
+        else:
+            return False
+
     def is_complete(self):
         raise NotImplementedError
     def is_started(self):

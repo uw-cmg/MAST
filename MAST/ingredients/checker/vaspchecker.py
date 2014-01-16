@@ -108,6 +108,11 @@ class VaspChecker(BaseChecker):
         """
         return self.copy_a_file(childpath, "OSZICAR", newname)
 
+    def is_frozen(self):
+        """Check if single VASP non-NEB calculation is frozen.
+        """
+        return BaseChecker.is_frozen(self, "OUTCAR")
+
     def is_complete(self):
         """Check if single VASP non-NEB calculation is complete.
         """

@@ -94,26 +94,27 @@ class BaseIngredient(MASTObj):
 
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
-        if self.checker.is_complete():
-            self.metafile.write_data('completed on', time.asctime())
-            if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
-                energy = self.checker.get_energy_from_energy_file()
-                self.metafile.write_data('energy', energy)
-            return True
-        else:
-            if not self.checker.is_started():
-                return False #hasn't started running yet.
-            else:
-                errct = self.errhandler.loop_through_errors()
-                if errct > 0:
-                    if 'mast_auto_correct' in self.keywords['program_keys'].keys():
-                        if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
-                            self.change_my_status("E")
-                        else:
-                            self.change_my_status("S")
+        if not self.checker.is_started():
+            return False #hasn't started running yet
+        if self.checker.is_complete() or self.checker.is_frozen():
+            errct = self.errhandler.loop_through_errors()
+            if errct > 0:
+                if 'mast_auto_correct' in self.keywords['program_keys'].keys():
+                    if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
+                        self.change_my_status("E")
                     else:
                         self.change_my_status("S")
+                else:
+                    self.change_my_status("S")
                 return False
+            else:
+                self.metafile.write_data('completed on', time.asctime())
+                if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
+                    energy = self.checker.get_energy_from_energy_file()
+                    self.metafile.write_data('energy', energy)
+                return True
+        else:
+            return False
 
     def directory_is_locked(self):
         return dirutil.directory_is_locked(self.keywords['name'])
