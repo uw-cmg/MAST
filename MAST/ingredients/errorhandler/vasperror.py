@@ -17,7 +17,6 @@ class VaspError(BaseError):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
-        self.logger.error("Uhoh!")
 
     def get_error_handlers(self):
         """Get error handler list from custodian.vasp.handlers.

@@ -45,7 +45,7 @@ def add_handler_for_recipe(rname, logger):
             rname <str>: Recipe full path
             logger <logging.Logger>: Logger
     """
-    print "Handler added for rname %s at %s" % (rname, time.asctime())
+    #print "Handler added for rname %s at %s" % (rname, time.asctime())
     logger.setLevel(logging.INFO)
     rnamevalid = validate_recipe_name(rname)
     formatstr ='%(asctime)s : %(module)10s: %(name)20s: %(levelname)8s : %(message)s'
