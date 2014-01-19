@@ -15,9 +15,4 @@ class PhonError(BaseError):
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
 
-    def loop_through_errors(self):
-        """Loop through all errors in the error handlers.
-        """
-        errct = 0
-        return errct
     
