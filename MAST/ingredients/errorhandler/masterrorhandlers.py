@@ -73,14 +73,17 @@ class MASTMemoryErrorHandler(ErrorHandler):
         the virtual memory requested is already at a max (at least for
         CMG queues).
     """
-    def __init__(self, ingpath):
+    def __init__(self, ingpath, archivelist=list()):
         """
             Args:
                 ingpath <str>: ingredient path
+                archivelist <list of str>: list of file names to be archived 
+                        e.g. OUTCAR (optional)
             Returns:
                 modifies submission script to add more nodes
         """
         self.ingpath = ingpath
+        self.archivelist = archivelist
     
     def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
@@ -106,6 +109,15 @@ class MASTMemoryErrorHandler(ErrorHandler):
             actions.append("Multiplied mast_processors by %i" % (multiplier, newprocs))
         script_commands.write_submit_script(self.keywords)
         actions.append("Wrote new submission script.")
+        #archive old files. But, for insufficient virtual memory, not worth
+        # trying to copy files, for example, CONTCAR to POSCAR, as the run
+        # probably did not actually run to begin with.
+        backup(self.archivelist)
+        actions.append("Archived files %s" % self.archivelist)
+        for fname in self.archivelist:
+            if os.path.isfile("%s/%s" % (self.keywords['name'],fname)):
+                os.remove("%s/%s" % (self.keywords['name'],fname))
+
         return {"errors": ["MAST insufficient virtual memory error"], "actions": actions}
 
     @property

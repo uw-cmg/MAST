@@ -23,9 +23,8 @@ class VaspError(BaseError):
             This is a dynamic function because the Materials Project is
             continuously adding new handlers.
         """
-        handlerlist = inspect.getmembers(handlers)
-        handlerlist.extend(inspect.getmembers(masterrorhandlers))
-        handlerdict=dict()
+        handlerdict = BaseError.get_error_handlers(self)
+        handlerlist = inspect.getmembers(handlers))
         for htry in handlerlist:
             hname = htry[0]
             if 'ErrorHandler' in hname and not (hname == 'ErrorHandler'):
@@ -45,68 +44,11 @@ class VaspError(BaseError):
         handler_input_d['UnconvergedErrorHandler']=["vasprun.xml"]
         handler_input_d['PoscarErrorHandler']=["OUTCAR"]
         handler_input_d['TripleProductErrorHandler']=["OUTCAR"]
-        handler_input_d['FrozenJobErrorHandler']="mast_skip"
-        handler_input_d['NonConvergingErrorHandler']="mast_skip"
-        handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
+        #handler_input_d['FrozenJobErrorHandler']="mast_skip"
+        #handler_input_d['NonConvergingErrorHandler']="mast_skip"
+        #handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
         handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR"],["CONTCAR"],["POSCAR"]]
-        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name']]
+        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR"]]
 
         return handler_input_d
 
-    def loop_through_errors(self):
-        """Loop through all errors in the error handlers.
-        """
-        mydir = self.keywords['name']
-        errct = 0
-        handlerdict = self.get_error_handlers() 
-        handler_input_d = self.set_handler_inputs()
-        myerror = ""
-        os.chdir(mydir)
-        self.logger.info("Checking errors for: %s" % mydir)
-        for hname in handlerdict.keys():
-            hinputs=""
-            if hname in handler_input_d.keys():
-                hinputs = handler_input_d[hname]
-            if hinputs == "mast_skip":
-                self.logger.info("Skipping %s" % hname)
-                pass
-            else:
-                self.logger.info("Checking for %s" % hname)
-                if len(hinputs) == 0:
-                    myerror = handlerdict[hname]()
-                elif len(hinputs) < 2:
-                    myerror = handlerdict[hname](hinputs[0])
-                elif len(hinputs) < 3:
-                    myerror = handlerdict[hname](hinputs[0],hinputs[1])
-                elif len(hinputs) < 4:
-                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2])
-                elif len(hinputs) < 5:
-                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3])
-                elif len(hinputs) < 6:
-                    myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3],hinputs[4])
-                else:
-                    raise MASTError(self.__class__.__name__,"Error %s has too many inputs (more than 5)" % hname)
-                if myerror.check():
-                    self.logger.error("%s Error found in directory %s! Attempting to correct." % (hname, self.keywords['name']))
-                    errct = errct + 1
-                    if "mast_auto_correct" in self.keywords['program_keys'].keys():
-                        if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
-                            errpath = os.path.join(os.path.dirname(mydir), "MAST_ERROR")
-                            if not os.path.isfile(errpath):
-                                errfile = MASTFile()
-                            else:
-                                errfile = MASTFile(errpath)
-                            errfile.data.append("Error %s found in error handling for ingredient %s! Writing MAST_ERROR file for recipe.\n" % (hname, mydir))
-                            errfile.to_file(errpath)
-                        else:
-                            c_dict = myerror.correct()
-                            self.logger.error("Errors: %s" % c_dict["errors"])
-                            self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
-                    else: 
-                        c_dict = myerror.correct()
-                        self.logger.error("Errors: %s" % c_dict["errors"])
-                        self.logger.error("Actions taken for %s: %s" % (self.keywords['name'],c_dict["actions"]))
-                else:
-                    self.logger.info("%s No error found." % hname)
-                    pass
-        return errct
