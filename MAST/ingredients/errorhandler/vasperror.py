@@ -24,7 +24,7 @@ class VaspError(BaseError):
             continuously adding new handlers.
         """
         handlerdict = BaseError.get_error_handlers(self)
-        handlerlist = inspect.getmembers(handlers))
+        handlerlist = inspect.getmembers(handlers)
         for htry in handlerlist:
             hname = htry[0]
             if 'ErrorHandler' in hname and not (hname == 'ErrorHandler'):
