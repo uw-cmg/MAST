@@ -233,7 +233,7 @@ def get_job_error_file(ingpath):
     tryitems = list()
     for diritem in dircontents:
         if tryfile in diritem:
-            tryitems.append(os.path.join(ingpath, tryfile))
+            tryitems.append(os.path.join(ingpath, diritem))
     if len(tryitems) == 0:
         logger.warning("No job error file found for %s" % ingpath)
         return None
