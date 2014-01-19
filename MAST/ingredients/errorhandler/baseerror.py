@@ -2,11 +2,13 @@ import os
 import time
 import shutil
 import logging
+import inspect
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.utility import loggerutils
+from MAST.ingredients.errorhandler import masterrorhandlers 
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
@@ -72,11 +74,21 @@ class BaseError(MASTObj):
             #if hinputs == "mast_skip":
             #    self.logger.info("Skipping %s" % hname)
             #    pass
-            self.logger.info("Checking for %s" % hname)
+            self.logger.info("Checking for %s with inputs %s." % (hname, hinputs))
             if len(hinputs) == 0:
                 myerror = handlerdict[hname]()
+            elif len(hinputs) == 1:
+                myerror = handlerdict[hname](hinputs[0])
+            elif len(hinputs) == 2:
+                myerror = handlerdict[hname](hinputs[0],hinputs[1])
+            elif len(hinputs) == 3:
+                myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2])
+            elif len(hinputs) == 4:
+                myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3])
+            elif len(hinputs) == 5:
+                myerror = handlerdict[hname](hinputs[0],hinputs[1],hinputs[2],hinputs[3],hinputs[4])
             else:
-                myerror = handlerdict[hname](hinputs)
+                raise MASTError(self.__class__.__name__, "Error %s has too many inputs (> 5)" % hname)
             if myerror.check():
                 self.logger.error("%s Error found in directory %s!" % (hname, self.keywords['name']))
                 errct = errct + 1

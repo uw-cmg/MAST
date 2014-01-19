@@ -92,6 +92,10 @@ class VaspNEBChecker(VaspChecker):
             imct = imct + 1
         return
         
+    def is_frozen(self):
+        """Check if single VASP non-NEB calculation is frozen.
+        """
+        return BaseChecker.is_frozen(self, "vasprun.xml")
     def is_complete(self):
         """Check if all images in a VASP NEB calculation are complete.
         """

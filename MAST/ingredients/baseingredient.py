@@ -96,7 +96,9 @@ class BaseIngredient(MASTObj):
         '''Function to check if Ingredient is ready'''
         if not self.checker.is_started():
             return False #hasn't started running yet
-        if self.checker.is_complete() or self.checker.is_frozen():
+        complete = self.checker.is_complete()
+        frozen = self.checker.is_frozen()
+        if complete or frozen:
             errct = self.errhandler.loop_through_errors()
             if errct > 0:
                 if 'mast_auto_correct' in self.keywords['program_keys'].keys():
@@ -108,11 +110,14 @@ class BaseIngredient(MASTObj):
                     self.change_my_status("S")
                 return False
             else:
-                self.metafile.write_data('completed on', time.asctime())
-                if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
-                    energy = self.checker.get_energy_from_energy_file()
-                    self.metafile.write_data('energy', energy)
-                return True
+                if complete:
+                    self.metafile.write_data('completed on', time.asctime())
+                    if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
+                        energy = self.checker.get_energy_from_energy_file()
+                        self.metafile.write_data('energy', energy)
+                    return True
+                else:
+                    return False
         else:
             return False
 
