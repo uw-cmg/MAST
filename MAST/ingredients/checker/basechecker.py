@@ -107,6 +107,7 @@ class BaseChecker(MASTObj):
         """
         parentpath = self.keywords['name']
         dirutil.lock_directory(childpath)
+        self.logger.info("Attempting copy of %s/%s into %s/%s" % (parentpath, pfname, childpath, cfname))
         if os.path.isfile("%s/%s" % (parentpath, pfname)):
             if not os.path.isfile("%s/%s" % (childpath, cfname)):
                 shutil.copy("%s/%s" % (parentpath, pfname),"%s/%s" % (childpath, cfname))

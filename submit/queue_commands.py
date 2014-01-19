@@ -71,6 +71,8 @@ def submit_from_submission_list():
         if len(subentry) == 0:
             continue
         subentry = subentry.strip()
+        if len(subentry) == 0:
+            continue
         if not os.path.isdir(subentry):
             continue
         elif subentry in submitted.keys():
@@ -82,13 +84,12 @@ def submit_from_submission_list():
             if jstatus.lower() in ['r','q','h','e']: #running, queued, held, error
                 submitted[subentry]="Already on queue with status %s" % jstatus
                 continue
-        else:
-            os.chdir(subentry)
-            subme=subprocess.Popen(subcommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subme.wait()
-            status=subme.communicate()[0]
-            write_to_jobids_file(subentry, status)
-            submitted[subentry]=status
+        os.chdir(subentry)
+        subme=subprocess.Popen(subcommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subme.wait()
+        status=subme.communicate()[0]
+        write_to_jobids_file(subentry, status)
+        submitted[subentry]=status
     print_submitted_dict(submitted)
     os.chdir(control)
 
@@ -227,6 +228,7 @@ def get_job_error_file(ingpath):
     logger = loggerutils.add_handler_for_control(logger)
     jobid = get_last_jobid(ingpath)
     tryfile = my_queue_commands.get_approx_job_error_file(jobid)
+    logger.info("Try this search string: %s" % tryfile)
     if not os.path.isdir(ingpath):
         return None
     dircontents = os.listdir(ingpath)

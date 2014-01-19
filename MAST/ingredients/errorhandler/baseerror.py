@@ -51,7 +51,7 @@ class BaseError(MASTObj):
             e.g. vasperror.py
         """
         handler_input_d=dict()
-        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name']]
+        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],self.keywords]
         return handler_input_d
 
     def loop_through_errors(self):

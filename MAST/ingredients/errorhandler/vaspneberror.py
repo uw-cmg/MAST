@@ -27,20 +27,25 @@ class VaspNEBError(BaseError):
         handler_input_d=dict()
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
         numim = int(numim)
-        archlist = list()
+        warchlist = list()
+        marchlist = list()
         clist = list()
         plist = list()
         for imct in range(1, numim+1):
             imstr = str(imct).zfill(2)
-            archlist.append("%s/OUTCAR" % imstr)
-            archlist.append("%s/OSZICAR" % imstr)
-            archlist.append("%s/CONTCAR" % imstr)
-            archlist.append("%s/POSCAR" % imstr)
-            archlist.append("%s/XDATCAR" % imstr)
+            warchlist.append("%s/OUTCAR" % imstr)
+            warchlist.append("%s/OSZICAR" % imstr)
+            warchlist.append("%s/CONTCAR" % imstr)
+            warchlist.append("%s/POSCAR" % imstr)
+            warchlist.append("%s/XDATCAR" % imstr)
+            marchlist.append("%s/OUTCAR" % imstr)
+            marchlist.append("%s/OSZICAR" % imstr)
+            marchlist.append("%s/CONTCAR" % imstr)
+            marchlist.append("%s/XDATCAR" % imstr)
             clist.append("%s/CONTCAR" % imstr)
             plist.append("%s/POSCAR" % imstr)
-        handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],archlist, clist, plist]
-        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],archlist]
+        handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],warchlist, clist, plist]
+        handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],self.keywords,marchlist]
 
         return handler_input_d
 

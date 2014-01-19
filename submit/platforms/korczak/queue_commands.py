@@ -131,4 +131,7 @@ def get_approx_job_error_file(jobid):
             Args:
                 jobid <int>: Job ID
     """
-    return ".e%s" % str(jobid)
+    if jobid == None:
+        return ".e"
+    else:
+        return ".e%s" % str(jobid)

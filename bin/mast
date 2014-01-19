@@ -52,12 +52,17 @@ def submit_and_monitor():
         print "The $MAST_SCRATCH directory is locked by a MAST monitor. Please wait for that monitor to complete, or check the $MAST_CONTROL/errormast file."
         return
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1) 
+    print "Moving log file."
     move_log()
+    print "Submitting from submission list."
     queue_commands.submit_from_submission_list()
+    print "Clearing submission list."
     queue_commands.clear_submission_list()
     display_recent_submissions()
+    print "Getting queue snapshot."
     clear_and_get_queue_snapshot()
     dirutil.unlock_directory(dirutil.get_mast_scratch_path())
+    print "Locking directory and submitting MAST monitor."
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
     mycwd=os.getcwd()
     mast_control = os.getenv("MAST_CONTROL")

@@ -6,12 +6,14 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
+from MAST.utility import loggerutils
 from submit import queue_commands
 from submit import script_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
 from custodian.custodian import ErrorHandler, backup
+import logging
 
 class MASTWalltimeErrorHandler(ErrorHandler):
     """Check if a job has exceeded its walltime."""
@@ -31,6 +33,8 @@ class MASTWalltimeErrorHandler(ErrorHandler):
         self.archivelist = list(archivelist)
         self.copyfromlist = list(copyfromlist)
         self.copytolist = list(copytolist)
+        self.logger = logging.getLogger(self.ingpath)
+        self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
     
     def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
@@ -73,10 +77,11 @@ class MASTMemoryErrorHandler(ErrorHandler):
         the virtual memory requested is already at a max (at least for
         CMG queues).
     """
-    def __init__(self, ingpath, archivelist=list()):
+    def __init__(self, ingpath, keywords, archivelist=list()):
         """
             Args:
                 ingpath <str>: ingredient path
+                keywords <dict>: keyword dictionary
                 archivelist <list of str>: list of file names to be archived 
                         e.g. OUTCAR (optional)
             Returns:
@@ -84,9 +89,13 @@ class MASTMemoryErrorHandler(ErrorHandler):
         """
         self.ingpath = ingpath
         self.archivelist = archivelist
-    
+        self.logger = logging.getLogger(self.ingpath)
+        self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
+        self.keywords = keywords
+
     def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
+        self.logger.info("Checking file at %s" % errfilepath)
         if errfilepath == None:
             return False
         errfile = MASTFile(errfilepath)
@@ -97,16 +106,18 @@ class MASTMemoryErrorHandler(ErrorHandler):
     def correct(self): 
         actions=list()
         multiplier = 4
-        if ['mast_nodes'] in self.keywords['program_keys'].keys():
+        
+        if 'mast_nodes' in self.keywords['program_keys'].keys():
             currnodes = self.keywords['program_keys']['mast_nodes']
             newnodes = int(currnodes) * multiplier
             self.keywords['program_keys']['mast_nodes'] = newnodes
-            actions.append("Multiplied mast_nodes by %i" % (multiplier, newnodes))
-        if ['mast_processors'] in self.keywords['program_keys'].keys():
+            actions.append("Multiplied mast_nodes by %i to get %i" % (multiplier, newnodes))
+        
+        if 'mast_processors' in self.keywords['program_keys'].keys():
             currprocs = self.keywords['program_keys']['mast_processors']
             newprocs = int(currprocs) * multiplier
             self.keywords['program_keys']['mast_processors'] = newprocs
-            actions.append("Multiplied mast_processors by %i" % (multiplier, newprocs))
+            actions.append("Multiplied mast_processors by %i to get %i" % (multiplier, newprocs))
         script_commands.write_submit_script(self.keywords)
         actions.append("Wrote new submission script.")
         #archive old files. But, for insufficient virtual memory, not worth
