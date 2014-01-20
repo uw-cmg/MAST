@@ -230,7 +230,7 @@ class RecipePlan:
             P = ready to Proceed
             C = Complete
         """
-        self.fast_forward_check_complete()
+        #self.fast_forward_check_complete()
         self.check_if_have_parents()
         self.check_if_ready_to_proceed_are_complete()
         self.check_if_parents_are_complete()
