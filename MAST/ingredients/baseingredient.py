@@ -206,7 +206,19 @@ class BaseIngredient(MASTObj):
             Args:
                 newstatus <str>: New status to which to change the ingredient.
         """
-        statuspath = "%s/change_status.txt" % self.keywords['name']
+        ingdir = self.keywords['name']
+        oneup = os.path.dirname(ingdir)
+        tryrecipe = os.path.basename(oneup)
+        statuspath = ""
+        if dirutil.dir_is_in_scratch(tryrecipe):
+            statuspath = "%s/change_status.txt" % ingdir
+        else:
+            twoup = os.path.dirname(oneup)
+            tryrecipe = os.path.basename(twoup)
+            if dirutil.dir_is_in_scratch(tryrecipe):
+                statuspath = "%s/change_status.txt" % oneup
+            else:
+                raise MASTError(self.__class__.__name__, "Cannot change status of ingredient %s as recipe %s or %s is not found in $MAST_SCRATCH." % (self.keywords['name'],oneup, twoup))
         if os.path.isfile(statuspath):
             statusfile = MASTFile(statuspath)
         else:

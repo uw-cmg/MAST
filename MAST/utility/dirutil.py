@@ -238,4 +238,16 @@ def list_methods(myclass=None, printout=1):
             print myentry
     return parsedlist
 
-                
+def dir_is_in_scratch(mydir):
+    """Check if the directory is in the $MAST_SCRATCH directory.
+        Args:
+            mydir <str>: directory name (not full path)
+        Returns:
+            True or False
+    """
+    scratch = get_mast_scratch_path()
+    dirs_in_scratch = os.listdir(scratch)
+    if (mydir in dirs_in_scratch):
+        return True
+    else:
+        return False
