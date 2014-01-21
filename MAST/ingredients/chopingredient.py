@@ -10,6 +10,7 @@
 import os
 import numpy as np
 import logging
+import shutil
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
@@ -37,16 +38,82 @@ class ChopIngredient(BaseIngredient):
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
+    def _fullpath_childname(self, childname):
+        """Get full path of the child directory.
+            Args: 
+                childname <str>: child directory
+        """
+        cshort = os.path.basename(childname)
+        recipedir = os.path.dirname(self.keywords['name'])
+        tryrecipe = os.path.basename(recipedir)
+        if not (dirutil.dir_is_in_scratch(tryrecipe)):
+            recipedir = os.path.dirname(recipedir)
+            tryrecipe = os.path.basename(recipedir)
+            if not (dirutil.dir_is_in_scratch(tryrecipe)):
+                raise MASTError(self.__class__.__name__, "Could not find child directory %s in %s" % (childname, recipedir))
+        return os.path.join(recipedir, cshort)
 
-class WriteIngredient(BaseIngredient):
-    def __init__(self, **kwargs):
-        allowed_keys = {
-            'name' : (str, str(), 'Name of directory'),
-            'program': (str, str(), 'Program, e.g. "vasp"'),
-            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
-            }
-        BaseIngredient.__init__(self, allowed_keys, **kwargs)
+
+    def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0):
+        """Copy a file.
+            Args:
+                copyfrom <str>: name to copy from, e.g. CONTCAR
+                copyto <str>: name to copy to, e.g. POSCAR
+                childdir <str>: child directory.
+                    If not given, use the same directory.
+                softlink <int>: 0 (default) - copy
+                                1 - softlink
+            Log an error if the file is already found
+                and do not copy over.
+            Do not copy over if the file is empty.
+        """
+        mydir = self.keywords['name']
+        if copyfrom == "":
+            raise MASTError(self.__class__.__name__, "No copy-from file given, ingredient %s" % mydir)
+        if copyto == "":
+            copyto = copyfrom
+        if childdir == "":
+            childdir = mydir
+        if not os.path.isdir(childdir):
+            raise MASTError(self.__class__.__name__, "No directory for copying into, at %s" % childdir)
+        if childdir == mydir and copyfrom == copyto:
+            raise MASTError(self.__class__.__name__, "Copy-from and copy-to are the same file and directory for ingredient %s" % mydir)
+        self.logger.info("Attempting to copy %s/%s to %s/%s" % (mydir, copyfrom, childdir, copyto))
+        frompath = "%s/%s" % (mydir, copyfrom)
+        topath = "%s/%s" % (childdir, copyto)
+        if not os.path.isfile(frompath):
+            self.logger.error("No file at %s. Skipping copy." % frompath)
+        else:
+            if os.path.isfile(topath):
+                self.logger.error("File found at %s already. Skipping copy." % topath)
+            else:
+                myfile = MASTfile(frompath)
+                if len(myfile.data) == 0:
+                    self.logger.error("File at %s is empty. Skipping copy." % frompath)
+                else:
+                    if softlink == 1:
+                        curpath = os.getcwd()
+                        os.chdir(childdir)
+                        mylink=subprocess.Popen("ln -s %s/%s %s" % (mydir, copyfrom, copyto), shell=True)
+                        mylink.wait()
+                        os.chdir(curpath)
+                        self.logger.info("Softlinked file from %s to %s" % (frompath, topath))
+                    else:
+                        shutil.copy(frompath, topath)
+                        self.logger.info("Copied file from %s to %s" % (frompath, topath))
+        return
+
+    def softlink_file(self, linkfrom="", linkto="", childdir=""):
+        """Softlink a file.
+            Args:
+                linkfrom <str>: name to link from, e.g. CONTCAR
+                linkto <str>: name to link to, e.g. POSCAR
+                childdir <str>: child directory.
+            Log an error if the file is already found
+                and do not copy over.
+        """
+        return self.copy_file(linkfrom, linkto, childdir, 1)
+
 
     def no_setup(self):
         """No setup is needed."""
@@ -248,14 +315,6 @@ class WriteIngredient(BaseIngredient):
         return [myphdict['phonon_center_site'],myphdict['phonon_center_radius'],myphdict['threshold']]
 
 
-class IsReadyToRunIngredient(BaseIngredient):
-    def __init__(self, **kwargs):
-        allowed_keys = {
-            'name' : (str, str(), 'Name of directory'),
-            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
-            }
-        BaseIngredient.__init__(self, allowed_keys, **kwargs)
     def ready_singlerun(self):
         return BaseIngredient.is_ready_to_run(self)
     def ready_structure(self):
@@ -310,14 +369,6 @@ class IsReadyToRunIngredient(BaseIngredient):
         else:
             return False
 
-class RunIngredient(BaseIngredient):
-    def __init__(self, **kwargs):
-        allowed_keys = {
-            'name' : (str, str(), 'Name of directory'),
-            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
-            }
-        BaseIngredient.__init__(self, allowed_keys, **kwargs)
     def run_singlerun(self, mode='serial'):
         return BaseIngredient.run(self, mode)
     def run_neb_subfolders(self):
@@ -415,14 +466,6 @@ class RunIngredient(BaseIngredient):
         self.checker.write_final_structure_file(scaled)
         return
 
-class IsCompleteIngredient(BaseIngredient):
-    def __init__(self, **kwargs):
-        allowed_keys = {
-            'name' : (str, str(), 'Name of directory'),
-            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
-            }
-        BaseIngredient.__init__(self, allowed_keys, **kwargs)
     def complete_structure(self):
         if self.directory_is_locked():
             return False
@@ -478,26 +521,6 @@ class IsCompleteIngredient(BaseIngredient):
         else:
             return False
 
-class UpdateChildrenIngredient(BaseIngredient):
-    def __init__(self, **kwargs):
-        allowed_keys = {
-            'name' : (str, str(), 'Name of directory'),
-            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
-            }
-        BaseIngredient.__init__(self, allowed_keys, **kwargs)
-    def _fullpath_childname(self, childname):
-        """Make sure the childname has a full path.
-            Args:
-                childname <str>: child name, like defect_1
-            Returns:
-                fullpathchild <str>: full path to child, e.g.
-                $MAST_SCRATCH/recipefolder/defect_1
-        """
-        fullpathchild=""
-        mydirname = os.path.dirname(self.keywords['name'])
-        fullpathchild = os.path.join(mydirname, childname)
-        return fullpathchild
 
     def give_structure(self, childname):
         childname = self._fullpath_childname(childname)

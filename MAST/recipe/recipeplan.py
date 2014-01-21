@@ -14,11 +14,11 @@ import inspect
 import subprocess
 from MAST.ingredients.chopingredient import ChopIngredient
 from customlib.customchopingredient import CustomChopIngredient
-from MAST.ingredients.chopingredient import WriteIngredient
-from MAST.ingredients.chopingredient import IsReadyToRunIngredient
-from MAST.ingredients.chopingredient import RunIngredient
-from MAST.ingredients.chopingredient import IsCompleteIngredient
-from MAST.ingredients.chopingredient import UpdateChildrenIngredient
+#from MAST.ingredients.chopingredient import WriteIngredient
+#from MAST.ingredients.chopingredient import IsReadyToRunIngredient
+#from MAST.ingredients.chopingredient import RunIngredient
+#from MAST.ingredients.chopingredient import IsCompleteIngredient
+#from MAST.ingredients.chopingredient import UpdateChildrenIngredient
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
 from MAST.utility import loggerutils
@@ -66,7 +66,7 @@ class RecipePlan:
         self.recipe_logger = logging.getLogger(self.working_directory)
         self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
 
-    def do_ingredient_methods(self, iname, methodtype):
+    def do_ingredient_methods(self, iname, methodtype, childname=""):
         """Do the ingredient methods.
             Args:
                 iname <str>: ingredient name
@@ -81,13 +81,15 @@ class RecipePlan:
         elif methodtype == 'mast_complete_method':
             mdict = self.complete_methods[iname]
         elif methodtype == 'mast_update_children_method':
-            mdict = self.update_methods[iname]
+            mdict = self.update_methods[iname][childname]
         else:
             raise MASTError(self.__class__.__name__,"Bad call to do_ingredient_methods with method type %s" % methodtype)
         allresults = list()
         self.logger.info("Do methods for %s" % methodtype)
         for methoditem in mdict.keys():
             minputs = list(mdict[methoditem])
+            if methodtype == 'mast_update_children_method':
+                minputs.append(childname)
             mresult = self.run_a_method(iname, methoditem, minputs)
             allresults.append(mresult)
         return allresults
@@ -190,6 +192,7 @@ class RecipePlan:
                 iscomplete = True
             else:
                 pass
+        self.recipe_logger.info("Completeness evaluation: %s (from %s)" % (iscomplete, cresults))
         return iscomplete
 
     def ready_ingredient(self, iname):
@@ -207,8 +210,8 @@ class RecipePlan:
         """Update the children of an ingredient
         """
         upd_results=list()
-        for childname in self.update_methods[iname]:
-            upd_results.append(self.do_ingredient_methods(iname, "mast_update_children_method"))
+        for childname in self.update_methods[iname].keys():
+            upd_results.append(self.do_ingredient_methods(iname, "mast_update_children_method", childname))
         return upd_results
 
     def fast_forward_check_complete(self):

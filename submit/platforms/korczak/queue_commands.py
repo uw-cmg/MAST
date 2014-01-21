@@ -71,6 +71,8 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
+    if string == "":
+        return None
     return int(string.split('.')[0])
     ####Bardeen and Curie:
     if system == "bardeen" or system == "curie":
