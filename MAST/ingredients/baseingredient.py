@@ -108,6 +108,7 @@ class BaseIngredient(MASTObj):
                         self.change_my_status("S")
                 else:
                     self.change_my_status("S")
+                self.errhandler.clean_up_directory()
                 return False
             else:
                 if complete:

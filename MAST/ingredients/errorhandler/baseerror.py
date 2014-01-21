@@ -104,3 +104,17 @@ class BaseError(MASTObj):
                 pass
         return errct
 
+    def clean_up_directory(self, alist=list()):
+        """Clean up old output files. (Custodian handlers to not necessarily
+            remove the old OUTCAR and OSZICAR files.)
+            IMPORTANT: Any output to be archived must have been archived by
+                the error handlers.
+            Args:
+                alist <list of str>: List of file names to remove
+        """
+        for aitem in alist:
+            apath = os.path.join(self.keywords['name'], aitem)
+            if os.path.isfile(apath):
+                self.logger.info("Removing old file %s" % apath)
+                os.remove(apath)
+        return

@@ -52,3 +52,6 @@ class VaspError(BaseError):
 
         return handler_input_d
 
+    def clean_up_directory(self):
+        """Clean up directory."""
+        return BaseError.clean_up_directory(self, ["OUTCAR","OSZICAR"])
