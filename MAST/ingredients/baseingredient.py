@@ -101,6 +101,10 @@ class BaseIngredient(MASTObj):
         if complete or frozen:
             errct = self.errhandler.loop_through_errors()
             if errct > 0:
+                if os.path.isfile(os.path.join(self.keywords['name'],'error.5.tar.gz')):
+                    self.logger.error("Ingredient directory already has 5 error zip files. A manual look is required.")
+                    self.change_my_status("E")
+                    return False
                 if 'mast_auto_correct' in self.keywords['program_keys'].keys():
                     if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
                         self.change_my_status("E")
