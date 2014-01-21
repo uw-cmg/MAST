@@ -85,7 +85,7 @@ class RecipePlan:
         else:
             raise MASTError(self.__class__.__name__,"Bad call to do_ingredient_methods with method type %s" % methodtype)
         allresults = list()
-        self.logger.info("Do methods for %s" % methodtype)
+        self.recipe_logger.info("Do methods for %s" % methodtype)
         for methoditem in mdict.keys():
             minputs = list(mdict[methoditem])
             if methodtype == 'mast_update_children_method':
@@ -108,6 +108,7 @@ class RecipePlan:
             Returns:
                 Results of the method, whatever it returns.
         """
+        self.recipe_logger.info("Attempt to run method %s with inputs %s" % (methodname, minputs))
         len_inputs = len(minputs)
         #Is it a ChopIngredient method?
         handlerlist = inspect.getmembers(ChopIngredient)
@@ -182,23 +183,41 @@ class RecipePlan:
         """Check if an ingredient is complete
         """
         cresults = self.do_ingredient_methods(iname, "mast_complete_method")
-        iscomplete = None
+        iscompletelist = list()
         for cresult in cresults:
             if (cresult == None) or (cresult == ""):
                 pass
             elif cresult == False:
                 return False
             elif cresult == True:
-                iscomplete = True
+                iscompletelist.append(1)
             else:
                 pass
+        iscomplete = False
+        if sum(iscompletelist) == len(cresults):
+            iscomplete = True
         self.recipe_logger.info("Completeness evaluation: %s (from %s)" % (iscomplete, cresults))
         return iscomplete
 
     def ready_ingredient(self, iname):
         """Check if an ingredient is ready
         """
-        return self.do_ingredient_methods(iname, "mast_ready_method")
+        rresults = self.do_ingredient_methods(iname, "mast_ready_method")
+        isreadylist = list()
+        for rresult in rresults:
+            if (rresult == None) or (rresult == ""):
+                pass
+            elif rresult == False:
+                return False
+            elif rresult == True:
+                isreadylist.append(1)
+            else:
+                pass
+        isready = False
+        if sum(isreadylist) == len(rresults):
+            isready = True
+        self.recipe_logger.info("Readiness evaluation: %s (from %s)" % (isready, rresults))
+        return isready
 
 
     def run_ingredient(self, iname):

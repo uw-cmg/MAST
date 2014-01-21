@@ -87,7 +87,7 @@ class ChopIngredient(BaseIngredient):
             if os.path.isfile(topath):
                 self.logger.error("File found at %s already. Skipping copy." % topath)
             else:
-                myfile = MASTfile(frompath)
+                myfile = MASTFile(frompath)
                 if len(myfile.data) == 0:
                     self.logger.error("File at %s is empty. Skipping copy." % frompath)
                 else:
