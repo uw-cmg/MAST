@@ -175,6 +175,7 @@ class RecipeSetup(MASTObj):
             Returns:
                 methodname <str>: method name ("write_default", etc.)
         """
+        raise NotImplementedError
         mdict=self.input_options.get_item("ingredients", ingredtype)
         if methodtype in mdict.keys():
             return mdict[methodtype]
@@ -202,14 +203,14 @@ class RecipeSetup(MASTObj):
             recipe_obj.ingred_input_options[ingred] = self.get_my_ingredient_options(ingred, ingredtype)
             if not os.path.isdir(os.path.join(self.work_dir, ingred)):
                 self.create_ingredient(recipe_obj.ingred_input_options[ingred])
-            recipe_obj.write_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_write_method")
-            recipe_obj.ready_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_ready_method")
-            recipe_obj.run_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_run_method")
-            recipe_obj.complete_methods[ingred] = self.get_method_from_ingredient_type(ingredtype, "mast_complete_method")
+            recipe_obj.write_methods[ingred] = self.get_method_dict(ingredtype, "mast_write_method")
+            recipe_obj.ready_methods[ingred] = self.get_method_dict(ingredtype, "mast_ready_method")
+            recipe_obj.run_methods[ingred] = self.get_method_dict(ingredtype, "mast_run_method")
+            recipe_obj.complete_methods[ingred] = self.get_method_dict(ingredtype, "mast_complete_method")
             recipe_obj.update_methods[ingred] = dict()
             for ichild in how_to_update[ingred].keys():
                 updingredtype = how_to_update[ingred][ichild]
-                recipe_obj.update_methods[ingred][ichild] = self.get_method_from_ingredient_type(updingredtype, "mast_update_children_method")
+                recipe_obj.update_methods[ingred][ichild] = self.get_method_dict(updingredtype, "mast_update_children_method")
             recipe_obj.parents_to_check = dict(parents_to_check)
         return recipe_obj
 
@@ -290,3 +291,45 @@ class RecipeSetup(MASTObj):
         recipe_plan = self.create_recipe_plan()
         return recipe_plan
 
+    def get_method_dict(self, ingredtype, methodtype):
+        """Get a method dictionary. Methods should be of
+            the form:
+                methodname arguments
+            where methodname is the method name, and arguments
+            are the arguments, as though listed through
+            a command line.
+            For example, copy_file CONTCAR POSCAR
+            Multiple methods may exist with the same keyword
+            in the ingredients section, and all will be applied.
+            Methods should be separated by a semicolon:
+            mast_update_children_method copy_file CONTCAR POSCAR; softlink_file WAVECAR
+            Args:
+                ingredtype <str>: ingredient type
+                methodtype <str>: method type ("mast_write_method", etc.)
+            Returns:
+                mdict <dict>: dictionary of the form
+                mdict[methodname]=<list of arguments>
+        """
+        ioptdict=self.input_options.get_item("ingredients", ingredtype)
+        if methodtype in ioptdict.keys():
+            unparsed = ioptdict[methodtype]
+        else:
+            globaldict=self.input_options.get_item("ingredients","global")
+            if methodtype in globaldict.keys():
+                unparsed = globaldict[methodtype]
+            else:
+                raise MASTError(self.__class__.__name__,"No method type %s in either ingredient type %s or global ingredient." % (methodtype, ingredtype))
+        splitmethods = unparsed.split(";")
+        mdict = dict()
+        for method_arg_item in splitmethods:
+            method_arg_item = method_arg_item.strip()
+            method_arg_list = method_arg_item.split()
+            methodname = method_arg_list[0].strip()
+            arglist = list()
+            for argitem in method_arg_list[1:]:
+                arglist.append(argitem.strip())
+            if not methodname in mdict.keys():
+                mdict[methodname]=list(arglist)
+            else:
+                self.logger.warning("Duplicate entry in method %s for ingredient type %s; ignoring the duplicate." % (methodtype, ingredtype))
+        return mdict

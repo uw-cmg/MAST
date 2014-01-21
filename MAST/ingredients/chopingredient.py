@@ -27,6 +27,17 @@ from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import VaspChecker
 
+class ChopIngredient(BaseIngredient):
+    def __init__(self, **kwargs):
+        allowed_keys = {
+            'name' : (str, str(), 'Name of directory'),
+            'program': (str, str(), 'Program, e.g. "vasp"'),
+            'program_keys': (dict, dict(), 'Dictionary of program keywords'),
+            'structure': (Structure, None, 'Pymatgen Structure object')
+            }
+        BaseIngredient.__init__(self, allowed_keys, **kwargs)
+
+
 class WriteIngredient(BaseIngredient):
     def __init__(self, **kwargs):
         allowed_keys = {

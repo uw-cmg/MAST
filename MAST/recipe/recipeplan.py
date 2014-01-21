@@ -10,6 +10,10 @@
 import os
 import time
 import logging
+import inspect
+import subprocess
+from MAST.ingredients.chopingredient import ChopIngredient
+from customlib.customchopingredient import CustomChopIngredient
 from MAST.ingredients.chopingredient import WriteIngredient
 from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 from MAST.ingredients.chopingredient import RunIngredient
@@ -62,59 +66,149 @@ class RecipePlan:
         self.recipe_logger = logging.getLogger(self.working_directory)
         self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
 
+    def do_ingredient_methods(self, iname, methodtype):
+        """Do the ingredient methods.
+            Args:
+                iname <str>: ingredient name
+                methodtype <str>: method type (write, run, etc.)
+        """
+        if methodtype == 'mast_write_method':
+            mdict = self.write_methods[iname]
+        elif methodtype == 'mast_run_method':
+            mdict = self.run_methods[iname]
+        elif methodtype == 'mast_ready_method':
+            mdict = self.ready_methods[iname]
+        elif methodtype == 'mast_complete_method':
+            mdict = self.complete_methods[iname]
+        elif methodtype == 'mast_update_children_method':
+            mdict = self.update_methods[iname]
+        else:
+            raise MASTError(self.__class__.__name__,"Bad call to do_ingredient_methods with method type %s" % methodtype)
+        allresults = list()
+        self.logger.info("Do methods for %s" % methodtype)
+        for methoditem in mdict.keys():
+            minputs = list(mdict[methoditem])
+            mresult = self.run_a_method(iname, methoditem, minputs)
+            allresults.append(mresult)
+        return allresults
+
+    def run_a_method(self, iname, methodname, minputs):
+        """Run a method. Evaluates which method to run
+            using this order:
+            A ChopIngredient method (no ".py")
+            A CustomIngredient method (no ".py" and not found
+                in ChopIngredient)
+            A script-defined method (some "def xxxx" in customlib/*.py)
+            Args:
+                iname <str>: ingredient name
+                methodname <str>: method name
+                minputs <list>: method inputs
+            Returns:
+                Results of the method, whatever it returns.
+        """
+        len_inputs = len(minputs)
+        #Is it a ChopIngredient method?
+        handlerlist = inspect.getmembers(ChopIngredient)
+        for htry in handlerlist:
+            hname = htry[0]
+            if methodname == hname: #found it. Return mresult.
+                my_ing = ChopIngredient(name = self.ingred_input_options[iname]['name'],
+                    program_keys=self.ingred_input_options[iname]['program_keys'],
+                    structure=self.ingred_input_options[iname]['structure'])
+                if len_inputs == 0:
+                    mresult = getattr(ChopIngredient, methodname)(my_ing)
+                elif len_inputs == 1:
+                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0])
+                elif len_inputs == 2:
+                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1])
+                elif len_inputs == 3:
+                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2])
+                elif len_inputs == 4:
+                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2], minputs[3])
+                else:
+                    raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
+                self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
+                return mresult
+        #Is it a CustomIngredient method?
+        handlerlist = inspect.getmembers(CustomChopIngredient)
+        for htry in handlerlist:
+            hname = htry[0]
+            if methodname == hname: #found it. Return mresult.
+                my_ing = CustomChopIngredient(name = self.ingred_input_options[iname]['name'],
+                    program_keys=self.ingred_input_options[iname]['program_keys'],
+                    structure=self.ingred_input_options[iname]['structure'])
+                if len_inputs == 0:
+                    mresult = getattr(CustomChopIngredient, methodname)(my_ing)
+                elif len_inputs == 1:
+                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0])
+                elif len_inputs == 2:
+                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1])
+                elif len_inputs == 3:
+                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2])
+                elif len_inputs == 4:
+                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2], minputs[3])
+                else:
+                    raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
+                self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
+                return mresult
+        #Is it some script in customlib?
+        mpath = os.path.join(os.getenv("MAST_INSTALL_PATH"),"customlib",methodname)
+        if os.path.isfile(mpath):
+            subinputs = list()
+            subinputs.append("python")
+            subinputs.append(mpath)
+            subinputs.extend(minputs)
+            myproc = subprocess.Popen(subinputs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            myproc.wait()
+            (mresult, merr) = myproc.communicate()
+            self.recipe_logger.info("Results for method name %s: %s %s" % (methodname, mresult, merr))
+            return mresult
+        else:
+            raise MASTError(self.__class__.__name__,"Could not find method or .py file %s" % methodname)
+        return None
+
+
+
+
     def write_ingredient(self, iname):
         """Write the ingredient files according to the 
             correct method
         """
-        methodname = self.write_methods[iname]
-        my_ing = WriteIngredient(name = self.ingred_input_options[iname]['name'],
-            program_keys=self.ingred_input_options[iname]['program_keys'],
-            structure=self.ingred_input_options[iname]['structure'])
-        writeresult=getattr(WriteIngredient, methodname)(my_ing)
-        return writeresult
+        return self.do_ingredient_methods(iname, "mast_write_method")
 
     def complete_ingredient(self, iname):
         """Check if an ingredient is complete
         """
-        methodname = self.complete_methods[iname]
-        my_ing = IsCompleteIngredient(name = self.ingred_input_options[iname]['name'],
-            program_keys=self.ingred_input_options[iname]['program_keys'],
-            structure=self.ingred_input_options[iname]['structure'])
-        iscomplete=getattr(IsCompleteIngredient, methodname)(my_ing)
+        cresults = self.do_ingredient_methods(iname, "mast_complete_method")
+        iscomplete = None
+        for cresult in cresults:
+            if (cresult == None) or (cresult == ""):
+                pass
+            elif cresult == False:
+                return False
+            elif cresult == True:
+                iscomplete = True
+            else:
+                pass
         return iscomplete
 
     def ready_ingredient(self, iname):
         """Check if an ingredient is ready
         """
-        methodname = self.ready_methods[iname]
-        my_ing = IsReadyToRunIngredient(name = self.ingred_input_options[iname]['name'],
-            program_keys=self.ingred_input_options[iname]['program_keys'],
-            structure=self.ingred_input_options[iname]['structure'])
-        isready=getattr(IsReadyToRunIngredient, methodname)(my_ing)
-        return isready
+        return self.do_ingredient_methods(iname, "mast_ready_method")
 
 
     def run_ingredient(self, iname):
         """Run ingredient
         """
-        methodname = self.run_methods[iname]
-        my_ing = RunIngredient(name = self.ingred_input_options[iname]['name'],
-            program_keys=self.ingred_input_options[iname]['program_keys'],
-            structure=self.ingred_input_options[iname]['structure'])
-        runresult=getattr(RunIngredient, methodname)(my_ing)
-        return runresult
+        return self.do_ingredient_methods(iname, "mast_run_method")
 
     def update_children(self, iname):
         """Update the children of an ingredient
         """
         upd_results=list()
         for childname in self.update_methods[iname]:
-            methodname = self.update_methods[iname][childname]
-            my_ing = UpdateChildrenIngredient(name = self.ingred_input_options[iname]['name'],
-                program_keys=self.ingred_input_options[iname]['program_keys'],
-                structure=self.ingred_input_options[iname]['structure'])
-            updresult=getattr(UpdateChildrenIngredient, methodname)(my_ing, childname)
-            upd_results.append(updresult)
+            upd_results.append(self.do_ingredient_methods(iname, "mast_update_children_method"))
         return upd_results
 
     def fast_forward_check_complete(self):
@@ -262,7 +356,6 @@ class RecipePlan:
 
 
         if verbose == 1:
-            import time
             namestring = "Recipe name: %s" % self.name
             self.recipe_logger.info(namestring)
             self.recipe_logger.info(time.asctime())
