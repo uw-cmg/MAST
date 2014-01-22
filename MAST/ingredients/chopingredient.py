@@ -74,6 +74,7 @@ class ChopIngredient(BaseIngredient):
             copyto = copyfrom
         if childdir == "":
             childdir = mydir
+        childdir = self._fullpath_childname(childdir)
         if not os.path.isdir(childdir):
             raise MASTError(self.__class__.__name__, "No directory for copying into, at %s" % childdir)
         if childdir == mydir and copyfrom == copyto:
@@ -114,6 +115,43 @@ class ChopIngredient(BaseIngredient):
         """
         return self.copy_file(linkfrom, linkto, childdir, 1)
 
+    def file_exists(self, filename=""):
+        """Check for the existence of a file in the ingredient
+            folder.
+            Args:
+                filename <str>: File name (e.g. OUTCAR)
+            Returns:
+                True if the file exists; False otherwise
+        """
+        checkfile = os.path.join(self.keywords['name'], filename)
+        filefound = os.path.isfile(checkfile)
+        if not filefound:
+            self.logger.warning("File %s not found." % checkfile)
+        return filefound
+
+    def file_has_string(self, filename="", searchstring="", last_x_lines=0):
+        """Check for a string in the file.
+            Args:
+                filename <str>: File name (e.g. OUTCAR)
+                searchstring <str>: Search string
+                last_x_lines <str, will be converted to int>:
+                    Optional: search only the last X lines.
+                    0 (default) - search all lines. 
+            Returns:
+                True if the string is found; False otherwise
+        """
+        if not (self.file_exists(filename)):
+            return False
+        if searchstring == "":
+            self.logger.error("No search string given. Returning None.")
+            return None
+        checkfile = os.path.join(self.keywords['name'],filename)
+        tempopen = MASTFile(checkfile)
+        mymatch = tempopen.get_last_x_lines_line_match(searchstring, last_x_lines)
+        if mymatch == None:
+            return False
+        else:
+            return True
 
     def no_setup(self):
         """No setup is needed."""

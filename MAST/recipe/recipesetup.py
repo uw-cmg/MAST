@@ -9,6 +9,7 @@
 ############################################################################
 import os
 import logging
+import shlex
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
@@ -323,7 +324,7 @@ class RecipeSetup(MASTObj):
         mdict = dict()
         for method_arg_item in splitmethods:
             method_arg_item = method_arg_item.strip()
-            method_arg_list = method_arg_item.split()
+            method_arg_list = shlex.split(method_arg_item)
             methodname = method_arg_list[0].strip()
             arglist = list()
             for argitem in method_arg_list[1:]:

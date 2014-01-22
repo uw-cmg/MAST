@@ -123,6 +123,19 @@ class MASTFile:
             return None
         return lastmatch
 
+    def get_last_x_lines_line_match(self, string_to_match, x_lines):
+        lastmatch=""
+        x_int = int(x_lines)
+        if x_int == 0:
+            return self.get_last_line_match(string_to_match)
+        searchme = self.data[-1*x_int:]
+        for line in searchme:
+            if string_to_match in line:
+                lastmatch = line
+        if lastmatch == "":
+            return None
+        return lastmatch
+
     #TTM+block 11/8/11 separated from get_segment_from_last_line_match
     def get_segment(self, string_to_chop, start_string="", end_string=""):
         start_found=""
