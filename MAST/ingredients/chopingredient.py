@@ -153,6 +153,60 @@ class ChopIngredient(BaseIngredient):
         else:
             return True
 
+    def copy_fullpath_file(self, copyfromfullpath="", copyto="", childdir="", softlink=0):
+        """Copy a file.
+            Args:
+                copyfromfullpath <str>: full path of the file
+                    to copy from, e.g.
+                    //home/user/POSCAR_allstart
+                copyto <str>: name to copy to, e.g. POSCAR
+                childdir <str>: child directory.
+                    If not given, use the ingredient directory.
+                softlink <int>: 0 (default) - copy
+                                1 - softlink
+            Log an error if the file is already found
+                and do not copy over.
+            Do not copy over if the file is empty.
+        """
+        mydir = self.keywords['name']
+        if copyfromfullpath == "":
+            raise MASTError(self.__class__.__name__, "No copy-from file given, ingredient %s" % mydir)
+        if copyto == "":
+            copyto = os.path.basename(copyfromfullpath)
+        if childdir == "":
+            childdir = mydir
+        childdir = self._fullpath_childname(childdir)
+        if not os.path.isdir(childdir):
+            raise MASTError(self.__class__.__name__, "No directory for copying into, at %s" % childdir)
+        self.logger.info("Attempting to copy %s to %s/%s" % (copyfromfullpath, childdir, copyto))
+        topath = "%s/%s" % (childdir, copyto)
+        if not os.path.isfile(copyfromfullpath):
+            self.logger.error("No file at %s. Skipping copy." % copyfromfullpath)
+        else:
+            if os.path.isfile(topath):
+                self.logger.error("File found at %s already. Skipping copy." % topath)
+            else:
+                myfile = MASTFile(copyfromfullpath)
+                if len(myfile.data) == 0:
+                    self.logger.error("File at %s is empty. Skipping copy." % copyfromfullpath)
+                else:
+                    if softlink == 1:
+                        curpath = os.getcwd()
+                        os.chdir(childdir)
+                        mylink=subprocess.Popen("ln -s %s %s" % (copyfromfullpath, copyto), shell=True)
+                        mylink.wait()
+                        os.chdir(curpath)
+                        self.logger.info("Softlinked file from %s to %s" % (copyfromfullpath, topath))
+                    else:
+                        shutil.copy(copyfromfullpath, topath)
+                        self.logger.info("Copied file from %s to %s" % (copyfromfullpath, topath))
+        return
+
+    def write_input_file_nonmast(self, delimiter="", fname=""):
+        """Write an input file.
+        """
+        pass
+
     def no_setup(self):
         """No setup is needed."""
         return
