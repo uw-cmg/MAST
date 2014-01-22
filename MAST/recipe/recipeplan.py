@@ -73,24 +73,24 @@ class RecipePlan:
                 methodtype <str>: method type (write, run, etc.)
         """
         if methodtype == 'mast_write_method':
-            mdict = self.write_methods[iname]
+            mlist = self.write_methods[iname]
         elif methodtype == 'mast_run_method':
-            mdict = self.run_methods[iname]
+            mlist = self.run_methods[iname]
         elif methodtype == 'mast_ready_method':
-            mdict = self.ready_methods[iname]
+            mlist = self.ready_methods[iname]
         elif methodtype == 'mast_complete_method':
-            mdict = self.complete_methods[iname]
+            mlist = self.complete_methods[iname]
         elif methodtype == 'mast_update_children_method':
-            mdict = self.update_methods[iname][childname]
+            mlist = self.update_methods[iname][childname]
         else:
             raise MASTError(self.__class__.__name__,"Bad call to do_ingredient_methods with method type %s" % methodtype)
         allresults = list()
         self.recipe_logger.info("Do methods for %s" % methodtype)
-        for methoditem in mdict.keys():
-            minputs = list(mdict[methoditem])
+        for methoditem in mlist:
+            minputs = list(methoditem[1:])
             if methodtype == 'mast_update_children_method':
                 minputs.append(childname)
-            mresult = self.run_a_method(iname, methoditem, minputs)
+            mresult = self.run_a_method(iname, methoditem[0], minputs)
             allresults.append(mresult)
         return allresults
 
