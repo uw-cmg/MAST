@@ -160,6 +160,7 @@ class RecipePlan:
             subinputs = list()
             subinputs.append("python")
             subinputs.append(mpath)
+            subinputs.append(self.keywords['name']) #always allow the ingredient name to be part of the inputs, since otherwise the function has no access to the ingredient name
             subinputs.extend(minputs)
             myproc = subprocess.Popen(subinputs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             myproc.wait()
