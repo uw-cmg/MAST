@@ -11,7 +11,7 @@ import time
 from MAST.utility import MASTFile
 
 def direct_shell_command():
-    return "//share/apps/vasp5.2_cNEB"
+    return "vasp"
 
 def queue_submission_command():
     return "qsub"
@@ -27,7 +27,7 @@ def queue_status_from_text(jobid, queuetext):
             'E': Error
             'X': Not found
             'R': Running
-            'W': Waiting
+            'Q': Queued
     """
     if (queuetext == None): 
         return 'X'
@@ -40,29 +40,11 @@ def queue_status_from_text(jobid, queuetext):
     end = queuetext.find('\n')
     if end > -1:
         queuetext = queuetext[:end]
-
-    if system == "ranger":####Ranger
-        ranger_out = queuetext.split()[4]
-        if (ranger_out == 'wq') or (ranger_out == 'qw'):
-            final_out = 'Q'
-        elif ranger_out == 'r':
-            final_out = 'R'
-        return final_out
-
-    if system == "bardeen" or system == "curie":###Bardeen, Curie, etc.
-        qmat = queuetext.split()
-        if len(qmat) < 5:
-            return 'E'
-        return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
     
-    if system == "dlx":####UKy DLX
-        queuetext = queuetext.strip()
-        dlx_out = queuetext.split()[4] #indexing starts at 0
-        if (dlx_out == 'PD'):
-            final_out = 'Q'
-        elif dlx_out in ['CG','CD','R']:
-            final_out = 'R'
-        return final_out
+    qmat = queuetext.split()
+    if len(qmat) < 5:
+        return 'E'
+    return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
 
 def extract_submitted_jobid(string):
     """
@@ -72,29 +54,9 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
-    ####Bardeen and Curie:
-    if system == "bardeen" or system == "curie":
-        final = ""
-        for char in string:
-            if(char != '.'):
-                final += char
-            else:
-                return int(final)
-
-    if system == "ranger":####Ranger:
-        findme=0
-        findstr=""
-        findme = string.find("Your job") # ..... Your job 12345678 has been submitted.
-        if findme == -1: #TTM+1 2/11/12 if not found, return negative 1
-            return -1
-        findstr = string[findme+9:]
-        splitstr=[]
-        splitstr = findstr.split()
-        return int(splitstr[0])
-
-    if system == "dlx":###UKY DLX:
-        findstr = string.strip()
-        return int(findstr.split()[3])
+    if string == "":
+        return None
+    return int(string.split('.')[0])
 
 def queue_snap_command():
     """
@@ -104,22 +66,15 @@ def queue_snap_command():
         OUTPUTS:
             Command for producing a queue snapshot
     """
-    qcmd=""
-    if(compute_node):
-        if(system == "ranger"):####Ranger, from compute node
-            #
-            qcmd = "ssh -f ranger 'qstat'"
+    return "qstat"
 
-        if(system == "bardeen"):####Bardeen, from compute node
-            qcmd = "ssh -f bardeen 'qstat'" 
-    
-        if(system == "curie"):####Curie, from compute node
-            qcmd = "ssh -f curie 'qstat'"
-    else:###Direct from headnode
-        qcmd = 'qstat 2> /dev/null' #TTM 052212 sometimes requires /bin/bash
-    ###Direct from headnode, UKY DLX:
-        if(system == "dlx"):
-            uname=os.getenv("USER")
-            qcmd = "squeue -u " + uname
-    return qcmd
-
+def get_approx_job_error_file(jobid):
+    """
+        Return the approximate job error file name
+            Args:
+                jobid <int>: Job ID
+    """
+    if jobid == None:
+        return ".e"
+    else:
+        return ".e%s" % str(jobid)

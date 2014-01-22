@@ -40,11 +40,30 @@ def queue_status_from_text(jobid, queuetext):
     end = queuetext.find('\n')
     if end > -1:
         queuetext = queuetext[:end]
-    
+     
     qmat = queuetext.split()
-    if len(qmat) < 5:
-        return 'E'
-    return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
+    #These are approximate translations of the actual
+    #    job status. 
+    #The point is to prevent MAST from resubmitting a job
+    #    which is already on the queue. The user should check
+    #    qstat manually in order to see the actual job status.
+    qpc = qmat[4].lower()
+    if 'e' in qpc: #Some error found
+        return "E" 
+    elif 'd' in qpc: #In the process of being deleted
+        return "R"
+    elif 'h' in qpc: #Held somehow
+        return "H"
+    elif 't' in qpc: #Transferring
+        return "H"
+    elif 's' in qpc: #Suspended
+        return "H"
+    elif 'q' in qpc: #Queued
+        return "Q"
+    elif 'r' in qpc: #Running
+        return "R"
+    else: #Not sure what this string is
+        return "E"
 
 def extract_submitted_jobid(string):
     """
@@ -54,9 +73,10 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
+    #Looks like: Your job 46745 ("jobname") has been submitted
     if string == "":
         return None
-    return int(string.split('.')[0])
+    return int(string.split('.')[2])
 
 def queue_snap_command():
     """
@@ -66,7 +86,8 @@ def queue_snap_command():
         OUTPUTS:
             Command for producing a queue snapshot
     """
-    return "qstat"
+    uname = os.getenv("USER")
+    return "qstat -u %s" % uname
 
 def get_approx_job_error_file(jobid):
     """

@@ -27,7 +27,7 @@ def queue_status_from_text(jobid, queuetext):
             'E': Error
             'X': Not found
             'R': Running
-            'W': Waiting
+            'Q': Queued
     """
     if (queuetext == None): 
         return 'X'
