@@ -202,10 +202,90 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (copyfromfullpath, topath))
         return
 
-    def write_input_file_nonmast(self, delimiter="", fname=""):
+    def write_ingred_input_file(self, fname="", allowed_file="all", delimiter=" "):
         """Write an input file.
+            Args: 
+                fname <str>: File name for the ingredient input 
+                            file to be created, e.g. INCAR
+                allowed_file <str>: File name for the list
+                    of allowed keywords. Use "all" to allow
+                    all non-mast keywords.
+                delimiter <str>: Delimiter to place between
+                    keywords and values in the input file.
+                    Default is space.
+                    Omit this parameter to use a space.
+                    Neither semicolon nor comma may be used
+                    as a delimiter, as these are special
+                    delimiters in the MAST input file already.
         """
-        pass
+        if delimiter == "":
+            delimiter = " "
+        if allowed_file.lower() == "all":
+            okay_keys = self._get_allowed_non_mast_keywords()
+        else:
+            okay_keys = self._get_allowed_non_mast_keywords(allowed_file)
+        my_input = MASTFile()
+        for key, value in okay_keys.iteritems():
+            my_input.data.append(str(key) + delimiter + str(value) + "\n")
+        inputpath = os.path.join(self.keywords['name'],fname)
+        if os.path.isfile(inputpath):
+            self.logger.error("File already exists at %s. Skipping input file writing." % inputpath)
+        else:
+            my_input.to_file(inputpath)
+        return 
+
+
+    def _get_allowed_non_mast_keywords(self, allowed_file=""):
+        """Get the non-mast keywords and make a dictionary.
+            Args:
+                allowed_file <str>: File name containing
+                    allowed keywords.
+                    If this argument is not entered,
+                    then any non-mast keyword will be allowed.
+            Returns:
+                my_dict <dict>: Dictionary of keyword and
+                    value entries
+        """
+        my_dict=dict()
+        allowed_list = list()
+        if not(allowed_file == ""):
+            if os.path.isfile(allowed_file):
+                allowed_list = self._get_allowed_keywords(allowed_file)
+            else:
+                allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST','ingredients','programkeys',allowed_file)
+                allowed_list = self._get_allowed_keywords(allowedpath)
+        for key, value in self.keywords['program_keys'].iteritems():
+            if not key[0:5] == "mast_":
+                keytry = key.upper()
+                keyokay = None
+                if len(allowed_list) > 0:
+                    if keytry in allowed_list:
+                        keyokay = True
+                    else:
+                        keyokay = False
+                        self.logger.warning("Ignoring program key %s for INCAR. To allow this keyword, add it to %s" % (keytry, allowedpath))
+                else:
+                    keyokay = True
+                if keyokay:
+                    if type(value)==str and value.lower() in ['false','true']:
+                        my_dict[keytry]=value.capitalize() #First letter cap
+                    else:
+                        my_dict[keytry]=value
+        return my_dict
+    
+    def _get_allowed_keywords(self, allowedpath):
+        """Get allowed keywords.
+            Args:
+                allowedpath <str>: file path for allowed keywords
+        """
+        if not os.path.isfile(allowedpath):
+            self.logger.error("No file at %s for allowed keywords. Returning empty list." % allowedpath)
+            return list()
+        allowed = MASTFile(allowedpath)
+        allowed_list=list()
+        for entry in allowed.data:
+            allowed_list.append(entry.strip().upper())
+        return allowed_list
 
     def no_setup(self):
         """No setup is needed."""
