@@ -12,6 +12,7 @@ import time
 import logging
 import inspect
 import subprocess
+import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
 from customlib.customchopingredient import CustomChopIngredient
 #from MAST.ingredients.chopingredient import WriteIngredient
@@ -94,81 +95,62 @@ class RecipePlan:
             allresults.append(mresult)
         return allresults
 
-    def run_a_method(self, iname, methodname, minputs):
-        """Run a method. Evaluates which method to run
-            using this order:
-            A ChopIngredient method (no ".py")
-            A CustomIngredient method (no ".py" and not found
-                in ChopIngredient)
-            A script-defined method (some "def xxxx" in customlib/*.py)
+    def run_a_method(self, iname, methodstring, minputs):
+        """Run a method. Evaluates the method to run.
             Args:
                 iname <str>: ingredient name
-                methodname <str>: method name
+                methodstring <str>: string of class.method, e.g.:
+                        ChopIngredient.write_singlerun
+                        If class is not given,
+                        ChopIngredient is assumed.
+                    Will look in customlib first, then in
+                    MAST.ingredients.
                 minputs <list>: method inputs
             Returns:
                 Results of the method, whatever it returns.
         """
-        self.recipe_logger.info("Attempt to run method %s with inputs %s" % (methodname, minputs))
+        self.recipe_logger.info("Attempt to run method %s with inputs %s" % (methodstring, minputs))
         len_inputs = len(minputs)
         #Is it a ChopIngredient method?
-        handlerlist = inspect.getmembers(ChopIngredient)
-        for htry in handlerlist:
-            hname = htry[0]
-            if methodname == hname: #found it. Return mresult.
-                my_ing = ChopIngredient(name = self.ingred_input_options[iname]['name'],
-                    program_keys=self.ingred_input_options[iname]['program_keys'],
-                    structure=self.ingred_input_options[iname]['structure'])
-                if len_inputs == 0:
-                    mresult = getattr(ChopIngredient, methodname)(my_ing)
-                elif len_inputs == 1:
-                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0])
-                elif len_inputs == 2:
-                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1])
-                elif len_inputs == 3:
-                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2])
-                elif len_inputs == 4:
-                    mresult = getattr(ChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2], minputs[3])
-                else:
-                    raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
-                self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
-                return mresult
-        #Is it a CustomIngredient method?
-        handlerlist = inspect.getmembers(CustomChopIngredient)
-        for htry in handlerlist:
-            hname = htry[0]
-            if methodname == hname: #found it. Return mresult.
-                my_ing = CustomChopIngredient(name = self.ingred_input_options[iname]['name'],
-                    program_keys=self.ingred_input_options[iname]['program_keys'],
-                    structure=self.ingred_input_options[iname]['structure'])
-                if len_inputs == 0:
-                    mresult = getattr(CustomChopIngredient, methodname)(my_ing)
-                elif len_inputs == 1:
-                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0])
-                elif len_inputs == 2:
-                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1])
-                elif len_inputs == 3:
-                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2])
-                elif len_inputs == 4:
-                    mresult = getattr(CustomChopIngredient, methodname)(my_ing, minputs[0], minputs[1], minputs[2], minputs[3])
-                else:
-                    raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
-                self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
-                return mresult
-        #Is it some script in customlib?
-        mpath = os.path.join(os.getenv("MAST_INSTALL_PATH"),"customlib",methodname)
-        if os.path.isfile(mpath):
-            subinputs = list()
-            subinputs.append("python")
-            subinputs.append(mpath)
-            subinputs.append(self.keywords['name']) #always allow the ingredient name to be part of the inputs, since otherwise the function has no access to the ingredient name
-            subinputs.extend(minputs)
-            myproc = subprocess.Popen(subinputs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            myproc.wait()
-            (mresult, merr) = myproc.communicate()
-            self.recipe_logger.info("Results for method name %s: %s %s" % (methodname, mresult, merr))
-            return mresult
+        myclass = ""
+        methodname = ""
+        if not '.' in methodstring:
+            myclass = "ChopIngredient"
+            methodname = methodstring
         else:
-            raise MASTError(self.__class__.__name__,"Could not find method or .py file %s" % methodname)
+            myclass = methodstring.split('.')[0]
+            methodname = methodstring.split('.')[1]
+        choplib_mast = importlib.import_module("MAST.ingredients")
+        choplib_custom = importlib.import_module("customlib")
+        chopmods_mast = inspect.getmembers(choplib_mast, predicate=inspect.ismodule)
+        chopmods_custom = inspect.getmembers(choplib_custom, predicate=inspect.ismodule)
+        chopclasses = list()
+        chopclasses = list()
+        for chopmod_custom in chopmods_custom:
+            chopclasses.extend(inspect.getmembers(chopmod_custom[1], predicate=inspect.isclass))
+        for chopmod_mast in chopmods_mast:
+            chopclasses.extend(inspect.getmembers(chopmod_mast[1], predicate=inspect.isclass))
+        for classitem in chopclasses:
+            if classitem[0] == myclass:
+                mymembers = inspect.getmembers(classitem[1], predicate=inspect.ismethod)
+                for classmember in mymembers:
+                    if methodname == classmember[0]:
+                        my_ing = classitem[1](name = self.ingred_input_options[iname]['name'], program_keys = self.ingred_input_options[iname]['program_keys'], structure = self.ingred_input_options[iname]['structure'])
+                        if len_inputs == 0:
+                            mresult = classmember[1](my_ing)
+                        elif len_inputs == 1:
+                            mresult = classmember[1](my_ing, minputs[0])
+                        elif len_inputs == 2:
+                            mresult = classmember[1](my_ing, minputs[0], minputs[1])
+                        elif len_inputs == 3:
+                            mresult = classmember[1](my_ing, minputs[0], minputs[1], minputs[2])
+                        elif len_inputs == 4:
+                            mresult = classmember[1](my_ing, minputs[0], minputs[1], minputs[2], minputs[3])
+                        else:
+                            raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
+                        self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
+                        return mresult
+        raise MASTError(self.__class__.__name__,"Could not find method %s" % methodname)
         return None
 
 
