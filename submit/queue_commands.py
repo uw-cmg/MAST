@@ -139,6 +139,8 @@ def get_last_jobid(ingpath):
     jfile = MASTFile(jpath)
     if len(jfile.data) == 0:
         return None
+    if 'None' in jfile.data[0]:
+        return None
     return int(jfile.data[0].strip())
 
 def clear_submission_list():
