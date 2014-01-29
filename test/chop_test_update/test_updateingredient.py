@@ -1,6 +1,6 @@
 """Tests for Chopingredient"""
 
-from MAST.ingredients.chopingredient import UpdateChildrenIngredient
+from MAST.ingredients.chopingredient import ChopIngredient
 
 import unittest
 from unittest import SkipTest
@@ -14,6 +14,7 @@ import shutil
 
 testname="chop_test_update"
 testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+oldscratch = os.getenv("MAST_SCRATCH")
 
 class TestUpdateChildrenIngredient(unittest.TestCase):
 
@@ -29,10 +30,12 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             os.mkdir("writedir/neb_labelinit-labelfin")
         if not os.path.isdir("writedir/single_phonon_label1"):
             os.mkdir("writedir/single_phonon_label1")
+        os.environ['MAST_SCRATCH'] = testdir
 
     def tearDown(self):
         tearlist = list()
         tearlist.append("writedir")
+        os.environ['MAST_SCRATCH'] = oldscratch
         #tearlist.append("writedir/single_label1")
         #tearlist.append("writedir/next_ingred")
         #tearlist.append("writedir/neb_labelinit-labelfin")
@@ -57,7 +60,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         kdict=dict()
         kdict['mast_program'] = 'vasp'
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         fullpath = myuci._fullpath_childname("next_ingred")
         self.assertEqual(fullpath, "%s/writedir/next_ingred" % testdir)
         #self.testclass._fullpath_childname(childname)
@@ -75,7 +78,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -99,7 +102,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             os.mkdir("writedir/neb_labelinit-labelfin/%s" % subdir)
             myrelaxed[subdir] = MASTFile("files/POSCAR_%s" % subdir)
             myrelaxed[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CONTCAR" % subdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_neb_structures_to_neb("next_ingred")
         for subdir in ['01','02','03']:
             givenstr = MASTFile("%s/writedir/next_ingred/parent_structure_labelinit-labelfin_%s" % (testdir,subdir))
@@ -132,7 +135,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             mychg[subdir].to_file("writedir/neb_labelinit-labelfin/%s/CHGCAR" % subdir)
             mywav[subdir] = MASTFile("files/WAVECAR")
             mywav[subdir].to_file("writedir/neb_labelinit-labelfin/%s/WAVECAR" % subdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_saddle_structure("next_ingred") #should be OSZ3
         saddle = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed['03'].data, saddle.data)
@@ -159,7 +162,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
             myxdat[subdir].to_file("%s/%s/XDATCAR" % (ingdir,subdir))
             mydynmat[subdir] = MASTFile("files/DYNMAT_%s" % subdir)
             mydynmat[subdir].to_file("%s/%s/DYNMAT" % (ingdir, subdir))
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_phonon_multiple_forces_and_displacements("next_ingred") 
         newpos = MASTFile("%s/writedir/next_ingred/POSCAR_prePHON" % testdir)
         newdyn = MASTFile("%s/writedir/next_ingred/DYNMAT" % testdir)
@@ -189,7 +192,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         myxdat.to_file("%s/XDATCAR" % ingdir)
         mydynmat = MASTFile("files/DYNMAT_compare")
         mydynmat.to_file("%s/DYNMAT" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_phonon_single_forces_and_displacements("next_ingred") 
         newpos = MASTFile("%s/writedir/next_ingred/POSCAR_prePHON" % testdir)
         newdyn = MASTFile("%s/writedir/next_ingred/DYNMAT" % testdir)
@@ -218,7 +221,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         myenergy = MASTFile("files/OSZICAR_relaxed")
         myenergy.to_file("%s/OSZICAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_energy_to_neb("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/parent_structure_label1" % testdir)
         givenenergy = MASTFile("%s/writedir/next_ingred/parent_energy_label1" % testdir)
@@ -243,7 +246,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_restart_files("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -268,7 +271,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_restart_files_full_copies("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -293,7 +296,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_restart_files_softlinks("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -318,7 +321,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_charge_density_softlink("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -342,7 +345,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_wavefunction_softlink("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -365,7 +368,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_wavefunction_full_copy("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)
@@ -388,7 +391,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mychg.to_file("%s/CHGCAR" % ingdir)
         mywave = MASTFile("files/WAVECAR")
         mywave.to_file("%s/WAVECAR" % ingdir)
-        myuci = UpdateChildrenIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myuci.give_structure_and_charge_density_full_copy("next_ingred")
         givenstr = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed.data, givenstr.data)

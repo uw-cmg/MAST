@@ -1,7 +1,6 @@
 """Tests for Chopingredient"""
 
-from MAST.ingredients.chopingredient import IsReadyToRunIngredient
-from MAST.ingredients.chopingredient import WriteIngredient
+from MAST.ingredients.chopingredient import ChopIngredient
 
 import unittest
 from unittest import SkipTest
@@ -53,9 +52,9 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_singlerun()
-        myrdi = IsReadyToRunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myrdi.ready_singlerun())
         os.remove("%s/POSCAR" % ingdir)
         self.assertFalse(myrdi.ready_singlerun())
@@ -75,7 +74,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_xc'] = 'pw91'
         my_pos = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
         my_pos.write_file("writedir/single_label1/POSCAR")
-        myrdi = IsReadyToRunIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
+        myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
         self.assertTrue(myrdi.ready_structure())
         os.remove("%s/POSCAR" % ingdir)
         self.assertFalse(myrdi.ready_structure())
@@ -96,7 +95,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images'] = 3
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         for subdir in ['00','01','02','03','04']:
             subname = "%s/%s" % (ingdir, subdir)
             os.mkdir(subname)
@@ -105,7 +104,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
             if not subdir in ['00','04']:
                 mywr.write_singlerun()
                 mywr.write_submit_script()
-        myrdi = IsReadyToRunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myrdi.ready_neb_subfolders())
         os.remove("%s/01/POSCAR" % ingdir)
         self.assertFalse(myrdi.ready_neb_subfolders())
@@ -125,7 +124,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_xc'] = 'pw91'
         kdict['images'] = 3
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         for subdir in ['00','01','02','03','04']:
             subname = "%s/%s" % (ingdir, subdir)
             os.mkdir(subname)
@@ -133,7 +132,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
             mywr.checker.keywords['name'] = subname 
             mywr.write_singlerun()
             mywr.write_submit_script()
-        myrdi = IsReadyToRunIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myrdi.ready_subfolders())
         os.remove("%s/00/POSCAR" % ingdir)
         self.assertFalse(myrdi.ready_subfolders())

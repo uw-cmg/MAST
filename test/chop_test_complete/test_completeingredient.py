@@ -1,7 +1,6 @@
 """Tests for Chopingredient"""
 
-from MAST.ingredients.chopingredient import IsCompleteIngredient
-from MAST.ingredients.chopingredient import WriteIngredient
+from MAST.ingredients.chopingredient import ChopIngredient
 import unittest
 from unittest import SkipTest
 import os
@@ -53,7 +52,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_xc'] = 'pw91'
         my_pos = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
         my_pos.write_file("%s/CONTCAR" % ingdir)
-        myci = IsCompleteIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
+        myci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
         self.assertTrue(myci.complete_structure())
         os.remove("%s/CONTCAR" % ingdir)
         self.assertFalse(myci.complete_structure())
@@ -73,13 +72,13 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_singlerun()
         myoutcar = MASTFile("files/OUTCAR_completed")
         myoutcar.to_file("%s/OUTCAR" % ingdir)
         myoszicar = MASTFile("files/OSZICAR_completed")
         myoszicar.to_file("%s/OSZICAR" % ingdir)
-        myrdi = IsCompleteIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myrdi.complete_singlerun())
         os.remove("%s/OUTCAR" % ingdir)
         self.assertFalse(myrdi.complete_singlerun())
@@ -102,7 +101,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images'] = 3
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         myoutcar = MASTFile("files/OUTCAR_completed")
         myoszicar = MASTFile("files/OSZICAR_completed")
         for subdir in ['00','01','02','03','04']:
@@ -115,7 +114,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
                 mywr.write_submit_script()
                 myoutcar.to_file("%s/OUTCAR" % subname)
                 myoszicar.to_file("%s/OSZICAR" % subname)
-        myci = IsCompleteIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myci.complete_neb_subfolders())
         os.remove("%s/03/OUTCAR" % ingdir)
         self.assertFalse(myci.complete_neb_subfolders())
@@ -135,7 +134,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
-        mywr = WriteIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
+        mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         myoutcar = MASTFile("files/OUTCAR_completed")
         myoszicar = MASTFile("files/OSZICAR_completed")
         for subdir in ['00','01','02','03','04']:
@@ -147,7 +146,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
             mywr.write_submit_script()
             myoutcar.to_file("%s/OUTCAR" % subname)
             myoszicar.to_file("%s/OSZICAR" % subname)
-        myci = IsCompleteIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
+        myci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         self.assertTrue(myci.complete_subfolders())
         os.remove("%s/04/OUTCAR" % ingdir)
         self.assertFalse(myci.complete_subfolders())

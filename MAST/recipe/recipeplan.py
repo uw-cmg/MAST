@@ -31,17 +31,20 @@ class RecipePlan:
                                      and their statuses
             self.update_methods <dict>: Dictionary of each
                   ingredient's update method, per child
-                  [ingredient][child] = update method for child
+                  [ingredient][child] = list of update
+                  methods for the child
+                  the method list is a nested list:
+                  [[method1name,arg1,arg2,...][method2name,...]]
             self.parents_to_check <dict>: Dictionary of parents
                   to check for completion before each ingredient
                   may be run
-            self.run_methods <dict>: Dictionary of ingredient
+            self.run_methods <list of list>: List of ingredient
                                      run methods
-            self.write_methods <dict>: Dictionary of ingredient
+            self.write_methods <list of list>: List of ingredient
                                        write methods
-            self.ready_methods <dict>: Dictionary of ingredient
+            self.ready_methods <list of list>: List of ingredient
                                        ready methods
-            self.complete_methods <dict>: Dictionary of ingred.
+            self.complete_methods <list of list>: List of ingred.
                                           complete methods
             self.ingred_input_options <dict>: Dictionary of 
                        ingredient input options
@@ -72,6 +75,8 @@ class RecipePlan:
             Args:
                 iname <str>: ingredient name
                 methodtype <str>: method type (write, run, etc.)
+            The method list should have the format:
+            [[method1name,arg1,arg2,...][method2name,arg1,...]]
         """
         if methodtype == 'mast_write_method':
             mlist = self.write_methods[iname]
