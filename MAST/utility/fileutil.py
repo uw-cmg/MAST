@@ -24,7 +24,6 @@ def grepme(filename="", grepstr="", lastlines=""):
         grepcmd = "tail -n %s %s | grep %s" % (lastlines, filename, grepstr)
     #print "GREP CMD: %s" % grepcmd
     grepproc = subprocess.Popen(grepcmd, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    grepproc.wait()
     grepcomm = grepproc.communicate()[0]
     grepresults = grepcomm.split("\n")
     grepresults.remove("") #Remove trailing carriage return
