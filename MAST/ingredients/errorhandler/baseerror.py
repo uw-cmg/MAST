@@ -9,6 +9,7 @@ from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.utility import loggerutils
 from MAST.ingredients.errorhandler import masterrorhandlers 
+from MAST.ingredients.errorhandler import mastvasperrorhandlers 
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
@@ -37,6 +38,7 @@ class BaseError(MASTObj):
         handlerlist = list()
         #handlerlist = inspect.getmembers(handlers)
         handlerlist.extend(inspect.getmembers(masterrorhandlers))
+        handlerlist.extend(inspect.getmembers(mastvasperrorhandlers))
         handlerdict=dict()
         for htry in handlerlist:
             hname = htry[0]
