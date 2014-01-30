@@ -304,6 +304,10 @@ class ChopIngredient(BaseIngredient):
             if oopchar in commandstr:
                 self.logger.error("Cannot run command specified by command string (see input file) because of bad character.")
                 return 
+        stringsplit = commandstr.split()
+        if not stringsplit[0].strip()[-3:] == ".py":
+            self.logger.error("Cannot run command specified by command string (see input file) because of non-python file.")
+            return 
         else:
             import subprocess
             myproc = subprocess.Popen(commandstr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
