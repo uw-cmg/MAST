@@ -51,15 +51,27 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         if nsw == 0:
             self.logger.info("NSW is 0 or not set.")
             return False
-        ofile = "%s/vasprun.xml" % self.ingpath
-        if os.path.isfile(ofile):
-            myvasprun = pymatgen.io.vaspio.Vasprun(ofile)
-            if myvasprun.nionic_steps >= nsw:
-                self.logger.info("Ionic steps %s is at NSW %s" % (myvasprun.nionic_steps, nsw))
-                return True
-        else:
-            self.logger.error("No vasprun.xml file found at %s/vasprun.xml" % self.ingpath)
+        ofile = "%s/OUTCAR" % self.ingpath
+        if not (os.path.isfile(ofile)):
+            ofile = "%s/01/OUTCAR" % self.ingpath
+        if not (os.path.isfile(ofile)):
+            self.logger.error("No OUTCAR file at %s or %s/01." % self.ingpath)
             return False
+        grepme = subprocess.Popen("grep Iter %s" % ofile, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        grepresults = grepme.communicate()[0]
+        grepme.wait()
+
+        lastiter = myoutcar.get_last_x_lines_line_match
+
+        #ofile = "%s/vasprun.xml" % self.ingpath
+        #if os.path.isfile(ofile):
+        #    myvasprun = pymatgen.io.vaspio.Vasprun(ofile)
+        #    if myvasprun.nionic_steps >= nsw:
+        #        self.logger.info("Ionic steps %s is at NSW %s" % (myvasprun.nionic_steps, nsw))
+        #        return True
+        #else:
+        #    self.logger.error("No vasprun.xml file found at %s/vasprun.xml" % self.ingpath)
+        #    return False
 
     def correct(self): 
         actions=list()
