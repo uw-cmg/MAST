@@ -41,29 +41,29 @@ def get_freq_name(inp,keyword):
     #content.pop(0) #TTM 20140130 separate input file, no $freq
     fp.close()
     for i in range(len(content)):
-	line = getinfo(content[i])
-	if not len(line)==0:
-	    if keyword=='E' and 'E' in line[0] or keyword=='v' and 'v' in line[0] or keyword=='H' and 'H' in line[0]:
+        line = getinfo(content[i])
+        if not len(line)==0:
+            if keyword=='E' and 'E' in line[0] or keyword=='v' and 'v' in line[0] or keyword=='H' and 'H' in line[0]:
                 freq_name[line[0]] = []
-	        if len(line)==2:
-		    freq_name[line[0]].append(float(line[1]))
+                if len(line)==2:
+                    freq_name[line[0]].append(float(line[1]))
                 else:
-		    for index in range(1,len(line)):
-		        freq_name[line[0]].append(line[index])
-	    elif keyword=='temp' and 'temp' in line[0]:
+                    for index in range(1,len(line)):
+                        freq_name[line[0]].append(line[index])
+            elif keyword=='temp' and 'temp' in line[0]:
                 freq_name['temp'] = [float(line[1]),float(line[2]),float(line[3])]
-	    elif keyword=='type' and 'type' in line[0]:
-		if line[0]=='type' and line[1]=='5' or line[1]=='fcc':
-		    freq_name['type'] = 5
-		elif line[0]=='type' and line[1]=='8' or line[1]=='hcp':  
+            elif keyword=='type' and 'type' in line[0]:
+                if line[0]=='type' and line[1]=='5' or line[1]=='fcc':
+                    freq_name['type'] = 5
+                elif line[0]=='type' and line[1]=='8' or line[1]=='hcp':  
                     freq_name['type'] = 8
     return freq_name
                
 def get_freq_sub(dir):
     sub = []
     for folder in os.listdir(dir):
-	if 'FREQ' in folder:
-	    sub.append(folder)
+        if 'FREQ' in folder:
+            sub.append(folder)
     return 'FREQ'+str(len(sub))
 
 def get_latt():
@@ -98,23 +98,23 @@ for i in Edir.keys():
 def get_HB_and_HVf(Hdir,keyword):
     if len(Hdir[keyword])==1: return Hdir[keyword][0]
     else:
-	dir = {}
-	ene = {}
-	for i in Hdir[keyword]:
-	    dir[i] = os.path.join(os.getcwd(),i+'_stat')	 
+        dir = {}
+        ene = {}
+        for i in Hdir[keyword]:
+            dir[i] = os.path.join(os.getcwd(),i+'_stat')         
             for line in open(os.path.join(dir[i],'OSZICAR'),'r'):
-		if 'E0' in line:
-		    ene[i] = float(getinfo(line)[4])
-	if keyword=='HVf':
+                if 'E0' in line:
+                    ene[i] = float(getinfo(line)[4])
+        if keyword=='HVf':
             return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
-	elif keyword=='HB':
-	    return ene['perfect'] + ene['sub'] - ene['vac'] - ene['vac-sub']
+        elif keyword=='HB':
+            return ene['perfect'] + ene['sub'] - ene['vac'] - ene['vac-sub']
 
 def get_saddle(Edir,Edir_neb):
     for freq in Edir.keys():
         energy = []
         images = 1
-	if len(Edir[freq])==1: continue
+        if len(Edir[freq])==1: continue
         for folder in os.listdir(Edir_neb[freq]):
             if '0'+str(images+2) in folder:
                 images = images + 1               
@@ -130,18 +130,18 @@ def get_saddle(Edir,Edir_neb):
 
 def get_end(Edir,Edir_def):
     for freq in Edir.keys():
-	if len(Edir[freq])==1: continue
-	fp = open(os.path.join(Edir_def[freq],'OSZICAR'),'r')
+        if len(Edir[freq])==1: continue
+        fp = open(os.path.join(Edir_def[freq],'OSZICAR'),'r')
         for line in fp:
-	    if 'E0' in line:
-		eneend[freq] = float(getinfo(line)[4])
-	fp.close()
+            if 'E0' in line:
+                eneend[freq] = float(getinfo(line)[4])
+        fp.close()
     return eneend
 
 def get_v(vdir,vdir_num,vdir_denom):
     for freq in vdir.keys():
-	if len(vdir[freq])==1: v[freq] = vdir[freq][0]*10**12
-	else:
+        if len(vdir[freq])==1: v[freq] = vdir[freq][0]*10**12
+        else:
             fn=open(os.path.join(vdir_num[freq],get_freq_sub(vdir_num[freq])),'r')
             freqn=getinfo(fn.readline())
             fd=open(os.path.join(vdir_denom[freq],get_freq_sub(vdir_denom[freq])),'r')
@@ -185,7 +185,7 @@ if types['type']==5:
         T=1000./t
         for freq in vdir.keys():
            jfreq[freq] = v[freq] * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
-	alpha = jfreq['v4']/jfreq['v0']
+        alpha = jfreq['v4']/jfreq['v0']
         F_num = 10*np.power(alpha,4) + 180.5*np.power(alpha,3) + 927*np.power(alpha,2) + 1341*alpha
         F_denom = 2*np.power(alpha,4) + 40.2*np.power(alpha,3) + 254*np.power(alpha,2) + 597*alpha + 435
         FX = 1-(1.0/7.0)*(F_num/F_denom)
@@ -195,9 +195,9 @@ if types['type']==5:
         Vacconc = np.exp(-kB*HVf/T)       
         Dself = f0*Vacconc*a**2*jfreq['v0']
         D.append(np.log10(Dself*f2*jfreq['v2']*jfreq['v4']/f0/jfreq['v0']/jfreq['v3']))
-	fp.write(str(t)+'    '+str(D[i])+'\n')
-	t = t + dt    
-	i = i + 1
+        fp.write(str(t)+'    '+str(D[i])+'\n')
+        t = t + dt    
+        i = i + 1
     t = np.linspace(t0,t1,i)    
     plt.plot(t,D,'.')
     plt.xlabel('$10^3/T$(K$^{-1}$)')
@@ -227,8 +227,8 @@ elif types['type']==8:
         C2=np.exp(-kB*(HVf+HB)/T)
         Dperp.append(np.log10(a**2*(3*f2x*jfreq['vX']+f1b*jfreq['vXp'])*C2/2))
         Dpara.append(np.log10(c**2*f1z*jfreq['vXp']*C2*0.75))
-	fp.write(str(t)+'    '+str(Dperp[i])+'    '+str(Dpara[i])+'\n')
-	t = t + dt
+        fp.write(str(t)+'    '+str(Dperp[i])+'    '+str(Dpara[i])+'\n')
+        t = t + dt
         i = i + 1
     print t
     t = np.linspace(t0,t1,i)

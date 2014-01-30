@@ -302,7 +302,7 @@ Some common open-ended methods are:
 *  no_setup: Does nothing. Useful when you want to specifically specify doing nothing.
 *  no_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
 *  run_command: <command string, including all arguments>: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, ``mast_run_method run_command "//home/user/myscripts/my_custom_parsing.py overhill overdale 25"``, where the number 25 will actually be passed into sys.argv as a string. Some useful scripts are found in ``$MAST_INSTALL_PATH/MAST/utility`` and described in ref:`6_0_tools`; however, not all scripts are suitable for run_command.
-(Instead of using run_command, use the mast_exec keyword and the mast_run_method run_singlerun in order to submit to the queue.)
+(Instead of using run_command, use the mast_write_method write_submit_script, the mast_exec keyword, and the mast_run_method run_singlerun in order to submit to the queue.)
 
 You may also choose to write your own methods.
 
