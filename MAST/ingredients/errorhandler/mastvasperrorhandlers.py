@@ -5,6 +5,7 @@ import pymatgen
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
+from MAST.utility import fileutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import loggerutils
@@ -57,12 +58,18 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         if not (os.path.isfile(ofile)):
             self.logger.error("No OUTCAR file at %s or %s/01." % self.ingpath)
             return False
-        grepme = subprocess.Popen("grep Iter %s" % ofile, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        grepresults = grepme.communicate()[0]
-        grepme.wait()
-
-        lastiter = myoutcar.get_last_x_lines_line_match
-
+        myiters = fileutil.grepme(ofile, "Iter")
+        if len(myiters) == 0:
+            self.logger.warning("No Iterations in OUTCAR at %s" % ofile)
+            return False
+        lastentry = myiters[-1]
+        ionichalf = lastentry.split('(')[0]
+        lastiter = ionichalf.split()[-1]
+        lastiter = int(lastiter)
+        if lastiter >= nsw:
+            self.logger.info("Last ionic step %s is at NSW %s" % (lastiter, nsw))
+            return True
+        return False
         #ofile = "%s/vasprun.xml" % self.ingpath
         #if os.path.isfile(ofile):
         #    myvasprun = pymatgen.io.vaspio.Vasprun(ofile)
@@ -77,15 +84,15 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         actions=list()
         backup(self.archivelist)
         actions.append("Archived files %s" % self.archivelist)
-        for file in self.archivelist:
-            if (not file in self.copyfromlist) and (not file in self.copytolist): #if it is a copy-from, don't want to delete it, and if it is a copy-to, it will be either overwritted by a copy-from file, or preserved
-                if os.path.isfile(file):
-                    os.remove(file)
-        for file in self.copyfromlist:
-            cindex = self.copyfromlist.index(file)
-            if os.path.isfile(file):
-                if os.stat(file).st_size > 0:
-                    os.rename(file, self.copytolist[cindex])
+        for myfile in self.archivelist:
+            if (not myfile in self.copyfromlist) and (not myfile in self.copytolist): #if it is a copy-from, don't want to delete it, and if it is a copy-to, it will be either overwritted by a copy-from file, or preserved
+                if os.path.isfile(myfile):
+                    os.remove(myfile)
+        for myfile in self.copyfromlist:
+            cindex = self.copyfromlist.index(myfile)
+            if os.path.isfile(myfile):
+                if os.stat(myfile).st_size > 0:
+                    os.rename(myfile, self.copytolist[cindex])
                     actions.append("Copied file %s to %s" % (self.copyfromlist[cindex], self.copytolist[cindex]))
                 else:
                     actions.append("Skipped file copy of %s to %s because %s was empty." % (self.copyfromlist[cindex],self.copytolist[cindex],self.copyfromlist[cindex]))

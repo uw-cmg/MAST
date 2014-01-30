@@ -15,15 +15,18 @@ def grepme(filename="", grepstr="", lastlines=""):
             lastlines <str or int>: Search only last X lines.
                 Leave blank to grep through entire file.
         Returns:
-            Grep results
+            Grep results as a list of strings
     """
     if lastlines == "":
         grepcmd = "grep %s %s" % (grepstr, filename)
     else:
         lastlines = str(lastlines)
-        grepcmd = "tail -n %s %s | grep %s %s" % (lastlines, filename, grepstr, filename)
+        grepcmd = "tail -n %s %s | grep %s" % (lastlines, filename, grepstr)
+    #print "GREP CMD: %s" % grepcmd
     grepproc = subprocess.Popen(grepcmd, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     grepproc.wait()
-    grepresults = grepproc.communicate()[0]
+    grepcomm = grepproc.communicate()[0]
+    grepresults = grepcomm.split("\n")
+    grepresults.remove("") #Remove trailing carriage return
     return grepresults
 
