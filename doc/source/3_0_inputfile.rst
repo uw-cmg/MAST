@@ -230,28 +230,11 @@ This example will stretch the lattice along lattice vector a by 1%, stretch the 
 *  The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.
 *  If set to False, MAST will attempt to find errors, then write them into a ``MAST_ERROR`` file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the ``MAST_ERROR`` file is manually deleted by the user.
 
-The following keywords are used only for generic programs (not VASP, PHON, or any other named programs). The ``mast_exec`` keyword must be self-contained, and can optionally take in an input file named ``input.txt``::
-
-    mast_exec python myscript.py input.txt
-
-**mast_complete_file**: A file name in the ingredient directory which can be used to signal that the ingredient is complete. This keyword is used in conjunction with ``mast_complete_search``.
-
-**mast_complete_search**: A string for which to search in the ``mast_complete_file`` file. Use None to indicate that the presence of the file, alone, signifies that the ingredient is complete. ::
-
-    mast_complete_file       GAoutput.txt
-    mast_complete_search     End of Execution
+The following keyword is used only for generic programs (not VASP, PHON, or any other named programs). 
 
 **mast_started_file**: A file name in the ingredient directory whose presence signals that the ingredient run has been started. ::
 
     mast_started_file        GAoutput.txt
-
-**mast_copy_files**: Absolute paths to files which should be copied into the ingredient directory prior to running the ingredient. ::
-
-    mast_copy_files //home/user/MAST/test/gatest/SiC.tersoff //home/user/MAST/test/gatest/cBulk.xyz
-
-**mast_delimiter**: A character to use as a delimiter when building an input file. The input file will be named "input.txt". ::
-
-    mast_delimiter               =
 
 The following queue-submission keywords are platform dependent and are used along to create the submission script:
 
@@ -282,9 +265,56 @@ The following keywords have individual sections:
 
 **mast_update_children_method**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
 
-----------------------------------
+------------------------------------
+mast_xxx_method General Notes
+------------------------------------
+Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.::
+
+    mast_write_method write_singlerun
+
+However, you may choose to specify arguments where available, e.g.::
+    
+    mast_complete_method file_has_string myoutput "End of Execution"
+
+You may also choose to specify multiple methods. These methods will be performed in the order listed. For ``mast_ready_method`` or ``mast_complete_method``, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively. 
+Use a semicolon to separate out the methods::
+
+    mast_complete_method file_has_string myoutput "End of Execution"; file_exists Parsed_Structures
+
+In the example above, the file "myoutput" must exist and contain the phrase "End of Execution", and the file "Parsed_Structures" must exist, in order for the ingredient to be considered complete.
+
+Update-children methods will always get the child name appended as the end of the argument string. For example, ::
+
+    mast_update_children_method copy_file EndStructure BeginStructure
+
+will copy the file EndStructure of the parent ingredient folder to a new file BeginStructure in the child ingredient folder. There is no separate argument denoting the child ingredient.
+
+All arguments are passed as strings. Arguments in quotation marks are kept together.
+
+Some common open-ended methods are:
+
+*  file_exists <filename>
+*  file_has_string <filename> <string>
+*  copy_file <filename> <copy_to_filename>
+*  softlink_file <filename> <softlink_to_filename>
+*  copy_fullpath_file <full path file name> <copy_to_filename>: This method is for copying some system file like //home/user/some_template, not an ingredient-specific file
+*  write_ingred_input_file <filename> <allowed file> <delimiter>: The allowed file specifies an allowed keywords file in $MAST_INSTALL_PATH/MAST/ingredients/programkeys. Use "all" to put any non-mast keywords into the input file. Leave off the delimiter argument in order to use a single space.
+*  no_setup: Does nothing. Useful when you want to specifically specify doing nothing.
+*  no_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
+*  run_command: <command string> <arguments>: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, ``mast_run_method run_command my_custom_parsing.py overhill overdale 25``, where the number 25 will actually be passed into sys.argv as a string.
+
+You may also choose to write your own methods.
+Place these methods in a file in the directory ``$MAST_INSTALL_PATH/customlib``, structured like the file ``$MAST_INSTALL_PATH/customlib/customchopingredient.py``
+
+*  Please inherit from either ChopIngredient or BaseIngredient.
+*  Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
+*  You will have access to the ingredient directory name at ``self.keywords['name']`` as well as ingredient keywords at ``self.keywords['program_keys']``.
+*  The method may also take in up to 3 string-based arguments.
+*  In the input file, designate your custom method as classname.methodname followed by any arguments, for example, ``mast_write_method MyChopClass.write_complex_file superfile``
+
+-----------------------------------------
 mast_write_method keyword values
-----------------------------------
+-----------------------------------------
 
 write_singlerun
 
@@ -316,9 +346,9 @@ write_phonon_multiple
 
 *  Write a phonon run, where the frequency calculation for each atom and each direction is a separate run, using selective dynamics. CHGCAR and WAVECAR must have been given to the ingredient previously; these files will be softlinked into each subfolder.
 *  Programs supported: vasp
-----------------------------------
+-----------------------------------------
 mast_ready_method keyword values
-----------------------------------
+-----------------------------------------
 
 ready_singlerun
 
