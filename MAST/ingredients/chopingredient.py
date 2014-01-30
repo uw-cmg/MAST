@@ -290,8 +290,26 @@ class ChopIngredient(BaseIngredient):
     def no_setup(self):
         """No setup is needed."""
         return
-
+    def no_update(self, childname=""):
+        """No updating is needed."""
+        return
     
+    def run_command(self, commandstr=""):
+        """Run a command. Command needs to be of the form
+            "<str>.py arg1 arg2 ...." and cannot contain
+            the following characters: *, |, &, <, >
+        """
+        oopslist = ["*","|","&","<",">"]
+        for oopchar in oopslist:
+            if oopchar in commandstr:
+                self.logger.error("Cannot run command specified by command string (see input file) because of bad character.")
+                return 
+        else:
+            import subprocess
+            myproc = subprocess.Popen(commandstr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            myresults = myproc.communicate()[0]
+            return myresults
+
     def write_neb(self):
         """Get the parent structures, sort and match atoms, and interpolate.
             Write images to the appropriate folders.
