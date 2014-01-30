@@ -30,13 +30,15 @@ def get_freq_name(inp,keyword):
     flag = 0
     fp = open(inp,'r')
     for line in fp:
-        if '$freq' in line:
-            flag = 1
-        if '$end' in line:
-            flag = 0
-        if flag==1:
-            content.append(line)
-    content.pop(0)
+        #TTM 20140130 separate input file; no $freq/$end
+        #if '$freq' in line:
+        #    flag = 1
+        #if '$end' in line:
+        #    flag = 0
+        #if flag==1:
+        #    content.append(line)
+        content.append(line)
+    #content.pop(0) #TTM 20140130 separate input file, no $freq
     fp.close()
     for i in range(len(content)):
 	line = getinfo(content[i])
