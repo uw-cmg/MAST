@@ -23,7 +23,6 @@ vdir_num = {}
 vdir_denom = {}
 Edir_neb = {}
 Edir_def = {}
-
 def get_freq_name(inp,keyword):
     freq_name = {}
     content = []
@@ -47,7 +46,7 @@ def get_freq_name(inp,keyword):
     for i in range(len(content)):
         line = getinfo(content[i])
         if not len(line)==0:
-            if (keyword=='E' and line[0] in Elist) or (keyword=='v' and line[0] in vlist) or (keyword=='H' and line[0] in Hlist):
+            if (keyword=='E' and line[0] in Elist) or (keyword=='v' and line[0] in vlist):
                 freq_name[line[0]] = []
                 if len(line)==2:
                     try:
@@ -57,6 +56,23 @@ def get_freq_name(inp,keyword):
                 else:
                     for index in range(1,len(line)):
                         freq_name[line[0]].append(line[index])
+            elif (keyword=='H' and line[0] in Hlist):
+                if line[0] == 'HB':
+                    if len(line) > 2:
+                        freq_name['HB'] = dict()
+                        freq_name['HB']['perfect'] = line[1]
+                        freq_name['HB']['sub'] = line[2]
+                        freq_name['HB']['vac-sub'] = line[3]
+                        freq_name['HB']['vac'] = line[4]
+                    else:
+                        freq_name['HB'] = float(line[1])
+                elif line[0] == 'HVf':
+                    if len(line) > 2:
+                        freq_name['HVf'] = dict()
+                        freq_name['HVf']['perfect'] = line[1]
+                        freq_name['HVf']['vac'] = line[2]
+                    else:
+                        freq_name['HB'] = float(line[1])
             elif keyword=='temp' and 'temp' in line[0]:
                 freq_name['temp'] = [float(line[1]),float(line[2]),float(line[3])]
             elif keyword=='type' and 'type' in line[0]:
@@ -64,6 +80,8 @@ def get_freq_name(inp,keyword):
                     freq_name['type'] = 5
                 elif line[0]=='type' and line[1]=='8' or line[1]=='hcp':  
                     freq_name['type'] = 8
+            elif keyword=='lattice' and 'lattice' in line[0]:
+                freq_name['lattice'] = line[1]
     return freq_name
                
 def get_freq_sub(dir):
@@ -75,8 +93,9 @@ def get_freq_sub(dir):
 
 def get_latt():
     data={'a':0,'c':0,'No.':0}
-    data['No.'] = len(mg.read_structure(os.getcwd()+'/POSCAR'))
-    struct = mg.read_structure(os.getcwd()+'/POSCAR_primitive')    
+    data['No.'] = len(mg.read_structure(lattice +'/POSCAR'))
+    #struct = mg.read_structure(lattice +'/POSCAR_primitive')        #TTM use pymatgen get_primitive_structure
+    struct = mg.read_structure(lattice + '/POSCAR').get_primitive_structure()
       
     if round(struct.lattice.angles[0])==round(struct.lattice.angles[1])==round(struct.lattice.angles[2])==90.0:
         data['a'] = struct.lattice.abc[0]*10**(-8)
@@ -92,7 +111,7 @@ vdir = get_freq_name(inp,'v')
 types = get_freq_name(inp,'type')
 Edir = get_freq_name(inp,'E')
 Hdir = get_freq_name(inp,'H')
-
+lattice = get_freq_name(inp,'lattice')['lattice'] #TTM added 20140129
 for i in vdir.keys(): 
     if len(vdir[i])==1: continue
     vdir_denom[i] = os.path.join(os.getcwd(),'phonon_'+vdir[i][1]+'_parse')
@@ -107,11 +126,11 @@ def get_HB_and_HVf(Hdir,keyword):
     else:
         dir = {}
         ene = {}
-        for i in Hdir[keyword]:
-            dir[i] = os.path.join(os.getcwd(),i+'_stat')         
-            for line in open(os.path.join(dir[i],'OSZICAR'),'r'):
+        for key in Hdir[keyword].keys():
+            dir[key] = os.path.join(os.getcwd(),Hdir[keyword][key]+'_stat')         
+            for line in open(os.path.join(dir[key],'OSZICAR'),'r'):
                 if 'E0' in line:
-                    ene[i] = float(getinfo(line)[4])
+                    ene[key] = float(getinfo(line)[4])
         if keyword=='HVf':
             return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
         elif keyword=='HB':
