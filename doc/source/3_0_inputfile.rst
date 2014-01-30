@@ -301,9 +301,10 @@ Some common open-ended methods are:
 *  write_ingred_input_file <filename> <allowed file> <delimiter>: The allowed file specifies an allowed keywords file in $MAST_INSTALL_PATH/MAST/ingredients/programkeys. Use "all" to put any non-mast keywords into the input file. Leave off the delimiter argument in order to use a single space.
 *  no_setup: Does nothing. Useful when you want to specifically specify doing nothing.
 *  no_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
-*  run_command: <command string> <arguments>: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, ``mast_run_method run_command my_custom_parsing.py overhill overdale 25``, where the number 25 will actually be passed into sys.argv as a string.
+*  run_command: <command string, including all arguments>: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, ``mast_run_method run_command "//home/user/myscripts/my_custom_parsing.py overhill overdale 25"``, where the number 25 will actually be passed into sys.argv as a string. Some useful scripts are found in ``$MAST_INSTALL_PATH/MAST/utility`` and described in ref:`6_0_tools`; however, not all scripts are suitable for run_command.
 
 You may also choose to write your own methods.
+
 Place these methods in a file in the directory ``$MAST_INSTALL_PATH/customlib``, structured like the file ``$MAST_INSTALL_PATH/customlib/customchopingredient.py``
 
 *  Please inherit from either ChopIngredient or BaseIngredient.
