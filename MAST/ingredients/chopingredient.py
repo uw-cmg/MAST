@@ -202,7 +202,7 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (copyfromfullpath, topath))
         return
 
-    def write_ingred_input_file(self, fname="", allowed_file="all", delimiter=" "):
+    def write_ingred_input_file(self, fname="", allowed_file="all", upperkey=1, delimiter=" "):
         """Write an input file.
             Args: 
                 fname <str>: File name for the ingredient input 
@@ -210,6 +210,9 @@ class ChopIngredient(BaseIngredient):
                 allowed_file <str>: File name for the list
                     of allowed keywords. Use "all" to allow
                     all non-mast keywords.
+                upperkey <str or int>: 
+                        1 - uppercase keywords (default)
+                        0 - leave keywords their own case
                 delimiter <str>: Delimiter to place between
                     keywords and values in the input file.
                     Default is space.
@@ -221,9 +224,9 @@ class ChopIngredient(BaseIngredient):
         if delimiter == "":
             delimiter = " "
         if allowed_file.lower() == "all":
-            okay_keys = self._get_allowed_non_mast_keywords()
+            okay_keys = self._get_allowed_non_mast_keywords("", upperkey)
         else:
-            okay_keys = self._get_allowed_non_mast_keywords(allowed_file)
+            okay_keys = self._get_allowed_non_mast_keywords(allowed_file, upperkey)
         my_input = MASTFile()
         for key, value in okay_keys.iteritems():
             my_input.data.append(str(key) + delimiter + str(value) + "\n")
@@ -235,13 +238,16 @@ class ChopIngredient(BaseIngredient):
         return 
 
 
-    def _get_allowed_non_mast_keywords(self, allowed_file=""):
+    def _get_allowed_non_mast_keywords(self, allowed_file="", upperkey=1):
         """Get the non-mast keywords and make a dictionary.
             Args:
                 allowed_file <str>: File name containing
                     allowed keywords.
                     If this argument is not entered,
                     then any non-mast keyword will be allowed.
+                upperkey <str or int>: 
+                        1 - uppercase keywords (default)
+                        0 - leave keywords their own case
             Returns:
                 my_dict <dict>: Dictionary of keyword and
                     value entries
@@ -256,7 +262,10 @@ class ChopIngredient(BaseIngredient):
                 allowed_list = self._get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
-                keytry = key.upper()
+                if int(upperkey) == 1:
+                    keytry = key.upper()
+                else:
+                    keytry = key
                 keyokay = None
                 if len(allowed_list) > 0:
                     if keytry in allowed_list:
