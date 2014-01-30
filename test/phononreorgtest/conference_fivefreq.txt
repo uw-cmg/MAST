@@ -1,0 +1,46 @@
+Recipe OptimizeWorkflow
+perfect_opt1 (lowmesh_perfect)
+    perfect_opt2 (relax_perfect)
+        perfect_stat (static)
+            diffcoeff_utility (diffcoeff)
+        {begin}
+        inducedefect_<N> (inducedefect)
+            defect_<N>_<Q>_opt1 (lowmesh_defect)
+                defect_<N>_<Q>_opt2 (relax_defect)
+                    defect_<N>_<Q>_stat (static)
+        {end}
+{begin}
+defect_<N>_<Q>_stat (static)
+    phonon_<N>_<Q>_<P> (phonon)
+        phonon_<N>_<Q>_<P>_parse (phononparse)
+{end}
+{begin}
+defect_<B>_<Q>_stat (static_to_neb), defect_<E>_<Q>_stat (static_to_neb)
+    neb_<B-E>_<Q>_opt1 (neb_to_neb)
+        neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+            neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+    neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+    neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+{end}
+{begin}
+neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+    phonon_<B-E>_<Q>_<P> (phonon)
+        phonon_<B-E>_<Q>_<P>_parse (phononparse)
+{end}
+{begin}
+neb_<B-E>_<Q>_stat (nebstat_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+phonon_<N>_<Q>_<P>_parse (phononparse)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+phonon_<B-E>_<Q>_<P>_parse (phononparse)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+defect_<N>_<Q>_stat (stat_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}

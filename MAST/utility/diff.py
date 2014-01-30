@@ -40,13 +40,20 @@ def get_freq_name(inp,keyword):
         content.append(line)
     #content.pop(0) #TTM 20140130 separate input file, no $freq
     fp.close()
+    #TTM 20140130 mixed keywords; explicitly allow some
+    Elist=['E0','E1','E2','E3','E4','Ea','Eb','Ec','EX','Eap','Ebp','Ecp','EXp']
+    vlist=['v0','v1','v2','v3','v4','va','vb','vc','vX','vap','vbp','vcp','vXp']
+    Hlist=['HB','HVf']
     for i in range(len(content)):
         line = getinfo(content[i])
         if not len(line)==0:
-            if keyword=='E' and 'E' in line[0] or keyword=='v' and 'v' in line[0] or keyword=='H' and 'H' in line[0]:
+            if (keyword=='E' and line[0] in Elist) or (keyword=='v' and line[0] in vlist) or (keyword=='H' and line[0] in Hlist):
                 freq_name[line[0]] = []
                 if len(line)==2:
-                    freq_name[line[0]].append(float(line[1]))
+                    try:
+                        freq_name[line[0]].append(float(line[1]))
+                    except ValueError:
+                        pass
                 else:
                     for index in range(1,len(line)):
                         freq_name[line[0]].append(line[index])
