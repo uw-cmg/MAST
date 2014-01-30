@@ -46,6 +46,7 @@ class VaspNEBError(BaseError):
             plist.append("%s/POSCAR" % imstr)
         handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],warchlist, clist, plist]
         handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],self.keywords,marchlist]
+        handler_input_d['VaspReachedNSWErrorHandler']=[self.keywords['name'],warchlist, clist, plist]
 
         return handler_input_d
 
