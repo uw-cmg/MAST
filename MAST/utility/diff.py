@@ -134,7 +134,7 @@ def get_HB_and_HVf(Hdir,keyword):
         if keyword=='HVf':
             return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
         elif keyword=='HB':
-            return ene['perfect'] + ene['sub'] - ene['vac'] - ene['vac-sub']
+            return ene['perfect'] + ene['vac-sub'] - ene['sub'] - ene['vac']
 
 def get_saddle(Edir,Edir_neb):
     for freq in Edir.keys():
