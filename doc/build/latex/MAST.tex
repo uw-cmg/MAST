@@ -14,7 +14,7 @@
 
 
 \title{MAST Documentation}
-\date{January 14, 2014}
+\date{January 31, 2014}
 \release{20140113.canoe}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
@@ -1234,37 +1234,12 @@ If set to False, MAST will attempt to find errors, then write them into a \code{
 
 \end{itemize}
 
-The following keywords are used only for generic programs (not VASP, PHON, or any other named programs). The \code{mast\_exec} keyword must be self-contained, and can optionally take in an input file named \code{input.txt}:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-mast\_exec python myscript.py input.txt
-\end{Verbatim}
-
-\textbf{mast\_complete\_file}: A file name in the ingredient directory which can be used to signal that the ingredient is complete. This keyword is used in conjunction with \code{mast\_complete\_search}.
-
-\textbf{mast\_complete\_search}: A string for which to search in the \code{mast\_complete\_file} file. Use None to indicate that the presence of the file, alone, signifies that the ingredient is complete.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-mast\_complete\_file       GAoutput.txt
-mast\_complete\_search     End of Execution
-\end{Verbatim}
+The following keyword is used only for generic programs (not VASP, PHON, or any other named programs).
 
 \textbf{mast\_started\_file}: A file name in the ingredient directory whose presence signals that the ingredient run has been started.
 
 \begin{Verbatim}[commandchars=\\\{\}]
 mast\_started\_file        GAoutput.txt
-\end{Verbatim}
-
-\textbf{mast\_copy\_files}: Absolute paths to files which should be copied into the ingredient directory prior to running the ingredient.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{mast\PYGZus{}copy\PYGZus{}files} \PYG{o}{/}\PYG{o}{/}\PYG{n}{home}\PYG{o}{/}\PYG{n}{user}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{gatest}\PYG{o}{/}\PYG{n}{SiC}\PYG{o}{.}\PYG{n}{tersoff} \PYG{o}{/}\PYG{o}{/}\PYG{n}{home}\PYG{o}{/}\PYG{n}{user}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{gatest}\PYG{o}{/}\PYG{n}{cBulk}\PYG{o}{.}\PYG{n}{xyz}
-\end{Verbatim}
-
-\textbf{mast\_delimiter}: A character to use as a delimiter when building an input file. The input file will be named ``input.txt''.
-
-\begin{Verbatim}[commandchars=\\\{\}]
-mast\_delimiter               =
 \end{Verbatim}
 
 The following queue-submission keywords are platform dependent and are used along to create the submission script:
@@ -1296,6 +1271,94 @@ The following keywords have individual sections:
 \textbf{mast\_complete\_method}: The .complete. method, which specifies how MAST can tell if the ingredient is considered complete
 
 \textbf{mast\_update\_children\_method}: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
+
+
+\subsubsection{mast\_xxx\_method General Notes}
+\label{3_0_inputfile:mast-xxx-method-general-notes}
+Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_write\_method write\_singlerun
+\end{Verbatim}
+
+However, you may choose to specify arguments where available, e.g.:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_complete\_method file\_has\_string myoutput "End of Execution"
+\end{Verbatim}
+
+You may also choose to specify multiple methods. These methods will be performed in the order listed. For \code{mast\_ready\_method} or \code{mast\_complete\_method}, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
+Use a semicolon to separate out the methods:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_complete\_method file\_has\_string myoutput "End of Execution"; file\_exists Parsed\_Structures
+\end{Verbatim}
+
+In the example above, the file ``myoutput'' must exist and contain the phrase ``End of Execution'', and the file ``Parsed\_Structures'' must exist, in order for the ingredient to be considered complete.
+
+Update-children methods will always get the child name appended as the end of the argument string. For example,
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_update\_children\_method copy\_file EndStructure BeginStructure
+\end{Verbatim}
+
+will copy the file EndStructure of the parent ingredient folder to a new file BeginStructure in the child ingredient folder. There is no separate argument denoting the child ingredient.
+
+All arguments are passed as strings. Arguments in quotation marks are kept together.
+
+Some common open-ended methods are:
+\begin{itemize}
+\item {} 
+file\_exists \textless{}filename\textgreater{}
+
+\item {} 
+file\_has\_string \textless{}filename\textgreater{} \textless{}string\textgreater{}
+
+\item {} 
+copy\_file \textless{}filename\textgreater{} \textless{}copy\_to\_filename\textgreater{}
+
+\item {} 
+softlink\_file \textless{}filename\textgreater{} \textless{}softlink\_to\_filename\textgreater{}
+
+\item {} 
+copy\_fullpath\_file \textless{}full path file name\textgreater{} \textless{}copy\_to\_filename\textgreater{}: This method is for copying some system file like //home/user/some\_template, not an ingredient-specific file
+
+\item {} 
+write\_ingred\_input\_file \textless{}filename\textgreater{} \textless{}allowed file\textgreater{} \textless{}uppercase keywords\textgreater{} \textless{}delimiter\textgreater{}: The allowed file specifies an allowed keywords file in \$MAST\_INSTALL\_PATH/MAST/ingredients/programkeys. Use ``all'' to put any non-mast keywords into the input file. Use 1 to uppercase all keywords, or 0 otherwise. Leave off the delimiter argument in order to use a single space.
+
+\item {} 
+no\_setup: Does nothing. Useful when you want to specifically specify doing nothing.
+
+\item {} 
+no\_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
+
+\item {} 
+run\_command: \textless{}command string, including all arguments\textgreater{}: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, \code{mast\_run\_method run\_command "//home/user/myscripts/my\_custom\_parsing.py overhill overdale 25"}, where the number 25 will actually be passed into sys.argv as a string. Some useful scripts are found in \code{\$MAST\_INSTALL\_PATH/MAST/utility} and described in ref:\emph{6\_0\_tools}; however, not all scripts are suitable for run\_command.
+
+\end{itemize}
+
+(Instead of using run\_command, use the mast\_write\_method write\_submit\_script, the mast\_exec keyword, and the mast\_run\_method run\_singlerun in order to submit to the queue.)
+
+You may also choose to write your own methods.
+
+Place these methods in a file in the directory \code{\$MAST\_INSTALL\_PATH/customlib}, structured like the file \code{\$MAST\_INSTALL\_PATH/customlib/customchopingredient.py}
+\begin{itemize}
+\item {} 
+Please inherit from either ChopIngredient or BaseIngredient.
+
+\item {} 
+Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
+
+\item {} 
+You will have access to the ingredient directory name at \code{self.keywords{[}'name'{]}} as well as ingredient keywords at \code{self.keywords{[}'program\_keys'{]}}.
+
+\item {} 
+The method may also take in up to 3 string-based arguments.
+
+\item {} 
+In the input file, designate your custom method as classname.methodname followed by any arguments, for example, \code{mast\_write\_method MyChopClass.write\_complex\_file superfile}
+
+\end{itemize}
 
 
 \subsubsection{mast\_write\_method keyword values}
@@ -1919,17 +1982,19 @@ For VASP, this inclusion takes the form of selective dynamics T T T for the atom
 
 If the phonon center radius is 0, only the atom found at the phonon center site point will be considered.
 
-To use phonons in the defects section, use the subsection keyword .phonon. followed by a label for the phonon, the fractional coordinates for the phonon center site, and a float value for the phonon center radius. Multiple separate phonon calculations may be obtained for each defect, for example:
+To use phonons in the defects section, use the subsection keyword .phonon. followed by a label for the phonon, the fractional coordinates for the phonon center site, a float value for the phonon center radius, and an optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used). Multiple separate phonon calculations may be obtained for each defect, for example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 begin int1
 interstitial 0.25 0.25 0.25 X2
-phonon host3 0.3 0.3 0.4 2.5
+phonon host3 0.3 0.3 0.4 2.5 0.01
 phonon solute 0.1 0.1 0.2 0.5
 end
 \end{Verbatim}
 
-In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates.
+In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site.
+
+In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
 
 The recipe template file for phonons may include either the explicit phonon labels and their charge and defect label, or \textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (defect label \_ charge label \_ phonon label).
 
@@ -3017,7 +3082,7 @@ This crontab line will run mast every 15 minutes and is ONLY suitable for short 
 
 
 \chapter{MAST post-processing utilities}
-\label{6_0_tools::doc}\label{6_0_tools:mast-post-processing-utilities}
+\label{6_0_tools:tools}\label{6_0_tools::doc}\label{6_0_tools:mast-post-processing-utilities}
 
 \section{Defect formation energy}
 \label{6_0_tools:defect-formation-energy}
@@ -3052,7 +3117,69 @@ The two-column printout is Fermi energy on the left, and defect formation energy
 
 \section{Diffusion coefficient}
 \label{6_0_tools:diffusion-coefficient}
-\textbf{Update this section with new diffusion coefficient help text}
+Usage of diffusion coefficient calculation tool code
+1.  This code currently supports 5(fcc) and 8(hcp) frequency models.
+2.  The code currently will work in the same directory with other MAST generated folders (\code{neb\_vac*}, \code{phonon\_vac*}, etc.)
+3.  Type \code{\$MAST\_INSTALL\_PATH/MAST/utility/diff.py -i \textless{}input\textgreater{}} to run.
+4.  The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
+a)  The order of different lines does not matter.
+b)  There can be as many .n. between lines or as many spaces between words, and they will not affect the code.
+c)  The keyword at the beginning of each line matters:
+i.  .type. means which frequency model to choose. Either .5. or .fcc. tells the code 5-freq is applied, while either .8. or .hcp. the 8-freq.
+ii. .E*. and .v*. means energy and attempting rate, respectively. (Currently doesn.t support other characters such as .w.).
+iii.    For 5-freq, .E0.\textasciitilde{}.E4. should be used to specify their relations with certain directories; for 8-freq, .Ea.,.Eb.,.Ec.,.EX.,.Eap.(.p. means .prime.),.Ebp.,.Ecp. and .EXp. should be used. Note they are all case sensitive and should be exactly the same as
+iv. Generally speaking, each keyword (.E*. or .v*.) is followed by two words. The first indicates the configuration of the starting/end point of NEB and the second represents the saddle point. This order should not be changed.
+v.  The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.
+vi. .HVf. means the formation energy of vacancy and .HB. means binding energy (4 configurations will be used for .HB., so 4 words or 1 float are expected after .HB.).
+vii.    Current code will not likely to work if these keywords are spelt incorrectly.
+
+Below are two examples of the \$freq part in the input file:
+Ex1:
+\$freq
+type 5
+
+v1 vac1 vac10-vac1
+v2  2
+v3 vac3 vac4-vac3
+v4  5
+v0 vac0 vac00-vac0
+
+E1  vac1 vac10-vac1
+
+E2 vac2   vac20-vac2
+E3   0.5
+E4 vac4 vac4-vac3
+E0 vac0 vac00-vac0
+HVf  0.5
+\#TTM can also have HVf  perfect   vac   ???
+HB  perfect  sub  vac-sub  vac
+\$end
+
+Ex2:
+\$freq
+
+type hcp
+
+HVf 0.44
+HB -0.1
+Ea 0.5
+Eb 0.5
+Ec 0.5
+EX 0.5
+Eap 0.5
+Ebp 0.5
+Ecp 0.5
+EXp 0.5
+va 5
+vb 5
+vc 5
+vX 3
+vap 5
+vbp 5
+vcp 3
+vXp 4
+
+\$end
 
 
 \section{Defect finder}

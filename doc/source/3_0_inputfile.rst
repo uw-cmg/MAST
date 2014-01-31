@@ -12,9 +12,9 @@ The input file contains several sections and subsections.
 Bounds of sections are denoted by ``$sectionname`` and ``$end``.
 Bounds of subsections within a section are denoted by ``begin subsectionname`` and ``end``.
 
-*Comments in the input file are allowed only as separate lines starting with .#.. A comment may not be appended to a line.*
+*Comments in the input file are allowed only as separate lines starting with #. A comment may not be appended to a line.*
 
-Example of the ``$structure`` section, with three subsections, .elementmap., .coordinates., and .lattice.::
+Example of the ``$structure`` section, with three subsections, **elementmap**, **coordinates**, and **lattice**::
 
     $structure
     coord_type fractional
@@ -68,7 +68,7 @@ Using the keyword ``posfile``, a VASP POSCAR-type file or a CIF file can be inse
 
 The file should be located in the same directory as the input file.
 
-A CIF file should end with *.cif.
+A CIF file should end with .cif.
 
 A POSCAR-type filename must start with ``POSCAR_`` or ``CONTCAR_`` in order for pymatgen to recognize it. The elements will be obtained from the POSCAR unless you also have a POTCAR in the directory, in which case, check your output carefully because the elements might be given by the POTCAR instead, no matter what elements are written in the POSCAR file.
 
@@ -78,15 +78,15 @@ Structure by specification
 
 To specify a structure, use the following subsections:
 
-**``coord_type``**: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.
+**coord_type**: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.
 
-**``lattice``**: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
+**lattice**: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
 
-**``elementmap``**: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
+**elementmap**: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
 
 The elementmap subsection works in conjunction with the coordinates subsection.
 
-**``coordinates``**: The coordinates subsection specifies the coordinates in order. 
+**coordinates**: The coordinates subsection specifies the coordinates in order. 
 
 Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.
 
@@ -95,7 +95,7 @@ Each fractional coordinate must be preceded by either an element symbol or an X#
 
 Example::
     
-begin $structure
+    begin $structure
 
     coord_type fractional    
 
@@ -133,9 +133,9 @@ Program-specific keywords such as VASP INCAR keywords are included in these sect
 
 Each ingredient type in the recipe should have a subsection denoted by ::
 
-begin ingredient_type
+    begin ingredient_type
     (keywords here)
-end
+    end
 
 even if there are no keywords within that section, in which case the ``end`` line directly follows the ``begin`` line.
 
@@ -153,8 +153,8 @@ One exception for VASP keywords is the ``IMAGES`` keyword, which signals a nudge
 
 For VASP ingredients, please include ::
 
-lcharg False 
-lwave False 
+    lcharg False 
+    lwave False 
 
 in your ingredient global keywords in order to avoid writing the large VASP files CHGCAR and WAVECAR, unless you really need these files.
 
@@ -167,11 +167,11 @@ Special MAST ingredient keywords:
 
 Some of these special MAST keywords are only appropriate for VASP calculations.
 
-**mast_program**: Specify which program to run (.vasp., .vasp_neb., .phon., or .None. for a generic program, are currently supported) ::
+**mast_program**: Specify which program to run (``vasp``, ``vasp_neb``, ``phon``, or ``None`` for a generic program, are currently supported) ::
 
     mast_program vasp
 
-*  This keyword must be in lowercase (.vasp., .phon.)
+*  This keyword must be in lowercase
 
 **mast_kpoints**: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. :: 
 
@@ -179,13 +179,14 @@ mast_kpoints = 3x3x3 G
 
 *  Either this keyword or ``mast_kpoint_density`` is required for VASP calculations.
 
-**mast_kpoint_density**: A number for the desired kpoint mesh density. Only works with ``mast_write_method`` of ``write_singlerun_automesh``
+**mast_kpoint_density**: A number for the desired kpoint mesh density. 
 
+*  Only works with ``mast_write_method`` of ``write_singlerun_automesh``
 *  Either this keyword or ``mast_kpoints`` is required for VASP calculations.
 
 **mast_pp_setup**: Specify which pseudopotential goes to which element::
 
-mast_pp_setup La=La Mn=Mn_pv O=O_s
+    mast_pp_setup La=La Mn=Mn_pv O=O_s
 
 **mast_xc**: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)
 
@@ -205,11 +206,11 @@ mast_pp_setup La=La Mn=Mn_pv O=O_s
 
 **mast_coordinates**: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the $structure section of the input file. The coordinates must be fractional coordinates. ::
 
-    mast_coordinates coordposcar
+    mast_coordinates POSCAR_initialize
 
 *  For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images::
     
-mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
+    mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
 
 *  The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run ``mast -i test.inp``); once the ``input.inp`` file is created in the recipe directory, it will store a full path back to these poscar-type files.
 
@@ -217,7 +218,7 @@ mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
 
 **mast_strain**: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with ``mast_run_method`` of ``run_strain`` ::
 
-mast_strain 1.01 1.03 0.98 
+    mast_strain 1.01 1.03 0.98 
 
 This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%
 
@@ -265,9 +266,11 @@ The following keywords have individual sections:
 
 **mast_update_children_method**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
 
-------------------------------------
-mast_xxx_method General Notes
-------------------------------------
+.. _important_notes:
+   
+--------------------------------------------------
+Important notes on using mast_xxx_method keywords
+--------------------------------------------------
 Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.::
 
     mast_write_method write_singlerun
@@ -293,58 +296,77 @@ All arguments are passed as strings. Arguments in quotation marks are kept toget
 
 Some common open-ended methods are:
 
-*  file_exists <filename>
-*  file_has_string <filename> <string>
-*  copy_file <filename> <copy_to_filename>
-*  softlink_file <filename> <softlink_to_filename>
-*  copy_fullpath_file <full path file name> <copy_to_filename>: This method is for copying some system file like //home/user/some_template, not an ingredient-specific file
-*  write_ingred_input_file <filename> <allowed file> <uppercase keywords> <delimiter>: The allowed file specifies an allowed keywords file in $MAST_INSTALL_PATH/MAST/ingredients/programkeys. Use "all" to put any non-mast keywords into the input file. Use 1 to uppercase all keywords, or 0 otherwise. Leave off the delimiter argument in order to use a single space.
-*  no_setup: Does nothing. Useful when you want to specifically specify doing nothing.
-*  no_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
-*  run_command: <command string, including all arguments>: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, ``mast_run_method run_command "//home/user/myscripts/my_custom_parsing.py overhill overdale 25"``, where the number 25 will actually be passed into sys.argv as a string. Some useful scripts are found in ``$MAST_INSTALL_PATH/MAST/utility`` and described in ref:`6_0_tools`; however, not all scripts are suitable for run_command.
-(Instead of using run_command, use the mast_write_method write_submit_script, the mast_exec keyword, and the mast_run_method run_singlerun in order to submit to the queue.)
+*  **file_exists <filename>**
 
-You may also choose to write your own methods.
+*  **file_has_string <filename> <string>**
 
-Place these methods in a file in the directory ``$MAST_INSTALL_PATH/customlib``, structured like the file ``$MAST_INSTALL_PATH/customlib/customchopingredient.py``
+*  **copy_file <filename> <copy_to_filename>**
 
-*  Please inherit from either ChopIngredient or BaseIngredient.
-*  Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
-*  You will have access to the ingredient directory name at ``self.keywords['name']`` as well as ingredient keywords at ``self.keywords['program_keys']``.
-*  The method may also take in up to 3 string-based arguments.
-*  In the input file, designate your custom method as classname.methodname followed by any arguments, for example, ``mast_write_method MyChopClass.write_complex_file superfile``
+*  **softlink_file <filename> <softlink_to_filename>**
+
+*  **copy_fullpath_file <full path file name> <copy_to_filename>**: This method is for copying some system file like //home/user/some_template, not an ingredient-specific file
+
+*  **write_ingred_input_file <filename> <allowed file> <uppercase keywords> <delimiter>**: The allowed file specifies an allowed keywords file name in ``$MAST_INSTALL_PATH/MAST/ingredients/programkeys``. 
+
+    *  Use "all" to put any non-mast keywords into the input file. 
+    *  Use 1 to uppercase all keywords, or 0 to leave them as entered. 
+    *  Leave off the delimiter argument in order to use a single space. 
+    *  Examples::
+    
+        write_ingred_input_file input.txt all 0 =
+        write_ingred_input_file input.txt phon_allowed_keys.py 1
+
+*  **no_setup**: Does nothing. Useful when you want to specifically specify doing nothing.
+
+*  **no_update**: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
+
+*  **run_command: <command string, including all arguments>**: This method allows you to run a python script. 
+
+    *  The python script may take in only string-based arguments
+    *  Please stick to common text characters. 
+    *  Example:: 
+    
+        mast_run_method run_command "//home/user/myscripts/my_custom_parsing.py 25 0.01"
+
+    *  In the example above, the numbers 25 and 0.01 will actually be passed into sys.argv as a string. 
+    *  This method is intended to allow you to run short custom scripts of your own creation, particularly for ``mast_write_method`` when setting up your ingredient.
+    *  For long or complex execution steps where you want the output tracked separately, do not use this method. Instead, do the following in order to get your script submitted to the queue:
+        #  Use ``write_submit_script`` in your ``mast_write_method``, along with any other write methods
+        #  Use ``mast_run_method run_singlerun``
+        #  Put your script in the ``mast_exec`` keyword
+        *  Some useful scripts are found in ``$MAST_INSTALL_PATH/tools`` and described in :ref:`6_0_tools`
 
 -----------------------------------------
 mast_write_method keyword values
 -----------------------------------------
 
-write_singlerun
+**write_singlerun**
 
 *  Write files for a single generic run.
 *  Programs supported: vasp, phon (phon assumes vasp-type output given by one of the .give_phonon. update children methods)
 
-write_singlerun_automesh
+**write_singlerun_automesh**
 
 *  Write files for a single generic run.
 *  Programs supported: vasp
 *  Requires the ``mast_kpoint_density`` ingredient keyword
 
-write_neb
+**write_neb**
 
 *  Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories.
 *  Programs supported: vasp
 
-write_neb_subfolders
+**write_neb_subfolders**
 
 *  Write static runs for an NEB, starting from a previous NEB, into image subfolders 01 to 0(N-1).
 *  Programs supported: vasp
 
-write_phonon_single
+**write_phonon_single**
 
 *  Write files for a phonon run.
 *  Programs supported: vasp
 
-write_phonon_multiple
+**write_phonon_multiple**
 
 *  Write a phonon run, where the frequency calculation for each atom and each direction is a separate run, using selective dynamics. CHGCAR and WAVECAR must have been given to the ingredient previously; these files will be softlinked into each subfolder.
 *  Programs supported: vasp
@@ -352,22 +374,22 @@ write_phonon_multiple
 mast_ready_method keyword values
 -----------------------------------------
 
-ready_singlerun
+**ready_singlerun**
 
 *  Checks that a single run is ready to run
 *  Programs supported: vasp (either NEB or regular VASP run), phon
 
-ready_defect
+**ready_defect**
 
 *  Checks that the ingredient has a structure file
 *  Programs supported: vasp
 
-ready_neb_subfolders
+**ready_neb_subfolders**
 
 *  Checks that each 01/.../0(N-1) subfolder is ready to run as its own separate calculation, following the ready_singlerun criteria for each folder
 *  This method is used for NEB static calculations rather than NEB calculations themselves.
 
-ready_subfolders
+**ready_subfolders**
 *  Checks that each subfolder is ready to run, following the ready_singlerun criteria.
 *  Generic
 *  This method is used for calculations whose write method includes subfolders, and where each subfolder is a calculation, as in ``write_phonon_multiple``.
@@ -376,40 +398,40 @@ ready_subfolders
 mast_run_method keyword values
 ----------------------------------
 
-run_defect
+**run_defect**
 
 *  Create a defect in the structure; not submitted to queue
 *  Generic
 *  Requires the ``$defects`` section in the input file.
 
-run_singlerun
+**run_singlerun**
 
 *  Submit a run to the queue.
 *  Generic
 
-run_neb_subfolders
+**run_neb_subfolders**
 
 *  Run each 01/.../0(N-1) subfolder as run_singlerun
 *  Generic
 
-run_subfolders
+**run_subfolders**
 
 *  Run each subfolder as run_singlerun
 *  Generic
 
-run_strain
+**run_strain**
 
 *  Strain the structure; not submitted to queue
 *  Generic
 *  Requires the ``mast_strain`` ingredient keyword
 
-run_scale
+**run_scale**
 
 *  Scale the structure (e.g. a 2-atom unit cell scaled by 2 becomes a 16-atom supercell)
 *  Generic
 *  Requires the ``mast_scale`` ingredient keyword, and must not be run on the starting ingredient (for VASP, the ingredient must already have been given a smaller POSCAR file, like the POSCAR for a 2-atom unit cell)
 
-run_scale_defect
+**run_scale_defect**
 
 *  Scale the structure and defect it (e.g. a single defect at 0.5 0.5 0.5 in the original structure becomes a single defect at 0.25 0.25 0.25 in the structure scaled by 2)
 *  Generic
@@ -419,27 +441,29 @@ run_scale_defect
 mast_complete_method keyword values
 ----------------------------------
 
-complete_singlerun
+**complete_singlerun**
 
 *  Check if run is complete
 *  Programs supported: vasp, phon (only entropy calculation)
-*  Note that for VASP, the line .reached required accuracy. is checked for, as well as a .User time. in seconds. The exceptions are:
+*  Note that for VASP, the phrase ``reached required accuracy`` is checked for, as well as a ``User time`` in seconds. The exceptions are:
 
     *  NSW of 0, NSW of -1, or NSW not specified in the ingredients section keywords is taken as a static calculation, and .EDIFF is reached. is checked instead of .reached required accuracy.
     *  IBRION of -1 is taken as a static calculation, and .EDIFF is  reached. is checked instead of .reached required accuracy.
     *  IBRION of 0 is taken as an MD calculation, and only user time is checked
-*  IBRION of 5, 6, 7, or 8 is taken as a phonon calculation, and only user time is checked
+    *  IBRION of 5, 6, 7, or 8 is taken as a phonon calculation, and only user time is checked
 
-complete_neb_subfolders
+**complete_neb_subfolders**
 
 *  Check if all NEB subfolders 01/.../0(N-1) are complete, according to complete_singlerun criteria.
+*  This method is not for checking the completion of NEBs! An NEB ingredient should have ``mast_program vasp_neb`` and ``mast_complete_method complete_singlerun``.
+*  An NEB static calculation, or a static calculation for each image, would use this keyword as ``mast_complete_method complete_neb_subfolders`` but have ``mast_program vasp`` instead of vasp_neb.
 
-complete_subfolders
+**complete_subfolders**
 
 *  Check if all subfolders are complete, according to complete_singlerun criteria.
 *  Generic
 
-complete_structure
+**complete_structure**
 
 *  Check if run has an output structure file written
 *  Programs supported: vasp (looks for CONTCAR)
@@ -448,35 +472,37 @@ complete_structure
 mast_update_children_method keyword values
 --------------------------------------------
 
-give_structure
+**give_structure**
 
 *  Forward the relaxed structure
 *  Programs supported: vasp (CONTCAR to POSCAR)
 
-give_structure_and_energy_to_neb
+**give_structure_and_energy_to_neb**
 
 *  Forward the relaxed structure and energy files
 *  Programs supported: vasp (CONTCAR to POSCAR, and copy over OSZICAR)
 
-give_neb_structures_to_neb
+**give_neb_structures_to_neb**
 
 *  Give NEB output images structures as the starting point image input structures in another NEB
 *  Programs supported: vasp (01/.../0(N-1) CONTCAR files will be the child NEB ingredient.s starting 01/.../0(N-1) POSCAR files.
 
-give_phonon_single_forces_and_displacements(self, childname)
+**give_phonon_single_forces_and_displacements(self, childname)**
 
 *  Forward force and displacement information
 *  Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
 
-give_phonon_multiple_forces_and_displacements
+**give_phonon_multiple_forces_and_displacements**
 
 *  Combine individual phonon forces and displacements and forward this information
 *  Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
 
-give_saddle_structure
+**give_saddle_structure**
 
 *  Forward the highest-energy structure of all subfolder structures
 *  Programs supported: vasp
+
+The following keywords are deprecated. Please use the generic methods in :ref:`important_notes` instead.
 
 give_structure_and_restart_files (same as give_structure_and_restart_files_softlinks)
 
@@ -506,6 +532,20 @@ give_structure_and_wavefunction_softlink
 
 *  Forward the relaxed structure and wavefunction file as a softlink
 *  Programs supported: vasp (CONTCAR to POSCAR, and softlink to WAVECAR)
+
+----------------------------------
+Custom mast_xxx_method keywords
+----------------------------------
+You may also choose to write your own methods, in addition to any of the methods above.
+
+Place these methods in a file in the directory ``$MAST_INSTALL_PATH/customlib``, structured like the file ``$MAST_INSTALL_PATH/customlib/customchopingredient.py``
+
+*  Please inherit from either ChopIngredient or BaseIngredient.
+*  Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
+*  You will have access to the ingredient directory name at ``self.keywords['name']`` as well as ingredient keywords at ``self.keywords['program_keys']``.
+*  The method may also take in up to 3 string-based arguments.
+*  In the input file, designate your custom method as classname.methodname followed by any arguments, for example, ``mast_write_method MyChopClass.write_complex_file superfile``
+
 
 -------------------------------
 Example Ingredients section
@@ -560,11 +600,11 @@ Here is an example ingredients section::
     end
 
     begin singlerun_vac1
-    mast_coordinates            vac1poscar
+    mast_coordinates            POSCAR_vac1
     end
 
     begin singlerun_vac2
-    mast_coordinates            vac2poscar
+    mast_coordinates            POSCAR_vac2
     end
 
     begin singlerun_to_neb
@@ -576,7 +616,7 @@ Here is an example ingredients section::
     end
 
     begin neb_to_neb_vac1-vac2
-    mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+    mast_coordinates            POSCAR_nebim1,POSCAR_nebim2,POSCAR_nebim3
     mast_write_method           write_neb
     mast_update_children_method  give_neb_structures_to_neb
     mast_nodes                  3
@@ -589,7 +629,7 @@ Here is an example ingredients section::
     end
 
     begin neb_to_neb_vac1-vac3
-    mast_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+    mast_coordinates            POSCAR_nebim1_set2,POSCAR_nebim2_set2,POSCAR_nebim3_set2
     mast_write_method           write_neb
     mast_update_children_method  give_neb_structures_to_neb
     mast_nodes                  3
@@ -660,9 +700,9 @@ The Recipe section
 
 The ``$recipe`` section contains the recipe template to be used. ::
 
-$recipe
-recipe_file myrecipefile.txt
-$end
+    $recipe
+    recipe_file myrecipefile.txt
+    $end
 
 *******************************
 The Defects section (optional)
@@ -678,10 +718,10 @@ The ``threshold`` keyword specifies the absolute threshold for finding the defec
 
 Example ``$defects`` section::
 
-$defects
+    $defects
 
-coord_type fractional
-threshold 1e-4
+    coord_type fractional
+    threshold 1e-4
 
     vacancy 0 0 0 Mg
     vacancy 0.5 0.5 0.5 Mg
@@ -694,7 +734,7 @@ The above section specifies 4 point defects (2 vacancies and 2 interstitials) to
 
 Multiple point defects can be also grouped together as a combined defect within a .begin/end,. with a label after the .begin,. such as::
 
-$defects
+    $defects
     
     coord_type fractional
     threshold 1e-4
@@ -713,7 +753,7 @@ In this case, there will be three separate .defect. ingredients: one ingredient 
 
 Charges can be specified as ``charge=0,10``, where a comma denotes the lower and upper ranges for the charges.
 
-Let.s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3)::
+Let's say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3)::
 
     vacancy 0 0 0 Mg charge=0,3
 
@@ -727,7 +767,7 @@ Let.s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as Vac
 
 For a single defect, charges and labels can be given at the same time:
 
-Let.s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as Vac@Mg:
+Let's say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as Vac@Mg::
 
     vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
 
@@ -741,7 +781,7 @@ If you use charges in the defects section like this, then you should use a :doc:
 Phonons for defects
 =====================
 
-Phonon calculations are described by a .phonon center site. coordinate and a .phonon center radius. in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.
+Phonon calculations are described by a *phonon center site* coordinate and a *phonon center radius* in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.
 
 For VASP, this inclusion takes the form of selective dynamics T T T for the atoms within the sphere, and F F F otherwise, in a phonon calculation (IBRION = 5, 6, 7, 8)
 
@@ -755,13 +795,13 @@ To use phonons in the defects section, use the subsection keyword .phonon. follo
     phonon solute 0.1 0.1 0.2 0.5
     end
 
-In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site. 
+In the example above, *host3* is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site. 
 
-In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
+In the example above, *solute* is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
 
 The recipe template file for phonons may include either the explicit phonon labels and their charge and defect label, or <N>_<Q>_<P> (defect label _ charge label _ phonon label).
 
-Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example:
+Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example::
 
     {begin}
     defect_<N>_<Q>_stat (static)
@@ -788,7 +828,7 @@ Currently, chemical potentials must be set ahead of time. Each chemical potentia
     Ga -4.2543
     As -5.3920
     Bi -4.5650
-end
+    end
     
     $end
 
@@ -808,7 +848,7 @@ Phonons may be specified within each NEB grouping, as in the defects section. Th
 
 Example defect and NEB section together::
 
-$defects
+    $defects
     
     coord_type fractional
     threshold 1e-4
@@ -825,15 +865,15 @@ $defects
     begin vac1-vac2
     images 1
     Mg, 0 0 0, 0 .5 0.5
-end
+    end
     
     begin int1-int2
     Al, 0.25 0 0, 0 0.25 0
     images 3
     phonon movingatom 0.125 0.125 0.0 1.0
-end
+    end
     
-$end
+    $end
 
 **************************************************************
 Creating several input files at once: the looped input file
@@ -851,7 +891,10 @@ The special looping keyword ``indeploop`` may be used to signify a line which in
 
 In this example, two input files will be created. One input file will contain the line ``mast_xc pw91``. The other input file will contain the line ``mast_xc pbe``.
 
-*  Any text within parentheses and separated by a comma will be looped. *  Lines which normally include commas, like the .charge. line in the ``$defects`` section, may not be looped.
+*  Any text within parentheses and separated by a comma will be looped. 
+
+*  Lines which normally include commas, like the ``charge`` line in the ``$defects`` section, or the ``mast_coordinates`` keyword for an NEB, may not be looped.
+
 *  This keyword may only be used once on a line.
 
 If there is more than one ``indeploop`` keyword in the input file, a combinatorial spawn of input files will be created.
@@ -859,17 +902,17 @@ If there is more than one ``indeploop`` keyword in the input file, a combinatori
 For example, this excerpt would generate four input files: one with iron using pw91, one with iron using pbe, one with copper using pw91, and one with copper using pbe::
     
     $structure
-begin elementmap
-indeploop X1 (Fe, Cu)
-end
-...
-$end
-    
-$ingredients
-begin ingredients_global
-indeploop mast_xc (pw91, pbe)
-...
-end
+    begin elementmap
+    indeploop X1 (Fe, Cu)
+    end
+    ...
+    $end
+        
+    $ingredients
+    begin ingredients_global
+    indeploop mast_xc (pw91, pbe)
+    ...
+    end
     $end
 
 =============================
@@ -884,7 +927,7 @@ For example, if you want to create a single input file, but signify that it shou
     begin elementmap
     pegloop1 X1 (Es, Fm, Md)
     end
-...
+    ...
     $end
     
     $ingredients
@@ -892,7 +935,7 @@ For example, if you want to create a single input file, but signify that it shou
     pegloop1 ldauu (5.3, 6.5, 8.0)
     ...
     end
-$end
+    $end
 
 In this case, three input files will be created. In the first input file, Es will be paired with a U-value of 5.3. In the second input file, Fm will be paired with a U-value of 6.5. In the third input file, Md will be paired with a U-value of 8.0.
 
@@ -900,222 +943,15 @@ There are two pegged loops allowed, specified by ``pegloop1`` and ``pegloop2``.
 
 Each pegged loop and independent loop will be combinatorially combined. For example, if a separate line ``indeploop mast_xc (pw91, pbe)`` were included in the ``ingredients_global`` subsection above, then six input files would be created: one pw91 and one pbe input file for Es with +U 5.3, another pair for Fm, and another pair for Mn.
 
-In the example below, four input files would be created, corresponding to four different lattices, [(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,2.0)], [(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,3.0)], [(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,2.0)], and [(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,3.0)] ::
+In the example below, four input files would be created, corresponding to four different lattices:
+*  [(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,2.0)]
+*  [(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,3.0)]
+*  [(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,2.0)], and 
+*  [(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,3.0)] ::
 
    begin lattice
    pegloop1 (6.0,4.0) 0.0 0.0
    pegloop1 0.0 (6.0,4.0) 0.0
    indeploop 0.0 0.0 (2.0,3.0)
    end
-
-*******************************
-Full example
-*******************************
-
-Recipe::
-
-    Recipe OptimizeWorkflow
-    perfect_opt1 (lowmesh)
-        perfect_opt2
-            perfect_stat (static)
-            {begin}
-            inducedefect_<N> (inducedefect)
-                defect_<N>_<Q>_opt1 (lowmesh_defect)
-                    defect_<N>_<Q>_opt2 (defect_relax)
-                        defect_<N>_<Q>_stat (static)
-            {end}
-    {begin}
-    defect_<N>_<Q>_stat (static)
-        phonon_<N>_<Q>_<P> (phonon)
-            phonon_<N>_<Q>_<P>_parse (phononparse)
-    {end}
-    {begin}
-    defect_<B>_<Q>_stat (static_to_neb), defect_<E>_<Q>_stat (static_to_neb)
-        neb_<B-E>_<Q>_opt1 (neb_to_neb)
-            neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
-                neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-        neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
-        neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-    {end}
-    {begin}
-    neb_<B-E>_<Q>_stat (nebstat_to_phonon)
-        phonon_<B-E>_<Q>_<P> (phonon)
-            phonon_<B-E>_<Q>_<P>_parse (phononparse)
-    {end}
-
-Input file::
-
-    # Small demo for NEB workflow
-    $mast
-    system_name PhononNebTest
-    $end
-
-    $structure
-    coord_type fractional
-
-    begin elementmap
-    X1 Al
-    X2 Mg
-    end
-
-    begin lattice
-    3.5 0 0
-    0 3.5 0
-    0 0 3.5
-    end
-
-    begin coordinates
-    X1 0.0000000000 0.0000000000 0.0000000000
-    X1 0.5000000000 0.5000000000 0.0000000000
-    X1 0.0000000000 0.5000000000 0.5000000000
-    X1 0.5000000000 0.0000000000 0.5000000000
-    end
-
-    $end
-
-    $defects
-    threshold 1e-4
-    coord_type fractional
-
-    begin int1
-    interstitial 0.25 0.25 0.25 X2
-    phonon host 0.0 0.5 0.5 0.5
-    charge=-3,-2
-    end
-
-    begin int2
-    interstitial 0.25 0.25 0.75 X2
-    phonon host 0.0 0.0 0.0 0.5
-    phonon int 0.25 0.25 0.75 0.5
-    charge=-2,-2
-    end
-
-    begin int3
-    interstitial 0.75 0.25 0.25 X2
-    phonon host 0.0 0.0 0.0 0.5
-    phonon int 0.75 0.25 0.25 0.5
-    charge=-3,-3
-    end
-
-    $end
-
-    $ingredients
-    begin ingredients_global
-    mast_nodes         1
-    mast_multiplyencut 1.5
-    mast_ppn           1
-    mast_queue         default
-    mast_exec          //share/apps/vasp5.2_cNEB
-    mast_kpoints       2x2x2 M
-    mast_xc            PBE
-    isif 3
-    ibrion 2
-    nsw 191
-    ismear 1
-    sigma 0.2
-    lwave False
-    lcharg False
-    prec Accurate
-    mast_program   vasp
-    mast_write_method            write_singlerun
-    mast_ready_method            ready_singlerun
-    mast_run_method              run_singlerun
-    mast_complete_method         complete_singlerun
-    mast_update_children_method  give_structure
-    end
-
-    begin inducedefect
-    mast_write_method            no_setup
-    mast_ready_method            ready_defect
-    mast_run_method              run_defect
-    mast_complete_method         complete_structure
-    end
-
-    begin lowmesh
-    mast_kpoints 1x1x1 G
-    end
-
-    begin lowmesh_defect
-    mast_kpoints 1x1x1 G
-    isif 2
-    end
-
-    begin defect_relax
-    isif 2
-    end
-
-    begin static
-    ibrion -1
-    nsw 0
-    mast_multiplyencut 1.25
-    mast_update_children_method give_structure
-    end
-
-    begin static_to_neb
-    ibrion -1
-    nsw 0
-    mast_multiplyencut 1.25
-    mast_update_children_method give_structure_and_energy_to_neb
-    end
-
-    begin phonon
-    ibrion 5
-    mast_write_method write_phonon_single
-    mast_update_children_method give_phonon_single_forces_and_displacements
-    end
-
-    begin phononparse
-    mast_program phon
-    lfree .True.
-    temperature 1173
-    nd 3
-    qa 11
-    qb 11
-    qc 11
-    lsuper .False.
-    mast_exec //home/tam/tammast/bin/phon_henry
-    end
-
-    begin neb_to_neb
-    mast_kpoints 1x1x1 G
-    mast_program   vasp_neb
-    mast_write_method            write_neb
-    mast_update_children_method  give_neb_structures_to_neb
-    end
-
-    begin neb_to_nebstat
-    mast_program   vasp_neb
-    mast_write_method            write_neb
-    mast_update_children_method  give_neb_structures_to_neb
-    end
-
-    begin nebstat_to_phonon
-    mast_program   vasp
-    mast_write_method            write_neb_subfolders
-    mast_ready_method            ready_neb_subfolders
-    mast_run_method              run_neb_subfolders
-    mast_complete_method         complete_neb_subfolders
-    mast_update_children_method  give_saddle_structure
-    end
-
-    $end
-
-    $neb
-    begin int1-int2
-    X2, 0.25 0.25 0.25, 0.25 0.25 0.75
-    images 1
-    phonon int 0.25 0.25 0.5 0.5
-    phonon host 0.0 0.0 0.0 0.5
-    end
-    begin int1-int3
-    X2, 0.25 0.25 0.25, 0.75 0.25 0.25
-    images 1
-    phonon int 0.5 0.25 0.25 0.5
-    phonon host 0.0 0.0 0.0 0.5
-    end
-    $end
-
-    $recipe
-    recipe_file phonon_test_neb.txt
-    $end
 

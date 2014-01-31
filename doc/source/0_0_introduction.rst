@@ -2,7 +2,6 @@ Introduction
 ============
 Welcome to the MAterials Simulation Toolkit (MAST)!
 
-**link to whitepaper here??**
 MAST is intended to be an easy-to-use wrapper to facilitate complex sequences of calculations.
 
 ==================
@@ -15,13 +14,13 @@ MAST uses kitchen terminology to organize the materials simulation workflow.
 * A :doc:`Recipe <4_0_recipe>` is a collection of several ingredients and information about how the ingredients are combined together. 
 
     * As in a cooking recipe, ingredients may need to be addressed in a certain logical order. This temporal order of how ingredients work together is the workflow.
-    * The :doc:`Recipe Template <4_1_recipetemplate>` and :doc:`Input File <3_0_inputfile>` together describe the order of the ingredients and the way they are combined together. 
-
-For more information, see the MAST introductory powerpoint **need to add ppt here**
+    * The :doc:`Recipe Template <4_0_recipe>` and :doc:`Input File <3_0_inputfile>` together describe the order of the ingredients and the way they are combined together. 
 
 =============================
 Computing in the MAST Kitchen
 =============================
+
+#.  Install MAST (see :ref:`1_0_installation`).
 
 #.  Plan your workflow. 
 
@@ -49,6 +48,4 @@ Computing in the MAST Kitchen
 #.  Run the command ``mast`` to start the MAST scheduling arm. The MAST scheduler will get information from the personal_recipe.txt, input.inp, and status.txt file in the recipe folder.
 #.  When all ingredients in the recipe are complete, the recipe directory is moved into a ``$MAST_ARCHIVE`` directory.
 
-For general examples on how to use MAST, see the presentations here **need presentations**
 Please check your output carefully, especially when setting up a new workflow using MAST.
-

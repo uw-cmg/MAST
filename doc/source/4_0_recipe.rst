@@ -16,7 +16,7 @@ The full recipe name goes in the ``$recipe`` section of the input file::
     recipe_file neb.txt
 $end
 
-***********************
+************************************
 The Recipe Template
 ************************************
 
@@ -37,11 +37,11 @@ If you use vi as your code editor, consider adding the following settings to you
 =====================
 Syntax
 =====================
-Each indentation level marks a parent-child relationship.
+Each indentation level marks a parent-child relationship.::
 
-perfect_opt1 (volrelax_lowmesh)
-    perfect_opt2
-        perfect_opt3
+    perfect_opt1 (volrelax_lowmesh)
+        perfect_opt2
+            perfect_opt3
    
 The ingredient type of an ingredient is specified in parentheses after the ingredient.
 
@@ -51,9 +51,9 @@ In the recipe::
     
     perfect_opt1 (volrelax_lowmesh)
 
-In the input file:
+In the input file::
 
-$ingredients
+    $ingredients
     
     begin volrelax_lowmesh
     mast_run_method run_singlerun

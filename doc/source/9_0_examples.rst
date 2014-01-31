@@ -96,9 +96,9 @@ Input file::
     begin ingredients_global
     mast_nodes         1
     mast_multiplyencut 1.5
-    mast_ppn           1
-    mast_queue         default
-    mast_exec          //share/apps/vasp5.2_cNEB
+    mast_ppn           8
+    mast_queue         morgan1
+    mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
     mast_kpoints       2x2x2 M
     mast_xc            PBE
     isif 3
@@ -166,10 +166,14 @@ Input file::
     qb 11
     qc 11
     lsuper .False.
-    mast_exec //home/tam/tammast/bin/phon_henry
+    mast_exec $MAST_INSTALL_PATH/bin/phon_henry
     end
 
     begin neb_to_neb
+    ibrion 1
+    potim 0.01
+    lclimb True
+    spring -5
     mast_kpoints 1x1x1 G
     mast_program   vasp_neb
     mast_write_method            write_neb
@@ -177,6 +181,10 @@ Input file::
     end
 
     begin neb_to_nebstat
+    ibrion 1
+    potim 0.01
+    lclimb True
+    spring -5
     mast_program   vasp_neb
     mast_write_method            write_neb
     mast_update_children_method  give_neb_structures_to_neb
@@ -248,13 +256,6 @@ Input file::
     begin generictest
     # need to add mastlib to python path to get lammps3.py
     # Amy's GAv14 is currently treated as closed-source
-    mast_program                 None
-    mast_exec                    python //home/tam/test_amy_GA/GAv14.py input.txt
-    mast_complete_file           GAoutput.txt
-    mast_complete_search         End of Execution
-    mast_started_file            GAoutput.txt
-    mast_copy_files //home/tam/tammast/test/gatest/SiC.tersoff //home/tam/tammast/test/gatest/cBulk.xyz
-    mast_delimiter               =
     type  Defect
     atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
     filename   GAoutput
@@ -275,11 +276,14 @@ Input file::
     genealogy   True
     allenergyfile  True
     BestIndsList   True
-    mast_write_method            write_singlerun
+    mast_write_method            write_ingred_input_file input.txt all 0 =;write_submit_script;copy_fullpath_file //home/tam/tammast/test/gatest/SiC.tersoff SiC.tersoff;copy_fullpath_file //home/tam/tammast/test/gatest/cBulk.xyz cBulk.xyz
     mast_ready_method            ready_singlerun
     mast_run_method              run_singlerun
-    mast_complete_method         complete_singlerun
+    mast_complete_method         file_has_string GAoutput.txt "End of Execution"
     mast_update_children_method  give_structure
+    mast_started_file            GAoutput.txt
+    mast_program                 None
+    mast_exec                    python //home/tam/test_amy_GA/GAv14.py input.txt
     end
     $end
 

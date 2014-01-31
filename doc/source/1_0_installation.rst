@@ -13,7 +13,7 @@ Skip this step if you are on bardeen.
 
 *  If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
 
-*  Have the owner of //tmp/pip-build remove the directory if it exists (see :ref:`pip issue 729 <https://github.com/pypa/pip/issues/729>`_)::
+*  Have the owner of //tmp/pip-build remove the directory if it exists (see `pip issue 729 <https://github.com/pypa/pip/issues/729>`_)::
 
     cd //tmp
     rm -r pip-build
@@ -47,7 +47,7 @@ If you do not have or cannot find Python 2.7.3, then you must install it.
 ---------------------
 Install python
 ---------------------
-The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from :ref:`EPD Free Canopy <https://www.enthought.com/downloads/>`_
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from `EPD Free Canopy <https://www.enthought.com/downloads/>`_
 
 *  Version 2.7.5 is okay
 *  On DLX, go into interactive setup with the command ``srun -u bash -i``
@@ -88,14 +88,14 @@ If either easy_install or pip is missing, install them as follows.
 
 Get setuptools (easy_install)
 
-    *  :ref:`setuptools <https://pypi.python.org/pypi/setuptools>`_
+    *  `setuptools <https://pypi.python.org/pypi/setuptools>`_
     *  ``wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py``
     *  ``python ez_setup.py`` if you are using your own locally-installed python
     *  ``python ez_setup.py --user`` if you are using a root-installed python
 
 Get pip
 
-    *  :ref:`pip <https://pypi.python.org/pypi/pip>`_
+    *  `pip <https://pypi.python.org/pypi/pip>`_
     *  ``curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py``
     *  ``python get-pip.py`` if you are using your own locally-installed python
     *  ``python get-pip.py --user`` if you are using a root-installed python
@@ -127,12 +127,14 @@ If numpy is not available, try pip installation::
 
 If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
 
-    *  Grab the most recent stable release of numpy from :ref:`<http://www.scipy.org/install.html>`_
+    *  Grab the most recent stable release of numpy from `<http://www.scipy.org/install.html>`_
     *  Untar with command ``tar -zxvf numpy-<version>.tar.gz``
     *  ``cd numpy-<version>``
-    *  Put the following in your command line::
+    *  Put the following in your command line, all as one line::
 
-        BLAS=None LAPACK=None ATLAS=None python setup.py config build install --prefix=<location where you want numpy installed, recommend $HOME/lib>
+        BLAS=None LAPACK=None ATLAS=None 
+        python setup.py config build install 
+        --prefix=<location where you want numpy installed, recommend $HOME/lib>
 
     *  Get something to drink; this'll take about 5-10 minutes.
     *  Add to your .bashrc::
@@ -143,7 +145,7 @@ If pip does not work, follow Quick install of numpy here. This will install Nump
     *  source $HOME/.bashrc
 
 ============================================
-4. Verify or install pymatgen and custodian
+Verify or install pymatgen and custodian
 ============================================   
 Check if pymatgen and custodian available::
 
@@ -170,10 +172,12 @@ pip install pymatgen and custodian::
     nice -n 19 pip install --user pymatgen
     nice -n 19 pip install --user custodian
 
-If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system::
+If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system (python line is all one line)::
 
     cd $HOME/.local/lib/python2.7/site-packages/setuptools-2.1-py2.7.egg
-    python ./easy_install.py --user https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
+
+    python ./easy_install.py --user https://bitbucket.org/
+        jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
 
 If pip does not work, try making your own temp directory. ::
             
@@ -188,7 +192,7 @@ Remove any pip directory if it exists. ::
     rm -r pip-build
 
 ======================================
-5. Set up the pymatgen VASP_PSP_DIR
+Set up the pymatgen VASP_PSP_DIR
 ======================================
 On DLX and bardeen, skip to the NEXT NUMBERED STEP
 
@@ -207,8 +211,13 @@ Take the paw directory if you are using PAW. Do not take the top directory, or t
 
 Example of running the python setup tool::
         
-    Please enter full path where the POT_GGA_PAW_PBE, etc. subdirs are present. If you obtained the PSPs directly from VASP, this should typically be the directory that you untar the files to : //share/apps/vasp_pseudopotentials/paw
-    Please enter the fullpath of the where you want to create your pymatgen resources directory:
+    Please enter full path where the POT_GGA_PAW_PBE, etc. 
+    subdirs are present. 
+    If you obtained the PSPs directly from VASP, this should 
+    typically be the directory that you untar the files to : 
+    //share/apps/vasp_pseudopotentials/paw
+    Please enter the fullpath of the where you want to create 
+    your pymatgen resources directory:
     //home/<username>/.local/vasp_pps
 
 Rename the folders under ``//home/<username>/.local/vasp_pps``:
@@ -217,7 +226,7 @@ Rename the folders under ``//home/<username>/.local/vasp_pps``:
 *  Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91
 
 ==============================================
-6. Add the VASP_PSP_DIR to your user profile
+Add the VASP_PSP_DIR to your user profile
 ==============================================
 Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR to this VASP directory.
 
@@ -237,7 +246,7 @@ Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR 
 *  Make sure you are getting to the right directory, which has POT_GGA_POW_PBE etc. folders inside it.
 
 ===============================
-7. Get MAST
+Get MAST
 ===============================
 Get the MAST tar.gz file from MaterialsHub.org and untar it::
 
@@ -247,7 +256,7 @@ Get the MAST tar.gz file from MaterialsHub.org and untar it::
 (or run this command over interactive submission, which is better)
 
 ======================================
-8. Set up the environment variables
+Set up the environment variables
 ======================================
 Go to the MAST installation path, for example ``//home/username/mast_version``
 
@@ -291,7 +300,7 @@ PYTHONPATH: If this environment variable already exists, the MAST installation d
     
     export PYTHONPATH=$PYTHONPATH://share/apps/MAST
 
-VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the :ref:`Materials Project's <http://materialsproject.org>`_ :ref:`pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
+VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the `Materials Project's <http://materialsproject.org>`_ `pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
     
     export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
 
@@ -354,18 +363,25 @@ queue_commands.py
 These queue commands will be used to submit ingredients to the queue.
 
 ================================
-10. Additional setup
+Additional setup
 ================================
 Figure out the correct mast_exec calls for your system, to be used in the :doc:`Input File<3_0_inputfile>`. Examples are below.
 
 *  Bardeen: ``mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1``  (or any of the other vasp executables) 
-*  DLX: ``mast_exec //home/username/bin/vaspmpirun``, where vaspmpirun is the following script::
+*  DLX: ``mast_exec //home/username/bin/vaspmpirun``, where vaspmpirun is the following script (indentations are all part of the previous line)::
 
     #!/bin/bash
     export PERL5LIB=/opt/moab/lib/perl5
-    export MIC_LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/compiler/lib/mic
-    export LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/lib:/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/compiler/lib/intel64:/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
-    export INTEL_MKL_LIBS=/share/cluster/RHEL6.2/x86_64/apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
+    export MIC_LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/
+        apps/intel/ict/composer_xe_2013.0.079/compiler/lib/mic
+    export LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/
+        openmpi/1.6.2/lib:
+        /share/cluster/RHEL6.2/x86_64/apps/intel/ict/
+        composer_xe_2013.0.079/compiler/lib/intel64:
+        /share/cluster/RHEL6.2/x86_64/apps/intel/ict/
+        composer_xe_2013.0.079/mkl/lib/intel64
+    export INTEL_MKL_LIBS=/share/cluster/RHEL6.2/x86_64/
+        apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
     export QTLIB=/usr/lib64/qt-3.3/lib
     PATH=$PATH:$HOME/bin:$HOME/bin/convaspTest
     export PATH
@@ -374,11 +390,12 @@ Figure out the correct mast_exec calls for your system, to be used in the :doc:`
     ulimit -s unlimited
     ulimit -l unlimited
     #mpirun $VaspPath/vasp
-    //share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/bin/mpirun $VaspPath/vasp
+    //share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/bin/
+        mpirun $VaspPath/vasp
 
 Modify ~/.bashrc if necessary
     
-*  ACI/HPC, add line: ``export LD_LIBRARY_PATH=$LD_LIBRARY_PATH://opt/intel/lib/intel64``
+*  ACI/HPC, add: ``export LD_LIBRARY_PATH=$LD_LIBRARY_PATH://opt/intel/lib/intel64``
 
 To ensure recipes are created correctly, add python whitespace tab stops to your ~/.vimrc file::
     
@@ -398,9 +415,10 @@ Follow the testing instructions from :ref:`test-on-cluster`
 Test that MAST can run
 *********************************
 #.  Make a test directory, like ``//home/username/MAST/test``
-#.  Copy the test input file to your test folder::
+#.  Copy the test input file to your test folder (all one line)::
 
-        cp //share/apps/MAST/test/phononreorgtest/phonon_with_neb.inp //home/username/MAST/test/test.inp
+        cp //share/apps/MAST/test/phononreorgtest/
+        phonon_with_neb.inp //home/username/MAST/test/test.inp
 
 #.  Go to your test directory, ``cd //home/username/MAST/test``
 #.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, and other settings described in :ref:`platforms`
