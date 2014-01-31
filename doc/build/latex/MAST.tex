@@ -122,7 +122,6 @@ Welcome to the MAST documentation site!
 \label{0_0_introduction:introduction}\label{0_0_introduction::doc}\label{0_0_introduction:materials-simulation-toolkit-mast-documentation}
 Welcome to the MAterials Simulation Toolkit (MAST)!
 
-\textbf{link to whitepaper here??}
 MAST is intended to be an easy-to-use wrapper to facilitate complex sequences of calculations.
 
 
@@ -140,17 +139,18 @@ A {\hyperref[4_0_recipe::doc]{\emph{Recipe}}} is a collection of several ingredi
 As in a cooking recipe, ingredients may need to be addressed in a certain logical order. This temporal order of how ingredients work together is the workflow.
 
 \item {} 
-The \code{Recipe Template} and {\hyperref[3_0_inputfile::doc]{\emph{Input File}}} together describe the order of the ingredients and the way they are combined together.
+The {\hyperref[4_0_recipe::doc]{\emph{Recipe Template}}} and {\hyperref[3_0_inputfile::doc]{\emph{Input File}}} together describe the order of the ingredients and the way they are combined together.
 
 \end{itemize}
 
 \end{itemize}
-
-For more information, see the MAST introductory powerpoint \textbf{need to add ppt here}
 
 
 \section{Computing in the MAST Kitchen}
 \label{0_0_introduction:computing-in-the-mast-kitchen}\begin{enumerate}
+\item {} 
+Install MAST (see \emph{1\_0\_installation}).
+
 \item {} 
 Plan your workflow.
 \begin{itemize}
@@ -219,7 +219,6 @@ When all ingredients in the recipe are complete, the recipe directory is moved i
 
 \end{enumerate}
 
-For general examples on how to use MAST, see the presentations here \textbf{need presentations}
 Please check your output carefully, especially when setting up a new workflow using MAST.
 
 
@@ -237,7 +236,7 @@ Skip this step if you are on bardeen.
 If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
 
 \item {} 
-Have the owner of //tmp/pip-build remove the directory if it exists (see {\color{red}\bfseries{}:ref:{}`pip issue 729 \textless{}https://github.com/pypa/pip/issues/729\textgreater{}{}`\_}):
+Have the owner of //tmp/pip-build remove the directory if it exists (see \href{https://github.com/pypa/pip/issues/729}{pip issue 729}):
 
 \begin{Verbatim}[commandchars=\\\{\}]
 cd //tmp
@@ -279,7 +278,7 @@ If you do not have or cannot find Python 2.7.3, then you must install it.
 
 \subsubsection{Install python}
 \label{1_0_installation:install-python}
-The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from {\color{red}\bfseries{}:ref:{}`EPD Free Canopy \textless{}https://www.enthought.com/downloads/\textgreater{}{}`\_}
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from \href{https://www.enthought.com/downloads/}{EPD Free Canopy}
 \begin{itemize}
 \item {} 
 Version 2.7.5 is okay
@@ -344,7 +343,7 @@ If either easy\_install or pip is missing, install them as follows.
 Get setuptools (easy\_install)
 \begin{itemize}
 \item {} 
-{\color{red}\bfseries{}:ref:{}`setuptools \textless{}https://pypi.python.org/pypi/setuptools\textgreater{}{}`\_}
+\href{https://pypi.python.org/pypi/setuptools}{setuptools}
 
 \item {} 
 \code{wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez\_setup.py}
@@ -360,7 +359,7 @@ Get setuptools (easy\_install)
 Get pip
 \begin{itemize}
 \item {} 
-{\color{red}\bfseries{}:ref:{}`pip \textless{}https://pypi.python.org/pypi/pip\textgreater{}{}`\_}
+\href{https://pypi.python.org/pypi/pip}{pip}
 
 \item {} 
 \code{curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py}
@@ -405,7 +404,7 @@ pip install --user numpy
 If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
 \begin{itemize}
 \item {} 
-Grab the most recent stable release of numpy from {\color{red}\bfseries{}:ref:{}`\textless{}http://www.scipy.org/install.html\textgreater{}{}`\_}
+Grab the most recent stable release of numpy from \href{http://www.scipy.org/install.html}{http://www.scipy.org/install.html}
 
 \item {} 
 Untar with command \code{tar -zxvf numpy-\textless{}version\textgreater{}.tar.gz}
@@ -414,10 +413,12 @@ Untar with command \code{tar -zxvf numpy-\textless{}version\textgreater{}.tar.gz
 \code{cd numpy-\textless{}version\textgreater{}}
 
 \item {} 
-Put the following in your command line:
+Put the following in your command line, all as one line:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-BLAS=None LAPACK=None ATLAS=None python setup.py config build install --prefix=\textless{}location where you want numpy installed, recommend \$HOME/lib\textgreater{}
+BLAS=None LAPACK=None ATLAS=None
+python setup.py config build install
+--prefix=\textless{}location where you want numpy installed, recommend \$HOME/lib\textgreater{}
 \end{Verbatim}
 
 \item {} 
@@ -437,7 +438,7 @@ source \$HOME/.bashrc
 \end{itemize}
 
 
-\subsection{4. Verify or install pymatgen and custodian}
+\subsection{Verify or install pymatgen and custodian}
 \label{1_0_installation:verify-or-install-pymatgen-and-custodian}
 Check if pymatgen and custodian available:
 
@@ -469,11 +470,13 @@ nice -n 19 pip install --user pymatgen
 nice -n 19 pip install --user custodian
 \end{Verbatim}
 
-If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system:
+If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system (python line is all one line):
 
 \begin{Verbatim}[commandchars=\\\{\}]
 cd \$HOME/.local/lib/python2.7/site-packages/setuptools-2.1-py2.7.egg
-python ./easy\_install.py --user https://bitbucket.org/jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
+
+python ./easy\_install.py --user https://bitbucket.org/
+    jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
 \end{Verbatim}
 
 If pip does not work, try making your own temp directory.
@@ -493,7 +496,7 @@ rm -r pip-build
 \end{Verbatim}
 
 
-\subsection{5. Set up the pymatgen VASP\_PSP\_DIR}
+\subsection{Set up the pymatgen VASP\_PSP\_DIR}
 \label{1_0_installation:set-up-the-pymatgen-vasp-psp-dir}
 On DLX and bardeen, skip to the NEXT NUMBERED STEP
 
@@ -520,8 +523,13 @@ Take the paw directory if you are using PAW. Do not take the top directory, or t
 Example of running the python setup tool:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Please enter full path where the POT\_GGA\_PAW\_PBE, etc. subdirs are present. If you obtained the PSPs directly from VASP, this should typically be the directory that you untar the files to : //share/apps/vasp\_pseudopotentials/paw
-Please enter the fullpath of the where you want to create your pymatgen resources directory:
+Please enter full path where the POT\_GGA\_PAW\_PBE, etc.
+subdirs are present.
+If you obtained the PSPs directly from VASP, this should
+typically be the directory that you untar the files to :
+//share/apps/vasp\_pseudopotentials/paw
+Please enter the fullpath of the where you want to create
+your pymatgen resources directory:
 //home/\textless{}username\textgreater{}/.local/vasp\_pps
 \end{Verbatim}
 
@@ -536,7 +544,7 @@ Rename the GGA folder POT\_GGA\_PAW\_PW91 to correspond to mast\_xc pw91
 \end{itemize}
 
 
-\subsection{6. Add the VASP\_PSP\_DIR to your user profile}
+\subsection{Add the VASP\_PSP\_DIR to your user profile}
 \label{1_0_installation:add-the-vasp-psp-dir-to-your-user-profile}
 Add a line to your .bashrc file exporting the environment variable VASP\_PSP\_DIR to this VASP directory.
 \begin{itemize}
@@ -569,7 +577,7 @@ Make sure you are getting to the right directory, which has POT\_GGA\_POW\_PBE e
 \end{itemize}
 
 
-\subsection{7. Get MAST}
+\subsection{Get MAST}
 \label{1_0_installation:get-mast}
 Get the MAST tar.gz file from MaterialsHub.org and untar it:
 
@@ -580,7 +588,7 @@ nice -n 19 tar -xzvf mast\_version.tar.gz
 (or run this command over interactive submission, which is better)
 
 
-\subsection{8. Set up the environment variables}
+\subsection{Set up the environment variables}
 \label{1_0_installation:set-up-the-environment-variables}
 Go to the MAST installation path, for example \code{//home/username/mast\_version}
 
@@ -638,7 +646,7 @@ PYTHONPATH: If this environment variable already exists, the MAST installation d
 export PYTHONPATH=\$PYTHONPATH://share/apps/MAST
 \end{Verbatim}
 
-VASP\_PSP\_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the {\color{red}\bfseries{}:ref:{}`Materials Project's \textless{}http://materialsproject.org\textgreater{}{}`\_} {\color{red}\bfseries{}:ref:{}`pymatgen \textless{}http://pymatgen.org\textgreater{}{}`\_} code. The VASP\_PSP\_DIR should be set to a path which contains folder such as POT\_GGA\_PAW\_PBE (for functional PBE, or mast\_xc PBE in Ingredients) or POT\_GGA\_PAW\_PW91 (for functional PW91).
+VASP\_PSP\_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the \href{http://materialsproject.org}{Materials Project's} \href{http://pymatgen.org}{pymatgen} code. The VASP\_PSP\_DIR should be set to a path which contains folder such as POT\_GGA\_PAW\_PBE (for functional PBE, or mast\_xc PBE in Ingredients) or POT\_GGA\_PAW\_PW91 (for functional PW91).
 
 \begin{Verbatim}[commandchars=\\\{\}]
 export VASP\_PSP\_DIR=//share/apps/MAST/vasp\_pps
@@ -723,7 +731,7 @@ Examine the template carefully, as an error here will prevent your ingredients f
 These queue commands will be used to submit ingredients to the queue.
 
 
-\subsection{10. Additional setup}
+\subsection{Additional setup}
 \label{1_0_installation:additional-setup}
 Figure out the correct mast\_exec calls for your system, to be used in the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}. Examples are below.
 \begin{itemize}
@@ -731,14 +739,21 @@ Figure out the correct mast\_exec calls for your system, to be used in the {\hyp
 Bardeen: \code{mast\_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_par\_opt1}  (or any of the other vasp executables)
 
 \item {} 
-DLX: \code{mast\_exec //home/username/bin/vaspmpirun}, where vaspmpirun is the following script:
+DLX: \code{mast\_exec //home/username/bin/vaspmpirun}, where vaspmpirun is the following script (indentations are all part of the previous line):
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \#!/bin/bash
 export PERL5LIB=/opt/moab/lib/perl5
-export MIC\_LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/mic
-export LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/lib:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/intel64:/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
-export INTEL\_MKL\_LIBS=/share/cluster/RHEL6.2/x86\_64/apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
+export MIC\_LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/
+    apps/intel/ict/composer\_xe\_2013.0.079/compiler/lib/mic
+export LD\_LIBRARY\_PATH=/share/cluster/RHEL6.2/x86\_64/apps/
+    openmpi/1.6.2/lib:
+    /share/cluster/RHEL6.2/x86\_64/apps/intel/ict/
+    composer\_xe\_2013.0.079/compiler/lib/intel64:
+    /share/cluster/RHEL6.2/x86\_64/apps/intel/ict/
+    composer\_xe\_2013.0.079/mkl/lib/intel64
+export INTEL\_MKL\_LIBS=/share/cluster/RHEL6.2/x86\_64/
+    apps/intel/ict/composer\_xe\_2013.0.079/mkl/lib/intel64
 export QTLIB=/usr/lib64/qt-3.3/lib
 PATH=\$PATH:\$HOME/bin:\$HOME/bin/convaspTest
 export PATH
@@ -747,7 +762,8 @@ export OMP\_NUM\_THREADS=1
 ulimit -s unlimited
 ulimit -l unlimited
 \#mpirun \$VaspPath/vasp
-//share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/bin/mpirun \$VaspPath/vasp
+//share/cluster/RHEL6.2/x86\_64/apps/openmpi/1.6.2/bin/
+    mpirun \$VaspPath/vasp
 \end{Verbatim}
 
 \end{itemize}
@@ -755,7 +771,7 @@ ulimit -l unlimited
 Modify \textasciitilde{}/.bashrc if necessary
 \begin{itemize}
 \item {} 
-ACI/HPC, add line: \code{export LD\_LIBRARY\_PATH=\$LD\_LIBRARY\_PATH://opt/intel/lib/intel64}
+ACI/HPC, add: \code{export LD\_LIBRARY\_PATH=\$LD\_LIBRARY\_PATH://opt/intel/lib/intel64}
 
 \end{itemize}
 
@@ -780,10 +796,11 @@ Follow the testing instructions from {\hyperref[1_0_installation:test-on-cluster
 Make a test directory, like \code{//home/username/MAST/test}
 
 \item {} 
-Copy the test input file to your test folder:
+Copy the test input file to your test folder (all one line):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{cp} \PYG{o}{/}\PYG{o}{/}\PYG{n}{share}\PYG{o}{/}\PYG{n}{apps}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{phononreorgtest}\PYG{o}{/}\PYG{n}{phonon\PYGZus{}with\PYGZus{}neb}\PYG{o}{.}\PYG{n}{inp} \PYG{o}{/}\PYG{o}{/}\PYG{n}{home}\PYG{o}{/}\PYG{n}{username}\PYG{o}{/}\PYG{n}{MAST}\PYG{o}{/}\PYG{n}{test}\PYG{o}{/}\PYG{n}{test}\PYG{o}{.}\PYG{n}{inp}
+cp //share/apps/MAST/test/phononreorgtest/
+phonon\_with\_neb.inp //home/username/MAST/test/test.inp
 \end{Verbatim}
 
 \item {} 
@@ -907,19 +924,16 @@ Each ingredient is given:
 A name, which is the full path to the ingredient.s directory and is automatically generated using the system name and the recipe template. (Do not use parentheses in ingredient names.) Some ingredient names must be structured specifically. For examples of naming conventions, see the {\hyperref[4_0_recipe::doc]{\emph{Recipe}}}. In particular:
 
 \item {} 
-An ingredient which is supposed to correspond to values given by the \code{\$defects} section of the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}} should always be named with \code{inducedefect\_} (for the structural creation of the defect) or \code{defect\_} (for an actual defect calcualtion)
+An ingredient which is supposed to correspond to values given by the \code{\$defects} section of the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}} should always be named with \code{inducedefect\_} (for the structural creation of the defect) or \code{defect\_} (for an actual defect calculation)
 
-\item {} \begin{description}
-\item[{An ingredient which is supposed to correspond to values in the \code{\$neb} section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with \code{neb\_}}] \leavevmode\begin{itemize}
+\item {} 
+An ingredient which is supposed to correspond to values in the \code{\$neb} section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with \code{neb\_}
+
 \item {} 
 A phonon calculation should always be named with \code{phonon\_}, and a subsequent calculation of phonon results should be named with \code{phonon\_...parse}
 
-\end{itemize}
-
-\end{description}
-
 \item {} 
-The letters .q=. are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name
+The letters \textbf{q=} are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name
 
 \item {} 
 A dictionary of program-specific keywords, which come from each ingredient.s section in the \code{\$ingredients} section of the {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}.
@@ -933,25 +947,25 @@ A type, which is specified in the recipe, next to the ingredient name, in parent
 \item {} 
 Program-specific keywords
 
-\end{itemize}
-
 \item {} 
 Other MAST keywords, including:
 \begin{itemize}
 \item {} 
-The .write. method: which files the ingredient should write out before running (e.g., create the INCAR)i
+The \textbf{write} method: which files the ingredient should write out before running (e.g., create the INCAR)
 
 \item {} 
-The .ready. method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)).
+The \textbf{ready} method: how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)).
 
 \item {} 
-The .run. method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
+The \textbf{run} method: what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
 
 \item {} 
-The .complete. method: how MAST can tell if the ingredient is considered complete
+The \textbf{complete} method: how MAST can tell if the ingredient is considered complete
 
 \item {} 
-The .update children. method: what information an ingredient passes on to its children, and how this information is passed on
+The \textbf{update children} method: what information an ingredient passes on to its children, and how this information is passed on
+
+\end{itemize}
 
 \end{itemize}
 
@@ -973,9 +987,9 @@ The input file contains several sections and subsections.
 Bounds of sections are denoted by \code{\$sectionname} and \code{\$end}.
 Bounds of subsections within a section are denoted by \code{begin subsectionname} and \code{end}.
 
-\emph{Comments in the input file are allowed only as separate lines starting with .\#.. A comment may not be appended to a line.}
+\emph{Comments in the input file are allowed only as separate lines starting with \#. A comment may not be appended to a line.}
 
-Example of the \code{\$structure} section, with three subsections, .elementmap., .coordinates., and .lattice.:
+Example of the \code{\$structure} section, with three subsections, \textbf{elementmap}, \textbf{coordinates}, and \textbf{lattice}:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$structure
@@ -1035,7 +1049,7 @@ posfile POSCAR\_fcc
 
 The file should be located in the same directory as the input file.
 
-A CIF file should end with {\color{red}\bfseries{}*}.cif.
+A CIF file should end with .cif.
 
 A POSCAR-type filename must start with \code{POSCAR\_} or \code{CONTCAR\_} in order for pymatgen to recognize it. The elements will be obtained from the POSCAR unless you also have a POTCAR in the directory, in which case, check your output carefully because the elements might be given by the POTCAR instead, no matter what elements are written in the POSCAR file.
 
@@ -1044,15 +1058,15 @@ A POSCAR-type filename must start with \code{POSCAR\_} or \code{CONTCAR\_} in or
 \label{3_0_inputfile:structure-by-specification}
 To specify a structure, use the following subsections:
 
-\textbf{{}`{}`coord\_type{}`{}`}: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.
+\textbf{coord\_type}: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.
 
-\textbf{{}`{}`lattice{}`{}`}: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
+\textbf{lattice}: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
 
-\textbf{{}`{}`elementmap{}`{}`}: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
+\textbf{elementmap}: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
 
 The elementmap subsection works in conjunction with the coordinates subsection.
 
-\textbf{{}`{}`coordinates{}`{}`}: The coordinates subsection specifies the coordinates in order.
+\textbf{coordinates}: The coordinates subsection specifies the coordinates in order.
 
 Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.
 
@@ -1060,8 +1074,8 @@ Each fractional coordinate must be preceded by either an element symbol or an X\
 
 Example:
 
+\begin{Verbatim}[commandchars=\\\{\}]
 begin \$structure
-\begin{quote}
 
 coord\_type fractional
 
@@ -1088,7 +1102,7 @@ X2 0.750000 0.250000 0.750000
 end
 
 \$end
-\end{quote}
+\end{Verbatim}
 
 
 \section{The Ingredients section}
@@ -1098,13 +1112,12 @@ The \code{\$ingredients} section contains a section for global ingredient keywor
 Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with \code{mast\_}.
 
 Each ingredient type in the recipe should have a subsection denoted by
-\begin{description}
-\item[{begin ingredient\_type}] \leavevmode
+
+\begin{Verbatim}[commandchars=\\\{\}]
+begin ingredient\_type
 (keywords here)
-
-\end{description}
-
 end
+\end{Verbatim}
 
 even if there are no keywords within that section, in which case the \code{end} line directly follows the \code{begin} line.
 
@@ -1121,8 +1134,10 @@ One exception for VASP keywords is the \code{IMAGES} keyword, which signals a nu
 
 For VASP ingredients, please include
 
+\begin{Verbatim}[commandchars=\\\{\}]
 lcharg False
 lwave False
+\end{Verbatim}
 
 in your ingredient global keywords in order to avoid writing the large VASP files CHGCAR and WAVECAR, unless you really need these files.
 
@@ -1133,14 +1148,14 @@ Any keyword that starts with \code{mast\_} is considered a special keyword utili
 \label{3_0_inputfile:special-mast-ingredient-keywords}
 Some of these special MAST keywords are only appropriate for VASP calculations.
 
-\textbf{mast\_program}: Specify which program to run (.vasp., .vasp\_neb., .phon., or .None. for a generic program, are currently supported)
+\textbf{mast\_program}: Specify which program to run (\code{vasp}, \code{vasp\_neb}, \code{phon}, or \code{None} for a generic program, are currently supported)
 
 \begin{Verbatim}[commandchars=\\\{\}]
 mast\_program vasp
 \end{Verbatim}
 \begin{itemize}
 \item {} 
-This keyword must be in lowercase (.vasp., .phon.)
+This keyword must be in lowercase
 
 \end{itemize}
 
@@ -1153,8 +1168,11 @@ Either this keyword or \code{mast\_kpoint\_density} is required for VASP calcula
 
 \end{itemize}
 
-\textbf{mast\_kpoint\_density}: A number for the desired kpoint mesh density. Only works with \code{mast\_write\_method} of \code{write\_singlerun\_automesh}
+\textbf{mast\_kpoint\_density}: A number for the desired kpoint mesh density.
 \begin{itemize}
+\item {} 
+Only works with \code{mast\_write\_method} of \code{write\_singlerun\_automesh}
+
 \item {} 
 Either this keyword or \code{mast\_kpoints} is required for VASP calculations.
 
@@ -1162,7 +1180,9 @@ Either this keyword or \code{mast\_kpoints} is required for VASP calculations.
 
 \textbf{mast\_pp\_setup}: Specify which pseudopotential goes to which element:
 
+\begin{Verbatim}[commandchars=\\\{\}]
 mast\_pp\_setup La=La Mn=Mn\_pv O=O\_s
+\end{Verbatim}
 
 \textbf{mast\_xc}: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)
 \begin{itemize}
@@ -1196,16 +1216,16 @@ A positive charge is the REMOVAL of electrons. For example, Na+ with a +1 charge
 \textbf{mast\_coordinates}: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the \$structure section of the input file. The coordinates must be fractional coordinates.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_coordinates coordposcar
+mast\_coordinates POSCAR\_initialize
 \end{Verbatim}
 \begin{itemize}
 \item {} 
 For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images:
 
-\end{itemize}
-
+\begin{Verbatim}[commandchars=\\\{\}]
 mast\_coordinates POSCAR\_im1,POSCAR\_im2,POSCAR\_im3
-\begin{itemize}
+\end{Verbatim}
+
 \item {} 
 The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run \code{mast -i test.inp}); once the \code{input.inp} file is created in the recipe directory, it will store a full path back to these poscar-type files.
 
@@ -1216,7 +1236,9 @@ This keyword cannot be used with programs other than VASP, cartesian coordinates
 
 \textbf{mast\_strain}: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with \code{mast\_run\_method} of \code{run\_strain}
 
+\begin{Verbatim}[commandchars=\\\{\}]
 mast\_strain 1.01 1.03 0.98
+\end{Verbatim}
 
 This example will stretch the lattice along lattice vector a by 1\%, stretch the lattice along lattice vector b by 3\%, and compress the lattice along lattice vector c by 2\%
 
@@ -1273,8 +1295,8 @@ The following keywords have individual sections:
 \textbf{mast\_update\_children\_method}: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
 
 
-\subsubsection{mast\_xxx\_method General Notes}
-\label{3_0_inputfile:mast-xxx-method-general-notes}
+\subsubsection{Important notes on using mast\_xxx\_method keywords}
+\label{3_0_inputfile:important-notes-on-using-mast-xxx-method-keywords}\label{3_0_inputfile:important-notes}
 Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.:
 
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -1309,61 +1331,87 @@ All arguments are passed as strings. Arguments in quotation marks are kept toget
 Some common open-ended methods are:
 \begin{itemize}
 \item {} 
-file\_exists \textless{}filename\textgreater{}
+\textbf{file\_exists \textless{}filename\textgreater{}}
 
 \item {} 
-file\_has\_string \textless{}filename\textgreater{} \textless{}string\textgreater{}
+\textbf{file\_has\_string \textless{}filename\textgreater{} \textless{}string\textgreater{}}
 
 \item {} 
-copy\_file \textless{}filename\textgreater{} \textless{}copy\_to\_filename\textgreater{}
+\textbf{copy\_file \textless{}filename\textgreater{} \textless{}copy\_to\_filename\textgreater{}}
 
 \item {} 
-softlink\_file \textless{}filename\textgreater{} \textless{}softlink\_to\_filename\textgreater{}
+\textbf{softlink\_file \textless{}filename\textgreater{} \textless{}softlink\_to\_filename\textgreater{}}
 
 \item {} 
-copy\_fullpath\_file \textless{}full path file name\textgreater{} \textless{}copy\_to\_filename\textgreater{}: This method is for copying some system file like //home/user/some\_template, not an ingredient-specific file
+\textbf{copy\_fullpath\_file \textless{}full path file name\textgreater{} \textless{}copy\_to\_filename\textgreater{}}: This method is for copying some system file like //home/user/some\_template, not an ingredient-specific file
 
 \item {} 
-write\_ingred\_input\_file \textless{}filename\textgreater{} \textless{}allowed file\textgreater{} \textless{}uppercase keywords\textgreater{} \textless{}delimiter\textgreater{}: The allowed file specifies an allowed keywords file in \$MAST\_INSTALL\_PATH/MAST/ingredients/programkeys. Use ``all'' to put any non-mast keywords into the input file. Use 1 to uppercase all keywords, or 0 otherwise. Leave off the delimiter argument in order to use a single space.
+\textbf{write\_ingred\_input\_file \textless{}filename\textgreater{} \textless{}allowed file\textgreater{} \textless{}uppercase keywords\textgreater{} \textless{}delimiter\textgreater{}}: The allowed file specifies an allowed keywords file name in \code{\$MAST\_INSTALL\_PATH/MAST/ingredients/programkeys}.
+\begin{itemize}
+\item {} 
+Use ``all'' to put any non-mast keywords into the input file.
 
 \item {} 
-no\_setup: Does nothing. Useful when you want to specifically specify doing nothing.
+Use 1 to uppercase all keywords, or 0 to leave them as entered.
 
 \item {} 
-no\_update: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
+Leave off the delimiter argument in order to use a single space.
 
 \item {} 
-run\_command: \textless{}command string, including all arguments\textgreater{}: This method allows you to run a python script. The python script may take in string-based arguments. Please stick to common text characters. For example, \code{mast\_run\_method run\_command "//home/user/myscripts/my\_custom\_parsing.py overhill overdale 25"}, where the number 25 will actually be passed into sys.argv as a string. Some useful scripts are found in \code{\$MAST\_INSTALL\_PATH/MAST/utility} and described in ref:\emph{6\_0\_tools}; however, not all scripts are suitable for run\_command.
+Examples:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+write\_ingred\_input\_file input.txt all 0 =
+write\_ingred\_input\_file input.txt phon\_allowed\_keys.py 1
+\end{Verbatim}
 
 \end{itemize}
 
-(Instead of using run\_command, use the mast\_write\_method write\_submit\_script, the mast\_exec keyword, and the mast\_run\_method run\_singlerun in order to submit to the queue.)
+\item {} 
+\textbf{no\_setup}: Does nothing. Useful when you want to specifically specify doing nothing.
 
-You may also choose to write your own methods.
+\item {} 
+\textbf{no\_update}: Does nothing (but, does accept the child name it is given). Useful when you want to specify doing nothing for a child update step.
 
-Place these methods in a file in the directory \code{\$MAST\_INSTALL\_PATH/customlib}, structured like the file \code{\$MAST\_INSTALL\_PATH/customlib/customchopingredient.py}
+\item {} 
+\textbf{run\_command: \textless{}command string, including all arguments\textgreater{}}: This method allows you to run a python script.
 \begin{itemize}
 \item {} 
-Please inherit from either ChopIngredient or BaseIngredient.
+The python script may take in only string-based arguments
 
 \item {} 
-Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
+Please stick to common text characters.
 
 \item {} 
-You will have access to the ingredient directory name at \code{self.keywords{[}'name'{]}} as well as ingredient keywords at \code{self.keywords{[}'program\_keys'{]}}.
+Example:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_run\_method run\_command "//home/user/myscripts/my\_custom\_parsing.py 25 0.01"
+\end{Verbatim}
 
 \item {} 
-The method may also take in up to 3 string-based arguments.
+In the example above, the numbers 25 and 0.01 will actually be passed into sys.argv as a string.
 
 \item {} 
-In the input file, designate your custom method as classname.methodname followed by any arguments, for example, \code{mast\_write\_method MyChopClass.write\_complex\_file superfile}
+This method is intended to allow you to run short custom scripts of your own creation, particularly for \code{mast\_write\_method} when setting up your ingredient.
+
+\item {} \begin{description}
+\item[{For long or complex execution steps where you want the output tracked separately, do not use this method. Instead, do the following in order to get your script submitted to the queue:}] \leavevmode
+\#  Use \code{write\_submit\_script} in your \code{mast\_write\_method}, along with any other write methods
+\#  Use \code{mast\_run\_method run\_singlerun}
+\#  Put your script in the \code{mast\_exec} keyword
+*  Some useful scripts are found in \code{\$MAST\_INSTALL\_PATH/tools} and described in {\hyperref[6_0_tools:tools]{\emph{MAST post-processing utilities}}}
+
+\end{description}
+
+\end{itemize}
 
 \end{itemize}
 
 
 \subsubsection{mast\_write\_method keyword values}
 \label{3_0_inputfile:mast-write-method-keyword-values}
-write\_singlerun
+\textbf{write\_singlerun}
 \begin{itemize}
 \item {} 
 Write files for a single generic run.
@@ -1373,7 +1421,7 @@ Programs supported: vasp, phon (phon assumes vasp-type output given by one of th
 
 \end{itemize}
 
-write\_singlerun\_automesh
+\textbf{write\_singlerun\_automesh}
 \begin{itemize}
 \item {} 
 Write files for a single generic run.
@@ -1386,7 +1434,7 @@ Requires the \code{mast\_kpoint\_density} ingredient keyword
 
 \end{itemize}
 
-write\_neb
+\textbf{write\_neb}
 \begin{itemize}
 \item {} 
 Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories.
@@ -1396,7 +1444,7 @@ Programs supported: vasp
 
 \end{itemize}
 
-write\_neb\_subfolders
+\textbf{write\_neb\_subfolders}
 \begin{itemize}
 \item {} 
 Write static runs for an NEB, starting from a previous NEB, into image subfolders 01 to 0(N-1).
@@ -1406,7 +1454,7 @@ Programs supported: vasp
 
 \end{itemize}
 
-write\_phonon\_single
+\textbf{write\_phonon\_single}
 \begin{itemize}
 \item {} 
 Write files for a phonon run.
@@ -1416,7 +1464,7 @@ Programs supported: vasp
 
 \end{itemize}
 
-write\_phonon\_multiple
+\textbf{write\_phonon\_multiple}
 \begin{itemize}
 \item {} 
 Write a phonon run, where the frequency calculation for each atom and each direction is a separate run, using selective dynamics. CHGCAR and WAVECAR must have been given to the ingredient previously; these files will be softlinked into each subfolder.
@@ -1429,7 +1477,7 @@ Programs supported: vasp
 
 \subsubsection{mast\_ready\_method keyword values}
 \label{3_0_inputfile:mast-ready-method-keyword-values}
-ready\_singlerun
+\textbf{ready\_singlerun}
 \begin{itemize}
 \item {} 
 Checks that a single run is ready to run
@@ -1439,7 +1487,7 @@ Programs supported: vasp (either NEB or regular VASP run), phon
 
 \end{itemize}
 
-ready\_defect
+\textbf{ready\_defect}
 \begin{itemize}
 \item {} 
 Checks that the ingredient has a structure file
@@ -1449,7 +1497,7 @@ Programs supported: vasp
 
 \end{itemize}
 
-ready\_neb\_subfolders
+\textbf{ready\_neb\_subfolders}
 \begin{itemize}
 \item {} 
 Checks that each 01/.../0(N-1) subfolder is ready to run as its own separate calculation, following the ready\_singlerun criteria for each folder
@@ -1459,7 +1507,7 @@ This method is used for NEB static calculations rather than NEB calculations the
 
 \end{itemize}
 
-ready\_subfolders
+\textbf{ready\_subfolders}
 *  Checks that each subfolder is ready to run, following the ready\_singlerun criteria.
 *  Generic
 *  This method is used for calculations whose write method includes subfolders, and where each subfolder is a calculation, as in \code{write\_phonon\_multiple}.
@@ -1467,7 +1515,7 @@ ready\_subfolders
 
 \subsubsection{mast\_run\_method keyword values}
 \label{3_0_inputfile:mast-run-method-keyword-values}
-run\_defect
+\textbf{run\_defect}
 \begin{itemize}
 \item {} 
 Create a defect in the structure; not submitted to queue
@@ -1480,7 +1528,7 @@ Requires the \code{\$defects} section in the input file.
 
 \end{itemize}
 
-run\_singlerun
+\textbf{run\_singlerun}
 \begin{itemize}
 \item {} 
 Submit a run to the queue.
@@ -1490,7 +1538,7 @@ Generic
 
 \end{itemize}
 
-run\_neb\_subfolders
+\textbf{run\_neb\_subfolders}
 \begin{itemize}
 \item {} 
 Run each 01/.../0(N-1) subfolder as run\_singlerun
@@ -1500,7 +1548,7 @@ Generic
 
 \end{itemize}
 
-run\_subfolders
+\textbf{run\_subfolders}
 \begin{itemize}
 \item {} 
 Run each subfolder as run\_singlerun
@@ -1510,7 +1558,7 @@ Generic
 
 \end{itemize}
 
-run\_strain
+\textbf{run\_strain}
 \begin{itemize}
 \item {} 
 Strain the structure; not submitted to queue
@@ -1523,7 +1571,7 @@ Requires the \code{mast\_strain} ingredient keyword
 
 \end{itemize}
 
-run\_scale
+\textbf{run\_scale}
 \begin{itemize}
 \item {} 
 Scale the structure (e.g. a 2-atom unit cell scaled by 2 becomes a 16-atom supercell)
@@ -1536,7 +1584,7 @@ Requires the \code{mast\_scale} ingredient keyword, and must not be run on the s
 
 \end{itemize}
 
-run\_scale\_defect
+\textbf{run\_scale\_defect}
 \begin{itemize}
 \item {} 
 Scale the structure and defect it (e.g. a single defect at 0.5 0.5 0.5 in the original structure becomes a single defect at 0.25 0.25 0.25 in the structure scaled by 2)
@@ -1552,7 +1600,7 @@ Requires the \code{mast\_scale} ingredient keyword, and must not be run on the s
 
 \subsubsection{mast\_complete\_method keyword values}
 \label{3_0_inputfile:mast-complete-method-keyword-values}
-complete\_singlerun
+\textbf{complete\_singlerun}
 \begin{itemize}
 \item {} 
 Check if run is complete
@@ -1561,7 +1609,7 @@ Check if run is complete
 Programs supported: vasp, phon (only entropy calculation)
 
 \item {} 
-Note that for VASP, the line .reached required accuracy. is checked for, as well as a .User time. in seconds. The exceptions are:
+Note that for VASP, the phrase \code{reached required accuracy} is checked for, as well as a \code{User time} in seconds. The exceptions are:
 \begin{itemize}
 \item {} 
 NSW of 0, NSW of -1, or NSW not specified in the ingredients section keywords is taken as a static calculation, and .EDIFF is reached. is checked instead of .reached required accuracy.
@@ -1572,21 +1620,27 @@ IBRION of -1 is taken as a static calculation, and .EDIFF is  reached. is checke
 \item {} 
 IBRION of 0 is taken as an MD calculation, and only user time is checked
 
-\end{itemize}
-
 \item {} 
 IBRION of 5, 6, 7, or 8 is taken as a phonon calculation, and only user time is checked
 
 \end{itemize}
 
-complete\_neb\_subfolders
+\end{itemize}
+
+\textbf{complete\_neb\_subfolders}
 \begin{itemize}
 \item {} 
 Check if all NEB subfolders 01/.../0(N-1) are complete, according to complete\_singlerun criteria.
 
+\item {} 
+This method is not for checking the completion of NEBs! An NEB ingredient should have \code{mast\_program vasp\_neb} and \code{mast\_complete\_method complete\_singlerun}.
+
+\item {} 
+An NEB static calculation, or a static calculation for each image, would use this keyword as \code{mast\_complete\_method complete\_neb\_subfolders} but have \code{mast\_program vasp} instead of vasp\_neb.
+
 \end{itemize}
 
-complete\_subfolders
+\textbf{complete\_subfolders}
 \begin{itemize}
 \item {} 
 Check if all subfolders are complete, according to complete\_singlerun criteria.
@@ -1596,7 +1650,7 @@ Generic
 
 \end{itemize}
 
-complete\_structure
+\textbf{complete\_structure}
 \begin{itemize}
 \item {} 
 Check if run has an output structure file written
@@ -1609,7 +1663,7 @@ Programs supported: vasp (looks for CONTCAR)
 
 \subsubsection{mast\_update\_children\_method keyword values}
 \label{3_0_inputfile:mast-update-children-method-keyword-values}
-give\_structure
+\textbf{give\_structure}
 \begin{itemize}
 \item {} 
 Forward the relaxed structure
@@ -1619,7 +1673,7 @@ Programs supported: vasp (CONTCAR to POSCAR)
 
 \end{itemize}
 
-give\_structure\_and\_energy\_to\_neb
+\textbf{give\_structure\_and\_energy\_to\_neb}
 \begin{itemize}
 \item {} 
 Forward the relaxed structure and energy files
@@ -1629,7 +1683,7 @@ Programs supported: vasp (CONTCAR to POSCAR, and copy over OSZICAR)
 
 \end{itemize}
 
-give\_neb\_structures\_to\_neb
+\textbf{give\_neb\_structures\_to\_neb}
 \begin{itemize}
 \item {} 
 Give NEB output images structures as the starting point image input structures in another NEB
@@ -1639,7 +1693,7 @@ Programs supported: vasp (01/.../0(N-1) CONTCAR files will be the child NEB ingr
 
 \end{itemize}
 
-give\_phonon\_single\_forces\_and\_displacements(self, childname)
+\textbf{give\_phonon\_single\_forces\_and\_displacements(self, childname)}
 \begin{itemize}
 \item {} 
 Forward force and displacement information
@@ -1649,7 +1703,7 @@ Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
 
 \end{itemize}
 
-give\_phonon\_multiple\_forces\_and\_displacements
+\textbf{give\_phonon\_multiple\_forces\_and\_displacements}
 \begin{itemize}
 \item {} 
 Combine individual phonon forces and displacements and forward this information
@@ -1659,7 +1713,7 @@ Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
 
 \end{itemize}
 
-give\_saddle\_structure
+\textbf{give\_saddle\_structure}
 \begin{itemize}
 \item {} 
 Forward the highest-energy structure of all subfolder structures
@@ -1668,6 +1722,8 @@ Forward the highest-energy structure of all subfolder structures
 Programs supported: vasp
 
 \end{itemize}
+
+The following keywords are deprecated. Please use the generic methods in {\hyperref[3_0_inputfile:important-notes]{\emph{Important notes on using mast\_xxx\_method keywords}}} instead.
 
 give\_structure\_and\_restart\_files (same as give\_structure\_and\_restart\_files\_softlinks)
 \begin{itemize}
@@ -1724,6 +1780,30 @@ Programs supported: vasp (CONTCAR to POSCAR, and softlink to WAVECAR)
 \end{itemize}
 
 
+\subsubsection{Custom mast\_xxx\_method keywords}
+\label{3_0_inputfile:custom-mast-xxx-method-keywords}
+You may also choose to write your own methods, in addition to any of the methods above.
+
+Place these methods in a file in the directory \code{\$MAST\_INSTALL\_PATH/customlib}, structured like the file \code{\$MAST\_INSTALL\_PATH/customlib/customchopingredient.py}
+\begin{itemize}
+\item {} 
+Please inherit from either ChopIngredient or BaseIngredient.
+
+\item {} 
+Name the method(s) something unique (e.g. not found in either ChopIngredient or BaseIngredient)
+
+\item {} 
+You will have access to the ingredient directory name at \code{self.keywords{[}'name'{]}} as well as ingredient keywords at \code{self.keywords{[}'program\_keys'{]}}.
+
+\item {} 
+The method may also take in up to 3 string-based arguments.
+
+\item {} 
+In the input file, designate your custom method as classname.methodname followed by any arguments, for example, \code{mast\_write\_method MyChopClass.write\_complex\_file superfile}
+
+\end{itemize}
+
+
 \subsubsection{Example Ingredients section}
 \label{3_0_inputfile:example-ingredients-section}
 Here is an example ingredients section:
@@ -1776,11 +1856,11 @@ mast\_complete\_method        complete\_structure
 end
 
 begin singlerun\_vac1
-mast\_coordinates            vac1poscar
+mast\_coordinates            POSCAR\_vac1
 end
 
 begin singlerun\_vac2
-mast\_coordinates            vac2poscar
+mast\_coordinates            POSCAR\_vac2
 end
 
 begin singlerun\_to\_neb
@@ -1792,7 +1872,7 @@ lcharge True
 end
 
 begin neb\_to\_neb\_vac1-vac2
-mast\_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+mast\_coordinates            POSCAR\_nebim1,POSCAR\_nebim2,POSCAR\_nebim3
 mast\_write\_method           write\_neb
 mast\_update\_children\_method  give\_neb\_structures\_to\_neb
 mast\_nodes                  3
@@ -1805,7 +1885,7 @@ spring -5
 end
 
 begin neb\_to\_neb\_vac1-vac3
-mast\_coordinates            nebim1poscar,nebim2poscar,nebim3poscar
+mast\_coordinates            POSCAR\_nebim1\_set2,POSCAR\_nebim2\_set2,POSCAR\_nebim3\_set2
 mast\_write\_method           write\_neb
 mast\_update\_children\_method  give\_neb\_structures\_to\_neb
 mast\_nodes                  3
@@ -1877,10 +1957,9 @@ The \code{\$recipe} section contains the recipe template to be used.
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$recipe
-\end{Verbatim}
-
 recipe\_file myrecipefile.txt
 \$end
+\end{Verbatim}
 
 
 \section{The Defects section (optional)}
@@ -1900,11 +1979,9 @@ Example \code{\$defects} section:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$defects
-\end{Verbatim}
 
 coord\_type fractional
 threshold 1e-4
-\begin{quote}
 
 vacancy 0 0 0 Mg
 vacancy 0.5 0.5 0.5 Mg
@@ -1912,7 +1989,7 @@ interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
 \$end
-\end{quote}
+\end{Verbatim}
 
 The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct {\hyperref[4_0_recipe::doc]{\emph{recipe}}}, four separate ingredients, each containing one of the defects above, will be created.
 
@@ -1920,8 +1997,6 @@ Multiple point defects can be also grouped together as a combined defect within 
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$defects
-\end{Verbatim}
-\begin{quote}
 
 coord\_type fractional
 threshold 1e-4
@@ -1935,13 +2010,13 @@ interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
 \$end
-\end{quote}
+\end{Verbatim}
 
 In this case, there will be three separate .defect. ingredients: one ingredient with two vacancies together (where the defect group is labeled .doublevac.), one interstitial, and another interstitial.
 
 Charges can be specified as \code{charge=0,10}, where a comma denotes the lower and upper ranges for the charges.
 
-Let.s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):
+Let's say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):
 
 \begin{Verbatim}[commandchars=\\\{\}]
 vacancy 0 0 0 Mg charge=0,3
@@ -1959,11 +2034,11 @@ end
 
 For a single defect, charges and labels can be given at the same time:
 
-Let.s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as \href{mailto:Vac@Mg}{Vac@Mg}:
-\begin{quote}
+Let's say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as \href{mailto:Vac@Mg}{Vac@Mg}:
 
-vacancy 0.0 0.0 0.0 Mg charge=0,3 \href{mailto:label=Vac@Mg}{label=Vac@Mg}
-\end{quote}
+\begin{Verbatim}[commandchars=\\\{\}]
+vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
+\end{Verbatim}
 
 The charge and label keywords are interchangeable, i.e. we could also have typed:
 
@@ -1976,7 +2051,7 @@ If you use charges in the defects section like this, then you should use a {\hyp
 
 \subsection{Phonons for defects}
 \label{3_0_inputfile:phonons-for-defects}
-Phonon calculations are described by a .phonon center site. coordinate and a .phonon center radius. in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.
+Phonon calculations are described by a \emph{phonon center site} coordinate and a \emph{phonon center radius} in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.
 
 For VASP, this inclusion takes the form of selective dynamics T T T for the atoms within the sphere, and F F F otherwise, in a phonon calculation (IBRION = 5, 6, 7, 8)
 
@@ -1992,27 +2067,21 @@ phonon solute 0.1 0.1 0.2 0.5
 end
 \end{Verbatim}
 
-In the example above, .host3. is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site.
+In the example above, \emph{host3} is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site.
 
-In the example above, .solute. is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
+In the example above, \emph{solute} is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
 
 The recipe template file for phonons may include either the explicit phonon labels and their charge and defect label, or \textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (defect label \_ charge label \_ phonon label).
 
 Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example:
-\begin{quote}
 
-\{begin\}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYGZob{}begin\PYGZcb{}
 defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
-\begin{quote}
-\begin{description}
-\item[{phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)}] \leavevmode
-phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
-
-\end{description}
-\end{quote}
-
-\{end\}
-\end{quote}
+    phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
+        phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
+\PYGZob{}end\PYGZcb{}
+\end{Verbatim}
 
 
 \section{The chemical potentials section}
@@ -2033,13 +2102,10 @@ begin As rich
 Ga -4.2543
 As -5.3920
 Bi -4.5650
-\end{Verbatim}
-
 end
-\begin{quote}
 
 \$end
-\end{quote}
+\end{Verbatim}
 
 
 \section{The NEB section}
@@ -2061,8 +2127,6 @@ Example defect and NEB section together:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$defects
-\end{Verbatim}
-\begin{quote}
 
 coord\_type fractional
 threshold 1e-4
@@ -2079,20 +2143,16 @@ interstitial 0.0 0.25 0.0 Al label=int2
 begin vac1-vac2
 images 1
 Mg, 0 0 0, 0 .5 0.5
-\end{quote}
-
 end
-\begin{quote}
 
 begin int1-int2
 Al, 0.25 0 0, 0 0.25 0
 images 3
 phonon movingatom 0.125 0.125 0.0 1.0
-\end{quote}
-
 end
 
 \$end
+\end{Verbatim}
 
 
 \section{Creating several input files at once: the looped input file}
@@ -2111,7 +2171,10 @@ indeploop mast\_xc (pw91, pbe)
 In this example, two input files will be created. One input file will contain the line \code{mast\_xc pw91}. The other input file will contain the line \code{mast\_xc pbe}.
 \begin{itemize}
 \item {} 
-Any text within parentheses and separated by a comma will be looped. *  Lines which normally include commas, like the .charge. line in the \code{\$defects} section, may not be looped.
+Any text within parentheses and separated by a comma will be looped.
+
+\item {} 
+Lines which normally include commas, like the \code{charge} line in the \code{\$defects} section, or the \code{mast\_coordinates} keyword for an NEB, may not be looped.
 
 \item {} 
 This keyword may only be used once on a line.
@@ -2124,8 +2187,6 @@ For example, this excerpt would generate four input files: one with iron using p
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \$structure
-\end{Verbatim}
-
 begin elementmap
 indeploop X1 (Fe, Cu)
 end
@@ -2137,10 +2198,8 @@ begin ingredients\_global
 indeploop mast\_xc (pw91, pbe)
 ...
 end
-\begin{quote}
-
 \$end
-\end{quote}
+\end{Verbatim}
 
 
 \subsection{Dependent, or pegged, loops}
@@ -2154,9 +2213,7 @@ For example, if you want to create a single input file, but signify that it shou
 begin elementmap
 pegloop1 X1 (Es, Fm, Md)
 end
-\end{Verbatim}
-\begin{description}
-\item[{...}] \leavevmode
+...
 \$end
 
 \$ingredients
@@ -2164,10 +2221,8 @@ begin ingredients\_global
 pegloop1 ldauu (5.3, 6.5, 8.0)
 ...
 end
-
-\end{description}
-
 \$end
+\end{Verbatim}
 
 In this case, three input files will be created. In the first input file, Es will be paired with a U-value of 5.3. In the second input file, Fm will be paired with a U-value of 6.5. In the third input file, Md will be paired with a U-value of 8.0.
 
@@ -2175,7 +2230,11 @@ There are two pegged loops allowed, specified by \code{pegloop1} and \code{peglo
 
 Each pegged loop and independent loop will be combinatorially combined. For example, if a separate line \code{indeploop mast\_xc (pw91, pbe)} were included in the \code{ingredients\_global} subsection above, then six input files would be created: one pw91 and one pbe input file for Es with +U 5.3, another pair for Fm, and another pair for Mn.
 
-In the example below, four input files would be created, corresponding to four different lattices, {[}(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,2.0){]}, {[}(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,3.0){]}, {[}(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,2.0){]}, and {[}(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,3.0){]}
+In the example below, four input files would be created, corresponding to four different lattices:
+*  {[}(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,2.0){]}
+*  {[}(6.0,0.0,0.0),(0.0,6.0,0.0),(0.0,0.0,3.0){]}
+*  {[}(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,2.0){]}, and
+*  {[}(4.0,0.0,0.0),(0.0,4.0,0.0),(0.0,0.0,3.0){]}
 
 \begin{Verbatim}[commandchars=\\\{\}]
 begin lattice
@@ -2183,220 +2242,6 @@ pegloop1 (6.0,4.0) 0.0 0.0
 pegloop1 0.0 (6.0,4.0) 0.0
 indeploop 0.0 0.0 (2.0,3.0)
 end
-\end{Verbatim}
-
-
-\section{Full example}
-\label{3_0_inputfile:full-example}
-Recipe:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-Recipe OptimizeWorkflow
-perfect\_opt1 (lowmesh)
-    perfect\_opt2
-        perfect\_stat (static)
-        \PYGZob{}begin\PYGZcb{}
-        inducedefect\_\textless{}N\textgreater{} (inducedefect)
-            defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (lowmesh\_defect)
-                defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (defect\_relax)
-                    defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
-        \PYGZob{}end\PYGZcb{}
-\PYGZob{}begin\PYGZcb{}
-defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
-    phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
-        phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
-\PYGZob{}end\PYGZcb{}
-\PYGZob{}begin\PYGZcb{}
-defect\_\textless{}B\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}E\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb)
-    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (neb\_to\_neb)
-        neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
-            neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
-    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
-    neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
-\PYGZob{}end\PYGZcb{}
-\PYGZob{}begin\PYGZcb{}
-neb\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
-    phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
-        phonon\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
-\PYGZob{}end\PYGZcb{}
-\end{Verbatim}
-
-Input file:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\# Small demo for NEB workflow
-\$mast
-system\_name PhononNebTest
-\$end
-
-\$structure
-coord\_type fractional
-
-begin elementmap
-X1 Al
-X2 Mg
-end
-
-begin lattice
-3.5 0 0
-0 3.5 0
-0 0 3.5
-end
-
-begin coordinates
-X1 0.0000000000 0.0000000000 0.0000000000
-X1 0.5000000000 0.5000000000 0.0000000000
-X1 0.0000000000 0.5000000000 0.5000000000
-X1 0.5000000000 0.0000000000 0.5000000000
-end
-
-\$end
-
-\$defects
-threshold 1e-4
-coord\_type fractional
-
-begin int1
-interstitial 0.25 0.25 0.25 X2
-phonon host 0.0 0.5 0.5 0.5
-charge=-3,-2
-end
-
-begin int2
-interstitial 0.25 0.25 0.75 X2
-phonon host 0.0 0.0 0.0 0.5
-phonon int 0.25 0.25 0.75 0.5
-charge=-2,-2
-end
-
-begin int3
-interstitial 0.75 0.25 0.25 X2
-phonon host 0.0 0.0 0.0 0.5
-phonon int 0.75 0.25 0.25 0.5
-charge=-3,-3
-end
-
-\$end
-
-\$ingredients
-begin ingredients\_global
-mast\_nodes         1
-mast\_multiplyencut 1.5
-mast\_ppn           1
-mast\_queue         default
-mast\_exec          //share/apps/vasp5.2\_cNEB
-mast\_kpoints       2x2x2 M
-mast\_xc            PBE
-isif 3
-ibrion 2
-nsw 191
-ismear 1
-sigma 0.2
-lwave False
-lcharg False
-prec Accurate
-mast\_program   vasp
-mast\_write\_method            write\_singlerun
-mast\_ready\_method            ready\_singlerun
-mast\_run\_method              run\_singlerun
-mast\_complete\_method         complete\_singlerun
-mast\_update\_children\_method  give\_structure
-end
-
-begin inducedefect
-mast\_write\_method            no\_setup
-mast\_ready\_method            ready\_defect
-mast\_run\_method              run\_defect
-mast\_complete\_method         complete\_structure
-end
-
-begin lowmesh
-mast\_kpoints 1x1x1 G
-end
-
-begin lowmesh\_defect
-mast\_kpoints 1x1x1 G
-isif 2
-end
-
-begin defect\_relax
-isif 2
-end
-
-begin static
-ibrion -1
-nsw 0
-mast\_multiplyencut 1.25
-mast\_update\_children\_method give\_structure
-end
-
-begin static\_to\_neb
-ibrion -1
-nsw 0
-mast\_multiplyencut 1.25
-mast\_update\_children\_method give\_structure\_and\_energy\_to\_neb
-end
-
-begin phonon
-ibrion 5
-mast\_write\_method write\_phonon\_single
-mast\_update\_children\_method give\_phonon\_single\_forces\_and\_displacements
-end
-
-begin phononparse
-mast\_program phon
-lfree .True.
-temperature 1173
-nd 3
-qa 11
-qb 11
-qc 11
-lsuper .False.
-mast\_exec //home/tam/tammast/bin/phon\_henry
-end
-
-begin neb\_to\_neb
-mast\_kpoints 1x1x1 G
-mast\_program   vasp\_neb
-mast\_write\_method            write\_neb
-mast\_update\_children\_method  give\_neb\_structures\_to\_neb
-end
-
-begin neb\_to\_nebstat
-mast\_program   vasp\_neb
-mast\_write\_method            write\_neb
-mast\_update\_children\_method  give\_neb\_structures\_to\_neb
-end
-
-begin nebstat\_to\_phonon
-mast\_program   vasp
-mast\_write\_method            write\_neb\_subfolders
-mast\_ready\_method            ready\_neb\_subfolders
-mast\_run\_method              run\_neb\_subfolders
-mast\_complete\_method         complete\_neb\_subfolders
-mast\_update\_children\_method  give\_saddle\_structure
-end
-
-\$end
-
-\$neb
-begin int1-int2
-X2, 0.25 0.25 0.25, 0.25 0.25 0.75
-images 1
-phonon int 0.25 0.25 0.5 0.5
-phonon host 0.0 0.0 0.0 0.5
-end
-begin int1-int3
-X2, 0.25 0.25 0.25, 0.75 0.25 0.25
-images 1
-phonon int 0.5 0.25 0.25 0.5
-phonon host 0.0 0.0 0.0 0.5
-end
-\$end
-
-\$recipe
-recipe\_file phonon\_test\_neb.txt
-\$end
 \end{Verbatim}
 
 
@@ -2418,6 +2263,9 @@ recipe\_file neb.txt
 
 \$end
 
+
+\section{The Recipe Template}
+\label{4_0_recipe:the-recipe-template}
 \textbf{Important: when creating or editing recipes, do not use the Tab key. Instead, use 4 spaces to indent.}
 
 Also make sure that the recipe you are working with has not somehow been converted to tabs.
@@ -2436,15 +2284,13 @@ set autoindent
 
 \subsection{Syntax}
 \label{4_0_recipe:syntax}
-Each indentation level marks a parent-child relationship.
-\begin{description}
-\item[{perfect\_opt1 (volrelax\_lowmesh)}] \leavevmode\begin{description}
-\item[{perfect\_opt2}] \leavevmode
-perfect\_opt3
+Each indentation level marks a parent-child relationship.:
 
-\end{description}
-
-\end{description}
+\begin{Verbatim}[commandchars=\\\{\}]
+perfect\_opt1 (volrelax\_lowmesh)
+    perfect\_opt2
+        perfect\_opt3
+\end{Verbatim}
 
 The ingredient type of an ingredient is specified in parentheses after the ingredient.
 
@@ -2458,8 +2304,8 @@ In the recipe:
 
 In the input file:
 
+\begin{Verbatim}[commandchars=\\\{\}]
 \$ingredients
-\begin{quote}
 
 begin volrelax\_lowmesh
 mast\_run\_method run\_singlerun
@@ -2467,7 +2313,7 @@ mast\_run\_method run\_singlerun
 end
 
 \$end
-\end{quote}
+\end{Verbatim}
 
 If the parent needs to update several children in different ways, create new trees where the originating parent is the same parent name, but with a different ingredient type.
 *  Those different ingredient types should have different mast\_update\_children\_method keyword values in the input file.
@@ -2658,9 +2504,9 @@ end
 begin ingredients\_global
 mast\_nodes         1
 mast\_multiplyencut 1.5
-mast\_ppn           1
-mast\_queue         default
-mast\_exec          //share/apps/vasp5.2\_cNEB
+mast\_ppn           8
+mast\_queue         morgan1
+mast\_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_CNEB
 mast\_kpoints       2x2x2 M
 mast\_xc            PBE
 isif 3
@@ -2728,10 +2574,14 @@ qa 11
 qb 11
 qc 11
 lsuper .False.
-mast\_exec //home/tam/tammast/bin/phon\_henry
+mast\_exec \$MAST\_INSTALL\_PATH/bin/phon\_henry
 end
 
 begin neb\_to\_neb
+ibrion 1
+potim 0.01
+lclimb True
+spring -5
 mast\_kpoints 1x1x1 G
 mast\_program   vasp\_neb
 mast\_write\_method            write\_neb
@@ -2739,6 +2589,10 @@ mast\_update\_children\_method  give\_neb\_structures\_to\_neb
 end
 
 begin neb\_to\_nebstat
+ibrion 1
+potim 0.01
+lclimb True
+spring -5
 mast\_program   vasp\_neb
 mast\_write\_method            write\_neb
 mast\_update\_children\_method  give\_neb\_structures\_to\_neb
@@ -2814,13 +2668,6 @@ end
 begin generictest
 \# need to add mastlib to python path to get lammps3.py
 \# Amy's GAv14 is currently treated as closed-source
-mast\_program                 None
-mast\_exec                    python //home/tam/test\_amy\_GA/GAv14.py input.txt
-mast\_complete\_file           GAoutput.txt
-mast\_complete\_search         End of Execution
-mast\_started\_file            GAoutput.txt
-mast\_copy\_files //home/tam/tammast/test/gatest/SiC.tersoff //home/tam/tammast/test/gatest/cBulk.xyz
-mast\_delimiter               =
 type  Defect
 atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
 filename   GAoutput
@@ -2841,11 +2688,14 @@ Lmin\_style   cg
 genealogy   True
 allenergyfile  True
 BestIndsList   True
-mast\_write\_method            write\_singlerun
+mast\_write\_method            write\_ingred\_input\_file input.txt all 0 =;write\_submit\_script;copy\_fullpath\_file //home/tam/tammast/test/gatest/SiC.tersoff SiC.tersoff;copy\_fullpath\_file //home/tam/tammast/test/gatest/cBulk.xyz cBulk.xyz
 mast\_ready\_method            ready\_singlerun
 mast\_run\_method              run\_singlerun
-mast\_complete\_method         complete\_singlerun
+mast\_complete\_method         file\_has\_string GAoutput.txt "End of Execution"
 mast\_update\_children\_method  give\_structure
+mast\_started\_file            GAoutput.txt
+mast\_program                 None
+mast\_exec                    python //home/tam/test\_amy\_GA/GAv14.py input.txt
 end
 \$end
 
@@ -2860,60 +2710,91 @@ recipe\_file generic\_test.txt
 
 \section{General notes}
 \label{5_0_runningmast:general-notes}
-Depending on your cluster, you might find it polite to .nice. your processes:
+Depending on your cluster, you might find it polite to \emph{nice} your processes:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 nice -n 19 mast -i input.inp
+nice -n 19 mast
 \end{Verbatim}
 
-nice -n 19 mast
-
-This allows the headnode to put its regular functions before the mast processes. MAST should start running within several seconds.
+Nice-ing allows the headnode to put its regular functions before the mast processes. MAST should start running within several seconds.
 
 
 \section{Inputting an input file}
 \label{5_0_runningmast:inputting-an-input-file}
 To parse an input file, use
 
+\begin{Verbatim}[commandchars=\\\{\}]
 mast -i input.inp
+\end{Verbatim}
 
 or
 
-mast -i //full/path/to/input/file/myinput.inp
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{mast} \PYG{o}{-}\PYG{n}{i} \PYG{o}{/}\PYG{o}{/}\PYG{n}{full}\PYG{o}{/}\PYG{n}{path}\PYG{o}{/}\PYG{n}{to}\PYG{o}{/}\PYG{n+nb}{input}\PYG{o}{/}\PYG{n+nb}{file}\PYG{o}{/}\PYG{n}{myinput}\PYG{o}{.}\PYG{n}{inp}
+\end{Verbatim}
 
 If your input file specifies any POSCAR or CIF files, those files must be in your current working directory at the time you call MAST.
 
 The input file will be parsed and a recipe directory should be created inside the \code{\$MAST\_SCRATCH} directory, with the appropriate ingredient subdirectories.
 
-Look at the personalized\_recipe.txt, input.inp, archive\_input\_options.txt, and archive\_recipe\_plan.txt files in the recipe directory to see if the setup agrees with what you think it should be.
+Look at the \code{personalized\_recipe.txt}, \code{input.inp}, \code{archive\_input\_options.txt}, and \code{archive\_recipe\_plan.txt} files in the recipe directory to see if the setup agrees with what you think it should be.
 
 
 \section{Running MAST}
 \label{5_0_runningmast:id1}
 Running MAST is separate from inputting input files. Use this command:
 
-mast
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{mast}
+\end{Verbatim}
 
 This command will do two things:
 \begin{enumerate}
 \item {} 
-Submit all ingredient runs listed in the \code{\$MAST\_CONTROL/submitlist} list to the queue
+Submit all ingredient runs listed in the \code{\$MAST\_CONTROL/submitlist} list to the queue.
+\begin{itemize}
+\item {} 
+The submission command (\code{sbatch}, \code{qsub}, etc.) is based on the platform chosen when you ran \code{python \$MAST\_INSTALL\_PATH initialize.py} during installation.
+
+\item {} 
+The exact commands can be found in \code{\$MAST\_INSTALL\_PATH/submit/platforms/\textless{}platform name\textgreater{}/queue\_commands.py}.
+
+\item {} 
+If you make changes to that \code{queue\_commands.py} file, run \code{python \$MAST\_INSTALL\_PATH initialize.py} again.
+
+\end{itemize}
 
 \end{enumerate}
 
-The submission command (sbatch, qsub, etc.) is based on the command in your \code{\$MAST\_INSTALL\_PATH/submit/queue\_commands.py} script.
+Individual ingredients' submission scripts are created automatically through a combination of the \code{\$ingredients} section in the input file, and your the template submission script for your platform
+\begin{itemize}
+\item {} 
+The template submission script is found in \code{\$MAST\_INSTALL\_PATH/submit/platforms/\textless{}platform name\textgreater{}/submit\_template.sh}).
 
-Individual ingredients. submission scripts are created automatically through a combination of the \code{\$ingredients} section in the input file, and your \code{\$MAST\_INSTALL\_PATH/submit/script\_commands.py} script.
+\item {} 
+If you make changes to the template, run \code{python \$MAST\_INSTALL\_PATH initialize.py} again.
+
+\end{itemize}
 \begin{enumerate}
 \setcounter{enumi}{1}
 \item {} 
-Spawn a MAST monitor, or .mastmon., process on the queue.
+Spawn a MAST monitor, or \emph{mastmon}, process on the queue.
 
 \end{enumerate}
+\begin{itemize}
+\item {} 
+Your \code{\$MAST\_INSTALL\_PATH/submit/platforms/\textless{}platform name\textgreater{}/mastmon\_submit.sh} script is responsible for submitting this process.
 
-Your \code{\$MAST\_INSTALL\_PATH/submit/submit.sh} script is responsible for submitting this process, and should be set up to use the shortest, fastest turnover queue available (e.g. a serial queue with a maximum walltime of 4 hours, or morganshort on bardeen).
+\item {} 
+The script should be set up to use the shortest, fastest turnover queue available (e.g. a serial queue with a maximum walltime of 4 hours, or morganshort on bardeen).
 
-The mastmon process will generate additional entries on \code{\$MAST\_CONTROL/submitlist}, but these will not be submitted to the queue until MAST is called again.
+\item {} 
+If you make changes to the script, run \code{python \$MAST\_INSTALL\_PATH initialize.py} again.
+
+\end{itemize}
+
+The mastmon process will generate additional entries on \code{\$MAST\_CONTROL/submitlist}, but these entries will not be submitted to the queue until MAST is called again.
 
 
 \subsection{The MAST monitor}
@@ -2925,13 +2806,29 @@ For human troubleshooting of a recipe, the archive\_recipe\_plan.txt file gives 
 The status.txt files gives the status of each ingredient.
 
 Ingredient statuses are:
-*  I = initialized: The ingredient has just been created from inputting the input file, but nothing has been run.
-*  W = waiting: The ingredient is waiting for parents to complete before it can be staged.
-*  S = staged: All parents have updated this child, but the run is not yet ready to run
-*  P = proceed: The ingredient has written its input files, all parents have updated it, and its run method has been called. The run method usually adds the ingredient to the list at \code{\$MAST\_CONTROL/submitlist}, to be submitted to the queue the next time mast is called. There is no MAST status change between an ingredient proceeding to the submitlist and being submitted to the queue off of the submitlist. However, \code{\$MAST\_CONTROL/submitted} can be used to see which ingredients were just submitted to the queue.
-*  C = complete: The ingredient is complete
-*  E = error: The ingredient has errored out, and {\color{red}\bfseries{}{}`{}`}mast\_auto\_correc{}`{}`t was set to False in the input file (the default is True)
-*  skip = skip: You can set ingredients to skip in the status.txt file by manually editing the file.
+\begin{itemize}
+\item {} 
+I = initialized: The ingredient has just been created from inputting the input file, but nothing has been run.
+
+\item {} 
+W = waiting: The ingredient is waiting for parents to complete before it can be staged.
+
+\item {} 
+S = staged: All parents have updated this child, but the run is not yet ready to run
+
+\item {} 
+P = proceed: The ingredient has written its input files, all parents have updated it, and its run method has been called. The run method usually adds the ingredient to the list at \code{\$MAST\_CONTROL/submitlist}, to be submitted to the queue the next time mast is called. There is no MAST status change between an ingredient proceeding to the submitlist and being submitted to the queue off of the submitlist. However, \code{\$MAST\_CONTROL/submitted} can be used to see which ingredients were just submitted to the queue.
+
+\item {} 
+C = complete: The ingredient is complete
+
+\item {} 
+E = error: The ingredient has errored out, and \code{mast\_auto\_correct} was set to False in the input file (the default is True)
+
+\item {} 
+skip = skip: You can set ingredients to skip in the status.txt file by manually editing the file.
+
+\end{itemize}
 
 The MAST monitor checks the status of all ingredients whose status is not yet complete. The MAST monitor updates each ingredient status in the recipe plan.
 
@@ -3007,7 +2904,12 @@ The \code{errormast} file is written when there is an error, and will need to be
 
 \subsection{The SCRATCH folder}
 \label{5_0_runningmast:the-scratch-folder}
-The \code{\$MAST\_SCRATCH} folder houses all recipe folders. It also houses a mast.write\_files.lock file while the MAST monitor is running, in order to prevent several versions of MAST from running at once and simultaneously checking and writing ingredients.
+The \code{\$MAST\_SCRATCH} folder houses all recipe folders. It also houses a \code{mast.write\_files.lock} file while the MAST monitor is running, in order to prevent several versions of MAST from running at once and simultaneously checking and writing ingredients.
+\begin{itemize}
+\item {} 
+Occasionally, MAST may report that it is locked. If there is no \emph{mastmon} process running or queued on the queue, you may delete the \code{mast.write\_files.lock} file manually.
+
+\end{itemize}
 
 
 \subsubsection{Skipping recipes or ingredients in the SCRATCH folder}
@@ -3022,10 +2924,21 @@ Go through \$MAST\_CONTROL/submitlist and delete all ingredients associated with
 
 \end{itemize}
 
-If you would like to skip certain ingredients of a single recipe, edit the recipe.s status.txt file and replace ingredients to be skipped with the status .skip. (use the whole word).
+If you would like to skip certain ingredients of a single recipe, edit the recipe's status.txt file and replace ingredients to be skipped with the status \emph{skip} (use the whole word).
 \begin{itemize}
 \item {} 
-To un-skip these ingredients, set them back to .W. for .waiting for parents. in status.txt. \textbf{Be careful if deleting any files for skipped ingredients. Do not delete the metadata.txt file. If deleting a file that was obtained from a parent, like a POSCAR file, also set the parent ingredient back to .P. when you un-skip the child ingredient.}
+To un-skip these ingredients, set them back to W for waiting for parents in status.txt.
+\begin{itemize}
+\item {} 
+\textbf{Be careful if deleting any files for skipped ingredients.}
+
+\item {} 
+\textbf{Do not delete the metadata.txt file.}
+
+\item {} 
+\textbf{If deleting a file that was obtained from a parent, like a POSCAR file, also set the parent ingredient back to P when you un-skip the child ingredient.}
+
+\end{itemize}
 
 \item {} 
 No recipe can be considered complete by MAST if it includes skipped ingredients. However, if you consider the recipe complete, you can move the entire recipe directory out of \code{\$MAST\_SCRATCH} and into \code{\$MAST\_ARCHIVE} or another directory.
@@ -3058,13 +2971,13 @@ Include \code{. \$HOME/.bashrc} or a similar line to get your MAST environment v
 Crontab commands are as follows:
 \begin{itemize}
 \item {} 
-\code{crontab .e} to edit your crontab
+\code{crontab -e} to edit your crontab
 
 \item {} 
-\code{crontab .l} to view your crontab
+\code{crontab -l} to view your crontab
 
 \item {} 
-\code{crontab .r} to remove your crontab
+\code{crontab -r} to remove your crontab
 
 \end{itemize}
 
@@ -3117,23 +3030,73 @@ The two-column printout is Fermi energy on the left, and defect formation energy
 
 \section{Diffusion coefficient}
 \label{6_0_tools:diffusion-coefficient}
-Usage of diffusion coefficient calculation tool code
-1.  This code currently supports 5(fcc) and 8(hcp) frequency models.
-2.  The code currently will work in the same directory with other MAST generated folders (\code{neb\_vac*}, \code{phonon\_vac*}, etc.)
-3.  Type \code{\$MAST\_INSTALL\_PATH/MAST/utility/diff.py -i \textless{}input\textgreater{}} to run.
-4.  The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
-a)  The order of different lines does not matter.
-b)  There can be as many .n. between lines or as many spaces between words, and they will not affect the code.
-c)  The keyword at the beginning of each line matters:
-i.  .type. means which frequency model to choose. Either .5. or .fcc. tells the code 5-freq is applied, while either .8. or .hcp. the 8-freq.
-ii. .E*. and .v*. means energy and attempting rate, respectively. (Currently doesn.t support other characters such as .w.).
-iii.    For 5-freq, .E0.\textasciitilde{}.E4. should be used to specify their relations with certain directories; for 8-freq, .Ea.,.Eb.,.Ec.,.EX.,.Eap.(.p. means .prime.),.Ebp.,.Ecp. and .EXp. should be used. Note they are all case sensitive and should be exactly the same as
-iv. Generally speaking, each keyword (.E*. or .v*.) is followed by two words. The first indicates the configuration of the starting/end point of NEB and the second represents the saddle point. This order should not be changed.
-v.  The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.
-vi. .HVf. means the formation energy of vacancy and .HB. means binding energy (4 configurations will be used for .HB., so 4 words or 1 float are expected after .HB.).
-vii.    Current code will not likely to work if these keywords are spelt incorrectly.
+Usage of diffusion coefficient calculation tool code:
+\begin{enumerate}
+\item {} 
+This code currently supports 5(fcc) and 8(hcp) frequency models.
 
-Below are two examples of the \$freq part in the input file:
+\item {} 
+The code currently will work in the same directory with other MAST generated folders (\code{neb\_vac*}, \code{phonon\_vac*}, etc.)
+
+\item {} 
+Type \code{\$MAST\_INSTALL\_PATH/MAST/utility/diff.py -i \textless{}input\textgreater{}} to run.
+
+\item {} 
+The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
+
+\end{enumerate}
+\begin{itemize}
+\item {} 
+The order of different lines does not matter.
+
+\item {} 
+There can be as many \code{\textbackslash{}n} between lines or as many spaces between words, and they will not affect the code.
+
+\item {} 
+The keyword at the beginning of each line matters:
+\begin{itemize}
+\item {} 
+\textbf{type} means which frequency model to choose. Either \code{5} or \code{fcc} tells the code that the five-frequency model should be applied, while either \code{8} or \code{hcp} tell the code that the eight-frequency model should be applied.
+
+\item {} 
+\textbf{E} and \textbf{v} means energy and attempting rate, respectively. (Currently does not support other characters such as w).
+
+\item {} 
+For 5-freq, \textbf{E0\textasciitilde{}E4} should be used to specify the relations with certain directories
+
+\item {} 
+For 8-freq, \textbf{Ea, Eb, Ec, EX, Eap (p means prime), Ebp, Ecp, and EXp} should be used. Note they are all case sensitive and should be exactly the same as written here.
+
+\end{itemize}
+
+\item {} 
+Generally speaking, each keyword (Exx or vxx) is followed by two words. The first indicates the configuration of the starting point of NEB and the second represents the saddle point. This order should not be changed.
+
+\item {} 
+The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.
+
+\item {} 
+\textbf{HVf} means the formation energy of vacancy and \textbf{HB} means binding energy (4 configurations will be used for \emph{HB}, so 4 words or 1 float are expected after \emph{HB}).
+
+\item {} 
+The current code is not likely to work if these keywords are spelled incorrectly.
+
+\item {} 
+\textbf{lattice} indicates the directory in which to find a lattice file.
+
+\item {} 
+This script is meant to be run in a recipe directory, as it needs access to all ingredient folders. If running this script from an ingredient, use
+
+\begin{Verbatim}[commandchars=\\\{\}]
+mast\_write\_method write\_ingred\_input\_file diffcoeff\_input.txt all 0;write\_submit\_script
+mast\_exec cd ..; python \$MAST\_INSTALL\_PATH/tools/diff.py -i \textless{}ingredient\_name\textgreater{}/diffcoeff\_input.txt
+\end{Verbatim}
+
+\end{itemize}
+
+Below are two examples of input files:
+
+\begin{Verbatim}[commandchars=\\\{\}]
 Ex1:
 \$freq
 type 5
@@ -3151,9 +3114,10 @@ E3   0.5
 E4 vac4 vac4-vac3
 E0 vac0 vac00-vac0
 HVf  0.5
-\#TTM can also have HVf  perfect   vac   ???
+\#HVf can also be given as 'perfect vac'
 HB  perfect  sub  vac-sub  vac
 \$end
+
 
 Ex2:
 \$freq
@@ -3179,7 +3143,9 @@ vbp 5
 vcp 3
 vXp 4
 
+
 \$end
+\end{Verbatim}
 
 
 \section{Defect finder}
