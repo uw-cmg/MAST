@@ -256,10 +256,10 @@ class ChopIngredient(BaseIngredient):
         allowed_list = list()
         if not(allowed_file == ""):
             if os.path.isfile(allowed_file):
-                allowed_list = self._get_allowed_keywords(allowed_file)
+                allowed_list = self._get_allowed_keywords(allowed_file, upperkey)
             else:
                 allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST','ingredients','programkeys',allowed_file)
-                allowed_list = self._get_allowed_keywords(allowedpath)
+                allowed_list = self._get_allowed_keywords(allowedpath, upperkey)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
                 if int(upperkey) == 1:
@@ -282,10 +282,11 @@ class ChopIngredient(BaseIngredient):
                         my_dict[keytry]=value
         return my_dict
     
-    def _get_allowed_keywords(self, allowedpath):
+    def _get_allowed_keywords(self, allowedpath, upperkey=1):
         """Get allowed keywords.
             Args:
                 allowedpath <str>: file path for allowed keywords
+                upperkey <int or str>: uppercase allowed keywords
         """
         if not os.path.isfile(allowedpath):
             self.logger.error("No file at %s for allowed keywords. Returning empty list." % allowedpath)
@@ -293,7 +294,10 @@ class ChopIngredient(BaseIngredient):
         allowed = MASTFile(allowedpath)
         allowed_list=list()
         for entry in allowed.data:
-            allowed_list.append(entry.strip().upper())
+            if upperkey == 1:
+                allowed_list.append(entry.strip().upper())
+            else:
+                allowed_list.append(entry.strip())
         return allowed_list
 
     def no_setup(self):
