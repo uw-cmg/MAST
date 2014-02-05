@@ -193,7 +193,8 @@ numatom = get_latt()['No.']
 a = get_latt()['a']
 c = get_latt()['c']
 HVf = get_HB_and_HVf(Hdir,'HVf')
-HB = get_HB_and_HVf(Hdir,'HB')
+if types['type']==8:
+    HB = get_HB_and_HVf(Hdir,'HB')
 fp = open('Diffusivity','w')
 try:
     temp = get_freq_name(inp,'temp')['temp']
