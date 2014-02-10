@@ -195,6 +195,7 @@ class MAST(MASTObj):
     def set_class_attributes(self):
         """Set class attributes, other than input options
         """
+        time.sleep(1)
         self.timestamp = time.strftime('%Y%m%dT%H%M%S')
         self.asctime = time.asctime()
         self.set_sysname()
