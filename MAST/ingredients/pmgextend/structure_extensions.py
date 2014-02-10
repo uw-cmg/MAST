@@ -347,13 +347,30 @@ class StructureExtensions(MASTObj):
         """Scale the structure.
             Args:
                 oldstr <structure>: old structure to be scaled
-                scale <int>: scale parameter; should be >= 2
+                scale <str>: scale parameter; should be >= 2
+                        Should be either a single digit "2"
+                        or a string of 3 digits "1 2 3"
+                        signifying scaling by 1a x 2b x 3c
             Returns:
                 scaledstr <structure>
         """
         scaledstr = self.keywords['struc_work1'].copy()
-        scaledstr.make_supercell(scale)
+        if type(scale) == int:
+            scaleinput = scale
+        else:
+            scale = scale.strip()
+            scalesplit = scale.split()
+            if len(scalesplit) == 1:
+                scaleinput = float(scalesplit[0])
+            elif len(scalesplit) == 3:
+                scaleinput = map(float, scalesplit)
+            else:
+                self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
+                raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
+                return None
+        scaledstr.make_supercell(scaleinput)
         return scaledstr
+
     def scale_defect(self, defect, coord_type, threshold):
         """Scales the defect dictionary and returns the modified structure
             Args:
