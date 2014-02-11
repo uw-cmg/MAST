@@ -76,6 +76,7 @@ class InputParser(MASTObj):
                 'recipe'   : self.parse_recipe_section,
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
+                'summary' : self.parse_summary_section
                                }
         scratchpath = os.getenv("MAST_SCRATCH").strip('/')
         inputlocation = os.path.dirname(self.keywords['inputfile'])
@@ -760,3 +761,11 @@ class InputParser(MASTObj):
             raise MASTError(self.__class__.__name__, error)
         input_options.update_item('structure','structure',structure)
 
+    def parse_summary_section(self, section_name, section_content, options):
+        """Parses the summary section and populates the options."""
+        for line in section_content:
+            line = line.split(self.delimiter, 1)
+            mast_dict[line[0]] = line[1]
+
+        for key, value in mast_dict.items():
+            options.set_item(section_name, key, value)
