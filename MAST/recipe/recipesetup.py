@@ -323,7 +323,7 @@ class RecipeSetup(MASTObj):
                 raise MASTError(self.__class__.__name__,"No method type %s in either ingredient type %s or global ingredient." % (methodtype, ingredtype))
         splitmethods = unparsed.split(";")
         mlist = list()
-        self.logger.info(splitmethods)
+        #self.logger.info(splitmethods)
         for method_arg_item in splitmethods:
             method_arg_item = method_arg_item.strip()
             method_arg_list = shlex.split(method_arg_item)
@@ -339,7 +339,7 @@ class RecipeSetup(MASTObj):
             #    mdict[methodname]=list(arglist)
             #else:
             #    self.logger.warning("Duplicate entry in method %s for ingredient type %s; ignoring the duplicate." % (methodtype, ingredtype))
-        self.logger.info(mlist)
+        #self.logger.info(mlist)
         return mlist
         #return mdict
 

@@ -230,7 +230,7 @@ def get_job_error_file(ingpath):
     logger = loggerutils.add_handler_for_control(logger)
     jobid = get_last_jobid(ingpath)
     tryfile = my_queue_commands.get_approx_job_error_file(jobid)
-    logger.info("Try this search string: %s" % tryfile)
+    #logger.info("Try this search string: %s" % tryfile)
     if not os.path.isdir(ingpath):
         return None
     dircontents = os.listdir(ingpath)
