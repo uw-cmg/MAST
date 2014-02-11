@@ -433,7 +433,7 @@ class RecipePlan:
             for name_key in name_keys:
                 result_dict[myingred]=dict()
                 if name_key in myingred: #name matches
-                    for method_key in mname_dict[name_key].keys():
+                    for method_key in mname_dict[name_key]:
                         try:
                             mymod = importlib.import_module("MAST.summary.%s" % method_key)
                         except ImportError:
@@ -447,15 +447,18 @@ class RecipePlan:
         result_names = result_dict.keys()
         result_names.sort()
         for result_name in result_names:
-            titlestring="%20s:" % result_name
-            valuestring="%20s:" % result_name
+            titlestring="t:%20s:" % result_name
+            valuestring="v:%20s:" % result_name
             method_keys = result_dict[result_name].keys()
             method_keys.sort()
             for method_key in method_keys:
-                title = result_name.split(";",1)[0].strip()
-                value = result_name.split(";",1)[1].strip()
+                myresult = result_dict[result_name][method_key]
+                title = myresult.split(";",1)[0].strip()
+                value = myresult.split(";",1)[1].strip()
                 titlestring = titlestring + "%20s:" % title
                 valuestring = valuestring + "%20s:" % value
+            titlestring = titlestring + '\n'
+            valuestring = valuestring + '\n'
             summary.data.append(titlestring)
             summary.data.append(valuestring)
         summary.to_file(os.path.join(self.working_directory,"SUMMARY.txt"))
