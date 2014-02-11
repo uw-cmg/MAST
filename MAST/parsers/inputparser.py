@@ -763,6 +763,7 @@ class InputParser(MASTObj):
 
     def parse_summary_section(self, section_name, section_content, options):
         """Parses the summary section and populates the options."""
+        mast_dict = dict()
         for line in section_content:
             line = line.split(self.delimiter, 1)
             mast_dict[line[0]] = line[1]

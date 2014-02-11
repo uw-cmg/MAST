@@ -52,6 +52,7 @@ class RecipePlan:
             self.working_directory <str>: Recipe working directory
             self.logger <logging logger>: Control-level logger
             self.recipe_logger <logging logger>: Recipe-level logger
+            self.summary_options <InputOptions>: summary input options
     """
     def __init__(self, name, working_directory):
         self.name            = name
@@ -63,6 +64,7 @@ class RecipePlan:
         self.ready_methods    = dict()
         self.complete_methods = dict()
         self.ingred_input_options = dict()
+        self.summary_options = ""
         self.status="I"
         self.working_directory = working_directory
         self.logger = logging.getLogger('mastmon')
@@ -399,12 +401,70 @@ class RecipePlan:
         self.logger.info(valuestring)
         if totcomp == total:
             self.status = "C"
+            self.run_summary_section()
         else:
             self.status = "R"
         #print "Recipe status: %s" % self.status
         statusfile.to_file(os.path.join(self.working_directory,"status.txt"))
         if toterr > 0:
             self.logger.error("ATTENTION: Recipe at %s has one or more ingredient errors. Please check the MAST_ERROR file and or mast_recipe.log file, in the recipe directory. Change status 'E' in status.txt to 'W' when the error has been resolved." % self.working_directory)
+    
+    def run_summary_section(self):
+        """Run the summary section of the input file, if it exists,
+            when the recipe is complete. Called from print_status.
+            Summary options are in the form:
+            self.summary_options["name keyword"]="keyword1 keyword2..."
+            The keywords should be the names of .py files located either in
+            MAST.summary or in customlib.
+            Each .py file should have a main function that takes in the
+            ingredient's full path:
+            def main(ingname="")
+            Each .py's main function should then return a string as follows:
+            "label (units);value"
+        """
+        name_keys = self.summary_options.keys()
+        mname_dict=dict()
+        for name_key in name_keys:
+            mname_dict[name_key] = self.summary_options[name_key].split()
+    
+        result_dict=dict()
+        for myingred in self.ingredients:
+            fullpath = os.path.join(self.working_directory, myingred)
+            for name_key in name_keys:
+                result_dict[myingred]=dict()
+                if name_key in myingred: #name matches
+                    for method_key in mname_dict[name_key].keys():
+                        try:
+                            mymod = importlib.import_module("MAST.summary.%s" % method_key)
+                        except ImportError:
+                            try:
+                                mymod = importlib.import_module("customlib.%s" % method_key)
+                            except ImportError:
+                                self.logger.error("Could not find method %s in either MAST.summary or customlib folders." % method_key)
+                                continue
+                        result_dict[myingred][method_key] = mymod.main(fullpath)
+        summary = MASTFile()
+        result_names = result_dict.keys()
+        result_names.sort()
+        for result_name in result_names:
+            titlestring="%20s:" % result_name
+            valuestring="%20s:" % result_name
+            method_keys = result_dict[result_name].keys()
+            method_keys.sort()
+            for method_key in method_keys:
+                title = result_name.split(";",1)[0].strip()
+                value = result_name.split(";",1)[1].strip()
+                titlestring = titlestring + "%20s:" % title
+                valuestring = valuestring + "%20s:" % value
+            summary.data.append(titlestring)
+            summary.data.append(valuestring)
+        summary.to_file(os.path.join(self.working_directory,"SUMMARY.txt"))
+        return
+
+                            
+
+
+
 
     def add_ingredient(self, ingredient_name, ingredient):
         """Used to add an ingredient_object corresponding to an ingredient name

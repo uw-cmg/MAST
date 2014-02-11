@@ -213,6 +213,7 @@ class RecipeSetup(MASTObj):
                 updingredtype = how_to_update[ingred][ichild]
                 recipe_obj.update_methods[ingred][ichild] = self.get_method_list(updingredtype, "mast_update_children_method")
             recipe_obj.parents_to_check = dict(parents_to_check)
+        recipe_obj.summary_options = self.get_summary_options()
         return recipe_obj
 
     def update_top_meta_for_ingred(self, myingred):
@@ -341,3 +342,12 @@ class RecipeSetup(MASTObj):
         self.logger.info(mlist)
         return mlist
         #return mdict
+
+    def get_summary_options(self):
+        """Get the summary options and give them to the recipe plan."""
+        sum_opts = dict()
+        if 'summary' in self.input_options.options.keys():
+            sumkeys = self.input_options.get_section_keys("summary")
+            for sumkey in sumkeys:
+                sum_opts[sumkey] = self.input_options.get_item("summary",sumkey)
+        return sum_opts
