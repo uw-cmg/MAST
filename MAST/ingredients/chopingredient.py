@@ -649,7 +649,7 @@ class ChopIngredient(BaseIngredient):
         scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         if not 'mast_scale' in self.keywords['program_keys'].keys():
             raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
-        scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
+        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
         defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
@@ -669,7 +669,7 @@ class ChopIngredient(BaseIngredient):
         scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         if not 'mast_scale' in self.keywords['program_keys'].keys():
             raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
-        scaled = scalextend.scale_structure(int(self.keywords['program_keys']['mast_scale']))
+        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
         self.checker.write_final_structure_file(scaled)
         return
 

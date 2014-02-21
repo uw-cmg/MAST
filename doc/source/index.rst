@@ -2,11 +2,8 @@
    sphinx-quickstart on Fri Jan 25 19:43:41 2013.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-
-MAterials Simulation Toolkit (MAST) Documentation
-=================================================================
-Welcome to the MAST documentation site!
-
+MAterials Simulation Toolkit (MAST) Manual
+===========================================
 .. toctree::
     :maxdepth: 2
 
@@ -20,8 +17,5 @@ Welcome to the MAST documentation site!
     6_0_tools
     7_0_externalpackages
     8_0_personnel
-
-* :ref:`Method index <genindex>`
-* :ref:`Module index <modindex>`
-* :ref:`search` 
-
+    10_0_acknowledgments
+    11_0_license
