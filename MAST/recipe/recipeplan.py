@@ -14,7 +14,7 @@ import inspect
 import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
-from customlib.customchopingredient import CustomChopIngredient
+from customlib import *
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 #from MAST.ingredients.chopingredient import RunIngredient
@@ -157,7 +157,7 @@ class RecipePlan:
                             raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
                         self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
                         return mresult
-        raise MASTError(self.__class__.__name__,"Could not find method %s" % methodname)
+        raise MASTError(self.__class__.__name__,"Could not find method %s in class %s" % (methodname, myclass))
         return None
 
 
