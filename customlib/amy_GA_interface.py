@@ -88,6 +88,7 @@ class OptiIngredient(BaseIngredient):
 
     def evaluate(self):
         inputfile = os.path.join(self.keywords['name'],"input.txt")
+        os.chdir(self.keywords['name'])
         Opti = Optimizer(inputfile)
         Opti.algorithm_initialize()
         #Begin main algorithm loop
