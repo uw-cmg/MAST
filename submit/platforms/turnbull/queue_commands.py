@@ -76,7 +76,7 @@ def extract_submitted_jobid(string):
     #Looks like: Your job 46745 ("jobname") has been submitted
     if string == "":
         return None
-    return int(string.split('.')[2])
+    return int(string.split()[2])
 
 def queue_snap_command():
     """
