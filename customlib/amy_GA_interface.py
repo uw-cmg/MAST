@@ -115,12 +115,9 @@ class OptiIngredient(BaseIngredient):
                 #VASP subfolders are complete. Now need to
                 #evaluate them for fitness and restart the
                 #Genetic Algorithm loop if necessary.
-                evaluate vasp
-                clear vasp
-                restart population
-                Totaloutputs = self.evaluate_ga_vasp_and_update()
+                Totaloutputs = self.extract_vasp_output()
                 #Extract information from output
-                for structurefile, VASPoutfile in Totaloutputs:
+                for (structurefile, energy, pressure) in Totaloutputs:
                     ind = read(structurefile)
                     index = int(structurefile.split('_')[1])
                     if Opti.structure == 'Defect':
@@ -131,9 +128,8 @@ class OptiIngredient(BaseIngredient):
                         invalid_ind[index].bulki = bulki
                     else:
                         invalid_ind[index][0] = ind
-                    outfile = open(VASPoutfile,'r')
-                    invalid_ind[index].energy = outfile.readline.split('=')
-                    invalid_ind[index].pressure = outfile.readline.split('=')
+                    invalid_ind[index].energy = energy
+                    invalid_ind[index].pressure = pressure
                     # Write any other information from the structure output file to the primary 
                     # optimizer output file.  This might be nothing or it could be a way to pass errors
                     # through to the user without needing to preserve VASP outputs
@@ -157,6 +153,8 @@ class OptiIngredient(BaseIngredient):
                     convokay.close()
                     end_signal = Opti.algorithm_stats(pop)
                     return end_signal
+                else:
+                    self.clear_vasp_folders()
             
         offspring = Opti.generation_set(pop)
         self.logger.info("generation set")
@@ -179,39 +177,19 @@ class OptiIngredient(BaseIngredient):
         self.set_up_vasp_folders()  #Start running.
         return
 
-    def evaluate_ga_vasp_and_update(self, childname=""):
-        """Evaluate the Genetic Algorithm VASP ingredient.
+    def extract_vasp_output(self, childname=""):
+        """Extract output from the VASP runs.
         """
-        childpath = os.path.join(os.path.dirname(self.keywords['name']), childname)
-        from MAST.ingredients.checker import VaspChecker
-        from MAST.utility import MASTFile
-        dircontents = os.listdir(self.keywords['name'])
-        subfolders = list()
-        for diritem in dircontents:
-            fulldir = os.path.join(self.keywords['name'],diritem)
-            if os.path.isdir(fulldir) and diritem.isdigit():
-                subfolders.append(fulldir)
-        
-        energylist = list()
-        structurelist = list()
-        for subfolder in subfolders:
+        outputlist=list()
+        for subfolder in self.get_vasp_subfolder_list():
             mychecker = VaspChecker(subfolder, self.keywords['program_keys'], self.keywords['structure'])
-            mystructure = mychecker.get_final_structure_from_directory()
-            structurelist.append(mystructure)
+            #mystructure = mychecker.get_final_structure_from_directory()
+            #structurelist.append(mystructure)
+            mystrfile = os.path.join(subfolder,"CONTCAR")
             myenergy = mychecker.get_energy_from_energy_file()
-            energylist.append(myenergy)
-
-        [fitoutput, fitstructure] = fitness_evaluator.evaluate(structurelist, energylist)
-        #If output is a structure or xyz file, could just write it directly.
-        fitfile = MASTFile()
-        fitfile.data = fitoutput
-        import time
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        outputname = "my_output_%s" % timestamp
-        outputstrname = "my_structure_%s" % timestamp
-        fitfile.to_file(os.path.join(childpath, outputname)) 
-        fitstructure.write_file(os.path.join(childpath, outputstrname))
-        return " %s and %s written in %s" % (outputname, outputstrname, childpath)
+            mypressure = mychecker.get_pressure()
+            outputlist.append(mystrfile, myenergy, mypressure)
+        return outputlist
 
     def set_up_vasp_folders(self, childname=""):
         """Set up the Genetic Algorithm VASP ingredient subfolders
@@ -223,28 +201,9 @@ class OptiIngredient(BaseIngredient):
             mychoping.write_submit_script()
             mychoping.run_singlerun()
 
-    def evaluate_ga_all_fitness_outputs(self):
-        """Evaluate all fitness outputs"""
-        outputname = "my_output"
-        dircontents = os.listdir(self.keywords['name'])
-        filelist = list()
-        for myfile in dircontents:
-            if outputname in myfile:
-                filelist.append(os.path.join(self.keywords['name'], myfile))
-        filelist.sort()
-        last_file = filelist[-1]
-        second_to_last_file = filelist[-2]
-        from amy_ga_code import can_we_stop_yet
-        okay_to_stop = can_we_stop_yet.evaluate(last_file, second_to_last_file)
-        if okay_to_stop:
-            pass
-        else:
-            last_time = os.path.basename(last_file).split("_")[-1]
-            new_seed_file = "my_structure_%s" % last_time
-            self.clear_ga_vasp_ingredient("vasp_ingredient_match_my_name_in_recipe", new_seed_file)
             self.change_my_status("W")
 
-    def clear_ga_vasp_ingredient(self, ingred_name="", new_seed_file=""):
+    def clear_vasp_folders(self):
         """Clear the Genetic Algorithm VASP ingredient.
             Assumes that the VASP ingredient has already
             been evaluated and the result passed
@@ -253,29 +212,11 @@ class OptiIngredient(BaseIngredient):
                 ingred_name <str>: Ingredient name to clear.
                     Match this carefully with a name from
                     the recipe.
-                new_seed_file <str>: New seed file to put
-                    in the cleared ingredient.
         """
-        if ingred_name == "":
-            self.logger.error("Needs an ingredient name!")
-            return None
-        fullpath = os.path.join(os.path.dirname(self.keywords['name']), ingred_name)
+        fullpath = self.keywords['name']
         self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
-        dircontents = os.listdir(fullpath)
-        subfolders = list()
-        import shutil
-        for diritem in dircontents:
-            fulldir = os.path.join(fullpath,diritem)
-            if os.path.isdir(fulldir) and diritem.isdigit():
-                subfolders.append(fulldir)
-        for subfolder in subfolders:
+        for subfolder in self.get_vasp_subfolder_list():
             shutil.rmtree(subfolder)
-        files_to_remove = list()
-        files_to_remove.append("starting.xyz")
-        for filename in files_to_remove:
-            os.remove(os.path.join(fullpath, filename))
-        shutil.copy(os.path.join(self.keywords['name'], new_seed_file), os.path.join(fullpath, "starting.xyz"))
-        from MAST.ingredients import BaseIngredient
         cleared_ing = BaseIngredient(name=fullpath)
         cleared_ing.change_my_status("W")
         return
