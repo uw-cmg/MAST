@@ -981,3 +981,23 @@ class VaspChecker(BaseChecker):
         self.keywords['program_keys']['mast_kpoints'] = klist
         return newkmesh
 
+    def get_final_pressure(self):
+        """Get the final pressure.
+            For VASP, this is the last pressure line from
+            the OUTCAR.
+            Args:
+                mydir <str>: Directory in which to look.
+            Returns:
+                <float>: last pressure from OUTCAR, in kB
+        """
+        fullpath=os.path.join(self.keywords['name'], "OUTCAR")
+        if not os.path.isfile(fullpath):
+            raise MASTError(self.__class__.__name__, "No OUTCAR file at %s" % self.keywords['name'])
+        myoutcar = MASTFile(fullpath)
+        mypress = myoutcar.get_segment_from_last_line_match("pressure", "external pressure =","kB  Pullay stress =")
+        mypressfloat=""
+        try:
+            mypressfloat=float(mypress)
+        except TypeError:
+            self.logger.error("Failed to log pressure %s" % str(mypress))
+        return mypressfloat
