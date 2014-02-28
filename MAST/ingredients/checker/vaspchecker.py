@@ -177,7 +177,7 @@ class VaspChecker(BaseChecker):
 
 
         if (isMD) or (isphonon):
-            if usertime == False:
+            if not usertime:
                 self.logger.warning("OUTCAR at %s shows no user time." % opath)
                 return False
             else:
@@ -185,15 +185,15 @@ class VaspChecker(BaseChecker):
                 return True
 
         if isstatic:
-            if reachedaccuracy==True:
-                if usertime==True:
+            if reachedaccuracy:
+                if usertime:
                     self.logger.info("OUTCAR at %s shows EDIFF reached for static run and user time; complete." % opath)
                     return True
                 else:
                     self.logger.warning("OUTCAR at %s shows EDIFF reached for static run, but no user time." % opath)
                     return False
             else:
-                if usertime==True:
+                if usertime:
                     self.logger.error("OUTCAR at %s does not show EDIFF reached for static run, but shows complete." % opath)
                     return False
                 else:
@@ -201,15 +201,15 @@ class VaspChecker(BaseChecker):
                     return False
 
         else:
-            if reachedaccuracy==True:
-                if usertime==True:
+            if reachedaccuracy:
+                if usertime:
                     self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
                     return True
                 else:
                     self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
                     return False
             else:
-                if usertime==True:
+                if usertime:
                     self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
                     return False
                 else:

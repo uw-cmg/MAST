@@ -13,73 +13,7 @@ from MAST.ingredients.chopingredient import ChopIngredient
 from pymatgen.core.structure import Structure
 from structopt import Optimizer
 from structopt.tools import find_defects, fitness_switch
-from ase.io import read, write
-
-def MAST_structopt(inputfile):
-    """Recipe to run the optimizer through MAST
-    Args:
-        inputfile = Str of filename with Optimizer parameters
-    """
-    Opti = Optimizer(inputfile)
-    Opti.algorithm_initialize()
-    #Begin main algorithm loop
-    while not Opti.convergence:
-        if Opti.generation==0:
-            pop = []
-        else:
-            #Clean out previous folders from MAST run
-            CustomChopIngredient.clear_ga_vasp_ingredient()
-        offspring = Opti.generation_set(pop)
-        # Identify the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if ind.energy==0]
-        #Evaluate the individuals with invalid fitness
-        Opti.output.write('\n--Evaluate Structures--\n')
-        #Write structures to POSCAR files for evaluation in MAST
-        fobj = open('filelist.txt','w')
-        for i in range(len(invalid_ind)):
-            write("POSCAR_%02d"%i)
-            fobj.write(os.path.join(os.getcwd(),"POSCAR_%02d"%i)+'\n')
-        fobj.close()
-        #Submit list of POSCARs to Tam's script to make subfolders
-        make_subfolders_from_structure_list()
-        #Ideally this next function will run and return a list of files that include the final
-        #structure output and the energy,pressure and other output details
-        Totaloutputs = CustomChopIngredient.evaluate_ga_vasp_and_update()
-        #Extract information from output
-        for structurefile, VASPoutfile in Totaloutputs:
-            ind = read(structurefile)
-            index = int(structurefile.split('_')[1])
-            if Opti.structure == 'Defect':
-                outt = find_defects([Opti,ind,Opti.sf,False])
-                indi = outt[0].copy()
-                bulki = outt[1].copy()
-                invalid_ind[index][0] = indi
-                invalid_ind[index].bulki = bulki
-            else:
-                invalid_ind[index][0] = ind
-            outfile = open(VASPoutfile,'r')
-            invalid_ind[index].energy = outfile.readline.split('=')
-            invalid_ind[index].pressure = outfile.readline.split('=')
-            # Write any other information from the structure output file to the primary 
-            # optimizer output file.  This might be nothing or it could be a way to pass errors
-            # through to the user without needing to preserve VASP outputs
-            while True:
-                try:
-                    Opti.output.write(outfile.readline()+'\n')
-                except:
-                    break
-            Opti.output.flush()
-            outfile.close()
-        for ind in invalid_ind:
-            outs = tools.fitnesseval([Opti,ind])
-            Opti.output.write(outs[1])
-            invalid_ind[i]=outs[0]
-        pop.extend(invalid_ind)
-        pop = Opti.generation_eval(pop)
-        Opti.population = pop
-    
-    end_signal = Opti.algorithm_stats(pop)
-    return end_signal    
+import ase
 
 class OptiIngredient(BaseIngredient):
     def __init__(self, **kwargs):
@@ -93,23 +27,29 @@ class OptiIngredient(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def evaluate(self):
-        inputfile = os.path.join(self.keywords['name'],"input.txt")
+        ingpath = self.keywords['name']
+        inputfile = os.path.join(ingpath,"input.txt")
         #pathtooutput = os.path.join(self.keywords['name'],self.keywords['program_keys']['filename']) #usually filename is "GAoutput"
-        pathtooutput = os.path.join(self.keywords['name'],"GAoutput")
+        pathtooutput = os.path.join(ingpath,"GAoutput")
+        perfect_structure = ase.io.read(os.path.join(ingpath,"cBulk.xyz"))
+        rcutoff=5.0
         os.chdir(self.keywords['name'])
         Opti = Optimizer(inputfile)
+        #Opti.output = open("opti_output","ab")
         Opti.algorithm_initialize()
         #Begin main algorithm loop
         self.logger.info("opti initialized")
-        genfile = MASTFile("GENERATION")
         if not os.path.isfile("GENERATION"):
+            genfile = MASTFile()
             Opti.generation = 0
             pop=[]
         else:
+            genfile = MASTFile("GENERATION")
             Opti.generation = int(genfile.data[0])
             #If VASP subfolders are not complete, return out
             #since cannot do any more checking.
             if not self.vasp_subfolders_complete():
+                #Opti.output.close()
                 return 
             else: 
                 #VASP subfolders are complete. Now need to
@@ -117,11 +57,12 @@ class OptiIngredient(BaseIngredient):
                 #Genetic Algorithm loop if necessary.
                 Totaloutputs = self.extract_vasp_output()
                 #Extract information from output
+                invalid_ind=dict()
                 for (structurefile, energy, pressure) in Totaloutputs:
-                    ind = read(structurefile)
+                    ind = ase.io.read(structurefile)
                     index = int(structurefile.split('_')[1])
                     if Opti.structure == 'Defect':
-                        outt = find_defects([Opti,ind,Opti.sf,False])
+                        outt = find_defects(ind,perfect_structure,rcutoff,False)
                         indi = outt[0].copy()
                         bulki = outt[1].copy()
                         invalid_ind[index][0] = indi
@@ -130,20 +71,10 @@ class OptiIngredient(BaseIngredient):
                         invalid_ind[index][0] = ind
                     invalid_ind[index].energy = energy
                     invalid_ind[index].pressure = pressure
-                    # Write any other information from the structure output file to the primary 
-                    # optimizer output file.  This might be nothing or it could be a way to pass errors
-                    # through to the user without needing to preserve VASP outputs
-                    while True:
-                        try:
-                            Opti.output.write(outfile.readline()+'\n')
-                        except:
-                            break
-                    Opti.output.flush()
-                    outfile.close()
                 for ind in invalid_ind:
-                    outs = tools.fitnesseval([Opti,ind])
+                    outs = fitness_switch([Opti,ind])
                     Opti.output.write(outs[1])
-                    invalid_ind[i]=outs[0]
+                    invalid_ind[ind]=outs[0]
                 pop.extend(invalid_ind)
                 pop = Opti.generation_eval(pop)
                 Opti.population = pop
@@ -152,6 +83,7 @@ class OptiIngredient(BaseIngredient):
                     convokay.write("Opti.convergence is True at %s\n" % time.asctime())
                     convokay.close()
                     end_signal = Opti.algorithm_stats(pop)
+                    #Opti.output.close()
                     return end_signal
                 else:
                     self.clear_vasp_folders()
@@ -168,13 +100,16 @@ class OptiIngredient(BaseIngredient):
         for i in range(len(invalid_ind)):
             indname = "indiv%02d.xyz" % i
             Opti.output.write(indname)
-            fobj.write(os.path.join(pathtooutput,indname))
+            fobj.write(os.path.join(pathtooutput,indname)+'\n')
         fobj.close()
         #Submit list of POSCARs to Tam's script to make subfolders
         self.make_subfolders_from_structure_list('filelist.txt')
         #Ideally this next function will run and return a list of files that include the final
         #structure output and the energy,pressure and other output details
         self.set_up_vasp_folders()  #Start running.
+        genfile.data="%i\n" % Opti.generation + 1
+        genfile.to_file(os.path.join(ingpath, "GENERATION"))
+        #Opti.output.close()
         return
 
     def extract_vasp_output(self, childname=""):
@@ -182,13 +117,13 @@ class OptiIngredient(BaseIngredient):
         """
         outputlist=list()
         for subfolder in self.get_vasp_subfolder_list():
-            mychecker = VaspChecker(subfolder, self.keywords['program_keys'], self.keywords['structure'])
+            mychecker = VaspChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
             #mystructure = mychecker.get_final_structure_from_directory()
             #structurelist.append(mystructure)
             mystrfile = os.path.join(subfolder,"CONTCAR")
             myenergy = mychecker.get_energy_from_energy_file()
-            mypressure = mychecker.get_pressure()
-            outputlist.append(mystrfile, myenergy, mypressure)
+            mypressure = mychecker.get_final_pressure()
+            outputlist.append((mystrfile, myenergy, mypressure))
         return outputlist
 
     def set_up_vasp_folders(self, childname=""):
@@ -217,7 +152,7 @@ class OptiIngredient(BaseIngredient):
         self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
         for subfolder in self.get_vasp_subfolder_list():
             shutil.rmtree(subfolder)
-        cleared_ing = BaseIngredient(name=fullpath)
+        cleared_ing = ChopIngredient(name=fullpath)
         cleared_ing.change_my_status("W")
         return
 
