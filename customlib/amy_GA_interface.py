@@ -27,10 +27,10 @@ class OptiIngredient(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def evaluate(self):
+        gadir = "GAoutput"
         ingpath = self.keywords['name']
         inputfile = os.path.join(ingpath,"input.txt")
-        #pathtooutput = os.path.join(self.keywords['name'],self.keywords['program_keys']['filename']) #usually filename is "GAoutput"
-        pathtooutput = os.path.join(ingpath,"GAoutput")
+        pathtooutput = os.path.join(ingpath,gadir)
         perfect_structure = ase.io.read(os.path.join(ingpath,"cBulk.xyz"))
         rcutoff=5.0
         os.chdir(self.keywords['name'])
@@ -39,28 +39,33 @@ class OptiIngredient(BaseIngredient):
         Opti.algorithm_initialize()
         #Begin main algorithm loop
         self.logger.info("opti initialized")
+        generation=""
         if not os.path.isfile("GENERATION"):
+            self.logger.info("Generation 0")
             genfile = MASTFile()
-            Opti.generation = 0
+            generation = 0
             pop=[]
         else:
             genfile = MASTFile("GENERATION")
-            Opti.generation = int(genfile.data[0])
+            generation = int(genfile.data[0])
+            self.logger.info("Generation %i" % generation)
             #If VASP subfolders are not complete, return out
             #since cannot do any more checking.
             if not self.vasp_subfolders_complete():
+                self.logger.info("Subfolders not complete. No further checks.")
                 #Opti.output.close()
                 return 
             else: 
                 #VASP subfolders are complete. Now need to
                 #evaluate them for fitness and restart the
                 #Genetic Algorithm loop if necessary.
+                self.logger.info("Extracting VASP outputs.")
                 Totaloutputs = self.extract_vasp_output()
                 #Extract information from output
                 invalid_ind=dict()
                 for (structurefile, energy, pressure) in Totaloutputs:
                     ind = ase.io.read(structurefile)
-                    index = int(structurefile.split('_')[1])
+                    index = int(os.path.basename(os.path.dirname(structurefile)))
                     if Opti.structure == 'Defect':
                         outt = find_defects(ind,perfect_structure,rcutoff,False)
                         indi = outt[0].copy()
@@ -79,6 +84,7 @@ class OptiIngredient(BaseIngredient):
                 pop = Opti.generation_eval(pop)
                 Opti.population = pop
                 if Opti.convergence:
+                    self.logger.info("Converged!")
                     convokay = open("CONVERGED","wb")
                     convokay.write("Opti.convergence is True at %s\n" % time.asctime())
                     convokay.close()
@@ -86,6 +92,7 @@ class OptiIngredient(BaseIngredient):
                     #Opti.output.close()
                     return end_signal
                 else:
+                    self.logger.info("Clearing folders for next setup.")
                     self.clear_vasp_folders()
             
         offspring = Opti.generation_set(pop)
@@ -96,19 +103,20 @@ class OptiIngredient(BaseIngredient):
         #Evaluate the individuals with invalid fitness
         Opti.output.write('\n--Evaluate Structures--\n')
         #Write structures to POSCAR files for evaluation in MAST
-        fobj = open('filelist.txt','w')
         for i in range(len(invalid_ind)):
-            indname = "indiv%02d.xyz" % i
+            indname = "%s/POSCAR_%02d" % (gadir, i)
+            ase.io.write(indname,invalid_ind[i][0],"vasp")
             Opti.output.write(indname)
-            fobj.write(os.path.join(pathtooutput,indname)+'\n')
-        fobj.close()
         #Submit list of POSCARs to Tam's script to make subfolders
-        self.make_subfolders_from_structure_list('filelist.txt')
+        self.make_subfolders_from_structures(pathtooutput)
         #Ideally this next function will run and return a list of files that include the final
         #structure output and the energy,pressure and other output details
         self.set_up_vasp_folders()  #Start running.
-        genfile.data="%i\n" % Opti.generation + 1
+        generation = generation+1
+        genfile.data="%i\n" % generation
         genfile.to_file(os.path.join(ingpath, "GENERATION"))
+        cleared_ing = ChopIngredient(name=fullpath)
+        cleared_ing.change_my_status("S")
         #Opti.output.close()
         return
 
@@ -136,8 +144,6 @@ class OptiIngredient(BaseIngredient):
             mychoping.write_submit_script()
             mychoping.run_singlerun()
 
-            self.change_my_status("W")
-
     def clear_vasp_folders(self):
         """Clear the Genetic Algorithm VASP ingredient.
             Assumes that the VASP ingredient has already
@@ -150,27 +156,25 @@ class OptiIngredient(BaseIngredient):
         """
         fullpath = self.keywords['name']
         self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        os.mkdir(timestamp)
         for subfolder in self.get_vasp_subfolder_list():
-            shutil.rmtree(subfolder)
-        cleared_ing = ChopIngredient(name=fullpath)
-        cleared_ing.change_my_status("W")
+            os.rename(subfolder, os.path.join(fullpath, timestamp, os.path.basename(subfolder)))
+            #shutil.rmtree(subfolder)
         return
 
 
-    def make_subfolders_from_structure_list(self, fname="", startat=0, childdir=""):
-        """This method makes POSCAR-containing subfolders from a 
-            list of structures,
+    def make_subfolders_from_structures(self, finddir="", childdir=""):
+        """This method makes POSCAR-containing subfolders from POSCAR
+            files found in a directory
             in childdir if a child directory is given, or in 
             mydir otherwise.
-            File fname must reside in directory mydir.
             Args:
                 #mydir <str>: Ingredient directory (from self)
-                fname <str>: File containing list of structures
-                startat <str, will be converted to int>: 
-                    0 (default) - start subfolders at 00
-                    1 - start subfolders at 01
+                finddir <str>: Directory containing list of structures
                 childdir <str>: Child directory (optional)
-            File list should be of the format:
+            Files should be named:
+                POSCAR_00
                 POSCAR_01
                 POSCAR_02
                 etc.
@@ -178,32 +182,18 @@ class OptiIngredient(BaseIngredient):
         mydir = self.keywords['name']
         logger = logging.getLogger(mydir)
         logger = loggerutils.add_handler_for_recipe(mydir, logger)
-
         if childdir == "":
             childdir = mydir
-        fpath = os.path.join(mydir, fname)
-        if not os.path.isfile(fpath):
-            logger.error("No file found at %s" % fpath)
-            return "File not found. No effect."
-        str_list_file = MASTFile(fpath)
-        namelist = list(str_list_file.data)
-        structure_list = self.get_structures(namelist)
-        if not (len(structure_list) == len(namelist)):
-            logger.error("Not all structures in file %s found." % fname)
-            return "Not all structures found. No effect."
-        strct = int(startat)
-        for one_structure in structure_list:
-            subname = str(strct).zfill(2)
+        strfiles = os.listdir(finddir)
+        for strfile in strfiles:
+            if not strfile[0:6] == "POSCAR":
+                continue
+            str_path = os.path.join(finddir, strfile)
+            subname = strfile.split("_")[1]
             subpath = os.path.join(childdir, subname)
             if not os.path.isdir(subpath):
                 os.mkdir(subpath)
-            one_poscar = pymatgen.io.vaspio.Poscar(one_structure)
-            pospath = os.path.join(subpath, "POSCAR")
-            if os.path.isfile(pospath):
-                logger.error("POSCAR file already exists at %s" % subpath)
-            else:
-                one_poscar.write_file(os.path.join(subpath, "POSCAR"))
-            strct = strct + 1
+            shutil.copy(str_path, "%s/POSCAR" % subpath)
         return "Wrote all POSCAR files to subdirectories in %s" % childdir
     def get_structures(self, namelist):
         """Get structures from list
@@ -213,6 +203,7 @@ class OptiIngredient(BaseIngredient):
             Returns:
                 return_structures <list of Structure objects>
         """
+        raise NotImplementedError()
         mydir = self.keywords['name']
         logger = logging.getLogger(mydir)
         logger = loggerutils.add_handler_for_recipe(mydir, logger)
