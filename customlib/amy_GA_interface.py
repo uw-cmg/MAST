@@ -38,16 +38,15 @@ class OptiIngredient(BaseIngredient):
         Opti.algorithm_initialize()
         #Begin main algorithm loop
         self.logger.info("opti initialized")
-        generation=""
         pop=[]
         if not os.path.isfile("GENERATION"):
             self.logger.info("Generation 0")
             genfile = MASTFile()
-            generation = 0
+            Opti.generation = 0
         else:
             genfile = MASTFile("GENERATION")
-            generation = int(genfile.data[0])
-            self.logger.info("Generation %i" % generation)
+            Opti.generation = int(genfile.data[0])
+            self.logger.info("Generation %i" % Opti.generation)
             #If VASP subfolders are not complete, return out
             #since cannot do any more checking.
             if not self.vasp_subfolders_complete():
@@ -58,42 +57,53 @@ class OptiIngredient(BaseIngredient):
                 #VASP subfolders are complete. Now need to
                 #evaluate them for fitness and restart the
                 #Genetic Algorithm loop if necessary.
-                self.logger.info("Extracting VASP outputs.")
-                Opti.output.write('\n--Evaluate Structures--\n')
+                self.logger.info("Extract VASP outputs.")
                 Totaloutputs = self.extract_vasp_output()
-                #every individual should have a file:
-                #structure written as xyz, to the actual file 
-                #name in Opti.flist
-                #60
-                #comment
-                #Si 0.0 0.1 0.2
-                #
-                #get_restart_population will tell me how
-                #to make and build individuals
+                #Append the new structures onto the indiv xyz's.
+                for idx in range(0, len(Totaloutput)):
+                    (structurefile, energy, pressure) = Totaloutput[idx]
+                    indivname = "indiv%s.xyz" % idx.zfill(2)
+                    pathtovasp = os.path.dirname(structurefile)
+                    atomsobj = ase.io.read(structurefile)
+                    ase.io.write(os.path.join(pathtovasp, indivname), atomsobj, "xyz")
+                    newxyz = open(os.path.join(pathtovasp,indivname),'rb')
+                    newlines = newxyz.readlines()
+                    newxyz.close()
+                    oldxyz = open(os.path.join(pathtooutput,indivname),'ab') #Append
+                    oldxyz.writelines(newlines)
+                    oldxyz.close()
+                #Set a new generation from the structures.
                 Opti.restart = True
                 offspring = Opti.generation_set(pop)
-                #create individual files
-                #when called with empty pop, will call get_restart_population and will read from files
-                self.logger.info("generation set")
+                self.logger.info("Generation set")
                 self.logger.info(offspring)
+                #Add energy and pressure info onto offspring.
                 for idx in range(0, len(Totaloutput)):
                     (structurefile, energy, pressure) = Totaloutput[idx]
                     offspring[idx].energy = energy
                     offspring[idx].pressure = pressure
-                #Set fitnesses
+                #Set fitnesses of offspring
                 for ind in offspring:
                     outs = fitness_switch([Opti,ind])
                     Opti.output.write(outs[1])
                     ind=outs[0]
+                #Build up the offspring, with fitness information
                 pop.extend(offspring)
                 #Evaluate generation (set rank of fitnesses)
                 pop = Opti.generation_eval(pop)
                 Opti.population = pop
-                #
-                ???Get_info_from_Stats_section_of_output_file_GAoutput.txt
-                Opti.generation=
-                Opti.minfit=(Min or Avg, depending on scheme)
-                Opti.genrep=
+                #Get previous convergence data
+                from MAST.utility import fileutil
+                outputpath = "%s/%s.txt" % (pathtooutput, gadir)
+                endmin = fileutil.grepme(outputpath, "Min", 20)
+                endavg = fileutil.grepme(outputpath, "Avg", 20)
+                endgenrep = fileutil.grepme(outputpath, "Genrep", 20)
+                if Opti.convergence_scheme == "Gen-Rep-Min":
+                    Opti.minfit = endmin
+                elif Opti.convergence_scheme == "Gen-Rep-Max":
+                    Opti.minfit = endavg
+                Opti.genrep = endgenrep
+                #Check convergence
                 check_results = Opti.check_pop()
 
                 if Opti.convergence:
@@ -124,7 +134,7 @@ class OptiIngredient(BaseIngredient):
         #Ideally this next function will run and return a list of files that include the final
         #structure output and the energy,pressure and other output details
         self.set_up_vasp_folders()  #Start running.
-        generation = generation+1
+        generation = Opti.generation + 1
         genfile.data="%i\n" % generation
         genfile.to_file(os.path.join(ingpath, "GENERATION"))
         cleared_ing = ChopIngredient(name=ingpath)
