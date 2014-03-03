@@ -27,24 +27,23 @@ class OptiIngredient(BaseIngredient):
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
 
     def evaluate(self):
-        gadir = "GAoutput"
         ingpath = self.keywords['name']
         inputfile = os.path.join(ingpath,"input.txt")
+        Opti = Optimizer(inputfile)
+        gadir = Opti.__dict__['filename'] #usually GAoutput
         pathtooutput = os.path.join(ingpath,gadir)
-        perfect_structure = ase.io.read(os.path.join(ingpath,"cBulk.xyz"))
+        perfect_structure = ase.io.read(os.path.join(ingpath, Opti.__dict__['SolidFile']))
         rcutoff=5.0
         os.chdir(self.keywords['name'])
-        Opti = Optimizer(inputfile)
-        #Opti.output = open("opti_output","ab")
         Opti.algorithm_initialize()
         #Begin main algorithm loop
         self.logger.info("opti initialized")
         generation=""
+        pop=[]
         if not os.path.isfile("GENERATION"):
             self.logger.info("Generation 0")
             genfile = MASTFile()
             generation = 0
-            pop=[]
         else:
             genfile = MASTFile("GENERATION")
             generation = int(genfile.data[0])
@@ -60,29 +59,43 @@ class OptiIngredient(BaseIngredient):
                 #evaluate them for fitness and restart the
                 #Genetic Algorithm loop if necessary.
                 self.logger.info("Extracting VASP outputs.")
+                Opti.output.write('\n--Evaluate Structures--\n')
                 Totaloutputs = self.extract_vasp_output()
-                #Extract information from output
-                invalid_ind=dict()
-                for (structurefile, energy, pressure) in Totaloutputs:
-                    ind = ase.io.read(structurefile)
-                    index = int(os.path.basename(os.path.dirname(structurefile)))
-                    if Opti.structure == 'Defect':
-                        outt = find_defects(ind,perfect_structure,rcutoff,False)
-                        indi = outt[0].copy()
-                        bulki = outt[1].copy()
-                        invalid_ind[index][0] = indi
-                        invalid_ind[index].bulki = bulki
-                    else:
-                        invalid_ind[index][0] = ind
-                    invalid_ind[index].energy = energy
-                    invalid_ind[index].pressure = pressure
-                for ind in invalid_ind:
+                #every individual should have a file:
+                #structure written as xyz, to the actual file 
+                #name in Opti.flist
+                #60
+                #comment
+                #Si 0.0 0.1 0.2
+                #
+                #get_restart_population will tell me how
+                #to make and build individuals
+                Opti.restart = True
+                offspring = Opti.generation_set(pop)
+                #create individual files
+                #when called with empty pop, will call get_restart_population and will read from files
+                self.logger.info("generation set")
+                self.logger.info(offspring)
+                for idx in range(0, len(Totaloutput)):
+                    (structurefile, energy, pressure) = Totaloutput[idx]
+                    offspring[idx].energy = energy
+                    offspring[idx].pressure = pressure
+                #Set fitnesses
+                for ind in offspring:
                     outs = fitness_switch([Opti,ind])
                     Opti.output.write(outs[1])
-                    invalid_ind[ind]=outs[0]
-                pop.extend(invalid_ind)
+                    ind=outs[0]
+                pop.extend(offspring)
+                #Evaluate generation (set rank of fitnesses)
                 pop = Opti.generation_eval(pop)
                 Opti.population = pop
+                #
+                ???Get_info_from_Stats_section_of_output_file_GAoutput.txt
+                Opti.generation=
+                Opti.minfit=(Min or Avg, depending on scheme)
+                Opti.genrep=
+                check_results = Opti.check_pop()
+
                 if Opti.convergence:
                     self.logger.info("Converged!")
                     convokay = open("CONVERGED","wb")
@@ -95,13 +108,12 @@ class OptiIngredient(BaseIngredient):
                     self.logger.info("Clearing folders for next setup.")
                     self.clear_vasp_folders()
             
+        #Mutating and evolving
         offspring = Opti.generation_set(pop)
         self.logger.info("generation set")
         self.logger.info(offspring)
         # Identify the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if ind.energy==0]
-        #Evaluate the individuals with invalid fitness
-        Opti.output.write('\n--Evaluate Structures--\n')
         #Write structures to POSCAR files for evaluation in MAST
         for i in range(len(invalid_ind)):
             indname = "%s/POSCAR_%02d" % (gadir, i)
@@ -115,7 +127,7 @@ class OptiIngredient(BaseIngredient):
         generation = generation+1
         genfile.data="%i\n" % generation
         genfile.to_file(os.path.join(ingpath, "GENERATION"))
-        cleared_ing = ChopIngredient(name=fullpath)
+        cleared_ing = ChopIngredient(name=ingpath)
         cleared_ing.change_my_status("S")
         #Opti.output.close()
         return

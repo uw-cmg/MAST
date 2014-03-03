@@ -44,10 +44,11 @@ filename   GAoutput
 nclust   5
 maxgen   5
 #supercell   (3,3,3)
-supercell    (1,1,1)
-SolidFile   cBulk.xyz
-#SolidCell   [13.092,13.092,13.092]
-SolidCell [5,5,5]
+supercell    (2,2,2)
+SolidFile   smallbulk.xyz
+#SolidFile  cBulk.xyz
+SolidCell   [8.728,8.728,8.728]
+#SolidCell [13.092,13.092,13.092]
 convergence_scheme   Max-Gen
 MUTPB  0.1
 mutation_options  ['Lattice_Alteration_small', 'Lattice_Alteration_Group', 'Rotation_geo']
@@ -72,8 +73,8 @@ end
 
 begin onegeneration
 mast_exec                  python //home/tam/tammast/test/gatest/fake_vasp.py
-mast_write_method           copy_fullpath_file //home/tam/tammast/test/gatest/SiC.tersoff; copy_fullpath_file //home/tam/tammast/test/gatest/cBulk.xyz
-mast_ready_method           file_exists input.txt; file_exists SiC.tersoff; file_exists cBulk.xyz
+mast_write_method           copy_fullpath_file //home/tam/tammast/test/gatest/SiC.tersoff; copy_fullpath_file //home/tam/tammast/test/gatest/smallbulk.xyz
+mast_ready_method           file_exists input.txt; file_exists SiC.tersoff; file_exists smallbulk.xyz
 mast_run_method             OptiIngredient.evaluate
 mast_complete_method        file_has_string GAoutput.txt "End of Execution"
 mast_update_children_method  no_update
