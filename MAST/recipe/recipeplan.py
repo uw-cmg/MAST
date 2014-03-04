@@ -461,7 +461,10 @@ class RecipePlan:
             valuestring = valuestring + '\n'
             summary.data.append(titlestring)
             summary.data.append(valuestring)
-        summary.to_file(os.path.join(self.working_directory,"SUMMARY.txt"))
+        if summary.data == []:
+            return
+        else:
+            summary.to_file(os.path.join(self.working_directory,"SUMMARY.txt"))
         return
 
                             
