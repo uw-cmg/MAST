@@ -36,144 +36,196 @@ class OptiIngredient(BaseIngredient):
         ingpath = self.keywords['name']
         inputfile = os.path.join(ingpath,"input.txt")
         Opti = Optimizer(inputfile)
-        #Opti.CALC_Method = Opti.__dict__['CALC_Method']
         Opti.restart_ints = 0
-        self.logger.info("OPTI VARS:")
-        optivars = vars(Opti)
-        for item in optivars.items():
-            self.logger.info("%20s: %20s" % item)
-        #Opti.calc = tools.setup_calculator(Opti)
-        gadir = Opti.__dict__['filename'] #usually GAoutput
-        pathtooutput = os.path.join(ingpath,gadir)
-        perfect_structure = ase.io.read(os.path.join(ingpath, Opti.SolidFile))
-        rcutoff=5.0
+        Opti.cxattempts = 0
+        Opti.mutattempts = []
+        #self.logger.info("OPTI VARS:")
+        #optivars = vars(Opti)
+        #for item in optivars.items():
+        #    self.logger.info("%20s: %20s" % item)
         os.chdir(self.keywords['name'])
         Opti.algorithm_initialize()
         #Begin main algorithm loop
-        self.logger.info("opti initialized")
-        pop=[]
+        self.logger.info("Opti initialized")
         if not os.path.isfile("GENERATION"):
             self.logger.info("Generation 0")
             genfile = MASTFile()
             Opti.generation = 0
+            Opti.population=[]
         else:
             genfile = MASTFile("GENERATION")
-            Opti.generation = int(genfile.data[0]) - 1
+            Opti.generation = int(genfile.data[0]) 
             self.logger.info("Generation %i" % Opti.generation)
             #If VASP subfolders are not complete, return out
             #since cannot do any more checking.
             if not self.vasp_subfolders_complete():
                 self.logger.info("Subfolders not complete. No further checks.")
                 #Opti.output.close()
+                self.flip_status_back()
                 return 
             else: 
-                #VASP subfolders are complete. Now need to
-                #evaluate them for fitness and restart the
-                #Genetic Algorithm loop if necessary.
-                self.logger.info("Extract VASP outputs.")
-                Totaloutputs = self.extract_vasp_output()
-                #Append the new structures onto the indiv xyz's.
-                for idx in range(0, len(Totaloutputs)):
-                    (structurefile, energy, pressure) = Totaloutputs[idx]
-                    indivname = "indiv%s.xyz" % str(idx).zfill(2)
-                    pathtovasp = os.path.dirname(structurefile)
-                    atomsobj = ase.io.read(structurefile)
-                    ase.io.write(os.path.join(pathtovasp, indivname), atomsobj, "xyz")
-                    newxyz = open(os.path.join(pathtovasp,indivname),'rb')
-                    newlines = newxyz.readlines()
-                    newxyz.close()
-                    oldxyz = open(os.path.join(pathtooutput,indivname),'ab') #Append
-                    oldxyz.writelines(newlines)
-                    oldxyz.close()
-                #Set a new generation from the structures.
-                Opti.restart = True
-                offspring = Opti.generation_set(pop)
-                self.logger.info("Generation set")
-                self.logger.info(offspring)
-                #Add energy and pressure info onto offspring.
-                for idx in range(0, len(Totaloutputs)):
-                    (structurefile, energy, pressure) = Totaloutputs[idx]
-                    offspring[idx].energy = energy
-                    offspring[idx].pressure = pressure
-                #Set fitnesses of offspring
-                self.logger.info(os.environ)
-                for ind in offspring:
-                    outs = fitness_switch([Opti,ind])
-                    Opti.output.write(outs[1])
-                    ind=outs[0]
-                #Build up the offspring, with fitness information
-                pop.extend(offspring)
-                #Read in BESTS as Individuals with fitnesses
-                if Opti.BestIndsList and (Opti.generation > 1):
-                    try:
-                        Opti.BESTS = structopt.io.read_xyz(os.path.join(pathtooutput, "Bests-%s.xyz" % Opti.filename),n='All',data=False)
-                        Opti.BESTS = [Individual(ind) for ind in Opti.BESTS]
-                        fitlist = open("Bests-energies%s.txt" % Opti.filename,'rb')
-                        fitlines = fitlist.readlines()
-                        for fdx in range(0, len(fitlines)):
-                            Opti.BESTS[fdx].fitness = float(fitlines[fdx])
-                            Opti.BESTS[fdx].bulki = ase.Atoms()
-                    except IOError:
-                        self.logger.error("No BESTS file found.")
-                        Opti.BESTS=[]
-                if Opti.generation < 2:
-                    Opti.BESTS=[]
-                #Get previous convergence data
-                from MAST.utility import fileutil
-                Opti.output.flush()
-                outputpath = "%s/%s.txt" % (ingpath, gadir)
-                endmin = fileutil.grepme(outputpath, "Min", 20)
-                endavg = fileutil.grepme(outputpath, "Avg", 20)
-                endgenrep = fileutil.grepme(outputpath, "Genrep", 20)
-                if Opti.convergence_scheme == "Gen-Rep-Min":
-                    Opti.minfit = endmin
-                elif Opti.convergence_scheme == "Gen-Rep-Max":
-                    Opti.minfit = endavg
-                Opti.genrep = endgenrep
-                #Evaluate generation (set rank of fitnesses)
-                pop = Opti.generation_eval(pop)
-                Opti.population = pop
-                #Check convergence
-                #check_results = Opti.check_pop(pop)
-                Opti.generation = Opti.generation + 1
+                self.logger.info("Evaluating completed structures.")
+                Opti = self.evaluate_structures_for_fitness(Opti)
                 if Opti.convergence:
-                    self.logger.info("Converged!")
-                    convokay = open("CONVERGED","wb")
-                    convokay.write("Opti.convergence is True at %s\n" % time.asctime())
-                    convokay.close()
-                    end_signal = Opti.algorithm_stats(pop)
-                    #Opti.output.close()
-                    return end_signal
-                else:
-                    self.logger.info("Clearing folders for next setup.")
-                    self.clear_vasp_folders()
-            
+                    return
+        genfile.data="%i\n" % Opti.generation
+        genfile.to_file(os.path.join(ingpath, "GENERATION"))
+        self.logger.info("Mutating and evolving structures for generation %i" % Opti.generation)
+        self.mutate_evolve_write_new_structures(Opti)
+        self.logger.info("Changing status back.")
+        self.flip_status_back()
+        #Opti.output.close()
+        return
+
+    def evaluate_structures_for_fitness(self, MyOpti):
+        """Evaluate completed VASP runs' structures for fitness.
+            Args:
+                MyOpti <GA Optimizer>
+            Returns:
+                MyOpti <GA Optimizer>: optimizer with any 
+                        settings that had been set
+        """
+        #VASP subfolders are complete. Now need to
+        #evaluate them for fitness and restart the
+        #Genetic Algorithm loop if necessary.
+        self.logger.info("Extracting VASP outputs.")
+        ingpath = self.keywords['name']
+        pathtooutput = os.path.join(ingpath,MyOpti.filename)
+        Totaloutputs = self.extract_vasp_output()
+        #Append the new structures onto the indiv xyz's.
+        for idx in range(0, len(Totaloutputs)):
+            (structurefile, energy, pressure) = Totaloutputs[idx]
+            indivname = "indiv%s.xyz" % str(idx).zfill(2)
+            pathtovasp = os.path.dirname(structurefile)
+            atomsobj = ase.io.read(structurefile)
+            ase.io.write(os.path.join(pathtovasp, indivname), atomsobj, "xyz")
+            newxyz = open(os.path.join(pathtovasp,indivname),'rb')
+            newlines = newxyz.readlines()
+            newxyz.close()
+            oldxyz = open(os.path.join(pathtooutput,indivname),'ab') #Append
+            oldxyz.writelines(newlines)
+            oldxyz.close()
+        #Set a new generation from the structures.
+        MyOpti.restart = True
+        pop=[]
+        offspring = MyOpti.generation_set(pop)
+        self.logger.info("Generation has been set.")
+        #self.logger.info(offspring)
+        #Add energy and pressure info onto offspring.
+        for idx in range(0, len(Totaloutputs)):
+            (structurefile, energy, pressure) = Totaloutputs[idx]
+            offspring[idx].energy = energy
+            offspring[idx].pressure = pressure
+        #Set fitnesses of offspring
+        self.logger.info(os.environ)
+        for ind in offspring:
+            outs = fitness_switch([MyOpti,ind])
+            MyOpti.output.write(outs[1])
+            ind=outs[0]
+        #Build up the offspring, with fitness information
+        pop.extend(offspring)
+        #Read in BESTS as Individuals with fitnesses
+        if MyOpti.BestIndsList and (MyOpti.generation > 1):
+            try:
+                MyOpti.BESTS = structopt.io.read_xyz(os.path.join(pathtooutput, "Bests-%s.xyz" % MyOpti.filename),n='All',data=False)
+                MyOpti.BESTS = [Individual(ind) for ind in MyOpti.BESTS]
+                fitlist = open("Bests-energies%s.txt" % MyOpti.filename,'rb')
+                fitlines = fitlist.readlines()
+                for fdx in range(0, len(fitlines)):
+                    MyOpti.BESTS[fdx].fitness = float(fitlines[fdx])
+                    MyOpti.BESTS[fdx].bulki = ase.Atoms()
+            except IOError:
+                self.logger.error("No BESTS file found.")
+                MyOpti.BESTS=[]
+        if MyOpti.generation < 2:
+            MyOpti.BESTS=[]
+        #Get previous convergence data
+        from MAST.utility import fileutil
+        MyOpti.output.flush()
+        outputpath = "%s/%s.txt" % (ingpath, MyOpti.filename)
+        hasstats = fileutil.grepme(outputpath, "Stats")
+        if not hasstats == []:
+            grepmin = fileutil.grepme(outputpath, "  Min ")
+            if not grepmin == []:
+                endmin = float(grepmin[-1].split()[1])
+            else:
+                endmin = None
+
+            grepavg = fileutil.grepme(outputpath, "  Avg ")
+            if not grepavg == []:
+                endavg = float(grepavg[-1].split()[1])
+            else:
+                endavg = None
+
+            grepgenrep = fileutil.grepme(outputpath, "  Genrep ")
+            if not grepgenrep == []:
+                endgenrep = float(grepgenrep[-1].split()[1])
+            else:
+                endgenrep = None
+            if MyOpti.convergence_scheme == "Gen_Rep_Min":
+                MyOpti.minfit = endmin
+            elif MyOpti.convergence_scheme == "Gen_Rep_Max":
+                MyOpti.minfit = endavg
+            MyOpti.genrep = endgenrep
+        #Evaluate generation (set rank of fitnesses)
+        pop = MyOpti.generation_eval(pop)
+        MyOpti.population = pop
+        #Check convergence
+        #check_results = Opti.check_pop(pop)
+        MyOpti.generation = MyOpti.generation + 1
+        self.logger.info("Generation incremented to %i" % MyOpti.generation)
+        if MyOpti.convergence:
+            self.logger.info("Converged!")
+            convokay = open("CONVERGED","wb")
+            convokay.write("Opti.convergence is True at %s\n" % time.asctime())
+            convokay.close()
+            end_signal = MyOpti.algorithm_stats(pop)
+            #Opti.output.close()
+            return end_signal
+        else:
+            self.logger.info("Clearing folders for next setup.")
+            self.clear_vasp_folders()
+        return MyOpti
+
+    def mutate_evolve_write_new_structures(self, MyOpti):
+        """Mutate, evolve, and write new structures for VASP.
+            Args:
+                MyOpti <GA Optimizer>
+            Returns:
+                MyOpti <GA Optimizer>: optimizer with any 
+                        settings that had been set
+        """
         #Mutating and evolving
-        offspring = Opti.generation_set(pop)
-        self.logger.info("generation set; pop len %i" % len(pop))
+        ingpath = self.keywords['name']
+        pathtooutput = os.path.join(ingpath,MyOpti.filename)
+        offspring = MyOpti.generation_set(MyOpti.population)
+        self.logger.info("generation set; pop len %i" % len(MyOpti.population))
         # Identify the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if ind.energy==0]
         #Write structures to POSCAR files for evaluation in MAST
         for i in range(len(invalid_ind)):
-            indname = "%s/POSCAR_%02d" % (gadir, i)
-            if Opti.structure == 'Defect':
+            indname = "%s/POSCAR_%02d_ase" % (MyOpti.filename, i)
+            if MyOpti.structure == 'Defect':
                 indatoms = invalid_ind[i][0]
                 indatoms.extend(invalid_ind[i].bulki)
-                ase.io.write(indname, indatoms, "vasp")
+                ase.io.write(indname, indatoms, "vasp", vasp5=True)
             else:
-                ase.io.write(indname,invalid_ind[i][0],"vasp")
-            Opti.output.write(indname)
+                ase.io.write(indname,invalid_ind[i][0],"vasp", vasp5=True)
+            mypos = pymatgen.io.vaspio.Poscar.from_file(indname)
+            mypos.write_file("%s/POSCAR_%02d" % (MyOpti.filename, i))
+            MyOpti.output.write(indname)
         #Submit list of POSCARs to Tam's script to make subfolders
         self.make_subfolders_from_structures(pathtooutput)
         #Ideally this next function will run and return a list of files that include the final
         #structure output and the energy,pressure and other output details
         self.set_up_vasp_folders()  #Start running.
-        generation = Opti.generation + 1
-        genfile.data="%i\n" % generation
-        genfile.to_file(os.path.join(ingpath, "GENERATION"))
+        return MyOpti
+
+    def flip_status_back(self):
+        """Flip status back to waiting."""
+        ingpath = self.keywords['name']
         cleared_ing = ChopIngredient(name=ingpath, program='None',program_keys = self.keywords['program_keys'], structure=self.keywords['structure'])
         cleared_ing.change_my_status("W")
-        #Opti.output.close()
         return
 
     def extract_vasp_output(self, childname=""):
@@ -244,6 +296,8 @@ class OptiIngredient(BaseIngredient):
         for strfile in strfiles:
             if not strfile[0:6] == "POSCAR":
                 continue
+            if "ase" in strfile:
+                continue
             str_path = os.path.join(finddir, strfile)
             subname = strfile.split("_")[1]
             subpath = os.path.join(childdir, subname)
@@ -310,7 +364,11 @@ class OptiIngredient(BaseIngredient):
             mychecker = VaspChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
             if mychecker.is_complete():
                 allcomplete = allcomplete + 1
-        if allcomplete == len(subfolders):
+            else:
+                mychoping = ChopIngredient(name=subfolder, program='vasp',program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
+                mychoping.run_singlerun()
+
+        if allcomplete == len(subfolders) and (allcomplete > 0):
             return True
         else:
             return False
