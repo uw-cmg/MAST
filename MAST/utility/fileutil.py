@@ -18,10 +18,10 @@ def grepme(filename="", grepstr="", lastlines=""):
             Grep results as a list of strings
     """
     if lastlines == "":
-        grepcmd = "grep %s %s" % (grepstr, filename)
+        grepcmd = 'grep "%s" %s' % (grepstr, filename)
     else:
         lastlines = str(lastlines)
-        grepcmd = "tail -n %s %s | grep %s" % (lastlines, filename, grepstr)
+        grepcmd = 'tail -n %s %s | grep "%s"' % (lastlines, filename, grepstr)
     #print "GREP CMD: %s" % grepcmd
     grepproc = subprocess.Popen(grepcmd, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     grepcomm = grepproc.communicate()[0]
