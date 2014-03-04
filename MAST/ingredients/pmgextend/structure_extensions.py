@@ -49,7 +49,7 @@ class StructureExtensions(MASTObj):
 
         if (defect['type'] == 'vacancy'):
             self.logger.info('Creating a %s vacancy at %s' % (symbol, str(defect['coordinates'])))
-            index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
+            index = find_in_coord_list_pbc(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
             if len(index) > 1:
@@ -65,7 +65,7 @@ class StructureExtensions(MASTObj):
                                   validate_proximity=True)
         elif (defect['type'] in ['antisite', 'substitution']):
             self.logger.info('Creating a %s antisite at %s' % (symbol, str(defect['coordinates'])))
-            index = find_in_coord_list(self.keywords['struc_work1'].frac_coords,
+            index = find_in_coord_list_pbc(self.keywords['struc_work1'].frac_coords,
                                        defect['coordinates'],
                                        atol=threshold)
             if len(index) > 1:
