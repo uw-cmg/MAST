@@ -98,46 +98,33 @@ class OptiIngredient(BaseIngredient):
         pathtooutput = os.path.join(ingpath,MyOpti.filename)
         Totaloutputs = self.extract_vasp_output()
         pop=[]
-        #Read last structures from indiv xyz files (parents)
-        #Read each fitness for each structure from StructureSummary.txt last generation, add to pop
-        #extend parents onto pop
-        #get CONTCARs and energies for the VASP-run structures
-        #Save structures and energies and pressures to offspring
-        #list; fitness switch for indiv in offspring
-        #now append offspring to population, which should
-        #include previous structures and fitnesses, and new
-        #structures and fitnesses
-        #BAD: 
+        #Get last structures from indiv xyz files, and fitnesses
+        parent_indivs = self.get_my_parents(pathtooutput)
+        #Build these parents onto pop
+        pop.extend(parent_indivs)
+        #Get CONTCARs, energies, and pressures for the VASP-run 
+        #structures
+        #Save structures, energies, and pressures to offspring
+        #list of individuals
+        offspring_indivs=list()
         for idx in range(0, len(Totaloutputs)):
-            (structurefile, energy, pressure) = Totaloutputs[idx]
-            indivname = "indiv%s.xyz" % str(idx).zfill(2)
-            pathtovasp = os.path.dirname(structurefile)
-            atomsobj = ase.io.read(structurefile)
-            ase.io.write(os.path.join(pathtovasp, indivname), atomsobj, "xyz")
-            newxyz = open(os.path.join(pathtovasp,indivname),'rb')
-            newlines = newxyz.readlines()
-            newxyz.close()
-            oldxyz = open(os.path.join(pathtooutput,indivname),'ab') #Append
-            oldxyz.writelines(newlines)
-            oldxyz.close()
-        #Set a new generation from the structures.
-        #BAD: offspring = MyOpti.generation_set(pop)
-        #GOOD: offspring = list of Individual objects
-        self.logger.info("Generation has been set.")
-        #self.logger.info(offspring)
-        #Add energy and pressure info onto offspring.
-        for idx in range(0, len(Totaloutputs)):
-            (structurefile, energy, pressure) = Totaloutputs[idx]
-            offspring[idx].energy = energy
-            offspring[idx].pressure = pressure
-        #Set fitnesses of offspring
+            (structurefile, myenergy, mypressure) = Totaloutputs[idx]
+            offspring_atoms = ase.io.read(structurefile)
+            offspring_indiv = Individual(offspring_atoms,
+                energy=myenergy, pressure=mypressure)
+            offspring_indivs.append(offspring_indiv)
+        #Get a fitness for each offspring individual
         self.logger.info(os.environ)
-        for ind in offspring:
+        for ind in offspring_indivs:
             outs = fitness_switch([MyOpti,ind])
             MyOpti.output.write(outs[1])
             ind=outs[0]
-        #Build up the offspring, with fitness information
-        pop.extend(offspring)
+        for ind in offspring_indivs:
+            self.logger.info("Offspring fitness:", ind.fitness)
+            #make sure it worked.
+        #Now append offspring to population, which includes
+        #parents and fitnesses already.
+        pop.extend(offspring_indivs)
         #Read in BESTS as Individuals with fitnesses
         if MyOpti.BestIndsList:
             try:
@@ -585,3 +572,39 @@ class OptiIngredient(BaseIngredient):
             return True
         else:
             return False
+
+    def get_my_parents(self, parentpath):
+        """Get parents from previous generation
+            Read last structures from indiv xyz files (parents)
+            Read each fitness for each structure from 
+            StructureSummary.txt's last generation
+            Args:
+                parentpath <str>: Path where parent indivXX.xyz
+                                  files are stored.
+                    (usually self.keywords['name']/Opti.filename)
+            Returns:
+                parent_indivs <list of Individual objects>:
+                    List of parent individual objects with
+                    fitnesses attached.
+        """
+        strsum="StructureSummary.txt"
+        dirlist = os.listdir(parentpath)
+        dirlist.sort()
+        parent_indivs=list()
+        parentpaths=list()
+        for diritem in dirlist:
+            if ('indiv' in diritem) and ('.xyz' in diritem):
+                fullpath = os.path.join(parentpath, diritem)
+                parentpaths.append(fullpath)
+        numparents = len(parentpaths)
+        fitnesslist = fileutil.grepme(os.path.join(parentpath,strsum),"Fitness")
+        fitnesslist=fitnesslist[-1*numparents:] #last X entries
+        self.logger.info("Creating parent list:")
+        self.logger.info(parentpaths)
+        self.logger.info(fitnesslist)
+        for pdx in range(0, numparents):
+            parentatoms = structopt.io.read_xyz(parentpaths[pdx])
+            parentfitness = fitnesslist[pdx]
+            parentindiv = Individual(parentatoms, fitness=parentfitness)
+            parent_indivs.append(parentindiv)
+        return parent_indivs
