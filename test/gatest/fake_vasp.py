@@ -3,6 +3,7 @@ import numpy as np
 import time
 import pymatgen
 import ase
+from ase import io as aseio
 timestamp = time.asctime()
 randenergy = np.random.random_sample()*-100.0 + -200.0
 randtime = np.random.random_sample()*100
@@ -14,11 +15,11 @@ fake_contcar.write_file("CONTCAR")
 #
 from ase.calculators.lj import LennardJones
 calc = LennardJones()
-aseatoms = ase.io.read("CONTCAR")
+aseatoms = aseio.read("CONTCAR")
 aseatoms.set_calculator(calc)
 aseenergy = aseatoms.get_potential_energy()
-stress_tensor = aseatoms.get_stresses()
-asepress = aseatoms.get_isotropic_pressure(stress_tensor)
+asestress = aseatoms.get_stress()
+asepress = aseatoms.get_isotropic_pressure(asestress)
 
 fake_osz = open("OSZICAR","wb")
 fake_osz.write("Output randomly generated at %s\n" % timestamp)

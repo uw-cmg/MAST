@@ -221,16 +221,16 @@ class OptiIngredient(BaseIngredient):
                 os.remove(os.path.join(pathtooutput, diritem))
         #Write structures to POSCAR files for evaluation in MAST
         for i in range(len(invalid_ind)):
-            indname = "%s/POSCAR_%02d_ase" % (MyOpti.filename, i)
+            indname = "%s/POSCAR_%02d" % (MyOpti.filename, i)
             if MyOpti.structure == 'Defect':
                 indatoms = invalid_ind[i][0]
                 indatoms.extend(invalid_ind[i].bulki)
-                ase.io.write(indname, indatoms, "vasp", vasp5=True)
+                ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
             else:
-                ase.io.write(indname,invalid_ind[i][0],"vasp", vasp5=True)
-            mypos = pymatgen.io.vaspio.Poscar.from_file(indname)
-            mypos.write_file("%s/POSCAR_%02d" % (MyOpti.filename, i))
-            MyOpti.output.write(indname)
+                ase.io.write(indname,invalid_ind[i][0],"vasp", direct=True, sort=True, vasp5=True)
+            #mypos = pymatgen.io.vaspio.Poscar.from_file(indname)
+            #mypos.write_file("%s/POSCAR_%02d" % (MyOpti.filename, i))
+            MyOpti.output.write(indname+'\n')
         #Submit list of POSCARs to Tam's script to make subfolders
         self.make_subfolders_from_structures(pathtooutput)
         #Ideally this next function will run and return a list of files that include the final
