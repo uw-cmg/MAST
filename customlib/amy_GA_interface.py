@@ -209,6 +209,9 @@ class OptiIngredient(BaseIngredient):
         self.logger.info("generation set; pop len %i" % len(MyOpti.population))
         # Identify the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if ind.energy==0]
+        while len(invalid_ind) == 0:
+            offspring = MyOpti.generation_set(offspring)
+            invalid_ind = [ind for ind in offspring if ind.energy==0]
         #AKK: It would be good to check the length of invalid ind to compare with what the output says is being mutated and crossed over
         self.logger.info('Length of invalid ind for generation {0} is {1}'.format(MyOpti.generation,len(invalid_ind)))
         #Delete all old POSCAR files:
