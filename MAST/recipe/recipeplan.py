@@ -430,8 +430,8 @@ class RecipePlan:
         result_dict=dict()
         for myingred in self.ingredients:
             fullpath = os.path.join(self.working_directory, myingred)
+            result_dict[myingred]=dict()
             for name_key in name_keys:
-                result_dict[myingred]=dict()
                 if name_key in myingred: #name matches
                     for method_key in mname_dict[name_key]:
                         try:
