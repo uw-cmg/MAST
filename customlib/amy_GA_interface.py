@@ -101,7 +101,7 @@ class OptiIngredient(BaseIngredient):
         pop=[]
         if MyOpti.generation > 0:
             #Get last structures from indiv xyz files, and fitnesses
-            parent_indivs = self.get_my_parents(pathtooutput)
+            parent_indivs = self.get_my_parents(pathtooutput, MyOpti)
             #Build these parents onto pop
             pop.extend(parent_indivs)
         #Get CONTCARs, energies, and pressures for the VASP-run 
@@ -393,7 +393,7 @@ class OptiIngredient(BaseIngredient):
         else:
             return False
 
-    def get_my_parents(self, parentpath):
+    def get_my_parents(self, parentpath, POpti):
         """Get parents from previous generation
             Read last structures from indiv xyz files (parents)
             Read each fitness for each structure from 
@@ -402,6 +402,7 @@ class OptiIngredient(BaseIngredient):
                 parentpath <str>: Path where parent indivXX.xyz
                                   files are stored.
                     (usually self.keywords['name']/Opti.filename)
+                POpti <Optimizer>: optimizer class
             Returns:
                 parent_indivs <list of Individual objects>:
                     List of parent individual objects with
@@ -419,12 +420,23 @@ class OptiIngredient(BaseIngredient):
         numparents = len(parentpaths)
         fitnesslist = fileutil.grepme(os.path.join(parentpath,strsum),"Fitness")
         fitnesslist=fitnesslist[-1*numparents:] #last X entries
+        energylist = fileutil.grepme(os.path.join(parentpath, strsum), "Energy")
+        energylist=energylist[-1*numparents:]
         self.logger.info("Creating parent list:")
         self.logger.info(parentpaths)
         self.logger.info(fitnesslist)
         for pdx in range(0, numparents):
             parentatoms = structopt.io.read_xyz(parentpaths[pdx])
             parentfitness = float(fitnesslist[pdx].strip().split('=')[1].strip())
-            parentindiv = Individual(parentatoms, fitness=parentfitness)
+            parentenergy = float(energylist[pdx].strip().split('=')[1].strip())
+            if POpti.structure=='Defect':
+                parentindiv = get_defect_restart_indiv(POpti, parentatoms)
+            elif POpti.structure=='Crystal':
+                parentindiv = get_crystal_restart_indiv(POpti, parentatoms)
+            elif POpti.structure=='Cluster':
+                parentatoms.set_cell([POpti.size, POpti.size, POpti.size])
+                parentindiv = Individual(parentatoms)
+            parentindiv.fitness = parentfitness
+            parentindiv.energy = parentenergy
             parent_indivs.append(parentindiv)
         return parent_indivs

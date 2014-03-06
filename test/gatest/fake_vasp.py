@@ -8,18 +8,31 @@ timestamp = time.asctime()
 randenergy = np.random.random_sample()*-100.0 + -200.0
 randtime = np.random.random_sample()*100
 randpress = np.random.random_sample()*50
-mystruc = pymatgen.io.vaspio.Poscar.from_file("POSCAR").structure
-mystruc.perturb(0.01)
-fake_contcar = pymatgen.io.vaspio.Poscar(mystruc)
-fake_contcar.write_file("CONTCAR")
+
+#mystruc = pymatgen.io.vaspio.Poscar.from_file("POSCAR").structure
+#mystruc.perturb(0.01)
+#fake_contcar = pymatgen.io.vaspio.Poscar(mystruc)
+#fake_contcar.write_file("CONTCAR",direct=False)
 #
 from ase.calculators.lj import LennardJones
+from ase.optimize import BFGS
+indiv = aseio.read("POSCAR")
 calc = LennardJones()
-aseatoms = aseio.read("CONTCAR")
-aseatoms.set_calculator(calc)
-aseenergy = aseatoms.get_potential_energy()
-asestress = aseatoms.get_stress()
-asepress = aseatoms.get_isotropic_pressure(asestress)
+indiv.set_calculator(calc)
+indiv.set_pbc=False
+dyn=BFGS(indiv)
+try:
+    dyn.run(fmax=0.01, steps=1000)
+    aseenergy = indiv.get_potential_energy()
+    asepress = indiv.get_isotropic_pressure(indiv.get_stress())
+except:
+    aseenergy = 10000
+    asepress = 10000
+indiv.set_pbc=True
+
+
+#poscaratoms.set_cell([4.275, 4.275, 4.275])
+ase.io.write("CONTCAR",indiv, "vasp", direct=True, sort=True, vasp5=True)
 
 fake_osz = open("OSZICAR","wb")
 fake_osz.write("Output randomly generated at %s\n" % timestamp)
