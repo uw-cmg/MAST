@@ -11,6 +11,7 @@ import os
 import logging
 from MAST.utility import loggerutils
 from MAST.utility import MASTFile
+from MAST.utility import MASTError
 
 """Utility to read the indented recipe file."""
 def read_recipe(filename, verbose=0):
@@ -33,6 +34,8 @@ def read_recipe(filename, verbose=0):
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
     for line in rfile.data:
+        if '\t' in line:
+            raise MASTError("recipe/recipeutility", "Recipe at %s contains tabs! Please convert all indentations to the appropriate number of groups of four spaces." % filename)
         myline = line.rstrip() #right-hand strip of carriage return only
         if len(myline) == 0: #blank line
             pass
