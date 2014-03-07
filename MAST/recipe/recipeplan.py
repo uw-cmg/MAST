@@ -15,7 +15,7 @@ import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
 from customlib import *
-import MAST.summary.citations
+from MAST.summary import citations
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 #from MAST.ingredients.chopingredient import RunIngredient

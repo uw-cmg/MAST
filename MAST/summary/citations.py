@@ -52,13 +52,17 @@ def get_citations(recipedir):
         if 'phon' in mastexec.lower():
             mylist.append('phon')
     linelist.append("==================================")
-    linelist.append("----------- CITATIONS ------------")
+    linelist.append("----------- CITATIONS-------------")
+    linelist.append("==================================")
     cited=list()
     for listitem in mylist:
         if not listitem in cited:
             if not listitem in citation_dict.keys():
                 linelist.append("NEED TO CITE %s BUT NO ENTRY IS IN CITATION DICT.")
             else:
+                linelist.append('======================')
+                linelist.append("    %s" % listitem)
+                linelist.append('======================')
                 for citeline in citation_dict[listitem]:
                     linelist.append(citeline)
             cited.append(listitem)
