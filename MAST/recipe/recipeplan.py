@@ -15,6 +15,7 @@ import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
 from customlib import *
+import MAST.summary.citations
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient
 #from MAST.ingredients.chopingredient import RunIngredient
@@ -461,6 +462,9 @@ class RecipePlan:
             valuestring = valuestring + '\n'
             summary.data.append(titlestring)
             summary.data.append(valuestring)
+        citation_lines = citations.get_citations(self.working_directory)
+        for cite_line in citation_lines:
+            summary.data.append(cite_line + '\n')
         if summary.data == []:
             return
         else:
