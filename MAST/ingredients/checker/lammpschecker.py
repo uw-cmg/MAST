@@ -23,7 +23,7 @@ class LammpsChecker(BaseChecker):
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
     def forward_final_structure_file(self, mydir=""):
-        """Get the final structure from the LAMMPS dump/data file
+        """Get the final structure from the LAMMPS dump file
             Args:
                 mydir <str>: Directory. If no directory is given,
                     use current ingredient directory given
@@ -36,10 +36,11 @@ class LammpsChecker(BaseChecker):
         #import data
         #import dump
         #import xyz
+        import ase
         from ase.io import read, write
         dumppath = os.path.join(curdir, dumpname)
-        if not os.path.isfile(datapath):
-            raise MASTError(self.__class__.__name__,"No data file at %s" % datapath)
+        if not os.path.isfile(dumppath):
+            raise MASTError(self.__class__.__name__,"No dump file at %s" % dumppath)
         #dumpobject = dump.dump(dumppath)
         #dumpobject.map()
         #xyzobject = xyz.xyz(dumpobject)
@@ -52,6 +53,7 @@ class LammpsChecker(BaseChecker):
         #        xyzfiles.append(myfile)
         #lastxyz = os.path.join(mydir, xyzfiles[-1])
         #aseatoms = ase.io.read(lastxyz)
-        aseatoms = ase.io.read(dumppath)
-        ase.io.write("CONTCAR",aseatomsobj,"vasp", direct=True, sort=True, vasp5=True)
+        aseatomsobj = ase.io.read(dumppath)
+        newpath = os.path.join(curdir, "CONTCAR")
+        ase.io.write(newpath,aseatomsobj,"vasp", direct=True, sort=True, vasp5=True)
         self.copy_a_file(mydir, "CONTCAR", "POSCAR")
