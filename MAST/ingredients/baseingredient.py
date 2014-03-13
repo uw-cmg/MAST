@@ -13,6 +13,7 @@ from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
 from MAST.ingredients.checker import GenericChecker
+from MAST.ingredients.checker import LammpsChecker
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
@@ -71,6 +72,9 @@ class BaseIngredient(MASTObj):
         elif self.program == 'phon':
             self.checker = PhonChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
             self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+        elif self.program == 'lammps':
+            self.checker = LammpsChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
             allowed_keys={'name','program_keys','structure'}
             self.checker = GenericChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])

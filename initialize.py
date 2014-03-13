@@ -109,3 +109,6 @@ print "export MAST_RECIPE_PATH=%s/MAST/recipe_templates" % myhome
 print "export MAST_SCRATCH=%s/MAST/SCRATCH" % myhome
 print "export MAST_ARCHIVE=%s/MAST/ARCHIVE" % myhome
 print "export MAST_CONTROL=%s/MAST/CONTROL" % myhome
+print "export PYTHONPATH=$PYTHONPATH:$MAST_INSTALL_PATH/mastlib/ase"
+print "export PATH=$PATH:$MAST_INSTALL_PATH/mastlib/ase/tools"
+print "export PYTHONPATH=$PYTHONPATH:$MAST_INSTALL_PATH/mastlib/pizza-5Aug12/src"

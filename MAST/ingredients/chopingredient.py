@@ -237,6 +237,52 @@ class ChopIngredient(BaseIngredient):
             my_input.to_file(inputpath)
         return 
 
+    def write_ordered_ingred_input_file(self, fname="", allowed_file="all", upperkey=1, delimiter=" "):
+        """Write an input file.
+            Assumes that keyword dictionary is given as
+            ["#.keyword"] = value
+            For example ["2.fix"]=["nvt"]
+            Creates an input with keywords in order.
+            Args: 
+                fname <str>: File name for the ingredient input 
+                            file to be created, e.g. INCAR
+                allowed_file <str>: File name for the list
+                    of allowed keywords. Use "all" to allow
+                    all non-mast keywords.
+                upperkey <str or int>: 
+                        1 - uppercase keywords (default)
+                        0 - leave keywords their own case
+                delimiter <str>: Delimiter to place between
+                    keywords and values in the input file.
+                    Default is space.
+                    Omit this parameter to use a space.
+                    Neither semicolon nor comma may be used
+                    as a delimiter, as these are special
+                    delimiters in the MAST input file already.
+        """
+        if delimiter == "":
+            delimiter = " "
+        if allowed_file.lower() == "all":
+            okay_keys = self._get_allowed_non_mast_keywords("", upperkey)
+        else:
+            okay_keys = self._get_allowed_non_mast_keywords(allowed_file, upperkey)
+        keylist=list()
+        for key, value in okay_keys.iteritems():
+            key = str(key)
+            keynum = int(key.split(".")[0])
+            keywordval = key.split(".")[1]
+            value = str(value)
+            keylist.append([keynum, keywordval, value])
+        keylist.sort()
+        my_input = MASTFile()
+        for keytriplet in keylist:
+            my_input.data.append(keytriplet[1] + delimiter + keytriplet[2] + "\n")
+        inputpath = os.path.join(self.keywords['name'],fname)
+        if os.path.isfile(inputpath):
+            self.logger.error("File already exists at %s. Skipping input file writing." % inputpath)
+        else:
+            my_input.to_file(inputpath)
+        return 
 
     def _get_allowed_non_mast_keywords(self, allowed_file="", upperkey=1):
         """Get the non-mast keywords and make a dictionary.
