@@ -23,7 +23,8 @@ class LammpsChecker(BaseChecker):
         BaseChecker.__init__(self, allowed_keys, **kwargs)
 
     def forward_final_structure_file(self, mydir=""):
-        """Get the final structure from the LAMMPS dump file
+        """Get the final structure from LAMMPS dump file.
+            The dump file must be named "dump.out"
             Args:
                 mydir <str>: Directory. If no directory is given,
                     use current ingredient directory given
