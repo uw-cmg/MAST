@@ -414,7 +414,7 @@ class RecipePlan:
         """Run the summary section of the input file, if it exists,
             when the recipe is complete. Called from print_status.
             Summary options are in the form:
-            self.summary_options["name keyword"]="keyword1 keyword2..."
+            self.summary_options["name keyword"]= ["keyword1",  "keyword2", ... ]
             The keywords should be the names of .py files located either in
             MAST.summary or in customlib.
             Each .py file should have a main function that takes in the
@@ -426,7 +426,7 @@ class RecipePlan:
         name_keys = self.summary_options.keys()
         mname_dict=dict()
         for name_key in name_keys:
-            mname_dict[name_key] = self.summary_options[name_key].split()
+            mname_dict[name_key] = self.summary_options[name_key]
     
         result_dict=dict()
         for myingred in self.ingredients:
@@ -448,20 +448,22 @@ class RecipePlan:
         result_names = result_dict.keys()
         result_names.sort()
         for result_name in result_names:
-            titlestring="t:%20s:" % result_name
-            valuestring="v:%20s:" % result_name
+            #titlestring="t:%20s:" % result_name
+            #valuestring="v:%20s:" % result_name
             method_keys = result_dict[result_name].keys()
             method_keys.sort()
             for method_key in method_keys:
                 myresult = result_dict[result_name][method_key]
                 title = myresult.split(";",1)[0].strip()
                 value = myresult.split(";",1)[1].strip()
-                titlestring = titlestring + "%20s:" % title
-                valuestring = valuestring + "%20s:" % value
-            titlestring = titlestring + '\n'
-            valuestring = valuestring + '\n'
-            summary.data.append(titlestring)
-            summary.data.append(valuestring)
+                result_line="%20s :: %20s :: %20s\n" % (result_name, title, value)
+                summary.data.append(result_line)
+                #titlestring = titlestring + "%20s:" % title
+                #valuestring = valuestring + "%20s:" % value
+            #titlestring = titlestring + '\n'
+            #valuestring = valuestring + '\n'
+            #summary.data.append(titlestring)
+            #summary.data.append(valuestring)
         citation_lines = citations.get_citations(self.working_directory)
         for cite_line in citation_lines:
             summary.data.append(cite_line + '\n')
