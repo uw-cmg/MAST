@@ -31,133 +31,98 @@ velocity	all create 1000.0 19237571 rot yes dist gaussian
 # dump out system information into a file
 # specific settings depends on what the GA needs
 # below dumps out atom positions every 5000 timesteps
-dump		dump1 all custom 5000 dump.test id type x y z
-#dump_modify	dump1 sort id
+dump		dump1 all custom 1000 dump.test id element x y z
+dump_modify dump1 element Si C
+dump_modify	dump1 sort id
 
 # NVT ensemble, first temperature hold, equilibrate
 fix			hold1 all nvt temp 500.0 500.0 0.1
-run			10000
+run			1000
 Memory usage per processor = 1.5749 Mbytes
 Step Temp E_pair E_mol TotEng Press 
        0         1000   -619.25494            0   -602.83891   -310061.65 
     1000    518.63689   -657.18243            0   -648.66847   -262517.08 
-    2000    509.06658   -657.28522            0   -648.92836   -241389.68 
-    3000    552.39629   -661.58155            0   -652.51339   -223017.78 
-    4000    513.17107   -662.13572            0   -653.71148   -226121.21 
-    5000    498.13591   -661.27908            0   -653.10166    -230770.6 
-    6000    554.61058   -662.01532            0   -652.91081   -212501.71 
-    7000    527.68935   -663.19898            0   -654.53641    -216743.5 
-    8000      501.228   -664.35878            0   -656.13061   -208210.35 
-    9000    551.87431   -663.83306            0   -654.77347      -214063 
-   10000    490.98967   -664.45767            0   -656.39756   -208016.61 
-Loop time of 19.0835 on 1 procs for 10000 steps with 128 atoms
+Loop time of 2.11155 on 1 procs for 1000 steps with 128 atoms
 
-Pair  time (%) = 18.7915 (98.4697)
-Neigh time (%) = 0.00608897 (0.031907)
-Comm  time (%) = 0.143369 (0.751272)
-Outpt time (%) = 0.000844717 (0.00442642)
-Other time (%) = 0.141725 (0.742659)
+Pair  time (%) = 2.07769 (98.3963)
+Neigh time (%) = 0.00302291 (0.14316)
+Comm  time (%) = 0.015331 (0.726054)
+Outpt time (%) = 0.000319004 (0.0151075)
+Other time (%) = 0.0151908 (0.719415)
 
 Nlocal:    128 ave 128 max 128 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:    680 ave 680 max 680 min
+Nghost:    678 ave 678 max 678 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Neighs:    0 ave 0 max 0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:  4848 ave 4848 max 4848 min
+FullNghs:  4806 ave 4806 max 4806 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 4848
-Ave neighs/atom = 37.875
-Neighbor list builds = 7
+Total # of neighbors = 4806
+Ave neighs/atom = 37.5469
+Neighbor list builds = 3
 Dangerous builds = 0
 unfix		hold1
 
 # ramp temperature up
 fix			ramp1 all nvt temp 500.0 1000.0 0.1
-run			20000
+run			2000
 Memory usage per processor = 1.5749 Mbytes
 Step Temp E_pair E_mol TotEng Press 
-   10000    490.98967   -664.45767            0   -656.39756   -208016.61 
-   11000    548.02257   -662.73659            0   -653.74023   -213267.96 
-   12000     628.9133   -664.41889            0   -654.09463   -212446.65 
-   13000    608.02826   -663.32056            0   -653.33914   -206426.27 
-   14000    594.12341   -663.60804            0   -653.85489   -220152.01 
-   15000    592.43128   -663.06741            0   -653.34204    -226396.4 
-   16000    741.72458   -663.09478            0    -650.9186   -206860.55 
-   17000    621.75332   -663.43169            0   -653.22496   -217730.98 
-   18000    738.49743   -662.09346            0   -649.97026   -221585.84 
-   19000    725.35512   -664.11392            0   -652.20646   -209108.83 
-   20000    903.63182    -664.0297            0   -649.19565   -207088.97 
-   21000    750.94232   -664.06643            0   -651.73893   -189536.41 
-   22000    707.97016   -664.83176            0   -653.20969   -183836.17 
-   23000    837.32891    -665.1752            0   -651.42957   -194447.65 
-   24000    773.76345   -665.71647            0   -653.01434   -204937.26 
-   25000    925.99691   -665.48829            0   -650.28709   -176317.93 
-   26000    877.89313   -661.89221            0   -647.48068   -171094.74 
-   27000    960.77071   -665.58012            0   -649.80807   -172129.23 
-   28000    934.01064   -664.69922            0   -649.36646   -143516.59 
-   29000    965.13734   -666.84332            0   -650.99958   -156680.58 
-   30000    1034.1288   -667.71221            0   -650.73592   -151602.29 
-Loop time of 35.5251 on 1 procs for 20000 steps with 128 atoms
+    1000    518.63689   -657.18243            0   -648.66847   -262517.08 
+    2000    782.93464   -652.33466            0   -639.48197   -243218.13 
+    3000    1023.8321   -655.85146            0   -639.04419    -237458.7 
+Loop time of 3.76981 on 1 procs for 2000 steps with 128 atoms
 
-Pair  time (%) = 34.964 (98.4204)
-Neigh time (%) = 0.00713277 (0.0200781)
-Comm  time (%) = 0.276159 (0.777361)
-Outpt time (%) = 0.00157738 (0.00444017)
-Other time (%) = 0.276289 (0.777728)
+Pair  time (%) = 3.71148 (98.4526)
+Neigh time (%) = 0.00178933 (0.0474648)
+Comm  time (%) = 0.0280266 (0.743448)
+Outpt time (%) = 0.000627041 (0.0166332)
+Other time (%) = 0.0278914 (0.739862)
 
 Nlocal:    128 ave 128 max 128 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:    677 ave 677 max 677 min
+Nghost:    682 ave 682 max 682 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Neighs:    0 ave 0 max 0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:  4908 ave 4908 max 4908 min
+FullNghs:  4846 ave 4846 max 4846 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 4908
-Ave neighs/atom = 38.3438
-Neighbor list builds = 12
+Total # of neighbors = 4846
+Ave neighs/atom = 37.8594
+Neighbor list builds = 3
 Dangerous builds = 0
 unfix		ramp1
 
 # second temperature hold, annealing
 fix			hold2 all nvt temp 1000.0 1000.0 0.1
-run			10000
+run			1000
 Memory usage per processor = 1.5749 Mbytes
 Step Temp E_pair E_mol TotEng Press 
-   30000    1034.1288   -667.71221            0   -650.73592   -151602.29 
-   31000    889.16874   -668.80413            0    -654.2075   -140561.74 
-   32000    960.10158   -668.24941            0   -652.48835   -150892.36 
-   33000    938.97151   -663.65799            0    -648.2438   -130261.23 
-   34000    1003.7151   -667.69766            0   -651.22063   -163258.14 
-   35000    969.60672   -671.07834            0   -655.16124   -133897.63 
-   36000    974.53415   -669.06925            0   -653.07126   -123395.69 
-   37000    1033.8072   -672.94851            0   -655.97749   -117592.92 
-   38000    896.63142     -669.268            0   -654.54887   -145845.11 
-   39000    1085.7614   -671.56627            0   -653.74237   -134603.18 
-   40000    962.43166   -670.72843            0   -654.92912   -133391.79 
-Loop time of 16.7647 on 1 procs for 10000 steps with 128 atoms
+    3000    1023.8321   -655.85146            0   -639.04419    -237458.7 
+    4000    1010.4379   -664.96612            0   -648.37873   -188633.58 
+Loop time of 1.80039 on 1 procs for 1000 steps with 128 atoms
 
-Pair  time (%) = 16.4854 (98.3338)
-Neigh time (%) = 0.00120211 (0.00717045)
-Comm  time (%) = 0.139053 (0.82944)
-Outpt time (%) = 0.000795364 (0.00474428)
-Other time (%) = 0.13828 (0.82483)
+Pair  time (%) = 1.76973 (98.2966)
+Neigh time (%) = 0.00237679 (0.132015)
+Comm  time (%) = 0.0140402 (0.779842)
+Outpt time (%) = 0.00030899 (0.0171624)
+Other time (%) = 0.0139418 (0.774373)
 
 Nlocal:    128 ave 128 max 128 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:    674 ave 674 max 674 min
+Nghost:    663 ave 663 max 663 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Neighs:    0 ave 0 max 0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:  4928 ave 4928 max 4928 min
+FullNghs:  4866 ave 4866 max 4866 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 4928
-Ave neighs/atom = 38.5
-Neighbor list builds = 2
+Total # of neighbors = 4866
+Ave neighs/atom = 38.0156
+Neighbor list builds = 4
 Dangerous builds = 0
 unfix		hold2
 
@@ -167,36 +132,36 @@ minimize	1.0e-6 1.0e-6 10000 100000
 WARNING: Resetting reneighboring criteria during minimization (min.cpp:173)
 Memory usage per processor = 2.27034 Mbytes
 Step Temp E_pair E_mol TotEng Press 
-   40000    962.43166   -670.72843            0   -654.92912   -133391.79 
-   40063    962.43166   -687.17855            0   -671.37923   -151373.84 
-Loop time of 0.59921 on 1 procs for 63 steps with 128 atoms
+    4000    1010.4379   -664.96612            0   -648.37873   -188633.58 
+    4042    1010.4379   -679.96924            0   -663.38185   -192043.75 
+Loop time of 0.370831 on 1 procs for 42 steps with 128 atoms
 
 Minimization stats:
   Stopping criterion = energy tolerance
   Energy initial, next-to-last, final = 
-        -670.728433877     -687.177924824     -687.178547691
-  Force two-norm initial, final = 34.2648 0.589217
-  Force max component initial, final = 6.43502 0.224501
-  Final line search alpha, max atom move = 0.000756592 0.000169856
-  Iterations, force evaluations = 63 362
+        -664.966120138     -679.968690387     -679.969241959
+  Force two-norm initial, final = 30.1101 0.534807
+  Force max component initial, final = 7.29405 0.151203
+  Final line search alpha, max atom move = 0.00110664 0.000167327
+  Iterations, force evaluations = 42 207
 
-Pair  time (%) = 0.590256 (98.5058)
+Pair  time (%) = 0.365546 (98.5748)
 Neigh time (%) = 0 (0)
-Comm  time (%) = 0.00507569 (0.847064)
+Comm  time (%) = 0.00288916 (0.779103)
 Outpt time (%) = 0 (0)
-Other time (%) = 0.00387788 (0.647165)
+Other time (%) = 0.00239587 (0.646081)
 
 Nlocal:    128 ave 128 max 128 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-Nghost:    673 ave 673 max 673 min
+Nghost:    668 ave 668 max 668 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 Neighs:    0 ave 0 max 0 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
-FullNghs:  4920 ave 4920 max 4920 min
+FullNghs:  4834 ave 4834 max 4834 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
 
-Total # of neighbors = 4920
-Ave neighs/atom = 38.4375
+Total # of neighbors = 4834
+Ave neighs/atom = 37.7656
 Neighbor list builds = 0
 Dangerous builds = 0
 

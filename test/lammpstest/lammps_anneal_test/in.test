@@ -27,22 +27,23 @@ velocity	all create 1000.0 19237571 rot yes dist gaussian
 # dump out system information into a file
 # specific settings depends on what the GA needs
 # below dumps out atom positions every 5000 timesteps
-dump		dump1 all custom 5000 dump.test id type x y z
-#dump_modify	dump1 sort id
+dump		dump1 all custom 1000 dump.test id element x y z
+dump_modify dump1 element Si C
+dump_modify	dump1 sort id
 
 # NVT ensemble, first temperature hold, equilibrate
 fix			hold1 all nvt temp 500.0 500.0 0.1
-run			10000
+run			1000
 unfix		hold1
 
 # ramp temperature up
 fix			ramp1 all nvt temp 500.0 1000.0 0.1
-run			20000
+run			2000
 unfix		ramp1
 
 # second temperature hold, annealing
 fix			hold2 all nvt temp 1000.0 1000.0 0.1
-run			10000
+run			1000
 unfix		hold2
 
 # conjugate gradient minimization
