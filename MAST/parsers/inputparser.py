@@ -766,7 +766,7 @@ class InputParser(MASTObj):
         mast_dict = dict()
         for line in section_content:
             line = line.split(self.delimiter, 1)
-            mast_dict[line[0]] = line[1]
+            mast_dict.setdefault(line[0], []).append(line[1].strip())
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
