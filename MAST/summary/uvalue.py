@@ -25,6 +25,8 @@ def main(ingname=""):
         else:
             tryfile = "%s/OUTCAR" % ingname
         grepldauu = fileutil.grepme(tryfile, "LDAUU")
+        if grepldauu == []:
+            return "%s N/A" % frontstr
         ldauuparse = grepldauu[0].split("=")[1].strip()
         grepldauj = fileutil.grepme(tryfile, "LDAUJ")
         ldaujparse = grepldauj[0].split("=")[1].strip()
