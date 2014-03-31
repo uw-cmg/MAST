@@ -265,6 +265,11 @@ class VaspChecker(BaseChecker):
             Monkhorst-Pack is assumed.
         """
         name = self.keywords['name']
+        tryname = os.path.join(name, "KPOINTS")
+        if os.path.isfile(tryname):
+            #KPOINTS already exists. Do not overwrite.
+            my_kpoints = Kpoints.from_file(tryname)
+            return my_kpoints
         if 'mast_kpoints' in self.keywords['program_keys'].keys():
             kptlist = self.keywords['program_keys']['mast_kpoints']
         else:
