@@ -53,6 +53,20 @@ class ChopIngredient(BaseIngredient):
                 raise MASTError(self.__class__.__name__, "Could not find child directory %s in %s" % (childname, recipedir))
         return os.path.join(recipedir, cshort)
 
+    def duplicate_ingredient_file(self, copyfrom="", childdir="", softlink=0):
+        """Duplicate an ingredient file into the child
+            directory, with the ingredient
+            name prepended
+            e.g. "OSZICAR" becomes "defect_vac1_q=p2_stat_OSZICAR"
+            Args:
+                copyfrom <str>: File name to copy, e.g. OSZICAR
+                childdir <str>: Child directory
+                softlink <int>: 0 - copy (default)
+                                1 - softlink
+        """
+        ingname = os.path.basename(self.keywords['name'])
+        toname = "%s_%s" % (ingname, copyfrom)
+        self.copy_file(copyfrom, toname, childdir, softlink)
 
     def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0):
         """Copy a file.
