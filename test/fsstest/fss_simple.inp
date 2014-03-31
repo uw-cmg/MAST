@@ -1,0 +1,150 @@
+# Small demo for NEB workflow
+$mast
+system_name FiniteSizeScaling
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$defects
+begin vac1
+vacancy 0.0 0.0 0.0 X1
+end
+
+begin int1
+interstitial 0.25 0.25 0.25 X2
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           1
+mast_queue         default
+mast_exec          //share/apps/vasp5.2_cNEB
+mast_kpoints       2x2x2 M
+mast_xc            PBE
+isif 3
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+
+begin lowmesh_perfect
+mast_kpoints                1x1x1 G
+isif 3
+end  
+
+begin relax_perfect
+isif 3
+end
+
+begin supercell_list
+mast_program                 None
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_singlerun
+mast_exec                    $MAST_INSTALL_PATH/tools/fss_generate_supercells
+mast_complete_method         file_exists supercell_list.txt
+mast_update_children_method  copy_file supercell_list.txt
+end
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+end
+
+begin inducedefect_scale
+mast_write_method           no_setup
+mast_ready_method           file_exists supercell_list.txt
+mast_run_method             run_supercell_defect_set
+mast_complete_method        complete_supercell_defect_set
+mast_update_children_method give_supercell_defect_structure; give_supercell_defect_kpoints
+end
+
+begin lowmesh
+mast_kpoints                1x1x1 G
+end  
+
+begin relax
+end
+
+begin static
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+mast_update_children_method duplicate_ingredient_file OSZICAR; duplicate_ingredient_file CONTCAR
+end
+
+begin lowmesh_scale
+mast_kpoints                from_supercell_file
+mast_update_children_method give_structure; copy_file supercell_list.txt
+end
+
+begin relax_scale
+mast_kpoints                from_supercell_file
+mast_update_children_method give_structure; copy_file supercell_list.txt
+end
+
+begin static_scale
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+mast_kpoints                from_supercell_file
+mast_update_children_method duplicate_ingredient_file OSZICAR; duplicate_ingredient_file CONTCAR
+end
+
+begin plot_vs_vm
+mast_program                 None
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_singlerun
+mast_exec                    $MAST_INSTALL_PATH/tools/fss_plot_energies
+mast_complete_method         file_exists plot_vs_vm.txt
+end
+
+$end
+
+$recipe
+recipe_file fss_simple.txt
+$end
+
+$summary
+perfect energy
+vac1 energy
+int energy
+$end

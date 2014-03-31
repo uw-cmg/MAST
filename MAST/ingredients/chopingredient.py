@@ -733,6 +733,47 @@ class ChopIngredient(BaseIngredient):
         self.checker.write_final_structure_file(scaled)
         return
 
+    def run_supercell_defect_set(self, parentdir=""):
+        """For finite size scaling.
+            Given a text file named supercell_list.txt:
+
+            /some/directory/of/parent/ingredient
+            ----------------------------------
+            ScalingLMN     V_M     Kpoint mesh
+            ----------------------------------
+            [4, 4, 4] 2.55350475682 [2, 2, 2]
+            [3, 4, 3] 3.00247070991 [2, 2, 2]
+            [4, 3, 2] 3.05854316622 [2, 2, 4]
+            [3, 3, 2] 3.67455399526 [2, 2, 4]
+            [2, 2, 2] 5.10700950784 [4, 4, 4]
+
+            There are folders in the parent ingredient
+                4x1x1
+                3x2x3 etc. within which are a perfect POSCAR
+                file and a correspondingly scaled KPOINTS file.
+            Copy each folder with POSCAR and KPOINTS.
+            Induce the correct defect group for each new folder
+                in the current ingredient, scaling by the
+                appropriate amount.
+            Args:
+                parentdir <str>: Parent directory. If not
+                        supplied, method will look for
+                        supercell_list.txt in the current
+                        directory and use the path 
+                        specified within the file.
+        """
+        
+        myname = self.keywords['name']
+        supercell_info = MASTFile(os.path.join(myname, "supercell_list.txt"))
+        if parentdir == "":
+            scaleset_dir = supercell_info.data[0].strip()
+        else:
+            scaleset_dir = parentdir
+        scale_folders = dirutil.immediate_subdirs(scaleset_dir)
+        for scale_folder in scale_folders:
+            shutil.copytree(os.path.join(scaleset_dir,scale_folder), os.path.join(myname, scale_folder))
+        print "NOT DONE!"
+
     def complete_structure(self):
         if self.directory_is_locked():
             return False
@@ -787,7 +828,8 @@ class ChopIngredient(BaseIngredient):
             return True
         else:
             return False
-
+    def complete_supercell_defect_set(self):
+        pass
 
     def give_structure(self, childname):
         childname = self._fullpath_childname(childname)
@@ -804,7 +846,11 @@ class ChopIngredient(BaseIngredient):
             self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
     
+    def give_supercell_defect_structure(self):
+        pass
 
+    def give_supercell_defect_kpoints(self):
+        pass
 
 
 

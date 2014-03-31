@@ -160,8 +160,8 @@ ediffg             5e-2
 ialgo              48
 isif 2
 ibrion 2
-#nsw                191
-nsw                 0
+nsw                191
+#nsw                 0
 ismear 1
 sigma 0.2
 lwave False
@@ -187,16 +187,16 @@ isif 3
 mast_kpoints 1x1x1 G
 end
 
-#begin relax_perfect
-#isif 3
-#end
+begin relax_perfect
+isif 3
+end
 
 begin lowmesh_defect
 mast_kpoints 1x1x1 G
 end
 
-#begin relax_defect
-#end
+begin relax_defect
+end
 
 begin static
 ibrion -1
@@ -249,15 +249,15 @@ mast_write_method            write_neb
 mast_update_children_method  give_neb_structures_to_neb
 end
 
-#begin neb_to_nebstat
-#ibrion 1
-#potim 0.5
-#lclimb True
-#spring -5
-#mast_program   vasp_neb
-#mast_write_method            write_neb
-#mast_update_children_method  give_neb_structures_to_neb
-#end
+begin neb_to_nebstat
+ibrion 1
+potim 0.5
+lclimb True
+spring -5
+mast_program   vasp_neb
+mast_write_method            write_neb
+mast_update_children_method  give_neb_structures_to_neb
+end
 
 begin nebstat_to_phonon
 ibrion -1

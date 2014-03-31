@@ -5,6 +5,24 @@ import time
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
 
+def immediate_subdirs(existdir):
+    """Walk through directory and return immediate subdirectories
+        (only one level)
+        as directory names (not full paths)
+    """
+    if not (os.path.exists(existdir)):
+        raise MASTError("utility","No directory at " +existdir)
+    listdir = os.listdir(existdir)
+    subdirs=list()
+    for myentry in listdir:
+        trydir = os.path.join(existdir, myentry)
+        if os.path.isdir(trydir):
+            subdirs.append(myentry)
+    subdirs.sort()
+    print "subdirectories:", subdirs
+    return subdirs
+
+
 def walkdirs(existdir, mindepth=1, maxdepth=5, matchme=""):
     """Walk through directory and return list of subdirectories."""
     if not(os.path.exists(existdir)):

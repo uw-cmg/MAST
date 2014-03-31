@@ -17,10 +17,10 @@ The following programmers are arranged by start date. (+) indicates research per
 *  Nada Alameddine (summer 2013)
 *  Jihad Naja (summer 2013)
 *  Dr. Henry Wu + (summer 2013 - present)
+*  Amy Kaczmarowski (fall 2013 - present)
+*  Wei Xie (fall 2013 - present)
+*  Zhewen Song + (fall 2013 - present)
 
 The following additional team or project members are arranged by start date:
 
 *  Ben Shrago (summer 2013)
-*  Amy Kaczmarowski (fall 2013 - present)
-*  Wei Xie (fall 2013 - present)
-*  Zhewen Song + (fall 2013 - present)
