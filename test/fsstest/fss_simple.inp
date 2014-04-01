@@ -112,20 +112,17 @@ mast_update_children_method duplicate_ingredient_file OSZICAR; duplicate_ingredi
 end
 
 begin lowmesh_scale
-mast_kpoints                from_supercell_file
-mast_update_children_method give_structure; copy_file supercell_list.txt
+mast_update_children_method give_structure; copy_file KPOINTS KPOINTS
 end
 
 begin relax_scale
-mast_kpoints                from_supercell_file
-mast_update_children_method give_structure; copy_file supercell_list.txt
+mast_update_children_method give_structure; copy_file KPOINTS KPOINTS
 end
 
 begin static_scale
 ibrion -1
 nsw 0
 mast_multiplyencut 1.25
-mast_kpoints                from_supercell_file
 mast_update_children_method duplicate_ingredient_file OSZICAR; duplicate_ingredient_file CONTCAR
 end
 
