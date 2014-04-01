@@ -785,7 +785,7 @@ class ChopIngredient(BaseIngredient):
                 else:
                     pass
             singlechecker.write_final_structure_file(scaled)
-        print "NOT DONE!"
+        return True
 
     def complete_structure(self):
         if self.directory_is_locked():
@@ -842,7 +842,23 @@ class ChopIngredient(BaseIngredient):
         else:
             return False
     def complete_supercell_defect_set(self):
-        pass
+        myname = self.keywords['name']
+        mysubdirs = dirutil.immediate_subdirs(myname)
+        oklist=list()
+        if len(mysubdirs) == 0: #No subdirectories set yet
+            return False
+        for subdir in mysubdirs:
+            self.checker.keywords['name']=os.path.join(myname, subdir)
+            if self.checker.has_ending_structure_file():
+                oklist.append(True)
+            else:
+                oklist.append(False)
+        self.checker.keywords['name']=myname
+        okarr = np.array(oklist)
+        if okarr.all():
+            return True
+        else:
+            return False
 
     def give_structure(self, childname):
         childname = self._fullpath_childname(childname)

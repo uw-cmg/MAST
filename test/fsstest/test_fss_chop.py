@@ -82,10 +82,19 @@ class TestFSSChopIngredient(unittest.TestCase):
         ddict['mast_defect_settings'].update(kdict['label1']) #single defect grouping
         ddict['mast_program'] = 'vasp'
         myri = ChopIngredient(name=ingdir,program_keys=ddict, structure=None)
+        iscomplete = myri.complete_supercell_defect_set()
+        self.assertFalse(iscomplete)
         myri.run_supercell_defect_set("gensc")
         subfolder_list = dirutil.immediate_subdirs(ingdir, 1)
         for subfolder in subfolder_list:
             my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/%s/CONTCAR" % (ingdir, subfolder)).structure.get_sorted_structure()
             defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/induced_defects/%s/CONTCAR" % subfolder).structure.get_sorted_structure()
             self.assertEquals(my_defected, defected_compare)
+        iscomplete = myri.complete_supercell_defect_set()
+        self.assertTrue(iscomplete)
+        #Remove one of the CONTCAR files (from last folder)
+        os.remove(os.path.join(ingdir, subfolder, "CONTCAR"))
+        iscomplete = myri.complete_supercell_defect_set()
+        self.assertFalse(iscomplete)
+
 
