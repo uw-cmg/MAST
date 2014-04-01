@@ -139,6 +139,8 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         myuci.give_saddle_structure("next_ingred") #should be OSZ3
         saddle = MASTFile("%s/writedir/next_ingred/POSCAR" % testdir)
         self.assertEqual(myrelaxed['03'].data, saddle.data)
+        saddledir = myuci.get_saddle_dir()
+        self.assertEqual(saddledir, "03")
         #self.testclass.give_saddle_structure(childname)
 
     def test_give_phonon_multiple_forces_and_displacements(self):
