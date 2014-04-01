@@ -88,6 +88,7 @@ opts, args = getopt.getopt(argv,"i")
 inp = args[0]
 vdir = get_item_name(inp,'v')
 types = get_item_name(inp,'type')
+print "TYPES: ", types
 Edir = get_item_name(inp,'E')
 Hdir = get_item_name(inp,'H')
 lattice = get_item_name(inp,'lattice')['lattice']

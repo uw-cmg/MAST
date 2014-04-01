@@ -53,19 +53,20 @@ class ChopIngredient(BaseIngredient):
                 raise MASTError(self.__class__.__name__, "Could not find child directory %s in %s" % (childname, recipedir))
         return os.path.join(recipedir, cshort)
 
-    def duplicate_ingredient_file(self, copyfrom="", childdir="", softlink=0):
+    def copy_file_with_prepend(self, copyfrom="", copyto="", childdir="", softlink=0):
         """Duplicate an ingredient file into the child
             directory, with the ingredient
             name prepended
             e.g. "OSZICAR" becomes "defect_vac1_q=p2_stat_OSZICAR"
             Args:
                 copyfrom <str>: File name to copy, e.g. OSZICAR
+                copyto <str>: File name to copy to, e.g. OSZICAR
                 childdir <str>: Child directory
                 softlink <int>: 0 - copy (default)
                                 1 - softlink
         """
         ingname = os.path.basename(self.keywords['name'])
-        toname = "%s_%s" % (ingname, copyfrom)
+        toname = "%s_%s" % (ingname, copyto)
         self.copy_file(copyfrom, toname, childdir, softlink)
 
     def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0):
@@ -118,6 +119,56 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (frompath, topath))
         return
 
+    def get_saddle_dir(self):
+        """Get the saddle directory of an NEB calculation.
+            VASP only supported.
+        """
+        if not 'vasp' in self.program:
+            raise MASTError(self.__class__.__name__, "Program %s not supported" % self.program)
+        myname = self.keywords['name']
+        subdirs = dirutil.immediate_subdirs(myname)
+        highenergystr="Not evaluated"
+        highenergy=-1000000000000.0
+        for subdir in subdirs:
+            fullsub = os.path.join(myname, subdir)
+            singlechecker = VaspChecker(name=fullsub, program_keys = dict(self.checker.keywords['program_keys']), structure = self.checker.keywords['structure'].copy())
+            singlechecker.keywords['program_keys']['mast_program'] = "vasp"
+            myenergy = singlechecker.get_energy_from_energy_file()
+            if myenergy > highenergy:
+                highenergystr = subdir
+                highenergy = myenergy
+        return highenergystr
+
+    def copy_saddle_file(self, oldfname, newfname, childname=""):
+        """Forward a file from the saddle of a NEB calculation.
+            VASP calculations only.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory
+        """
+        saddledir = self.get_saddle_dir()
+        self.copy_file("%s/oldfname" % saddledir, newfname, childname)
+        return
+    def copy_saddle_file_with_prepend(self, oldfname, newfname, childname=""):
+        """Forward a file from the saddle of a NEB calculation with
+            the original NEB prepend, but not the inage name.
+            VASP calculations only.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory
+            e.g. 
+            self.copy_saddle_file_with_prepend("CONTCAR","POSCAR", childdir)
+            neb_vac1-vac2_stat/03/CONTCAR will be copied into childdir as:
+            neb_vac1-vac2_stat_POSCAR
+        """
+        saddledir = self.get_saddle_dir()
+        ingname = os.path.basename(self.keywords['name'])
+        prependedname = "%s_%s" % (ingname, newfname)
+        self.copy_file("%s/oldfname" % saddledir, prependedname, childname)
+        return
+    
     def softlink_file(self, linkfrom="", linkto="", childdir=""):
         """Softlink a file.
             Args:
