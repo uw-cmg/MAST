@@ -5,10 +5,14 @@ import time
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
 
-def immediate_subdirs(existdir):
+def immediate_subdirs(existdir, verbose=0):
     """Walk through directory and return immediate subdirectories
         (only one level)
         as directory names (not full paths)
+        Args:
+            existdir <str>: Directory, which should exist
+            verbose <int>: 0 - concise (default)
+                           1 - verbose
     """
     if not (os.path.exists(existdir)):
         raise MASTError("utility","No directory at " +existdir)
@@ -19,7 +23,8 @@ def immediate_subdirs(existdir):
         if os.path.isdir(trydir):
             subdirs.append(myentry)
     subdirs.sort()
-    print "subdirectories:", subdirs
+    if verbose == 1:
+        print "subdirectories:", subdirs
     return subdirs
 
 

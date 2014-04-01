@@ -762,7 +762,6 @@ class ChopIngredient(BaseIngredient):
                         directory and use the path 
                         specified within the file.
         """
-        
         myname = self.keywords['name']
         supercell_info = MASTFile(os.path.join(myname, "supercell_list.txt"))
         if parentdir == "":
@@ -772,6 +771,20 @@ class ChopIngredient(BaseIngredient):
         scale_folders = dirutil.immediate_subdirs(scaleset_dir)
         for scale_folder in scale_folders:
             shutil.copytree(os.path.join(scaleset_dir,scale_folder), os.path.join(myname, scale_folder))
+        for scale_folder in scale_folders:
+            myfolder = os.path.join(myname, scale_folder)
+            singlechecker = VaspChecker(name=myfolder,program_keys = dict(self.checker.keywords['program_keys']))
+            scaled = singlechecker.get_initial_structure_from_directory() 
+            defect = self.keywords['program_keys']['mast_defect_settings']
+            scalestring = scale_folder
+            for key in defect:
+                if 'subdefect' in key:
+                    subdefect = defect[key]
+                    sxtend = StructureExtensions(struc_work1=scaled, name=self.keywords['name'])
+                    scaled = sxtend.scale_defect_by_LMN(scalestring, subdefect, defect['coord_type'], defect['threshold'])
+                else:
+                    pass
+            singlechecker.write_final_structure_file(scaled)
         print "NOT DONE!"
 
     def complete_structure(self):

@@ -405,3 +405,34 @@ class StructureExtensions(MASTObj):
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)
         return returnstr
+    def scale_defect_by_LMN(self, scale, defect, coord_type, threshold):
+        """Scales the defect dictionary and returns the modified structure
+            Args:
+                keyword struc_work1: scaled-up structure
+                scale <str>: String "LxMxN" for scaling defect position
+                defect <dict>: Defect subdictionary (single 
+                               defect) of the form:
+                        {'symbol': 'cr', 'type': 'interstitial', 
+                    'coordinates': array([ 0. ,  0.5,  0. ])}}
+                coord_type <str>: cartesian or fractional
+                threshold <float>: Threshold for finding the
+                                   defect position in what may
+                                   be a relaxed, imperfect 
+                                   structure.
+            Returns:
+                defected structure <Structure>
+        """
+        mycoords = defect['coordinates']
+        scaledstr = self.keywords['struc_work1']
+        scalelist = scale.strip().split("x")
+        scale1 = float(scalelist[0])
+        scale2 = float(scalelist[1])
+        scale3 = float(scalelist[2])
+        #if newa is twice as big as olda, coordinate should be half as big
+        coorda = mycoords[0]/scale1
+        coordb = mycoords[1]/scale2
+        coordc = mycoords[2]/scale3
+        newdict = dict(defect)
+        newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
+        returnstr = self.induce_defect(newdict, coord_type, threshold)
+        return returnstr

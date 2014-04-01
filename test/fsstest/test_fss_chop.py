@@ -33,7 +33,7 @@ class TestFSSChopIngredient(unittest.TestCase):
             os.mkdir("%s/writedir/inducedefect_label1" % testdir)
     def tearDown(self):
         tearlist = list()
-        #tearlist.append("writedir")
+        tearlist.append("writedir")
         for foldername in tearlist:
             try:
                 shutil.rmtree(foldername)
@@ -71,9 +71,9 @@ class TestFSSChopIngredient(unittest.TestCase):
         kdict['label1']['subdefect2']['type']='antisite'
         kdict['label1']['subdefect2']['coordinates']=np.array([0.5,0.5,0.0])
         kdict['label1']['subdefect5']=dict()
-        kdict['label1']['subdefect5']['symbol']='O'
+        kdict['label1']['subdefect5']['symbol']='Al'
         kdict['label1']['subdefect5']['type']='vacancy'
-        kdict['label1']['subdefect5']['coordinates']=np.array([0.0,0.0,0.5])
+        kdict['label1']['subdefect5']['coordinates']=np.array([0.0,0.5,0.5])
         kdict['label1']['coord_type'] = 'fractional'
         kdict['label1']['threshold'] = 0.01
         kdict['label1']['charge'] = '2'
@@ -83,9 +83,9 @@ class TestFSSChopIngredient(unittest.TestCase):
         ddict['mast_program'] = 'vasp'
         myri = ChopIngredient(name=ingdir,program_keys=ddict, structure=None)
         myri.run_supercell_defect_set("gensc")
-        #my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
-        #defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_multi").structure.get_sorted_structure()
-        #self.assertEquals(my_defected, defected_compare)
-        #self.assertFalse(os.path.isfile("test_control/submitlist"))
-        #self.testclass.run_defect()
+        subfolder_list = dirutil.immediate_subdirs(ingdir, 1)
+        for subfolder in subfolder_list:
+            my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/%s/CONTCAR" % (ingdir, subfolder)).structure.get_sorted_structure()
+            defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/induced_defects/%s/CONTCAR" % subfolder).structure.get_sorted_structure()
+            self.assertEquals(my_defected, defected_compare)
 
