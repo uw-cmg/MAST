@@ -446,7 +446,7 @@ class InputParser(MASTObj):
                 # ingredient dictionary
                 ingredient_name = line.split()[1]
                 ingredient_dict = dict()
-            elif ('end' not in line):
+            elif (not (line == 'end')):
                 opt = line.split()
                 # print opt
                 if (opt[0] == 'mast_kpoints'):

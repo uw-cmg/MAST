@@ -172,7 +172,7 @@ mast_write_method            write_singlerun
 mast_ready_method            ready_singlerun
 mast_run_method              run_singlerun
 mast_complete_method         complete_singlerun
-mast_update_children_method  give_structure
+mast_update_children_method  give_structure; go_bananas
 end
 
 begin inducedefect
@@ -274,8 +274,7 @@ end
 begin perfect_stat_to_diffcoeff
 ibrion -1
 nsw 0
-#mast_multiplyencut 1.25
-mast_update_children_method copy_file_with_prepend OSZICAR OSZICAR; copy_file_with_prepend POSCAR POSCAR
+mast_update_children_method     copy_file_with_prepend OSZICAR OSZICAR; copy_file_with_prepend POSCAR POSCAR
 end
 
 begin nebstat_to_diffcoeff
