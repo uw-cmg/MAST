@@ -1,7 +1,7 @@
 """Tests for Chopingredient"""
 
 from MAST.ingredients.chopingredient import ChopIngredient
-
+import filecmp
 import unittest
 from unittest import SkipTest
 import os
@@ -10,6 +10,7 @@ import MAST
 import pymatgen
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
+from MAST.utility import MASTError
 import shutil
 import numpy as np
 testname="fsstest"
@@ -31,6 +32,12 @@ class TestFSSChopIngredient(unittest.TestCase):
             os.mkdir("%s/writedir" % testdir)
         if not os.path.isdir("%s/writedir/inducedefect_label1" % testdir):
             os.mkdir("%s/writedir/inducedefect_label1" % testdir)
+        if not os.path.isdir("%s/writedir/child_mislabeled" % testdir):
+            os.mkdir("%s/writedir/child_mislabeled" % testdir)
+        if not os.path.isdir("%s/writedir/child_scalewhat" % testdir):
+            os.mkdir("%s/writedir/child_scalewhat" % testdir)
+        if not os.path.isdir("%s/writedir/child_scale5" % testdir):
+            os.mkdir("%s/writedir/child_scale5" % testdir)
     def tearDown(self):
         tearlist = list()
         tearlist.append("writedir")
@@ -97,4 +104,30 @@ class TestFSSChopIngredient(unittest.TestCase):
         iscomplete = myri.complete_supercell_defect_set()
         self.assertFalse(iscomplete)
 
+    def test_give_supercell_subfolder_file(self):
+        ingdir="%s/writedir/induced_defects" % testdir
+        shutil.copytree("files/induced_defects", "%s/writedir/induced_defects" % testdir)
+        ingdirchildm="%s/writedir/child_mislabeled" % testdir
+        ingdirchildw="%s/writedir/child_scalewhat" % testdir
+        ingdirchild5="%s/writedir/child_scale5" % testdir
+        recipedir="%s/writedir" % testdir
+        topmetad = MASTFile("files/top_metadata_single")
+        topmetad.data.append("origin_dir = %s/files\n" % testdir) #give origin directory
+        topmetad.to_file("writedir/metadata.txt")
+        metad = MASTFile("files/metadata_single")
+        metad.data.append("defect_label = label1\n")
+        metad.to_file("%s/metadata.txt" % ingdir)
+        metad.to_file("%s/metadata.txt" % ingdirchildm)
+        metad.to_file("%s/metadata.txt" % ingdirchildw)
+        metad.to_file("%s/metadata.txt" % ingdirchild5)
+        ddict=dict()
+        ddict['mast_program'] = 'vasp'
+        myri = ChopIngredient(name=ingdir,program_keys=ddict, structure=None)
+        self.assertRaises(MASTError, myri.give_supercell_subfolder_file,"CONTCAR","POSCAR",ingdirchildm)
+        self.assertRaises(ValueError, myri.give_supercell_subfolder_file,"CONTCAR","POSCAR",ingdirchildw) 
+        myri.give_supercell_subfolder_file("CONTCAR","POSCAR",ingdirchild5) 
+        myri.give_supercell_subfolder_file("KPOINTS","KPOINTS",ingdirchild5)
+        self.assertTrue(filecmp.cmp("%s/POSCAR" % ingdirchild5, "%s/4x4x4/CONTCAR" % ingdir))
+        self.assertFalse(filecmp.cmp("%s/POSCAR" % ingdirchild5, "%s/2x2x2/CONTCAR" % ingdir))
+        self.assertTrue(filecmp.cmp("%s/KPOINTS" % ingdirchild5, "%s/4x4x4/KPOINTS" % ingdir))
 

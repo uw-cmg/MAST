@@ -842,6 +842,10 @@ class ChopIngredient(BaseIngredient):
         else:
             return False
     def complete_supercell_defect_set(self):
+        """Check that a supercell defect set is complete
+            by making sure that there is an ending structure
+            (CONTCAR for VASP) in every subfolder.
+        """
         myname = self.keywords['name']
         mysubdirs = dirutil.immediate_subdirs(myname)
         oklist=list()
@@ -875,11 +879,38 @@ class ChopIngredient(BaseIngredient):
             self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
     
-    def give_supercell_defect_structure(self):
-        pass
+    def give_supercell_subfolder_file(self, oldfname, newfname, childname):
+        """Give each CONTCAR to a corresponding scale1 through scale5
+            child folder.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory name (fullpath)
+        """
+        myname = self.keywords['name']
+        childbase = os.path.basename(childname)
+        if not "scale" in childbase:
+            raise MASTError(self.__class__.__name__,"Child directory %s needs 'scale' in its name" % childname)
+        namesplit = childbase.split("_")
+        for nspl in namesplit:
+            if "scale" in nspl:
+                scalestr = nspl
+                break
+        scaleidx = int(scalestr.strip()[5:]) - 1 #e.g. scale3 = index 2
+        subdirs = dirutil.immediate_subdirs(myname)
+        mysubdir = subdirs[scaleidx]
+        self.copy_file(os.path.join(mysubdir, oldfname),newfname,childname)
+        
 
-    def give_supercell_defect_kpoints(self):
-        pass
+
+    def give_supercell_defect_kpoints(self, childname):
+        """Give each KPOINTS to a corresponding scale1 through scale5
+            child folder.
+        """
+        myname = self.keywords['name']
+        if not "scale" in childname:
+            raise MASTError(self.__class__.__name__,"Child directory %s needs 'scale' in its name" % childname)
+        subdirs = dirutil.immediate_subdirs(myname)
 
 
 
