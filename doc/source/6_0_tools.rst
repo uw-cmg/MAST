@@ -37,7 +37,7 @@ Usage of diffusion coefficient calculation tool code:
 
 2.  The code currently will work in the same directory with other MAST generated folders (``neb_vac*``, ``phonon_vac*``, etc.)
 
-3.  Type ``$MAST_INSTALL_PATH/MAST/utility/diff.py -i <input>`` to run.
+3.  Type ``$MAST_INSTALL_PATH/MAST/utility/diffusion_coefficient/diff_v2.py -i <input>`` to run.
 
 4.  The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
 
@@ -88,7 +88,7 @@ Below are two examples of input files::
     E4 vac4 vac4-vac3 
     E0 vac0 vac00-vac0
     HVf  0.5
-    #HVf can also be given as 'perfect vac'
+    #HVf can also be given as 'vac perfect'
     HB  perfect  sub  vac-sub  vac
     $end
 

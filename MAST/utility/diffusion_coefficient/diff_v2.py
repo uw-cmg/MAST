@@ -92,8 +92,11 @@ print "TYPES: ", types
 Edir = get_item_name(inp,'E')
 Hdir = get_item_name(inp,'H')
 lattice = get_item_name(inp,'lattice')['lattice']
+print "Lattice: ", lattice
 numatom = get_latt(lattice)['No.']
+print "numatom: ", numatom
 a = get_latt(lattice)['a']
+print "a: ", a
 if types['type']==8: c = get_latt(lattice)['c']
 
 for i in vdir.keys(): 
@@ -126,6 +129,8 @@ def get_HB_and_HVf(Hdir,keyword):
                 while not 'E0' in line[pt]: pt = pt - 1
                 ene[key] = float(getinfo(line[pt])[4])
         if keyword=='HVf':
+            print "vac energy: ", ene['vac']
+            print "perfect energy: ", ene['perfect']
             return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
         elif keyword=='HB':
             return ene['perfect'] + ene['vac-sub'] - ene['sub'] - ene['vac']
@@ -206,10 +211,14 @@ kB = 11604.52
 for freq in Edir.keys():
     if len(Edir[freq])==1: enebarr[freq] = Edir[freq][0]
     else: enebarr[freq] = get_saddle(Edir,Edir_neb)[freq] - get_end(Edir,Edir_def)[freq]
+print "enebarr: ", enebarr
 v = get_v(vdir,vdir_num,vdir_denom)
+print "v: ", v
 HVf = get_HB_and_HVf(Hdir,'HVf')
+print "HVf: ", HVf
 if types['type']==8:
     HB = get_HB_and_HVf(Hdir,'HB')
+    print "HB: ", HB
     
 
 try:
