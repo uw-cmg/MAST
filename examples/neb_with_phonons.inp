@@ -301,7 +301,7 @@ mast_program None
 mast_write_method           write_ingred_input_file diffcoeff_input.txt diff_allowed_keywords.py 0;write_submit_script
 mast_ready_method           file_exists diffcoeff_input.txt
 mast_run_method             run_singlerun
-mast_complete_method        no_setup
+mast_complete_method        file_exists Diffusivity.txt
 mast_update_children_method no_update
 mast_exec python $MAST_INSTALL_PATH/MAST/utility/diffusion_coefficient/diff_v2.py -i diffcoeff_input.txt
 #inputs below
