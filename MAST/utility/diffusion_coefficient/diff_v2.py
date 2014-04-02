@@ -2,7 +2,7 @@
 import sys, getopt, os
 import numpy as np
 import pymatgen as mg
-
+from MAST.utility import fileutil
 def getinfo(line):
     line=line.strip('\n')
     data=line.split(' ')
@@ -158,23 +158,46 @@ def get_v(vdir,vdir_num,vdir_denom):
         else:
             try: v_num[freq]=float(vdir_num[freq])
             except ValueError:
-                fn=open(vdir_num[freq]+'_FREQ','r')
-                freqn=getinfo(fn.readline())
-                i=0
-                v_num[freq]=1.0
-                while i<len(freqn):
-                    if not float(freqn[i])==0.0: v_num[freq]=v_num[freq]*float(freqn[i])
-                    i+=1
-                    
+                if os.path.isfile(vdir_num[freq]+'_FREQ'):
+                    fn=open(vdir_num[freq]+'_FREQ','r')
+                    freqn=getinfo(fn.readline())
+                    i=0
+                    v_num[freq]=1.0
+                    while i<len(freqn):
+                        if not float(freqn[i])==0.0: v_num[freq]=v_num[freq]*float(freqn[i])
+                        i+=1
+                    fn.close()
+                else: #TTM add OUTCAR direct reading block
+                    fname = vdir_num[freq]+'_OUTCAR'
+                    thzlist = fileutil.grepme(fname, "THz")
+                    v_num[freq]=1.0
+                    for idx in range(0, len(thzlist)):
+                        thzline = thzlist[idx]
+                        thzsplit = thzline.split()
+                        label = thzsplit[1]
+                        if not 'i' in label:
+                            v_num[freq] = v_num[freq]*float(thzsplit[3])
             try: v_denom[freq]=float(vdir_denom[freq])
             except ValueError:
-                fd=open(vdir_denom[freq]+'_FREQ','r')
-                freqd=getinfo(fd.readline())
-                i=0
-                v_denom[freq]=1.0
-                while i<len(freqd):           
-                    if not float(freqd[i])==0.0: v_denom[freq]=v_denom[freq]*float(freqd[i])
-                    i+=1
+                if os.path.isfile(vdir_num[freq]+'_FREQ'):
+                    fd=open(vdir_denom[freq]+'_FREQ','r')
+                    freqd=getinfo(fd.readline())
+                    i=0
+                    v_denom[freq]=1.0
+                    while i<len(freqd):           
+                        if not float(freqd[i])==0.0: v_denom[freq]=v_denom[freq]*float(freqd[i])
+                        i+=1
+                    fd.close()
+                else: #TTM add OUTCAR direct reading block
+                    fname = vdir_denom[freq]+'_OUTCAR'
+                    thzlist = fileutil.grepme(fname, "THz")
+                    v_denom[freq]=1.0
+                    for idx in range(0, len(thzlist)):
+                        thzline = thzlist[idx]
+                        thzsplit = thzline.split()
+                        label = thzsplit[1]
+                        if not 'f/i' in label:
+                            v_denom[freq] = v_denom[freq]*float(thzsplit[3])
             v[freq]=v_num[freq]/v_denom[freq]*10**12
     return v
 

@@ -137,6 +137,7 @@ class ChopIngredient(BaseIngredient):
             if myenergy > highenergy:
                 highenergystr = subdir
                 highenergy = myenergy
+        self.logger.info("Saddle directory: %s" % highenergystr)
         return highenergystr
 
     def copy_saddle_file(self, oldfname, newfname, childname=""):
@@ -148,7 +149,7 @@ class ChopIngredient(BaseIngredient):
                 childname <str>: Child directory
         """
         saddledir = self.get_saddle_dir()
-        self.copy_file("%s/oldfname" % saddledir, newfname, childname)
+        self.copy_file("%s/%s" % (saddledir, oldfname), newfname, childname)
         return
     def copy_saddle_file_with_prepend(self, oldfname, newfname, childname=""):
         """Forward a file from the saddle of a NEB calculation with
@@ -166,7 +167,7 @@ class ChopIngredient(BaseIngredient):
         saddledir = self.get_saddle_dir()
         ingname = os.path.basename(self.keywords['name'])
         prependedname = "%s_%s" % (ingname, newfname)
-        self.copy_file("%s/oldfname" % saddledir, prependedname, childname)
+        self.copy_file("%s/%s" % (saddledir, oldfname), prependedname, childname)
         return
     
     def softlink_file(self, linkfrom="", linkto="", childdir=""):
