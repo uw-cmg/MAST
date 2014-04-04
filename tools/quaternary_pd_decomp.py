@@ -26,15 +26,15 @@ def get_decomp(o_chem_pot, mycomp, verbose=1):
     entries = a.get_entries_in_chemsys(ellist)
     #entries = a.get_entries_in_chemsys(['La', 'Mn', 'O', 'Fe'])
     pd = PhaseDiagram(entries)
-    gppd = GrandPotentialPhaseDiagram(entries,{'O': float(o_chem_pot)})
+    gppd = GrandPotentialPhaseDiagram(entries,{Element('O'): float(o_chem_pot)})
     print gppd
     #plotter = PDPlotter(gppd)
     #plotter.show()
 
     gppda = PDAnalyzer(gppd)
-    mychempots = gppda.get_composition_chempots(mycomp)
-    print "My chem pots:"
-    print mychempots
+    #mychempots = gppda.get_composition_chempots(mycomp)
+    #print "My chem pots:"
+    #print mychempots
     mydecompgppd = gppda.get_decomposition(mycomp)
     #pdentry = PDEntry(mycomp, 0)
     #print "Decomp and energy:"
@@ -48,8 +48,8 @@ def get_decomp(o_chem_pot, mycomp, verbose=1):
     if verbose:
         for (entry,amount) in mydecompgppd.iteritems():
             print "%s: %3.3f" % (entry.name, amount)
-            mymurangegppd = gppda.getmu_range_stability_phase(Composition(entry.name),Element('O'))
-            print mymurangegppd
+            #mymurangegppd = gppda.getmu_range_stability_phase(Composition(entry.name),Element('O'))
+            #print mymurangegppd
         #for (entry,amount) in mydecomppd.iteritems():
         #    print "%s: %3.3f" % (entry.name, amount)
         print ""
