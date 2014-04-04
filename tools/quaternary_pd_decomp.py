@@ -56,5 +56,9 @@ def get_decomp(o_chem_pot, mycomp, verbose=1):
     return mydecompgppd
 
 mycomp = Composition(La=1,Mn=0.4,Fe=0.6,O=3)
-for ocp in [-10,-7,-5,-2]:
+import numpy as np
+import sys
+myrange = np.arange(-12,1,0.25)
+
+for ocp in myrange:
     get_decomp(ocp, mycomp)
