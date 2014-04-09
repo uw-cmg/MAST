@@ -88,7 +88,7 @@ Below are two examples of input files::
     E4 vac4 vac4-vac3 
     E0 vac0 vac00-vac0
     HVf  0.5
-    #HVf can also be given as 'vac perfect'
+    #HVf can also be given as 'perfect vac'
     HB  perfect  sub  vac-sub  vac
     $end
 
