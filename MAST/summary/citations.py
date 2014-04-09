@@ -4,7 +4,7 @@ import time
 from MAST.utility import fileutil
 citation_dict=dict()
 citation_dict['mast']=list()
-citation_dict['mast'].append("MAterials Simulation Toolkit (MAST). T. Angsten, T. Mayeshiba, H. Wu, and D. Morgan, New J. Phys. 16, 015018 (2014). doi:10.1088/1367-2630/16/1/015018")
+citation_dict['mast'].append("MAterials Simulation Toolkit (MAST). Developed at the University of Wisconsin-Madison under NSF award number 1148011. First use cited in T. Angsten, T. Mayeshiba, H. Wu, and D. Morgan, New J. Phys. 16, 015018 (2014). doi:10.1088/1367-2630/16/1/015018")
 citation_dict['vasp']=list()
 citation_dict['vasp'].append("Vienna Ab initio Simulation Package (VASP). https://www.vasp.at")
 citation_dict['vasp'].append("G. Kresse and J. Hafner, Phys. Rev. B 47 , 558 (1993).")
