@@ -26,8 +26,8 @@ citation_dict['spglib'].append("Spglib project acknowledges Yusuke Seto for the 
 ###More pymatgen citations may be added depending on which modules are additionally used by MAST.
 citation_dict['python']=list()
 citation_dict['python'].append("Python. http://www.python.org")
-citation_dict['geneticalgorithm']=list()
-citation_dict['geneticalgorithm'].append("The Genetic Algorithm code used in the MAST package (as the structopt package) was created at the University of Wisconsin-Madison by Amy Kaczmarowski and tested by Hyunseok Ko and Min Yu, under the research direction of Professor Dane Morgan.")
+citation_dict['structopt']=list()
+citation_dict['structopt'].append("The 'structopt' package for implementing genetic algorithms on clusters was created 2012-2014 at the University of Wisconsin-Madison by Amy Kaczmarowski and tested by Hyunseok Ko and Min Yu, under the research direction of Professor Dane Morgan.")
 def get_citations(recipedir):
     """Use mast_exec lines from the recipe directory in order
         to assign a CITATIONS section to the SUMMARY.txt file.
@@ -53,7 +53,7 @@ def get_citations(recipedir):
         if 'phon' in mastexec.lower():
             mylist.append('phon')
         if 'structopt' in mastexec.lower():
-            mylist.append('geneticalgorithm')
+            mylist.append('structopt')
     linelist.append("==================================")
     linelist.append("----------- CITATIONS-------------")
     linelist.append("==================================")
