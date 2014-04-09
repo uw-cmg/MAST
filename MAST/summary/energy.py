@@ -27,7 +27,8 @@ def main(ingname=""):
             estr = "energies (eV)"
             for subdir in dirutil.immediate_subdirs(ingname):
                 mychecker = VaspChecker(name="%s/%s" % (ingname, subdir))
-                estr = estr + ";%3.3f" % mychecker.get_energy_from_energy_file()            return estr
+                estr = estr + ";%3.3f" % mychecker.get_energy_from_energy_file()
+            return estr
         else:
             mychecker = VaspChecker(name=ingname)
             return "energy (eV);%3.3f" % mychecker.get_energy_from_energy_file()
