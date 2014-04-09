@@ -54,8 +54,8 @@ def get_item_name(inp,keyword):
                 elif line[0] == 'HVf':
                     if len(line) > 2:
                         item_name['HVf'] = dict()
-                        item_name['HVf']['vac'] = line[1]
-                        item_name['HVf']['perfect'] = line[2]
+                        item_name['HVf']['perfect'] = line[1]
+                        item_name['HVf']['vac'] = line[2]
                     else:
                         item_name['HVf'] = float(line[1])
             elif keyword=='temp' and 'temp' in line[0]:
@@ -88,15 +88,16 @@ opts, args = getopt.getopt(argv,"i")
 inp = args[0]
 vdir = get_item_name(inp,'v')
 types = get_item_name(inp,'type')
-print "TYPES: ", types
 Edir = get_item_name(inp,'E')
 Hdir = get_item_name(inp,'H')
 lattice = get_item_name(inp,'lattice')['lattice']
-print "Lattice: ", lattice
 numatom = get_latt(lattice)['No.']
-print "numatom: ", numatom
+# need to get MAST to pass on POSCAR as well as OSZICAR for the following to be able to change numatom behavior properly
+#perfect = get_item_name(inp,'H')['HVf']['perfect']
+#vacancy = get_item_name(inp,'H')['HVf']['vac']
+#numatom_perfect = get_latt(perfect)['No.']
+#numatom_vacancy = get_latt(vacancy)['No.']
 a = get_latt(lattice)['a']
-print "a: ", a
 if types['type']==8: c = get_latt(lattice)['c']
 
 for i in vdir.keys(): 
@@ -128,11 +129,10 @@ def get_HB_and_HVf(Hdir,keyword):
                 pt = -1   
                 while not 'E0' in line[pt]: pt = pt - 1
                 ene[key] = float(getinfo(line[pt])[4])
-        if keyword=='HVf':
-            print "vac energy: ", ene['vac']
-            print "perfect energy: ", ene['perfect']
+        if keyword=='HVf': #HHW numatom behavior need to be changed for HVf calculation
             return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
-        elif keyword=='HB':
+            # return ene['vac'] - (numatom_vacancy)*ene['perfect']/numatom_perfect
+        elif keyword=='HB': #HHW additional checks for numatom will be needed for HB calculation (though not as likely)
             return ene['perfect'] + ene['vac-sub'] - ene['sub'] - ene['vac']
 
 def get_saddle(Edir,Edir_neb):
@@ -157,6 +157,7 @@ def get_end(Edir,Edir_def):
                 eneend[freq] = float(getinfo(line[pt])[4])
     return eneend
 
+#HHW need to add check for number of frequencies found
 def get_v(vdir,vdir_num,vdir_denom):
     for freq in vdir.keys():
         if len(vdir[freq])==1: v[freq] = vdir[freq][0]*10**12
@@ -211,15 +212,32 @@ kB = 11604.52
 for freq in Edir.keys():
     if len(Edir[freq])==1: enebarr[freq] = Edir[freq][0]
     else: enebarr[freq] = get_saddle(Edir,Edir_neb)[freq] - get_end(Edir,Edir_def)[freq]
-print "enebarr: ", enebarr
 v = get_v(vdir,vdir_num,vdir_denom)
-print "v: ", v
+v_THz = v  # attempt freq in THz for screen output
+for freq in vdir.keys():
+    v_THz[freq] = v[freq]*10**(-12)
 HVf = get_HB_and_HVf(Hdir,'HVf')
-print "HVf: ", HVf
 if types['type']==8:
     HB = get_HB_and_HVf(Hdir,'HB')
-    print "HB: ", HB
-    
+
+
+# print all system information
+if types['type']==5:
+    print "FCC Five-Frequency Diffusion Model"
+    print "FCC lattice constant [angstrom]: {0:.4f}".format(a*10**8)
+    print "Energy Barriers [eV]:       E0: {E0:.4f}  E1: {E1:.4f}  E2: {E2:.4f}  E3: {E3:.4f}  E4: {E4:.4f}".format(**enebarr)
+    print "Attempt Frequencies [THz]:  v0: {v0:.4f}  v1: {v1:.4f}  v2: {v2:.4f}  v3: {v3:.4f}  v4: {v4:.4f}".format(**v_THz)
+    print "Vacancy Formation Energy [eV]: {0:.4f}\n".format(HVf)
+    print ""
+if types['type']==8:
+    print "HCP Eight-Frequency Diffusion Model"
+    print "HCP basal lattice constant  [angstrom]: {0:.4f}".format(a*10**8)
+    print "HCP c-axis lattice constant [angstrom]: {0:.4f}".format(c*10**8)
+    print "Energy Barriers [eV]:       Ea: {Ea:.4f}  Eb: {Eb:.4f}  Ec: {Ec:.4f}  EX: {EX:.4f}  E'a: {Eap:.4f}  E'b: {Ebp:.4f}  E'c: {Ecp:.4f}  E'X: {EXp:.4f}".format(**enebarr)
+    print "Attempt Frequencies [THz]:  va: {va:.4f}  vb: {vb:.4f}  vc: {vc:.4f}  vX: {vX:.4f}  v'a: {vap:.4f}  v'b: {vbp:.4f}  v'c: {vcp:.4f}  v'X: {vXp:.4f}".format(**v_THz)
+    print "Vacancy Formation Energy [eV]: {0:.4f}".format(HVf)
+    print "Vacancy-Solute Binding Energy [eV]:  {0:.4f}\n".format(HB)
+
 
 try:
     temp = get_item_name(inp,'temp')['temp']
