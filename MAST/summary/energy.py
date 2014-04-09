@@ -1,8 +1,8 @@
 import os
 import sys
 from MAST.utility import Metadata
+from MAST.utility import dirutil
 from MAST.ingredients.checker import VaspChecker
-from MAST.ingredients.checker import VaspNEBChecker
 def main(ingname=""):
     """Get the energy from an ingredient.
         Args:
@@ -22,14 +22,14 @@ def main(ingname=""):
         myprogram = "None"
     if 'induce' in ingname: #skip inducedefect ingredients
         myprogram = "None"
-    if myprogram == 'vasp':
+    if 'vasp' in myprogram:
         if os.path.isdir("%s/01" % ingname):
-            myprogram = 'vasp_neb' #probably a NEB static
+            estr = "energies (eV)"
+            for subdir in dirutil.immediate_subdirs(ingname):
+                mychecker = VaspChecker(name="%s/%s" % (ingname, subdir))
+                estr = estr + ";%3.3f" % mychecker.get_energy_from_energy_file()            return estr
         else:
             mychecker = VaspChecker(name=ingname)
             return "energy (eV);%3.3f" % mychecker.get_energy_from_energy_file()
-    if myprogram == 'vasp_neb':
-        mychecker = VaspNEBChecker(name=ingname)
-        return "energy (eV);%s" % mychecker.get_energy_from_energy_file()
     else:
         return "energy (eV);N/A"
