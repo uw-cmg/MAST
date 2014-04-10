@@ -31,8 +31,11 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
             self.bandgap_lda_or_gga <float>: LDA or GGA bandgap (usually
                                              underestimated)
             self.bandgap_hse_or_expt <float>: HSE or experimental bandgap
-            self.e_defects <dict>: Defect formation energy dictionary
-                self.e_defects[conditions][label] = <float>
+            self.e_defects <dict of list of tuples>: 
+                Defect formation energy dictionary, by charge
+                self.e_defects[conditions][label] =
+                    [(charge <float>, dfe <float>),
+                     (charge <float>, dfe <float), etc.]
     """
 
     def __init__(self, inputtxt="", plot_threshold=0.01):
@@ -50,8 +53,11 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         self.ingdir = os.getcwd() #Should be run in current directory
         self.recdir = os.path.dirname(self.ingdir)
         self.plot_threshold = plot_threshold
-        ipparser = InputParser(inputfile=os.path.join(self.recdir,'input.inp'))
+        ipdir = os.path.join(self.recdir,'input.inp')
+        os.chdir(self.recdir) #change to recipe directory
+        ipparser = InputParser(inputfile=ipdir)
         self.input_options = ipparser.parse()
+        os.chdir(self.ingdir) #change back to ingredient directory
         self.dirs = dict()
         self.bandgap_lda_or_gga = 0.0
         self.bandgap_hse_or_expt = 0.0
@@ -92,7 +98,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
                 continue
             if len(dline) == 0:
                 continue
-            dsplit = dline.split("=")
+            dsplit = dline.split("=",1)
             dkey = dsplit[0]
             dval = dsplit[1]
             if dkey[0:4] == "dfe_":
@@ -102,32 +108,43 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
                 self.dirs[mylabel] = dict()
                 self.dirs[mylabel]['perfect']=myperfect
                 self.dirs[mylabel]['defected']=mydefected
-            elif dkey == "bandgap_lda_or_gga"
+            elif dkey == "bandgap_lda_or_gga":
                 self.bandgap_lda_or_gga = float(dval)
-            elif dkey == "bandgap_hse_or_expt"
+            elif dkey == "bandgap_hse_or_expt":
                 self.bandgap_hse_or_expt = float(dval)
             else:
                 pass
         return
-
-    def _calculate_defect_formation_energies(self):
-        try:
-            perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
-        except IndexError:
-            raise MASTError(self.__class__.__name__, "A perfect final directory (has no children and has the word 'perfect' in its name) could not be found. Check recipe %s for a perfect directory." % self.directory)
-
-        def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
-        #for whatever in sorted(def_dir):
-            #print whatever
-
-        defects = self.input_options.get_item('defects', 'defects')
+    def calculate_defect_formation_energies(self):
+        """Calculate all defect formation energies"""
         chempot = self.input_options.get_item('chemical_potentials')
+        for conditions, potentials in chempot.items():
+            print 'Conditions:  %s' % conditions.upper()
+            self.e_defects[conditions] = dict()
+            for mylabel in self.dirs.keys():
+                self.calculate_single_defect_formation_energy(mylabel, conditions, potentials)
 
-        perf_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, perf_dir))
-        e_perf = float(perf_meta.read_data('energy'))
-        efermi = self.get_fermi_energy(perf_dir)
-        struct_perf = self.get_structure(perf_dir)
 
+    def calculate_single_defect_formation_energy(self, mylabel, conditions, potentials):
+        """Calculate one defect formation energy.
+            Args:
+                mylabel <str>: Defect label
+                conditions <str>: Environment condition, e.g. "As-rich"
+                potentials <dict of float>: Dictionary of chemical potentials,
+                    e.g.:
+                    potentials['As']=-6.0383
+                    potentials['Ga']=-3.6080
+                    potentials['Bi']=-4.5650
+            Returns:
+                <float>: Defect formation energy
+        """
+        pdir = self.dirs[mylabel]['perfect']
+        ddir = self.dirs[mylabel]['defected']
+        #Get perfect data
+        perf_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.recdir, pdir))
+        e_perf = float(perf_meta.read_data('energy').split(',')[-1]) #Sometimes the energy is listed more than once.
+        efermi = self.get_fermi_energy(pdir)
+        struct_perf = self.get_structure(pdir)
         perf_species = dict()
         for site in struct_perf:
             if (str(site.specie) not in perf_species):
@@ -137,64 +154,52 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
 
         #print 'Perfect composition: ', perf_species
 
-        # First loop through the conditions for the defects
-        for conditions, potentials in chempot.items():
-            print 'Conditions:  %s' % conditions.upper()
-            self.e_defects[conditions] = dict()
+        #Get defected data
+        def_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.recdir, ddir))
+        #print def_meta
+        label = def_meta.read_data('defect_label')
+        charge = int(def_meta.read_data('charge'))
+        energy = float(def_meta.read_data('energy').split(',')[-1])
+        structure = self.get_structure(ddir)
+        if (label not in self.e_defects[conditions]):
+            self.e_defects[conditions][label] = list()
+        print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
+        def_species = dict()
+        for site in structure.sites:
+            if (site.specie not in def_species):
+                def_species[site.specie] = 1
+            else:
+                def_species[site.specie] += 1
 
-            # Loop through each defect
-            for ddir in sorted(def_dir):
-                def_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, ddir))
-                #print def_meta
-                label = def_meta.read_data('defect_label')
-                charge = int(def_meta.read_data('charge'))
-                energy = float(def_meta.read_data('energy'))
-                structure = self.get_structure(ddir)
+        # Find the differences in the number of each atom type
+        # between the perfect and the defect
+        struct_diff = dict()
+        for specie, number in def_species.items():
+            try:
+                nperf = perf_species[str(specie)]
+            except KeyError:
+                nperf = 0
+            struct_diff[str(specie)] = number - nperf
 
-                if (label not in self.e_defects[conditions]):
-                    self.e_defects[conditions][label] = list()
+        # Get the potential alignment correction
+        alignment = self.get_potential_alignment(pdir, ddir)
 
-                print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
-
-                # Find out how many atoms of each type are in the defects
-                def_species = dict()
-                for site in structure.sites:
-                    if (site.specie not in def_species):
-                        def_species[site.specie] = 1
-                    else:
-                        def_species[site.specie] += 1
-
-                # Find the differences in the number of each atom type
-                # between the perfect and the defect
-                struct_diff = dict()
-                for specie, number in def_species.items():
-                    try:
-                        nperf = perf_species[str(specie)]
-                    except KeyError:
-                        nperf = 0
-                    struct_diff[str(specie)] = number - nperf
-
-                # Get the potential alignment correction
-                alignment = self.get_potential_alignment(perf_dir, ddir)
-
-                # Calculate the base DFE energy
-                e_def = energy - e_perf # E_defect - E_perf
-                for specie, number in struct_diff.items():
-                    mu = potentials[str(specie)]
-                    #print str(specie), mu, number
-                    e_def -= (number * mu)
-                e_def += charge * (efermi + alignment) # Add in the shift here!
-                #print '%-15s%-5i%12.5f%12.5f%12.5f%12.5f' % (label.split('_')[1], charge, energy, e_perf, efermi, alignment)
-                print 'DFE = %f' % e_def
-                self.e_defects[conditions][label].append( (charge, e_def) )
-
-        #print e_defects
-        #return e_defects
+        # Calculate the base DFE energy
+        e_def = energy - e_perf # E_defect - E_perf
+        for specie, number in struct_diff.items():
+            mu = potentials[str(specie)]
+            #print str(specie), mu, number
+            e_def -= (number * mu)
+        e_def += charge * (efermi + alignment) # Add in the shift here!
+        #print '%-15s%-5i%12.5f%12.5f%12.5f%12.5f' % (label.split('_')[1], charge, energy, e_perf, efermi, alignment)
+        print 'DFE = %f' % e_def
+        self.e_defects[conditions][label].append( (charge, e_def) )
+        return
 
     def get_total_energy(self, directory):
         """Returns the total energy from a directory"""
 
-        abspath = '%s/%s/' % (self.directory, directory)
+        abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('vasprun.xml' in os.listdir(abspath)):
         # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
@@ -202,7 +207,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
 
     def get_fermi_energy(self, directory):
         """Returns the Fermi energy from a directory"""
-        abspath = '%s/%s/' % (self.directory, directory)
+        abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).efermi
@@ -212,7 +217,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
     def get_structure(self, directory):
         """Returns the final structure from an optimization"""
 
-        abspath = '%s/%s/' % (self.directory, directory)
+        abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
@@ -222,8 +227,8 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""
 
-        abs_path_perf = '%s/%s/' % (self.directory, perf_dir)
-        abs_path_def = '%s/%s/' % (self.directory, def_dir)
+        abs_path_perf = '%s/%s/' % (self.recdir, perf_dir)
+        abs_path_def = '%s/%s/' % (self.recdir, def_dir)
 
         pa = PotentialAlignment()
 
@@ -235,7 +240,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
 
     def get_defect_formation_energies(self):
         if not self.e_defects:
-            self._calculate_defect_formation_energies()
+            self.calculate_defect_formation_energies()
 
         return self.e_defects
 
@@ -264,4 +269,59 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         myfile.to_file(os.path.join(os.getcwd(),"dfe.txt"))
         for line in myfile.data:
             print line.strip()
+
+
+def run_dfe(inputtxt=""):
+    """Defect Formation Energy tool main portal for running DFE as an 
+        ingredient.
+        Args:
+            inputtxt <str>: Input text file for the DFE tool
+    """
+    DFE = DefectFormationEnergyIngredient(inputtxt)
+    DFE.calculate_defect_formation_energies()
+
+    proposedpath = 'dfe_results'
+    if not os.path.exists(proposedpath):
+        os.mkdir(proposedpath)
+    else:
+        raise MASTError('defect_formation_energy plot path',"Path at %s already exists." % proposedpath)
+
+    curdir = os.getcwd()
+    os.chdir(proposedpath)
+
+    DFE.print_table()
+    plotanything = True
+    
+    if not plotanything:
+        print 'Plotting skipped.'
+        return
+
+    bandgap = DFE.bandgap_lda_or_gga
+    real_gap = DFE.bandgap_hse_or_expt
+    if bandgap == 0.0:
+        print "No bandgap given. Plotting skipped."
+        os.chdir(curdir)
+        return
+
+    print 'Proceeding with a band gap of %.2f eV' % bandgap
+    gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+    gp.plot_levels()
+
+    if real_gap == 0.0:
+        os.chdir(curdir)
+        return
+
+    print 'Proceeding with a band gap of %.2f eV, rescaled to a real band gap of %f eV.' % (bandgap, real_gap)
+    gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies, real_gap=real_gap)
+    gp.plot_levels("_rescaled")
+    os.chdir(curdir)
+    return
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        run_dfe(sys.argv[1])
+    else:
+        run_dfe("input.txt")
+    sys.exit()
 

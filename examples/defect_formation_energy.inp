@@ -73,16 +73,16 @@ mast_write_method       write_ingred_input_file dfe_input.txt all 0 =; write_sub
 mast_ready_method       file_exists dfe_input.txt
 mast_run_method         run_singlerun
 mast_complete_method    file_exists DefectFormationEnergy.txt
-mast_exec               $MAST_INSTALL_PATH/MAST/utility/defect_formation_energy/dfe_ingredient.py
+mast_exec               python $MAST_INSTALL_PATH/MAST/utility/defect_formation_energy/dfe_ingredient.py dfe_input.txt
 #dfe_label  perfect_prefix  defected_prefix
-dfe_group1_n3 perfect_stat defect_group1_q=n3_stat
-dfe_group1_n2 perfect_stat defect_group1_q=n2_stat
-dfe_group1_n1 perfect_stat defect_group1_q=n1_stat
-dfe_group1_p0 perfect_stat defect_group1_q=p0_stat
-dfe_group2_p0 perfect_stat defect_group2_q=p0_stat
-dfe_group3_p0 perfect_stat defect_group3_q=p0_stat
-dfe_group3_p1 perfect_stat defect_group3_q=p1_stat
-dfe_group3_p2 perfect_stat defect_group3_q=p2_stat
+dfe_group1_n3 perfect_sp defect_group1_q=n3_sp
+dfe_group1_n2 perfect_sp defect_group1_q=n2_sp
+dfe_group1_n1 perfect_sp defect_group1_q=n1_sp
+dfe_group1_p0 perfect_sp defect_group1_q=p0_sp
+dfe_group2_p0 perfect_sp defect_group2_q=p0_sp
+dfe_group3_p0 perfect_sp defect_group3_q=p0_sp
+dfe_group3_p1 perfect_sp defect_group3_q=p1_sp
+dfe_group3_p2 perfect_sp defect_group3_q=p2_sp
 bandgap_lda_or_gga     3.5
 bandgap_hse_or_expt    4.1
 end
