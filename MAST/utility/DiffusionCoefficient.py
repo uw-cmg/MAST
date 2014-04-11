@@ -200,9 +200,9 @@ class ParsingInputFiles(object):
                         print 'WARNING: Numbers of non-zero frequencies at local minimum and at saddle point do not match! Please double-check the FREQ files of %s and %s'%(vdir_num[freq],vdir_denom[freq])
 
                 else: # Reading data from OUTCAR files
-        	    nthzlist = fileutil.grepme(vdir_num[freq]+'_OUTCAR', "THz")
+        	    nthzlist = fileutil.grepme(vdir_num[freq]+'_OUTCAR', "2PiTHz")
                     num_num=len(nthzlist)
-		    dthzlist = fileutil.grepme(vdir_denom[freq]+'_OUTCAR', "THz")
+		    dthzlist = fileutil.grepme(vdir_denom[freq]+'_OUTCAR', "2PiTHz")
            	    denom_num=len(dthzlist)
            	    im_num=0
            	    im_denom=0
