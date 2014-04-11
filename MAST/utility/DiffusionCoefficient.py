@@ -15,6 +15,7 @@ from MAST.utility import fileutil
 class ParsingInputFiles(object):
     """Parsing files of energy and frequency.
         Attributes:
+            self.inp <str>: input file name
             self.get_item_name <dict of dict>: get directories from input
             self.get_lattice <dict>: lattice information
             self.get_HB_and_HVf <float>: vacancy formation energy or/and binding energy
@@ -23,6 +24,7 @@ class ParsingInputFiles(object):
     """
     def __init__(self,inp):
         self.inp = inp
+        
     def getinfo(self,line):
         """Splitting a certain line with space and enter.
             Args:
@@ -79,28 +81,28 @@ class ParsingInputFiles(object):
                     item_name['temp'] = [float(line[1]),float(line[2]),float(line[3])]
                 elif keyword=='type' and 'type' in line[0]:
                     if line[0]=='type' and line[1]=='fcc_5freq':
-                        item_name['type'] = 5
+                        item_name = 5
                     elif line[0]=='type' and line[1]=='hcp_8freq':  
-                        item_name['type'] = 8
+                        item_name = 8
                 elif keyword=='lattice' and 'lattice' in line[0]:
-                    item_name['lattice'] = line[1]
+                    item_name = line[1]
         return item_name
     
-    def get_latt(self,types,lattice):
+    def get_latt(self,model,latt):
         """Obtaining lattice information from the POSCAR.
             Args:
                 types <dict>: type of frequency model, types={'types':<int>}
                 lattice <str>: specific name of the POSCAR given by the user
         """
         data={'a':0,'c':0,'No.':0}
-        os.system('cp '+lattice+'_POSCAR POSCAR')
+        os.system('cp '+latt+'_POSCAR POSCAR')
         struct = mg.read_structure('POSCAR')
         os.system('rm POSCAR')
         reduced = mg.symmetry.finder.SymmetryFinder(struct,0.001).get_primitive_standard_structure()   
         data['No.'] = len(struct)
-        if types['type']==5:
+        if model==5:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
-        if types['type']==8:
+        if model==8:
             data['a'] = reduced.lattice.abc[0]*10**(-8)
             data['c'] = reduced.lattice.abc[2]*10**(-8)
         return data
@@ -249,12 +251,12 @@ class DiffCoeff(ParsingInputFiles):
         vdir = self.get_item_name('v')        
         Edir = self.get_item_name('E')
         Hdir = self.get_item_name('H')
-        lattice = self.get_item_name('lattice')['lattice']
-        types = self.get_item_name('type')
-        numatom = self.get_latt(types,lattice)['No.']
-        values['a'] = self.get_latt(types,lattice)['a']
-        values['type'] = types
-        if types['type']==8: values['c'] = self.get_latt(types,lattice)['c']
+        latt = self.get_item_name('lattice')
+        model = self.get_item_name('type')
+        numatom = self.get_latt(model,latt)['No.']
+        values['a'] = self.get_latt(model,latt)['a']
+        values['type'] = model
+        if model==8: values['c'] = self.get_latt(model,latt)['c']
 
         for i in vdir.keys(): 
             if not len(vdir[i])==1:
@@ -276,7 +278,7 @@ class DiffCoeff(ParsingInputFiles):
             v_THz[freq] = v_THz[freq]*10**(-12)
         values['v_THz'] = v_THz
 	values['HVf'] = self.get_HB_and_HVf(Hdir,numatom,'HVf')
-        if types['type']==8:
+        if model==8:
             values['HB'] = self.get_HB_and_HVf(Hdir,numatom,'HB')
         return values
     
@@ -287,24 +289,24 @@ class DiffCoeff(ParsingInputFiles):
         kB = 11604.52
         jfreq = dict()
         values = self.init_values()
-        types = values['type']
+        model = values['type']
         enebarr = values['enebarr']
         v = values['v']
         v_THz = values['v_THz']
         a = values['a'] 
         HVf = values['HVf'] 
-        if types['type']==8: 
+        if model==8: 
             c = values['c'] 
             HB = values['HB'] 
 	# print all system information
-        if types['type']==5:
+        if model==5:
             print "FCC Five-Frequency Diffusion Model"
             print "FCC lattice constant [Angstrom]: {0:.4f}".format(a*10**8)
             print "Energy Barriers [eV]:       E0: {E0:.4f}  E1: {E1:.4f}  E2: {E2:.4f}  E3: {E3:.4f}  E4: {E4:.4f}".format(**enebarr)
             print "Attempt Frequencies [THz]:  v0: {v0:.4f}  v1: {v1:.4f}  v2: {v2:.4f}  v3: {v3:.4f}  v4: {v4:.4f}".format(**v_THz)
             print "Vacancy Formation Energy [eV]: {0:.4f}\n".format(HVf)
             print ""
-        if types['type']==8:
+        if model==8:
             print "HCP Eight-Frequency Diffusion Model"
             print "HCP basal lattice constant  [Angstrom]: {0:.4f}".format(a*10**8)
             print "HCP c-axis lattice constant [Angstrom]: {0:.4f}".format(c*10**8)
@@ -320,7 +322,7 @@ class DiffCoeff(ParsingInputFiles):
             tempstep = temp[1]
             tempend = temp[2]
         except: tempstart = 0.0; tempstep = 0.1; tempend = 2.0 # default temperature range
-        if types['type']==5:
+        if model==5:
             fp = open('Diffusivity.txt','w+')
             fp.write('1000/T(K^(-1))    D(cm^2/s)\n')
             print '1000/T(K^(-1))    D(cm^2/s)'
@@ -350,7 +352,7 @@ class DiffCoeff(ParsingInputFiles):
                 t = t + tempstep    
                 i = i + 1
             
-        elif types['type']==8:
+        elif model==8:
             fp = open('Diffusivity.txt','w+')
             fp.write('1000/T(K^(-1))    D_basal(cm^2/s)    D_c-axis(cm^2/s)\n')
             print '1000/T(K^(-1))    D_basal(cm^2/s)    D_c-axis(cm^2/s)'
@@ -383,7 +385,7 @@ class DiffCoeff(ParsingInputFiles):
                 t = t + tempstep
                 i = i + 1
 
-def main():
+def main():   
     argv = sys.argv[1:]
     opts, args = getopt.getopt(argv,"i")
     if len(sys.argv) < 2:
