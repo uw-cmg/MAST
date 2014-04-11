@@ -209,20 +209,20 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         """Returns the Fermi energy from a directory"""
         abspath = '%s/%s/' % (self.recdir, directory)
 
-        if ('vasprun.xml' in os.listdir(abspath)):
-            return Vasprun('%s/vasprun.xml' % abspath).efermi
-        elif ('OUTCAR' in os.listdir(abspath)):
+        if ('OUTCAR' in os.listdir(abspath)):
             return Outcar('%s/OUTCAR' % abspath).efermi
+        elif ('vasprun.xml' in os.listdir(abspath)):
+            return Vasprun('%s/vasprun.xml' % abspath).efermi
 
     def get_structure(self, directory):
         """Returns the final structure from an optimization"""
 
         abspath = '%s/%s/' % (self.recdir, directory)
 
-        if ('vasprun.xml' in os.listdir(abspath)):
-            return Vasprun('%s/vasprun.xml' % abspath).final_structure
-        elif ('CONTCAR' in os.listdir(abspath)):
+        if ('CONTCAR' in os.listdir(abspath)):
             return pmg.read_structure('%s/CONTCAR' % abspath)
+        elif ('vasprun.xml' in os.listdir(abspath)):
+            return Vasprun('%s/vasprun.xml' % abspath).final_structure
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""
