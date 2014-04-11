@@ -7,7 +7,7 @@ from MAST.utility import dirutil
 from MAST.utility import loggerutils
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
-
+from MAST.utility import MASTFile
 
 class MASTmon(object):
     """The MAST monitor runs on a submission node and checks
@@ -80,6 +80,13 @@ class MASTmon(object):
         os.chdir(self.scratch)
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
+            summarypath = "%s/%s/SUMMARY.txt" % (self._ARCHIVE, shortdir)
+            if os.path.isfile(summarypath):
+                self.logger.info("Recipe %s completed." % shortdir)
+                self.logger.info("SUMMARY.txt below:")
+                summarytext = MASTFile(summarypath)
+                for myline in summarytext.data:
+                    self.logger.info(myline.strip())
         self.logger.info("-----------------------------")
         self.logger.info("Recipe %s processed." % shortdir)
         self.logger.info("-----------------------------")

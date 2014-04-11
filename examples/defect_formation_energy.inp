@@ -73,7 +73,7 @@ mast_write_method       write_ingred_input_file dfe_input.txt all 0 =; write_sub
 mast_ready_method       file_exists dfe_input.txt
 mast_run_method         run_singlerun
 mast_complete_method    file_exists dfe_results/dfe.txt
-mast_exec               python $MAST_INSTALL_PATH/MAST/utility/defect_formation_energy/dfe_ingredient.py dfe_input.txt
+mast_exec               python $MAST_INSTALL_PATH/MAST/utility/defect_formation_energy/dfe_ingredient.py dfe_input.txt; cat dfe_results/dfe.txt
 #dfe_label  perfect_prefix  defected_prefix
 dfe_group1_n3 perfect_sp defect_group1_q=n3_sp
 dfe_group1_n2 perfect_sp defect_group1_q=n2_sp
@@ -105,6 +105,10 @@ $end
 
 $recipe
 recipe_file defect_formation_energy.txt 
+$end
+
+$summary
+_sp energy
 $end
 
 
