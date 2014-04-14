@@ -1,11 +1,15 @@
 import sys, os
 
 import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
+from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar, Oszicar
 from pymatgen.io.smartio import read_structure
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility.defect_formation_energy.defectformationenergy import DefectFormationEnergy
+from MAST.utility import loggerutils
+from MAST.utility import fileutil
+import logging
+from MAST.ingredients.checker import VaspChecker
 #from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
 from MAST.utility.defect_formation_energy.gapplot import GapPlot
@@ -36,6 +40,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
                 self.e_defects[conditions][label] =
                     [(charge <float>, dfe <float>),
                      (charge <float>, dfe <float), etc.]
+            self.logger <logging logger>
     """
 
     def __init__(self, inputtxt="", plot_threshold=0.01):
@@ -49,7 +54,8 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
                     bandgap_hse_or_expt=<float>
                 plot_threshold <float>: Plotting threshold value
         """
-        
+        self.logger = logging.getLogger('mastmon')
+        self.logger = loggerutils.add_handler_for_control(self.logger)
         self.ingdir = os.getcwd() #Should be run in current directory
         self.recdir = os.path.dirname(self.ingdir)
         self.plot_threshold = plot_threshold
@@ -142,7 +148,8 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         ddir = self.dirs[mylabel]['defected']
         #Get perfect data
         perf_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.recdir, pdir))
-        e_perf = float(perf_meta.read_data('energy').split(',')[-1]) #Sometimes the energy is listed more than once.
+        e_perf = self.get_total_energy(pdir)
+        #e_perf = float(perf_meta.read_data('energy').split(',')[-1]) #Sometimes the energy is listed more than once.
         efermi = self.get_fermi_energy(pdir)
         struct_perf = self.get_structure(pdir)
         perf_species = dict()
@@ -159,7 +166,8 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         #print def_meta
         label = def_meta.read_data('defect_label')
         charge = int(def_meta.read_data('charge'))
-        energy = float(def_meta.read_data('energy').split(',')[-1])
+        energy = self.get_total_energy(ddir)
+        #energy = float(def_meta.read_data('energy').split(',')[-1])
         structure = self.get_structure(ddir)
         if (label not in self.e_defects[conditions]):
             self.e_defects[conditions][label] = list()
@@ -200,10 +208,14 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         """Returns the total energy from a directory"""
 
         abspath = '%s/%s/' % (self.recdir, directory)
+        mychecker = VaspChecker(name=abspath)
+        return mychecker.get_energy_from_energy_file()
+        #if ('OSZICAR' in os.listdir(abspath)):
+        #    return Oszicar('%s/OSZICAR' % abspath).final_energy
 
-        if ('vasprun.xml' in os.listdir(abspath)):
-        # Modified from the PyMatGen Vasprun.final_energy() function to return E_0
-            return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
+        #elif ('vasprun.xml' in os.listdir(abspath)):
+        ## Modified from the PyMatGen Vasprun.final_energy() function to return E_0
+        #    return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
     def get_fermi_energy(self, directory):
         """Returns the Fermi energy from a directory"""
@@ -269,6 +281,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         myfile.to_file(os.path.join(os.getcwd(),"dfe.txt"))
         for line in myfile.data:
             print line.strip()
+            self.logger.info(line.strip())
 
 
 def run_dfe(inputtxt=""):
