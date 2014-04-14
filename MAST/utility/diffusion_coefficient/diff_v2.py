@@ -213,9 +213,9 @@ for freq in Edir.keys():
     if len(Edir[freq])==1: enebarr[freq] = Edir[freq][0]
     else: enebarr[freq] = get_saddle(Edir,Edir_neb)[freq] - get_end(Edir,Edir_def)[freq]
 v = get_v(vdir,vdir_num,vdir_denom)
-v_THz = v  # attempt freq in THz for screen output
+v_THz = v.copy()  # attempt freq in THz for screen output
 for freq in vdir.keys():
-    v_THz[freq] = v[freq]*10**(-12)
+    v_THz[freq] = v_THz[freq]*10**(-12)
 HVf = get_HB_and_HVf(Hdir,'HVf')
 if types['type']==8:
     HB = get_HB_and_HVf(Hdir,'HB')
