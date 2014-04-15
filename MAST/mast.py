@@ -212,7 +212,9 @@ class MAST(MASTObj):
 
     def set_sysname(self):
         """Set system name."""
-        element_str = self.get_element_string()
+        element_str = self.get_element_map_string()
+        if element_str == None:
+            element_str = self.get_element_string()
         system_name = self.input_options.get_item("mast", "system_name", "sys")
         self.sysname = system_name + '_' + element_str
         return
@@ -221,7 +223,8 @@ class MAST(MASTObj):
         """Get the system name and working directory.
         """
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
-        dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
+        #dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
+        dir_name = "%s_%s" % (self.sysname, self.timestamp)
         dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
         self.working_directory = dir_path
         return
@@ -240,4 +243,27 @@ class MAST(MASTObj):
             except KeyError:
                 elemok = 0
         return elemstr
+    def get_element_map_string(self):
+        """Get the element string from the elementmap section.
+            Returns:
+                elemstr <str>: element string from elementmap
+                                section of the input file,
+                                in order of X1, X2, etc.
+                If no elementmap section exists in the input file
+                (which, when put in dictionary form, has the
+                subsection name element_map), then the method
+                returns None
+        """
+        elemmap = self.input_options.get_item('structure','element_map')
+        if elemmap == None:
+            return None
+        elkeys = elemmap.keys()
+        elkeys.sort()
+        elstr=""
+        for elkey in elkeys:
+            elstr = elstr + elemmap[elkey]
+        if elstr == "":
+            return None
+        return elstr
+
 
