@@ -14,7 +14,7 @@
 
 
 \title{MAST Documentation}
-\date{February 11, 2014}
+\date{April 18, 2014}
 \release{20140131.coracle}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
@@ -3037,7 +3037,7 @@ This code currently supports 5(fcc) and 8(hcp) frequency models.
 The code currently will work in the same directory with other MAST generated folders (\code{neb\_vac*}, \code{phonon\_vac*}, etc.)
 
 \item {} 
-Type \code{\$MAST\_INSTALL\_PATH/MAST/utility/diff.py -i \textless{}input\textgreater{}} to run.
+Type \code{\$MAST\_INSTALL\_PATH/MAST/utility/diffusion\_coefficient/diff\_v2.py -i \textless{}input\textgreater{}} to run.
 
 \item {} 
 The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
@@ -3179,6 +3179,83 @@ Vienna Ab-initio Simulation Package, \href{https://www.vasp.at/}{VASP website}, 
 \end{itemize}
 
 
+\chapter{Programming for MAST}
+\label{12_0_programming:programming-for-mast}\label{12_0_programming::doc}
+
+\section{Object hierarchy}
+\label{12_0_programming:object-hierarchy}
+Several objects are created in MAST. The classes for these objects are in similarly named files, for example, class MyClass in file myclass.py.
+\begin{itemize}
+\item {} 
+When the user types \code{mast} or when crontab executes \code{mast}, a \textbf{MAST monitor} object is created (class MASTmon in MAST). This monitor is responsible for looking through the \code{\$MAST\_SCRATCH} directory for recipe folders.
+
+\item {} 
+For each recipe folder,
+\begin{itemize}
+\item {} 
+An \textbf{Input Options} object is created from the \code{input.inp} file (class InputOptions in MAST/utility, parsed from the input file through class InputParser in MAST/parsers)
+
+\item {} 
+A \textbf{Recipe Plan} object is created from that Input Options object and from the \code{personal\_recipe.txt} file (class RecipePlan in MAST/recipe)
+
+\end{itemize}
+
+\item {} 
+The status of the ingredients in the recipe is given by \code{status.txt}
+\begin{itemize}
+\item {} 
+Depending on the ingredient status, an \textbf{Ingredient} object is created using information from the Recipe Plan object (class ChopIngredient, inheriting from class BaseIngredient, in MAST/ingredients)
+
+\item {} 
+That Ingredient object may involve several \textbf{Checker} objects for different programs (class XXXChecker, MAST/ingredients/checker)
+
+\end{itemize}
+
+\end{itemize}
+
+
+\section{Code hooks in the input file}
+\label{12_0_programming:code-hooks-in-the-input-file}
+The most common modifications to MAST are expected to be:
+\begin{itemize}
+\item {} 
+Adding support for new programs, e.g. besides VASP
+
+\item {} 
+Adding new parent-child information transfer methods, for example:
+\begin{itemize}
+\item {} 
+Giving additional information to a child ingredient, like number of pairs
+
+\item {} 
+Accommodating different run structures, for example, forward on the least symmetric structure among several folders in the parent ingredient
+
+\end{itemize}
+
+\end{itemize}
+
+Both of these modifications are currently coded in \code{MAST/ingredients/chopingredient.py} and in \code{MAST/ingredients/checker}
+
+In the input file, the \code{mast\_xxxx\_method} keywords are direct hooks to methods in the \textbf{ChopIngredient} class.
+\begin{itemize}
+\item {} 
+Methods are separated by semicolons, and can include arguments (see \emph{3\_0\_inputfile})
+
+\item {} 
+The method in the ChopIngredient class may involve a checker, if they are generic but require program-specific treatment, for example, \code{forward\_final\_structure}.
+
+\item {} 
+Or, the method in the ChopIngredient class may not need a checker, if it is totally generic, for example, \code{copy\_file OLDNAME NEWNAME}
+
+\item {} 
+When used as an update method, please remember that the last argument to a method is going to be the child ingredient's directory, as determined by \code{personal\_recipe.txt} in the recipe folder.
+
+\end{itemize}
+
+Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of \code{MAST/ingredients/baseingredient.py}.
+Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)
+
+
 \chapter{Authors}
 \label{8_0_personnel::doc}\label{8_0_personnel:authors}
 
@@ -3215,13 +3292,6 @@ Jihad Naja (summer 2013)
 \item {} 
 Dr. Henry Wu + (summer 2013 - present)
 
-\end{itemize}
-
-The following additional team or project members are arranged by start date:
-\begin{itemize}
-\item {} 
-Ben Shrago (summer 2013)
-
 \item {} 
 Amy Kaczmarowski (fall 2013 - present)
 
@@ -3230,6 +3300,13 @@ Wei Xie (fall 2013 - present)
 
 \item {} 
 Zhewen Song + (fall 2013 - present)
+
+\end{itemize}
+
+The following additional team or project members are arranged by start date:
+\begin{itemize}
+\item {} 
+Ben Shrago (summer 2013)
 
 \end{itemize}
 

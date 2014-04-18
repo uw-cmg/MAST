@@ -194,11 +194,19 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
 
         # Calculate the base DFE energy
         e_def = energy - e_perf # E_defect - E_perf
+        print "TTM DEBUG: e_def: ", e_def
         for specie, number in struct_diff.items():
             mu = potentials[str(specie)]
             #print str(specie), mu, number
             e_def -= (number * mu)
+            print "TTM DEBUG: number: ", number
+            print "TTM DEBUG: mu: ", mu
+            print "TTM DEBUG: e_def -= number*mu: ", e_def
+        print "TTM DEBUG: charge: ", charge
+        print "TTM DEBUG: alignment: ", alignment
+        print "TTM DEBUG: efermi: ", efermi
         e_def += charge * (efermi + alignment) # Add in the shift here!
+        print "TTM DEBUG: e_def += charge*(efermi + alignment): ", e_def
         #print '%-15s%-5i%12.5f%12.5f%12.5f%12.5f' % (label.split('_')[1], charge, energy, e_perf, efermi, alignment)
         print 'DFE = %f' % e_def
         self.e_defects[conditions][label].append( (charge, e_def) )
@@ -222,7 +230,13 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('OUTCAR' in os.listdir(abspath)):
-            return Outcar('%s/OUTCAR' % abspath).efermi
+            grepfermi = fileutil.grepme("%s/OUTCAR" % abspath, "E-fermi")
+            lastfermi=grepfermi[-1]
+            fermi = float(lastfermi.split()[2])
+            print "TTM DEBUG LAST FERMI: ", fermi
+            return fermi
+            #print "TTM DEBUG: OUTCAR efermi: ", Outcar('%s/OUTCAR' % abspath).efermi
+            #return Outcar('%s/OUTCAR' % abspath).efermi
         elif ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).efermi
 
@@ -247,8 +261,11 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         if ('OUTCAR' in os.listdir(abs_path_perf)):
             perfect_info = pa.read_outcar('%s/%s' % (abs_path_perf, 'OUTCAR'))
             defect_info = pa.read_outcar('%s/%s' % (abs_path_def, 'OUTCAR'))
-
-            return pa.get_potential_alignment(perfect_info, defect_info)
+            print "TTM DEBUG: Perfect PA info: ", perfect_info
+            print "TTM DEBUG: Defected PA info: ", defect_info
+            pa_output = pa.get_potential_alignment(perfect_info, defect_info)
+            print "TTM DEBUG: PA output: ", defect_info
+            return pa_output
 
     def get_defect_formation_energies(self):
         if not self.e_defects:
