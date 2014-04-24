@@ -1,0 +1,25 @@
+Recipe NEBTreeTest
+#Here is the perfect section and a comment.
+perfect_opt1 (volrelax_to_singlerun)
+    perfect_opt2 (volrelax_to_singlerun)
+        perfect_stat (singlerun_to_phonon)
+        inducedefect_group1 (inducedefect)
+            defect_group1_q=n1_opt1 (singlerun_group1)
+                defect_group1_q=n1_opt2
+                    defect_group1_q=n1_stat (singlerun_to_phonon)
+        inducedefect_group3 (inducedefect)
+            defect_group3_q=n1_opt1 (singlerun_group3)
+                defect_group3_q=n1_opt2
+                    defect_group3_q=n1_stat (singlerun_to_phonon)
+defect_group1_q=n1_stat (singlerun_to_phonon)
+    phonon_group1_q=n1_int (phonon_to_phononparse)
+        phonon_group1_q=n1_int_parse (phononparse)
+defect_group1_q=n1_stat (singlerun_to_neb), defect_group3_q=n1_stat (singlerun_to_neb)
+    neb_group1-group3_q=n1_opt1 (neb_to_neb_group1-group3)
+        neb_group1-group3_q=n1_opt2 (neb_to_nebstat)
+            neb_group1-group3_q=n1_stat (nebstat_to_nebphonon)
+    neb_group1-group3_q=n1_opt2 (neb_to_nebstat)
+    neb_group1-group3_q=n1_stat (nebstat_to_nebphonon)
+neb_group1-group3_q=n1_stat (nebstat_to_nebphonon)
+    phonon_group1-group3_q=n1_host1 (phonon_to_phononparse)
+        phonon_group1-group3_q=n1_host1_parse (phononparse)

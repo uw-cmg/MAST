@@ -1,0 +1,35 @@
+perfect_opt1 (volrelax_to_vasp)
+    perfect_opt2 (volrelax_to_vasp)
+        perfect_stat (vasp_to_phonon)
+            perfect_phon (phonon_to_phon)
+                perfect_phon_parse (phon)
+        inducedefect1 (induce_defect)
+            defect1_opt1
+                defect1_opt2
+                    defect1_stat (vasp_to_phonon)
+                        defect1_phon (phonon_to_phon)
+                            defect1_phon_parse (phon)
+        inducedefect2 (induce_defect)
+            defect2_opt1
+                defect2_opt2
+                    defect2_stat (vasp_to_phonon)
+                        defect2_phon (phonon_to_phon)
+                            defect2_phon_parse (phon)
+        inducedefect3 (induce_defect)
+            defect3_opt1
+                defect3_opt2
+                    defect3_stat (vasp_to_phonon)
+                        defect3_phon (phonon_to_phon)
+                            defect3_phon_parse (phon)
+defect1_stat (vasp_to_neb), defect2_stat (vasp_to_neb)
+    neb_1-2_opt1 (neb_to_neb)
+        neb_1-2_opt2 (neb_to_nebstat)
+            neb_1-2_stat (nebstat_to_nebphonon)
+                neb_1-2_phon (phonon_to_phon)
+                    neb_1-2_phon_parse (phon)
+defect1_stat (vasp_to_neb), defect3_stat (vasp_to_neb)
+    neb_1-3_opt1 (neb_to_neb)
+        neb_1-3_opt2 (neb_to_nebstat)
+            neb_1-3_stat (nebstat_to_nebphonon)
+                neb_1-3_phon (phonon_to_phon)
+                    neb_1-3_phon_parse (phon)

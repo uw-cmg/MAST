@@ -1,0 +1,95 @@
+# Small demo for NEB workflow
+$mast
+system_name GATest
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes         1
+mast_ppn           1
+mast_queue         default
+mast_program       None
+end
+
+begin setup
+# need to add mastlib to python path to get lammps3.py
+# Amy's GAv14 is currently treated as closed-source
+mast_exec                    None
+structure  Defect
+atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
+filename   GAoutput
+nindiv   5
+maxgen   5
+#supercell   (3,3,3)
+supercell    (2,2,2)
+SolidFile   smallbulk.xyz
+#SolidFile  cBulk.xyz
+SolidCell   [8.728,8.728,8.728]
+#SolidCell [13.092,13.092,13.092]
+convergence_scheme   Gen_Rep_Min
+MUTPB  0.2
+CXPB 0.2
+mutation_options  ['Lattice_Alteration_small', 'Lattice_Alteration_Group', 'Rotation_geo']
+CALC_Method   MAST
+#CALC_Method   LAMMPS
+pair_style  tersoff
+pot_file    SiC.tersoff
+LammpsMin   1e-25 1e-25 5000 10000
+keep_Lammps_files False
+Lmin_style   cg
+genealogy   True
+allenergyfile  True
+BestIndsList   True
+#
+mast_write_method            write_ingred_input_file input.txt all 0 =
+mast_ready_method            no_setup
+mast_run_method              no_setup
+mast_complete_method         file_exists input.txt
+mast_update_children_method  copy_file input.txt input.txt
+end
+
+
+
+begin onegeneration
+mast_exec                  python //home/tam/tammast/test/gatest/fake_vasp.py
+mast_write_method           copy_fullpath_file //home/tam/tammast/test/gatest/SiC.tersoff; copy_fullpath_file //home/tam/tammast/test/gatest/smallbulk.xyz
+mast_ready_method           file_exists input.txt; file_exists SiC.tersoff; file_exists smallbulk.xyz
+mast_run_method             OptiIngredient.evaluate
+mast_complete_method        file_has_string GAoutput.txt "End of Execution"
+mast_update_children_method  no_update
+ibrion 2
+isif 2
+nsw 191
+mast_xc pbe
+mast_kpoints 1x1x1 G
+end
+
+
+$end
+
+$recipe
+recipe_file GA_test_split.txt
+$end

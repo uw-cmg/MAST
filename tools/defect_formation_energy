@@ -3,38 +3,154 @@
 import sys, os
 
 from MAST.utility.defect_formation_energy import DefectFormationEnergy
+from MAST.utility.defect_formation_energy import GapPlot
 from MAST.utility import Metadata
+from MAST.utility import MASTError
 
 
-def main():
+def main(prompt=False,dftbandgap="",hseorexptbandgap="",archive=""):
+    """Defect Formation Energy tool main portal.
+        Args:
+            prompt <bool>: True to use prompts.
+                           False to go through all options automatically,
+                               requiring additional arguments (default)
+            dftbandgap <float>: DFT (LDA or GGA) bandgap (optional)
+            hseorexptbandgap <float>: HSE or experimental bandgap for
+                                      "stretching" plots (optional)
+            archive <str>: archive directory (optional)
+                        if left blank, the MAST_ARCHIVE directory will be used.
+    """
     archive = os.path.expandvars(os.environ['MAST_ARCHIVE'])
 
     dir_list = os.listdir(archive)
-    print 'Found %i completed jobs in %s:\n' % (len(dir_list), archive)
+    print 'Found %i completed recipes in %s:\n' % (len(dir_list), archive)
 
     for ndir, directory in enumerate(dir_list):
         metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
-        system = metafile.read_data('system name')
-        date = metafile.read_data('directory created')
+        system = metafile.read_data('system_name')
+        date = metafile.read_data('directory_created')
 
-        print '%i) %s ran on %s' % (ndir, system, date)
+        print '%i) %s, which ran on %s' % (ndir, system, date)
+    
+    indexlist=list()
+    promptrecipe=prompt #use True to keep recipe prompting
+    if promptrecipe:
+        print '\nPlease select a recipe from the above list to calculate the defect formation energies for:'
+        index = int(sys.stdin.readline())
+        #print 'Index selected:', index
+        indexlist.append(index)
+    
+    else:
+        indexlist = range(0,len(dir_list))
+    print indexlist
+    for index in indexlist:
+        directory = dir_list[index]
+        metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
+        system = metafile.read_data('system_name')
+        date = metafile.read_data('directory_created')
 
-    print '\nPlease select a run from the above list to calculate the defect formation energies for:'
-    index = int(sys.stdin.readline())
-    #print 'Index selected:', index
+        print '--------------------------------------' 
+        print 'You have selected %s, which ran on %s.' % (system, date)
+        print 'Calculating defect formation energies now.'
 
-    directory = dir_list[index]
-    metafile = Metadata(metafile='%s/%s/metadata.txt' % (archive, directory))
-    system = metafile.read_data('system name')
-    date = metafile.read_data('directory created')
+        directory_path = '%s/%s' % (archive, directory)
+        try:
+            _run_dfe(directory_path, prompt, dftbandgap, hseorexptbandgap)
+        except MASTError, errormsg:
+            pass
+            #print errormsg    
+        print 'Finished analyzing %s, which ran on %s.' % (system, date)
+    print 'Have a nice day.'
+    sys.exit()
 
-    print 'You have selected %s ran on %s.' % (system, date)
-    print 'Calculating defect formation energies now.'
-
-    directory_path = '%s/%s/' % (archive, directory)
+def _run_dfe(directory_path, prompt, dftbandgap, hseorexptbandgap):
     DFE = DefectFormationEnergy(directory=directory_path)
-    #defect_energies = DFE.calculate_defect_formation_energies()
+    DFE._calculate_defect_formation_energies()
+    
+    proposedpath = os.path.basename(directory_path) + '_dfe_results'
+    if not os.path.exists(proposedpath):
+        os.mkdir(proposedpath)
+    else:
+        raise MASTError('defect_formation_energy plot path',"Path at %s already exists." % proposedpath)
+
+    curdir = os.getcwd()
+    os.chdir(proposedpath)
+
     DFE.print_table()
+    
+    if prompt:
+        print 'Do you wish to plot the band gap energy levels ([y]es/[n]o)?'
+        plotresponse = sys.stdin.readline().lower()
+    else:
+        plotresponse = 'y'
+    
+    plotanything = False
+    if 'y' in plotresponse:
+        plotanything = True
+    if not plotanything:
+        print 'Plotting skipped.'
+        return
+
+    undergap = False
+    bandgap=""
+    if prompt:
+        print 'Before plotting the levels, please specify a band gap:'
+        bandgap = float(sys.stdin.readline())
+        print 'Is this a LDA/GGA band gap ([y]es/[n]o)?'
+        response = sys.stdin.readline()
+        if 'y' in response:
+            undergap = True
+        elif 'n' in response:
+            undergap = False
+        else:
+            error = 'I do not recognize the answer %s ' % response
+            raise MASTError('defect_formation_energy', error)
+    else:
+        bandgap=dftbandgap
+        if hseorexptbandgap == "": #if don't give a real gap, assume this is an accurate bandgap and doesn't need stretching
+            undergap = False
+        else:
+            undergap = True
+
+    if undergap:
+        if prompt:
+            print 'Would you like to stretch your LDA/GGA results to the real band bap ([y]es/[n]o)?'
+            response = sys.stdin.readline()
+            if 'y' in response:
+                print 'Please specify the HSE/experimental band gap:'
+                real_gap = float(sys.stdin.readline())
+        else:
+            real_gap = hseorexptbandgap 
+    
+    if bandgap=="":
+        print "No bandgap given. Plotting skipped."
+        return
+
+    print 'Proceeding with a band gap of %.2f eV' % bandgap
+    gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+    gp.plot_levels()
+    
+    if undergap:
+        print 'Proceeding with a band gap of %.2f eV, rescaled to a real band gap of %f eV.' % (bandgap, real_gap)
+        gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies, real_gap=real_gap)
+        gp.plot_levels("_rescaled")
+    os.chdir(curdir)
+    return
+
 
 if __name__ == '__main__':
-    main()
+    dftbg=""
+    exptbg=""
+    myarch=""
+    if len(sys.argv) > 1:
+        if 'prompt' in sys.argv[1]:
+            main(True)
+        else:
+            dftbg = float(sys.argv[1])
+    if len(sys.argv) > 2:
+        exptbg = float(sys.argv[2])
+    if len(sys.argv) > 3:
+        myarch = sys.argv[3]
+    main(False, dftbg, exptbg, myarch)
+    sys.exit()
+

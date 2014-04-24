@@ -1,0 +1,78 @@
+# Small demo for NEB workflow
+$mast
+system_name GATest
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           1
+mast_queue         default
+mast_exec          //share/apps/vasp5.2_cNEB
+end
+
+begin generictest
+# need to add mastlib to python path to get lammps3.py
+# Amy's GAv14 is currently treated as closed-source
+mast_program                 None
+mast_exec                    python //home/tam/test_amy_GA/GAv14.py input.txt
+mast_complete_file           GAoutput.txt
+mast_complete_search         End of Execution
+mast_started_file            GAoutput.txt
+mast_copy_files //home/tam/tammast/test/gatest/SiC.tersoff //home/tam/tammast/test/gatest/cBulk.xyz
+mast_delimiter               =
+type  Defect
+atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
+filename   GAoutput
+nclust   5
+maxgen   5
+supercell   (3,3,3)
+SolidFile   cBulk.xyz
+SolidCell   [13.092,13.092,13.092]
+convergence_scheme   Max-Gen
+MUTPB  0.1
+mutation_options  ['Lattice_Alteration_small', 'Lattice_Alteration_Group', 'Rotation_geo']
+CALC_Method   LAMMPS
+pair_style  tersoff
+pot_file    SiC.tersoff
+LammpsMin   1e-25 1e-25 5000 10000
+keep_Lammps_files True
+Lmin_style   cg
+genealogy   True
+allenergyfile  True
+BestIndsList   True
+mast_write_method            copy_fullpath_file //home/tam/tammast/test/gatest/SiC.tersoff; copy_fullpath_file //home/tam/tammast/test/gatest/cBulk.xyz
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         file_has_string GAoutput.txt "End of Execution"
+mast_update_children_method  give_structure
+end
+$end
+
+$recipe
+recipe_file generic_test.txt
+$end

@@ -19,6 +19,7 @@ from MAST.utility import MASTFile
 #from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
+from MAST.utility import loggerutils
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
 #from MAST.parsers import InputPythonCreator
@@ -62,8 +63,7 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,
@@ -83,7 +83,7 @@ class MAST(MASTObj):
                 for ipfile in loopfiles:
                     self.keywords['inputfile']=ipfile
                     self.set_up_recipe()
-        except MASTError as errormsg:
+        except Exception,errormsg:
             self.logger.error(str(errormsg))
         self.logger.info("%%%%%%Finished processing inputfile.%%%%%%")
 
@@ -145,7 +145,7 @@ class MAST(MASTObj):
     def create_recipe_metadata(self):
         """Create the recipe metadata file.
         """
-        topmeta = Metadata(metafile='%s/metadata.txt' % self.working_directory)
+        topmeta = Metadata(metafile="%s/metadata.txt" % self.working_directory)
         topmeta.write_data('directory_created', self.asctime)
         topmeta.write_data('system_name', self.sysname)
         topmeta.write_data('origin_dir', self.origin_dir)
@@ -195,6 +195,7 @@ class MAST(MASTObj):
     def set_class_attributes(self):
         """Set class attributes, other than input options
         """
+        time.sleep(1)
         self.timestamp = time.strftime('%Y%m%dT%H%M%S')
         self.asctime = time.asctime()
         self.set_sysname()
@@ -221,7 +222,7 @@ class MAST(MASTObj):
         """
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
-        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
+        dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
         self.working_directory = dir_path
         return
 

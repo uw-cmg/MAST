@@ -1,0 +1,15 @@
+Recipe OptimizeWorkflow
+perfect_opt1 (lowmesh)
+    perfect_opt2
+        perfect_stat (static)
+        {begin}
+        inducedefect_<N> (inducedefect)
+            defect_<N>_<Q>_opt1 (lowmesh)
+                defect_<N>_<Q>_opt2
+                    defect_<N>_<Q>_stat (static)
+        {end}
+{begin}
+defect_<N>_<Q>_stat (static)
+    phonon_<N>_<Q>_<P> (phonon)
+        phonon_<N>_<Q>_<P>_parse (phononparse)
+{end}

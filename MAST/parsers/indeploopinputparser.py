@@ -22,37 +22,6 @@ ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
 
-MAST_KEYWORDS = {'program': 'vasp',
-                 'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
-                }
-
-STRUCTURE_KEYWORDS = {'posfile': None,
-                      'spacegroup': None,
-                      'symmetry_only': False,
-                      'coord_type': 'cartesian',
-                      'atom_list': None,
-                      'coordinates': None,
-                      'lattice': None,
-                      'primitive': False,
-                      'structure': None
-                     }
-
-DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
-                    'vacancy': list(),
-                    'interstial': list(),
-                    'antisite': list(),
-                    'substitution': list(),
-                   }
-
-INGREDIENTS_KEYWORDS = ['singlepoint',
-                        'optimization',
-                        'neb',
-                   ]
-
-RECIPE_KEYWORDS = {'recipe_file': None,
-                  }
-
 class IndepLoopInputParser(MASTObj):
 
     """Scans an input file for "indeploop" keyword and copies it into

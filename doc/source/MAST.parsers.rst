@@ -1,27 +1,20 @@
-parsers Package
-===============
+MAST.parsers package
+====================
 
-:mod:`parsers` Package
-----------------------
+Submodules
+----------
+
+.. toctree::
+
+   MAST.parsers.indeploopinputparser
+   MAST.parsers.inputparser
+   MAST.parsers.inputpythoncreator
+   MAST.parsers.recipetemplateparser
+
+Module contents
+---------------
 
 .. automodule:: MAST.parsers
     :members:
     :undoc-members:
     :show-inheritance:
-
-:mod:`inputparser` Module
--------------------------
-
-.. automodule:: MAST.parsers.inputparser
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`recipeparsers` Module
----------------------------
-
-.. automodule:: MAST.parsers.recipeparsers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-

@@ -1,0 +1,74 @@
+# Small demo for NEB workflow
+$mast
+system_name GATest
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           1
+mast_queue         default
+mast_exec          //share/apps/vasp5.2_cNEB
+end
+
+begin generictest
+mast_program                 None
+mast_exec                    python //home/tam/test_amy_GA/GAv14.py input.txt
+mast_complete_file           generictest/Bests.xyz
+mast_complete_search         None
+mast_started_file            generictest.txt
+mast_delimiter               =
+type  Defect
+atomlist  [('Si',0,28.0855,-5.3062),('C',4,12.011,-7.371)]
+filename   generictest
+nclust   5
+maxgen   5
+supercell   (3,3,3)
+SolidFile   //home/tam/test_amy_GA/cBulk.xyz
+SolidCell   [13.092,13.092,13.092]
+convergence_scheme   Max-Gen
+MUTPB  0.1
+mutation_options  ['Lattice_Alteration_small', 'Lattice_Alteration_Group', 'Rotation_geo']
+CALC_Method   LAMMPS
+pair_style  tersoff
+pot_file  //home/tam/test_amy_GA/SiC.tersoff
+LammpsMin   1e-25 1e-25 5000 10000
+Lmin_style   cg
+genealogy   True
+allenergyfile  True
+BestIndsList   True
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+$end
+
+$recipe
+recipe_file generic_test.txt
+$end

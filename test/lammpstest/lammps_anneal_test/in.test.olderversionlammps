@@ -1,0 +1,50 @@
+# Test lammps input for temperature ramp, anneal, then relaxation (to 0K)
+
+# basic system settings: particle type, units to use, periodic boundary types, timestep for MD simulation, thermodynamic output every N-timesteps
+atom_style	atomic
+units		metal
+boundary	p p p
+timestep	0.001
+thermo		1000
+
+# read in position file
+read_data	data.test
+ 
+# choose potential type and the potential file name
+# this section is quite different for different potential types
+# for certain potential types, setting the atomic mass would also be needed
+pair_style	tersoff
+pair_coeff * * SiC.tersoff Si C
+mass 1 28
+mass 2 12
+
+# creates the initial temperature distribution for MD simulation
+# keep in mind that if the starting atomic positions has been minimized,
+# then the temperature to be set here should be twice the temperature that you want
+# since that energy would be split into PE and KE.
+velocity	all create 1000.0 19237571 rot yes dist gaussian
+
+# dump out system information into a file
+# specific settings depends on what the GA needs
+# below dumps out atom positions every 5000 timesteps
+dump		dump1 all custom 5000 dump.test id type x y z
+#dump_modify	dump1 sort id
+
+# NVT ensemble, first temperature hold, equilibrate
+fix			hold1 all nvt temp 500.0 500.0 0.1
+run			10000
+unfix		hold1
+
+# ramp temperature up
+fix			ramp1 all nvt temp 500.0 1000.0 0.1
+run			20000
+unfix		ramp1
+
+# second temperature hold, annealing
+fix			hold2 all nvt temp 1000.0 1000.0 0.1
+run			10000
+unfix		hold2
+
+# conjugate gradient minimization
+min_style	cg
+minimize	1.0e-6 1.0e-6 10000 100000

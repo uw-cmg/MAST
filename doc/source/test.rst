@@ -1,11 +1,17 @@
-test Package
+test package
 ============
 
-:mod:`oldfcntsts` Module
-------------------------
+Submodules
+----------
 
-.. automodule:: test.oldfcntsts
+.. toctree::
+
+   test.testclass
+
+Module contents
+---------------
+
+.. automodule:: test
     :members:
     :undoc-members:
     :show-inheritance:
-

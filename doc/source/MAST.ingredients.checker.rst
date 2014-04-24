@@ -1,11 +1,20 @@
-checker Package
-===============
+MAST.ingredients.checker package
+================================
 
-:mod:`vasp_checker` Module
---------------------------
+Submodules
+----------
 
-.. automodule:: MAST.ingredients.checker.vasp_checker
+.. toctree::
+
+   MAST.ingredients.checker.basechecker
+   MAST.ingredients.checker.phonchecker
+   MAST.ingredients.checker.vaspchecker
+   MAST.ingredients.checker.vaspnebchecker
+
+Module contents
+---------------
+
+.. automodule:: MAST.ingredients.checker
     :members:
     :undoc-members:
     :show-inheritance:
-

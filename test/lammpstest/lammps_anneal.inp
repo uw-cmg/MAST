@@ -1,0 +1,125 @@
+# Small demo for NEB workflow
+$mast
+system_name OptimizeWorkflowTest
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Si
+X2 C
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           1
+mast_queue         default
+end
+
+begin lammps_anneal
+mast_program lammps
+mast_exec $MAST_INSTALL_PATH/mastlib/lammps_14Nov12 < in.test
+mast_write_method           copy_fullpath_file //home/tam/tammast/test/lammpstest/data.test; copy_fullpath_file //home/tam/tammast/test/lammpstest/SiC.tersoff; write_ordered_ingred_input_file in.test all 0; write_submit_script
+mast_ready_method            file_exists data.test; file_exists SiC.tersoff
+mast_run_method              run_singlerun
+mast_complete_method         file_has_string log.lammps "All done"
+mast_update_children_method  give_structure
+#Test lammps input for temperature ramp, anneal, then relaxation (to 0K)
+# basic system settings: particle type, units to use, periodic boundary types, timestep for MD simulation, thermodynamic output every N-timesteps
+1.atom_style      atomic
+2.units           metal
+3.boundary        p p p
+4.timestep        0.001
+5.thermo          1000
+# read in position file
+6.read_data       data.test
+# choose potential type and the potential file name
+# this section is quite different for different potential types
+# for certain potential types, setting the atomic mass would also be needed
+7.pair_style      tersoff
+8.pair_coeff * * SiC.tersoff Si C
+9.mass 1 28
+10.mass 2 12
+# creates the initial temperature distribution for MD simulation
+# keep in mind that if the starting atomic positions has been minimized,
+# then the temperature to be set here should be twice the temperature that you want
+# since that energy would be split into PE and KE.
+11.velocity        all create 1000.0 19237571 rot yes dist gaussian
+#
+# dump out system information into a file
+# specific settings depends on what the GA needs
+# below dumps out atom positions every 5000 timesteps
+12.dump            dump1 all custom 5000 dump.out id element x y z
+13.dump_modify    dump1 element Si C
+14.dump_modify    dump1 sort id
+
+# NVT ensemble, first temperature hold, equilibrate
+15.fix                     hold1 all nvt temp 500.0 500.0 0.1
+16.run                     10000
+17.unfix           hold1
+#
+# ramp temperature up
+18.fix                     ramp1 all nvt temp 500.0 1000.0 0.1
+19.run                     20000
+20.unfix           ramp1
+#
+# second temperature hold, annealing
+21.fix                     hold2 all nvt temp 1000.0 1000.0 0.1
+22.run                     10000
+23.unfix           hold2
+#
+# conjugate gradient minimization
+24.min_style       cg
+25.minimize        1.0e-6 1.0e-6 10000 100000
+26.print "All done" 
+end
+
+
+begin vasp_opt
+mast_exec          //share/apps/vasp5.2_cNEB
+mast_kpoints       2x2x2 M
+mast_xc            PBE
+isif 3
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end  
+$end
+
+$recipe
+recipe_file lammps_test.txt
+$end
+
+$summary
+#perfect energy
+#vac1 energy
+#int energy
+$end

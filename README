@@ -1,9 +1,59 @@
-This is the README file for MAST.
-The MAST team still needs to put information into README.
+MAST version "coracle" 2014_01_31
+* Reorganized phonons - multiple phonons for defects and nebs
+* Each NEB may have a different number of images
+* Improved MAST error handling (for mastmon detected errors) and directory locking
+* Improved and split mast-level logging (MAST_CONTROL/mast.log) and recipe-level logging (recipe directory, mast_recipe.log)
+* Ability to skip recipes (MAST_SKIP file in recipe directory) and ingredients within recipes
+      ("skip" status in status.txt file in recipe directory)
+* Ability to set mast_frozen_seconds for each ingredient type
+* Ability to specify auto-error-correction or the writing of MAST_ERROR with the ingredient-level error message
+      encountered. MAST_ERROR will also cause the recipe to be skipped over by MAST.
+      Use mast_auto_correct in input file as True or False.
+* Generic ingredient (for genetic algorithm and other scripts)
+* Multiple methods allowed for mast_xxx_method keywords, as well as custom methods, and methods with arguments.
 
-Required environment variables:
+===========================
+Installation requirements
+===========================
+MAST requires the following dependencies:
+python 2.7.3 (try the EPD Canopy Free version https://www.enthought.com/products/epd/ which includes numpy and scipy)
+numpy 1.6.1
+scipy 0.10.1
+pymatgen 2.8.8 (http://pymatgen.org/)
+custodian 0.5.1 (http://pythonhosted.org//custodian/)
 
-MAST_SCRATCH:  Scratch directory for storing temporary files related to running MAST
-MAST_INSTALL_PATH:  Top level MAST directory
-MAST_RECIPE_PATH: Path for MAST recipes
-VASP_PSP_DIRS:  Location of the VASP pseudopotential library (required for PyMatGen)
+Newer versions of each package may work; however, MAST has only been tested with the versions above.
+
+===========================
+Documentation
+===========================
+For the latest documentation, including full installation instructions, see the PDF file in doc/build/latex/MAST.pdf
+
+==========================
+Quick start
+==========================
+1. Install all dependencies.
+2. Make sure your default python is the correct version.
+3. Unzip MAST into a directory. Navigate into that directory and run:
+python initialize.py
+4. Copy the environment variables output by the initialize.py script into your profile.
+5. Source your profile.
+6. See the examples in doc/build/latex/MAST.pdf
+7. Use 
+mast -i <input file name>.inp
+to input an input file for a recipe
+8. Use
+mast 
+to run the MAST monitor for previously-input recipes.
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,194 @@
+Recipe name: DEFECTS
+Ingredients: 
+    defect_group1_q=n1_opt
+        Parents: 
+            inducedefect_group1
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group1_q=n1_sp:give_structure
+    defect_group1_q=n1_sp
+        Parents: 
+            defect_group1_q=n1_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group1_q=n2_opt
+        Parents: 
+            inducedefect_group1
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group1_q=n2_sp:give_structure
+    defect_group1_q=n2_sp
+        Parents: 
+            defect_group1_q=n2_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group1_q=n3_opt
+        Parents: 
+            inducedefect_group1
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group1_q=n3_sp:give_structure
+    defect_group1_q=n3_sp
+        Parents: 
+            defect_group1_q=n3_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group1_q=p0_opt
+        Parents: 
+            inducedefect_group1
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group1_q=p0_sp:give_structure
+    defect_group1_q=p0_sp
+        Parents: 
+            defect_group1_q=p0_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group2_q=p0_opt
+        Parents: 
+            inducedefect_group2
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group2_q=p0_sp:give_structure
+    defect_group2_q=p0_sp
+        Parents: 
+            defect_group2_q=p0_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group3_q=p0_opt
+        Parents: 
+            inducedefect_group3
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group3_q=p0_sp:give_structure
+    defect_group3_q=p0_sp
+        Parents: 
+            defect_group3_q=p0_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group3_q=p1_opt
+        Parents: 
+            inducedefect_group3
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group3_q=p1_sp:give_structure
+    defect_group3_q=p1_sp
+        Parents: 
+            defect_group3_q=p1_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    defect_group3_q=p2_opt
+        Parents: 
+            inducedefect_group3
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            defect_group3_q=p2_sp:give_structure
+    defect_group3_q=p2_sp
+        Parents: 
+            defect_group3_q=p2_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+    inducedefect_group1
+        Parents: 
+            perfect_sp
+            perfect_sp
+            perfect_sp
+            perfect_sp
+        Write:    no_setup
+        Ready:    ready_structure
+        Run:      run_defect
+        Complete: complete_structure
+        Children: 
+            defect_group1_q=n3_opt:give_structure
+            defect_group1_q=n2_opt:give_structure
+            defect_group1_q=p0_opt:give_structure
+            defect_group1_q=n1_opt:give_structure
+    inducedefect_group2
+        Parents: 
+            perfect_sp
+        Write:    no_setup
+        Ready:    ready_structure
+        Run:      run_defect
+        Complete: complete_structure
+        Children: 
+            defect_group2_q=p0_opt:give_structure
+    inducedefect_group3
+        Parents: 
+            perfect_sp
+            perfect_sp
+            perfect_sp
+        Write:    no_setup
+        Ready:    ready_structure
+        Run:      run_defect
+        Complete: complete_structure
+        Children: 
+            defect_group3_q=p1_opt:give_structure
+            defect_group3_q=p0_opt:give_structure
+            defect_group3_q=p2_opt:give_structure
+    perfect_opt
+        Parents: 
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            perfect_sp:give_structure
+    perfect_sp
+        Parents: 
+            perfect_opt
+        Write:    write_singlerun
+        Ready:    ready_singlerun
+        Run:      run_singlerun
+        Complete: complete_singlerun
+        Children: 
+            inducedefect_group2:give_structure
+            inducedefect_group3:give_structure
+            inducedefect_group1:give_structure
