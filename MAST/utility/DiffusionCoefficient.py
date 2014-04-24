@@ -175,7 +175,7 @@ class ParsingInputFiles(object):
         v_num = dict()
         v_denom = dict()
         for freq in vdir.keys():
-            if len(vdir[freq])==1: v[freq] = vdir[freq][0]*10**12
+            if len(vdir[freq])==1: v[freq] = vdir[freq][0]
             else:
                 if os.path.isfile(vdir_num[freq]+'_FREQ') and os.path.isfile(vdir_num[freq]+'_FREQ'): # Reading data from FREQ files
                     fn=open(vdir_num[freq]+'_FREQ','r')
@@ -227,7 +227,7 @@ class ParsingInputFiles(object):
                     for i in range(denom_num):    
                         if not 'f/i' in dthzlist[i]:
                             v_denom[freq]*=float(self.getinfo(dthzlist[i])[3])
-		v[freq]=v_num[freq]/v_denom[freq]*10**12
+		v[freq]=v_num[freq]/v_denom[freq]
         return v
 
 
@@ -273,10 +273,6 @@ class DiffCoeff(ParsingInputFiles):
        
         values['enebarr'] = self.get_barrier(Edir,Edir_saddle,Edir_min)
         values['v'] = self.get_v(vdir,vdir_num,vdir_denom)
-        v_THz = values['v']  # attempt freq in THz for screen output
-        for freq in vdir.keys():
-            v_THz[freq] = v_THz[freq]*10**(-12)
-        values['v_THz'] = v_THz
 	values['HVf'] = self.get_HB_and_HVf(Hdir,numatom,'HVf')
         if model==8:
             values['HB'] = self.get_HB_and_HVf(Hdir,numatom,'HB')
@@ -292,7 +288,6 @@ class DiffCoeff(ParsingInputFiles):
         model = values['type']
         enebarr = values['enebarr']
         v = values['v']
-        v_THz = values['v_THz']
         a = values['a'] 
         HVf = values['HVf'] 
         if model==8: 
@@ -303,7 +298,7 @@ class DiffCoeff(ParsingInputFiles):
             print "FCC Five-Frequency Diffusion Model"
             print "FCC lattice constant [Angstrom]: {0:.4f}".format(a*10**8)
             print "Energy Barriers [eV]:       E0: {E0:.4f}  E1: {E1:.4f}  E2: {E2:.4f}  E3: {E3:.4f}  E4: {E4:.4f}".format(**enebarr)
-            print "Attempt Frequencies [THz]:  v0: {v0:.4f}  v1: {v1:.4f}  v2: {v2:.4f}  v3: {v3:.4f}  v4: {v4:.4f}".format(**v_THz)
+            print "Attempt Frequencies [THz]:  v0: {v0:.4f}  v1: {v1:.4f}  v2: {v2:.4f}  v3: {v3:.4f}  v4: {v4:.4f}".format(**v)
             print "Vacancy Formation Energy [eV]: {0:.4f}\n".format(HVf)
             print ""
         if model==8:
@@ -311,7 +306,7 @@ class DiffCoeff(ParsingInputFiles):
             print "HCP basal lattice constant  [Angstrom]: {0:.4f}".format(a*10**8)
             print "HCP c-axis lattice constant [Angstrom]: {0:.4f}".format(c*10**8)
             print "Energy Barriers [eV]:       Ea: {Ea:.4f}  Eb: {Eb:.4f}  Ec: {Ec:.4f}  EX: {EX:.4f}  E'a: {Eap:.4f}  E'b: {Ebp:.4f}  E'c: {Ecp:.4f}  E'X: {EXp:.4f}".format(**enebarr)
-            print "Attempt Frequencies [THz]:  va: {va:.4f}  vb: {vb:.4f}  vc: {vc:.4f}  vX: {vX:.4f}  v'a: {vap:.4f}  v'b: {vbp:.4f}  v'c: {vcp:.4f}  v'X: {vXp:.4f}".format(**v_THz)
+            print "Attempt Frequencies [THz]:  va: {va:.4f}  vb: {vb:.4f}  vc: {vc:.4f}  vX: {vX:.4f}  v'a: {vap:.4f}  v'b: {vbp:.4f}  v'c: {vcp:.4f}  v'X: {vXp:.4f}".format(**v)
             print "Vacancy Formation Energy [eV]: {0:.4f}".format(HVf)
             print "Vacancy-Solute Binding Energy [eV]:  {0:.4f}\n".format(HB)
         
@@ -332,10 +327,10 @@ class DiffCoeff(ParsingInputFiles):
             i = 0
             while t<tempend+tempstep:
                 for freq in ['v0','v1','v2','v3','v4']:
-                    if t==0.0: jfreq[freq] = v[freq]
+                    if t==0.0: jfreq[freq] = v[freq]*10**12
                     else: 
                         T=1000./t
-                        jfreq[freq] = v[freq] * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
+                        jfreq[freq] = v[freq]* 10**12 * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
                 alpha = jfreq['v4']/jfreq['v0']
                 F_num = 10*np.power(alpha,4) + 180.5*np.power(alpha,3) + 927*np.power(alpha,2) + 1341*alpha
                 F_denom = 2*np.power(alpha,4) + 40.2*np.power(alpha,3) + 254*np.power(alpha,2) + 597*alpha + 435
@@ -365,10 +360,10 @@ class DiffCoeff(ParsingInputFiles):
             i = 0
             while t<tempend+tempstep:
                 for freq in ['va','vb','vc','vX','vap','vbp','vcp','vXp']:
-                    if t==0.0: jfreq[freq] = v[freq]
+                    if t==0.0: jfreq[freq] = v[freq]*10**12
                     else:
                         T=1000./t
-                        jfreq[freq] = v[freq] * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
+                        jfreq[freq] = v[freq] * 10**12 * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
                 f1z = (2*jfreq['vap']+7*F*jfreq['vcp'])/(2*jfreq['vap']+7*F*jfreq['vcp']+2*jfreq['vXp'])
                 S1b_num = (3**0.5)*jfreq['vX']/jfreq['va']*lambda1+jfreq['vXp']/jfreq['vap']*lambda2b*(2+jfreq['vb']/jfreq['va']+7*F*jfreq['vc']/jfreq['va']+2*jfreq['vX']/jfreq['va'])
                 S1b_denom = 3 - (2+jfreq['vb']/jfreq['va']+7*F*jfreq['vc']/jfreq['va']+2*jfreq['vX']/jfreq['va'])*(2+3*jfreq['vbp']/jfreq['vap']+7*F*jfreq['vcp']/jfreq['vap']+2*jfreq['vXp']/jfreq['vap']-1./(2+3*jfreq['vb']/jfreq['va']+7*F*jfreq['vc']/jfreq['va']+jfreq['vX']/jfreq['va']))
