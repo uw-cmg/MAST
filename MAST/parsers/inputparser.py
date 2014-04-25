@@ -19,15 +19,15 @@ from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import MAST2Structure
-from MAST.utility import PickleManager
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.utility import loggerutils
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
-MAST_KEYWORDS = {'program': 'vasp',
+MAST_KEYWORDS = {
                  'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
+                 'mast_auto_correct': 'True'
                 }
 
 STRUCTURE_KEYWORDS = {'posfile': None,
@@ -62,6 +62,7 @@ class InputParser(MASTObj):
             self.section_end <str>: delimiter for the end of a section
             self.delimiter <str>: character(s) for breaking up each line
             self.section_parsers <dict>: supported sections
+            self.logger <logging Logger>: logger, either recipe-level or MAST input level
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
@@ -75,10 +76,20 @@ class InputParser(MASTObj):
                 'recipe'   : self.parse_recipe_section,
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
-                'phonon'   : self.parse_phonon_section,
+                'summary' : self.parse_summary_section
                                }
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        scratchpath = os.getenv("MAST_SCRATCH").strip('/')
+        inputlocation = os.path.dirname(self.keywords['inputfile'])
+        if (inputlocation == ""):
+            self.logger = logging.getLogger('mast')
+            self.logger = loggerutils.add_handler_for_control(self.logger)
+        elif scratchpath not in inputlocation:
+            self.logger = logging.getLogger('mast')
+            self.logger = loggerutils.add_handler_for_control(self.logger)
+        else:
+            self.logger = logging.getLogger(inputlocation)
+            self.logger = loggerutils.add_handler_for_recipe(inputlocation, self.logger)
+
 
 
     def parse(self):
@@ -127,9 +138,8 @@ class InputParser(MASTObj):
 
         self.perform_element_mapping(options)
         self.set_structure_from_inputs(options)
-        
+        self.logger.info(options)
         self.validate_execs(options)
-
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
@@ -179,8 +189,8 @@ class InputParser(MASTObj):
         structure_dict = STRUCTURE_KEYWORDS.copy() 
 
         subsection_dict = dict()
-        for line in section_content:
-            line = line.split(self.delimiter)
+        for myline in section_content:
+            line = myline.split(self.delimiter, 1)
 
             if (line[0] in structure_dict):
                 structure_dict[line[0]] = line[1]
@@ -188,7 +198,13 @@ class InputParser(MASTObj):
                 subsection = line[1]
                 subsection_list = list()
             elif ('end' not in line):
-                subsection_list.append(line)
+                lsplit = myline.split(self.delimiter)
+                lineval = list()
+                for lval in lsplit:
+                    lval.strip()
+                    if len(lval) > 0:
+                        lineval.append(lval)
+                subsection_list.append(lineval)
             elif ('end' in line):
                 subsection_dict[subsection] = subsection_list
 
@@ -215,7 +231,9 @@ class InputParser(MASTObj):
                 for file in file_list:
                     self.logger.warning(file)
                 error='Found ambiguous file names'
-                MASTError(self.__class__.__name__, error)
+                raise MASTError(self.__class__.__name__, error)
+            elif len(file_list) == 0:
+                raise MASTError(self.__class__.__name__, "No structure file %s found in %s" % (structure_dict['posfile'], origindir))
             else:
                 structure_dict['posfile'] = file_list[0]
 
@@ -223,6 +241,7 @@ class InputParser(MASTObj):
         # TM
         element_map = dict()
         atom_list = list()
+	scaling = dict()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -234,6 +253,7 @@ class InputParser(MASTObj):
                 coordinates = np.array(value[:, 1:], dtype='float')
                 structure_dict['coordinates'] = coordinates
             if (key == 'lattice'):
+                #print "VALUE: ", value
                 lattice = np.array(value, dtype='float')
                 structure_dict['lattice'] = lattice
             if (key == 'elementmap'):
@@ -242,7 +262,16 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
-
+	    if (key == 'scaling'):
+		for scline in value:
+		    scsize = scline[0].strip()
+		    sckmesh = scline[1].strip()
+		    scktype = scline[2].strip()
+		    sckshift = '0.0x0.0x0.0'
+		    try: sckshift = scline[3]
+		    except IndexError: pass
+		    scaling[scsize]=[sckmesh,scktype,sckshift]
+		structure_dict['scaling'] = scaling
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
             for atomval in atom_list:
@@ -276,6 +305,7 @@ class InputParser(MASTObj):
             elif (line[0] in defect_list) and (not multidefect):
                 type_dict = dict()
                 label = None
+                charge = [0]
 
                 if (len(line) < 5):
                     error = 'Defect specification requires at least 5 arguments.'
@@ -303,7 +333,8 @@ class InputParser(MASTObj):
                 defect = {'charge': charge,
                           'subdefect_1': type_dict,
                           'coord_type': coord_type,
-                          'threshold': threshold}
+                          'threshold': threshold,
+                          'phonon': dict()}
 
                 #defect_types['defect_%s' % label] = defect
                 defect_types[label] = defect
@@ -316,6 +347,7 @@ class InputParser(MASTObj):
                 defect['charge'] = charge
                 defect['coord_type'] = coord_type
                 defect['threshold'] = threshold
+                defect['phonon'] = dict()
 
                 try:
                     label = line[1]
@@ -332,6 +364,17 @@ class InputParser(MASTObj):
                 charge_range = line[0].split('=')[-1].split(',')
                 defect['charge'] = range(int(charge_range[0]),
                                          int(charge_range[1])+1)
+            elif ('phonon' in line[0]):
+                plabel = line[1]
+                p_center = ' '.join(line[2:5])
+                p_radius = float(line[5])
+                p_thresh = 0.1
+                if len(line) > 6:
+                    p_thresh = float(line[6])
+                defect['phonon'][plabel]=dict()
+                defect['phonon'][plabel]['phonon_center_site'] = p_center
+                defect['phonon'][plabel]['phonon_center_radius'] = p_radius
+                defect['phonon'][plabel]['threshold'] = p_thresh
             else:
                 type_dict = dict()
 
@@ -348,7 +391,6 @@ class InputParser(MASTObj):
                 defect['subdefect_%i' % subcount] = type_dict
                 # print 'Rawr!', defect
                 subcount += 1
-
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
         options.set_item(section_name, 'coord_type', coord_type)
@@ -365,7 +407,7 @@ class InputParser(MASTObj):
                 return
             elif (line[0] == 'recipe_file'):
                 try:
-                    recipe_path = os.environ['MAST_RECIPE_PATH']
+                    recipe_path = os.getenv('MAST_RECIPE_PATH')
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
                     MASTError(self.__class__.__name__, error) 
@@ -431,16 +473,16 @@ class InputParser(MASTObj):
                         val = str().join(key[1][0].upper() + key[1][1:])
                         psp_dict[ref] = val
                     ingredient_dict[opt[0]] = psp_dict
-                elif (opt[0] == 'mast_exec'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'mast_strain'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'ptemp'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
-                elif (opt[0] == 'rwigs'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
-                elif (opt[0] == 'mast_setmagmom'):
-                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_exec'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_strain'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'ptemp'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line 
+                #elif (opt[0] == 'rwigs'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                #elif (opt[0] == 'mast_setmagmom'):
+                #    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
                 elif (opt[0] == 'mast_coordinates'):
                     shortsplit = opt[1].split(",")
                     filesplit=list()
@@ -458,8 +500,9 @@ class InputParser(MASTObj):
                         raise MASTError(self.__class__.__name__, "Not all files given by %s were found in %s." % (shortsplit, origindir))
                     ingredient_dict[opt[0]] = filesplit
                 else:
-                    ingredient_dict[opt[0]] = opt[1]
-                if (opt[0] == 'mast_program') and opt[1] == 'vasp':
+                    ingredient_dict[opt[0]] = ' '.join(opt[1:]) #preserve whole line
+                    #ingredient_dict[opt[0]] = opt[1] #old behavior took only the first part
+                if (opt[0] == 'mast_program') and (opt[1] == 'vasp' or opt[1] == 'vasp_neb'):
                     if os.getenv('VASP_PSP_DIR') == None:
                         raise MASTError(self.__class__.__name__, "Input file specifies program vasp, but no POTCAR directory is set in environment variable VASP_PSP_DIR")
             elif ('end' in line):
@@ -512,29 +555,45 @@ class InputParser(MASTObj):
             antisites. The neb section allows us to unambiguously match up 
             the atoms and determine which atoms are moving, and where. 
         """
-        neblines = dict()
+        nebs = dict()
         images = 0
         neblabel=""
         for line in section_content:
             line = line.strip()
-            if 'images' in line:
-                line = line.split(self.delimiter)
-                images = int(line[1])
-            elif 'begin' in line:
+            #if 'images' in line:
+            #    line = line.split(self.delimiter)
+            #    images = int(line[1])
+            if 'begin' in line:
                 line = line.split(self.delimiter)
                 neblabel = line[1].strip()
-                neblines[neblabel]=list()
+                nebs[neblabel]=dict()
+                nebs[neblabel]['lines']=list()
+                nebs[neblabel]['phonon']=dict()
             elif 'end' in line:
                 neblabel = ""
             else:
-                line = line.split(',') #use commas for elementl ines
-                neblines[neblabel].append(line)
+                line = line.split(',') #use commas for element lines
+                if 'phonon' in line[0]:
+                    sline = line[0].split()
+                    plabel = sline[1]
+                    p_center = ' '.join(sline[2:5])
+                    p_radius = float(sline[5])
+                    p_thresh = 0.1
+                    if len(sline) > 6:
+                        p_thresh = float(sline[6])
+                    nebs[neblabel]['phonon'][plabel]=dict()
+                    nebs[neblabel]['phonon'][plabel]['phonon_center_site'] = p_center
+                    nebs[neblabel]['phonon'][plabel]['phonon_center_radius'] = p_radius
+                    nebs[neblabel]['phonon'][plabel]['threshold'] = p_thresh
+                elif 'images' in line[0]:
+                    nebs[neblabel]['images'] = int(line[0].split()[1])
+                else:
+                    nebs[neblabel]['lines'].append(line)
 
-        options.set_item(section_name, 'images', images)
-        options.set_item(section_name, 'neblines', neblines)
+        #options.set_item(section_name, 'images', images)
+        options.set_item(section_name, 'nebs', nebs)
 
-    def parse_chemical_potentials_section(self, section_name, section_content,
-                                          options):
+    def parse_chemical_potentials_section(self, section_name, section_content, options):
         """Parses the chemical_potentials section and populates the options.
             Section uses the standard begin...end subsection structure, but with
             a modification: instead of strict subsection titles (i.e. structure,
@@ -614,6 +673,7 @@ class InputParser(MASTObj):
 
             $end
         """
+        raise MASTError(self.__class__.__name__,"Phonon section in input files *.inp is obsolete. Phonons now go in the defects and neb sections.")
         phonon = dict()
         label=""
         for line in section_content:
@@ -654,14 +714,14 @@ class InputParser(MASTObj):
                         if symbol in eldict.keys():
                             defdict[dkey][sdkey]['symbol'] = eldict[symbol]
         if 'neb' in input_options.get_sections():
-            neblinedict = input_options.get_item('neb','neblines')
-            for nlabelkey in neblinedict.keys():
-                nlinenum = len(neblinedict[nlabelkey])
+            nebdict = input_options.get_item('neb','nebs')
+            for nebkey in nebdict.keys():
+                nlinenum = len(nebdict[nebkey]['lines'])
                 nlinect=0
                 while nlinect < nlinenum:
-                    symbol = neblinedict[nlabelkey][nlinect][0].upper()
+                    symbol = nebdict[nebkey]['lines'][nlinect][0].upper()
                     if symbol in eldict.keys():
-                        neblinedict[nlabelkey][nlinect][0] = eldict[symbol]
+                        nebdict[nebkey]['lines'][nlinect][0] = eldict[symbol]
                     nlinect = nlinect + 1
         return
 
@@ -709,3 +769,12 @@ class InputParser(MASTObj):
             raise MASTError(self.__class__.__name__, error)
         input_options.update_item('structure','structure',structure)
 
+    def parse_summary_section(self, section_name, section_content, options):
+        """Parses the summary section and populates the options."""
+        mast_dict = dict()
+        for line in section_content:
+            line = line.split(self.delimiter, 1)
+            mast_dict[line[0]] = line[1]
+
+        for key, value in mast_dict.items():
+            options.set_item(section_name, key, value)
