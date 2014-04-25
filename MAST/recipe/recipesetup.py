@@ -98,7 +98,6 @@ class RecipeSetup(MASTObj):
                     if not 'defects' in self.input_options.options.keys():
                         raise MASTError(self.__class__.__name__, "No defects section in input file. Error setting up recipe %s." % self.work_dir)
                     defdict = self.input_options.get_item('defects','defects')
-		    scaling = self.input_options.get_item('structure','scaling')
                     if not defect_label in defdict.keys():
                         raise MASTError(self.__class__.__name__, "No such label %s found in the defects section dictionary." % defect_label)
 		    mydefdict = dict()
