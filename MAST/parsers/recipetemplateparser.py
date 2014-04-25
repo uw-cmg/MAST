@@ -118,62 +118,112 @@ class RecipeTemplateParser(MASTObj):
                 expandedchunk <list>: List of lines
         """
         origchunk = list(chunk)
-        expandedchunk=list()
+        expandedchunk = list()
         needsdefects=0
         needscharges=0
+        needsphonons=0
         needsnebs=0
+	needsscaling=0
         for line in chunk:
             if "<N>" in line:
                 needsdefects=1
             if "<B-E>" in line:
                 needsnebs=1
+            if "<P>" in line:
+                needsphonons=1
             if "<Q>" in line:
                 needscharges=1
             if "<B>" in line:
                 needsnebs=1
             if "<E>" in line:
                 needsnebs=1
+	    if "<S>" in line:
+		needsscaling=1
+	d_scaling       = self.input_options.get_item("structure","scaling")
         d_defects       = self.input_options.get_item("defects","defects")
-        d_neblines      = self.input_options.get_item("neb", "neblines")
-        if needsdefects == 1:
-            mydefects=d_defects.keys()
-            mydefects.sort()
-            for defectname in mydefects:
-                for charge in d_defects[defectname]['charge']:
-                    if charge < 0:
-                        mycharge = 'q=n' + str(int(math.fabs(charge)))
-                    else:
-                        mycharge = 'q=p' + str(int(charge))
-                    for line in origchunk:
-                        newline = line.replace("<N>", defectname)
-                        if needscharges == 1:
-                            newline = newline.replace("<Q>", mycharge)
-                        expandedchunk.append(newline)
-        elif needsnebs == 1:
-            mynebs=d_neblines.keys()
-            mynebs.sort()
-            for neblabel in mynebs:
-                defbegin = neblabel.split('-')[0]
-                defend = neblabel.split('-')[1]
-                chargebegin = d_defects[defbegin]['charge']
-                chargeend = d_defects[defend]['charge']
-                chargeboth = set(chargebegin) & set(chargeend)
-                for charge in chargeboth:
-                    if charge < 0:
-                        mycharge = 'q=n' + str(int(math.fabs(charge)))
-                    else:
-                        mycharge = 'q=p' + str(int(charge))
-                    for line in origchunk:
-                        newline = line.replace("<B>", defbegin)
-                        newline = newline.replace("<E>", defend)
-                        newline = newline.replace("<B-E>", neblabel)
-                        if needscharges == 1:
-                            newline = newline.replace("<Q>", mycharge)
-                        expandedchunk.append(newline)
+	d_nebs          = self.input_options.get_item("neb","nebs")
+	
+        if needsscaling == 1:
+            scalingsize = d_scaling.keys()
+            scalingsize.sort()
+        else: scalingsize = '1x1x1'
 
-        else:
-            expandedchunk = list(origchunk)
-        return expandedchunk
+        for size in scalingsize:
+            if needsdefects == 1:
+                mydefects=d_defects.keys()
+                mydefects.sort()
+                for defectname in mydefects:
+                    for charge in d_defects[defectname]['charge']:
+                        if charge < 0:
+                            mycharge = 'q=n' + str(int(math.fabs(charge)))
+                        else:
+                            mycharge = 'q=p' + str(int(charge))
+                        if needsphonons == 1:
+                            if len(d_defects[defectname]['phonon'].keys()) > 0:
+                                phononkeys = d_defects[defectname]['phonon'].keys()
+ 			        phononkeys.sort()
+                                for phonon in phononkeys:
+                                    for line in origchunk:
+                                        newline = line.replace("<N>", defectname)
+                                        if needscharges == 1:
+                                            newline = newline.replace("<Q>", mycharge)
+                                        if needsscaling == 1:
+                                            newline = newline.replace("<S>",size)
+                                        newline = newline.replace("<P>", phonon)
+                                        expandedchunk.append(newline)
+                        else:
+                            for line in origchunk:
+                                newline = line.replace("<N>", defectname)
+                                if needscharges == 1:
+                                    newline = newline.replace("<Q>", mycharge)
+                                if needsscaling == 1:
+                                    newline = newline.replace("<S>",size)
+                                expandedchunk.append(newline)
+            elif needsnebs == 1:
+                nebkeys = d_nebs.keys()
+                nebkeys.sort()
+                for neblabel in nebkeys:
+                    defbegin = neblabel.split('-')[0]
+                    defend = neblabel.split('-')[1]
+                    chargebegin = d_defects[defbegin]['charge']
+                    chargeend = d_defects[defend]['charge']
+                    chargeboth = set(chargebegin) & set(chargeend)
+                    for charge in chargeboth:
+                        if charge < 0:
+                            mycharge = 'q=n' + str(int(math.fabs(charge)))
+                        else:
+                            mycharge = 'q=p' + str(int(charge))
+                        if needsphonons == 1:
+                            if len(d_nebs[neblabel]['phonon'].keys()) > 0:
+                                phononkeys = d_nebs[neblabel]['phonon'].keys()
+                                phononkeys.sort()
+                                for phonon in phononkeys:
+                                    for line in origchunk:
+                                        newline = line.replace("<B>", defbegin)
+                                        newline = newline.replace("<E>", defend)
+                                        newline = newline.replace("<B-E>", neblabel)
+                                        if needscharges == 1:
+                                            newline = newline.replace("<Q>", mycharge)
+                                        if needsscaling == 1:
+                                    	    newline = newline.replace("<S>",size)
+                                        newline = newline.replace("<P>", phonon)
+                                        expandedchunk.append(newline)
+                        else:
+                            for line in origchunk:
+                                newline = line.replace("<B>", defbegin)
+                                newline = newline.replace("<E>", defend)
+                                newline = newline.replace("<B-E>", neblabel)
+                                if needscharges == 1:
+                                    newline = newline.replace("<Q>", mycharge)
+                                if needsscaling == 1:
+                                    newline = newline.replace("<S>",size)                            
+                                expandedchunk.append(newline)
+	    elif needsscaling==1:
+		for line in origchunk:
+		    newline = line.replace("<S>",size)
+		    expandedchunk.append(newline)
+	    else: expandedchunk = list(origchunk)	
+	return expandedchunk
         #origchunk = list(expandedchunk)
         #expandedchunk=list()
         #for defectname in self.d_defects:
@@ -183,7 +233,7 @@ class RecipeTemplateParser(MASTObj):
 
 
     def old_parsing(self):
-        linestr="hello"
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in linestr:
             #validate the input line
             if not line or line.startswith('#'):
@@ -230,6 +280,7 @@ class RecipeTemplateParser(MASTObj):
     def process_system_name(self, processing_lines, system_name):
         """replace <sys> with the system name from the input options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for index in xrange(len(processing_lines)):
             processing_lines[index] = processing_lines[index].replace('<sys>', system_name)
         return processing_lines
@@ -242,6 +293,7 @@ class RecipeTemplateParser(MASTObj):
                 processing_lines <list of str>: recipe lines to process.
                 d_neblines <dict of str>: dictionary of NEB lines.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         eval_lines = []
         if not d_neblines:
@@ -291,6 +343,7 @@ class RecipeTemplateParser(MASTObj):
            lines based on the number of images found in the
            input_options
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         new_lines = []
         if not n_images:
             return processing_lines
@@ -318,6 +371,7 @@ class RecipeTemplateParser(MASTObj):
             d_defects <dict>: dictionary of defects, including labels and 
                                 positions.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         #import inspect
         #print 'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
         #print d_defects
@@ -362,6 +416,7 @@ class RecipeTemplateParser(MASTObj):
     def process_phononlines(self, processing_lines):
         """add phonon information to the metadata. Does not change line info.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line and 'phonon_' in line:
                 nameval = line.split()[1]
@@ -392,6 +447,7 @@ class RecipeTemplateParser(MASTObj):
         """Add metadata entry for all ingredients. 
             Does not change line information.
         """
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         for line in processing_lines:
             if 'ingredient' in line:
                 nameval = line.split()[1]
@@ -400,4 +456,5 @@ class RecipeTemplateParser(MASTObj):
         return 
     def get_unique_ingredients(self):
         """fetches the ingredients names"""
+        raise MASTError(self.__class__.__name__, "This function is obsolete.") 
         return list(set(self.ingredient_list))
