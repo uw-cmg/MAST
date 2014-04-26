@@ -1,6 +1,11 @@
 #!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 # Purpose: Modify and get information out of submission scripts.
-# Authors: Tam Mayeshiba
 # 11/9/12 created
 
 import os

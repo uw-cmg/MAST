@@ -1,6 +1,11 @@
 #!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 # Purpose: Submit a job to the queue. This function is highly platform-specific and may need to be modified.
-# Authors: Tam Mayeshiba
 # 10/25/12 TTM created
 # 12/6/12 TTM added UKY DLX commands
 import os
