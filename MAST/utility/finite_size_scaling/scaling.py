@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Wei Xie
+# Last updated: 2014-04-25
+##############################################################
 import sys, getopt
 from numpy import *
 import pymatgen as mg
