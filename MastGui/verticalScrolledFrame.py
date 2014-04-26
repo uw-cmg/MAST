@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Kumaresh Visakan Murugan
+# Last updated: 2014-01-01
+##############################################################
 from Tkinter import *
 import Tkinter as ttk
 
