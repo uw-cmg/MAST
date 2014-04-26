@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Amy Kacmarowski
+# Last updated: 2014-04-25
+##############################################################
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from MAST.utility import dirutil

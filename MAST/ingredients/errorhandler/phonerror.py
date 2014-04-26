@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# PHON error handler is obsolete, as PHON is no longer being supported.
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 from custodian.vasp import handlers
 from pymatgen.core.structure import Structure
 import inspect
