@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 #TTM 20130128
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 """Create a unit test framework using function names in a file
 
 Writes to a new file.
