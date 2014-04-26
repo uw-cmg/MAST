@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Zhewen Song
+# Last updated: 2014-04-25
+##############################################################
 import pymatgen as mg
 from numpy import *
 import create_paths

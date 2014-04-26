@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-###################################################
-# Diffusion Coefficent Tool
-# Version: Apr. 10, 2014
-# Programmers: Zhewen Song, Tam Mayeshiba, Henry Wu
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Zhewen Song
+# Last updated: 2014-04-25
 # Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
 # Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
-###################################################
+##############################################################
 
 import sys, getopt, os
 import numpy as np
