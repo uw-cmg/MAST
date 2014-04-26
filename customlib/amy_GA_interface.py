@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba - file to be replaced with mods by Amy Kaczmarowski
+# Last updated: 2014-04-25
+##############################################################
 import os
 import shutil
 import sys
