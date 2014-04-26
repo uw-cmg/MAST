@@ -1,4 +1,10 @@
 #!/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 #TTM 13Mar2014
 def doc():
     """This routine numbers all the lines in a text file

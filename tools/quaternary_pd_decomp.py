@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 #TTM 2014-03-27
 #use pymatgen.phasediagram.pdanalyzer get_decomposition(pymatgen.core.composition Composition, and using an open element O2 quaternary phase diagram) to get compositions and percentages for some composition (e.g. LaMn0.4Fe0.6O3)
 from pymatgen.matproj.rest import MPRester
