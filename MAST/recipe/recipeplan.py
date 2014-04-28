@@ -391,10 +391,12 @@ class RecipePlan:
                 toterr = toterr + 1
             elif self.ingredients[iname] == "skip":
                 totskip = totskip + 1
-        headerstring = "%8s %8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "USERSKIP", "TOTAL")
+        #headerstring = "%8s %8s %8s %8s %8s %8s %8s= %8s" % ("INIT","WAITING","STAGED","PROCEED","COMPLETE", "ERROR", "USERSKIP", "TOTAL")
+        headerstring = "%6s %6s %8s %15s %10s %7s %6s= %5s" % ("(I)nit","(W)ait","(S)taged","(P)roceed2queue","(C)omplete", "(E)rror", "(skip)", "TOTAL")
         self.recipe_logger.info(headerstring)
         self.logger.info(headerstring)
-        valuestring = "%8i %8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, totskip, total)
+        #valuestring = "%8i %8i %8i %8i %8i %8i %8i= %8i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, totskip, total)
+        valuestring = "%6i %6i %8i %15i %10i %7i %6i= %5i" % (totinit, totwait, totstage, totproceed, totcomp, toterr, totskip, total)
         self.recipe_logger.info(valuestring)
         self.logger.info(valuestring)
         if totcomp == total:
@@ -442,6 +444,7 @@ class RecipePlan:
                                 continue
                         result_dict[myingred][method_key] = mymod.main(fullpath)
         summary = MASTFile()
+        summary.data.append("RECIPE: %s\n" % self.name)
         result_names = result_dict.keys()
         result_names.sort()
         for result_name in result_names:
