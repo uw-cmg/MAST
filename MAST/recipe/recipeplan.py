@@ -444,7 +444,7 @@ class RecipePlan:
                                 continue
                         result_dict[myingred][method_key] = mymod.main(fullpath)
         summary = MASTFile()
-        summary.data.append("RECIPE: %s\n" % self.name)
+        summary.data.append("RECIPE WORKING DIRECTORY: %s\n" % self.working_directory)
         result_names = result_dict.keys()
         result_names.sort()
         for result_name in result_names:
