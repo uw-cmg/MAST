@@ -64,6 +64,8 @@ Usage of diffusion coefficient calculation tool code:
 
 *  **lattice** indicates the directory in which to find a lattice file.
 
+*  **plotdisplay** indicates whether to use matplotlib.pyplot in order to create a plot, or whether to skip plotting. Use "plotdisplay none" to skip plotting, omit this keyword to use a default display, or use "plotdiplay tkagg" etc. or another display string to specify a matplotlib display.
+
 *  This script is meant to be run in a recipe directory, as it needs access to all ingredient folders. If running this script from an ingredient, use ::
 
     mast_write_method write_ingred_input_file diffcoeff_input.txt all 0;write_submit_script
