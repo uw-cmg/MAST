@@ -464,13 +464,15 @@ class RecipePlan:
             #valuestring = valuestring + '\n'
             #summary.data.append(titlestring)
             #summary.data.append(valuestring)
-        citation_lines = citations.get_citations(self.working_directory)
-        for cite_line in citation_lines:
-            summary.data.append(cite_line + '\n')
         if summary.data == []:
-            return
+            pass
         else:
             summary.to_file(os.path.join(self.working_directory,"SUMMARY.txt"))
+        citationfile = MASTFile()
+        citation_lines = citations.get_citations(self.working_directory)
+        for cite_line in citation_lines:
+            citationfile.data.append(cite_line)
+        citationfile.to_file(os.path.join(self.working_directory,"CITATIONS.bib"))
         return
 
                             
