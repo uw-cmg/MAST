@@ -267,8 +267,8 @@ class InputParser(MASTObj):
 		    scsize = scline[0].strip()
 		    sckmesh = scline[1].strip()
 		    scktype = scline[2].strip()
-		    sckshift = '0.0x0.0x0.0'
-		    try: sckshift = scline[3]
+		    sckshift = "0.0 0.0 0.0"
+		    try: sckshift = "%s %s %s"%(scline[3],scline[4],scline[5])
 		    except IndexError: pass
 		    scaling[scsize]=[sckmesh,scktype,sckshift]
 		structure_dict['scaling'] = scaling
