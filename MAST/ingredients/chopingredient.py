@@ -606,23 +606,6 @@ class ChopIngredient(BaseIngredient):
         self.keywords['name']=myname
         return
 
-    def run_defect(self):
-        try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
-        except: #no initial structure
-            base_structure = self.keywords['structure'].copy()
-            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-
-        defect = self.keywords['program_keys']['mast_defect_settings']
-        for key in defect:
-            if 'subdefect' in key:
-                subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-                base_structure = sxtend.induce_defect(subdefect, defect['coord_type'], defect['threshold'])
-            else:
-                pass
-        self.checker.write_final_structure_file(base_structure)
-        return
 
     def run_strain(self):
         """Strain the lattice.
@@ -639,7 +622,39 @@ class ChopIngredient(BaseIngredient):
         strained_structure = sxtend.strain_lattice(mystrain)
         self.checker.write_final_structure_file(strained_structure)
         return
+    
+    def run_scale(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory() 
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
+        scalingsize = self.metafile.read_data('scaling_size')
+        if scalingsize == None: scalingsize = '1 1 1'
+        else: scalingsize = ' '.join(scalingsize.split('x'))
+        scaled = scalextend.scale_structure(scalingsize)
+        self.checker.write_final_structure_file(scaled)
+        return
 
+    def run_defect(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory() 
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
+	scaled = scalextend.scale_structure('1 1 1')
+	defect = self.keywords['program_keys']['mast_defect_settings']
+        for key in defect:
+            if 'subdefect' in key:
+                subdefect = defect[key]
+                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=self.keywords['structure'].copy(), name=self.keywords['name'])
+                scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
+            else:
+                pass
+        self.checker.write_final_structure_file(scaled)
+        return
 
     def run_scale_defect(self):
         try:
@@ -660,18 +675,6 @@ class ChopIngredient(BaseIngredient):
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
-        self.checker.write_final_structure_file(scaled)
-        return
-    def run_scale(self):
-        try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
-        except: #no initial structure
-            base_structure = self.keywords['structure'].copy()
-            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-        if not 'mast_scale' in self.keywords['program_keys'].keys():
-            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
-        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
         self.checker.write_final_structure_file(scaled)
         return
 
