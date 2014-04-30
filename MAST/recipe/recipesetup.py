@@ -230,8 +230,11 @@ class RecipeSetup(MASTObj):
 	    kpoints = d_scaling[scalingsize]
 	    datalist.append("kpoints: %s %s %s" % (kpoints[0],kpoints[1],kpoints[2]) )
 	if 'defect_' in myingred:
-            defectlabel = myingred.split('defect_')[1].split('_')[0]
-            if defectlabel.isdigit():
+	    if scaling:
+            	defectlabel = myingred.split('defect_')[1].split('_')[1]
+            else: 
+		defectlabel = myingred.split('defect_')[1].split('_')[0]
+	    if defectlabel.isdigit():
                 defectlabel = "defect_" + defectlabel
             datalist.append("defect_label: %s" % defectlabel)
         if 'q=' in myingred:
@@ -244,7 +247,10 @@ class RecipeSetup(MASTObj):
                 chargelabel=chargestr
             datalist.append("charge: %s" % chargelabel)
         if 'neb_' in myingred:
-            neblabel = myingred.split('neb_')[1].split('_')[0]
+	    if scaling:
+                neblabel = myingred.split('neb_')[1].split('_')[1]
+	    else:
+		neblabel = myingred.split('neb_')[1].split('_')[0]
             datalist.append("neb_label: %s" % neblabel)
         if 'phonon_' in myingred:
             labels = myingred.split('phonon_')[1].split('_')
