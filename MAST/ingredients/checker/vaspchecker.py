@@ -269,12 +269,12 @@ class VaspChecker(BaseChecker):
 	if not (self.metafile.read_data('kpoints')==None):
 	    kpoints = self.metafile.read_data('kpoints').split()
 	    kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
-	    if len(kpoints) == 2:
+	    if len(kpoints) == 4:
 	        desig = "M"
-                kshift = (float(kpoints[1].split('x')[0]),float(kpoints[1].split('x')[1]),float(kpoints[1].split('x')[2]))
-            elif len(kpoints) == 3:
+		kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
+            else:
                 desig = kpoints[1].upper()
-                kshift = (float(kpoints[2].split('x')[0]),float(kpoints[2].split('x')[1]),float(kpoints[2].split('x')[2]))
+		kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))    
         else:
             if 'mast_kpoints' in self.keywords['program_keys'].keys():
             	kpoints = self.keywords['program_keys']['mast_kpoints']
