@@ -13,7 +13,7 @@ if sys.version_info[0] < 2 or (sys.version_info[0] == 2 and sys.version_info[1] 
 setup(
         name="MAST",
         packages=find_packages(),
-        version="1.0.7",
+        version="1.0.9",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/initialize"],
