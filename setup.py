@@ -1,5 +1,5 @@
-from distribute_setup import use_setuptools
-use_setuptools()
+#TTM from distribute_setup import use_setuptools
+#TTM use_setuptools()
 from setuptools.command.install import install
 from setuptools import setup, find_packages
 
@@ -13,16 +13,17 @@ if sys.version_info[0] < 2 or (sys.version_info[0] == 2 and sys.version_info[1] 
 setup(
         name="MAST",
         packages=find_packages(),
-        version="1.0.0",
-        setup_requires=["numpy>=1.6.1"],
-        install_requires=["scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
-        author="Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim, Kumaresh Visakan Murugan, Parker Sear",
-        author_email="",
-        maintainer="Tam Mayeshiba",
+        version="1.0.7",
+        #setup_requires=["numpy>=1.6.1"],
+        install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
+        author="MAST Development Team, University of Wisconsin-Madison Computational Materials Group",
+        author_email="ddmorgan@wisc.edu",
+        #maintainer="Tam Mayeshiba",
+        url="https://materialshub.org",
         license="MIT",
-        description="MAST project",
-        long_description="MAST project",
-        keywords=["MAST"],
+        description="MAterials Simulation Toolkit",
+        long_description="MAterials Simulation Toolkit for diffusion and defects",
+        keywords=["MAST","materials","simulation","diffusion","defects","ab initio","high throughput", "DFT", "density functional theory", "defect formation"],
         classifiers=[
             "Programming Language :: Python :: 2.7",
             "Development Status :: 4 - Beta",
