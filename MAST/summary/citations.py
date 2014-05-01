@@ -26,7 +26,7 @@ def get_citations(recipedir):
         if 'vasp' in mastexec.lower():
             mylist.append('vasp')
             mastxcs = fileutil.grepme(myinput, "mast_xc")
-            if len(mastxcs) > 1:
+            if len(mastxcs) >= 1:
                 mylist.append('vasp_pps')
                 for mastxc in mastxcs:
                     if ("pw" in mastxc.lower()) or ("paw" in mastxc.lower()):
