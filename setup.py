@@ -16,6 +16,7 @@ setup(
         version="1.0.7",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
+        scripts=["MAST/initialize"],
         author="MAST Development Team, University of Wisconsin-Madison Computational Materials Group",
         author_email="ddmorgan@wisc.edu",
         #maintainer="Tam Mayeshiba",
