@@ -26,7 +26,7 @@ mast_install = os.getenv("MAST_INSTALL_PATH")
 platform_file = MASTFile("%s/set_platform" % mast_control)
 mast_platform = platform_file.data[0].strip()
 
-myqc = "submit.platforms.%s.queue_commands" % mast_platform
+myqc = "MAST.submit.platforms.%s.queue_commands" % mast_platform
 my_queue_commands = importlib.import_module(myqc)
 
 def direct_shell_command(scriptname="submit.sh"):
