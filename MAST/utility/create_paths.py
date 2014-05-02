@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Zhewen Song
+# Last updated: 2014-04-25
+##############################################################
 from numpy import *
 import pymatgen as mg
 
@@ -10,6 +16,10 @@ def getinfo(line):
     return data
 
 def read_ele(inp):
+    """Reading elements from MAST input file.
+    	Args: 
+    	    inp <str>: input file
+    """
     fp=open(inp,'r+').readlines()
     i=0
     ele={}
@@ -27,6 +37,10 @@ def read_ele(inp):
             
             
 def read_site(inp):
+    """Reading defect sites from MAST input file.
+    	Args: 
+    	    inp <str>: input file
+    """
     fp=open(inp,'r+').readlines()
     i=0
     site={}
@@ -45,6 +59,10 @@ def read_site(inp):
     return site
     
 def read_vec(inp):
+    """Reading lattice vector from MAST input file.
+    	Args: 
+    	    inp <str>: input file
+    """
     fp=open(inp,'r+').readlines()
     i=0           
     lattice_vectors=zeros((3,3)) 
@@ -62,6 +80,10 @@ def read_vec(inp):
     return  lattice_vectors
     
 def read_coordinates(inp):
+    """Reading coordinates from MAST input file.
+    	Args: 
+    	    inp <str>: input file
+    """
     fp=open(inp,'r+').readlines()
     i=0           
     coordinates={}   
@@ -79,6 +101,11 @@ def read_coordinates(inp):
     return coordinates
         
 def MakeSupercell(xyz,size):
+    """Making supercell with a given size.
+    	Args: 
+    	    xyz <dict>: the coordinates to be scaled
+    	    size <list>: the scaling size
+    """
     supercell={}
     for i in range(size[0]):
         for j in range(size[1]):
@@ -92,6 +119,11 @@ def MakeSupercell(xyz,size):
     return supercell
        
 def distance(A,B,vec):
+    """Calculating distance of two atoms considering the periodical conditions
+        Args:
+            A, B <list>: the two coordinates
+            vec <list>: lattice vector
+    """
     d=array([0.,0.,0.])
     for i in range(3):
         d[i]=A[i]-B[i]
@@ -100,7 +132,13 @@ def distance(A,B,vec):
     d=dot(d,vec)
     return double(linalg.norm(d))
 
-def neighbors(site,Nth,vec):  # Get nth neighbor of possible pairs of same/different site types
+def neighbors(site,Nth,vec):  
+    """Get nth neighbor of possible pairs of same/different site types
+        Args: 
+            site <dict>: the defect sites
+            Nth <int>: up to Nth neighbor
+            vec <list>: lattice vector
+    """
     pair={}
     for i in site.keys():
         for j in site.keys():
@@ -128,6 +166,11 @@ def neighbors(site,Nth,vec):  # Get nth neighbor of possible pairs of same/diffe
     return pair            
 
 def isline(A,M,B,vec):
+    """Checking if three atoms are in a line
+        Args:
+            A, M, B <list>: the three coordinates
+            vec <list>: lattice vector
+    """
     a=distance(A,M,vec)
     b=distance(B,M,vec)
     c=distance(A,B,vec)
@@ -141,6 +184,13 @@ def isline(A,M,B,vec):
     return flag
     
 def iscross(xyz,vec,site,site1,site2):  
+    """Checking if the path crosses over a host atom or another site
+        Args:
+            xyz <dict>: the host lattice coordinates
+            vec <list>: lattice vector
+            site <dict>: the defect sites
+            site1, site2 <list>: the two ends of a path
+    """
     for ele in xyz.keys():
         for i in range(len(xyz[ele])): # check if the path crosses over a host atom
             coords=xyz[ele][i]
@@ -155,6 +205,12 @@ def iscross(xyz,vec,site,site1,site2):
     return 1
             
 def get_path(site,xyz,vec,N): 
+    """Getting paths from the defect sites
+        Args:
+            site <dict>: the defect sites
+            xyz <dict>: the host lattice coordinates
+            vec <list>: lattice vector
+    """
     path={'T':[],'F':[]}
     for nb in range(1,N+1):
         if neighbors(site,nb,vec)=='NaN':
