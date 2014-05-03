@@ -26,7 +26,7 @@ def get_decomp(o_chem_pot, mycomp, verbose=1):
         Returns:
             decomposition string
     """        
-    a = MPRester("przN3JsK1grF3Q0w")
+    a = MPRester("<YOUR_MPREST_API_KEY_HERE>")
     elements = mycomp.elements
     ellist = map(str, elements)
     entries = a.get_entries_in_chemsys(ellist)
