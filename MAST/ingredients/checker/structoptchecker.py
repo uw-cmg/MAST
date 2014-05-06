@@ -69,6 +69,22 @@ class StructoptChecker(BaseChecker):
                 if not (keytry in allowed_list):
                     self.logger.warning("Ignoring program key %s for INPUT. To allow this keyword, add it to %s" % (keytry, allowedpath))
                 else:
+                    try:
+                        #Convert numbers to floats
+                        value = float(value)
+                    except:
+                        try:
+                            #Convert list, tuple, and booleans
+                            if value != 'calc_method':
+                                value = eval(value)
+                            else:
+                                value = value.strip()
+                        except:
+                            try:
+                                #Leave remaining as strings
+                                value = value.strip()
+                            except:
+                                print 'Trouble with input line: ', value
                     input_dict[keytry]=value
         return input_dict
 
