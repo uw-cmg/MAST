@@ -8,6 +8,7 @@ import subprocess
 from MAST.utility import loggerutils
 from MAST.utility import MASTFile
 from MAST.utility import dirutil
+from MAST.utility import MASTError
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import LammpsChecker
