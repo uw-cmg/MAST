@@ -20,18 +20,6 @@ from structopt import post_processing as pp
 from structopt import inp_out
 from structopt.switches import fitness_switch
 
-#Used to need the following:
-#from structopt.fitness import *
-#import ase
-#import numpy as np
-#from structopt import tools
-#import structopt
-#from structopt import Optimizer
-#from structopt.generate import Individual
-#from MAST.utility import fileutil
-#import pymatgen
-
-
 class StructoptChecker(BaseChecker):
     
     def __init__(self, **kwargs):
@@ -87,6 +75,12 @@ class StructoptChecker(BaseChecker):
                             except:
                                 print 'Trouble with input line: ', value
                     input_dict[keytry]=value
+        if 'input_file' in input_dict:
+            new_dict = inp_out.read_parameter_input(input_dict['input_file'])
+            #Overwrite parameters from input file with parameters in mast input
+            for key, value in input_dict.iteritems():
+                new_dict[key] = value
+            input_dict = new_dict
         return input_dict
 
     def _structopt_get_allowed_keywords(self, allowedpath):
@@ -792,6 +786,25 @@ class StructoptChecker(BaseChecker):
             return True
         return False
     
+    def clear_folders(self):
+        """Clear the Genetic Algorithm Evaluator ingredient.
+            Assumes that the VASP ingredient has already
+            been evaluated and the result passed
+            to the child ingredient.
+            Args:
+                ingred_name <str>: Ingredient name to clear.
+                    Match this carefully with a name from
+                    the recipe.
+        """
+        fullpath = self.keywords['name']
+        self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        os.mkdir(timestamp)
+        for subfolder in self.get_subfolder_list():
+            os.rename(subfolder, os.path.join(fullpath, timestamp, os.path.basename(subfolder)))
+            #shutil.rmtree(subfolder)
+        return
+
     def convert_asecalc2checker(self):
         return
     
@@ -895,137 +908,10 @@ class StructoptChecker(BaseChecker):
             submitted[subentry]=status
         queue_commands.print_submitted_dict(submitted)
 
-if __name__ == "__main__":
-    import sys
-    inputfile = sys.argv[1]
-    Opti = Optimizer(inputfile)
-    Opti.algorithm_initialize()
-    Opti.write()
-    self.mutate_evolve_write_new_structures(Opti)
-
-#     def make_subfolders_from_structures(self, finddir="", childdir=""):
-#         """This method makes POSCAR-containing subfolders from POSCAR
-#             files found in a directory
-#             in childdir if a child directory is given, or in 
-#             mydir otherwise.
-#             Args:
-#                 #mydir <str>: Ingredient directory (from self)
-#                 finddir <str>: Directory containing list of structures
-#                 childdir <str>: Child directory (optional)
-#             Files should be named:
-#                 POSCAR_00
-#                 POSCAR_01
-#                 POSCAR_02
-#                 etc.
-#         """
-#         mydir = self.keywords['name']
-#         logger = logging.getLogger(mydir)
-#         logger = loggerutils.add_handler_for_recipe(mydir, logger)
-#         if childdir == "":
-#             childdir = mydir
-#         strfiles = os.listdir(finddir)
-#         for strfile in strfiles:
-#             if not strfile[0:6] == "POSCAR":
-#                 continue
-#             if "ase" in strfile:
-#                 continue
-#             str_path = os.path.join(finddir, strfile)
-#             subname = strfile.split("_")[1]
-#             subpath = os.path.join(childdir, subname)
-#             if not os.path.isdir(subpath):
-#                 os.mkdir(subpath)
-#             shutil.copy(str_path, "%s/POSCAR" % subpath)
-#         return "Wrote all POSCAR files to subdirectories in %s" % childdir
-# 
-#     def subfolders_complete(self, childname=""):
-#         """Check if the Optimizer ingredient subfolders are complete
-#         """
-#         from MAST.ingredients.chopingredient import ChopIngredient
-#         subfolders = self.get_subfolder_list()
-#         allcomplete=0
-#         for subfolder in self.get_subfolder_list():
-#             #Need switch for LAMMPS and VASP
-#             if self.keywords['program']=='VASP':
-#                 mychecker = VaspChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
-#             elif self.keywords['program']=='LAMMPS':
-#                 mychecker = LammpsChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
-#             if mychecker.is_complete():
-#                 allcomplete = allcomplete + 1
-#             else:
-#                 mychoping = ChopIngredient(name=subfolder, program=self.keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
-#                 mychoping.run_singlerun()
-#         if allcomplete == len(subfolders) and (allcomplete > 0):
-#             return True
-#         else:
-#             return False
-#
-#     def set_up_run_folders(self, childname=""):
-#         """Set up the Optimizer ingredient subfolders
-#         """
-#         from MAST.ingredients.chopingredient import ChopIngredient
-#         for subfolder in self.get_vasp_subfolder_list():
-#             if self.keywords['program']=='VASP':
-#                 mychecker = VaspChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
-#             elif self.keywords['program']=='LAMMPS':
-#                 mychecker = LammpsChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
-#             mychecker.set_up_program_input()
-#             mychoping = ChopIngredient(name=subfolder, program=self.keywords['program'] ,program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
-#             mychoping.write_submit_script()
-#             mychoping.run_singlerun()
-#     def mutate_evolve_write_new_structures(self, MyOpti):
-#         """Mutate, evolve, and write new structures for VASP.
-#             Args:
-#                 MyOpti <GA Optimizer>
-#             Returns:
-#                 MyOpti <GA Optimizer>: optimizer with any 
-#                         settings that had been set
-#         """
-#         #Mutating and evolving
-#         ingpath = self.keywords['name']
-#         pathtooutput = os.path.join(ingpath,MyOpti.filename)
-#         offspring = MyOpti.generation_set(MyOpti.population)
-#         self.logger.info("generation set; pop len %i" % len(MyOpti.population))
-#         # Identify the individuals with an invalid fitness
-#         invalid_ind = [ind for ind in offspring if ind.energy==0]
-#         while len(invalid_ind) == 0:
-#             offspring = MyOpti.generation_set(offspring)
-#             invalid_ind = [ind for ind in offspring if ind.energy==0]
-#         self.run_structures(invalid_ind,MyOpti)
-#         
-#         return MyOpti
-#
-#     def run_structures(self,invalid_ind, MyOpti):
-#         #Delete all old files:
-#         dirlist = os.listdir(pathtooutput)
-#         for diritem in dirlist:
-#             if self.keywords['program']=='VASP':
-#                 if 'POSCAR_' in diritem:
-#                     os.remove(os.path.join(pathtooutput, diritem))
-#             elif self.keywords['program']=='LAMMPS':
-#                 if 'data_' in diritem:
-#                     os.remove(os.path.join(pathtooutput, diritem))
-#         #Write structures to POSCAR files or data files for evaluation in MAST
-#         for i in range(len(invalid_ind)):
-#             if self.keywords['program']=='VASP':
-#                 indname = "%s/POSCAR_%02d" % (MyOpti.filename, i)
-#                 if MyOpti.structure == 'Defect':
-#                     indatoms = invalid_ind[i][0]
-#                     indatoms.extend(invalid_ind[i].bulki)
-#                     ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
-#                 else:
-#                     ase.io.write(indname,invalid_ind[i][0],"vasp", direct=True, sort=True, vasp5=True)
-#             elif self.keywords['program']=='LAMMPS':
-#                 indname = "%s/data_%02d" % (MyOpti.filename, i)
-#                 if MyOpti.structure == 'Defect':
-#                     indatoms = invalid_ind[i][0]
-#                     indatoms.extend(invalid_ind[i].bulki)
-#                     inp_out.write_lammps_data(indname, indatoms)
-#                 else:
-#                     inp_out.write_lammps_data(indname, invalid_ind[i][0])
-#             MyOpti.output.write(indname+'\n')
-#             #Append individuals in invalid_ind to population for writing out
-#             MyOpti.population.append(invalid_ind[i])
-#         #Submit list of files to Tam's script to make subfolders
-#         self.make_subfolders_from_structures(pathtooutput)
-#         self.set_up_run_folders()  #Start running.
-#         return
+# if __name__ == "__main__":
+#     import sys
+#     inputfile = sys.argv[1]
+#     Opti = Optimizer(inputfile)
+#     Opti.algorithm_initialize()
+#     Opti.write()
+#     self.mutate_evolve_write_new_structures(Opti)

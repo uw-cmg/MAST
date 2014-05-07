@@ -1,5 +1,6 @@
 ########
 potential_file
+input_file
 exec_mast
 parallel
 filename
