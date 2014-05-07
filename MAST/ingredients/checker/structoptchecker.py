@@ -81,6 +81,10 @@ class StructoptChecker(BaseChecker):
             for key, value in input_dict.iteritems():
                 new_dict[key] = value
             input_dict = new_dict
+        # Check for potential file
+        if 'potential_file' in input_dict:
+            if 'pot_file' not in input_dict:
+                input_dict['pot_file']
         return input_dict
 
     def _structopt_get_allowed_keywords(self, allowedpath):
@@ -382,7 +386,11 @@ class StructoptChecker(BaseChecker):
         for segment in sp_exec_line:
             if ('.py' not in segment):
                 new_exec_line += segment + ' '
-        structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
+        try:
+            structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
+        except:
+            raise MASTError(self.__class__.__name__,
+                "Cannot find 'structopt' in python sys.path! Need to install structopt in folder .../structopt/structopt/Optimizer. Current sys.path: {0}".format(sys.path))
         optimizerpath = os.path.join(structoptpath,'Optimizer.py')
         new_exec_line += ' {0} {1}'.format(optimizerpath,inputfile)
         self.keywords['program_keys']['mast_exec'] = new_exec_line
