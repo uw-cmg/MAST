@@ -122,7 +122,8 @@ class StructoptChecker(BaseChecker):
         """Check if StructOpt calculation is complete.
         """
         if 'filename' in self.structopt_parameters:
-            opath = os.path.join(self.keywords['name'],self.structopt_parameters['filename'])
+            fname = '{0}-rank0.txt'.format(self.structopt_parameters['filename'])
+            opath = os.path.join(self.keywords['name'],fname)
         else:
             opath = os.path.join(self.keywords['name'],'Output-rank0.txt')
         if not os.path.isfile(opath):
