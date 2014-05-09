@@ -16,7 +16,6 @@ import logging
 
 from MAST.utility import MASTFile
 from MAST.parsers import InputParser
-from MAST.submit import queue_commands
 from MAST.utility import dirutil
 from MAST.utility import MASTError
 from MAST.utility import loggerutils
@@ -49,6 +48,7 @@ def main():
         process_input_file(mastopt.input)
 
 def submit_and_monitor():
+    from MAST.submit import queue_commands
     myerrors = display_errors()
     if myerrors == -1:
         return
@@ -80,6 +80,7 @@ def submit_and_monitor():
 
 def clear_and_get_queue_snapshot():
     """Clear the $MAST_CONTROL/queue_snapshot file and get a new one."""
+    from MAST.submit import queue_commands
     mast_control = os.getenv("MAST_CONTROL")
     qspath = "%s/queue_snapshot" % mast_control
     if os.path.isfile(qspath):
