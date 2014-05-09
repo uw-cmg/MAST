@@ -11,7 +11,6 @@ import inspect
 import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
-from customlib import *
 from MAST.summary import citations
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient
@@ -108,8 +107,7 @@ class RecipePlan:
                         ChopIngredient.write_singlerun
                         If class is not given,
                         ChopIngredient is assumed.
-                    Will look in customlib first, then in
-                    MAST.ingredients.
+                    Will look in MAST.ingredients.
                 minputs <list>: method inputs
             Returns:
                 Results of the method, whatever it returns.
@@ -126,13 +124,8 @@ class RecipePlan:
             myclass = methodstring.split('.')[0]
             methodname = methodstring.split('.')[1]
         choplib_mast = importlib.import_module("MAST.ingredients")
-        choplib_custom = importlib.import_module("customlib")
         chopmods_mast = inspect.getmembers(choplib_mast, predicate=inspect.ismodule)
-        chopmods_custom = inspect.getmembers(choplib_custom, predicate=inspect.ismodule)
         chopclasses = list()
-        chopclasses = list()
-        for chopmod_custom in chopmods_custom:
-            chopclasses.extend(inspect.getmembers(chopmod_custom[1], predicate=inspect.isclass))
         for chopmod_mast in chopmods_mast:
             chopclasses.extend(inspect.getmembers(chopmod_mast[1], predicate=inspect.isclass))
         for classitem in chopclasses:
@@ -414,8 +407,8 @@ class RecipePlan:
             when the recipe is complete. Called from print_status.
             Summary options are in the form:
             self.summary_options["name keyword"]= ["keyword1",  "keyword2", ... ]
-            The keywords should be the names of .py files located either in
-            MAST.summary or in customlib.
+            The keywords should be the names of .py files located in
+            MAST.summary.
             Each .py file should have a main function that takes in the
             ingredient's full path:
             def main(ingname="")
@@ -437,11 +430,8 @@ class RecipePlan:
                         try:
                             mymod = importlib.import_module("MAST.summary.%s" % method_key)
                         except ImportError:
-                            try:
-                                mymod = importlib.import_module("customlib.%s" % method_key)
-                            except ImportError:
-                                self.logger.error("Could not find method %s in either MAST.summary or customlib folders." % method_key)
-                                continue
+                            self.logger.error("Could not find method %s in MAST.summary." % method_key)
+                            continue
                         result_dict[myingred][method_key] = mymod.main(fullpath)
         summary = MASTFile()
         summary.data.append("RECIPE WORKING DIRECTORY: %s\n" % self.working_directory)
