@@ -61,6 +61,28 @@ class MAST(MASTObj):
         self.sysname=""
         self.recipe_plan = None
         self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.check_env_variables()
+
+    def check_env_variables(self):
+        """Check for the presence of environment variables.
+            Raise an error if a crucial variable is not set.
+            Additionally, set up necessary platform files
+            if MAST_PLATFORM is set but the files do not exist.
+        """
+        env_varlist=["MAST_CONTROL","MAST_SCRATCH","MAST_ARCHIVE",
+                        "MAST_RECIPE_PATH","MAST_PLATFORM"]
+        for env_var in env_varlist:
+            if os.getenv(env_var) == None:
+                raise MASTError(self.__class__.__name__, "Environment variable %s must be set." % env_var)
+        mast_control = os.getenv("MAST_CONTROL")
+        mast_platform = os.getenv("MAST_PLATFORM").lower()
+        if not os.path.isfile("%s/set_platform" % mast_control):
+            myfile = MASTFile()
+            myfile.data.append(mast_platform)
+            myfile.to_file("%s/set_platform" % mast_control)
+        if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
+            shutil.copy("%s/platforms/%s/mastmon_submit.sh" % (mast_control, mast_platform), mast_control)
+        return
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,

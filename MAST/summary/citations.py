@@ -35,7 +35,7 @@ def get_citations(recipedir):
         #    mylist.append('phon')
         if 'structopt' in mastexec.lower():
             mylist.append('structopt')
-    citationpath = os.path.join(dirutil.get_mast_install_path(),"MAST","summary","citations")
+    citationpath = os.path.join(dirutil.get_mast_control_path(),"citations")
     citationfiles = os.listdir(citationpath)
     linelist = list()
     for listitem in mylist:
