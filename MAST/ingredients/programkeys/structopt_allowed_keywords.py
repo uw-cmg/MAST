@@ -1,6 +1,6 @@
 ########
 potential_file
-input_file
+structopt_input_file
 exec_mast
 parallel
 filename

@@ -75,12 +75,18 @@ class StructoptChecker(BaseChecker):
                             except:
                                 print 'Trouble with input line: ', value
                     input_dict[keytry]=value
-        if 'input_file' in input_dict:
-            new_dict = inp_out.read_parameter_input(input_dict['input_file'])
+        if 'structopt_input_file' in input_dict:
+            new_dict = inp_out.read_parameter_input(input_dict['structopt_input_file'])
             #Overwrite parameters from input file with parameters in mast input
             for key, value in input_dict.iteritems():
                 new_dict[key] = value
             input_dict = new_dict
+        if ('restart_optimizer' in input_dict) and (input_dict['restart_optimizer']==True):
+            if (['structopt_input_file'] in input_dict) and \
+                ('Optimizer-restart-file' in input_dict['structopt_input_file']):
+                input_dict = self.transfer_restart_files(input_dict)
+        if ('restart' in input_dict) and (input_dict['restart']==True):
+            input_dict = self.transfer_restart_files(input_dict)
         # Check for potential file
         if 'potential_file' in input_dict:
             if 'pot_file' not in input_dict:
@@ -97,6 +103,55 @@ class StructoptChecker(BaseChecker):
         for entry in allowed.data:
             allowed_list.append(entry.strip())
         return allowed_list
+    
+    def transfer_restart_files(self, input_dict):
+        if 'filename' in input_dict:
+            fname = '{0}-rank0'.format(input_dict['filename'])
+        else:
+            fname = 'Output-rank0'
+        if ('restart' in input_dict) and (input_dict['restart']):
+            try:
+                restartdir = os.path.join(self.keywords['name'],fname)
+                files = os.listdir(restartdir)
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Cannot find directory for restart: {0}".format(restartdir))
+            return input_dict
+        if input_dict['restart_optimizer']:
+            path = os.path.join(self.keywords['name'],fname)
+            if not os.path.exists(path):
+                os.mkdir(path)
+            outputoptions = ['optimizerfile', 'files', 'ifiles', 'tenergyfile', 'fpfile',
+                            'fpminfile', 'debugfile', 'Genealogyfile', 'summary']
+            for one in outputoptions:
+                if one in input_dict:
+                    if (input_dict[one] != None):
+                        bname = os.path.basename(input_dict[one])
+                        npath = os.path.join(path,bname)
+                        shutil.copyfile(input_dict[one], npath)
+                        input_dict[one] = npath
+            bname = os.path.basename(input_dict['output'])
+            npath = os.path.join(self.keywords['name'],bname)
+            shutil.copyfile(input_dict['output'], npath)
+            input_dict['output'] = npath
+            path = os.path.join(path, 'Restart-files')
+            if not os.path.exists(path):
+                os.mkdir(path)
+            popfiles = list()
+            for one in input_dict['population']:
+                bname = os.path.basename(one)
+                npath = os.path.join(path,bname)
+                shutil.copy(one, npath)
+                popfiles.append(npath)
+            input_dict['population'] = list()
+            bestfiles = list()
+            for one in input_dict['BESTS']:
+                bname = os.path.basename(one)
+                npath = os.path.join(path,bname)
+                shutil.copy(one, npath)
+                bestfiles.append(npath)
+            input_dict['BESTS'] = bestfiles
+            return input_dict
     
     def is_frozen(self):
         """Check if StructOpt calculation is frozen.
@@ -516,6 +571,8 @@ class StructoptChecker(BaseChecker):
         offspring = list()
         pathtooutput = os.path.join(ingpath,MyOpti.filename+'-rank0')
         Totaloutputs = self.extract_output(ingpath)
+        tolen = len(Totaloutputs)
+        self.logger.info('Length of totaloutputs = {0}'.format(tolen))
         count = 0
         for idx in range(len(MyOpti.population)):
             ind = MyOpti.population[idx]
@@ -523,25 +580,31 @@ class StructoptChecker(BaseChecker):
                 population.append(ind)
                 count = idx
             else:
-                (myatoms, myenergy, mypressure) = Totaloutputs[idx-count]
-                if MyOpti.structure=='Defect':
-                    from structopt.tools import find_defects
-                    outt=find_defects(myatoms.copy(), MyOpti.solidbulk, MyOpti.sf,
-                        atomlistcheck=MyOpti.atomlist,trackvacs=MyOpti.trackvacs,
-                        trackswaps=MyOpti.trackswaps,debug=False)
-                    ind[0]=outt[0]
-                    ind.buki=outt[1]
-                    ind.vacancies = outt[2]
-                    ind.swaps = outt[3]
-                    MyOpti.output.write(outt[4])
-                elif MyOpti.structure=='Cluster':
-                    myatoms.translate([-MyOpti.large_box_size/2.0,-MyOpti.large_box_size/2.0,-MyOpti.large_box_size/2.0])
-                    ind[0] = myatoms.copy()
-                else:
-                    ind[0] = myatoms.copy()
-                ind.energy = myenergy
-                ind.pressure = mypressure
-                offspring.append(ind)
+                self.logger.info('Count = {0}'.format(count))
+                try:
+                    (myatoms, myenergy, mypressure) = Totaloutputs[idx-count]
+                    passflag = True
+                except:
+                    passflag = False
+                if passflag:
+                    if MyOpti.structure=='Defect':
+                        from structopt.tools import find_defects
+                        outt=find_defects(myatoms.copy(), MyOpti.solidbulk, MyOpti.sf,
+                            atomlistcheck=MyOpti.atomlist,trackvacs=MyOpti.trackvacs,
+                            trackswaps=MyOpti.trackswaps,debug=False)
+                        ind[0]=outt[0]
+                        ind.buki=outt[1]
+                        ind.vacancies = outt[2]
+                        ind.swaps = outt[3]
+                        MyOpti.output.write(outt[4])
+                    elif MyOpti.structure=='Cluster':
+                        myatoms.translate([-MyOpti.large_box_size/2.0,-MyOpti.large_box_size/2.0,-MyOpti.large_box_size/2.0])
+                        ind[0] = myatoms.copy()
+                    else:
+                        ind[0] = myatoms.copy()
+                    ind.energy = myenergy
+                    ind.pressure = mypressure
+                    offspring.append(ind)
         return population, offspring
     
     def extract_output(self, childname=""):
@@ -575,13 +638,14 @@ class StructoptChecker(BaseChecker):
                     Match this carefully with a name from
                     the recipe.
         """
-#         fullpath = self.keywords['name']
-#         self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
-#         timestamp = time.strftime("%Y%m%d_%H%M%S")
-#         os.mkdir(timestamp)
-#         for subfolder in self.get_subfolder_list():
-#             os.rename(subfolder, os.path.join(fullpath, timestamp, os.path.basename(subfolder)))
-#             #shutil.rmtree(subfolder)
+        fullpath = self.keywords['name']
+        self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        os.mkdir(timestamp)
+        for subfolder in self.get_subfolder_list():
+            pth = os.path.join(fullpath, timestamp, os.path.basename(subfolder))
+            os.renames(subfolder, pth)
+            #shutil.rmtree(subfolder)
         return
     
     def flip_status_back(self):
@@ -746,7 +810,7 @@ class StructoptChecker(BaseChecker):
         from MAST.ingredients.chopingredient import ChopIngredient
         subfolders = self.get_subfolder_list()
         if 'LAMMPS' in self.structopt_parameters['calc_method']:
-            count = 10
+            count = 2
         else:
             count = 1
         for check in range(count):
@@ -768,7 +832,7 @@ class StructoptChecker(BaseChecker):
             if allcomplete == len(subfolders) and (allcomplete > 0):
                 return True
             if 'LAMMPS' in self.structopt_parameters['calc_method']:
-                time.sleep(300)
+                time.sleep(180)
         return False
     
     def subfolders_complete_looped(self, childname=""):
@@ -795,25 +859,6 @@ class StructoptChecker(BaseChecker):
             return True
         return False
     
-    def clear_folders(self):
-        """Clear the Genetic Algorithm Evaluator ingredient.
-            Assumes that the VASP ingredient has already
-            been evaluated and the result passed
-            to the child ingredient.
-            Args:
-                ingred_name <str>: Ingredient name to clear.
-                    Match this carefully with a name from
-                    the recipe.
-        """
-        fullpath = self.keywords['name']
-        self.logger.info("Removing directories and files from ingredient specified at %s" % fullpath)
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        os.mkdir(timestamp)
-        for subfolder in self.get_subfolder_list():
-            os.rename(subfolder, os.path.join(fullpath, timestamp, os.path.basename(subfolder)))
-            #shutil.rmtree(subfolder)
-        return
-
     def convert_asecalc2checker(self):
         return
     

@@ -116,39 +116,6 @@ class LammpsChecker(BaseChecker):
         self.copy_a_file(childpath, "FINAL", newname)
         self.copy_a_file(childpath, "atom_symbols", "atom_symbols")
     
-#     def forward_final_structure_file(self, mydir="", newname="POSCAR"):
-#         """Get the final structure from LAMMPS dump file.
-#             Args:
-#                 mydir <str>: Directory. If no directory is given,
-#                     use current ingredient directory given
-#                     as keyword 'name'
-#         """
-#         if mydir == "":
-#             mydir = self.keywords['name']
-#         curdir = self.keywords['name']
-#         filelist = os.listdir(mydir)
-#         dumpname = None
-#         atomsymbolsfile = None
-#         for onefile in filelist:
-#             if 'TRAJECTORY' in onefile:
-#                 dumpname = os.path.join(mydir, onefile)
-#             if 'atom_symbols' in onefile:
-#                 atomsymbolsfile = os.path.join(mydir, onefile)
-#         if not dumpname:
-#             raise MASTError(self.__class__.__name__,"No trajectory file in %s" % mydir)
-#         #Read the atom types from the atoms symbol file
-#         f = open(atomsymbolsfile)
-#         atomslist = list()
-#         for line in f.readlines():
-#             atomslist.append(line.strip())
-#         f.close()
-#         atms, vels, forces = read_lammps_trajectory(dumpame, atomlist = atomslist)
-#         from ase.io import read, write
-#         newpath = os.path.join(curdir, "CONTCAR")
-#         ase.io.write(newpath,aseatomsobj,"vasp", direct=True, sort=True, vasp5=True)
-#         return self.copy_a_file(mydir, "CONTCAR", "POSCAR")
-#     
-
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
         """Forward the initial structure.
             For LAMMPS, this is the data file. This function is
@@ -211,7 +178,14 @@ class LammpsChecker(BaseChecker):
         if not os.path.isfile(opath):
             self.logger.info("No LOG at %s; not complete." % opath)
             return False
-        
+        reachgrep=subprocess.Popen('grep "ERROR" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        reachrpt=reachgrep.communicate()[0]
+        reachgrep.wait()
+        if reachrpt=='':
+            founderror=False
+        else:
+            founderror=True
+            raise MASTError(self.__class__.__name__,"Found error in LAMMPS Execution: {0}".format(reachrpt))
         reachgrep=subprocess.Popen('grep "CALCULATION HAS FINISHED" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         reachrpt=reachgrep.communicate()[0]
         reachgrep.wait()
@@ -264,7 +238,7 @@ class LammpsChecker(BaseChecker):
         name = self.keywords['name']
         datapath = os.path.join(name, "DATA")
         if os.path.isfile(datapath):
-            my_data_structure = self.get_structure_from_file(datapath) 
+            my_data_structure = self.get_structure_from_file(datapath)
             #parent should have given a structure
         else: #this is an originating run; mast should give it a structure
             my_data_structure = self.keywords['structure']
@@ -296,12 +270,6 @@ class LammpsChecker(BaseChecker):
                         input_dict[keytry.lower()]=value
                     else:
                         input_dict[keytry.lower()]=value
-        if 'autocorrect' in input_dict:
-            input_dict['autocorrect'] = bool(input_dict['autocorrect'])
-        else:
-            input_dict['autocorrect'] = True
-        if input_dict['autocorrect']:
-            input_dict = readable_lammps_parameters(input_dict,self.keywords['structure'])
         return input_dict
 
     def _lammps_input_get_allowed_keywords(self, allowedpath):
@@ -340,6 +308,28 @@ class LammpsChecker(BaseChecker):
         #Get keyword parameters
         parameters = dict()
         parameters = self._lammps_input_get_non_mast_keywords()
+        if 'autocorrect' in parameters:
+            parameters['autocorrect'] = bool(parameters['autocorrect'])
+        else:
+            parameters['autocorrect'] = True
+        if parameters['autocorrect']:
+            try:
+                atpath = os.path.join(os.path.dirname(lammps_data_file),'atom_symbols')
+                try:
+                    atf = open(atpath,'r')
+                except:
+                    atf = open('atom_symbols', 'r')
+                atomlist = list()
+                for line in atf.readlines():
+                    atomlist.append(line.strip())
+                atf.close()
+                atomlist = sorted(list(set(atomlist)))
+            except:
+                struct = self.keywords['structure']
+                atomst = AseAtomsAdaptor.get_atoms(struct)
+                atomlist = sorted(list(set(atomst.get_chemical_symbols())))
+            parameters = readable_lammps_parameters(parameters,atomlist)
+        
         #Copy potential file to current working directory
         if ('potential_file' in parameters) and (parameters['potential_file'] != 'None'):
             newlocation = os.path.join(os.path.dirname(lammps_data_file),os.path.basename(parameters['potential_file']))
@@ -379,7 +369,7 @@ class LammpsChecker(BaseChecker):
             for pair_coeff in parameters['pair_coeff']:
                 f.write('pair_coeff %s \n' % pair_coeff)
             if ('mass' in parameters) and (parameters['mass'] != 'None'):
-                if not isinstance(parameter['mass'],list):
+                if not isinstance(parameters['mass'],list):
                     try:
                         parameters['mass'] = eval(parameters['mass'])
                     except:
@@ -789,9 +779,9 @@ def read_lammps_log(lammps_log="LOG"):
     f.close()
     return thermo_content
 
-def readable_lammps_parameters(parameters, structure):
-    atoms = AseAtomsAdaptor.get_atoms(structure)
-    atomlist = sorted(list(set(atoms.get_chemical_symbols())))
+def readable_lammps_parameters(parameters, atomlist):
+    #atoms = AseAtomsAdaptor.get_atoms(structure)
+    #atomlist = sorted(list(set(atoms.get_chemical_symbols())))
     masslist = [Atom(sym).mass for sym in atomlist]
     if 'potential_file' in parameters:
         if parameters['potential_file']:
@@ -826,7 +816,7 @@ def readable_lammps_parameters(parameters, structure):
     elif parameters['pair_style']=='edip':
         parcoff = '* * {0}'.format(parameters['pot_file'])
         for one in atomlist:
-            parcoff+=' {0}'.format(one[0])
+            parcoff+=' {0}'.format(one)
         parameters['pair_coeff'] = [parcoff]
         mass = ['1 {0}'.format(masslist[0])]
         if len(masslist) > 1:
