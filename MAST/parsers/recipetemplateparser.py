@@ -140,6 +140,7 @@ class RecipeTemplateParser(MASTObj):
                 needsscaling=1
         d_scaling       = self.input_options.get_item("structure","scaling")
         d_defects       = self.input_options.get_item("defects","defects")
+<<<<<<< HEAD
         d_nebs          = self.input_options.get_item("neb","nebs")
         
         if needsscaling == 1:
@@ -222,6 +223,77 @@ class RecipeTemplateParser(MASTObj):
                     newline = line.replace("<S>",size)
                     expandedchunk.append(newline)
             else: expandedchunk = list(origchunk)       
+=======
+        d_nebs         = self.input_options.get_item("neb","nebs")
+        if needsdefects == 1:
+            mydefects=d_defects.keys()
+            mydefects.sort()
+            for defectname in mydefects:
+                for charge in d_defects[defectname]['charge']:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    if needsphonons == 1:
+                        if len(d_defects[defectname]['phonon'].keys()) > 0:
+                            phononkeys = d_defects[defectname]['phonon'].keys()
+                            phononkeys.sort()
+                            for phonon in phononkeys:
+                                for line in origchunk:
+                                    newline = line.replace("<N>", defectname)
+                                    if needscharges == 1:
+                                        newline = newline.replace("<Q>", mycharge)
+                                    newline = newline.replace("<P>", phonon)
+                                    expandedchunk.append(newline)
+                        else:
+                            pass
+                    else:
+                        for line in origchunk:
+                            newline = line.replace("<N>", defectname)
+                            if needscharges == 1:
+                                newline = newline.replace("<Q>", mycharge)
+                            expandedchunk.append(newline)
+        elif needsnebs == 1:
+            nebkeys = d_nebs.keys()
+            nebkeys.sort()
+            for neblabel in nebkeys:
+                defbegin = neblabel.split('-')[0]
+                defend = neblabel.split('-')[1]
+                chargebegin = d_defects[defbegin]['charge']
+                chargeend = d_defects[defend]['charge']
+                chargeboth = set(chargebegin) & set(chargeend)
+                for charge in chargeboth:
+                    if charge < 0:
+                        mycharge = 'q=n' + str(int(math.fabs(charge)))
+                    else:
+                        mycharge = 'q=p' + str(int(charge))
+                    if needsphonons == 1:
+                        if len(d_nebs[neblabel]['phonon'].keys()) > 0:
+                            phononkeys = d_nebs[neblabel]['phonon'].keys()
+                            phononkeys.sort()
+                            for phonon in phononkeys:
+                                for line in origchunk:
+                                    newline = line.replace("<B>", defbegin)
+                                    newline = newline.replace("<E>", defend)
+                                    newline = newline.replace("<B-E>", neblabel)
+                                    if needscharges == 1:
+                                        newline = newline.replace("<Q>", mycharge)
+                                    newline = newline.replace("<P>", phonon)
+                                    expandedchunk.append(newline)
+                        else:
+                            pass
+                    else:
+                        for line in origchunk:
+                            newline = line.replace("<B>", defbegin)
+                            newline = newline.replace("<E>", defend)
+                            newline = newline.replace("<B-E>", neblabel)
+                            if needscharges == 1:
+                                newline = newline.replace("<Q>", mycharge)
+                            expandedchunk.append(newline)
+
+        else:
+            expandedchunk = list(origchunk)
+>>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         return expandedchunk
         #origchunk = list(expandedchunk)
         #expandedchunk=list()

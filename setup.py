@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #TTM from distribute_setup import use_setuptools
 #TTM use_setuptools()
 from setuptools.command.install import install
