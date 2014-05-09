@@ -12,9 +12,8 @@ if sys.version_info[0] < 2 or (sys.version_info[0] == 2 and sys.version_info[1] 
     print "Python version >= 2.7.3 needed!!!"
     sys.exit(0)
 
-
+myhome = os.getenv("HOME")
 def output_env_variable_info():
-    myhome = os.getenv("HOME")
     print ""
     print ""
     print ""
@@ -46,54 +45,37 @@ def output_env_variable_info():
     print ""
     print ""
     return
-
-def make_mast_tree():
-    myhome = os.getenv("HOME")
-    print "...Making/looking for a MAST tree in %s/MAST..." % myhome
-    dirlist=list()
-    dirlist.append("%s/MAST" % myhome)
-    dirlist.append("%s/MAST/SCRATCH" % myhome)
-    dirlist.append("%s/MAST/ARCHIVE" % myhome)
-    dirlist.append("%s/MAST/CONTROL" % myhome)
-    for onedir in dirlist:
-        if not os.path.isdir(onedir):
-            print "...Creating directory %s" % onedir
-            os.mkdir(onedir)
-        else:
-            print "...Directory %s found; not creating." % onedir
-
-
+    
 class build_py(_build_py):
     """Specialized Python source builder."""
     print "Starting setup for the MAterials Simulation Toolkit."
-    make_mast_tree()
     output_env_variable_info()
 
 setup(
         name="MAST_tam_test",
         packages=find_packages(),
-        version="1.0.37",
+        version="1.0.39",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast"],
         data_files=[
-            ("MAST/recipe_templates",
+            ("%s/MAST/recipe_templates" % myhome,
                 ["MAST/recipe_templates/neb_with_phonons.txt", 
                 "MAST/recipe_templates/simple_optimization.txt",
                 "MAST/recipe_templates/u_ramping.txt",
                 "MAST/recipe_templates/defect_formation_energy.txt"]),
-            ("MAST/examples",
+            ("%s/MAST/examples" % myhome,
                 ["MAST/examples/README",
                 "MAST/examples/neb_with_phonons.inp",
                 "MAST/examples/simple_optimization.inp",
                 "MAST/examples/u_ramping.inp",
                 "MAST/examples/defect_formation_energy.inp",
                 "MAST/examples/POSCAR.ga4as4"]),
-            ("MAST/SCRATCH",
+            ("%s/MAST/SCRATCH" % myhome,
                 ["MAST/initialization/README_Scratch"]),
-            ("MAST/ARCHIVE",
+            ("%s/MAST/ARCHIVE" % myhome,
                 ["MAST/initialization/README_Archive"]),
-            ("MAST/CONTROL",
+            ("%s/MAST/CONTROL" % myhome,
                 ["MAST/initialization/README_Control",
                 "MAST/initialization/submitlist",
                 "MAST/initialization/just_submitted"])
