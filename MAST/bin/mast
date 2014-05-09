@@ -188,7 +188,7 @@ def display_displayme_lines():
     #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
     #mycheck.wait()
 
-def check_env_variables(self):
+def check_env_variables():
     """Check for the presence of environment variables.
         Raise an error if a crucial variable is not set.
         Additionally, set up necessary platform files
@@ -198,7 +198,7 @@ def check_env_variables(self):
                     "MAST_RECIPE_PATH","MAST_PLATFORM"]
     for env_var in env_varlist:
         if os.getenv(env_var) == None:
-            raise MASTError(self.__class__.__name__, "Environment variable %s must be set." % env_var)
+            raise MASTError("bin/mast", "Environment variable %s must be set." % env_var)
     mast_control = os.getenv("MAST_CONTROL")
     mast_platform = os.getenv("MAST_PLATFORM").lower()
     if not os.path.isfile("%s/set_platform" % mast_control):
