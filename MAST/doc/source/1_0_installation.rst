@@ -255,8 +255,6 @@ Get MAST
 
 (No dependencies because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.)
     
-* The TESTING LINK is: pip install --upgrade --no-deps MAST_tam_test -i https://testpypi.python.org/pypi
-
 ======================================
 Set up the environment variables
 ======================================
@@ -265,6 +263,7 @@ The pip installation should set up a ``MAST`` directory in ``//home/username/MAS
 The pip installation should then warn you with an ATTENTION flag of environment variables that must be set. 
 
 You may copy and paste the environment variables from the terminal into your user profile. In the examples below, ``username`` should have been changed to your username.::
+    
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
     export MAST_SCRATCH=//home/username/MAST/SCRATCH
     export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
@@ -272,6 +271,7 @@ You may copy and paste the environment variables from the terminal into your use
     export MAST_PLATFORM=platform_name
 
 You will need to manually choose platform_name as one of the following::
+    
     aci
     bardeen
     dlx

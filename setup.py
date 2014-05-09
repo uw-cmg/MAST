@@ -52,9 +52,9 @@ class build_py(_build_py):
     output_env_variable_info()
 
 setup(
-        name="MAST_tam_test",
+        name="MAST",
         packages=find_packages(),
-        version="1.0.48",
+        version="1.0.49",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast",
