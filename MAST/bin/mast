@@ -14,7 +14,6 @@ import glob
 import subprocess 
 import logging
 
-from MAST.controllers.mast import MAST
 from MAST.utility import MASTFile
 from MAST.parsers import InputParser
 from MAST.submit import queue_commands
@@ -96,6 +95,7 @@ def process_input_file(myinputfile):
     if myerrors == -1:
         return
     move_log()
+    from MAST.controllers.mast import MAST
     mast = MAST(inputfile=myinputfile, outputfile="mastoutput.txt")
     mast.check_independent_loops()
     print "Finished processing input file. Check $MAST_CONTROL/mast.log for logged information."
@@ -187,7 +187,28 @@ def display_displayme_lines():
     #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
     #mycheck.wait()
 
+def check_env_variables(self):
+    """Check for the presence of environment variables.
+        Raise an error if a crucial variable is not set.
+        Additionally, set up necessary platform files
+        if MAST_PLATFORM is set but the files do not exist.
+    """
+    env_varlist=["MAST_CONTROL","MAST_SCRATCH","MAST_ARCHIVE",
+                    "MAST_RECIPE_PATH","MAST_PLATFORM"]
+    for env_var in env_varlist:
+        if os.getenv(env_var) == None:
+            raise MASTError(self.__class__.__name__, "Environment variable %s must be set." % env_var)
+    mast_control = os.getenv("MAST_CONTROL")
+    mast_platform = os.getenv("MAST_PLATFORM").lower()
+    if not os.path.isfile("%s/set_platform" % mast_control):
+        myfile = MASTFile()
+        myfile.data.append(mast_platform)
+        myfile.to_file("%s/set_platform" % mast_control)
+    if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
+        shutil.copy("%s/platforms/%s/mastmon_submit.sh" % (mast_control, mast_platform), mast_control)
+    return
 
 if __name__ == '__main__':
+    check_env_variables()
     main()
 
