@@ -588,11 +588,6 @@ pip install --upgrade --no-deps MAST
 \end{itemize}
 
 (No dependencies because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.)
-\begin{itemize}
-\item {} 
-The TESTING LINK is: pip install --upgrade --no-deps MAST\_tam\_test -i \href{https://testpypi.python.org/pypi}{https://testpypi.python.org/pypi}
-
-\end{itemize}
 
 
 \subsection{Set up the environment variables}
@@ -600,27 +595,31 @@ The TESTING LINK is: pip install --upgrade --no-deps MAST\_tam\_test -i \href{ht
 The pip installation should set up a \code{MAST} directory in \code{//home/username/MAST} with several subdirectories.
 
 The pip installation should then warn you with an ATTENTION flag of environment variables that must be set.
-\begin{description}
-\item[{You may copy and paste the environment variables from the terminal into your user profile. In the examples below, \code{username} should have been changed to your username.::}] \leavevmode
+
+You may copy and paste the environment variables from the terminal into your user profile. In the examples below, \code{username} should have been changed to your username.:
+
+\begin{Verbatim}[commandchars=\\\{\}]
 export MAST\_RECIPE\_PATH=//home/username/MAST/recipe\_templates
 export MAST\_SCRATCH=//home/username/MAST/SCRATCH
 export MAST\_ARCHIVE=//home/username/MAST/ARCHIVE
-export MAST\_CONTROL=//home/username/MAST/CONTRO''
+export MAST\_CONTROL=//home/username/MAST/CONTRO"
 export MAST\_PLATFORM=platform\_name
+\end{Verbatim}
 
-\item[{You will need to manually choose platform\_name as one of the following::}] \leavevmode
-aci
-bardeen
-dlx
-korczak
-no\_queue\_system
-pbs\_generic
-sge\_generic
-slurm\_generic
-stampede
-turnbull
+You will need to manually choose platform\_name as one of the following:
 
-\end{description}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{aci}
+\PYG{n}{bardeen}
+\PYG{n}{dlx}
+\PYG{n}{korczak}
+\PYG{n}{no\PYGZus{}queue\PYGZus{}system}
+\PYG{n}{pbs\PYGZus{}generic}
+\PYG{n}{sge\PYGZus{}generic}
+\PYG{n}{slurm\PYGZus{}generic}
+\PYG{n}{stampede}
+\PYG{n}{turnbull}
+\end{Verbatim}
 
 For example:
 
