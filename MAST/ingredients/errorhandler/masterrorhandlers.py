@@ -13,8 +13,8 @@ from MAST.utility import dirutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import loggerutils
-from submit import queue_commands
-from submit import script_commands
+from MAST.submit import queue_commands
+from MAST.submit import script_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser

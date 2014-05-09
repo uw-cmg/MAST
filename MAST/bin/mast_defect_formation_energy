@@ -1,0 +1,55 @@
+#!/bin/env python
+from MAST.utility.defect_formation_energy.dfe_ingredient import DefectFormationEnergyIngredient
+import sys
+from MAST.utility import MASTError
+from MAST.utility.defect_formation_energy.gapplot import GapPlot
+def run_dfe(inputtxt=""):
+    """Defect Formation Energy tool main portal for running DFE as an 
+        ingredient.
+        Args:
+            inputtxt <str>: Input text file for the DFE tool
+    """
+    DFE = DefectFormationEnergyIngredient(inputtxt)
+    DFE.calculate_defect_formation_energies()
+
+    proposedpath = 'dfe_results'
+    if not os.path.exists(proposedpath):
+        os.mkdir(proposedpath)
+    else:
+        raise MASTError('defect_formation_energy plot path',"Path at %s already exists." % proposedpath)
+
+    curdir = os.getcwd()
+    os.chdir(proposedpath)
+
+    DFE.print_table()
+    plotanything = True
+    
+    if not plotanything:
+        print 'Plotting skipped.'
+        return
+
+    bandgap = DFE.bandgap_lda_or_gga
+    real_gap = DFE.bandgap_hse_or_expt
+    if bandgap == 0.0:
+        print "No bandgap given. Plotting skipped."
+        os.chdir(curdir)
+        return
+
+    print 'Proceeding with a band gap of %.2f eV' % bandgap
+    gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies)
+    gp.plot_levels()
+
+    if real_gap == 0.0:
+        os.chdir(curdir)
+        return
+
+    print 'Proceeding with a band gap of %.2f eV, rescaled to a real band gap of %f eV.' % (bandgap, real_gap)
+    gp = GapPlot(gap=bandgap, dfe=DFE.defect_formation_energies, real_gap=real_gap)
+    gp.plot_levels("_rescaled")
+    os.chdir(curdir)
+    return
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        run_dfe(sys.argv[1])

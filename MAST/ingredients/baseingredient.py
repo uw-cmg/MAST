@@ -158,12 +158,12 @@ class BaseIngredient(MASTObj):
         return self.keywords['name']
     
     def write_submit_script(self):
-        from submit import script_commands
+        from MAST.submit import script_commands
         script_commands.write_submit_script(self.keywords)
         return
     
     def run(self, mode='serial', curdir=os.getcwd()):
-        from submit import queue_commands 
+        from MAST.submit import queue_commands 
         
 
         if mode.lower() == 'noqsub':
