@@ -22,7 +22,6 @@ from MAST.utility import dirutil
 from MAST.utility import loggerutils
 
 mast_control = os.getenv("MAST_CONTROL")
-mast_install = os.getenv("MAST_INSTALL_PATH")
 platform_file = MASTFile("%s/set_platform" % mast_control)
 mast_platform = platform_file.data[0].strip()
 

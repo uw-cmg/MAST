@@ -17,7 +17,6 @@ from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 
 mast_control = os.getenv("MAST_CONTROL")
-mast_install = os.getenv("MAST_INSTALL_PATH")
 platform_file = MASTFile("%s/set_platform" % mast_control)
 mast_platform = platform_file.data[0].strip()
 
@@ -62,10 +61,6 @@ def write_submit_script(keywords):
         mast_nodes = "1"
     try:
         mast_exec = str(keywords['program_keys']['mast_exec'])
-        if "$MAST_INSTALL_PATH" in mast_exec:
-            startpos=mast_exec.find("$MAST_INSTALL_PATH")
-            newexec = mast_exec[:startpos] + os.getenv("MAST_INSTALL_PATH") + mast_exec[startpos+18:] 
-            mast_exec = newexec
     except KeyError:
         mast_exec = "mpiexec vasp"
     try:
@@ -87,7 +82,7 @@ def write_submit_script(keywords):
     newkey['mast_processors'] = mast_processors
     newkey['mast_name'] = name
     
-    my_template = MASTFile("%s/submit/platforms/%s/submit_template.sh" % (mast_install, mast_platform))
+    my_template = MASTFile("%s/platforms/%s/submit_template.sh" % (mast_control, mast_platform))
     newdata = list()
     for myline in my_template.data:
         for mykey in newkey.keys():
