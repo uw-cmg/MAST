@@ -12,32 +12,42 @@ if sys.version_info[0] < 2 or (sys.version_info[0] == 2 and sys.version_info[1] 
     print "Python version >= 2.7.3 needed!!!"
     sys.exit(0)
 
-#def run_initialize(my_platform):
-#    import subprocess
-#    myfile = open("setup_output","wb")
-#    myinit = subprocess.Popen("mast_initialize", shell=True, stdout=myfile, stderr=myfile)
-#    myinit.wait()
-#    myfile.close()
-#    return
 
 def output_env_variable_info():
     myhome = os.getenv("HOME")
+    print ""
+    print ""
+    print ""
     print "==============================================="
+    print "*************** ATTENTION *********************"
     print "Add the following lines to your //home/user/.bashrc file"
     print "or a similar configuration file."
     print "Then, log out and log back in."
     print "See the MAST manual for more information."
     print "==============================================="
-
+    print ""
     print "export MAST_RECIPE_PATH=%s/MAST/recipe_templates" % myhome
     print "export MAST_SCRATCH=%s/MAST/SCRATCH" % myhome
     print "export MAST_ARCHIVE=%s/MAST/ARCHIVE" % myhome
     print "export MAST_CONTROL=%s/MAST/CONTROL" % myhome
-    platform_list=""
-    print "export MAST_PLATFORM=<choose one of: %s>" % platform_list
+    platform_list=["aci",
+                    "bardeen",
+                    "dlx",
+                    "korczak",
+                    "no_queue_system",
+                    "pbs_generic",
+                    "sge_generic",
+                    "slurm_generic",
+                    "stampede",
+                    "turnbull"]
+    myplatforms = "|".join(platform_list)
+    print "export MAST_PLATFORM=<choose one of: %s>" % myplatforms
+    print "==============================================="
+    print ""
+    print ""
     return
 
-def make_mast_tree(sourcedir):
+def make_mast_tree():
     myhome = os.getenv("HOME")
     print "...Making/looking for a MAST tree in %s/MAST..." % myhome
     dirlist=list()
@@ -52,30 +62,42 @@ def make_mast_tree(sourcedir):
         else:
             print "...Directory %s found; not creating." % onedir
 
-    if not os.path.isdir("%s/MAST/recipe_templates" % myhome):
-        print "...Copying recipe directory from %s/recipe_templates into %s/MAST/recipe_templates" % (sourcedir,myhome)
-        shutil.copytree("%s/recipe_templates" % sourcedir, "%s/MAST/recipe_templates" % myhome)
-    else:
-        print "...Directory %s/MAST/recipe_templates found; not creating." % myhome
-
 
 class build_py(_build_py):
     """Specialized Python source builder."""
-    print "Hello!"
-    #make_mast_tree(_build_py.build_lib)
+    print "Starting setup for the MAterials Simulation Toolkit."
+    make_mast_tree()
     output_env_variable_info()
 
 setup(
         name="MAST_tam_test",
         packages=find_packages(),
-        version="1.0.28",
+        version="1.0.37",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast"],
         data_files=[
-            ("MAST/recipe_templates",["files_to_copy/templates/neb_with_phonons.txt"])
+            ("MAST/recipe_templates",
+                ["MAST/recipe_templates/neb_with_phonons.txt", 
+                "MAST/recipe_templates/simple_optimization.txt",
+                "MAST/recipe_templates/u_ramping.txt",
+                "MAST/recipe_templates/defect_formation_energy.txt"]),
+            ("MAST/examples",
+                ["MAST/examples/README",
+                "MAST/examples/neb_with_phonons.inp",
+                "MAST/examples/simple_optimization.inp",
+                "MAST/examples/u_ramping.inp",
+                "MAST/examples/defect_formation_energy.inp",
+                "MAST/examples/POSCAR.ga4as4"]),
+            ("MAST/SCRATCH",
+                ["MAST/initialization/README_Scratch"]),
+            ("MAST/ARCHIVE",
+                ["MAST/initialization/README_Archive"]),
+            ("MAST/CONTROL",
+                ["MAST/initialization/README_Control",
+                "MAST/initialization/submitlist",
+                "MAST/initialization/just_submitted"])
         ],
-
 
         author="MAST Development Team, University of Wisconsin-Madison Computational Materials Group",
         author_email="ddmorgan@wisc.edu",
