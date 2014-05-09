@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-09
 ##############################################################
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
@@ -33,6 +33,7 @@ class VaspChecker(BaseChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def get_structure_from_file(self, myfilepath=""):
         """Get the structure from a specified file path.
@@ -276,24 +277,37 @@ class VaspChecker(BaseChecker):
             #KPOINTS already exists. Do not overwrite.
             my_kpoints = Kpoints.from_file(tryname)
             return my_kpoints
-        if 'mast_kpoints' in self.keywords['program_keys'].keys():
-            kptlist = self.keywords['program_keys']['mast_kpoints']
+        if not (self.metafile.read_data('kpoints')==None):
+            kpoints = self.metafile.read_data('kpoints').split()
+            kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
+            if len(kpoints) == 4:
+                desig = "M"
+                kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
+            else:
+                desig = kpoints[1].upper()
+                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))    
         else:
-            raise MASTError(self.__class__.__name__,"k-point instructions need to be set in ingredients keyword mast_kpoints")
-        if len(kptlist) == 3:
-            desig = "M"
-        else:
-            desig = kptlist[3].upper()
+            if 'mast_kpoints' in self.keywords['program_keys'].keys():
+                kpoints = self.keywords['program_keys']['mast_kpoints']
+            else:
+                raise MASTError(self.__class__.__name__,"k-point instructions need to be set either in ingredients keyword mast_kpoints or scaling section in structure ingredient: No k-point settings for the ingredient %s"% name)
+            if len(kpoints) == 3:
+                desig = "M"
+            else:
+                desig = kpoints[3].upper()
+            kmesh = (int(kpoints[0]),int(kpoints[1]),int(kpoints[2]))
+            kshift = (0,0,0)
         if desig == "M":
-            my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
+            my_kpoints = Kpoints.monkhorst_automatic(kpts=kmesh,shift=kshift)
         elif desig == "G":
-            my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
+            my_kpoints = Kpoints.gamma_automatic(kpts=kmesh,shift=kshift)
         else:
             raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
+        
         dirutil.lock_directory(name)
         my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
-        return my_kpoints
+        return my_kpoints   
 
     def _vasp_potcar_setup(self, my_poscar):
         """Set up the POTCAR file."""

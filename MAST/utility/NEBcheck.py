@@ -6,7 +6,7 @@
 ##############################################################
 import pymatgen as mg
 from numpy import *
-import create_paths
+from MAST.utility import create_paths
 import os, getopt, sys, re
 
 argv = sys.argv[1:]
@@ -17,6 +17,9 @@ info=create_paths.main(inp,Nth)
 [vec,xyz,path]=info
 
 def add_structure():
+    """Adding structures to the temporary MAST input file.
+    
+    """
     fp=open('temp.inp','w+')
     rp=open(inp,'r+').readlines()
     i=0
@@ -35,6 +38,9 @@ def add_structure():
     fp.writelines(rp)
     
 def add_defects():
+    """Adding defects with NEB, phonon information to the temporary MAST input file.
+    
+    """
     ends=[]
     tmp=[]
     dash=re.compile(r'-')
