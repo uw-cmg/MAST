@@ -419,13 +419,3 @@ class DiffCoeff(ParsingInputFiles):
                 plt.savefig('Diffusivity.png')
                 plt.show()
 
-def main():   
-    argv = sys.argv[1:]
-    opts, args = getopt.getopt(argv,"i")
-    if len(sys.argv) < 2:
-        sys.exit('Usage: %s -i <input_filename>' % sys.argv[0])
-    inp = args[0]
-    DiffCoeff(inp).calculatingD()
-
-if __name__=="__main__":
-    main()

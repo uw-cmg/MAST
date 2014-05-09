@@ -57,7 +57,9 @@ setup(
         version="1.0.39",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
-        scripts=["MAST/bin/mast"],
+        scripts=["MAST/bin/mast",
+                "MAST/bin/mast_diffusion_coefficient",
+                "MAST/bin/mast_defect_formation_energy"],
         data_files=[
             ("%s/MAST/recipe_templates" % myhome,
                 ["MAST/recipe_templates/neb_with_phonons.txt", 
