@@ -74,12 +74,8 @@ def add_handler_for_control(logger):
             logger <logging.Logger>: Logger
     """
     logger.setLevel(logging.INFO)
-<<<<<<< HEAD
     #formatstr ='%(levelname)8s : %(name)10s: %(message)s'
     formatstr ='%(levelname)8s : %(message)s'
-=======
-    formatstr ='%(levelname)8s : %(name)10s: %(message)s'
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
     formatter = logging.Formatter(formatstr)
     controlhandler = logging.FileHandler(filename="%s/mast.log" % os.getenv("MAST_CONTROL"))
     controlhandler.setFormatter(formatter)

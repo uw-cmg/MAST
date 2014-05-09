@@ -20,10 +20,6 @@ from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
 from MAST.ingredients.checker import GenericChecker
 from MAST.ingredients.checker import LammpsChecker
-<<<<<<< HEAD
-=======
-from MAST.ingredients.checker import StructoptChecker
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
@@ -85,12 +81,6 @@ class BaseIngredient(MASTObj):
         elif self.program == 'lammps':
             self.checker = LammpsChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
             self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
-<<<<<<< HEAD
-=======
-        elif self.program =='structopt':
-            self.checker = StructoptChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
-            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         else:
             allowed_keys={'name','program_keys','structure'}
             self.checker = GenericChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
@@ -173,13 +163,9 @@ class BaseIngredient(MASTObj):
         return
     
     def run(self, mode='serial', curdir=os.getcwd()):
-<<<<<<< HEAD
         from MAST.submit import queue_commands 
         
 
-=======
-        from submit import queue_commands 
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         if mode.lower() == 'noqsub':
             curdir = os.getcwd()
             os.chdir(self.keywords['name'])
@@ -188,10 +174,7 @@ class BaseIngredient(MASTObj):
             p.wait()
             os.chdir(curdir)
             self.metafile.write_data('run', time.asctime())
-<<<<<<< HEAD
             
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         elif mode.lower() == 'serial':
             queuesub = queue_commands.write_to_submit_list(self.keywords['name'])
             #runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -214,11 +197,8 @@ class BaseIngredient(MASTObj):
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
-<<<<<<< HEAD
 
     
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
     def get_my_label(self, label):
         """Get the value of a label in the metadata file.
             Args:

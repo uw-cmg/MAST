@@ -50,10 +50,6 @@ class RecipeSetup(MASTObj):
         self.recipe_logger = loggerutils.add_handler_for_recipe(self.work_dir, self.recipe_logger)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
-<<<<<<< HEAD
-=======
-
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         self.recipe_logger.info('Setting up the recipe based on %s' % (self.recipe_file))
 
     def get_my_ingredient_options(self, name, ingredient_type):
@@ -87,10 +83,6 @@ class RecipeSetup(MASTObj):
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
         mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
-<<<<<<< HEAD
-=======
-        defect_label=""
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         neb_label=""
         charge=""
         phonon_label=""
@@ -258,17 +250,10 @@ class RecipeSetup(MASTObj):
             datalist.append("neb_label: %s" % neblabel)
         if 'phonon_' in myingred:
             labels = myingred.split('phonon_')[1].split('_')
-<<<<<<< HEAD
             try: labels.remove('parse')
             except ValueError: pass
             if scaling: labels.remove(scalingsize)
             phononlabel = '_'.join(labels)
-=======
-            if labels[-1] == 'parse':
-                phononlabel = '_'.join(labels[0:-1])
-            else:
-                phononlabel = '_'.join(labels)
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
             datalist.append("phonon_label: %s" % phononlabel)
         data=','.join(datalist)
         self.metafile.write_data(myingred, data)

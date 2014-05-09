@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
@@ -10,13 +9,6 @@ import sys
 from MAST.utility import Metadata
 from MAST.utility import dirutil
 from MAST.ingredients.checker import VaspChecker
-=======
-import os
-import sys
-from MAST.utility import Metadata
-from MAST.ingredients.checker import VaspChecker
-from MAST.ingredients.checker import VaspNEBChecker
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 def main(ingname=""):
     """Get the energy from an ingredient.
         Args:
@@ -36,7 +28,6 @@ def main(ingname=""):
         myprogram = "None"
     if 'induce' in ingname: #skip inducedefect ingredients
         myprogram = "None"
-<<<<<<< HEAD
     if 'vasp' in myprogram:
         if os.path.isdir("%s/01" % ingname):
             estr = "energies (eV)"
@@ -47,16 +38,5 @@ def main(ingname=""):
         else:
             mychecker = VaspChecker(name=ingname)
             return "energy (eV);%3.3f" % mychecker.get_energy_from_energy_file()
-=======
-    if myprogram == 'vasp':
-        if os.path.isdir("%s/01" % ingname):
-            myprogram = 'vasp_neb' #probably a NEB static
-        else:
-            mychecker = VaspChecker(name=ingname)
-            return "energy (eV);%3.3f" % mychecker.get_energy_from_energy_file()
-    if myprogram == 'vasp_neb':
-        mychecker = VaspNEBChecker(name=ingname)
-        return "energy (eV);%s" % mychecker.get_energy_from_energy_file()
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
     else:
         return "energy (eV);N/A"

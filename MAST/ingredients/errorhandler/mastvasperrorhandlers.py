@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-04-25
 ##############################################################
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 import os
 import time
 import shutil
@@ -18,13 +15,8 @@ from MAST.utility import fileutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import loggerutils
-<<<<<<< HEAD
 from MAST.submit import queue_commands
 from MAST.submit import script_commands
-=======
-from submit import queue_commands
-from submit import script_commands
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser

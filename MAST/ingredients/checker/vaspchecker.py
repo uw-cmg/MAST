@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-05-09
 ##############################################################
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Potcar
@@ -36,10 +33,7 @@ class VaspChecker(BaseChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
-<<<<<<< HEAD
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 
     def get_structure_from_file(self, myfilepath=""):
         """Get the structure from a specified file path.
@@ -283,7 +277,6 @@ class VaspChecker(BaseChecker):
             #KPOINTS already exists. Do not overwrite.
             my_kpoints = Kpoints.from_file(tryname)
             return my_kpoints
-<<<<<<< HEAD
         if not (self.metafile.read_data('kpoints')==None):
             kpoints = self.metafile.read_data('kpoints').split()
             kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
@@ -315,26 +308,6 @@ class VaspChecker(BaseChecker):
         my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
         return my_kpoints   
-=======
-        if 'mast_kpoints' in self.keywords['program_keys'].keys():
-            kptlist = self.keywords['program_keys']['mast_kpoints']
-        else:
-            raise MASTError(self.__class__.__name__,"k-point instructions need to be set in ingredients keyword mast_kpoints")
-        if len(kptlist) == 3:
-            desig = "M"
-        else:
-            desig = kptlist[3].upper()
-        if desig == "M":
-            my_kpoints = Kpoints.monkhorst_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
-        elif desig == "G":
-            my_kpoints = Kpoints.gamma_automatic(kpts=(int(kptlist[0]),int(kptlist[1]),int(kptlist[2])),shift=(0,0,0))
-        else:
-            raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
-        dirutil.lock_directory(name)
-        my_kpoints.write_file(name + "/KPOINTS")
-        dirutil.unlock_directory(name)
-        return my_kpoints
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 
     def _vasp_potcar_setup(self, my_poscar):
         """Set up the POTCAR file."""
@@ -366,13 +339,8 @@ class VaspChecker(BaseChecker):
     def _vasp_incar_get_non_mast_keywords(self):
         """Get the non-VASP keywords and make a dictionary."""
         incar_dict=dict()
-<<<<<<< HEAD
         allowedpath = os.path.join(dirutil.get_mast_control_path(),
                         'programkeys','vasp_allowed_keywords.py')
-=======
-        allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
-                        'ingredients','programkeys','vasp_allowed_keywords.py')
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
         allowed_list = self._vasp_incar_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
