@@ -76,17 +76,13 @@ class StructoptChecker(BaseChecker):
                                 print 'Trouble with input line: ', value
                     input_dict[keytry]=value
         if 'structopt_input_file' in input_dict:
-            new_dict = inp_out.read_parameter_input(input_dict['structopt_input_file'])
+            self.logger.info('Requested read from StructOpt input file at : {0}'.format(input_dict['structopt_input_file']))
+            new_dict = inp_out.read_parameter_input(input_dict['structopt_input_file'],False)
             #Overwrite parameters from input file with parameters in mast input
             for key, value in input_dict.iteritems():
                 new_dict[key] = value
             input_dict = new_dict
-        if ('restart_optimizer' in input_dict) and (input_dict['restart_optimizer']==True):
-            if (['structopt_input_file'] in input_dict) and \
-                ('Optimizer-restart-file' in input_dict['structopt_input_file']):
-                input_dict = self.transfer_restart_files(input_dict)
-        if ('restart' in input_dict) and (input_dict['restart']==True):
-            input_dict = self.transfer_restart_files(input_dict)
+            self.logger.info('New input_dict as read from StructOpt input file : {0}'.format(input_dict))
         # Check for potential file
         if 'potential_file' in input_dict:
             if 'pot_file' not in input_dict:
@@ -118,20 +114,47 @@ class StructoptChecker(BaseChecker):
                     "Cannot find directory for restart: {0}".format(restartdir))
             return input_dict
         if input_dict['restart_optimizer']:
+            if 'ARCHIVE' in input_dict['structopt_input_file']:
+                replaceflag = True
+            else:
+                replaceflag = False
             path = os.path.join(self.keywords['name'],fname)
             if not os.path.exists(path):
                 os.mkdir(path)
-            outputoptions = ['optimizerfile', 'files', 'ifiles', 'tenergyfile', 'fpfile',
+            outputoptions = ['optimizerfile', 'tenergyfile', 'fpfile',
                             'fpminfile', 'debugfile', 'Genealogyfile', 'summary']
             for one in outputoptions:
                 if one in input_dict:
                     if (input_dict[one] != None):
                         bname = os.path.basename(input_dict[one])
                         npath = os.path.join(path,bname)
+                        if replaceflag:
+                            input_dict[one] = input_dict[one].replace('SCRATCH','ARCHIVE')
                         shutil.copyfile(input_dict[one], npath)
                         input_dict[one] = npath
+            flist = list()
+            for one in input_dict['files']:
+                bname = os.path.basename(one)
+                npath = os.path.join(path,bname)
+                if replaceflag:
+                    one = one.replace('SCRATCH','ARCHIVE')
+                shutil.copyfile(one, npath)
+                flist.append(npath)
+            input_dict['files'] = flist
+            iflist = list()
+            if input_dict['ifiles']:
+                for one in input_dict['ifiles']:
+                    bname = os.path.basename(one)
+                    npath = os.path.join(path,bname)
+                    if replaceflag:
+                        one = one.replace('SCRATCH','ARCHIVE')
+                    shutil.copyfile(one, npath)
+                    iflist.append(npath)
+            input_dict['ifiles'] = iflist
             bname = os.path.basename(input_dict['output'])
             npath = os.path.join(self.keywords['name'],bname)
+            if replaceflag:
+                input_dict['output'] = input_dict['output'].replace('SCRATCH','ARCHIVE')
             shutil.copyfile(input_dict['output'], npath)
             input_dict['output'] = npath
             path = os.path.join(path, 'Restart-files')
@@ -141,13 +164,17 @@ class StructoptChecker(BaseChecker):
             for one in input_dict['population']:
                 bname = os.path.basename(one)
                 npath = os.path.join(path,bname)
+                if replaceflag:
+                    one = one.replace('SCRATCH','ARCHIVE')
                 shutil.copy(one, npath)
                 popfiles.append(npath)
-            input_dict['population'] = list()
+            input_dict['population'] = popfiles
             bestfiles = list()
             for one in input_dict['BESTS']:
                 bname = os.path.basename(one)
                 npath = os.path.join(path,bname)
+                if replaceflag:
+                    one = one.replace('SCRATCH','ARCHIVE')
                 shutil.copy(one, npath)
                 bestfiles.append(npath)
             input_dict['BESTS'] = bestfiles
@@ -238,14 +265,15 @@ class StructoptChecker(BaseChecker):
                 if Opti.convergence:
                     os.chdir(ingpath)
                     end_signal = Opti.algorithm_stats(Opti.population)
+                    cwd = os.getcwd()
                     if Opti.postprocessing:
                         self.logger.info('Running Post-processing')
                         path = os.path.join(os.getcwd(), '{0}-rank{1}'.format(Opti.filename,0))
                         os.chdir(path)
                         if Opti.genealogytree:
-                            pp.read_output(os.getcwd(),genealogytree=True,natoms=self.natoms)
+                            pp.read_output(os.getcwd(),genealogytree=True,natoms=Opti.natoms)
                         else:
-                            pp.read_output(os.getcwd(),genealogytree=False,natoms=self.natoms)
+                            pp.read_output(os.getcwd(),genealogytree=False,natoms=Opti.natoms)
                         os.chdir(cwd)
                     if Opti.lattice_concentration:
                         if Opti.structure=='Defect':
@@ -415,6 +443,14 @@ class StructoptChecker(BaseChecker):
             return False
     
     def set_up_program_input(self):
+        input_dict = self.structopt_parameters
+        if ('restart_optimizer' in input_dict) and (input_dict['restart_optimizer']==True):
+            if ('structopt_input_file' in input_dict) and \
+                ('Optimizer-restart-file' in input_dict['structopt_input_file']):
+                input_dict = self.transfer_restart_files(input_dict)
+        if ('restart' in input_dict) and (input_dict['restart']==True):
+            input_dict = self.transfer_restart_files(input_dict)
+        self.structopt_parameters = input_dict
         if "MAST" in self.structopt_parameters['calc_method']:
             if 'LOOPED' in self.structopt_parameters['calc_method']:
                 return self.set_up_program_input_looped()
@@ -425,7 +461,10 @@ class StructoptChecker(BaseChecker):
     
     def set_up_program_input_whole(self):
         """Set up the StructOpt input file."""
-        print self.structopt_parameters
+        self.logger.info('Parameters for structopt: {0}'.format(self.structopt_parameters))
+        if ('restart_optimizer' in self.structopt_parameters and self.structopt_parameters['restart_optimizer']):
+            population_list = self.structopt_parameters['population']
+            bests_list = self.structopt_parameters['BESTS']
         Optinit = Optimizer(self.structopt_parameters)
         ingpath = self.keywords['name']
         inputfile = os.path.join(ingpath,"structoptinput.txt")
@@ -434,7 +473,12 @@ class StructoptChecker(BaseChecker):
             shutil.copyfile(self.structopt_parameters['potential_file'],newlocation)
             if not Optinit.pot_file:
                 Optinit.pot_file = os.path.basename(self.structopt_parameters['potential_file'])
-        Optinit.write(inputfile,restart=False)
+        if Optinit.restart_optimizer:
+            Optinit.population = population_list
+            Optinit.BESTS = bests_list
+            Optinit.write(inputfile)
+        else:
+            Optinit.write(inputfile,restart=False)
         import sys
         exec_line = self.keywords['program_keys']['mast_exec']
         sp_exec_line = exec_line.split(' ')
@@ -645,7 +689,6 @@ class StructoptChecker(BaseChecker):
         for subfolder in self.get_subfolder_list():
             pth = os.path.join(fullpath, timestamp, os.path.basename(subfolder))
             os.renames(subfolder, pth)
-            #shutil.rmtree(subfolder)
         return
     
     def flip_status_back(self):
@@ -832,7 +875,7 @@ class StructoptChecker(BaseChecker):
             if allcomplete == len(subfolders) and (allcomplete > 0):
                 return True
             if 'LAMMPS' in self.structopt_parameters['calc_method']:
-                time.sleep(180)
+                time.sleep(60)
         return False
     
     def subfolders_complete_looped(self, childname=""):
