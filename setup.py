@@ -123,7 +123,10 @@ setup(
                 "MAST/summary/citations/vasp_03",
                 "MAST/summary/citations/vasp_04",
                 "MAST/summary/citations/vasp_paw_01",
-                "MAST/summary/citations/vasp_pps_01"])
+                "MAST/summary/citations/vasp_pps_01"]),
+            ("%s/MAST/CONTROL/programkeys" % myhome,
+                ["MAST/ingredients/programkeys/diff_allowed_keywords.py",
+                "MAST/ingredients/programkeys/vasp_allowed_keywords.py"])
         ],
 
         author="MAST Development Team, University of Wisconsin-Madison Computational Materials Group",

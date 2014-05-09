@@ -370,7 +370,7 @@ class ChopIngredient(BaseIngredient):
             if os.path.isfile(allowed_file):
                 allowed_list = self._get_allowed_keywords(allowed_file, upperkey)
             else:
-                allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST','ingredients','programkeys',allowed_file)
+                allowedpath = os.path.join(dirutil.get_mast_control_path(),'programkeys',allowed_file)
                 allowed_list = self._get_allowed_keywords(allowedpath, upperkey)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
