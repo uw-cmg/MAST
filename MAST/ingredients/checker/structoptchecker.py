@@ -155,7 +155,18 @@ class StructoptChecker(BaseChecker):
             npath = os.path.join(self.keywords['name'],bname)
             if replaceflag:
                 input_dict['output'] = input_dict['output'].replace('SCRATCH','ARCHIVE')
-            shutil.copyfile(input_dict['output'], npath)
+            fout = open(input_dict['output'],'r')
+            lines = fout.readlines()
+            fout.close()
+            nlines = []
+            for line in lines:
+                if "End of Execution" not in line:
+                    nlines.append(line)
+            foutn = open(npath,'a')
+            for line in nlines:
+                foutn.write(line)
+            foutn.close()
+            #shutil.copyfile(input_dict['output'], npath)
             input_dict['output'] = npath
             path = os.path.join(path, 'Restart-files')
             if not os.path.exists(path):
