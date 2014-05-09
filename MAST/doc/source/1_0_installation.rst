@@ -24,12 +24,13 @@ Verify your Python version
 Check your version of python: ``python --version``
 
 If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.
-Then, make sure that this version of python is defaulted to be used first. You may need to add a line similar to your user profile, such as ``//home/username/.bashrc``
-Then, log out and log back in. 
+Then, make sure that this version of python is defaulted to be used first. You may need to add a line to your user profile. Your user profile may be located in ``//home/username/.bashrc`` or a similar file.
 
 For bardeen, the line you need to add is::
     
     export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
+
+Then, log out and log back in. 
 
 For platforms with the "module" system like stampede or DLX, check which modules are available (``module avail``) and add a line something like::
 
@@ -58,7 +59,7 @@ Add lines to your profile to make this python installation your default python::
 
     vi ~/.bashrc
     #EPD (Canopy) python
-    export PATH=//home/tma249/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH
+    export PATH=//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH
 
 *  Do not just use the .Canopy/bin. directory - python modules will not load properly
 *  Log out and log in
@@ -248,39 +249,54 @@ Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR 
 ===============================
 Get MAST
 ===============================
-Get the MAST tar.gz file from MaterialsHub.org and untar it::
+* Get the latest MAST package from the Python package index::
+    
+    pip install --upgrade --no-deps MAST
 
-    nice -n 19 tar -xzvf mast_version.tar.gz
-
-
-(or run this command over interactive submission, which is better)
+(No dependencies because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.)
+    
+* The TESTING LINK is: pip install --upgrade --no-deps MAST_tam_test -i https://testpypi.python.org/pypi
 
 ======================================
 Set up the environment variables
 ======================================
-Go to the MAST installation path, for example ``//home/username/mast_version``
+The pip installation should set up a ``MAST`` directory in ``//home/username/MAST`` with several subdirectories.
 
-Run the command ::
+The pip installation should then warn you with an ATTENTION flag of environment variables that must be set. 
 
-    python initialize.py
+You may copy and paste the environment variables from the terminal into your user profile. In the examples below, ``username`` should have been changed to your username.::
+    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
+    export MAST_SCRATCH=//home/username/MAST/SCRATCH
+    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
+    export MAST_CONTROL=//home/username/MAST/CONTRO"
+    export MAST_PLATFORM=platform_name
 
-This command should create the ``home/username/MAST`` directory in your home directory, as well as necessary subdirectories and files.
-It should also make the MAST bin executables executable.
+You will need to manually choose platform_name as one of the following::
+    aci
+    bardeen
+    dlx
+    korczak
+    no_queue_system
+    pbs_generic
+    sge_generic
+    slurm_generic
+    stampede
+    turnbull
 
-Choose a platform at the prompt. You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, choose something anyway, complete the rest of this step, and go on to the following step.
+For example::
 
-Copy the environment variables which are printed out into your setup profile, such as ``//home/username/.bashrc``, where ``username`` is your username. Replace all instances of ``//home/username`` with your actual username, like ``//home/janedoe``. 
+    export MAST_PLATFORM=sge_generic
+
+You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, choose something anyway, complete the rest of this step, and go on to the following step.
+
+Remember to log out and log back in after modifying your user profile.
 
 -----------------------------------
 Environment variable explanations
 -----------------------------------
 An explanation of each variable appears in the next section
 
-MAST_INSTALL_PATH: This variable should be set to the installation directory. ::
-
-    export MAST_INSTALL_PATH=//share/apps/MAST
-
-MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You may want to copy recipes from the ``$MAST_INSTALL_PATH/recipe_templates`` directory into this folder and modify them. ::
+MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You will have been supplied with a few example templates, also corresponding to example input files in a newly-created ``//home/username/MAST/examples`` directory. ::
     
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
 
@@ -296,22 +312,22 @@ MAST_CONTROL: This variable may be set to any directory. MAST monitor log files,
     
     export MAST_CONTROL=//home/username/MAST/CONTROL
 
-PYTHONPATH: If this environment variable already exists, the MAST installation directory should be appended. Otherwise, this variable can be set to the installation directory. Assuming PYTHONPATH already has some value (use env to see a list of environment variables)::
-    
-    export PYTHONPATH=$PYTHONPATH://share/apps/MAST
+MAST_CONTROL also has several subfolders. If you move your $MAST_CONTROL to a different path, please copy the subfolders with it.
 
 VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the `Materials Project's <http://materialsproject.org>`_ `pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
     
     export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
 
-PATH: This variable should be appended with the ``$MAST_INSTALL_PATH/bin`` directory, for example::
+PATH: If you have created a local MAST installation using ``pip --install --no-deps --user``, then this variable should be appended with the ``//home/username/.local/bin`` directory so that the mast* executables may be found. ::
     
-    export PATH=$PATH://share/apps/MAST/bin:PATH
+    export PATH=$PATH://home/username/.local/bin
+
+Otherwise, if the mast executables are in ``//home/username/bin``, no such modification is needed.
 
 =================================================
 Modify submission details for your platform
 =================================================
-If your platform was not matched exactly, you should go to ``$MAST_INSTALL_PATH/submit/platforms``.
+If your platform was not matched exactly, you or your system administrator should look where MAST was installed (e.g. often under some python folder, for example ``//share/apps/EPD...etc./lib/python-2.7/site-packages``, or, for a local installation, ``//home/username/.local/lib/python-2.7/site-packages``) and go to ``MAST/submit/platforms``.
 
 Copy the closest-matching set of files into a new directory inside the ``platforms`` folder.
 Then, modify each of the following files as necessary for your platform::
@@ -320,12 +336,9 @@ Then, modify each of the following files as necessary for your platform::
     mastmon_submit.sh
     queue_commands.py
 
-
-Go to $MAST_INSTALL_PATH and again run ::
-
-    python initialize.py
-
-This time, select your new platform.
+* Copy this new folder into your ``$MAST_CONTROL/platforms`` folder with the other platform folders.
+* Edit ``$MAST_CONTROL/set_platform`` so that the word in it is the name of the new folder.
+* Copy the new ``mastmon_submit.sh`` as ``$MAST_CONTROL/mastmon_submit.sh``
 
 ---------------------------------
 mastmon_submit.sh
