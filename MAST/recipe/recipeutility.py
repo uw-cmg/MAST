@@ -1,15 +1,14 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 import logging
+from MAST.utility import loggerutils
 from MAST.utility import MASTFile
+from MAST.utility import MASTError
 
 """Utility to read the indented recipe file."""
 def read_recipe(filename, verbose=0):
@@ -25,13 +24,15 @@ def read_recipe(filename, verbose=0):
                 [childname]['method']=[method group]
             rname <str>: Recipe name
     """
-    logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
+    logger=logging.getLogger('mast')
+    logger=loggerutils.add_handler_for_control(logger)
 
     rfile = MASTFile(filename)
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
     for line in rfile.data:
+        if '\t' in line:
+            raise MASTError("recipe/recipeutility", "Recipe at %s contains tabs! Please convert all indentations to the appropriate number of groups of four spaces." % filename)
         myline = line.rstrip() #right-hand strip of carriage return only
         if len(myline) == 0: #blank line
             pass
@@ -229,4 +230,3 @@ def make_indentation_dictionary(subrlist):
         for parent in pdict.keys():
             idict[indent].append([lct, parent, pdict[parent]])
     return idict
-
