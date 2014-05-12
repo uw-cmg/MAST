@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-05-12 by Zhewen Song
+##############################################################
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Potcar
@@ -26,8 +32,8 @@ class VaspChecker(BaseChecker):
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
-	BaseChecker.__init__(self, allowed_keys, **kwargs)
-	self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
+        BaseChecker.__init__(self, allowed_keys, **kwargs)
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def get_structure_from_file(self, myfilepath=""):
         """Get the structure from a specified file path.
@@ -178,7 +184,7 @@ class VaspChecker(BaseChecker):
 
 
         if (isMD) or (isphonon):
-            if usertime == False:
+            if not usertime:
                 self.logger.warning("OUTCAR at %s shows no user time." % opath)
                 return False
             else:
@@ -186,15 +192,15 @@ class VaspChecker(BaseChecker):
                 return True
 
         if isstatic:
-            if reachedaccuracy==True:
-                if usertime==True:
+            if reachedaccuracy:
+                if usertime:
                     self.logger.info("OUTCAR at %s shows EDIFF reached for static run and user time; complete." % opath)
                     return True
                 else:
                     self.logger.warning("OUTCAR at %s shows EDIFF reached for static run, but no user time." % opath)
                     return False
             else:
-                if usertime==True:
+                if usertime:
                     self.logger.error("OUTCAR at %s does not show EDIFF reached for static run, but shows complete." % opath)
                     return False
                 else:
@@ -202,15 +208,15 @@ class VaspChecker(BaseChecker):
                     return False
 
         else:
-            if reachedaccuracy==True:
-                if usertime==True:
+            if reachedaccuracy:
+                if usertime:
                     self.logger.info("OUTCAR at %s shows reached required accuracy and user time; complete." % opath)
                     return True
                 else:
                     self.logger.warning("OUTCAR at %s shows reached required accuracy, but no user time." % opath)
                     return False
             else:
-                if usertime==True:
+                if usertime:
                     self.logger.error("OUTCAR at %s does not show reached required accuracy, but shows complete." % opath)
                     return False
                 else:
@@ -266,20 +272,20 @@ class VaspChecker(BaseChecker):
             Monkhorst-Pack is assumed.
         """
         name = self.keywords['name']
-	if not (self.metafile.read_data('kpoints')==None):
-	    kpoints = self.metafile.read_data('kpoints').split()
-	    kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
-	    if len(kpoints) == 4:
-	        desig = "M"
-		kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
+        if not (self.metafile.read_data('kpoints')==None):
+            kpoints = self.metafile.read_data('kpoints').split()
+            kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
+            if len(kpoints) == 4:
+                desig = "M"
+                kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
             else:
                 desig = kpoints[1].upper()
-		kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))    
+                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
         else:
             if 'mast_kpoints' in self.keywords['program_keys'].keys():
-            	kpoints = self.keywords['program_keys']['mast_kpoints']
-	    else:
-	   	raise MASTError(self.__class__.__name__,"k-point instructions need to be set either in ingredients keyword mast_kpoints or scaling section in structure ingredient: No k-point settings for the ingredient %s"% name)
+                kpoints = self.keywords['program_keys']['mast_kpoints']
+            else:
+                raise MASTError(self.__class__.__name__,"k-point instructions need to be set either in ingredients keyword mast_kpoints or scaling section in structure ingredient: No k-point settings for the ingredient %s"% name)
             if len(kpoints) == 3:
                 desig = "M"
             else:
@@ -292,11 +298,11 @@ class VaspChecker(BaseChecker):
             my_kpoints = Kpoints.gamma_automatic(kpts=kmesh,shift=kshift)
         else:
             raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
-        
+
         dirutil.lock_directory(name)
         my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
-        return my_kpoints   
+        return my_kpoints
 
     def _vasp_potcar_setup(self, my_poscar):
         """Set up the POTCAR file."""
@@ -994,3 +1000,24 @@ class VaspChecker(BaseChecker):
         klist.append(newkmesh.to_dict['generation_style'][0])
         self.keywords['program_keys']['mast_kpoints'] = klist
         return newkmesh
+
+    def get_final_pressure(self):
+        """Get the final pressure.
+            For VASP, this is the last pressure line from
+            the OUTCAR.
+            Args:
+                mydir <str>: Directory in which to look.
+            Returns:
+                <float>: last pressure from OUTCAR, in kB
+        """
+        fullpath=os.path.join(self.keywords['name'], "OUTCAR")
+        if not os.path.isfile(fullpath):
+            raise MASTError(self.__class__.__name__, "No OUTCAR file at %s" % self.keywords['name'])
+        myoutcar = MASTFile(fullpath)
+        mypress = myoutcar.get_segment_from_last_line_match("pressure", "external pressure =","kB  Pullay stress =")
+        mypressfloat=""
+        try:
+            mypressfloat=float(mypress)
+        except TypeError:
+            self.logger.error("Failed to log pressure %s" % str(mypress))
+        return mypressfloat
