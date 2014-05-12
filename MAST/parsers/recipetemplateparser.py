@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-05-12 by Zhewen Song
+##############################################################
 import os, math
 
 from MAST.utility import MASTObj
@@ -77,6 +74,8 @@ class RecipeTemplateParser(MASTObj):
         mychunk=list()
         modchunk=False
         for line in f_ptr.readlines():
+            if '\t' in line:
+                raise MASTError("parsers/recipetemplateparser","The tab character exists in recipe template %s. Please convert all tabs to the appropriate number of groups of four spaces." % self.template_file)
             if '{begin}' in line:
                 self.chunks.append(list(mychunk))
                 mychunk=list()
@@ -123,7 +122,7 @@ class RecipeTemplateParser(MASTObj):
         needscharges=0
         needsphonons=0
         needsnebs=0
-	needsscaling=0
+        needsscaling=0
         for line in chunk:
             if "<N>" in line:
                 needsdefects=1
@@ -137,9 +136,9 @@ class RecipeTemplateParser(MASTObj):
                 needsnebs=1
             if "<E>" in line:
                 needsnebs=1
-	    if "<S>" in line:
-		needsscaling=1
-	d_scaling       = self.input_options.get_item("structure","scaling")
+            if "<S>" in line:
+                needsscaling=1
+        d_scaling       = self.input_options.get_item("structure","scaling")
         d_defects       = self.input_options.get_item("defects","defects")
 	d_nebs          = self.input_options.get_item("neb","nebs")
 	
@@ -205,7 +204,7 @@ class RecipeTemplateParser(MASTObj):
                                         if needscharges == 1:
                                             newline = newline.replace("<Q>", mycharge)
                                         if needsscaling == 1:
-                                    	    newline = newline.replace("<S>",size)
+                                            newline = newline.replace("<S>",size)
                                         newline = newline.replace("<P>", phonon)
                                         expandedchunk.append(newline)
                         else:
@@ -218,12 +217,12 @@ class RecipeTemplateParser(MASTObj):
                                 if needsscaling == 1:
                                     newline = newline.replace("<S>",size)                            
                                 expandedchunk.append(newline)
-	    elif needsscaling==1:
-		for line in origchunk:
-		    newline = line.replace("<S>",size)
-		    expandedchunk.append(newline)
-	    else: expandedchunk = list(origchunk)	
-	return expandedchunk
+            elif needsscaling==1:
+                for line in origchunk:
+                    newline = line.replace("<S>",size)
+                    expandedchunk.append(newline)
+            else: expandedchunk = list(origchunk)	
+        return expandedchunk
         #origchunk = list(expandedchunk)
         #expandedchunk=list()
         #for defectname in self.d_defects:
