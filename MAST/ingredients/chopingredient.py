@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-05-12 by Zhewen Song
+##############################################################
 import os
 import numpy as np
 import logging
@@ -17,7 +14,7 @@ from pymatgen.core.structure import Lattice
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
-
+from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
@@ -717,24 +714,6 @@ class ChopIngredient(BaseIngredient):
         self.keywords['name']=myname
         return
 
-    def run_defect(self):
-        try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
-        except: #no initial structure
-            base_structure = self.keywords['structure'].copy()
-            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-
-        defect = self.keywords['program_keys']['mast_defect_settings']
-        for key in defect:
-            if 'subdefect' in key:
-                subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-                base_structure = sxtend.induce_defect(subdefect, defect['coord_type'], defect['threshold'])
-            else:
-                pass
-        self.checker.write_final_structure_file(base_structure)
-        return
-
     def run_strain(self):
         """Strain the lattice.
             Args:
@@ -751,6 +730,39 @@ class ChopIngredient(BaseIngredient):
         self.checker.write_final_structure_file(strained_structure)
         return
 
+    def run_scale(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory()
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalingsize = self.metafile.read_data('scaling_size')
+        if scalingsize == None: scalingsize = '1 1 1'
+        else: scalingsize = ' '.join(scalingsize.split('x'))
+        scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+        scaled = scalextend.scale_structure()
+        self.checker.write_final_structure_file(scaled)
+        return
+
+    def run_defect(self):
+        try:
+            base_structure = self.checker.get_initial_structure_from_directory()
+        except: #no initial structure
+            base_structure = self.keywords['structure'].copy()
+            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
+        scalingsize = self.metafile.read_data('scaling_size')
+        if scalingsize == None: scalingsize = '1 1 1'
+        else: scalingsize = ' '.join(scalingsize.split('x'))
+        defect = self.keywords['program_keys']['mast_defect_settings']
+        for key in defect:
+            if 'subdefect' in key:
+                subdefect = defect[key]
+                sxtend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+                scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
+            else:
+                pass
+        self.checker.write_final_structure_file(scaled)
+        return
 
     def run_scale_defect(self):
         try:
@@ -770,18 +782,6 @@ class ChopIngredient(BaseIngredient):
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
-        self.checker.write_final_structure_file(scaled)
-        return
-    def run_scale(self):
-        try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
-        except: #no initial structure
-            base_structure = self.keywords['structure'].copy()
-            self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-        if not 'mast_scale' in self.keywords['program_keys'].keys():
-            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
-        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
         self.checker.write_final_structure_file(scaled)
         return
 
@@ -1047,4 +1047,3 @@ class ChopIngredient(BaseIngredient):
         childname = self._fullpath_childname(childname)
         self.checker.forward_final_structure_file(childname)
         self.checker.softlink_wavefunction_file(childname)
-

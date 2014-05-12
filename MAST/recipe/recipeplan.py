@@ -11,6 +11,10 @@ import inspect
 import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
+<<<<<<< HEAD
+=======
+from customlib import *
+>>>>>>> d72ada45b6a4ab30669cda2ca564dc6f0efc5d5d
 from MAST.summary import citations
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient
@@ -540,5 +544,3 @@ class RecipePlan:
                     self.ingredients[oneingred] = onestatus
                 else:
                     raise MASTError(self.__class__.__name__, "Ingredient %s is not in the original recipe's ingredients list." % oneingred)
-
-            

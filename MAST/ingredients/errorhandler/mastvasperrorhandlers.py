@@ -15,8 +15,13 @@ from MAST.utility import fileutil
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import loggerutils
+<<<<<<< HEAD
 from MAST.submit import queue_commands
 from MAST.submit import script_commands
+=======
+from submit import queue_commands
+from submit import script_commands
+>>>>>>> d72ada45b6a4ab30669cda2ca564dc6f0efc5d5d
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
@@ -111,4 +116,3 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
 
     @property
     def to_dict(self): return {"@module": self.__class__.__module__, "@class": self.__class__.__name__, "output_filename": self.output_filename, "timeout": self.timeout}
-

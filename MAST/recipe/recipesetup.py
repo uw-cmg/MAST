@@ -2,9 +2,9 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
-import os
+import os, re
 import logging
 import shlex
 from MAST.utility import InputOptions
@@ -50,7 +50,6 @@ class RecipeSetup(MASTObj):
         self.recipe_logger = loggerutils.add_handler_for_recipe(self.work_dir, self.recipe_logger)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
-
         self.recipe_logger.info('Setting up the recipe based on %s' % (self.recipe_file))
 
     def get_my_ingredient_options(self, name, ingredient_type):
@@ -220,8 +219,18 @@ class RecipeSetup(MASTObj):
         """
         datalist=list()
         datalist.append("ingredient type: %s " % myingred)
+        scaling = re.search(r'_\d*x\d*x\d*',myingred)
+        if scaling: 
+            scalingsize=scaling.group().split('_')[1]
+            datalist.append("scaling_size: %s" % scalingsize)
+            d_scaling = self.input_options.get_item("structure","scaling")
+            kpoints = d_scaling[scalingsize]
+            datalist.append("kpoints: %s %s %s" % (kpoints[0],kpoints[1],kpoints[2]) )
         if 'defect_' in myingred:
-            defectlabel = myingred.split('defect_')[1].split('_')[0]
+            if scaling:
+                defectlabel = myingred.split('defect_')[1].split('_')[1]
+            else: 
+                defectlabel = myingred.split('defect_')[1].split('_')[0]
             if defectlabel.isdigit():
                 defectlabel = "defect_" + defectlabel
             datalist.append("defect_label: %s" % defectlabel)
@@ -235,14 +244,17 @@ class RecipeSetup(MASTObj):
                 chargelabel=chargestr
             datalist.append("charge: %s" % chargelabel)
         if 'neb_' in myingred:
-            neblabel = myingred.split('neb_')[1].split('_')[0]
+            if scaling:
+                neblabel = myingred.split('neb_')[1].split('_')[1]
+            else:
+                neblabel = myingred.split('neb_')[1].split('_')[0]
             datalist.append("neb_label: %s" % neblabel)
         if 'phonon_' in myingred:
             labels = myingred.split('phonon_')[1].split('_')
-            if labels[-1] == 'parse':
-                phononlabel = '_'.join(labels[0:-1])
-            else:
-                phononlabel = '_'.join(labels)
+            try: labels.remove('parse')
+            except ValueError: pass
+            if scaling: labels.remove(scalingsize)
+            phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
         data=','.join(datalist)
         self.metafile.write_data(myingred, data)

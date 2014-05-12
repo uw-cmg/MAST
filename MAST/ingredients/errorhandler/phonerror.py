@@ -20,5 +20,3 @@ class PhonError(BaseError):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseError.__init__(self, allowed_keys, **kwargs)
-
-    

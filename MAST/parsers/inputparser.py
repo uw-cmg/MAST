@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 import os
 import time
@@ -137,7 +137,6 @@ class InputParser(MASTObj):
         self.set_structure_from_inputs(options)
         self.logger.info(options)
         self.validate_execs(options)
-
         return options
 
     def parse_mast_section(self, section_name, section_content, options):
@@ -239,6 +238,7 @@ class InputParser(MASTObj):
         # TM
         element_map = dict()
         atom_list = list()
+        scaling = dict()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -259,7 +259,16 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
-
+            if (key == 'scaling'):
+                for scline in value:
+                    scsize = scline[0].strip()
+                    sckmesh = scline[1].strip()
+                    scktype = scline[2].strip()
+                    sckshift = "0.0 0.0 0.0"
+                    try: sckshift = "%s %s %s"%(scline[3],scline[4],scline[5])
+                    except IndexError: pass
+                    scaling[scsize]=[sckmesh,scktype,sckshift]
+                structure_dict['scaling'] = scaling
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
             for atomval in atom_list:
@@ -379,7 +388,6 @@ class InputParser(MASTObj):
                 defect['subdefect_%i' % subcount] = type_dict
                 # print 'Rawr!', defect
                 subcount += 1
-
         options.set_item(section_name, 'num_defects', count-1)
         options.set_item(section_name, 'defects', defect_types)
         options.set_item(section_name, 'coord_type', coord_type)
