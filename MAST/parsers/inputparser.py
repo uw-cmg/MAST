@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-05-12 by Zhewen Song
+##############################################################
 import os
 import time
 import fnmatch
@@ -241,7 +238,7 @@ class InputParser(MASTObj):
         # TM
         element_map = dict()
         atom_list = list()
-	scaling = dict()
+        scaling = dict()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -262,16 +259,16 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
-	    if (key == 'scaling'):
-		for scline in value:
-		    scsize = scline[0].strip()
-		    sckmesh = scline[1].strip()
-		    scktype = scline[2].strip()
-		    sckshift = "0.0 0.0 0.0"
-		    try: sckshift = "%s %s %s"%(scline[3],scline[4],scline[5])
-		    except IndexError: pass
-		    scaling[scsize]=[sckmesh,scktype,sckshift]
-		structure_dict['scaling'] = scaling
+            if (key == 'scaling'):
+                for scline in value:
+                    scsize = scline[0].strip()
+                    sckmesh = scline[1].strip()
+                    scktype = scline[2].strip()
+                    sckshift = "0.0 0.0 0.0"
+                    try: sckshift = "%s %s %s"%(scline[3],scline[4],scline[5])
+                    except IndexError: pass
+                    scaling[scsize]=[sckmesh,scktype,sckshift]
+                structure_dict['scaling'] = scaling
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
             for atomval in atom_list:
@@ -454,7 +451,7 @@ class InputParser(MASTObj):
                 # ingredient dictionary
                 ingredient_name = line.split()[1]
                 ingredient_dict = dict()
-            elif ('end' not in line):
+            elif (not (line == 'end')):
                 opt = line.split()
                 # print opt
                 if (opt[0] == 'mast_kpoints'):
@@ -774,7 +771,7 @@ class InputParser(MASTObj):
         mast_dict = dict()
         for line in section_content:
             line = line.split(self.delimiter, 1)
-            mast_dict[line[0]] = line[1]
+            mast_dict.setdefault(line[0], []).append(line[1].strip())
 
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
