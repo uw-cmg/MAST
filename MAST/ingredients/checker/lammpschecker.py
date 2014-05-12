@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
@@ -6,25 +5,15 @@
 # Last updated: 2014-04-25
 ##############################################################
 from pymatgen.core.structure import Structure
-from pymatgen.io.vaspio import Poscar
-=======
-from pymatgen.core.structure import Structure
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.ingredients.checker import BaseChecker
-<<<<<<< HEAD
-from MAST.ingredients.checker import VaspChecker
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 import os
 import logging
 import pymatgen
 import numpy as np
 import time
-<<<<<<< HEAD
-=======
 import subprocess
 
 import ase
@@ -35,7 +24,6 @@ import decimal as dec
 from ase import Atom, Atoms
 import shutil
 
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 class LammpsChecker(BaseChecker):
     """LAMMPS checker functions
         Mostly structure functions right now.

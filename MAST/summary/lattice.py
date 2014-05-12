@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-04-25
 ##############################################################
-=======
->>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 import os
 import sys
 from MAST.utility import Metadata
