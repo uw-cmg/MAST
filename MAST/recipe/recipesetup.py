@@ -86,7 +86,7 @@ class RecipeSetup(MASTObj):
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
         mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
-	defect_label=""
+        defect_label=""
         neb_label=""
         charge=""
         phonon_label=""
@@ -100,7 +100,7 @@ class RecipeSetup(MASTObj):
                     defdict = self.input_options.get_item('defects','defects')
                     if not defect_label in defdict.keys():
                         raise MASTError(self.__class__.__name__, "No such label %s found in the defects section dictionary." % defect_label)
-		    mydefdict = dict()
+                    mydefdict = dict()
                     mydefdict['mast_defect_settings'] = defdict[defect_label]
                     pkey_d.update(mydefdict)
                     break
@@ -119,7 +119,7 @@ class RecipeSetup(MASTObj):
             for datum in mydata:
                 if 'neb_label' in datum:
                     neb_label = datum.split(':')[-1].strip()
-		    if not 'neb' in self.input_options.options.keys():
+                    if not 'neb' in self.input_options.options.keys():
                         raise MASTError(self.__class__.__name__, "No neb section in input file. Error setting up recipe %s." % self.work_dir)
                     nebdict = self.input_options.get_item('neb','nebs')
                     if not neb_label in nebdict.keys():
@@ -136,7 +136,7 @@ class RecipeSetup(MASTObj):
         #if 'phonon' in self.input_options.options.keys():
         #    pkey_d.update(self.input_options.options['phonon'])
         if 'phonon_' in name.lower():
-	    for datum in mydata:
+            for datum in mydata:
                 if 'phonon_label' in datum:
                     phonon_label = datum.split(':')[-1].strip()
                     def_or_neb_label = phonon_label.split('_')[0]
@@ -222,19 +222,19 @@ class RecipeSetup(MASTObj):
         """
         datalist=list()
         datalist.append("ingredient type: %s " % myingred)
-	scaling = re.search(r'_\d*x\d*x\d*',myingred)
-	if scaling: 
-	    scalingsize=scaling.group().split('_')[1]
-	    datalist.append("scaling_size: %s" % scalingsize)
-	    d_scaling = self.input_options.get_item("structure","scaling")
-	    kpoints = d_scaling[scalingsize]
-	    datalist.append("kpoints: %s %s %s" % (kpoints[0],kpoints[1],kpoints[2]) )
-	if 'defect_' in myingred:
-	    if scaling:
-            	defectlabel = myingred.split('defect_')[1].split('_')[1]
+        scaling = re.search(r'_\d*x\d*x\d*',myingred)
+        if scaling: 
+            scalingsize=scaling.group().split('_')[1]
+            datalist.append("scaling_size: %s" % scalingsize)
+            d_scaling = self.input_options.get_item("structure","scaling")
+            kpoints = d_scaling[scalingsize]
+            datalist.append("kpoints: %s %s %s" % (kpoints[0],kpoints[1],kpoints[2]) )
+        if 'defect_' in myingred:
+            if scaling:
+                defectlabel = myingred.split('defect_')[1].split('_')[1]
             else: 
-		defectlabel = myingred.split('defect_')[1].split('_')[0]
-	    if defectlabel.isdigit():
+                defectlabel = myingred.split('defect_')[1].split('_')[0]
+            if defectlabel.isdigit():
                 defectlabel = "defect_" + defectlabel
             datalist.append("defect_label: %s" % defectlabel)
         if 'q=' in myingred:
@@ -247,18 +247,18 @@ class RecipeSetup(MASTObj):
                 chargelabel=chargestr
             datalist.append("charge: %s" % chargelabel)
         if 'neb_' in myingred:
-	    if scaling:
+            if scaling:
                 neblabel = myingred.split('neb_')[1].split('_')[1]
-	    else:
-		neblabel = myingred.split('neb_')[1].split('_')[0]
+            else:
+                neblabel = myingred.split('neb_')[1].split('_')[0]
             datalist.append("neb_label: %s" % neblabel)
         if 'phonon_' in myingred:
             labels = myingred.split('phonon_')[1].split('_')
             try: labels.remove('parse')
-	    except ValueError: pass
-	    if scaling: labels.remove(scalingsize)
-	    phononlabel = '_'.join(labels)
-	    datalist.append("phonon_label: %s" % phononlabel)
+            except ValueError: pass
+            if scaling: labels.remove(scalingsize)
+            phononlabel = '_'.join(labels)
+            datalist.append("phonon_label: %s" % phononlabel)
         data=','.join(datalist)
         self.metafile.write_data(myingred, data)
 
