@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 
 import numpy as np
@@ -21,37 +18,6 @@ from MAST.utility.mastfile import MASTFile
 ALLOWED_KEYS = {\
                  'inputfile'    : (str, 'mast.inp', 'Input file name'),\
                }
-
-MAST_KEYWORDS = {'program': 'vasp',
-                 'system_name': 'mast',
-                 'scratch_directory': os.path.expanduser(os.environ['MAST_SCRATCH']),
-                }
-
-STRUCTURE_KEYWORDS = {'posfile': None,
-                      'spacegroup': None,
-                      'symmetry_only': False,
-                      'coord_type': 'cartesian',
-                      'atom_list': None,
-                      'coordinates': None,
-                      'lattice': None,
-                      'primitive': False,
-                      'structure': None
-                     }
-
-DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
-                    'vacancy': list(),
-                    'interstial': list(),
-                    'antisite': list(),
-                    'substitution': list(),
-                   }
-
-INGREDIENTS_KEYWORDS = ['singlepoint',
-                        'optimization',
-                        'neb',
-                   ]
-
-RECIPE_KEYWORDS = {'recipe_file': None,
-                  }
 
 class IndepLoopInputParser(MASTObj):
 
@@ -305,4 +271,3 @@ class IndepLoopInputParser(MASTObj):
             createdfiles.append(os.path.basename(newname))
             dct=dct+1
         return createdfiles
-
