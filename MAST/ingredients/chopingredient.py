@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-05-12 by Zhewen Song
+##############################################################
 import os
 import numpy as np
 import logging
@@ -17,7 +14,6 @@ from pymatgen.core.structure import Lattice
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
-
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
@@ -54,6 +50,21 @@ class ChopIngredient(BaseIngredient):
                 raise MASTError(self.__class__.__name__, "Could not find child directory %s in %s" % (childname, recipedir))
         return os.path.join(recipedir, cshort)
 
+    def copy_file_with_prepend(self, copyfrom="", copyto="", childdir="", softlink=0):
+        """Duplicate an ingredient file into the child
+            directory, with the ingredient
+            name prepended
+            e.g. "OSZICAR" becomes "defect_vac1_q=p2_stat_OSZICAR"
+            Args:
+                copyfrom <str>: File name to copy, e.g. OSZICAR
+                copyto <str>: File name to copy to, e.g. OSZICAR
+                childdir <str>: Child directory
+                softlink <int>: 0 - copy (default)
+                                1 - softlink
+        """
+        ingname = os.path.basename(self.keywords['name'])
+        toname = "%s_%s" % (ingname, copyto)
+        self.copy_file(copyfrom, toname, childdir, softlink)
 
     def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0):
         """Copy a file.
@@ -105,6 +116,57 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (frompath, topath))
         return
 
+    def get_saddle_dir(self):
+        """Get the saddle directory of an NEB calculation.
+            VASP only supported.
+        """
+        if not 'vasp' in self.program:
+            raise MASTError(self.__class__.__name__, "Program %s not supported" % self.program)
+        myname = self.keywords['name']
+        subdirs = dirutil.immediate_subdirs(myname)
+        highenergystr="Not evaluated"
+        highenergy=-1000000000000.0
+        for subdir in subdirs:
+            fullsub = os.path.join(myname, subdir)
+            singlechecker = VaspChecker(name=fullsub, program_keys = dict(self.checker.keywords['program_keys']), structure = self.checker.keywords['structure'].copy())
+            singlechecker.keywords['program_keys']['mast_program'] = "vasp"
+            myenergy = singlechecker.get_energy_from_energy_file()
+            if myenergy > highenergy:
+                highenergystr = subdir
+                highenergy = myenergy
+        self.logger.info("Saddle directory: %s" % highenergystr)
+        return highenergystr
+
+    def copy_saddle_file(self, oldfname, newfname, childname=""):
+        """Forward a file from the saddle of a NEB calculation.
+            VASP calculations only.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory
+        """
+        saddledir = self.get_saddle_dir()
+        self.copy_file("%s/%s" % (saddledir, oldfname), newfname, childname)
+        return
+    def copy_saddle_file_with_prepend(self, oldfname, newfname, childname=""):
+        """Forward a file from the saddle of a NEB calculation with
+            the original NEB prepend, but not the inage name.
+            VASP calculations only.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory
+            e.g. 
+            self.copy_saddle_file_with_prepend("CONTCAR","POSCAR", childdir)
+            neb_vac1-vac2_stat/03/CONTCAR will be copied into childdir as:
+            neb_vac1-vac2_stat_POSCAR
+        """
+        saddledir = self.get_saddle_dir()
+        ingname = os.path.basename(self.keywords['name'])
+        prependedname = "%s_%s" % (ingname, newfname)
+        self.copy_file("%s/%s" % (saddledir, oldfname), prependedname, childname)
+        return
+    
     def softlink_file(self, linkfrom="", linkto="", childdir=""):
         """Softlink a file.
             Args:
@@ -238,6 +300,52 @@ class ChopIngredient(BaseIngredient):
             my_input.to_file(inputpath)
         return 
 
+    def write_ordered_ingred_input_file(self, fname="", allowed_file="all", upperkey=1, delimiter=" "):
+        """Write an input file.
+            Assumes that keyword dictionary is given as
+            ["#.keyword"] = value
+            For example ["2.fix"]=["nvt"]
+            Creates an input with keywords in order.
+            Args: 
+                fname <str>: File name for the ingredient input 
+                            file to be created, e.g. INCAR
+                allowed_file <str>: File name for the list
+                    of allowed keywords. Use "all" to allow
+                    all non-mast keywords.
+                upperkey <str or int>: 
+                        1 - uppercase keywords (default)
+                        0 - leave keywords their own case
+                delimiter <str>: Delimiter to place between
+                    keywords and values in the input file.
+                    Default is space.
+                    Omit this parameter to use a space.
+                    Neither semicolon nor comma may be used
+                    as a delimiter, as these are special
+                    delimiters in the MAST input file already.
+        """
+        if delimiter == "":
+            delimiter = " "
+        if allowed_file.lower() == "all":
+            okay_keys = self._get_allowed_non_mast_keywords("", upperkey)
+        else:
+            okay_keys = self._get_allowed_non_mast_keywords(allowed_file, upperkey)
+        keylist=list()
+        for key, value in okay_keys.iteritems():
+            key = str(key)
+            keynum = int(key.split(".")[0])
+            keywordval = key.split(".")[1]
+            value = str(value)
+            keylist.append([keynum, keywordval, value])
+        keylist.sort()
+        my_input = MASTFile()
+        for keytriplet in keylist:
+            my_input.data.append(keytriplet[1] + delimiter + keytriplet[2] + "\n")
+        inputpath = os.path.join(self.keywords['name'],fname)
+        if os.path.isfile(inputpath):
+            self.logger.error("File already exists at %s. Skipping input file writing." % inputpath)
+        else:
+            my_input.to_file(inputpath)
+        return 
 
     def _get_allowed_non_mast_keywords(self, allowed_file="", upperkey=1):
         """Get the non-mast keywords and make a dictionary.
@@ -606,7 +714,6 @@ class ChopIngredient(BaseIngredient):
         self.keywords['name']=myname
         return
 
-
     def run_strain(self):
         """Strain the lattice.
             Args:
@@ -622,34 +729,35 @@ class ChopIngredient(BaseIngredient):
         strained_structure = sxtend.strain_lattice(mystrain)
         self.checker.write_final_structure_file(strained_structure)
         return
-    
+
     def run_scale(self):
         try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
+            base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
         if scalingsize == None: scalingsize = '1 1 1'
         else: scalingsize = ' '.join(scalingsize.split('x'))
-        scaled = scalextend.scale_structure(scalingsize)
+        scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+        scaled = scalextend.scale_structure()
         self.checker.write_final_structure_file(scaled)
         return
 
     def run_defect(self):
         try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
+            base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-	scaled = scalextend.scale_structure('1 1 1')
-	defect = self.keywords['program_keys']['mast_defect_settings']
+        scalingsize = self.metafile.read_data('scaling_size')
+        if scalingsize == None: scalingsize = '1 1 1'
+        else: scalingsize = ' '.join(scalingsize.split('x'))
+        defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=self.keywords['structure'].copy(), name=self.keywords['name'])
+                sxtend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
@@ -663,11 +771,10 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-	scalingsize = self.metafile.read_data('scaling_size')
-        if scalingsize == None: scalingsize = '1 1 1'
-	else: scalingsize = ' '.join(scalingsize.split('x'))
-	scaled = scalextend.scale_structure(scalingsize)
-	defect = self.keywords['program_keys']['mast_defect_settings']
+        if not 'mast_scale' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
+        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
+        defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
@@ -677,6 +784,60 @@ class ChopIngredient(BaseIngredient):
                 pass
         self.checker.write_final_structure_file(scaled)
         return
+
+    def run_supercell_defect_set(self, parentdir=""):
+        """For finite size scaling.
+            Given a text file named supercell_list.txt:
+
+            /some/directory/of/parent/ingredient
+            ----------------------------------
+            ScalingLMN     V_M     Kpoint mesh
+            ----------------------------------
+            [4, 4, 4] 2.55350475682 [2, 2, 2]
+            [3, 4, 3] 3.00247070991 [2, 2, 2]
+            [4, 3, 2] 3.05854316622 [2, 2, 4]
+            [3, 3, 2] 3.67455399526 [2, 2, 4]
+            [2, 2, 2] 5.10700950784 [4, 4, 4]
+
+            There are folders in the parent ingredient
+                4x1x1
+                3x2x3 etc. within which are a perfect POSCAR
+                file and a correspondingly scaled KPOINTS file.
+            Copy each folder with POSCAR and KPOINTS.
+            Induce the correct defect group for each new folder
+                in the current ingredient, scaling by the
+                appropriate amount.
+            Args:
+                parentdir <str>: Parent directory. If not
+                        supplied, method will look for
+                        supercell_list.txt in the current
+                        directory and use the path 
+                        specified within the file.
+        """
+        myname = self.keywords['name']
+        supercell_info = MASTFile(os.path.join(myname, "supercell_list.txt"))
+        if parentdir == "":
+            scaleset_dir = supercell_info.data[0].strip()
+        else:
+            scaleset_dir = parentdir
+        scale_folders = dirutil.immediate_subdirs(scaleset_dir)
+        for scale_folder in scale_folders:
+            shutil.copytree(os.path.join(scaleset_dir,scale_folder), os.path.join(myname, scale_folder))
+        for scale_folder in scale_folders:
+            myfolder = os.path.join(myname, scale_folder)
+            singlechecker = VaspChecker(name=myfolder,program_keys = dict(self.checker.keywords['program_keys']))
+            scaled = singlechecker.get_initial_structure_from_directory() 
+            defect = self.keywords['program_keys']['mast_defect_settings']
+            scalestring = scale_folder
+            for key in defect:
+                if 'subdefect' in key:
+                    subdefect = defect[key]
+                    sxtend = StructureExtensions(struc_work1=scaled, name=self.keywords['name'])
+                    scaled = sxtend.scale_defect_by_LMN(scalestring, subdefect, defect['coord_type'], defect['threshold'])
+                else:
+                    pass
+            singlechecker.write_final_structure_file(scaled)
+        return True
 
     def complete_structure(self):
         if self.directory_is_locked():
@@ -732,7 +893,28 @@ class ChopIngredient(BaseIngredient):
             return True
         else:
             return False
-
+    def complete_supercell_defect_set(self):
+        """Check that a supercell defect set is complete
+            by making sure that there is an ending structure
+            (CONTCAR for VASP) in every subfolder.
+        """
+        myname = self.keywords['name']
+        mysubdirs = dirutil.immediate_subdirs(myname)
+        oklist=list()
+        if len(mysubdirs) == 0: #No subdirectories set yet
+            return False
+        for subdir in mysubdirs:
+            self.checker.keywords['name']=os.path.join(myname, subdir)
+            if self.checker.has_ending_structure_file():
+                oklist.append(True)
+            else:
+                oklist.append(False)
+        self.checker.keywords['name']=myname
+        okarr = np.array(oklist)
+        if okarr.all():
+            return True
+        else:
+            return False
 
     def give_structure(self, childname):
         childname = self._fullpath_childname(childname)
@@ -749,7 +931,38 @@ class ChopIngredient(BaseIngredient):
             self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
     
+    def give_supercell_subfolder_file(self, oldfname, newfname, childname):
+        """Give each CONTCAR to a corresponding scale1 through scale5
+            child folder.
+            Args:
+                oldfname <str>: Old file name
+                newfname <str>: New file name
+                childname <str>: Child directory name (fullpath)
+        """
+        myname = self.keywords['name']
+        childbase = os.path.basename(childname)
+        if not "scale" in childbase:
+            raise MASTError(self.__class__.__name__,"Child directory %s needs 'scale' in its name" % childname)
+        namesplit = childbase.split("_")
+        for nspl in namesplit:
+            if "scale" in nspl:
+                scalestr = nspl
+                break
+        scaleidx = int(scalestr.strip()[5:]) - 1 #e.g. scale3 = index 2
+        subdirs = dirutil.immediate_subdirs(myname)
+        mysubdir = subdirs[scaleidx]
+        self.copy_file(os.path.join(mysubdir, oldfname),newfname,childname)
+        
 
+
+    def give_supercell_defect_kpoints(self, childname):
+        """Give each KPOINTS to a corresponding scale1 through scale5
+            child folder.
+        """
+        myname = self.keywords['name']
+        if not "scale" in childname:
+            raise MASTError(self.__class__.__name__,"Child directory %s needs 'scale' in its name" % childname)
+        subdirs = dirutil.immediate_subdirs(myname)
 
 
 
