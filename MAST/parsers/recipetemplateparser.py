@@ -160,7 +160,7 @@ class RecipeTemplateParser(MASTObj):
                         if needsphonons == 1:
                             if len(d_defects[defectname]['phonon'].keys()) > 0:
                                 phononkeys = d_defects[defectname]['phonon'].keys()
- 			        phononkeys.sort()
+                                phononkeys.sort()
                                 for phonon in phononkeys:
                                     for line in origchunk:
                                         newline = line.replace("<N>", defectname)
