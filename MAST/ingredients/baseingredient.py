@@ -1,14 +1,31 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 import subprocess
 import time
-
+import logging
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
+from MAST.utility import MASTFile
+from MAST.utility import loggerutils
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
+from MAST.ingredients.checker import GenericChecker
+from MAST.ingredients.checker import LammpsChecker
+from MAST.ingredients.errorhandler import BaseError
+from MAST.ingredients.errorhandler import VaspError
+from MAST.ingredients.errorhandler import PhonError
+from MAST.ingredients.errorhandler import VaspNEBError
+from MAST.ingredients.errorhandler import GenericError
+from MAST.utility import loggerutils
 
 class BaseIngredient(MASTObj):
     """Base Ingredient class
@@ -18,8 +35,10 @@ class BaseIngredient(MASTObj):
             self.program <str>: program name, all lowercase,
                                 from 'mast_program' in input
                                 file
-            self.checker <BaseChecker, PhonChecker, VaspChecker>:
+            self.checker <VaspChecker, PhonChecker, etc.>:
                     program-dependent checker object
+            self.errhandler <VaspError, PhonError, etc.>:
+                    program-dependent handler object
     """
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
@@ -29,9 +48,6 @@ class BaseIngredient(MASTObj):
         work_dir = '/'.join(self.keywords['name'].split('/')[:-1])
         topmeta = Metadata(metafile='%s/metadata.txt' % work_dir)
         data = topmeta.read_data(self.keywords['name'].split('/')[-1])
-        #print 'GRJ DEBUG: name =', self.keywords['name'].split('/')[-1]
-        #print 'GRJ DEBUG: data =', data
-        #print 'GRJ DEBUG: topmeta =\n', topmeta
 
         self.meta_dict = dict()
         if data:
@@ -41,17 +57,34 @@ class BaseIngredient(MASTObj):
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
+        
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],
             program_keys = self.keywords['program_keys'],
             structure = self.keywords['structure'])
+            self.errhandler = VaspError(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
+        elif self.program == 'vasp_neb':
+            self.checker = VaspNEBChecker(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
+            self.errhandler = VaspNEBError(name=self.keywords['name'],
+            program_keys = self.keywords['program_keys'],
+            structure = self.keywords['structure'])
         elif self.program == 'phon':
             self.checker = PhonChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+        elif self.program == 'lammps':
+            self.checker = LammpsChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
-            self.checker = BaseChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
-
-        #self.logger    = logger #keep this space
-        #self.structure = dict() #TTM 2013-03-27 structure is in allowed_keys
+            allowed_keys={'name','program_keys','structure'}
+            self.checker = GenericChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
 
     def write_directory(self):
         try:
@@ -65,103 +98,43 @@ class BaseIngredient(MASTObj):
             for key, value in self.meta_dict.items():
                 self.metafile.write_data(key, value)
         except OSError:
-            print "Directory exists."
+            self.logger.info("Directory for %s already exists." % self.keywords['name'])
             return
         return
-  
-    def get_structure_from_directory(self, dirname):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_structure_from_directory(dirname)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_structure_from_directory)")
 
-    def get_structure_from_file(self, filepath):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_structure_from_file(filepath)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_structure_from_file)")
-
-    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_structure(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
-    def forward_parent_initial_structure(self, parentpath, childpath, newname="POSCAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_initial_structure(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_initial_structure)")
-
-
-    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_energy(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
-
-    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            vasp_checker.forward_parent_dynmat(parentpath, childpath, newname)
-            return None
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in forward_parent_structure)")
     def is_complete(self):
         '''Function to check if Ingredient is ready'''
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            usepath = self.keywords['name']
-            if vasp_checker._vasp_is_neb(self.keywords):
-                mycomplete = vasp_checker.images_complete(self.keywords['name'],
-                                self.keywords['program_keys']['images'])
-                usepath = usepath + '/01'
-            else:
-                mycomplete = vasp_checker.is_complete(usepath)
-
-            if mycomplete:
-                self.metafile.write_data('completed on', time.asctime())
-                if 'OSZICAR' in os.listdir(self.keywords['name']):
-                    energy = self.get_e0_energy(self.keywords['name'])
+        if not self.checker.is_started():
+            return False #hasn't started running yet
+        complete = self.checker.is_complete()
+        frozen = self.checker.is_frozen()
+        if complete or frozen:
+            errct = self.errhandler.loop_through_errors()
+            if errct > 0:
+                if os.path.isfile(os.path.join(self.keywords['name'],'error.5.tar.gz')):
+                    self.logger.error("Ingredient directory already has 5 error zip files. A manual look is required.")
+                    self.change_my_status("E")
+                    return False
+                if 'mast_auto_correct' in self.keywords['program_keys'].keys():
+                    if str(self.keywords['program_keys']['mast_auto_correct']).strip()[0].lower() == 'f':
+                        self.change_my_status("E")
+                    else:
+                        self.change_my_status("S")
                 else:
-                    energy = None
-                self.metafile.write_data('energy', energy)
-
-                return mycomplete
-            else:
-                if not os.path.exists(usepath + '/OUTCAR'):
-                    return False #hasn't started running yet.
-                from MAST.ingredients.errorhandler import vasp_error
-                if 'images' in self.keywords['program_keys'].keys():
-                    errct = vasp_error.loop_through_errors(usepath, 1)
-                else:
-                    errct = vasp_error.loop_through_errors(usepath)
-                if errct > 0:
-                    pass #self.run() #Should try to rerun automatically or not?? NO.
+                    self.change_my_status("S")
+                self.errhandler.clean_up_directory()
                 return False
-
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            usepath = self.keywords['name']
-            mycomplete = phon_checker.is_complete(usepath)
-            self.metafile.write_data('completed on', time.asctime())
-            return mycomplete
+            else:
+                if complete:
+                    self.metafile.write_data('completed on', time.asctime())
+                    if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
+                        energy = self.checker.get_energy_from_energy_file()
+                        self.metafile.write_data('energy', energy)
+                    return True
+                else:
+                    return False
         else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in is_complete)")
+            return False
 
     def directory_is_locked(self):
         return dirutil.directory_is_locked(self.keywords['name'])
@@ -178,15 +151,7 @@ class BaseIngredient(MASTObj):
     def is_ready_to_run(self):
         if self.directory_is_locked():
             return False
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.is_ready_to_run(self.keywords['name'])
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            return phon_checker.is_ready_to_run(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in is_complete)")
+        return self.checker.is_ready_to_run()
         
     def getpath(self):
         '''getpath returns the directory of the ingredient'''
@@ -200,13 +165,15 @@ class BaseIngredient(MASTObj):
     def run(self, mode='serial', curdir=os.getcwd()):
         from submit import queue_commands 
         
-        curdir = os.getcwd()
-        os.chdir(self.keywords['name'])
 
         if mode.lower() == 'noqsub':
+            curdir = os.getcwd()
+            os.chdir(self.keywords['name'])
             programpath = queue_commands.direct_shell_command()
             p = subprocess.Popen(programpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             p.wait()
+            os.chdir(curdir)
+            self.metafile.write_data('run', time.asctime())
             
         elif mode.lower() == 'serial':
             queuesub = queue_commands.write_to_submit_list(self.keywords['name'])
@@ -214,53 +181,8 @@ class BaseIngredient(MASTObj):
             #runme.wait()
             # for scheduling other jobs
             #runme.wait()
-        os.chdir(curdir)
-        self.metafile.write_data('run start', time.asctime())
-
+            self.metafile.write_data('queued', time.asctime())
         return
-
-    def set_up_program_input(self):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.set_up_program_input(self.keywords)
-        elif self.program == 'phon':
-            from MAST.ingredients.checker import phon_checker
-            return phon_checker.set_up_program_input(self.keywords)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in set_up_program_input)")
-
-    def get_path_to_write_neb_parent_energy(self, parent):
-        """Get path to write the NEB's parent energy file.
-            parent = 1 for initial, 2 for final
-        """
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.get_path_to_write_neb_parent_energy(self.keywords['name'], self.keywords['program_keys']['images'],parent)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_path_to_write_neb_parent_energy)")
-
-    def set_up_program_input_neb(self, image_structures):
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.set_up_program_input_neb(self.keywords, image_structures)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in set_up_neb)")
-
-    #def get_children(self):
-    #    """Returns the children of this ingredient.
-    #        If there are no children, it will return None instead.
-    #    """
-    #    if (self.keywords['child_dict']):
-    #        return self.keywords['child_dict'].copy()
-    #    else:
-    #        return None
-
-    #@property
-    #def children(self):
-    #    return self.get_children()
 
     def get_name(self):
         return self.keywords['name'].split('/')[-1]
@@ -275,47 +197,6 @@ class BaseIngredient(MASTObj):
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
-    def add_selective_dynamics_to_structure(self, sdarray):
-        """Adds selective dynamics to a structure."""
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.add_selective_dynamics_to_structure(self.keywords, sdarray)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-
-    def forward_extra_restart_files(self, parentpath, childpath):
-        """Forward links to extra restart files."""
-        if self.program == 'vasp':
-            from MAST.ingredients.checker import vasp_checker
-            return vasp_checker.forward_extra_restart_files(parentpath, childpath)
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-    def combine_dynmats(self):
-        """Combine dynmats."""
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            vasp_extensions.combine_dynmats(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-    def combine_displacements(self):
-        """Combine displacements."""
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            vasp_extensions.combine_displacements(self.keywords['name'])
-        else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in add_selective_dynamics_to_structure)")
-# The following functions need to be defined by the child class:
-    #def write_files(self):
-    #    '''writes the files needed as input for the jobs'''
-    #    raise NotImplementedError
-    
-    #def create_metadata_file(self):
-    #    '''writes the initial metadata file'''
-    #    raise NotImplementedError
 
     
     def get_my_label(self, label):
@@ -332,14 +213,31 @@ class BaseIngredient(MASTObj):
             raise MASTError(self.__class__.__name__, 
                 "No metadata for tag %s" % label)
         return mylabel[1]
-    def get_e0_energy(self, mydir):
-        """Get the E0 energy from a directory.
+
+    def change_my_status(self, newstatus):
+        """Change an ingredient status by writing the new status to 
+            change_status.txt in the ingredient folder, to get picked
+            up by the recipe plan.
+            Args:
+                newstatus <str>: New status to which to change the ingredient.
         """
-        if self.program == 'vasp':
-            from MAST.ingredients.pmgextend import vasp_extensions
-            return vasp_extensions.get_e0_energy(mydir)
+        ingdir = self.keywords['name']
+        oneup = os.path.dirname(ingdir)
+        tryrecipe = os.path.basename(oneup)
+        statuspath = ""
+        if dirutil.dir_is_in_scratch(tryrecipe):
+            statuspath = "%s/change_status.txt" % ingdir
         else:
-            raise MASTError(self.__class__.__name__, 
-                "Program not recognized (in get_e0_energy)")
-
-
+            twoup = os.path.dirname(oneup)
+            tryrecipe = os.path.basename(twoup)
+            if dirutil.dir_is_in_scratch(tryrecipe):
+                statuspath = "%s/change_status.txt" % oneup
+            else:
+                raise MASTError(self.__class__.__name__, "Cannot change status of ingredient %s as recipe %s or %s is not found in $MAST_SCRATCH." % (self.keywords['name'],oneup, twoup))
+        if os.path.isfile(statuspath):
+            statusfile = MASTFile(statuspath)
+        else:
+            statusfile=MASTFile()
+        statusfile.data.append("%s:recommend:%s" % (newstatus, time.asctime()))
+        statusfile.to_file(statuspath)
+        self.logger.info("Recommending status change to %s" % newstatus)
