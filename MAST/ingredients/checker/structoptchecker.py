@@ -12,7 +12,7 @@ from MAST.utility import MASTError
 from MAST.ingredients.checker import BaseChecker
 from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import LammpsChecker
-from submit import queue_commands
+from MAST.submit import queue_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.aseio import AseAtomsAdaptor
 from structopt import Optimizer
