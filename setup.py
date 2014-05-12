@@ -137,16 +137,5 @@ setup(
         description="MAterials Simulation Toolkit",
         long_description="MAterials Simulation Toolkit for diffusion and defects",
         keywords=["MAST","materials","simulation","diffusion","defects","ab initio","high throughput", "DFT", "density functional theory", "defect formation"],
-        classifiers=[
-            "Programming Language :: Python :: 2.7",
-            "Development Status :: 4 - Beta",
-            "Intended Audience :: Science/Research",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Topic :: Scientific/Engineering :: Information Analysis",
-            "Topic :: Scientific/Engineering :: Physics",
-            "Topic :: Scientific/Engineering :: Chemistry",
-            "Topic :: Software Development :: Libraries :: Python Modules"
-        ],
         cmdclass={'build_py': build_py}
 )

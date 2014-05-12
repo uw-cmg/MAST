@@ -12,9 +12,13 @@ import subprocess
 import importlib
 from MAST.ingredients.chopingredient import ChopIngredient
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from customlib import *
 >>>>>>> d72ada45b6a4ab30669cda2ca564dc6f0efc5d5d
+=======
+from customlib import *
+>>>>>>> 1e7ff1933f44df0bd90ea0325109658e94e0222c
 from MAST.summary import citations
 #from MAST.ingredients.chopingredient import WriteIngredient
 #from MAST.ingredients.chopingredient import IsReadyToRunIngredient

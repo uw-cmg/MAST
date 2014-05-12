@@ -20,6 +20,7 @@ from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
 from MAST.ingredients.checker import GenericChecker
 from MAST.ingredients.checker import LammpsChecker
+from MAST.ingredients.checker import StructoptChecker
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
@@ -80,6 +81,9 @@ class BaseIngredient(MASTObj):
             self.errhandler = PhonError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         elif self.program == 'lammps':
             self.checker = LammpsChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+            self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
+        elif self.program =='structopt':
+            self.checker = StructoptChecker(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
             self.errhandler = GenericError(name=self.keywords['name'],program_keys=self.keywords['program_keys'],structure=self.keywords['structure'])
         else:
             allowed_keys={'name','program_keys','structure'}
@@ -164,8 +168,6 @@ class BaseIngredient(MASTObj):
     
     def run(self, mode='serial', curdir=os.getcwd()):
         from MAST.submit import queue_commands 
-        
-
         if mode.lower() == 'noqsub':
             curdir = os.getcwd()
             os.chdir(self.keywords['name'])
@@ -174,7 +176,6 @@ class BaseIngredient(MASTObj):
             p.wait()
             os.chdir(curdir)
             self.metafile.write_data('run', time.asctime())
-            
         elif mode.lower() == 'serial':
             queuesub = queue_commands.write_to_submit_list(self.keywords['name'])
             #runme = subprocess.Popen(queuesub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -197,8 +198,6 @@ class BaseIngredient(MASTObj):
     def __repr__(self):
         return 'Ingredient %s of type %s' % (self.keywords['name'].split('/')[-1], self.__class__.__name__)
 
-
-    
     def get_my_label(self, label):
         """Get the value of a label in the metadata file.
             Args:
