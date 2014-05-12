@@ -1,16 +1,22 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
-import subprocess
+import shutil
+import logging
 import time
-
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import Metadata
-allowed_keys = {
-    'name' : (str, str(), 'Name of directory'),
-    'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-    'structure': (Structure, None, 'Pymatgen Structure object')
-            }
+from MAST.utility import loggerutils
+from pymatgen.core.structure import Structure
+from pymatgen.io.vaspio import Poscar
+from pymatgen.io.cifio import CifParser
+
 class BaseChecker(MASTObj):
     """Base checker class. This class switches between
         program-specific functions.
@@ -22,49 +28,97 @@ class BaseChecker(MASTObj):
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
+        self.logger = logging.getLogger(self.keywords['name'])
+        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
 
-    def get_structure_from_directory(self, dirname):
-        raise NotImplementedError
+    def is_frozen(self, output_filename=""):
+        """Check if the ingredient is frozen.
+            Args:
+                output_filename <str>: Output filename to check (not full path)
+                    e.g. OUTCAR
+            Returns:
+                True if frozen, False otherwise
+        """
+        if output_filename == "":
+            self.logger.error("No output filename given for is_frozen check")
+            return False
+        frozensec=21000
+        if "mast_frozen_seconds" in self.keywords['program_keys'].keys():
+            frozensec = int(self.keywords['program_keys']['mast_frozen_seconds'])
+        st = os.stat(os.path.join(self.keywords['name'], output_filename)) 
+        if time.time() - st.st_mtime > frozensec: 
+            self.logger.warning("Ingredient appears frozen based on file %s" % output_filename)
+            return True
+        else:
+            return False
 
-    def get_structure_from_file(self, filepath):
-        raise NotImplementedError
-
-    def forward_parent_structure(self, parentpath, childpath, newname="POSCAR"):
-        raise NotImplementedError
-    
-    def forward_parent_initial_structure(self, parentpath, childpath, newname="POSCAR"):
-        raise NotImplementedError
-
-    def forward_parent_energy(self, parentpath, childpath, newname="OSZICAR"):
-        raise NotImplementedError
-    def forward_parent_dynmat(self, parentpath, childpath, newname="DYNMAT"):
-        raise NotImplementedError
     def is_complete(self):
         raise NotImplementedError
-   
+    def is_started(self):
+        raise NotImplementedError
     def is_ready_to_run(self):
         raise NotImplementedError
+    def get_coordinates_only_structure_from_input(self):
+        """Get coordinates-only structures from mast_coordinates
+            ingredient keyword
+            Args:
+                keywords <dict>: ingredient keywords
+            Returns:
+                coordstrucs <list>: list of Structure objects
+        """
+        coordposlist=self.keywords['program_keys']['mast_coordinates']
+        coordstrucs=list()
+        coordstruc=None
+        for coordpositem in coordposlist:
+            if ('poscar' in os.path.basename(coordpositem).lower()):
+                coordstruc = Poscar.from_file(coordpositem).structure
+            elif ('cif' in os.path.basename(coordpositem).lower()):
+                coordstruc = CifParser(coordpositem).get_structures()[0]
+            else:
+                error = 'Cannot build structure from file %s' % coordpositem
+                raise MASTError(self.__class__.__name__, error)
+            coordstrucs.append(coordstruc)
+        return coordstrucs
+    def softlink_a_file(self, childpath, filename):
+        """Softlink a parent file to a matching name in the child folder.
+            Args:
+                childpath <str>: path to child ingredient
+                filename <str>: file name (e.g. "CHGCAR")
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        import subprocess
+        #print "cwd: ", os.getcwd()
+        #print parentpath
+        #print childpath
+        if os.path.isfile("%s/%s" % (parentpath, filename)):
+            if not os.path.isfile("%s/%s" % (childpath, filename)):
+                curpath = os.getcwd()
+                os.chdir(childpath)
+                mylink=subprocess.Popen("ln -s %s/%s %s" % (parentpath,filename,filename), shell=True)
+                mylink.wait()
+                os.chdir(curpath)
+            else:
+                self.logger.warning("%s already exists in %s. Parent %s not softlinked." % (filename,childpath,filename))
+        else:
+            raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot create softlink." % (parentpath, filename))
+        dirutil.unlock_directory(childpath)
     
-    def set_up_program_input(self):
-        raise NotImplementedError
-
-    def get_path_to_write_neb_parent_energy(self, parent):
-        raise NotImplementedError
-
-    def set_up_program_input_neb(self, image_structures):
-        raise NotImplementedError
-
-    def add_selective_dynamics_to_structure(self, sdarray):
-        raise NotImplementedError
-
-    def forward_extra_restart_files(self, parentpath, childpath):
-        raise NotImplementedError
-    
-    def combine_dynmats(self):
-        raise NotImplementedError
-    
-    def combine_displacements(self):
-        raise NotImplementedError
-    
-    def get_e0_energy(self, mydir):
-        raise NotImplementedError
+    def copy_a_file(self, childpath, pfname, cfname):
+        """Copy a parent file to an arbitrary name in the child folder.
+            Args:
+                childpath <str>: path to child ingredient
+                pfname <str>: file name in parent folder (e.g. "CONTCAR")
+                cfname <str>: file name for child folder (e.g. "POSCAR")
+        """
+        parentpath = self.keywords['name']
+        dirutil.lock_directory(childpath)
+        self.logger.info("Attempting copy of %s/%s into %s/%s" % (parentpath, pfname, childpath, cfname))
+        if os.path.isfile("%s/%s" % (parentpath, pfname)):
+            if not os.path.isfile("%s/%s" % (childpath, cfname)):
+                shutil.copy("%s/%s" % (parentpath, pfname),"%s/%s" % (childpath, cfname))
+            else:
+                self.logger.warning("%s already exists in %s. Parent file %s not copied from %s into child %s." % (cfname,childpath,pfname,parentpath,cfname))
+        else:
+            raise MASTError(self.__class__.__name__,"No file in parent path %s named %s. Cannot copy into child path as %s." % (parentpath, pfname, cfname))
+        dirutil.unlock_directory(childpath)
