@@ -5,13 +5,13 @@ import random
 import math
 import pdb
 import logging
-from structopt import inp_out
-from structopt import tools
-from structopt import generate
-from structopt import switches
-from structopt.switches.predator_switch import predator_switch
-from structopt import fingerprinting
-from structopt import post_processing as pp
+from MAST.structopt import inp_out
+from MAST.structopt import tools
+from MAST.structopt import generate
+from MAST.structopt import switches
+from MAST.structopt.switches.predator_switch import predator_switch
+from MAST.structopt import fingerprinting
+from MAST.structopt import post_processing as pp
 from ase import Atom, Atoms
 try:
     from mpi4py import MPI

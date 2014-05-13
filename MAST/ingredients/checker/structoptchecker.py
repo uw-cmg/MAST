@@ -15,10 +15,10 @@ from MAST.ingredients.checker import LammpsChecker
 from MAST.submit import queue_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.aseio import AseAtomsAdaptor
-from structopt import Optimizer
-from structopt import post_processing as pp
-from structopt import inp_out
-from structopt.switches import fitness_switch
+from MAST.structopt import Optimizer
+from MAST.structopt import post_processing as pp
+from MAST.structopt import inp_out
+from MAST.structopt.switches import fitness_switch
 
 class StructoptChecker(BaseChecker):
     

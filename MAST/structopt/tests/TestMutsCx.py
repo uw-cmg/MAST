@@ -172,8 +172,8 @@ def test_cx(ind1, ind2):
     nc1, nc2 = rotct(i1,i2,A,False)
 
 def main():
-    from structopt import Optimizer
-    from structopt import tools
+    from MAST.structopt import Optimizer
+    from MAST.structopt import tools
     
     #Test for cluster structures
     parameters = {'structure':'Cluster','optimizer_type': 'GA','atomlist':[('Au', 10, 0, 0), ('Cu', 10, 0, 0)]}

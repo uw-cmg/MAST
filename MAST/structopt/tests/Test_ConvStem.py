@@ -2,7 +2,7 @@
 #import matplotlib.cm  as cm
 from structopt.tools.StemCalc import ConvStem
 from structopt.generate.gen_pop_box import gen_pop_box as gpb
-from structopt import Optimizer
+from MAST.structopt import Optimizer
 import numpy
 
 size = 10.0

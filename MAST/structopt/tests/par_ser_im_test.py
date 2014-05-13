@@ -1,4 +1,4 @@
-from structopt import Optimizer
+from MAST.structopt import Optimizer
 from mpi4py import MPI
 
 rank = MPI.COMM_WORLD.Get_rank()

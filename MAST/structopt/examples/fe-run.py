@@ -1,4 +1,4 @@
-from structopt import Optimizer
+from MAST.structopt import Optimizer
 from ase.lattice.cubic import BodyCenteredCubic as BCC
 from ase import Atoms,Atom
 from structopt.io.write_xyz import write_xyz
