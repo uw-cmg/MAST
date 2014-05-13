@@ -1,8 +1,8 @@
-from structopt.tools import get_best
-from structopt.switches import moves_switch, lambdacommamu
-from structopt.generate import gen_pop_box
-from structopt.generate.Individual import Individual
-from structopt.tools import remove_duplicates
+from MAST.structopt.tools import get_best
+from MAST.structopt.switches import moves_switch, lambdacommamu
+from MAST.structopt.generate import gen_pop_box
+from MAST.structopt.generate.Individual import Individual
+from MAST.structopt.tools import remove_duplicates
 
 def fitpred_new(pop,Optimizer):
     """Predator function to identify similar structures based on energy and replace one with new structure.

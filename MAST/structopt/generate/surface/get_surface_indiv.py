@@ -1,7 +1,7 @@
-from structopt.inp_out import read_xyz
-from structopt.tools import find_top_layer
-from structopt.switches import moves_switch
-from structopt.generate.Individual import Individual
+from MAST.structopt.inp_out import read_xyz
+from MAST.structopt.tools import find_top_layer
+from MAST.structopt.switches import moves_switch
+from MAST.structopt.generate.Individual import Individual
 
 def get_surface_indiv(Optimizer):
     """

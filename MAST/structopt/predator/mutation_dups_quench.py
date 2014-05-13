@@ -1,7 +1,7 @@
-from structopt.fingerprinting import get_fingerprint
-from structopt.tools import get_best
-from structopt.tools import remove_duplicates
-from structopt.switches import selection_switch, moves_switch, lambdacommamu
+from MAST.structopt.fingerprinting import get_fingerprint
+from MAST.structopt.tools import get_best
+from MAST.structopt.tools import remove_duplicates
+from MAST.structopt.switches import selection_switch, moves_switch, lambdacommamu
 import random
 
 def mutation_dups_quench(pop, Optimizer):
@@ -47,7 +47,7 @@ def mutation_dups_quench(pop, Optimizer):
     pop = get_best(pop,len(pop))
     
     if Optimizer.genrep >10:
-        from structopt.moves.quench import quench
+        from MAST.structopt.moves.quench import quench
         import os
         olammpsvar = os.environ['LAMMPS_COMMAND']
         try:

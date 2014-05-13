@@ -1,7 +1,7 @@
-from structopt.tools import get_best
-from structopt.switches import selection_switch, moves_switch, lambdacommamu
-from structopt.tools import remove_duplicates
-from structopt.fingerprinting import get_fingerprint
+from MAST.structopt.tools import get_best
+from MAST.structopt.switches import selection_switch, moves_switch, lambdacommamu
+from MAST.structopt.tools import remove_duplicates
+from MAST.structopt.fingerprinting import get_fingerprint
 import random
 
 def mutation_dups_energy(pop, Optimizer):

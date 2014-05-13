@@ -1,10 +1,10 @@
 import copy
 import random
 import numpy
-from structopt.switches import fitness_switch
-from structopt.moves.rotation import rotation
-from structopt.moves.rotation_geo import rotation_geo
-from structopt.moves.zp_rotation import zp_rotation
+from MAST.structopt.switches import fitness_switch
+from MAST.structopt.moves.rotation import rotation
+from MAST.structopt.moves.rotation_geo import rotation_geo
+from MAST.structopt.moves.zp_rotation import zp_rotation
 
 def basin_hop_rotate(indiv, Optimizer):
     """Move function to perform mini-basin hopping run to Rotate atoms

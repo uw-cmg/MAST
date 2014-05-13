@@ -1,10 +1,10 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
-from structopt.tools.position_average import position_average
-from structopt.tools.shift_atoms import shift_atoms
-from structopt.inp_out import write_xyz
+from MAST.structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.position_average import position_average
+from MAST.structopt.tools.shift_atoms import shift_atoms
+from MAST.structopt.inp_out import write_xyz
 
 def rotct_defect(ind1, ind2, Optimizer):
     """Rotate atoms cut and splice

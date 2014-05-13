@@ -1,7 +1,7 @@
-from structopt.tools import get_best
-from structopt.switches import selection_switch, moves_switch, lambdacommamu
-from structopt.fingerprinting import get_fingerprint
-from structopt.tools import remove_duplicates
+from MAST.structopt.tools import get_best
+from MAST.structopt.switches import selection_switch, moves_switch, lambdacommamu
+from MAST.structopt.fingerprinting import get_fingerprint
+from MAST.structopt.tools import remove_duplicates
 
 def mutation_dups_zp(pop, Optimizer):
     """Predator function that selects individuals that are too similar based fitness and
