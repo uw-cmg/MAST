@@ -6,7 +6,7 @@ def mutation_test(indiv, A):
     '''
     print 'Beginning unit testing of mutations'
     try:
-		from structopt.moves.ase_minimization import ase_minimization
+		from MAST.structopt.moves.ase_minimization import ase_minimization
 		A.ase_min_fmax=0.001
 		A.ase_min_maxsteps=2500
 		ind = indiv.duplicate()
@@ -17,7 +17,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-		from structopt.moves.atoms_add import atoms_add
+		from MAST.structopt.moves.atoms_add import atoms_add
 		ind = indiv.duplicate()
 		nind = atoms_add(ind,A)
 		print 'Atoms_Add mutation successful'
@@ -26,7 +26,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-		from structopt.moves.atoms_remove import atoms_remove
+		from MAST.structopt.moves.atoms_remove import atoms_remove
 		ind = indiv.duplicate()
 		nind = atoms_remove(ind,A)
 		print 'Atoms_Remove mutation successful'
@@ -35,7 +35,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-		from structopt.moves.basin_hop_la import basin_hop_la
+		from MAST.structopt.moves.basin_hop_la import basin_hop_la
 		A.finddefect=False
 		A.bh_steps=10
 		A.bh_temp=1000*8.617385692256675e-05
@@ -47,7 +47,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.basin_hop_permute import basin_hop_permute
+        from MAST.structopt.moves.basin_hop_permute import basin_hop_permute
         A.finddefect=False
         A.bh_steps=10
         A.bh_temp=1000*8.617385692256675e-05
@@ -59,7 +59,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.basin_hop_ra_atoms import basin_hop_ra_atoms
+        from MAST.structopt.moves.basin_hop_ra_atoms import basin_hop_ra_atoms
         A.finddefect=False
         A.bh_steps=10
         A.bh_temp=1000*8.617385692256675e-05
@@ -71,7 +71,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.basin_hop_rotate import basin_hop_rotate
+        from MAST.structopt.moves.basin_hop_rotate import basin_hop_rotate
         A.finddefect=False
         A.bh_steps=10
         A.bh_temp=1000*8.617385692256675e-05
@@ -83,7 +83,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.cell_relax_lammps import cell_relax_lammps
+        from MAST.structopt.moves.cell_relax_lammps import cell_relax_lammps
         ind = indiv.duplicate()
         nind = cell_relax_lammps(ind,A)
         print 'cell_relax_lammps mutation successful'
@@ -92,7 +92,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.cell_shape import cell_shape
+        from MAST.structopt.moves.cell_shape import cell_shape
         ind = indiv.duplicate()
         nind = cell_shape(ind,A)
         print 'cell_shape mutation successful'
@@ -101,7 +101,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration_crystal import lattice_alteration_crystal
+        from MAST.structopt.moves.lattice_alteration_crystal import lattice_alteration_crystal
         ind = indiv.duplicate()
         nind = lattice_alteration_crystal(ind,A)
         print 'lattice_alteration_crystal mutation successful'
@@ -110,7 +110,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration_group import lattice_alteration_group
+        from MAST.structopt.moves.lattice_alteration_group import lattice_alteration_group
         ind = indiv.duplicate()
         nind = lattice_alteration_group(ind,A)
         print 'lattice_alteration_group mutation successful'
@@ -119,7 +119,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration_nn import lattice_alteration_nn
+        from MAST.structopt.moves.lattice_alteration_nn import lattice_alteration_nn
         ind = indiv.duplicate()
         nind = lattice_alteration_nn(ind,A)
         print 'lattice_alteration_nn mutation successful'
@@ -128,7 +128,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration_rdrd import lattice_alteration_rdrd
+        from MAST.structopt.moves.lattice_alteration_rdrd import lattice_alteration_rdrd
         ind = indiv.duplicate()
         nind = lattice_alteration_rdrd(ind,A)
         print 'lattice_alteration_rdrd mutation successful'
@@ -137,7 +137,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration_small import lattice_alteration_small
+        from MAST.structopt.moves.lattice_alteration_small import lattice_alteration_small
         ind = indiv.duplicate()
         nind = lattice_alteration_small(ind,A)
         print 'lattice_alteration_small mutation successful'
@@ -146,7 +146,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.lattice_alteration import lattice_alteration
+        from MAST.structopt.moves.lattice_alteration import lattice_alteration
         ind = indiv.duplicate()
         nind = lattice_alteration(ind,A)
         print 'lattice_alteration mutation successful'
@@ -155,7 +155,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.move_la import move_la
+        from MAST.structopt.moves.move_la import move_la
         ind = indiv.duplicate()
         nind = move_la(ind,A)
         print 'move_la mutation successful'
@@ -164,7 +164,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.permutation_bulk import permutation_bulk
+        from MAST.structopt.moves.permutation_bulk import permutation_bulk
         ind = indiv.duplicate()
         nind = permutation_bulk(ind,A)
         print 'permutation_bulk mutation successful'
@@ -173,7 +173,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.permutation_crystal_multi import permutation_crystal_multi
+        from MAST.structopt.moves.permutation_crystal_multi import permutation_crystal_multi
         ind = indiv.duplicate()
         nind = permutation_crystal_multi(ind,A)
         print 'permutation_crystal_multi mutation successful'
@@ -182,7 +182,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.permutation_crystal import permutation_crystal
+        from MAST.structopt.moves.permutation_crystal import permutation_crystal
         ind = indiv.duplicate()
         nind = permutation_crystal(ind,A)
         print 'permutation_crystal mutation successful'
@@ -191,7 +191,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.permutation import permutation
+        from MAST.structopt.moves.permutation import permutation
         ind = indiv.duplicate()
         nind = permutation(ind,A)
         print 'permutation mutation successful'
@@ -200,7 +200,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.quench import quench
+        from MAST.structopt.moves.quench import quench
         ind = indiv.duplicate()
         nind = quench(ind,A)
         print 'quench mutation successful'
@@ -209,7 +209,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.random_replacement import random_replacement
+        from MAST.structopt.moves.random_replacement import random_replacement
         ind = indiv.duplicate()
         nind = random_replacement(ind,A)
         print 'random_replacement mutation successful'
@@ -218,7 +218,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.rotation_geo import rotation_geo
+        from MAST.structopt.moves.rotation_geo import rotation_geo
         ind = indiv.duplicate()
         nind = rotation_geo(ind,A)
         print 'rotation_geo mutation successful'
@@ -227,7 +227,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.rotation import rotation
+        from MAST.structopt.moves.rotation import rotation
         ind = indiv.duplicate()
         nind = rotation(ind,A)
         print 'rotation mutation successful'
@@ -236,7 +236,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.scale_size import scale_size
+        from MAST.structopt.moves.scale_size import scale_size
         ind = indiv.duplicate()
         nind = scale_size(ind,A)
         print 'scale_size mutation successful'
@@ -245,7 +245,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.swap_int_local import swap_int_local
+        from MAST.structopt.moves.swap_int_local import swap_int_local
         ind = indiv.duplicate()
         nind = swap_int_local(ind,A)
         print 'swap_int_local mutation successful'
@@ -254,7 +254,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.swap_int import swap_int
+        from MAST.structopt.moves.swap_int import swap_int
         ind = indiv.duplicate()
         nind = swap_int(ind,A)
         print 'swap_int mutation successful'
@@ -263,7 +263,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.swap_vacancy import swap_vacancy
+        from MAST.structopt.moves.swap_vacancy import swap_vacancy
         ind = indiv.duplicate()
         nind = swap_vacancy(ind,A)
         print 'swap_vacancy mutation successful'
@@ -272,7 +272,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.swap import swap
+        from MAST.structopt.moves.swap import swap
         ind = indiv.duplicate()
         nind = swap(ind,A)
         print 'swap mutation successful'
@@ -281,7 +281,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.zp_rotation_fixed import zp_rotation_fixed
+        from MAST.structopt.moves.zp_rotation_fixed import zp_rotation_fixed
         ind = indiv.duplicate()
         nind = zp_rotation_fixed(ind,A)
         print 'zp_rotation_fixed mutation successful'
@@ -290,7 +290,7 @@ def mutation_test(indiv, A):
         print e
         pass
     try:
-        from structopt.moves.zp_rotation import zp_rotation
+        from MAST.structopt.moves.zp_rotation import zp_rotation
         ind = indiv.duplicate()
         nind = zp_rotation(ind,A)
         print 'zp_rotation mutation successful'
