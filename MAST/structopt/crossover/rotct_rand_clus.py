@@ -1,8 +1,8 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
-from structopt.inp_out import write_xyz
+from MAST.structopt.tools.find_defects import find_defects
+from MAST.structopt.inp_out import write_xyz
 
 def rotct_rand_clus(ind1, ind2, Optimizer):
     """Rotate atoms cut and splice

@@ -1,6 +1,6 @@
 import numpy
 import random
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def lattice_alteration(indiv, Optimizer):
     """Move function to perform Lattice Alteration of atoms

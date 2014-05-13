@@ -1,8 +1,8 @@
 import numpy
 import copy
 import random
-from structopt.switches import fitness_switch
-from structopt.moves.rattle import rattle
+from MAST.structopt.switches import fitness_switch
+from MAST.structopt.moves.rattle import rattle
 
 def basin_hop_rattle(indiv, Optimizer):
     """Move function to perform mini-basin hopping run to Rattle atoms

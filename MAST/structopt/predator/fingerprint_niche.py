@@ -1,6 +1,6 @@
-from structopt.fingerprinting import fingerprint_dist
-from structopt.tools import get_best
-from structopt.predator import mutation_dups
+from MAST.structopt.fingerprinting import fingerprint_dist
+from MAST.structopt.tools import get_best
+from MAST.structopt.predator import mutation_dups
 import random
 
 def fingerprint_niche(pop, Optimizer):

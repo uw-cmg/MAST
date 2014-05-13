@@ -1,6 +1,6 @@
-from structopt.fingerprinting import get_fingerprint
-from structopt.switches import selection_switch
-from structopt.tools import remove_duplicates
+from MAST.structopt.fingerprinting import get_fingerprint
+from MAST.structopt.switches import selection_switch
+from MAST.structopt.tools import remove_duplicates
 import math
 
 def adapting(pop, Optimizer):

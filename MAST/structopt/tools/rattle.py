@@ -1,4 +1,4 @@
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 from ase import Atom, Atoms
 
 def rattle(indiv):

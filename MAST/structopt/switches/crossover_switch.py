@@ -1,4 +1,4 @@
-from structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 import pdb
 
@@ -22,7 +22,7 @@ def crossover_switch(child1, child2, Optimizer):
     passflag = True
     scheme = Optimizer.cx_scheme
     try:
-        exec "from structopt.crossover.{0} import {0}".format(scheme)
+        exec "from MAST.structopt.crossover.{0} import {0}".format(scheme)
         nchild1, nchild2 = eval('{0}(child1, child2, Optimizer)'.format(scheme))
     except NameError, e:
         logger.warning('Specified Crossover not one of the available options. Please check documentation and spelling! Crossover : {0}. {1}'.format(Optimizer.cx_scheme,e), exc_info=True)
@@ -34,7 +34,7 @@ def crossover_switch(child1, child2, Optimizer):
         passflag = False
     if not passflag:
         try:
-            from structopt.crossover.cxtp import cxtp
+            from MAST.structopt.crossover.cxtp import cxtp
             nchild1, nchild2 = cxtp(child1, child2, Optimizer)
             passflag = True
         except NameError, e:

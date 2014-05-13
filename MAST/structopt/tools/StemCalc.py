@@ -628,7 +628,7 @@ def fitgaussian(data):
 	return p
 
 def find_stem_coeff(Optimizer, indiv):
-    from structopt.tools.eval_energy import eval_energy
+    from MAST.structopt.tools.eval_energy import eval_energy
     outs = eval_energy([Optimizer,indiv])
     indiv.energy = outs[0]
     stro=outs[3]

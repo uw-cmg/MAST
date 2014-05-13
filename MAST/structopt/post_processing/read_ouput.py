@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 import numpy
-from structopt.post_processing.read_genealogy import read_genealogy
+from MAST.structopt.post_processing.read_genealogy import read_genealogy
 import logging
 
 def read_output(folder,genealogytree=False,natoms=None, loggername=None):

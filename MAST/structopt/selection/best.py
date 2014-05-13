@@ -1,4 +1,4 @@
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 
 def best(pop, nkeep, Optimizer=None):
     """Selection function to select the best individuals in a population

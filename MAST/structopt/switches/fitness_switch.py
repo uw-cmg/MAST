@@ -1,4 +1,4 @@
-from structopt.tools import rattle
+from MAST.structopt.tools import rattle
 import logging
 try:
     from mpi4py import MPI
@@ -22,7 +22,7 @@ def fitness_switch(input):
         scheme = Optimizer.fitness_scheme
         strn = ''
         try:
-            exec "from structopt.fitness.{0} import {0}".format(scheme)
+            exec "from MAST.structopt.fitness.{0} import {0}".format(scheme)
             indiv, strn = eval('{0}(indiv, Optimizer)'.format(scheme))
         except NameError, e:
             print e

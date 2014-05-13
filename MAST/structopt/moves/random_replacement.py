@@ -1,8 +1,8 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
-from structopt.generate import gen_pop_box
+from MAST.structopt.tools.find_defects import find_defects
+from MAST.structopt.generate import gen_pop_box
 
 def random_replacement(indiv, Optimizer):
     """Move function to replace selection of atoms with randomly generated group

@@ -11,7 +11,7 @@ def moves_switch(indiv, Optimizer):
     else:
         debug = False
     try:
-       exec "from structopt.moves.{0} import {0}".format(scheme)
+       exec "from MAST.structopt.moves.{0} import {0}".format(scheme)
        mutant = eval('{0}(indiv, Optimizer)'.format(scheme))
        mutant.energy = 0
        mutant.fitness = 0

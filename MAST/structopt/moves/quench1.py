@@ -1,4 +1,4 @@
-from structopt.switches import fitness_switch
+from MAST.structopt.switches import fitness_switch
 import copy
 
 def quench(indiv, Optimizer):

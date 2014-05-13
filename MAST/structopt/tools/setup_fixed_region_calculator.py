@@ -1,4 +1,4 @@
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 from ase.calculators.vasp import Vasp
 
 def setup_fixed_region_calculator(Optimizer):

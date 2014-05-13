@@ -1,5 +1,5 @@
-from structopt.tools import get_best
-from structopt.switches import selection_switch
+from MAST.structopt.tools import get_best
+from MAST.structopt.switches import selection_switch
 
 def lambdacommamu(pop, Optimizer):
     """Selection function to employ a lambda,mu GA scheme

@@ -1,9 +1,9 @@
-from structopt.tools.eval_energy import eval_energy
-from structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.tools.eval_energy import eval_energy
+from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 import math
 import os
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def sibias(indiv, Optimizer):
     """Function to calculate total energy fitness of individual and bias away 

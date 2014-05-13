@@ -1,5 +1,5 @@
 import random
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def rotation(indiv, Optimizer):
     """Move function to perform rotation of a group of atoms

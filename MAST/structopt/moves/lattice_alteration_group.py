@@ -1,7 +1,7 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def lattice_alteration_group(indiv, Optimizer):
     """Move function to perform Lattice Alteration of group of atoms based on location

@@ -2,7 +2,7 @@ import random
 import os
 import copy
 import numpy
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 
 def cell_shape(indiv, Optimizer):
     """Move function to forcefully alter the unit cell shape

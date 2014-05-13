@@ -1,5 +1,5 @@
-from structopt.switches import fitness_switch
-from structopt.moves.permutation import permutation
+from MAST.structopt.switches import fitness_switch
+from MAST.structopt.moves.permutation import permutation
 import numpy
 import random
 import copy

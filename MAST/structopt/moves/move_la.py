@@ -1,6 +1,6 @@
 import random
 import numpy
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def move_la(indiv, Optimizer):
     """Move function to move atoms in structure by lattice constant.  Intended for use in Defect optimization.

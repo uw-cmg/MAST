@@ -2,7 +2,7 @@ import random
 import numpy
 from ase import Atom, Atoms
 from ase.calculators.neighborlist import NeighborList
-from structopt.inp_out import write_xyz
+from MAST.structopt.inp_out import write_xyz
 
 def newclus(ind1, ind2, Optimizer):
     """Select a box in the cluster configuration"""

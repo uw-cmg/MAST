@@ -3,8 +3,8 @@ import copy
 import random
 import time
 import logging
-from structopt.inp_out.loggerUtils import initialize_logger
-from structopt.tools.check_atomlist_concentration import check_atomlist_concentration
+from MAST.structopt.inp_out.loggerUtils import initialize_logger
+from MAST.structopt.tools.check_atomlist_concentration import check_atomlist_concentration
 import pdb
 try:
     from mpi4py import MPI
@@ -730,7 +730,7 @@ def read_parameter_input(input, logger):
             parameters['stem_coeff'] = None
     if 'stem' in parameters['fitness_scheme']:
         #Initialize function for experimental image
-        from structopt.tools.StemCalc import ConvStem
+        from MAST.structopt.tools.StemCalc import ConvStem
         logger.info('Initializing ConvStem Calculator')
         parameters['stemcalc'] = ConvStem(parameters=stemparams, tmp_dir='/'+os.getcwd()+'/ConvStemImages/', keep_files=parameters['stem_keep_files'])
     else:

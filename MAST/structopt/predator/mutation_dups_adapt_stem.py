@@ -46,7 +46,7 @@ def mutation_dups_adapt_stem(pop, Optimizer):
     pop = get_best(pop,len(pop))
     indiv = pop[0]
     if (indiv.fitness/indiv.energy <2.0):
-        from structopt.tools.StemCalc import find_stem_coeff
+        from MAST.structopt.tools.StemCalc import find_stem_coeff
         outs = find_stem_coeff(Optimizer,indiv)
         ind = outs[1]
         Optimizer.stem_coeff = outs[0]

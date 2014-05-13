@@ -1,4 +1,4 @@
-from structopt.fingerprinting import fingerprint_dist
+from MAST.structopt.fingerprinting import fingerprint_dist
 import random
 
 def fussf(pop, nkeep, Optimizer):

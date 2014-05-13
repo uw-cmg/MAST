@@ -2,8 +2,8 @@ import os
 import random
 from ase import Atom, Atoms
 from ase.optimize import BFGS
-from structopt.tools.lammps import LAMMPS
-from structopt.tools.setup_calculator import setup_calculator
+from MAST.structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.setup_calculator import setup_calculator
 
 def ase_minimization(indiv, Optimizer):
     """Function to use built in ASE minimizers to minimize atomic positions in structure.

@@ -1,8 +1,8 @@
 import os
 import math
 import numpy
-from structopt.inp_out import read_xyz
-from structopt.tools import calc_dist
+from MAST.structopt.inp_out import read_xyz
+from MAST.structopt.tools import calc_dist
 
 def get_lattice_concentration(bulkfile,indivfile):
     """Function to identify the lattice concentration of atoms in a bulk structure compared to a 

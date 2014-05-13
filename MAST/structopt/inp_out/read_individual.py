@@ -1,5 +1,5 @@
-from structopt.inp_out.read_xyz import read_xyz
-from structopt.generate.Individual import Individual
+from MAST.structopt.inp_out.read_xyz import read_xyz
+from MAST.structopt.generate.Individual import Individual
 from ase import Atom, Atoms
 
 def read_individual(indivfile, n=-1):

@@ -5,8 +5,8 @@ import copy
 import random
 import numpy
 import math
-from structopt.tools.calc_dist import calc_dist
-from structopt.tools.eval_energy import run_energy_eval as REE
+from MAST.structopt.tools.calc_dist import calc_dist
+from MAST.structopt.tools.eval_energy import run_energy_eval as REE
 
 def fss_bcc(indiv, Optimizer):
     defected = indiv[0].copy()

@@ -1,7 +1,7 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def rotation_geo(indiv, Optimizer):
     '''Function to handle a geometry based rotation mutation

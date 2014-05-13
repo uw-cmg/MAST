@@ -2,8 +2,8 @@ from ase import Atom, Atoms
 import numpy
 import copy
 from ase.calculators.neighborlist import NeighborList
-from structopt.inp_out.write_xyz import write_xyz
-from structopt.tools.calc_dist import calc_dist
+from MAST.structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.tools.calc_dist import calc_dist
 
 def find_defects(solid, bulko, rcutoff, atomlistcheck=False, trackvacs=False, trackswaps=False, debug=False, dcheck = 0.6):
     """Function to find interstitials, vacancies, and substitutional atoms (swaps) in a defected structure.

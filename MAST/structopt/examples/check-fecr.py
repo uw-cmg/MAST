@@ -1,7 +1,7 @@
-from structopt.io.read_xyz import read_xyz
-from structopt.io.write_xyz import write_xyz
+from MAST.structopt.io.read_xyz import read_xyz
+from MAST.structopt.io.write_xyz import write_xyz
 from ase import Atom,Atoms
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 import os
 
 # Set up calculator

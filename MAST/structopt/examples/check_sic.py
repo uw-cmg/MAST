@@ -1,7 +1,7 @@
-from structopt.inp_out.read_xyz import read_xyz
-from structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.inp_out.read_xyz import read_xyz
+from MAST.structopt.inp_out.write_xyz import write_xyz
 from ase import Atom,Atoms
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 
 # Set up calculator
 parcoff = '* * SiC.edip C Si' 

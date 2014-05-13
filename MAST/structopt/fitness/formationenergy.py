@@ -1,6 +1,6 @@
-from structopt.tools import eval_energy
-from structopt.fitness import totalenfit
-from structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.tools import eval_energy
+from MAST.structopt.fitness import totalenfit
+from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 import math
 import os

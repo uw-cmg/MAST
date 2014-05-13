@@ -1,5 +1,5 @@
 import os
-from structopt.tools.lammps import prism
+from MAST.structopt.tools.lammps import prism
 
 def write_lammps_data(data_name, atoms):
     """Function to write ase atoms object to LAMMPS file

@@ -1,7 +1,7 @@
 #import matplotlib.pyplot as plt
 #import matplotlib.cm  as cm
-from structopt.tools.StemCalc import ConvStem
-from structopt.generate.gen_pop_box import gen_pop_box as gpb
+from MAST.structopt.tools.StemCalc import ConvStem
+from MAST.structopt.generate.gen_pop_box import gen_pop_box as gpb
 from MAST.structopt import Optimizer
 import numpy
 

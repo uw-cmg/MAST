@@ -1,7 +1,7 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.inp_out import write_xyz
+from MAST.structopt.inp_out import write_xyz
 
 def clustbx(ind1, ind2, Optimizer):
     """Select a box in the cluster configuration

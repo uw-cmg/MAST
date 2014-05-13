@@ -1,9 +1,9 @@
 import numpy
 import copy
 import random
-from structopt.switches import fitness_switch
-from structopt.moves.lattice_alteration_group import lattice_alteration_group
-from structopt.moves.lattice_alteration_rdrd import lattice_alteration_rdrd
+from MAST.structopt.switches import fitness_switch
+from MAST.structopt.moves.lattice_alteration_group import lattice_alteration_group
+from MAST.structopt.moves.lattice_alteration_rdrd import lattice_alteration_rdrd
 
 def basin_hop_la(indiv, Optimizer):
     """Move function to perform mini-basin hopping run to Translate atoms

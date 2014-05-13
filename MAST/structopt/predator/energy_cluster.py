@@ -1,5 +1,5 @@
-from structopt.tools import get_best
-from structopt.predator import mutation_dups
+from MAST.structopt.tools import get_best
+from MAST.structopt.predator import mutation_dups
 import random
 
 def energy_cluster(pop, Optimizer):

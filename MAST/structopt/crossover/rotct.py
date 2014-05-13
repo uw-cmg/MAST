@@ -1,7 +1,7 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.inp_out import write_xyz
+from MAST.structopt.inp_out import write_xyz
 
 def rotct(ind1, ind2, Optimizer):
     """Rotate atoms cut and splice

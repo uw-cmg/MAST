@@ -1,5 +1,5 @@
-from structopt.generate import gen_pop_box, gen_pop_sphere
-from structopt.generate.Individual import Individual
+from MAST.structopt.generate import gen_pop_box, gen_pop_sphere
+from MAST.structopt.generate.Individual import Individual
 
 def get_crystal_indiv(Optimizer):
     """

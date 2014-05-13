@@ -1,6 +1,6 @@
-from structopt.inp_out import read_xyz
-from structopt.generate.Individual import Individual
-from structopt.tools import find_top_layer
+from MAST.structopt.inp_out import read_xyz
+from MAST.structopt.generate.Individual import Individual
+from MAST.structopt.tools import find_top_layer
 
 def get_crystal_restart_indiv(Optimizer, indiv):
     """

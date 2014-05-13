@@ -1,6 +1,6 @@
 import os
 import copy
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 
 def cell_relax_lammps(indiv, Optimizer):
     """Move function to perform Lammps box/relax for cell. Intended for use in Crystal Optimization

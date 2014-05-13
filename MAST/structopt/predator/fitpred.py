@@ -1,4 +1,4 @@
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 
 def fitpred(pop,Optimizer):
     """Predator function to select best structures

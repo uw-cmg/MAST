@@ -1,5 +1,5 @@
 import random
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 
 def random_pick(pop, nkeep, Optimizer):
 	"""Selection function that randomly choose structures from a population to survive.

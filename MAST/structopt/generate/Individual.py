@@ -1,6 +1,6 @@
 import copy
 from ase import Atom, Atoms
-from structopt.inp_out.write_individual import write_individual
+from MAST.structopt.inp_out.write_individual import write_individual
 
 class Individual(object):
     """Defines class object individual for use in evolution"""

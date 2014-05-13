@@ -1,7 +1,7 @@
 import random
 import numpy
 from ase import Atom, Atoms
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def permutation_crystal(indiv, Optimizer):
     """Move function to perform Permutation of one atom based on atomlist with entire crystal in Defect

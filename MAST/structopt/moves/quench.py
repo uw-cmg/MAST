@@ -1,5 +1,5 @@
-from structopt.switches import fitness_switch
-from structopt.tools import setup_calculator
+from MAST.structopt.switches import fitness_switch
+from MAST.structopt.tools import setup_calculator
 import copy
 
 def quench(indiv, Optimizer):

@@ -1,9 +1,9 @@
 import copy
 import random
 import numpy
-from structopt.tools import fitness_switch
-from structopt.moves.atoms_add import atoms_add
-from structopt.moves.atoms_remove import atoms_remove
+from MAST.structopt.tools import fitness_switch
+from MAST.structopt.moves.atoms_add import atoms_add
+from MAST.structopt.moves.atoms_remove import atoms_remove
 
 def basin_hop_ra_atoms(indiv, Optimizer):
     """Move function to perform mini-basin hopping run to add/remove atoms

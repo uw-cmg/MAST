@@ -1,7 +1,7 @@
 import numpy
 import math
 from ase import Atom, Atoms
-from structopt.fingerprinting import dirac
+from MAST.structopt.fingerprinting import dirac
 
 def get_fingerprint(Optimizer,indiv,binsize,cutoffdist):
     """Function to calculate the fingerprint of a structure

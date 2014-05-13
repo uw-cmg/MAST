@@ -1,6 +1,6 @@
 import random
 import numpy
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 from ase import Atom, Atoms
 from ase.calculators.neighborlist import NeighborList
 

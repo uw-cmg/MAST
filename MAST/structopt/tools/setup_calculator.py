@@ -1,4 +1,4 @@
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.tools.lammps import LAMMPS
 from ase.calculators.vasp import Vasp
 from ase.calculators.lj import LennardJones
 import os

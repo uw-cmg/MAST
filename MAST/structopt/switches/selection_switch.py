@@ -1,4 +1,4 @@
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 import logging
 
 def selection_switch(pop, nkeep, scheme, Optimizer):
@@ -11,7 +11,7 @@ def selection_switch(pop, nkeep, scheme, Optimizer):
     else:
         debug = False
     try:
-        exec "from structopt.selection.{0} import {0}".format(scheme)
+        exec "from MAST.structopt.selection.{0} import {0}".format(scheme)
         newpop = eval('{0}(pop, nkeep, Optimizer)'.format(scheme))
     except NameError,e:
     	logger.warning('Selection scheme not one of the available options! Check Document and spelling. Selection Scheme : {0}. {1}'.format(scheme,e), exc_info=True)

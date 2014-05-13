@@ -1,7 +1,7 @@
 import random
 import math
 import numpy
-from structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.find_defects import find_defects
 
 def lattice_alteration_rdrd(indiv, Optimizer):
     """Move function to move random atoms in random direction for random distance

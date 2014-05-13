@@ -1,5 +1,5 @@
 import random
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 
 def rank(pop, nkeep, Optimizer):
     """Selection function that chooses structures to survive and orders them based on their relative ranking

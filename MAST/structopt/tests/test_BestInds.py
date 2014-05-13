@@ -1,7 +1,7 @@
 #Test the BestInds function
 
-from structopt.tools.BestInds import BestInds
-from structopt.generate.Individual import Individual
+from MAST.structopt.tools.BestInds import BestInds
+from MAST.structopt.generate.Individual import Individual
 from ase import Atom, Atoms
 from operator import attrgetter
 

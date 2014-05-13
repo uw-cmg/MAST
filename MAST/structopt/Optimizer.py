@@ -394,7 +394,7 @@ class Optimizer():
                 if self.fitness_scheme=='STEM_Cost':
                     if self.stem_coeff==None:
                         ind = invalid_ind.pop()
-                        from structopt.tools.StemCalc import find_stem_coeff
+                        from MAST.structopt.tools.StemCalc import find_stem_coeff
                         outs = find_stem_coeff(self,ind)
                         ind = outs[1]
                         self.stem_coeff = outs[0]
@@ -456,7 +456,7 @@ class Optimizer():
                 if self.fitness_scheme=='STEM_Cost':
                     if self.stem_coeff==None:
                         ind = invalid_ind.pop()
-                        from structopt.tools.StemCalc import find_stem_coeff
+                        from MAST.structopt.tools.StemCalc import find_stem_coeff
                         outs = find_stem_coeff(self,ind)
                         ind = outs[1]
                         self.stem_coeff = outs[0]
@@ -885,7 +885,7 @@ class Optimizer():
             if self.stem_coeff==None:
                 logger.info('Setting STEM coeff (alpha)')
                 ind = offspring.pop()
-                from structopt.tools.StemCalc import find_stem_coeff
+                from MAST.structopt.tools.StemCalc import find_stem_coeff
                 outs = find_stem_coeff(self,ind)
                 ind = outs[1]
                 ind.fitness = 0

@@ -1,4 +1,4 @@
-from structopt.tools import get_best
+from MAST.structopt.tools import get_best
 import random
 
 def cost(pop, nkeep, Optimizer):

@@ -1,5 +1,5 @@
 from ase import Atoms, Atom
-from structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.inp_out.write_xyz import write_xyz
 
 def write_pop(Optimizer,pop):
     """

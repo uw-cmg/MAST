@@ -1,8 +1,8 @@
 import os
 from ase import Atom, Atoms
-from structopt.generate.defect import gen_solid
-from structopt.tools.find_defects import find_defects
-from structopt.generate.Individual import Individual
+from MAST.structopt.generate.defect import gen_solid
+from MAST.structopt.tools.find_defects import find_defects
+from MAST.structopt.generate.Individual import Individual
 try:
 	from mpi4py import MPI
 except:
