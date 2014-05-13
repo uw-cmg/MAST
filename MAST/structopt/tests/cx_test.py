@@ -10,7 +10,7 @@ def cx_test(ind1, ind2, A):
     '''
     print 'Beginning unit testing of crossovers'
     try:
-        from structopt.crossover.clustbx import clustbx
+        from MAST.structopt.crossover.clustbx import clustbx
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = clustbx(i1,i2,A)
@@ -20,7 +20,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.cxTP import cxTP
+        from MAST.structopt.crossover.cxTP import cxTP
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = cxTP(i1,i2,A)
@@ -30,7 +30,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.cxTPA import cxTPA
+        from MAST.structopt.crossover.cxTPA import cxTPA
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = cxTPA(i1,i2,A)
@@ -40,7 +40,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.cxTPC import cxTPC
+        from MAST.structopt.crossover.cxTPC import cxTPC
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = cxTPC(i1,i2,A)
@@ -50,7 +50,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.NewClus import NewClus
+        from MAST.structopt.crossover.NewClus import NewClus
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = NewClus(i1,i2,A)
@@ -60,7 +60,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.randalloybox import randalloybox
+        from MAST.structopt.crossover.randalloybox import randalloybox
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = randalloybox(i1,i2,A)
@@ -70,7 +70,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.rotct_rand_clus import rotct_rand_clus
+        from MAST.structopt.crossover.rotct_rand_clus import rotct_rand_clus
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = rotct_rand_clus(i1,i2,A)
@@ -80,7 +80,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.rotct_rand import rotct_rand
+        from MAST.structopt.crossover.rotct_rand import rotct_rand
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = rotct_rand(i1,i2,A)
@@ -90,7 +90,7 @@ def cx_test(ind1, ind2, A):
         print e
         pass
     try:
-        from structopt.crossover.rotct import rotct
+        from MAST.structopt.crossover.rotct import rotct
         i1 = ind1.duplicate()
         i2 = ind2.duplicate()
         nc1, nc2 = rotct(i1,i2,A)

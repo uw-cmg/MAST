@@ -1,7 +1,7 @@
-from structopt.tools import get_best
-from structopt.switches import selection_switch
-from structopt.switches import lambdacommamu
-from structopt.tools import remove_duplicates
+from MAST.structopt.tools import get_best
+from MAST.structopt.switches import selection_switch
+from MAST.structopt.switches import lambdacommamu
+from MAST.structopt.tools import remove_duplicates
 import logging
 import random
 import pdb
@@ -14,7 +14,7 @@ def predator_switch(pop,Optimizer):
     logger.info('Applying predator to population with initial size = {0}'.format(len(pop)))
     STR = 'PREDATOR\n'
     try:
-       exec "from structopt.predator.{0} import {0}".format(scheme)
+       exec "from MAST.structopt.predator.{0} import {0}".format(scheme)
        pop, STR = eval('{0}(pop, Optimizer)'.format(scheme))
        passflag = True
     except NameError, e:

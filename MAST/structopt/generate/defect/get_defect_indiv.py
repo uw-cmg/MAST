@@ -2,9 +2,9 @@ import random
 import numpy
 import os
 from ase import Atom, Atoms
-from structopt.generate.defect import gen_solid
-from structopt.generate import gen_pop_box, gen_pop_sphere, generate_dumbbells
-from structopt.generate.Individual import Individual
+from MAST.structopt.generate.defect import gen_solid
+from MAST.structopt.generate import gen_pop_box, gen_pop_sphere, generate_dumbbells
+from MAST.structopt.generate.Individual import Individual
 try:
     from mpi4py import MPI
 except ImportError:
@@ -27,7 +27,7 @@ def get_defect_indiv(Optimizer):
 		outfilename = os.path.join(os.path.join(os.getcwd(),Optimizer.filename+'-rank'+repr(rank)),'Bulkfile.xyz')
 		if Optimizer.evalsolid:
 			if Optimizer.parallel:
-			    from structopt.tools.setup_calculator import setup_calculator
+			    from MAST.structopt.tools.setup_calculator import setup_calculator
 			    Optimizer.calc = setup_calculator(Optimizer)
 			bulk1, PureBulkEnpa, stro = gen_solid(Optimizer.solidfile,
 				Optimizer.solidcell,outfilename,Optimizer.calc,Optimizer.calc_method)

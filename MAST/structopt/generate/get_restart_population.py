@@ -1,8 +1,8 @@
-from structopt.inp_out import read_xyz
-from structopt.generate.surface import get_surface_restart_indiv
-from structopt.generate.defect import get_defect_restart_indiv
-from structopt.generate.crystal import get_crystal_restart_indiv
-from structopt.generate.Individual import Individual
+from MAST.structopt.inp_out import read_xyz
+from MAST.structopt.generate.surface import get_surface_restart_indiv
+from MAST.structopt.generate.defect import get_defect_restart_indiv
+from MAST.structopt.generate.crystal import get_crystal_restart_indiv
+from MAST.structopt.generate.Individual import Individual
 import logging
 
 def get_restart_population(Optimizer):

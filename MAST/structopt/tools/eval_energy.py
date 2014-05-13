@@ -1,11 +1,11 @@
 import os
 from ase import Atom, Atoms
-from structopt.inp_out.write_xyz import write_xyz
-from structopt.tools.setup_calculator import setup_calculator
-from structopt.tools.find_defects import find_defects
-from structopt.tools.check_cell_type import check_cell_type
-from structopt.fingerprinting import get_fingerprint
-from structopt.tools.lammps import LAMMPS
+from MAST.structopt.inp_out.write_xyz import write_xyz
+from MAST.structopt.tools.setup_calculator import setup_calculator
+from MAST.structopt.tools.find_defects import find_defects
+from MAST.structopt.tools.check_cell_type import check_cell_type
+from MAST.structopt.fingerprinting import get_fingerprint
+from MAST.structopt.tools.lammps import LAMMPS
 from ase.calculators.vasp import Vasp
 from ase.optimize import BFGS
 from ase.units import GPa

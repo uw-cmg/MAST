@@ -1,8 +1,8 @@
-from structopt.generate.surface import get_surface_indiv
-from structopt.generate.defect import get_defect_indiv
-from structopt.generate.crystal import get_crystal_indiv
-from structopt.generate import gen_pop_box, gen_pop_sphere
-from structopt.generate.Individual import Individual
+from MAST.structopt.generate.surface import get_surface_indiv
+from MAST.structopt.generate.defect import get_defect_indiv
+from MAST.structopt.generate.crystal import get_crystal_indiv
+from MAST.structopt.generate import gen_pop_box, gen_pop_sphere
+from MAST.structopt.generate.Individual import Individual
 
 def get_population(Optimizer):
     """
