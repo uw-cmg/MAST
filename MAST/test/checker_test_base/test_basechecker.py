@@ -14,7 +14,8 @@ from MAST.utility import MASTFile
 import shutil
 import subprocess
 testname="checker_test_base"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+print "************************CURDIR:", os.getcwd()
+testdir = dirutil.get_test_dir(testname)
 
 class TestBasechecker(unittest.TestCase):
 
@@ -96,6 +97,7 @@ class TestBasechecker(unittest.TestCase):
         self.assertTrue("childdir/alphatest" in myfiles)
         #self.testclass.softlink_a_file(childpath, filename)
     def test_softlink_a_file_child_softlink_exists(self):
+        print "CURDIR: ", os.getcwd()
         allowed=dict()
         allowed['name']=(str,"","Directory name")
         os.chdir("childdir")

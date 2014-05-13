@@ -6,8 +6,10 @@ import filecmp
 from filecmp import dircmp
 import MAST
 import shutil
+from MAST.utility import dirutil
 
 testname ="mast_test"
+testdir = dirutil.get_test_dir(testname)
 oldcontrol = os.getenv("MAST_CONTROL")
 oldrecipe = os.getenv("MAST_RECIPE_PATH")
 oldscratch = os.getenv("MAST_SCRATCH")
@@ -15,7 +17,6 @@ print "Old directories:"
 print oldcontrol
 print oldrecipe
 print oldscratch
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 
 
 class TestMAST(unittest.TestCase):

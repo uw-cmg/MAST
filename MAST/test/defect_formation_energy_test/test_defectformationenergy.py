@@ -12,7 +12,7 @@ from MAST.utility import dirutil
 import shutil
 from MAST.utility import MASTFile
 testname="defect_formation_energy_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 oldarchive = os.getenv("MAST_ARCHIVE")
       
 class TestDefectformationenergy(unittest.TestCase):

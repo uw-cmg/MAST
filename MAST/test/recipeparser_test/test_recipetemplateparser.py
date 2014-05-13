@@ -14,7 +14,7 @@ from MAST.utility import MASTFile
 import shutil
 
 testname="recipeparser_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 class TestRecipetemplateparser(unittest.TestCase):
 

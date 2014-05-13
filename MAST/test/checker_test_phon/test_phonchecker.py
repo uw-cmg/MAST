@@ -12,7 +12,7 @@ from MAST.utility import dirutil
 from MAST.utility import MASTFile
 
 testname="checker_test_phon"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 class TestPhonChecker(unittest.TestCase):
 

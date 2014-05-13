@@ -13,7 +13,7 @@ from MAST.utility import MASTFile
 import shutil
 
 testname="chop_test_ready"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 class TestIsReadyToRunIngredient(unittest.TestCase):
 

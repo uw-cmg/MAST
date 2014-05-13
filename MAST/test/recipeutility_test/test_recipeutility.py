@@ -11,7 +11,7 @@ import pymatgen
 from MAST.utility import dirutil
 
 testname="recipeutility_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 class TestRecipeUtility(unittest.TestCase):
 

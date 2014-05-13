@@ -15,7 +15,7 @@ from MAST.utility import MASTError
 import numpy as np
 
 testname="inputparser_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 class TestInputparser(unittest.TestCase):
 

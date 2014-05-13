@@ -13,7 +13,7 @@ from MAST.utility import dirutil
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
 testname="recipeplan_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
 old_scratch = os.getenv("MAST_SCRATCH")
 old_recipe = os.getenv("MAST_RECIPE_PATH")
