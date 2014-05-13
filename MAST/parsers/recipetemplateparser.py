@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 import os, math
 
@@ -141,7 +141,6 @@ class RecipeTemplateParser(MASTObj):
         d_scaling       = self.input_options.get_item("structure","scaling")
         d_defects       = self.input_options.get_item("defects","defects")
         d_nebs          = self.input_options.get_item("neb","nebs")
-        
         if needsscaling == 1:
             scalingsize = d_scaling.keys()
             scalingsize.sort()
@@ -221,7 +220,7 @@ class RecipeTemplateParser(MASTObj):
                 for line in origchunk:
                     newline = line.replace("<S>",size)
                     expandedchunk.append(newline)
-            else: expandedchunk = list(origchunk)       
+            else: expandedchunk = list(origchunk)
         return expandedchunk
         #origchunk = list(expandedchunk)
         #expandedchunk=list()

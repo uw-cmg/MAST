@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
@@ -33,6 +33,7 @@ class VaspNEBChecker(VaspChecker):
             'structure': (Structure, None, 'Pymatgen Structure object')
             }
         BaseChecker.__init__(self, allowed_keys, **kwargs)
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def get_path_to_write_neb_parent_energy(self, parent):
         """Get the path into which to write the NEB parent

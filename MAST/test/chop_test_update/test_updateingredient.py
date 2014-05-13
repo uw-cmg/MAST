@@ -13,7 +13,7 @@ from MAST.utility import MASTFile
 import shutil
 
 testname="chop_test_update"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 oldscratch = os.getenv("MAST_SCRATCH")
 
 class TestUpdateChildrenIngredient(unittest.TestCase):

@@ -281,3 +281,26 @@ def dir_is_in_scratch(mydir):
         return True
     else:
         return False
+def get_test_dir(testname):
+    """Get testing directory name.
+        Args:
+            testname <str>: test directory name, e.g. test_mod_1
+        Returns:
+            <str>: full test directory, depending on where python is
+                    installed and where the tests are located, e.g.
+        <python install dir>/lib/python2.7/site-packages/MAST/test/test_mod_1
+        where <python install dir> might be:
+                //home/username/.local/
+                //share/apps/EPD_64bit
+                or some other directory
+        Assumes that the user starts running the nosetests in the MAST
+        directory or in MAST/test
+    """
+    testdir=""
+    curdir = os.getcwd()
+    curdir = os.path.normpath(curdir)
+    testdir = curdir
+    if os.path.basename(curdir) == "MAST":
+        testdir = os.path.join(testdir, "test")
+    testdir = os.path.join(testdir, testname)
+    return testdir

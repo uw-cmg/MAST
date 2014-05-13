@@ -1,0 +1,90 @@
+$mast
+system_name GATest
+$end
+$structure
+#The structure actually does not make a difference for this. example, as it is not passed into any structure file.
+coord_type fractional
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+Si 0.0000000000 0.0000000000 0.0000000000
+end
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_nodes 1
+mast_multiplyencut 1.5
+mast_ppn 8
+mast_queue morgan1
+PAIR_STYLE edip
+MINIMIZE 1e-8 1e-8 5000 10000
+MIN_STYLE cg
+MIN_MODIFY line quadratic
+structure Defect
+optimizer_type GA
+atomlist [('Si', 0, 28.0855, -4.647),('C', 1, 12.011, -7.371)]
+solidcell [17.493, 17.493, 17.493]
+solidfile /home/amyk/mast/cBulk.xyz
+evalsolid True
+supercell (3,3,3)
+filename Sic
+natoms 1
+nindiv 1
+maxgen 10
+reqrep 6
+tolerance 0.001
+r_ab 2.5
+size 2.87195635428007
+sf   4.5
+algorithm_type lambda+mu
+calc_method LAMMPS
+cxpb 0.80
+mutpb 0.15
+cx_scheme rotct_rand_clus
+fitness_scheme totalenfit
+output_format formation_energy_per_int
+selection_scheme tournament2
+natural_selection_scheme fuss
+tournsize  3
+fusslimit  5
+convergence_scheme      gen_rep_min
+predator      mutation_dups
+demin      0.01
+mutation_options      ['lattice_alteration_rdrd','lattice_alteration_group','rotation_geo','rotation','zp_rotation','random_replacement','quench']
+quench_max_temp      1000 
+quench_min_temp      2 
+quench_n_steps_1      20000
+pair_style      edip
+pot_file      /home/amyk/mast/SiC.edip
+lammps_keep_files      True
+lammps_min      1e-8 1e-8 5000 10000
+lammps_min_style      'cg\nmin_modify line quadratic'
+genealogy      True
+allenergyfile      True
+best_inds_list      True
+postprocessing      True
+finddefects      True
+parallel      True 
+alloy      True
+
+mast_write_method write_singlerun 
+mast_ready_method ready_singlerun
+mast_run_method run_singlerun
+mast_complete_method complete_singlerun
+mast_update_children_method give_structure
+#mast_started_file GAoutput.txt
+mast_program structopt
+exec_mast /home/amy/bin/lmp_linux 
+mast_exec //share/apps/mvapich2/tam_mvapich2-1.9a2/usr/local/bin/mpiexec //share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python /home/amyk/structopt/structopt/Optimizer.py
+end
+$end
+
+$recipe
+recipe_file simple_structopt.txt
+$end

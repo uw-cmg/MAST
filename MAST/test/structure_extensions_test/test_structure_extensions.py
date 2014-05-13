@@ -9,8 +9,9 @@ from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 import shutil
 import pymatgen
 import numpy as np
-
+from MAST.utility import dirutil
 testname ="structure_extensions_test"
+testdir = dirutil.get_test_dir(testname)
 #oldcontrol = os.getenv("MAST_CONTROL")
 #oldrecipe = os.getenv("MAST_RECIPE_PATH")
 #oldscratch = os.getenv("MAST_SCRATCH")
@@ -18,7 +19,6 @@ testname ="structure_extensions_test"
 #print oldcontrol
 #print oldrecipe
 #print oldscratch
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
 
 
 class TestSE(unittest.TestCase):

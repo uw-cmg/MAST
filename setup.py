@@ -54,7 +54,7 @@ class build_py(_build_py):
 setup(
         name="MAST",
         packages=find_packages(),
-        version="1.0.49",
+        version="1.0.56",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast",
@@ -137,16 +137,5 @@ setup(
         description="MAterials Simulation Toolkit",
         long_description="MAterials Simulation Toolkit for diffusion and defects",
         keywords=["MAST","materials","simulation","diffusion","defects","ab initio","high throughput", "DFT", "density functional theory", "defect formation"],
-        classifiers=[
-            "Programming Language :: Python :: 2.7",
-            "Development Status :: 4 - Beta",
-            "Intended Audience :: Science/Research",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Topic :: Scientific/Engineering :: Information Analysis",
-            "Topic :: Scientific/Engineering :: Physics",
-            "Topic :: Scientific/Engineering :: Chemistry",
-            "Topic :: Software Development :: Libraries :: Python Modules"
-        ],
         cmdclass={'build_py': build_py}
 )

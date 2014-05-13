@@ -247,6 +247,20 @@ Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR 
 *  Make sure you are getting to the right directory, which has POT_GGA_POW_PBE etc. folders inside it.
 
 ===============================
+Install ASE
+===============================
+
+Obtain the latest source code from `<https://wiki.fysik.dtu.dk/ase/>`_
+
+Unzip the tar.gz file to your home directory
+
+In your user profile, add the following line::
+
+    export PYTHONPATH=$PYTHONPATH:~/ase
+
+Log out and log back in.
+
+===============================
 Get MAST
 ===============================
 * Get the latest MAST package from the Python package index::

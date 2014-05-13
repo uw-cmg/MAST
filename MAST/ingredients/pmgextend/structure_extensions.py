@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 from pymatgen.io.vaspio import *
 import numpy as np
@@ -25,11 +25,13 @@ class StructureExtensions(MASTObj):
             'struc_work1': (Structure, None, 'First working Pymatgen Structure object (e.g. create a defect, or use work1 and work2 to interpolate positions)'),
             'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
             'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe'),
+            'scaling_size':(str,None,'Scaling size'),
             'name': (str, os.getenv("MAST_CONTROL"), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
         self.logger = logging.getLogger(self.keywords['name'])
         self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
@@ -132,7 +134,13 @@ class StructureExtensions(MASTObj):
             else:
                 mystridx = int(folderstr)
                 mycoord = strlist[mystridx].frac_coords[lastidx]
-            
+
+            scalingsize = self.metafile.read_data('scaling_size')
+            if not (scalingsize == None):
+                scalingsize = np.array(scalingsize.split('x'),float)
+                for i in range(3):
+                    mycoord[i] /= scalingsize[i]
+
             indexraw = find_in_coord_list_pbc(sortedstruc.frac_coords, mycoord, atol)
             index=list()
             for indexentry in indexraw:
@@ -242,12 +250,17 @@ class StructureExtensions(MASTObj):
         if phonon_center_site == None:
             return None
         pcscoord = np.array(phonon_center_site.strip().split(), float)
+        scalingsize = self.metafile.read_data('scaling_size')
+        if not (scalingsize == None):
+            scalingsize = np.array(scalingsize.split('x'),float)
+            for i in range(3):
+                pcscoord[i] /= scalingsize[i]
         tol = float(tol)
         pcsarr = find_in_coord_list_pbc(mystruc.frac_coords, pcscoord,tol)
         uniqsites = np.unique(pcsarr)
 
         if len(uniqsites) == 0:
-            raise MASTError("pmgextend/structure_extensions", "No sites found for phonon centering for %s" % self.keywords['name'])
+            raise MASTError("pmgextend/structure_extensions", "No sites found for phonon centering for %s" %self.keywords['name'])
 
         if phonon_center_radius == None:
             return uniqsites
@@ -272,7 +285,6 @@ class StructureExtensions(MASTObj):
         alltotarr = np.concatenate([uniqsites, nbsitelist])
         allsites = np.unique(alltotarr)
         return allsites
-
 
     def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius,threshold=1e-1):
         """Create a selective dynamics array, for use when every atom and every
@@ -349,39 +361,23 @@ class StructureExtensions(MASTObj):
         newstructure.modify_lattice(newlattice)
         return newstructure
 
-    def scale_structure(self, scale):
-        """Scale the structure.
-            Args:
-                oldstr <structure>: old structure to be scaled
-                scale <str>: scale parameter; should be >= 2
-                        Should be either a single digit "2"
-                        or a string of 3 digits "1 2 3"
-                        signifying scaling by 1a x 2b x 3c
-            Returns:
-                scaledstr <structure>
-        """
+    def scale_structure(self):
         scaledstr = self.keywords['struc_work1'].copy()
-        if type(scale) == int:
-            scaleinput = scale
+        scale = self.keywords['scaling_size']
+        scale = scale.strip()
+        scalesplit = scale.split()
+        if len(scalesplit) == 3:
+            scaleinput = map(float, scalesplit)
         else:
-            scale = scale.strip()
-            scalesplit = scale.split()
-            if len(scalesplit) == 1:
-                scaleinput = float(scalesplit[0])
-            elif len(scalesplit) == 3:
-                scaleinput = map(float, scalesplit)
-            else:
-                self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
-                raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
-                return None
+            self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
+            raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
+            return None
         scaledstr.make_supercell(scaleinput)
         return scaledstr
 
     def scale_defect(self, defect, coord_type, threshold):
         """Scales the defect dictionary and returns the modified structure
             Args:
-                keyword struc_work1: scaled-up structure
-                keyword struc_work2: original structure
                 defect <dict>: Defect subdictionary (single 
                                defect) of the form:
                         {'symbol': 'cr', 'type': 'interstitial', 
@@ -395,49 +391,20 @@ class StructureExtensions(MASTObj):
                 defected structure <Structure>
         """
         mycoords = defect['coordinates']
-        origstr = self.keywords['struc_work2']
-        scaledstr = self.keywords['struc_work1']
-        olda = origstr.lattice.a
-        oldb = origstr.lattice.b
-        oldc = origstr.lattice.c
-        newa = scaledstr.lattice.a
-        newb = scaledstr.lattice.b
-        newc = scaledstr.lattice.c
+        scale = self.keywords['scaling_size']
+        scale = scale.strip()
+        scalesplit = scale.split()
+        if len(scalesplit) == 3:
+                scaleinput = map(float, scalesplit)
+        else:
+            self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
+            raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
+            return None
+
         #if newa is twice as big as olda, coordinate should be half as big
-        coorda = mycoords[0]*(olda/newa)
-        coordb = mycoords[1]*(oldb/newb)
-        coordc = mycoords[2]*(oldc/newc)
-        newdict = dict(defect)
-        newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
-        returnstr = self.induce_defect(newdict, coord_type, threshold)
-        return returnstr
-    def scale_defect_by_LMN(self, scale, defect, coord_type, threshold):
-        """Scales the defect dictionary and returns the modified structure
-            Args:
-                keyword struc_work1: scaled-up structure
-                scale <str>: String "LxMxN" for scaling defect position
-                defect <dict>: Defect subdictionary (single 
-                               defect) of the form:
-                        {'symbol': 'cr', 'type': 'interstitial', 
-                    'coordinates': array([ 0. ,  0.5,  0. ])}}
-                coord_type <str>: cartesian or fractional
-                threshold <float>: Threshold for finding the
-                                   defect position in what may
-                                   be a relaxed, imperfect 
-                                   structure.
-            Returns:
-                defected structure <Structure>
-        """
-        mycoords = defect['coordinates']
-        scaledstr = self.keywords['struc_work1']
-        scalelist = scale.strip().split("x")
-        scale1 = float(scalelist[0])
-        scale2 = float(scalelist[1])
-        scale3 = float(scalelist[2])
-        #if newa is twice as big as olda, coordinate should be half as big
-        coorda = mycoords[0]/scale1
-        coordb = mycoords[1]/scale2
-        coordc = mycoords[2]/scale3
+        coorda = mycoords[0]/scaleinput[0]
+        coordb = mycoords[1]/scaleinput[1]
+        coordc = mycoords[2]/scaleinput[2]
         newdict = dict(defect)
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)

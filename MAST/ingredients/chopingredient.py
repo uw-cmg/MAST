@@ -1,8 +1,8 @@
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
-#
+# 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-09
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 import os
 import numpy as np
@@ -14,7 +14,6 @@ from pymatgen.core.structure import Lattice
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
-
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
@@ -715,7 +714,6 @@ class ChopIngredient(BaseIngredient):
         self.keywords['name']=myname
         return
 
-
     def run_strain(self):
         """Strain the lattice.
             Args:
@@ -731,33 +729,35 @@ class ChopIngredient(BaseIngredient):
         strained_structure = sxtend.strain_lattice(mystrain)
         self.checker.write_final_structure_file(strained_structure)
         return
+
     def run_scale(self):
         try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
+            base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
         if scalingsize == None: scalingsize = '1 1 1'
         else: scalingsize = ' '.join(scalingsize.split('x'))
-        scaled = scalextend.scale_structure(scalingsize)
+        scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+        scaled = scalextend.scale_structure()
         self.checker.write_final_structure_file(scaled)
         return
 
     def run_defect(self):
         try:
-            base_structure = self.checker.get_initial_structure_from_directory() 
+            base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
-        scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-        scaled = scalextend.scale_structure('1 1 1')
+        scalingsize = self.metafile.read_data('scaling_size')
+        if scalingsize == None: scalingsize = '1 1 1'
+        else: scalingsize = ' '.join(scalingsize.split('x'))
         defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=scaled, struc_work2=self.keywords['structure'].copy(), name=self.keywords['name'])
+                sxtend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
@@ -771,10 +771,9 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, name=self.keywords['name'])
-        scalingsize = self.metafile.read_data('scaling_size')
-        if scalingsize == None: scalingsize = '1 1 1'
-        else: scalingsize = ' '.join(scalingsize.split('x'))
-        scaled = scalextend.scale_structure(scalingsize)
+        if not 'mast_scale' in self.keywords['program_keys'].keys():
+            raise MASTError(self.__class__.__name__,"No mast_scale ingredient keyword for scaling ingredient %s." % self.keywords['name'])
+        scaled = scalextend.scale_structure(self.keywords['program_keys']['mast_scale'])
         defect = self.keywords['program_keys']['mast_defect_settings']
         for key in defect:
             if 'subdefect' in key:
@@ -785,6 +784,60 @@ class ChopIngredient(BaseIngredient):
                 pass
         self.checker.write_final_structure_file(scaled)
         return
+
+    def run_supercell_defect_set(self, parentdir=""):
+        """For finite size scaling.
+            Given a text file named supercell_list.txt:
+
+            /some/directory/of/parent/ingredient
+            ----------------------------------
+            ScalingLMN     V_M     Kpoint mesh
+            ----------------------------------
+            [4, 4, 4] 2.55350475682 [2, 2, 2]
+            [3, 4, 3] 3.00247070991 [2, 2, 2]
+            [4, 3, 2] 3.05854316622 [2, 2, 4]
+            [3, 3, 2] 3.67455399526 [2, 2, 4]
+            [2, 2, 2] 5.10700950784 [4, 4, 4]
+
+            There are folders in the parent ingredient
+                4x1x1
+                3x2x3 etc. within which are a perfect POSCAR
+                file and a correspondingly scaled KPOINTS file.
+            Copy each folder with POSCAR and KPOINTS.
+            Induce the correct defect group for each new folder
+                in the current ingredient, scaling by the
+                appropriate amount.
+            Args:
+                parentdir <str>: Parent directory. If not
+                        supplied, method will look for
+                        supercell_list.txt in the current
+                        directory and use the path 
+                        specified within the file.
+        """
+        myname = self.keywords['name']
+        supercell_info = MASTFile(os.path.join(myname, "supercell_list.txt"))
+        if parentdir == "":
+            scaleset_dir = supercell_info.data[0].strip()
+        else:
+            scaleset_dir = parentdir
+        scale_folders = dirutil.immediate_subdirs(scaleset_dir)
+        for scale_folder in scale_folders:
+            shutil.copytree(os.path.join(scaleset_dir,scale_folder), os.path.join(myname, scale_folder))
+        for scale_folder in scale_folders:
+            myfolder = os.path.join(myname, scale_folder)
+            singlechecker = VaspChecker(name=myfolder,program_keys = dict(self.checker.keywords['program_keys']))
+            scaled = singlechecker.get_initial_structure_from_directory() 
+            defect = self.keywords['program_keys']['mast_defect_settings']
+            scalestring = scale_folder
+            for key in defect:
+                if 'subdefect' in key:
+                    subdefect = defect[key]
+                    sxtend = StructureExtensions(struc_work1=scaled, name=self.keywords['name'])
+                    scaled = sxtend.scale_defect_by_LMN(scalestring, subdefect, defect['coord_type'], defect['threshold'])
+                else:
+                    pass
+            singlechecker.write_final_structure_file(scaled)
+        return True
 
     def complete_structure(self):
         if self.directory_is_locked():
@@ -837,6 +890,28 @@ class ChopIngredient(BaseIngredient):
         self.checker.keywords['name']=myname
         self.errhandler.keywords['name']=myname
         if notready == 0:
+            return True
+        else:
+            return False
+    def complete_supercell_defect_set(self):
+        """Check that a supercell defect set is complete
+            by making sure that there is an ending structure
+            (CONTCAR for VASP) in every subfolder.
+        """
+        myname = self.keywords['name']
+        mysubdirs = dirutil.immediate_subdirs(myname)
+        oklist=list()
+        if len(mysubdirs) == 0: #No subdirectories set yet
+            return False
+        for subdir in mysubdirs:
+            self.checker.keywords['name']=os.path.join(myname, subdir)
+            if self.checker.has_ending_structure_file():
+                oklist.append(True)
+            else:
+                oklist.append(False)
+        self.checker.keywords['name']=myname
+        okarr = np.array(oklist)
+        if okarr.all():
             return True
         else:
             return False

@@ -13,7 +13,7 @@ from MAST.utility import MASTFile
 import shutil
 import numpy as np
 testname="chop_test_run"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
 old_recipe = os.getenv("MAST_RECIPE_PATH")
 old_scratch = os.getenv("MAST_SCRATCH")

@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-09
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
@@ -285,7 +285,7 @@ class VaspChecker(BaseChecker):
                 kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
             else:
                 desig = kpoints[1].upper()
-                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))    
+                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
         else:
             if 'mast_kpoints' in self.keywords['program_keys'].keys():
                 kpoints = self.keywords['program_keys']['mast_kpoints']
@@ -303,11 +303,11 @@ class VaspChecker(BaseChecker):
             my_kpoints = Kpoints.gamma_automatic(kpts=kmesh,shift=kshift)
         else:
             raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
-        
+
         dirutil.lock_directory(name)
         my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
-        return my_kpoints   
+        return my_kpoints
 
     def _vasp_potcar_setup(self, my_poscar):
         """Set up the POTCAR file."""

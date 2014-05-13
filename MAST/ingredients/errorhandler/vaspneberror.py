@@ -55,4 +55,3 @@ class VaspNEBError(BaseError):
         handler_input_d['VaspReachedNSWErrorHandler']=[self.keywords['name'],warchlist, clist, plist]
 
         return handler_input_d
-

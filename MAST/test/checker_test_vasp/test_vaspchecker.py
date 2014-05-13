@@ -20,7 +20,7 @@ testname ="checker_test_vasp"
 #print oldcontrol
 #print oldrecipe
 #print oldscratch
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = dirutil.get_test_dir(testname)
 
 
 class TestVaspChecker(unittest.TestCase):

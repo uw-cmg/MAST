@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-05-12 by Zhewen Song
 ##############################################################
 import os, re
 import logging
@@ -83,6 +83,7 @@ class RecipeSetup(MASTObj):
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
         mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
+        defect_label=""
         neb_label=""
         charge=""
         phonon_label=""
