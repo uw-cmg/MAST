@@ -20,7 +20,11 @@ from MAST.submit import script_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.cifio import CifParser
-from custodian.custodian import ErrorHandler, backup
+from custodian.custodian import ErrorHandler
+try:
+   from custodian.custodian import backup
+except:
+   from custodian.utils import backup
 import logging
 
 class VaspReachedNSWErrorHandler(ErrorHandler):
