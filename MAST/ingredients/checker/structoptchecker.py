@@ -430,8 +430,6 @@ class StructoptChecker(BaseChecker):
             for segment in sp_exec_line:
                 if ('.py' not in segment):
                     new_exec_line += segment + ' '
-            #structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
-            #optimizerpath = os.path.join(structoptpath,'Optimizer.py')
             try:
                 optimizerpath = os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')
             except:
@@ -503,7 +501,6 @@ class StructoptChecker(BaseChecker):
             if ('.py' not in segment):
                 new_exec_line += segment + ' '
         try:
-            #structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
             structoptpath = os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')
         except:
             raise MASTError(self.__class__.__name__,
