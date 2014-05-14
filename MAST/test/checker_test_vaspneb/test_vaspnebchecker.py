@@ -19,6 +19,7 @@ class TestVaspnebchecker(unittest.TestCase):
         os.chdir(testdir)
         if not os.path.isdir('childdir'):
             os.mkdir('childdir')
+        shutil.copy("files/metadata.txt","childdir")
 
     def tearDown(self):
         #return
