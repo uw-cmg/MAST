@@ -1,6 +1,10 @@
+####################
+Acknowledgments
+####################
 ==================
 Citing MAST
 ==================
+
 To properly cite MAST and its dependencies, copy all the text in the ::
 
     CITATIONS.bib
@@ -10,6 +14,7 @@ file, which should be found in the completed recipe directory located in the ``$
 ==================
 The MAST Team
 ==================
+
 PI: Professor Dane Morgan
 All inquiries should be directed to ddmorgan@wisc.edu
 
@@ -35,6 +40,7 @@ The following additional team or project members are arranged by start date:
 ========================
 Other Acknowledgments
 ========================
+
 .. image:: _static/nsf1.jpg
     :scale: 50 %
 
