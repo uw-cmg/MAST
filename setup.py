@@ -54,7 +54,7 @@ class build_py(_build_py):
 setup(
         name="MAST",
         packages=find_packages(),
-        version="1.0.56",
+        version="1.0.57",
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast",
@@ -126,7 +126,9 @@ setup(
                 "MAST/summary/citations/vasp_pps_01"]),
             ("%s/MAST/CONTROL/programkeys" % myhome,
                 ["MAST/ingredients/programkeys/diff_allowed_keywords.py",
-                "MAST/ingredients/programkeys/vasp_allowed_keywords.py"])
+                "MAST/ingredients/programkeys/vasp_allowed_keywords.py"]),
+            ("%s/MAST/CONTROL" % myhome,
+                ["MAST/structopt/Optimizer.py"])
         ],
 
         author="MAST Development Team, University of Wisconsin-Madison Computational Materials Group",
