@@ -44,25 +44,15 @@ class TestRunIngredient(unittest.TestCase):
             shutil.copytree(old_control + "/programkeys", "test_control/programkeys")
 
     def tearDown(self):
-        return
         tearlist = list()
         #tearlist.append("writedir/single_label1")
         #tearlist.append("writedir/next_ingred")
         #tearlist.append("writedir/neb_labelinit-labelfin_stat")
         #tearlist.append("writedir/single_phonon_label1")
         tearlist.append("writedir")
-        for foldername in tearlist:
-            try:
-                shutil.rmtree(foldername)
-            except OSError:
-                pass
-        removelist = list()
-        removelist.append("test_control/submitlist")
-        for ritem in removelist:
-            try:
-                os.remove(ritem)
-            except OSError:
-                pass
+        tearlist.append("test_control")
+        for tearfolder in tearlist:
+            shutil.rmtree(tearfolder)
         os.environ['MAST_CONTROL'] = old_control
         os.environ['MAST_RECIPE_PATH'] = old_recipe
         os.environ['MAST_SCRATCH'] = old_scratch
@@ -73,7 +63,7 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.__init__(**kwargs)
 
     def test_run_singlerun(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/single_label1" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_single")
@@ -96,7 +86,7 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.run_singlerun(mode='serial')
 
     def test_run_neb_subfolders(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/neb_labelinit-labelfin_stat" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_neb")
@@ -152,7 +142,7 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.run_neb_subfolders()
 
     def test_run_subfolders(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/single_label1" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_single")
@@ -263,7 +253,7 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.run_defect()
 
     def test_run_strain(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/single_label1" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_single")
@@ -286,7 +276,7 @@ class TestRunIngredient(unittest.TestCase):
         #self.testclass.run_strain()
 
     def test_run_scale_defect(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/single_label1" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_single")
@@ -294,6 +284,7 @@ class TestRunIngredient(unittest.TestCase):
         topmetad.to_file("writedir/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.data.append("defect_label = label1\n")
+        metad.data.append("scaling_size = 2x2x2\n")
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['label1']=dict()
@@ -333,7 +324,6 @@ class TestRunIngredient(unittest.TestCase):
         kdict['label1']['threshold'] = 0.01
         kdict['label1']['charge'] = '2'
         mdict=dict()
-        mdict['mast_scale'] = 2
         mdict['mast_program'] = 'vasp'
         mdict['mast_defect_settings']=dict()
         mdict['mast_defect_settings'].update(kdict['label1'])
@@ -341,12 +331,15 @@ class TestRunIngredient(unittest.TestCase):
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
         myri = ChopIngredient(name=ingdir,program_keys=mdict, structure=my_structure)
-        myri.run_scale_defect()
+        myri.run_scale()
+        #copy contcar to poscar
+        os.rename("%s/CONTCAR" % ingdir, "%s/POSCAR" % ingdir)
+        myri.run_defect()
         my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
         defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled_defected").structure.get_sorted_structure()
         self.assertEquals(my_defected, defected_compare)
     def test_run_scale(self):
-        raise SkipTest
+        #raise SkipTest
         ingdir="%s/writedir/single_label1" % testdir
         recipedir="%s/writedir" % testdir
         topmetad = MASTFile("files/top_metadata_single")
@@ -354,10 +347,10 @@ class TestRunIngredient(unittest.TestCase):
         topmetad.to_file("writedir/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.data.append("defect_label = label1\n")
+        metad.data.append("scaling_size = 2x2x2\n")
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        kdict['mast_scale'] = 2
         my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
