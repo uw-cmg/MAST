@@ -7,7 +7,7 @@ from filecmp import dircmp
 import MAST
 import shutil
 from MAST.utility import dirutil
-
+from MAST.controllers.mast import MAST as controllerMAST
 testname ="mast_test"
 testdir = dirutil.get_test_dir(testname)
 oldcontrol = os.getenv("MAST_CONTROL")
@@ -45,7 +45,7 @@ class TestMAST(unittest.TestCase):
         mymast = MAST.mast.MAST(inputfile="basic_test.inp",outputfile="output.inp")
         mymast.check_independent_loops()
     def test_set_up_recipe(self):
-        mymast = MAST.mast.MAST(inputfile="basic_test.inp",
+        mymast = controllerMAST(inputfile="basic_test.inp",
                                 outputfile="output.inp")
         mymast.set_input_options()
         #print "INPUT OPTIONS: ", mymast.input_options

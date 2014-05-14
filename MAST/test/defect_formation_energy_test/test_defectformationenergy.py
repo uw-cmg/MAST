@@ -28,7 +28,7 @@ class TestDefectformationenergy(unittest.TestCase):
 
     def test_dfe_tool(self):
         import subprocess
-        mydfetest=subprocess.Popen(["%s/tools/defect_formation_energy 2 3" % os.getenv("MAST_INSTALL_PATH")],shell=True)
+        mydfetest=subprocess.Popen(["mast_defect_formation_energy"],shell=True)
         mydfetest.wait()
         compare_walk = dirutil.walkfiles("compare_results")
         res_walk = dirutil.walkfiles("GaAs_defects_AsGa_recipe_defects_20131125T220427_dfe_results")

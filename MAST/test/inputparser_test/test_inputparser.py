@@ -35,6 +35,7 @@ class TestInputparser(unittest.TestCase):
                 'recipe' : myip.parse_recipe_section,
                 'neb' : myip.parse_neb_section,
                 'chemical_potentials' : myip.parse_chemical_potentials_section,
+                'summary' : myip.parse_summary_section,
                                })
         self.assertItemsEqual(myip.section_parsers, s_dict)
         #self.testclass.__init__(**kwargs)
