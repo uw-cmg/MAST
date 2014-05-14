@@ -30,9 +30,10 @@ class TestVaspChecker(unittest.TestCase):
         os.chdir(testdir)
         if not os.path.exists("childdir"):
             os.mkdir("childdir")
+        shutil.copy("files/metadata.txt","childdir")
 
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined","CONTCAR"]:
+        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined","CONTCAR","metadata.txt"]:
             try:
                 os.remove("childdir/%s" % fname)
             except OSError:
@@ -183,7 +184,26 @@ class TestVaspChecker(unittest.TestCase):
         mypos = myvc._vasp_poscar_setup()
         self.assertEqual(mypos.structure, grafted_pos.structure)
 
-    def test_vasp_kpoints_setup(self):
+    def test_vasp_kpoints_setup_from_metafile(self):
+        kdict=dict()
+        mymeta = MASTFile("childdir/metadata.txt")
+        mymeta.data.append("kpoints = 3x1x7 G 0.5 0.2 .1\n")
+        mymeta.to_file("childdir/metadata.txt")
+        mymeta2=MASTFile("childdir/metadata.txt")
+        print mymeta2.data
+        myvc = VaspChecker(name="childdir",program_keys=kdict)
+        mykpt = myvc._vasp_kpoints_setup()
+        kpt_compare = pymatgen.io.vaspio.Kpoints.from_file("files/KPOINTS_317G")
+        self.assertEqual(kpt_compare.kpts[0][0],mykpt.kpts[0][0])
+        self.assertEqual(kpt_compare.kpts[0][1],mykpt.kpts[0][1])
+        self.assertEqual(kpt_compare.kpts[0][2],mykpt.kpts[0][2])
+        self.assertEqual(kpt_compare.num_kpts, mykpt.num_kpts)
+        self.assertEqual(kpt_compare.style, mykpt.style)
+        #self.assertEqual(kpt_compare.kpts_shift, mykpt.kpts_shift)
+        self.assertEqual((0.5,0.2,0.1),mykpt.kpts_shift)
+
+
+    def test_vasp_kpoints_setup_from_keyword(self):
         kdict=dict()
         kdict['mast_kpoints'] = [3,3,3,"M"]
         myvc = VaspChecker(name="childdir",program_keys=kdict)
@@ -194,7 +214,8 @@ class TestVaspChecker(unittest.TestCase):
         self.assertEqual(kpt_compare.kpts[0][2],mykpt.kpts[0][2])
         self.assertEqual(kpt_compare.num_kpts, mykpt.num_kpts)
         self.assertEqual(kpt_compare.style, mykpt.style)
-
+        
+        os.remove("childdir/KPOINTS")
         kdict['mast_kpoints'] = [1,2,5,"G"]
         myvc = VaspChecker(name="childdir",program_keys=kdict)
         mykpt=myvc._vasp_kpoints_setup()
@@ -205,6 +226,7 @@ class TestVaspChecker(unittest.TestCase):
         self.assertEqual(kpt_compare.num_kpts, mykpt.num_kpts)
         self.assertEqual(kpt_compare.style, mykpt.style)
 
+        os.remove("childdir/KPOINTS")
         kdict['mast_kpoints'] = [2,2,2,"throw error"]
         myvc = VaspChecker(name="childdir",program_keys=kdict)
         self.assertRaises(MASTError, myvc._vasp_kpoints_setup)

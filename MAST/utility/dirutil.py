@@ -299,6 +299,8 @@ def get_test_dir(testname):
     testdir=""
     curdir = os.getcwd()
     curdir = os.path.normpath(curdir)
+    if os.path.basename(curdir) == testname:
+        return curdir
     testdir = curdir
     if os.path.basename(curdir) == "MAST":
         testdir = os.path.join(testdir, "test")
