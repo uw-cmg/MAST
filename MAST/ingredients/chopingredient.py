@@ -754,10 +754,11 @@ class ChopIngredient(BaseIngredient):
         if scalingsize == None: scalingsize = '1 1 1'
         else: scalingsize = ' '.join(scalingsize.split('x'))
         defect = self.keywords['program_keys']['mast_defect_settings']
+        scaled = base_structure.copy()
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+                sxtend = StructureExtensions(struc_work1=scaled, scaling_size=scalingsize, name=self.keywords['name'])
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
