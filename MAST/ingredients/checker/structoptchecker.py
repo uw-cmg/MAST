@@ -430,8 +430,13 @@ class StructoptChecker(BaseChecker):
             for segment in sp_exec_line:
                 if ('.py' not in segment):
                     new_exec_line += segment + ' '
-            structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
-            optimizerpath = os.path.join(structoptpath,'Optimizer.py')
+            #structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
+            #optimizerpath = os.path.join(structoptpath,'Optimizer.py')
+            try:
+                optimizerpath = os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')
+            except:
+                raise MASTError(self.__class__.__name__,
+                    "Cannot find Optimizer run file in 'structopt'! Current path: {0}".format(os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')))
             new_exec_line += ' {0} {1}'.format(optimizerpath,inputfile)
             self.keywords['program_keys']['mast_exec'] = new_exec_line
             return True
@@ -498,10 +503,11 @@ class StructoptChecker(BaseChecker):
             if ('.py' not in segment):
                 new_exec_line += segment + ' '
         try:
-            structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
+            #structoptpath = os.path.join([pt for pt in sys.path if 'structopt' in pt][0],'structopt')
+            structoptpath = os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')
         except:
             raise MASTError(self.__class__.__name__,
-                "Cannot find 'structopt' in python sys.path! Need to install structopt in folder .../structopt/structopt/Optimizer. Current sys.path: {0}".format(sys.path))
+                "Cannot find Optimizer run file in 'structopt'! Current path: {0}".format(os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')))
         optimizerpath = os.path.join(structoptpath,'Optimizer.py')
         new_exec_line += ' {0} {1}'.format(optimizerpath,inputfile)
         self.keywords['program_keys']['mast_exec'] = new_exec_line
