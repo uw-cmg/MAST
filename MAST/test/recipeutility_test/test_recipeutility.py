@@ -6,10 +6,9 @@ import unittest
 from unittest import SkipTest
 import os
 import time
-import MAST
 import pymatgen
 from MAST.utility import dirutil
-
+from MAST.recipe import recipeutility
 testname="recipeutility_test"
 testdir = dirutil.get_test_dir(testname)
 
@@ -22,7 +21,7 @@ class TestRecipeUtility(unittest.TestCase):
         pass
 
     def test_read_recipe(self):
-        [htu, ptc,htr, rname]=MAST.recipe.recipeutility.read_recipe(os.path.join(testdir,'short_test'))
+        [htu, ptc,htr, rname]=recipeutility.read_recipe(os.path.join(testdir,'short_test'))
         #print htu
         #print ptc
         #print htr

@@ -1,0 +1,17 @@
+Recipe FiniteSizeScaling
+perfect_opt (no_run)
+    {begin}
+    inducescaling_<S> (inducescaling)
+        perfect_<S>_opt (no_run)
+            inducedefect_<S>_<N> (inducedefect)
+                defect_<S>_<N>_opt (relax)
+    {end}
+{begin}    
+defect_<S>_<N>_opt (relax)
+    phonon_<S>_<N>_<P> (phonon)
+{end}
+{begin}
+defect_<S>_<B>_opt (relax_to_neb), defect_<S>_<E>_opt (relax_to_neb)
+    neb_<S>_<B-E>_opt (neb_to_phonon)
+        phonon_<S>_<B-E>_<P> (phonon)
+{end}
