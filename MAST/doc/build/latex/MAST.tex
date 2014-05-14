@@ -14,8 +14,8 @@
 
 
 \title{MAST Documentation}
-\date{May 09, 2014}
-\release{coracle 1.0.49}
+\date{May 14, 2014}
+\release{coracle 1.1.0}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
 \renewcommand{\releasename}{Release}
@@ -574,6 +574,21 @@ cd \$VASP\_PSP\_DIR
 Make sure you are getting to the right directory, which has POT\_GGA\_POW\_PBE etc. folders inside it.
 
 \end{itemize}
+
+
+\subsection{Install ASE}
+\label{1_0_installation:install-ase}
+Obtain the latest source code from \href{https://wiki.fysik.dtu.dk/ase/}{https://wiki.fysik.dtu.dk/ase/}
+
+Unzip the tar.gz file to your home directory
+
+In your user profile, add the following line:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+export PYTHONPATH=\$PYTHONPATH:\textasciitilde{}/ase
+\end{Verbatim}
+
+Log out and log back in.
 
 
 \subsection{Get MAST}
@@ -3190,6 +3205,9 @@ pymatgen, \href{http://pymatgen.org}{pymatgen.org}, Shyue Ping Ong, Anubhav Jai
 custodian, Shyue Ping Ong
 
 \item {} 
+Atomic Simulation Environment (ASE), {\color{red}\bfseries{}{}`https://wiki.fysik.dtu.dk/ase/{}`\_}
+
+\item {} 
 (Future plans) pymatgen-db, Anubhav Jain, Dan Gunter
 
 \end{itemize}
@@ -3197,10 +3215,10 @@ custodian, Shyue Ping Ong
 MAST can interface with:
 \begin{itemize}
 \item {} 
-PHON version 1.36, adapted, \href{http://www.homepages.ucl.ac.uk/~ucfbdxa/phon/phon.html}{PHON webpage}, Dario Alfe, Computer Physics Communications 180, 2622-2633 (2009)
+Vienna Ab-initio Simulation Package, \href{https://www.vasp.at/}{VASP website}, Jurgen Hafner, Georg Kresse, Doris Vogtenhuber, Martijn Marsman
 
 \item {} 
-Vienna Ab-initio Simulation Package, \href{https://www.vasp.at/}{VASP website}, Jurgen Hafner, Georg Kresse, Doris Vogtenhuber, Martijn Marsman
+LAMMPS Molecular Dynamics Simulator, \href{http://lammps.sandia.gov/}{LAMMPS website}
 
 \end{itemize}
 
@@ -3282,12 +3300,21 @@ Support for using a new checker type as self.checker in a ChopIngredient class w
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)
 
 
-\chapter{Authors}
-\label{8_0_personnel::doc}\label{8_0_personnel:authors}
+\chapter{Citing MAST}
+\label{10_0_acknowledgments:citing-mast}\label{10_0_acknowledgments::doc}
+To properly cite MAST and its dependencies, copy all the text in the
 
-\section{The MAST Team}
-\label{8_0_personnel:the-mast-team}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{CITATIONS}\PYG{o}{.}\PYG{n}{bib}
+\end{Verbatim}
+
+file, which should be found in the completed recipe directory located in the \code{\$MAST\_ARCHIVE} directory.
+
+
+\chapter{The MAST Team}
+\label{10_0_acknowledgments:the-mast-team}
 PI: Professor Dane Morgan
+All inquiries should be directed to \href{mailto:ddmorgan@wisc.edu}{ddmorgan@wisc.edu}
 
 The following programmers are arranged by start date. (+) indicates research performed using MAST.
 \begin{itemize}
@@ -3301,13 +3328,13 @@ Tom Angsten + (spring 2011 - summer 2013)
 Dr. Glen Jenness + (spring 2013 - summer 2013)
 
 \item {} 
-Kumaresh Visakan Murugan (spring 2013, fall 2013 - present)
+Kumaresh Visakan Murugan (spring 2013, fall 2013, spring 2014)
 
 \item {} 
 Hyunwoo Kim (spring 2013)
 
 \item {} 
-Parker Sear (spring 2013 - summer 2013, present)
+Parker Sear (spring 2013 - summer 2013, spring 2014)
 
 \item {} 
 Nada Alameddine (summer 2013)
@@ -3337,8 +3364,8 @@ Ben Shrago (summer 2013)
 \end{itemize}
 
 
-\chapter{Acknowledgments}
-\label{10_0_acknowledgments::doc}\label{10_0_acknowledgments:acknowledgments}
+\chapter{Other Acknowledgments}
+\label{10_0_acknowledgments:other-acknowledgments}
 \scalebox{0.500000}{\includegraphics{nsf1.jpg}}
 
 The MAterials Simulation Toolkit (MAST) was developed with funding from the National Science Foundation Grant 1148011. T. Mayeshiba gratefully acknowledges support from the National Science Foundation Graduate Research Fellowship Grant No. DGE-0718123.
@@ -3346,6 +3373,11 @@ The MAterials Simulation Toolkit (MAST) was developed with funding from the Nati
 \scalebox{0.500000}{\includegraphics{pymatgen.png}}
 
 Many underlying MAST functions are built using pymatgen (\href{http://pymatgen.org}{http://pymatgen.org}), and the MAST team would especially like to thank pymatgen developers Shyue Ping Ong and Anubhav Jain for their assistance.
+
+
+\chapter{Contact Us}
+\label{14_0_contact:contact-us}\label{14_0_contact::doc}
+All inquiries about MAST should be made to Dane Morgan at \href{mailto:ddmorgan@wisc.edu}{ddmorgan@wisc.edu}
 
 
 \chapter{License}
