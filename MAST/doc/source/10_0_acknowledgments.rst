@@ -5,11 +5,15 @@ Acknowledgments
 Citing MAST
 ==================
 
-To properly cite MAST and its dependencies, copy all the text in the ::
+To properly cite MAST and its dependencies, go to your completed recipe directory in ``$MAST_ARCHIVE`` and locate the following file ::
 
     CITATIONS.bib
 
-file, which should be found in the completed recipe directory located in the ``$MAST_ARCHIVE`` directory.
+For example::
+
+    cat $MAST_ARCHIVE/Optimization_Al_20140101T120000/CITATIONS.bib
+
+This Bibtex-formatted file may be used directly with LaTeX or imported into a reference manager such as EndNote or Mendeley.
 
 ==================
 The MAST Team
