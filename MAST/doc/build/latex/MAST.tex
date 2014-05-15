@@ -14,7 +14,7 @@
 
 
 \title{MAST Documentation}
-\date{May 14, 2014}
+\date{May 15, 2014}
 \release{coracle 1.1.0}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
@@ -439,7 +439,7 @@ source \$HOME/.bashrc
 
 \subsection{Verify or install pymatgen and custodian}
 \label{1_0_installation:verify-or-install-pymatgen-and-custodian}
-Check if pymatgen and custodian available:
+Check if pymatgen and custodian are available:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{n}{python}
@@ -597,12 +597,14 @@ Log out and log back in.
 Get the latest MAST package from the Python package index:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-pip install --upgrade --no-deps MAST
+nice -n 19 pip install --upgrade --no-deps --user MAST
 \end{Verbatim}
 
 \end{itemize}
 
-(No dependencies because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.)
+The no-dependencies tag is on because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.
+
+Use the \code{-{-}user} tag if you are not using the easy\_install and pip from your own installation of python. Otherwise, you can omit this tag.
 
 
 \subsection{Set up the environment variables}
@@ -676,6 +678,12 @@ export MAST\_CONTROL=//home/username/MAST/CONTROL
 \end{Verbatim}
 
 MAST\_CONTROL also has several subfolders. If you move your \$MAST\_CONTROL to a different path, please copy the subfolders with it.
+
+MAST\_PLATFORM: This variable switches among platforms. Note that it looks both in \$MAST\_CONTROL/platforms and in the platforms folder in your MAST installation directory (often in some path like //home/username/.local/lib/python2.7/site-packages/MAST or //share/apps/EPD.../lib/python2.7/site-packages/MAST).
+
+\begin{Verbatim}[commandchars=\\\{\}]
+export MAST\_PLATFORM=bardeen
+\end{Verbatim}
 
 VASP\_PSP\_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the \href{http://materialsproject.org}{Materials Project's} \href{http://pymatgen.org}{pymatgen} code. The VASP\_PSP\_DIR should be set to a path which contains folder such as POT\_GGA\_PAW\_PBE (for functional PBE, or mast\_xc PBE in Ingredients) or POT\_GGA\_PAW\_PW91 (for functional PW91).
 
@@ -829,21 +837,20 @@ Follow the testing instructions from {\hyperref[1_0_installation:test-on-cluster
 \section{Test that MAST can run}
 \label{1_0_installation:test-that-mast-can-run}\label{1_0_installation:test-on-cluster}\begin{enumerate}
 \item {} 
-Make a test directory, like \code{//home/username/MAST/test}
+Go to \code{//home/username/MAST/examples}
 
 \item {} 
-Copy the test input file to your test folder (all one line):
+Select one of the examples. The fastest one is \code{simple\_optimization.inp}
+
+\item {} 
+Copy that file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cp //share/apps/MAST/test/phononreorgtest/
-phonon\_with\_neb.inp //home/username/MAST/test/test.inp
+cp simple\_optimization.inp test.inp
 \end{Verbatim}
 
 \item {} 
-Go to your test directory, \code{cd //home/username/MAST/test}
-
-\item {} 
-Modify the test.inp file with the correct \code{mast\_exec}, \code{mast\_ppn}, \code{mast\_queue}, and other settings described in \emph{platforms}
+Modify the test.inp file with the correct \code{mast\_exec}, \code{mast\_ppn}, \code{mast\_queue}, and other settings described in {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}
 
 \item {} 
 Try to parse the input file, entering the following command as one line:
@@ -861,10 +868,18 @@ The -i signals to MAST that it is processing an input file.
 \end{itemize}
 
 \item {} 
-Your \code{//home/username/MAST/SCRATCH} directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
+Your \code{//home/username/MAST/SCRATCH} directory should now have a recipe directory in it.
+\begin{itemize}
+\item {} 
+The recipe directory will have a name corresponding to the elements and the input file, and ending with a timestamp of YYYYMMDD''T''hhmmss.
 
 \item {} 
-Go to that long recipe directory. (PhononNebTest...)
+The recipe directory will contain several subfolders, which are ingredient directories.
+
+\end{itemize}
+
+\item {} 
+Go to that recipe directory.
 \begin{itemize}
 \item {} 
 To see the input options:
@@ -907,7 +922,7 @@ To see ingredient statuses at a glance:
 Run mast once: \code{nice -n 19 mast}
 
 \item {} 
-You should see a \emph{mastmon} job appear on morganshort.
+You should see a \emph{mastmon} job appear on the queue specified in \$MAST\_CONTROL/mastmon\_submit.sh (which should be morganshort for bardeen).
 
 \item {} 
 MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: \code{nice -n 19 mast}
@@ -929,14 +944,7 @@ The \code{\$MAST\_CONTROL} folder gives you error messages and other information
 
 \section{Unit testing}
 \label{1_0_installation:unit-testing}
-To run unit tests and verify that the MAST code is sound, go to
-\code{\$MAST\_INSTALL\_PATH/test} and run the command
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
-\end{Verbatim}
-
-Or, optionally, run the command
+To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. \textless{}python installation path\textgreater{}/lib/python2.7/site-packages/MAST/test) and run the command
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
