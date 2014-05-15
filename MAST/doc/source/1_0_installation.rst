@@ -148,7 +148,7 @@ If pip does not work, follow Quick install of numpy here. This will install Nump
 ============================================
 Verify or install pymatgen and custodian
 ============================================   
-Check if pymatgen and custodian available::
+Check if pymatgen and custodian are available::
 
     python
     import pymatgen
@@ -265,9 +265,11 @@ Get MAST
 ===============================
 * Get the latest MAST package from the Python package index::
     
-    pip install --upgrade --no-deps MAST
+    nice -n 19 pip install --upgrade --no-deps --user MAST
 
-(No dependencies because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.)
+The no-dependencies tag is on because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.
+
+Use the ``--user`` tag if you are not using the easy_install and pip from your own installation of python. Otherwise, you can omit this tag.
     
 ======================================
 Set up the environment variables
@@ -327,6 +329,10 @@ MAST_CONTROL: This variable may be set to any directory. MAST monitor log files,
     export MAST_CONTROL=//home/username/MAST/CONTROL
 
 MAST_CONTROL also has several subfolders. If you move your $MAST_CONTROL to a different path, please copy the subfolders with it.
+
+MAST_PLATFORM: This variable switches among platforms. Note that it looks both in $MAST_CONTROL/platforms and in the platforms folder in your MAST installation directory (often in some path like //home/username/.local/lib/python2.7/site-packages/MAST or //share/apps/EPD.../lib/python2.7/site-packages/MAST). ::
+
+    export MAST_PLATFORM=bardeen
 
 VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the `Materials Project's <http://materialsproject.org>`_ `pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
     
@@ -441,22 +447,25 @@ Follow the testing instructions from :ref:`test-on-cluster`
 *********************************
 Test that MAST can run
 *********************************
-#.  Make a test directory, like ``//home/username/MAST/test``
-#.  Copy the test input file to your test folder (all one line)::
+#.  Go to ``//home/username/MAST/examples``
+#.  Select one of the examples. The fastest one is ``simple_optimization.inp``
+#.  Copy that file::
 
-        cp //share/apps/MAST/test/phononreorgtest/
-        phonon_with_neb.inp //home/username/MAST/test/test.inp
+        cp simple_optimization.inp test.inp
 
-#.  Go to your test directory, ``cd //home/username/MAST/test``
-#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, and other settings described in :ref:`platforms`
+#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, and other settings described in :doc:`Input File<3_0_inputfile>`
+
 #.  Try to parse the input file, entering the following command as one line::
 
         nice -n 19 mast -i test.inp 
 
     *  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
     *  The -i signals to MAST that it is processing an input file.
-#. Your ``//home/username/MAST/SCRATCH`` directory should now have a folder with a very long name in it (recipe directory), which contains several subfolders (ingredient directories).
-#. Go to that long recipe directory. (PhononNebTest...)
+#. Your ``//home/username/MAST/SCRATCH`` directory should now have a recipe directory in it.
+
+    * The recipe directory will have a name corresponding to the elements and the input file, and ending with a timestamp of YYYYMMDD"T"hhmmss. 
+    * The recipe directory will contain several subfolders, which are ingredient directories.
+#. Go to that recipe directory.
 
     *  To see the input options:
 
@@ -475,7 +484,7 @@ Test that MAST can run
         *  ``cat status.txt``
 
 #.  Run mast once: ``nice -n 19 mast``
-#.  You should see a `mastmon` job appear on morganshort.
+#.  You should see a `mastmon` job appear on the queue specified in $MAST_CONTROL/mastmon_submit.sh (which should be morganshort for bardeen).
 #.  MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
 #.  Now you should see ``perfect_opt1`` appear on the queue.
 #. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
@@ -488,12 +497,7 @@ Test that MAST can run
 Unit testing
 *************************
 
-To run unit tests and verify that the MAST code is sound, go to
-``$MAST_INSTALL_PATH/test`` and run the command ::
-
-    nosetests -v --nocapture
-
-Or, optionally, run the command ::
+To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. <python installation path>/lib/python2.7/site-packages/MAST/test) and run the command ::
 
     nosetests -v --nocapture
 
