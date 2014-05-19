@@ -2,9 +2,9 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-12 by Zhewen Song
+# Last updated: 2014-05-19 by Zhewen Song
 ##############################################################
-import os, re
+import os
 import logging
 import shlex
 from MAST.utility import InputOptions
@@ -219,13 +219,15 @@ class RecipeSetup(MASTObj):
         """
         datalist=list()
         datalist.append("ingredient type: %s " % myingred)
-        scaling = re.search(r'_\d*x\d*x\d*',myingred)
+        scaling = self.input_options.get_item('structure','scaling')
+        scalingsize = None
         if scaling: 
-            scalingsize=scaling.group().split('_')[1]
-            datalist.append("scaling_size: %s" % scalingsize)
-            d_scaling = self.input_options.get_item("structure","scaling")
-            kpoints = d_scaling[scalingsize]
-            datalist.append("kpoints: %s %s %s" % (kpoints[0],kpoints[1],kpoints[2]) )
+            for sckeys in scaling.keys():
+                if sckeys in myingred:
+                    scalingsize = sckeys
+            if scalingsize:
+                datalist.append("scaling_size: [%s]" % scaling[scalingsize][0])
+                datalist.append("kpoints: %s %s %s" % (scaling[scalingsize][-3],scaling[scalingsize][-2],scaling[scalingsize][-1]))
         if 'defect_' in myingred:
             if scaling:
                 defectlabel = myingred.split('defect_')[1].split('_')[1]
@@ -256,7 +258,7 @@ class RecipeSetup(MASTObj):
             if scaling: labels.remove(scalingsize)
             phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
-        data=','.join(datalist)
+        data=';'.join(datalist)
         self.metafile.write_data(myingred, data)
 
     def create_ingredient(self, my_ingred_input_options):
