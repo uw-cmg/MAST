@@ -14,7 +14,6 @@ from pymatgen.core.structure import Lattice
 from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
-from MAST.utility import InputOptions
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
@@ -31,10 +30,10 @@ class ChopIngredient(BaseIngredient):
             'name' : (str, str(), 'Name of directory'),
             'program': (str, str(), 'Program, e.g. "vasp"'),
             'program_keys': (dict, dict(), 'Dictionary of program keywords'),
-            'structure': (Structure, None, 'Pymatgen Structure object')
+            'structure': (Structure, None, 'Pymatgen Structure object'),
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-
+        
     def _fullpath_childname(self, childname):
         """Get full path of the child directory.
             Args: 
@@ -738,7 +737,9 @@ class ChopIngredient(BaseIngredient):
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
         if scalingsize == None: scalingsize = '1 1 1'
-        else: scalingsize = ' '.join(scalingsize.split('x'))
+        elif '[' and ']' in scalingsize:
+            scalingsize = scalingsize.split('[')[1].split(']')[0]
+        else: raise MASTError("Error in scaling size for the ingredient %s"%self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
         self.checker.write_final_structure_file(scaled)
@@ -752,12 +753,15 @@ class ChopIngredient(BaseIngredient):
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
         if scalingsize == None: scalingsize = '1 1 1'
-        else: scalingsize = ' '.join(scalingsize.split('x'))
+        elif '[' and ']' in scalingsize:
+            scalingsize = scalingsize.split('[')[1].split(']')[0]        
+        else: raise MASTError("Error in scaling size for the ingredient %s"%self.keywords['name'])        
         defect = self.keywords['program_keys']['mast_defect_settings']
+        scaled = base_structure.copy()
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
-                sxtend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
+                sxtend = StructureExtensions(struc_work1=scaled, scaling_size=scalingsize, name=self.keywords['name'])
                 scaled = sxtend.scale_defect(subdefect, defect['coord_type'], defect['threshold'])
             else:
                 pass
