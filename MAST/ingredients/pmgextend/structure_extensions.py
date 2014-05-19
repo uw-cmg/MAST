@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-12 by Zhewen Song
+# Last updated: 2014-05-19 by Zhewen Song
 ##############################################################
 from pymatgen.io.vaspio import *
 import numpy as np
@@ -137,10 +137,12 @@ class StructureExtensions(MASTObj):
 
             scalingsize = self.metafile.read_data('scaling_size')
             if not (scalingsize == None):
-                scalingsize = np.array(scalingsize.split('x'),float)
-                for i in range(3):
-                    mycoord[i] /= scalingsize[i]
-
+                scale = scalingsize.split('[')[1].split(']')[0]
+                try:
+                    scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                    scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                    mycoord = np.dot(mycoord, np.linalg.inv(scaleinput))
             indexraw = find_in_coord_list_pbc(sortedstruc.frac_coords, mycoord, atol)
             index=list()
             for indexentry in indexraw:
@@ -252,9 +254,13 @@ class StructureExtensions(MASTObj):
         pcscoord = np.array(phonon_center_site.strip().split(), float)
         scalingsize = self.metafile.read_data('scaling_size')
         if not (scalingsize == None):
-            scalingsize = np.array(scalingsize.split('x'),float)
-            for i in range(3):
-                pcscoord[i] /= scalingsize[i]
+            scale = scalingsize.split('[')[1].split(']')[0]
+            try:
+                scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                pcscoord = np.dot(pcscoord, np.linalg.inv(scaleinput))
+
         tol = float(tol)
         pcsarr = find_in_coord_list_pbc(mystruc.frac_coords, pcscoord,tol)
         uniqsites = np.unique(pcsarr)
@@ -365,9 +371,12 @@ class StructureExtensions(MASTObj):
         scaledstr = self.keywords['struc_work1'].copy()
         scale = self.keywords['scaling_size']
         scale = scale.strip()
-        scalesplit = scale.split()
-        if len(scalesplit) == 3:
-            scaleinput = map(float, scalesplit)
+        if len(scale.split()) == 3:
+            scaleinput = map(int, scale.split())
+        elif len(scale.split(',')) == 3:
+            try: scaleinput = map(int, scale.split(','))
+            except ValueError: 
+                scaleinput = [map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())]
         else:
             self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
             raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
@@ -390,21 +399,28 @@ class StructureExtensions(MASTObj):
             Returns:
                 defected structure <Structure>
         """
-        mycoords = defect['coordinates']
+        mycoords = np.array(defect['coordinates'])
         scale = self.keywords['scaling_size']
         scale = scale.strip()
-        scalesplit = scale.split()
-        if len(scalesplit) == 3:
-                scaleinput = map(float, scalesplit)
+        if len(scale.split()) == 3: # input scaling size like '1 1 1'
+            scaleinput = map(float, scale.split())
+            #if newa is twice as big as olda, coordinate should be half as big
+            coorda = mycoords[0]/scaleinput[0]
+            coordb = mycoords[1]/scaleinput[1]
+            coordc = mycoords[2]/scaleinput[2]
+        elif len(scale.split(',')) == 3:
+            try: 
+                scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                coorda = mycoords[0]/scaleinput[0]
+                coordb = mycoords[1]/scaleinput[1]
+                coordc = mycoords[2]/scaleinput[2]
+            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
         else:
             self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
             raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
             return None
-
-        #if newa is twice as big as olda, coordinate should be half as big
-        coorda = mycoords[0]/scaleinput[0]
-        coordb = mycoords[1]/scaleinput[1]
-        coordc = mycoords[2]/scaleinput[2]
         newdict = dict(defect)
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)
