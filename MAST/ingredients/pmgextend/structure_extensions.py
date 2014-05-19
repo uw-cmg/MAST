@@ -134,12 +134,12 @@ class StructureExtensions(MASTObj):
             else:
                 mystridx = int(folderstr)
                 mycoord = strlist[mystridx].frac_coords[lastidx]
-
             scalingsize = self.metafile.read_data('scaling_size')
             if not (scalingsize == None):
                 scale = scalingsize.split('[')[1].split(']')[0]
                 try:
                     scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                    mycoord = mycoord / np.array(scaleinput)
                 except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                     scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
                     mycoord = np.dot(mycoord, np.linalg.inv(scaleinput))
@@ -257,6 +257,7 @@ class StructureExtensions(MASTObj):
             scale = scalingsize.split('[')[1].split(']')[0]
             try:
                 scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                pcscoord = pcscoord / np.array(scaleinput)
             except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
                 pcscoord = np.dot(pcscoord, np.linalg.inv(scaleinput))
