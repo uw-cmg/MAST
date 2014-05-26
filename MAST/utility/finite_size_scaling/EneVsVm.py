@@ -3,7 +3,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Wei Xie
-# Last updated: 2014-04-19
+# Last updated: 2014-05-19
 ##############################################################
 import sys, getopt, os
 import shutil
@@ -43,8 +43,12 @@ def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
     
     Eform = [None]*len(defectDirs)
     V_M = [None]*len(defectDirs)
+
+ 
+    cwdir = os.getcwd()
+    os.chdir(perfectDir)
     
-    prf=mg.io.vaspio.vasp_output.Vasprun(perfectDir+"_vasprun.xml")
+    prf=mg.io.vaspio.vasp_output.Vasprun("vasprun.xml")
 
     prf_ene=prf.final_energy
     #TotEnePr = psTotEne("OSZICAR")
@@ -59,13 +63,17 @@ def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
     
     #gap,cbm,vbm,ifdirectgap=prf.eigenvalue_band_properties
     #print (defectDirs[i]+" "+str(V_M[i])+" "+str(gap)+" "+str(cbm)+" "+str(vbm))
-   
+
+    os.chdir(cwdir)
+    
     all_elmnts = prf_elmnts               
     for i in range(len(defectDirs)):
+        os.chdir(defectDirs[i])
         
-        dfct=mg.io.vaspio.vasp_output.Vasprun(defectDirs[i]+"_vasprun.xml")
+        dfct=mg.io.vaspio.vasp_output.Vasprun("vasprun.xml")
 
         dfct_strct=dfct.structures[len(dfct.structures)-1]
+        #defct_strct=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
         
         V_M[i] = CalcV_M(dfct_strct)
 
@@ -117,8 +125,9 @@ def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
                     raise RuntimeError("Chemical potential of "+all_elmnts[k].symbol
                                         +"is not provided!")       
 
-    return(V_M,Eform)
+        os.chdir(cwdir)
 
+    return(V_M,Eform)
 
 def linearFit(listX,listY):
     listXnp = np.array(listX)
@@ -223,11 +232,14 @@ if __name__ == "__main__":
     fout = file('out.log', 'w')
     sys.stdout = writer(sys.stdout, fout)
     
-    sc_struct=mg.io.vaspio.Poscar.from_file(defectDirs[0]+"_CONTCAR").structure
-    sc_potcar=mg.io.vaspio.Potcar.from_file(defectDirs[0]+"_POTCAR")
-    sc_incar=mg.io.vaspio.Incar.from_file(defectDirs[0]+"_INCAR") 
+    cwdir=os.getcwd()
+    os.chdir(defectDirs[0])    
+    sc_struct=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    sc_potcar=mg.io.vaspio.Potcar.from_file('POTCAR')
+    sc_incar=mg.io.vaspio.Incar.from_file('INCAR') 
     defchg=GenSC.defChg(sc_struct,sc_potcar,sc_incar)
     print "defect charge: ", defchg
+    os.chdir(cwdir)
             
     (V_M,Eform_orig)=collectEformV_M(perfectDir,defectDirs,defchg,mu_e,mu_i)
 

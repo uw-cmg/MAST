@@ -3,13 +3,14 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Wei Xie
-# Last updated: 2014-04-19
+# Last updated: 2014-05-14
 ##############################################################
 import sys
 import getopt 
 import os
 import shutil
 import errno
+import warnings
 import numpy as np
 from scipy import stats
 
@@ -17,17 +18,24 @@ import pymatgen as mg
 from pymatgen.analysis import ewald
 from pymatgen.io import vaspio
 
-import EneVsVm     
+import EneVsVm 
+import uniformPick    
 
 class writer:
-        def __init__(self, *writers) :
-                self.writers = writers
+    """
+    This is a helper class that copies all console ouput to a text file as well
+    """
+    def __init__(self, *writers) :
+        self.writers = writers
 
-        def write(self, text) :
-                for w in self.writers :
-                        w.write(text)
+    def write(self, text) :
+        for w in self.writers:
+            w.write(text)
 
 def mkdir_p(path):
+    """
+    This is a helper method that makes a directory minicking shell's mkdir -p
+    """
     try:
         os.makedirs(path)
     except OSError as exc: 
@@ -36,6 +44,12 @@ def mkdir_p(path):
         else:
             raise      
 def num_atoms_speciewise(inputstruct):
+    """
+    This is a helper method that output a list giving the number of atoms for 
+    each atomic specie in the same order as POTCAR. 
+    This method is used instead of pymatgen's composition class because the order 
+    from pymatgen's composition class is not necessarify in the same order as POTCAR 
+    """
 
     transitionSiteIndex=[0]
     SpecieLastSite=inputstruct.species[0]
@@ -53,6 +67,11 @@ def num_atoms_speciewise(inputstruct):
     return numAtomsSpeciewise           
     
 def defChg(inputStruct,inputPotcar,inputIncar):
+    """
+    This is a helper method that calculates the defect charge based on input files
+    POSCAR, INCAR and POTCAR (not the file name, but objects of pymatgen's 
+    corresponding Poscar, Incar, and Potcar class.
+    """
     if ('NELECT' not in inputIncar): 
         raise RuntimeError("cannot find NELECT in input INCAR")
     natoms_el=num_atoms_speciewise(inputStruct)
@@ -65,6 +84,13 @@ def defChg(inputStruct,inputPotcar,inputIncar):
     return defchg   
                         
 def minVertDist(inputlat):
+    """
+    This is a helper method that calculates the the minimum distance between the
+    vertices of an input 3-D lattice. Is is essentially the shortest distance 
+    possible between two points in the space asuuming 3D periodic boundary conditions.
+    Used to calculate the shortest defect-defect
+    distance in a defected supercell containing one point defect. 
+    """
     dummyMat = inputlat.matrix
     return min(np.linalg.norm(dummyMat[0]),
                np.linalg.norm(dummyMat[1]),
@@ -82,72 +108,31 @@ def minVertDist(inputlat):
                )
 
 def roof_mean(intA,intB):
+    """
+    This is a helper method that calculates the integer mean of two integers 
+    rounded to roof if the direct mean of the two integers are not a integer.
+    """
     if (intA+intB)%2 == 0:
         return (intA+intB)/2
     else:
         return (intA+intB+1)/2
 
-               
-def list2Bins(inputlist,numBins):
-    '''
-    helper function to group the elements of inputlist into some evenly spaced 
-    subgroups called bins. Each bin has two boundaries and there are totally numBins+1
-    bin boundaries.    
-    '''   
-    listMin=min(inputlist)
-    listMax=max(inputlist)
-
-    if (numBins <= 0):
-        raise RuntimeError("numBins <= 0")
-    elif (listMin == listMax):
-        raise RuntimeError("All memebers of the list have the same value")
-    else:
-        binWidth=(listMax-listMin)/numBins
-
-        binLowerBounds=np.arange(listMin,listMax,binWidth)
-        #binUpperBounds=binLowerBounds+binWidth
-        binBounds=np.append(binLowerBounds,listMax)
-        
-        binLowerBounds=binLowerBounds.tolist()
-        #binUpperBounds=binUpperBounds.tolist()
-        binBounds=binBounds.tolist()     
-
-        #itemsClosest2binBounds=[[] for i in range(len(binBounds))]
-        #itemsClosest2binBounds_index=[[] for i in range(len(binBounds))]
-        #closestDist2binBounds=[[] for i in range(len(binBounds))]
- 
-        itemsClosest2binBounds=[None]*(len(binBounds))
-        #itemsClosest2binBounds_index=[None]*(len(binBounds))
-        closestDist2binBounds=[None]*(len(binBounds))
-        
-        for i, item in enumerate(inputlist):
-            for j, boundary in enumerate(binBounds):
-                dummyDist=item-boundary
-                if (-binWidth/2<=dummyDist) and (dummyDist<binWidth/2):
-                   if ((itemsClosest2binBounds[j]==None) or 
-                       (abs(dummyDist)<closestDist2binBounds[j])):
-                       itemsClosest2binBounds[j]=inputlist[i]
-                       #itemsClosest2binBounds_index[j]=[i]
-                       closestDist2binBounds[j]=abs(dummyDist)
-                   break                       
-                                              
-    #return (binBounds,itemsClosest2binBounds,closestDist2binBounds)    
-    #return (itemsClosest2binBounds,itemsClosest2binBounds_index)
-    return itemsClosest2binBounds
-
-
 #def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,minNumAtoms=64,numStructAsked=5):
-def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):   
+def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
+    """
+    Calculates a list of LxMxN scaling factors for a input structure given inputs 
+    of minmum defect-defect distance, maximum number of atoms that the scaled 
+    supercell may have, and how many LxMxN scaling factors to outpout
+    """   
     maxLMN=int((maxNumAtoms/primordial_struct.composition.num_atoms)**(1/3.0))
     print ("Generating candidate supercells with the scaling factors"+
            " L/M/N less than or equal to "+str(maxLMN)+".")
-    print ("If you want to explore larger scaling factors L/M/N, " + 
-           "please rerun with larger maxNumAtoms input parameter.")
+    print ("If you want to explore larger scaling factors L/M/N, \
+            please rerun with larger maxNumAtoms input parameter.")
     print (" ")
     print maxLMN
-    #####The following section generate a list of candidates LMN's######   
-    LMN_list_raw=[]
-    Vm_list_raw=[]
+    #####The following section generates a list of candidates LMN's######   
+    Vm_LMN_dict={}
     print ("The following are candiate supercells:")   
     print ("ScalingLMN  " " V_M")
     print ("-----------------")
@@ -160,64 +145,43 @@ def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
                             #(dummy_sc.composition.num_atoms >= minNumAtoms) and
                             (dummy_sc.composition.num_atoms <= maxNumAtoms)):
                             dummy_Vm=np.asscalar(EneVsVm.CalcV_M(dummy_sc))
-                            #print str([L,M,N]),"tmp"                            
+
                             alreadyExist=False
-                            for vmraw in Vm_list_raw:
-                                #print str([L,M,N]),"good"
-                                if abs(vmraw-dummy_Vm)<0.00001:
+                            for vmraw in Vm_LMN_dict.keys():
+                                if abs(vmraw-dummy_Vm)<0.01:
                                     alreadyExist=True
                                     break                                                                                     
-                            #if dummy_Vm not in Vm_list_raw:
                             if not alreadyExist:
-                                LMN_list_raw.append([L,M,N])
-                                Vm_list_raw.append(dummy_Vm)
-                                print str([L,M,N]),"start"
-                                print(str([L,M,N]) +"   "+ str(round(dummy_Vm,2)))
-                                print str([L,M,N]),"finish"  
+                                Vm_LMN_dict[dummy_Vm]=[L,M,N]
+                                #print(str([L,M,N]) +"   "+ str(round(dummy_Vm,2)))
+                                print(str([L,M,N]) +"   %4.2f" % dummy_Vm)
     print""   
     
-    #####The following section select "Good" LMN's from the candidates list######
+    #####The following section selects "Good" LMN's from the candidates list######
+    LMN_list_raw=Vm_LMN_dict.values()
+    Vm_list_raw=Vm_LMN_dict.keys()
+    
     if len(LMN_list_raw) < numStructAsked:
         LMN_list=LMN_list_raw
-        print ('Warning: You asked for '+str(numStructAsked)+ 
-               ' supercells, but totally only '
+        warnings.warn("You asked for "+str(numStructAsked)+ 
+               " supercells, but totally only "
                +str(len(LMN_list_raw))+
-               ' supercells were found to fullfile the input requirements!')
+               " supercells were found to fullfile the input requirements!")
     elif len(LMN_list_raw) == numStructAsked:
         LMN_list=LMN_list_raw
+    elif type(numStructAsked) != int or numStructAsked <=0:
+        raise RuntimeError("You asked for "+str(numStructAsked)+ " supercells, \
+            but this input parameter should be a positive integer number.")
+    elif numStructAsked == 1:
+        VmSelected=sorted(Vm_list_raw)[roof_mean(0,(len(Vm_list_raw)-1))]
+        LMN_list=[Vm_LMN_dict[VmSelected]]
+    elif numStructAsked == 2:
+        VmSelected=[min(Vm_list_raw),max(Vm_list_raw)]
+        LMN_list=[Vm_LMN_dict[VmSelected[0]],Vm_LMN_dict[VmSelected[1]]]                             
     else:
-        LMN_list=[]
-
-        Vm_LMN_dict={}
-        for i in range(len(LMN_list_raw)):
-            Vm_LMN_dict[Vm_list_raw[i]]=LMN_list_raw[i]      
-        
-        Vm_list_raw_copy=list(Vm_list_raw)
-        
-        VmClosest2binBounds=list2Bins(Vm_list_raw,numStructAsked-1)
-        
-        VmSelected=[]        
-        for kk in VmClosest2binBounds:
-            if kk!=None:
-                VmSelected.append(kk)                                              
-                Vm_list_raw_copy.remove(kk)
-                
-        while len(VmSelected) < numStructAsked:                       
-            numStructDeficit=numStructAsked-len(VmSelected)
-
-            if (numStructDeficit == 1):
-                Vm_list_raw_copy_sorted=sorted(Vm_list_raw_copy)
-                dummyVm=Vm_list_raw_copy_sorted[roof_mean(0,len(Vm_list_raw_copy_sorted))]
-                VmSelected.append(dummyVm)                                              
-                #Vm_list_raw_copy.remove(dummyVm)
-            else:
-                VmClosest2binBounds_loop=list2Bins(Vm_list_raw_copy,numStructDeficit-1)
-                for mm in VmClosest2binBounds_loop:
-                    if mm!=None:
-                        VmSelected.append(mm)
-                        Vm_list_raw_copy.remove(mm)
-                        
-        for Vm in sorted(VmSelected):
+        VmSelected=uniformPick.pickSubList(Vm_list_raw,numStructAsked)        
+        LMN_list=[]                
+        for Vm in VmSelected:
             LMN_list.append(Vm_LMN_dict[Vm])
 
     print ("The following are selected supercells:")   
@@ -226,14 +190,18 @@ def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
     for j in range(len(LMN_list)):
         dummystruct=primordial_struct.copy()
         dummystruct.make_supercell(LMN_list[j])
-        print (str(LMN_list[j])+"   "+
-               str(round(EneVsVm.CalcV_M(dummystruct),2))) 
+        print (str(LMN_list[j])+"   %4.2f" % EneVsVm.CalcV_M(dummystruct)) 
     print ""
     return LMN_list
 
 def gensc(LMN_list,perf_primordial_struct, 
           def_primordial_struct,def_primordial_kpnt,
           def_primordial_potcar,def_primordial_incar):
+    """
+    Generate supercells given input LxMxN scaling factor list, the defected 
+    primordial cell's POSCAR, INCAR, POTCAR and KPOINTS and undefected primordial
+    cell's CONTCAR's corresponding object generated by pymatgen.
+    """
 
     if ('MAGMOM' in def_primordial_incar):
         print ("WARNING: found MAGMOM in the primordial cell INCAR" 
@@ -258,7 +226,7 @@ def gensc(LMN_list,perf_primordial_struct,
         dummystruct.make_supercell(LMN_list[j])
         ####The next section does embeding#######            
 
-        ####This above section does embeding#######
+        ####The above section does embeding#######
         mg.write_structure(dummystruct,'POSCAR') 
        
         kppra=round((def_primordial_kpnt.kpts[0][0]*
@@ -278,8 +246,8 @@ def gensc(LMN_list,perf_primordial_struct,
         def_primordial_incar.write_file('INCAR')
         
         def_primordial_potcar.write_file('POTCAR')
-        print (str(LMN_list[j])+"   "+
-               str(round(EneVsVm.CalcV_M(dummystruct),2))+"   "+
+        print (str(LMN_list[j])+"   %4.2f"
+               %EneVsVm.CalcV_M(dummystruct)+"   "+
                str(dummykpnt.kpts[0])+"   "+
                str(int(dummystruct.composition.num_atoms)))
  
@@ -293,17 +261,27 @@ if __name__ == "__main__":
     perfDir = "primordial_perfect"
     defDir = "primordial_defected"
     
+    ###read CONTCAR from primordial_perfect directory########
+    cwdir=os.getcwd()
+    os.chdir(perfDir)      
+    perfectContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    os.chdir(cwdir)
 
-    jj=mg.io.vaspio.Poscar.from_file(perfDir+"_CONTCAR").structure 
+    #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_perfect directory##
+    os.chdir(defDir)       
+    defectedContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    defectedKpoints=mg.io.vaspio.Kpoints.from_file('KPOINTS')
+    defectedPotcar=mg.io.vaspio.Potcar.from_file('POTCAR')
+    defectedIncar=mg.io.vaspio.Incar.from_file('INCAR')
+    os.chdir(cwdir)
 
-    kk=mg.io.vaspio.Poscar.from_file(defDir+"_CONTCAR").structure
-    ll=mg.io.vaspio.Kpoints.from_file(defDir+"_KPOINTS")
-    mm=mg.io.vaspio.Potcar.from_file(defDir+'POTCAR')
-    nn=mg.io.vaspio.Incar.from_file(defDir+'INCAR')
+    ##calculate and select a list of LMN scaling factors to run
+    #os.chdir('..')
+    LMN_list=genLMNs(perfectContcar,3,600,5)
 
-    LMN_list=genLMNs(jj,3,600,20)
-
-    gensc(LMN_list,jj,kk,ll,mm,nn)
+    ##generate the input files for the above scaling factors
+    gensc(LMN_list,perfectContcar,
+          defectedContcar,defectedKpoints,defectedPotcar,defectedIncar)
 
     sys.stdout = saved
     fout.close()
