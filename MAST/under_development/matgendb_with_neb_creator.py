@@ -1,0 +1,931 @@
+#!/usr/bin/env python
+
+"""
+This module defines a Drone to assimilate vasp data and insert it into a
+Mongo database.
+"""
+
+from __future__ import division
+
+__author__ = "Shyue Ping Ong"
+__copyright__ = "Copyright 2012, The Materials Project"
+__version__ = "2.0.0"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyue@mit.edu"
+__date__ = "Mar 18, 2012"
+
+import os
+import re
+import glob
+import logging
+import datetime
+import string
+import json
+import socket
+import util2
+from fnmatch import fnmatch
+from collections import OrderedDict
+
+from pymongo import MongoClient
+import gridfs
+
+from pymatgen.apps.borg.hive import AbstractDrone
+from pymatgen.analysis.structure_analyzer import VoronoiCoordFinder
+from pymatgen.core.structure import Structure
+from pymatgen.core.composition import Composition
+from pymatgen.io.vaspio import Vasprun, Incar, Kpoints, Potcar, Poscar, \
+    Outcar, Oszicar
+from pymatgen.io.cifio import CifWriter
+from pymatgen.symmetry.finder import SymmetryFinder
+from pymatgen.analysis.bond_valence import BVAnalyzer
+from pymatgen.util.io_utils import zopen
+from pymatgen.matproj.rest import MPRester
+from pymatgen.entries.computed_entries import ComputedEntry
+
+
+logger = logging.getLogger(__name__)
+
+
+class VaspToDbTaskDrone(AbstractDrone):
+    """
+    VaspToDbTaskDrone assimilates directories containing vasp input to
+    inserted db tasks. This drone is meant ot be used with pymatgen's
+    BorgQueen to assimilate entire directory structures and insert them into
+    a database using Python's multiprocessing. The current format assumes
+    standard VASP relaxation runs. If you have other kinds of runs,
+    you may design your own Drone class based on this one.
+
+    There are some restrictions on the valid directory structures:
+
+    1. There can be only one vasp run in each directory. Nested directories
+       are fine.
+    2. Directories designated "relax1", "relax2" are considered to be 2 parts
+       of an aflow style run.
+    3. Directories containing vasp output with ".relax1" and ".relax2" are
+       also considered as 2 parts of an aflow style run.
+    """
+
+    #Version of this db creator document.
+    __version__ = "2.0.0"
+
+    def __init__(self, host="127.0.0.1", port=27017, database="vasp",
+                 user=None, password=None,  collection="tasks",
+                 parse_dos=False, simulate_mode=False,
+                 additional_fields=None, update_duplicates=True,
+                 mapi_key=None):
+        """
+        Args:
+            host:
+                Hostname of database machine. Defaults to 127.0.0.1 or
+                localhost.
+            port:
+                Port for db access. Defaults to mongo's default of 27017.
+            database:
+                Actual database to access. Defaults to "vasp".
+            user:
+                User for db access. Requires write access. Defaults to None,
+                which means no authentication.
+            password:
+                Password for db access. Requires write access. Defaults to
+                None, which means no authentication.
+            collection:
+                Collection to query. Defaults to "tasks".
+            parse_dos:
+                Whether to parse the DOS data where possible. Defaults to
+                False. If True, the dos will be inserted into a gridfs
+                collection called dos_fs.
+            simulate_mode:
+                Allows one to simulate db insertion without actually performing
+                the insertion.
+            additional_fields:
+                Dict specifying additional fields to append to each doc
+                inserted into the collection. For example, allows one to add
+                an author or tags to a whole set of runs for example.
+            update_duplicates:
+                If True, if a duplicate path exists in the collection, the
+                entire doc is updated. Else, duplicates are skipped.
+            mapi_key:
+                A Materials API key. If this key is supplied,
+                the insertion code will attempt to use the Materials REST API
+                to calculate stability data for inserted calculations.
+                Stability assessment requires a large quantity of materials
+                data. E.g., to compute the stability of a new LixFeyOz
+                calculation, you need to the energies of all known
+                phases in the Li-Fe-O chemical system. Using
+                the Materials API, we can obtain the pre-calculated data from
+                the Materials Project.
+
+                Go to www.materialsproject.org/profile to generate or obtain
+                your API key.
+        """
+        self.host = host
+        self.database = database
+        self.user = user
+        self.password = password
+        self.collection = collection
+        self.port = port
+        self.simulate = simulate_mode
+        self.parse_dos = parse_dos
+        self.additional_fields = {} if not additional_fields \
+            else additional_fields
+        self.update_duplicates = update_duplicates
+        self.mapi_key = mapi_key
+        if not simulate_mode:
+            conn = MongoClient(self.host, self.port)
+            db = conn[self.database]
+            if self.user:
+                db.authenticate(self.user, self.password)
+            if db.counter.find({"_id": "taskid"}).count() == 0:
+                db.counter.insert({"_id": "taskid", "c": 1})
+
+    def assimilate(self, path):
+        """
+        Parses vasp runs. Then insert the result into the db. and return the
+        task_id or doc of the insertion.
+
+        Returns:
+            If in simulate_mode, the entire doc is returned for debugging
+            purposes. Else, only the task_id of the inserted doc is returned.
+        """
+        try:
+            d = self.get_task_doc(path, self.parse_dos,
+                                  self.additional_fields)
+            if self.mapi_key is not None and d["state"] == "successful":
+                self.calculate_stability(d)
+            tid = self._insert_doc(d)
+            return tid
+        except Exception as ex:
+            import traceback
+            print traceback.format_exc(ex)
+            logger.error(traceback.format_exc(ex))
+            return False
+
+    def calculate_stability(self, d):
+        m = MPRester(self.mapi_key)
+        functional = d["pseudo_potential"]["functional"]
+        syms = ["{} {}".format(functional, l)
+                for l in d["pseudo_potential"]["labels"]]
+        entry = ComputedEntry(Composition(d["unit_cell_formula"]),
+                              d["output"]["final_energy"],
+                              parameters={"hubbards": d["hubbards"],
+                                          "potcar_symbols": syms})
+        data = m.get_stability([entry])[0]
+        for k in ("e_above_hull", "decomposes_to"):
+            d["analysis"][k] = data[k]
+
+    @classmethod
+    def get_task_doc(cls, path, parse_dos=False, additional_fields=None):
+        """
+        Get the entire task doc for a path, including any post-processing.
+        """
+        logger.info("Getting task doc for base dir :{}".format(path))
+
+        d = None
+        vasprun_files = OrderedDict()
+        files = os.listdir(path)
+        if ("relax1" in files and "relax2" in files and
+                os.path.isdir(os.path.join(path, "relax1")) and
+                os.path.isdir(os.path.join(path, "relax2"))):
+            #Materials project style aflow runs.
+            for subtask in ["relax1", "relax2"]:
+                for f in os.listdir(os.path.join(path, subtask)):
+                    if fnmatch(f, "vasprun.xml*"):
+                        vasprun_files[subtask] = os.path.join(subtask, f)
+        elif "STOPCAR" in files:
+            #Stopped runs. Try to parse as much as possible.
+            logger.info(path + " contains stopped run")
+            for subtask in ["relax1", "relax2"]:
+                if subtask in files and \
+                        os.path.isdir(os.path.join(path, subtask)):
+                    for f in os.listdir(os.path.join(path, subtask)):
+                        if fnmatch(f, "vasprun.xml*"):
+                            vasprun_files[subtask] = os.path.join(
+                                subtask, f)
+        else:
+            vasprun_pattern = re.compile("^vasprun.xml([\w\.]*)")
+            for f in files:
+                m = vasprun_pattern.match(f)
+                if m:
+                    fileext = m.group(1)
+                    if fileext.startswith(".relax2"):
+                        fileext = "relax2"
+                    elif fileext.startswith(".relax1"):
+                        fileext = "relax1"
+                    else:
+                        fileext = "standard"
+                    vasprun_files[fileext] = f
+
+        #Need to sort so that relax1 comes before relax2.
+        sorted_vasprun_files = OrderedDict()
+        for k in sorted(vasprun_files.keys()):
+            sorted_vasprun_files[k] = vasprun_files[k]
+
+        if len(vasprun_files) > 0:
+            d = cls.generate_doc(path, sorted_vasprun_files, parse_dos,
+                                 additional_fields)
+            if not d:
+                d = cls.process_killed_run(path)
+            cls.post_process(path, d)
+        elif (not (path.endswith("relax1") or
+              path.endswith("relax2"))) and contains_vasp_input(path):
+            #If not Materials Project style, process as a killed run.
+            logger.warning(path + " contains killed run")
+            d = cls.process_killed_run(path)
+            cls.post_process(path, d)
+
+        return d
+
+    def _insert_doc(self, d):
+        if not self.simulate:
+            # Perform actual insertion into db. Because db connections cannot
+            # be pickled, every insertion needs to create a new connection
+            # to the db.
+            conn = MongoClient(self.host, self.port)
+            db = conn[self.database]
+            if self.user:
+                db.authenticate(self.user, self.password)
+            coll = db[self.collection]
+
+            # Insert dos data into gridfs and then remove it from the dict.
+            # DOS data tends to be above the 4Mb limit for mongo docs. A ref
+            # to the dos file is in the dos_fs_id.
+            result = coll.find_one({"dir_name": d["dir_name"]},
+                                   fields=["dir_name", "task_id"])
+            if result is None or self.update_duplicates:
+                if self.parse_dos and "calculations" in d:
+                    for calc in d["calculations"]:
+                        if "dos" in calc:
+                            dos = json.dumps(calc["dos"])
+                            if not self.simulate:
+                                fs = gridfs.GridFS(db, "dos_fs")
+                                dosid = fs.put(dos)
+                                calc["dos_fs_id"] = dosid
+                                del calc["dos"]
+                            else:
+                                logger.info("Simulated Insert DOS into db.")
+
+                d["last_updated"] = datetime.datetime.today()
+                if result is None:
+                    if ("task_id" not in d) or (not d["task_id"]):
+                        d["task_id"] = db.counter.find_and_modify(
+                            query={"_id": "taskid"},
+                            update={"$inc": {"c": 1}}
+                        )["c"]
+                    logger.info("Inserting {} with taskid = {}"
+                                .format(d["dir_name"], d["task_id"]))
+                    coll.insert(d, safe=True)
+                elif self.update_duplicates:
+                    d["task_id"] = result["task_id"]
+                    logger.info("Updating {} with taskid = {}"
+                                .format(d["dir_name"], d["task_id"]))
+                    coll.update({"dir_name": d["dir_name"]}, {"$set": d})
+                return d["task_id"]
+            else:
+                logger.info("Skipping duplicate {}".format(d["dir_name"]))
+        else:
+            d["task_id"] = 0
+            logger.info("Simulated Insert into database for {} with task_id {}"
+                        .format(d["dir_name"], d["task_id"]))
+            return d
+
+    @classmethod
+    def post_process(cls, dir_name, d):
+        """
+        Simple post-processing for various files other than the vasprun.xml.
+        Called by generate_task_doc. Modify this if your runs have other
+        kinds of processing requirements.
+
+        Args:
+            dir_name:
+                The dir_name.
+            d:
+                Current doc generated.
+        """
+        logger.info("Post-processing dir:{}".format(dir_name))
+
+        fullpath = os.path.abspath(dir_name)
+
+        # VASP input generated by pymatgen's alchemy has a
+        # transformations.json file that keeps track of the origin of a
+        # particular structure. This is extremely useful for tracing back a
+        # result. If such a file is found, it is inserted into the task doc
+        # as d["transformations"]
+        transformations = {}
+        filenames = glob.glob(os.path.join(fullpath, "transformations.json*"))
+        if len(filenames) >= 1:
+            with zopen(filenames[0], "rb") as f:
+                transformations = json.load(f)
+                try:
+                    m = re.match("(\d+)-ICSD",
+                                 transformations["history"][0]["source"])
+                    if m:
+                        d["icsd_id"] = int(m.group(1))
+                except ValueError:
+                    pass
+        else:
+            logger.warning("Transformations file does not exist.")
+
+        other_parameters = transformations.get("other_parameters")
+        new_tags = None
+        if other_parameters:
+            # We don't want to leave tags or authors in the
+            # transformations file because they'd be copied into
+            # every structure generated after this one.
+            new_tags = other_parameters.pop("tags", None)
+            new_author = other_parameters.pop("author", None)
+            if new_author:
+                d["author"] = new_author
+            if not other_parameters:  # if dict is now empty remove it
+                transformations.pop("other_parameters")
+
+        d["transformations"] = transformations
+
+        # Calculations done using custodian has a custodian.json,
+        # which tracks the jobs performed and any errors detected and fixed.
+        # This is useful for tracking what has actually be done to get a
+        # result. If such a file is found, it is inserted into the task doc
+        # as d["custodian"]
+        filenames = glob.glob(os.path.join(fullpath, "custodian.json*"))
+        if len(filenames) >= 1:
+            with zopen(filenames[0], "rb") as f:
+                d["custodian"] = json.load(f)
+
+        # Parse OUTCAR for additional information and run stats that are
+        # generally not in vasprun.xml.
+        try:
+            run_stats = {}
+            for filename in glob.glob(os.path.join(fullpath, "OUTCAR*")):
+                outcar = Outcar(filename)
+                i = 1 if re.search("relax2", filename) else 0
+                taskname = "relax2" if re.search("relax2", filename) else "relax1"
+                d["calculations"][i]["output"]["outcar"] = outcar.to_dict
+                run_stats[taskname] = outcar.run_stats
+        except:
+            logger.error("Bad OUTCAR for {}.".format(fullpath))
+
+        try:
+            overall_run_stats = {}
+            for key in ["Total CPU time used (sec)", "User time (sec)",
+                        "System time (sec)", "Elapsed time (sec)"]:
+                overall_run_stats[key] = sum([v[key]
+                                              for v in run_stats.values()])
+            run_stats["overall"] = overall_run_stats
+        except:
+            logger.error("Bad run stats for {}.".format(fullpath))
+
+        d["run_stats"] = run_stats
+
+        #Convert to full uri path.
+        d["dir_name"] = get_uri(dir_name)
+
+        if new_tags:
+            d["tags"] = new_tags
+
+        logger.info("Post-processed " + fullpath)
+
+    @classmethod
+    def process_killed_run(cls, dir_name):
+        """
+        Process a killed vasp run.
+        """
+        fullpath = os.path.abspath(dir_name)
+        logger.info("Processing Killed run " + fullpath)
+        d = {"dir_name": fullpath, "state": "killed", "oszicar": {}}
+
+        for f in os.listdir(dir_name):
+            filename = os.path.join(dir_name, f)
+            if fnmatch(f, "INCAR*"):
+                try:
+                    incar = Incar.from_file(filename)
+                    d["incar"] = incar.to_dict
+                    d["is_hubbard"] = incar.get("LDAU", False)
+                    if d["is_hubbard"]:
+                        us = incar.get("LDAUU", [])
+                        js = incar.get("LDAUJ", [])
+                        if sum(us) == 0 and sum(js) == 0:
+                            d["is_hubbard"] = False
+                            d["hubbards"] = {}
+                    else:
+                        d["hubbards"] = {}
+                    if d["is_hubbard"]:
+                        d["run_type"] = "GGA+U"
+                    elif incar.get("LHFCALC", False):
+                        d["run_type"] = "HF"
+                    else:
+                        d["run_type"] = "GGA"
+                except Exception as ex:
+                    print str(ex)
+                    logger.error("Unable to parse INCAR for killed run {}."
+                                 .format(dir_name))
+            elif fnmatch(f, "KPOINTS*"):
+                try:
+                    kpoints = Kpoints.from_file(filename)
+                    d["kpoints"] = kpoints.to_dict
+                except:
+                    logger.error("Unable to parse KPOINTS for killed run {}."
+                                 .format(dir_name))
+            elif fnmatch(f, "POSCAR*"):
+                try:
+                    s = Poscar.from_file(filename).structure
+                    comp = s.composition
+                    el_amt = s.composition.get_el_amt_dict()
+                    d.update({"unit_cell_formula": comp.to_dict,
+                              "reduced_cell_formula": comp.to_reduced_dict,
+                              "elements": list(el_amt.keys()),
+                              "nelements": len(el_amt),
+                              "pretty_formula": comp.reduced_formula,
+                              "anonymous_formula": comp.anonymized_formula,
+                              "nsites": comp.num_atoms,
+                              "chemsys": "-".join(sorted(el_amt.keys()))})
+                    d["poscar"] = s.to_dict
+                except:
+                    logger.error("Unable to parse POSCAR for killed run {}."
+                                 .format(dir_name))
+            elif fnmatch(f, "POTCAR*"):
+                try:
+                    potcar = Potcar.from_file(filename)
+                    d["pseudo_potential"] = {"functional": "pbe",
+                                             "pot_type": "paw",
+                                             "labels": potcar.symbols}
+                except:
+                    logger.error("Unable to parse POTCAR for killed run in {}."
+                                 .format(dir_name))
+            elif fnmatch(f, "OSZICAR"):
+                try:
+                    d["oszicar"]["root"] = \
+                        Oszicar(os.path.join(dir_name, f)).to_dict
+                except:
+                    logger.error("Unable to parse OSZICAR for killed run in {}."
+                                 .format(dir_name))
+            elif re.match("relax\d", f):
+                if os.path.exists(os.path.join(dir_name, f, "OSZICAR")):
+                    try:
+                        d["oszicar"][f] = Oszicar(
+                            os.path.join(dir_name, f, "OSZICAR")).to_dict
+                    except:
+                        logger.error("Unable to parse OSZICAR for killed "
+                                     "run in {}.".format(dir_name))
+        return d
+
+    @classmethod
+    def process_vasprun(cls, dir_name, taskname, filename, parse_dos):
+        """
+        Process a vasprun.xml file.
+        """
+        vasprun_file = os.path.join(dir_name, filename)
+        r = Vasprun(vasprun_file)
+        d = r.to_dict
+        d["dir_name"] = os.path.abspath(dir_name)
+        d["completed_at"] = \
+            str(datetime.datetime.fromtimestamp(os.path.getmtime(
+                vasprun_file)))
+        d["cif"] = str(CifWriter(r.final_structure))
+        d["density"] = r.final_structure.density
+        if parse_dos:
+            try:
+                d["dos"] = r.complete_dos.to_dict
+            except Exception:
+                logger.warn("No valid dos data exist in {}.\n Skipping dos"
+                            .format(dir_name))
+        if taskname == "relax1" or taskname == "relax2":
+            d["task"] = {"type": "aflow", "name": taskname}
+        else:
+            d["task"] = {"type": "standard", "name": "standard"}
+        return d
+
+    @classmethod
+    def generate_doc(cls, dir_name, vasprun_files, parse_dos,
+                     additional_fields):
+        """
+        Process aflow style runs, where each run is actually a combination of
+        two vasp runs.
+        """
+        try:
+            fullpath = os.path.abspath(dir_name)
+            #Defensively copy the additional fields first.  This is a MUST.
+            #Otherwise, parallel updates will see the same object and inserts
+            #will be overridden!!
+            d = {k: v for k, v in additional_fields.items()} \
+                if additional_fields else {}
+            d["dir_name"] = fullpath
+            d["schema_version"] = VaspToDbTaskDrone.__version__
+            d["calculations"] = [
+                cls.process_vasprun(dir_name, taskname, filename, parse_dos)
+                for taskname, filename in vasprun_files.items()]
+            d1 = d["calculations"][0]
+            d2 = d["calculations"][-1]
+
+            #Now map some useful info to the root level.
+            for root_key in ["completed_at", "nsites", "unit_cell_formula",
+                             "reduced_cell_formula", "pretty_formula",
+                             "elements", "nelements", "cif", "density",
+                             "is_hubbard", "hubbards", "run_type"]:
+                d[root_key] = d2[root_key]
+            d["chemsys"] = "-".join(sorted(d2["elements"]))
+            d["input"] = {"crystal": d1["input"]["crystal"]}
+            vals = sorted(d2["reduced_cell_formula"].values())
+            d["anonymous_formula"] = {string.ascii_uppercase[i]: float(vals[i])
+                                      for i in xrange(len(vals))}
+            d["output"] = {
+                "crystal": d2["output"]["crystal"],
+                "final_energy": d2["output"]["final_energy"],
+                "final_energy_per_atom": d2["output"]["final_energy_per_atom"]}
+            d["name"] = "aflow"
+            d["pseudo_potential"] = {"functional": "pbe", "pot_type": "paw",
+                                     "labels": d2["input"]["potcar"]}
+
+            if len(d["calculations"]) == 2 or \
+                    vasprun_files.keys()[0] != "relax1":
+                d["state"] = "successful" if d2["has_vasp_completed"] \
+                    else "unsuccessful"
+            else:
+                d["state"] = "stopped"
+
+            s = Structure.from_dict(d2["output"]["crystal"])
+            if not s.is_valid():
+                d["state"] = "errored_bad_structure"
+
+            d["analysis"] = get_basic_analysis_and_error_checks(d)
+
+            sg = SymmetryFinder(Structure.from_dict(d["output"]["crystal"]),
+                                0.1)
+            d["spacegroup"] = {"symbol": sg.get_spacegroup_symbol(),
+                               "number": sg.get_spacegroup_number(),
+                               "point_group": unicode(sg.get_point_group(),
+                                                      errors="ignore"),
+                               "source": "spglib",
+                               "crystal_system": sg.get_crystal_system(),
+                               "hall": sg.get_hall()}
+            d["last_updated"] = datetime.datetime.today()
+            d["type"] = "VASP" #PS
+            
+            return d
+        except Exception as ex:
+            logger.error("Error in " + os.path.abspath(dir_name) +
+                         ".\nError msg: " + str(ex))
+            return None
+
+    def get_valid_paths(self, path):
+        """
+        There are some restrictions on the valid directory structures:
+
+        1. There can be only one vasp run in each directory. Nested directories
+           are fine.
+        2. Directories designated "relax1", "relax2" are considered to be 2
+           parts of an aflow style run.
+        3. Directories containing vasp output with ".relax1" and ".relax2" are
+           also considered as 2 parts of an aflow style run.
+        """
+        (parent, subdirs, files) = path
+        if "relax1" in subdirs:
+            return [parent]
+        if ((not parent.endswith(os.sep + "relax1")) and
+                (not parent.endswith(os.sep + "relax2")) and
+                len(glob.glob(os.path.join(parent, "vasprun.xml*"))) > 0):
+            return [parent]
+        return []
+
+    def convert(self, d):
+        return d
+
+    def __str__(self):
+        return "VaspToDbDictDrone"
+
+    @staticmethod
+    def from_dict(d):
+        return VaspToDbTaskDrone(**d["init_args"])
+
+    @property
+    def to_dict(self):
+        init_args = {"host": self.host, "port": self.port,
+                     "database": self.database, "user": self.user,
+                     "password": self.password,
+                     "collection": self.collection,
+                     "parse_dos": self.parse_dos,
+                     "simulate_mode": self.simulate,
+                     "additional_fields": self.additional_fields,
+                     "update_duplicates": self.update_duplicates}
+        output = {"name": self.__class__.__name__,
+                  "init_args": init_args, "version": __version__}
+        return output
+
+
+def get_basic_analysis_and_error_checks(d):
+    initial_vol = d["input"]["crystal"]["lattice"]["volume"]
+    final_vol = d["output"]["crystal"]["lattice"]["volume"]
+    delta_vol = final_vol - initial_vol
+    percent_delta_vol = delta_vol / initial_vol
+    coord_num = get_coordination_numbers(d)
+    calc = d["calculations"][-1]
+    gap = calc["output"]["bandgap"]
+    cbm = calc["output"]["cbm"]
+    vbm = calc["output"]["vbm"]
+    is_direct = calc["output"]["is_gap_direct"]
+
+    if abs(percent_delta_vol) > 0.20:
+        warning_msgs = ["Volume change > 20%"]
+    else:
+        warning_msgs = []
+
+    bv_struct = Structure.from_dict(d["output"]["crystal"])
+    try:
+        bva = BVAnalyzer()
+        bv_struct = bva.get_oxi_state_decorated_structure(bv_struct)
+    except ValueError as e:
+        logger.error("Valence cannot be determined due to {e}."
+                     .format(e=e))
+    except Exception as ex:
+        logger.error("BVAnalyzer error {e}.".format(e=str(ex)))
+
+    return {"delta_volume": delta_vol,
+            "percent_delta_volume": percent_delta_vol,
+            "warnings": warning_msgs, "coordination_numbers": coord_num,
+            "bandgap": gap, "cbm": cbm, "vbm": vbm,
+            "is_gap_direct": is_direct,
+            "bv_structure": bv_struct.to_dict}
+
+
+def contains_vasp_input(dir_name):
+    """
+    Checks if a directory contains valid VASP input.
+
+    Args:
+        dir_name:
+            Directory name to check.
+
+    Returns:
+        True if directory contains all four VASP input files (INCAR, POSCAR,
+        KPOINTS and POTCAR).
+    """
+    for f in ["INCAR", "POSCAR", "POTCAR", "KPOINTS"]:
+        if not os.path.exists(os.path.join(dir_name, f)) and \
+                not os.path.exists(os.path.join(dir_name, f + ".orig")):
+            return False
+    return True
+
+
+def get_coordination_numbers(d):
+    """
+    Helper method to get the coordination number of all sites in the final
+    structure from a run.
+
+    Args:
+        d:
+            Run dict generated by VaspToDbTaskDrone.
+
+    Returns:
+        Coordination numbers as a list of dict of [{"site": site_dict,
+        "coordination": number}, ...].
+    """
+    structure = Structure.from_dict(d["output"]["crystal"])
+    f = VoronoiCoordFinder(structure)
+    cn = []
+    for i, s in enumerate(structure.sites):
+        try:
+            n = f.get_coordination_number(i)
+            number = int(round(n))
+            cn.append({"site": s.to_dict, "coordination": number})
+        except Exception:
+            logger.error("Unable to parse coordination errors")
+    return cn
+
+
+def get_uri(dir_name):
+    """
+    Returns the URI path for a directory. This allows files hosted on
+    different file servers to have distinct locations.
+
+    Args:
+        dir_name:
+            A directory name.
+
+    Returns:
+        Full URI path, e.g., fileserver.host.com:/full/path/of/dir_name.
+    """
+    fullpath = os.path.abspath(dir_name)
+    try:
+        hostname = socket.gethostbyaddr(socket.gethostname())[0]
+    except:
+        hostname = socket.gethostname()
+    return "{}:{}".format(hostname, fullpath)
+
+
+class NEBToDbTaskDrone(VaspToDbTaskDrone):
+    """
+    NEBToDbTaskDrone is the same as VaspToDbTaskDrone, except with additional processing
+    for NEB runs.
+    """
+
+    #Version of this db creator document.
+    __version__ = "2.0.0"
+
+    def __init__(self, host="127.0.0.1", port=27017, database="vasp",
+                 user=None, password=None,  collection="tasks",
+                 parse_dos=False, simulate_mode=False,
+                 additional_fields=None, update_duplicates=True,
+                 mapi_key=None):
+        VaspToDbTaskDrone.__init__(self,host,port,database,user,password,collection,parse_dos,simulate_mode,additional_fields,update_duplicates,mapi_key)
+        """
+        Args:
+            host:
+                Hostname of database machine. Defaults to 127.0.0.1 or
+                localhost.
+            port:
+                Port for db access. Defaults to mongo's default of 27017.
+            database:
+                Actual database to access. Defaults to "vasp".
+            user:
+                User for db access. Requires write access. Defaults to None,
+                which means no authentication.
+            password:
+                Password for db access. Requires write access. Defaults to
+                None, which means no authentication.
+            collection:
+                Collection to query. Defaults to "tasks".
+            parse_dos:
+                Whether to parse the DOS data where possible. Defaults to
+                False. If True, the dos will be inserted into a gridfs
+                collection called dos_fs.
+            simulate_mode:
+                Allows one to simulate db insertion without actually performing
+                the insertion.
+            additional_fields:
+                Dict specifying additional fields to append to each doc
+                inserted into the collection. For example, allows one to add
+                an author or tags to a whole set of runs for example.
+            update_duplicates:
+                If True, if a duplicate path exists in the collection, the
+                entire doc is updated. Else, duplicates are skipped.
+            mapi_key:
+                A Materials API key. If this key is supplied,
+                the insertion code will attempt to use the Materials REST API
+                to calculate stability data for inserted calculations.
+                Stability assessment requires a large quantity of materials
+                data. E.g., to compute the stability of a new LixFeyOz
+                calculation, you need to the energies of all known
+                phases in the Li-Fe-O chemical system. Using
+                the Materials API, we can obtain the pre-calculated data from
+                the Materials Project.
+
+                Go to www.materialsproject.org/profile to generate or obtain
+                your API key.
+        """
+    @classmethod
+    def generate_doc(cls, dir_name, vasprun_files, parse_dos,
+                     additional_fields):
+        """Process aflow style and NEB runs."""
+        print "TTM DEBUG: In generate_doc for NEB task drone."
+        try:
+            fullpath = os.path.abspath(dir_name)
+            #Defensively copy the additional fields first.  This is a MUST.
+            #Otherwise, parallel updates will see the same object and inserts
+            #will be overridden!!
+            d = {k: v for k, v in additional_fields.items()} \
+                if additional_fields else {}
+            d["dir_name"] = fullpath
+            print "TTM DEBUG: fullpath: ", fullpath
+            d["schema_version"] = NEBToDbTaskDrone.__version__
+            d["calculations"] = [
+                cls.process_vasprun(dir_name, taskname, filename, parse_dos)
+                for taskname, filename in vasprun_files.items()]
+            d1 = d["calculations"][0]
+            d2 = d["calculations"][-1]
+
+            #Now map some useful info to the root level.
+            for root_key in ["completed_at", "nsites", "unit_cell_formula",
+                             "reduced_cell_formula", "pretty_formula",
+                             "elements", "nelements", "cif", "density",
+                             "is_hubbard", "hubbards", "run_type"]:
+                d[root_key] = d2[root_key]
+            d["chemsys"] = "-".join(sorted(d2["elements"]))
+            d["input"] = {"crystal": d1["input"]["crystal"]}
+            vals = sorted(d2["reduced_cell_formula"].values())
+            d["anonymous_formula"] = {string.ascii_uppercase[i]: float(vals[i])
+                                      for i in xrange(len(vals))}
+            d["output"] = {
+                "crystal": d2["output"]["crystal"],
+                "final_energy": d2["output"]["final_energy"],
+                "final_energy_per_atom": d2["output"]["final_energy_per_atom"]}
+            d["name"] = "aflow"
+            d["pseudo_potential"] = {"functional": "pbe", "pot_type": "paw",
+                                     "labels": d2["input"]["potcar"]}
+
+            if len(d["calculations"]) == 2 or \
+                    vasprun_files.keys()[0] != "relax1":
+                d["state"] = "successful" if d2["has_vasp_completed"] \
+                    else "unsuccessful"
+            else:
+                d["state"] = "stopped"
+
+            s = Structure.from_dict(d2["output"]["crystal"])
+            if not s.is_valid():
+                d["state"] = "errored_bad_structure"
+
+            d["analysis"] = get_basic_analysis_and_error_checks(d)
+
+            sg = SymmetryFinder(Structure.from_dict(d["output"]["crystal"]),
+                                0.1)
+            d["spacegroup"] = {"symbol": sg.get_spacegroup_symbol(),
+                               "number": sg.get_spacegroup_number(),
+                               "point_group": unicode(sg.get_point_group(),
+                                                      errors="ignore"),
+                               "source": "spglib",
+                               "crystal_system": sg.get_crystal_system(),
+                               "hall": sg.get_hall()}
+            d["last_updated"] = datetime.datetime.today()
+
+            # Process NEB runs. The energy and magnetic moments for each image are listed.
+            # Some useful values are calculated.
+
+            # Number of NEB images
+            print "TTM DEBUG: At NEB processing stage."
+            image_list = []
+            for i in xrange(0,9):
+                append = "0"+str(i)
+                newpath = os.path.join(fullpath,append)
+                if os.path.exists(newpath):
+                    image_list.append(newpath)
+            d["num_images"] = len(image_list)
+            print "TTM DEBUG: Image list:", image_list
+            # Image energies and magnetic moments for specific folders
+            list_image_energies = []
+            list_image_mags = []
+            for i in xrange(0,len(image_list)):
+                append = "0"+str(i)
+                oszicar = os.path.join(fullpath,append,"OSZICAR")
+                if not os.path.isfile(oszicar):
+                    return None
+                val_energy = util2.getEnergy(oszicar)
+                val_mag = util2.getMag(oszicar)
+                d["E_"+append]= val_energy
+                d["mag_"+append]= val_mag
+                list_image_energies.append(val_energy)
+                list_image_mags.append(val_mag)
+            print "TTM DEBUG: first occurrence list_image_mags", list_image_mags
+            # List of image energies and magnetic moments in order 
+            image_energies = ' '.join(map(str,list_image_energies))
+            d["image_energies"] = image_energies
+
+            # An simple way to visualize relative image energies and magnetic moments
+            energy_contour = "-x-"
+            if len(image_list)==0:
+                return None
+            for i in xrange(1,len(image_list)):
+                if(list_image_energies[i]>list_image_energies[i-1]):
+                    energy_contour += "/-x-"
+                elif list_image_energies[i]<list_image_energies[i-1]:
+                    energy_contour += "\\-x-"
+                else:
+                    energy_contour += "=-x-"
+            d["energy_contour"] = energy_contour
+            print "TTM DEBUG: energy contour:", energy_contour
+
+            # Difference between the first and maximum energies and magnetic moments
+            deltaE_firstmax = max(list_image_energies) - list_image_energies[0] 
+            d["deltaE_firstmax"] = deltaE_firstmax
+            # Difference between the last and maximum energies and magnetic moments
+            deltaE_lastmax = max(list_image_energies) - list_image_energies[-1]
+            d["deltaE_lastmax"] = deltaE_lastmax
+
+            # Difference between the endpoint energies and magnetic moments
+            deltaE_endpoints = list_image_energies[-1] - list_image_energies[0]
+            d["deltaE_endpoints"] = deltaE_endpoints
+
+            # Difference between the minimum and maximum energies and magnetic moments
+            deltaE_maxmin = max(list_image_energies) - min(list_image_energies)
+            d["deltaE_maxmin"] = deltaE_maxmin            
+        
+#INDENT THE NEXT LINES:
+            if not (list_image_mags[0] == None): #if ISPIN not 2, no mag info
+                image_mags = ' '.join(map(str,list_image_mags))
+                d["image_mags"] = image_mags
+                mag_contour = "-o-"
+                if len(image_list)==0:
+                    return None
+                for i in xrange(1,len(image_list)):
+                    if(list_image_mags[i]>list_image_mags[i-1]):
+                        mag_contour += "/-o-"
+                    elif list_image_mags[i]<list_image_mags[i-1]:
+                        mag_contour += "\\-o-"
+                    else:
+                        mag_contour += "=-o-"
+                d["mag_contour"] = mag_contour
+                deltaM_firstmax = max(list_image_mags) - list_image_mags[0]
+                d["deltaM_firstmax"] = deltaM_firstmax
+                deltaM_lastmax = max(list_image_mags) - list_image_mags[-1]
+                d["deltaM_lastmax"] = deltaM_lastmax
+                deltaM_endpoints = list_image_mags[-1] - list_image_mags[0]
+                d["deltaM_endpoints"] = deltaM_endpoints
+                deltaM_maxmin = max(list_image_mags) - min(list_image_mags)
+                d["deltaM_maxmin"] = deltaM_maxmin
+
+
+            d["type"] = "NEB"
+
+            return d
+
+        except Exception as ex:
+            logger.error("Error in " + os.path.abspath(dir_name) +
+                         ".\nError msg: " + str(ex))
+            return None
+
