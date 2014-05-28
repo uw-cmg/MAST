@@ -283,7 +283,7 @@ You may copy and paste the environment variables from the terminal into your use
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
     export MAST_SCRATCH=//home/username/MAST/SCRATCH
     export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-    export MAST_CONTROL=//home/username/MAST/CONTRO"
+    export MAST_CONTROL=//home/username/MAST/CONTROL"
     export MAST_PLATFORM=platform_name
 
 You will need to manually choose platform_name as one of the following::
