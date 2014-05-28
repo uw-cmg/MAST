@@ -31,6 +31,11 @@ def get_citations(recipedir):
                 for mastxc in mastxcs:
                     if ("pw" in mastxc.lower()) or ("paw" in mastxc.lower()):
                         mylist.append('vasp_paw')
+            mastprogs = fileutil.grepme(myinput, "mast_program")
+            if len(mastprogs) >=1:
+                for mastprog in mastprogs:
+                    if ("neb" in mastprog.lower()):
+                        mylist.append('vaspneb')
         #if 'phon' in mastexec.lower():
         #    mylist.append('phon')
         if 'structopt' in mastexec.lower():
