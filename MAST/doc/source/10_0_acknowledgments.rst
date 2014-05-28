@@ -23,9 +23,24 @@ PI: Professor Dane Morgan
 
 All inquiries should be directed to ddmorgan@wisc.edu
 
-The following programmers are arranged by start date. (+) indicates research performed using MAST.
+-----------------
+Current Team
+-----------------
+The following team members are arranged by start date. (+) indicates research performed using MAST.
 
 *  Tam Mayeshiba + (summer 2010 - present)
+*  Dr. Henry Wu + (summer 2013 - present)
+*  Amy Kaczmarowski (fall 2013 - present)
+*  Wei Xie (fall 2013 - present)
+*  Zhewen Song + (fall 2013 - present)
+*  Saswati De (summer 2014 - present)
+*  Jesus Chavez (summer 2014)
+*  Chandana Hosamane Kabbali (summer 2014 - present)
+
+----------------------
+Alumni
+----------------------
+
 *  Tom Angsten + (spring 2011 - summer 2013)
 *  Dr. Glen Jenness + (spring 2013 - summer 2013)
 *  Kumaresh Visakan Murugan (spring 2013, fall 2013, spring 2014)
@@ -33,14 +48,6 @@ The following programmers are arranged by start date. (+) indicates research per
 *  Parker Sear (spring 2013 - summer 2013, spring 2014)
 *  Nada Alameddine (summer 2013)
 *  Jihad Naja (summer 2013)
-*  Dr. Henry Wu + (summer 2013 - present)
-*  Amy Kaczmarowski (fall 2013 - present)
-*  Wei Xie (fall 2013 - present)
-*  Zhewen Song + (fall 2013 - present)
-
-The following additional team or project members are arranged by start date:
-
-*  Ben Shrago (summer 2013)
 
 ========================
 Other Acknowledgments

@@ -14,7 +14,7 @@
 
 
 \title{MAST Documentation}
-\date{May 15, 2014}
+\date{May 28, 2014}
 \release{coracle 1.1.0}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
@@ -1444,7 +1444,7 @@ This method is intended to allow you to run short custom scripts of your own cre
 \#  Use \code{write\_submit\_script} in your \code{mast\_write\_method}, along with any other write methods
 \#  Use \code{mast\_run\_method run\_singlerun}
 \#  Put your script in the \code{mast\_exec} keyword
-*  Some useful scripts are found in \code{\$MAST\_INSTALL\_PATH/tools} and described in {\hyperref[6_0_tools:tools]{\emph{MAST post-processing utilities}}}
+*  Some useful scripts are found in \code{\$MAST\_INSTALL\_PATH/tools} and described in {\hyperref[6_0_postprocessingtools:tools]{\emph{MAST post-processing utilities}}}
 
 \end{description}
 
@@ -3039,10 +3039,10 @@ This crontab line will run mast every 15 minutes and is ONLY suitable for short 
 
 
 \chapter{MAST post-processing utilities}
-\label{6_0_tools:tools}\label{6_0_tools::doc}\label{6_0_tools:mast-post-processing-utilities}
+\label{6_0_postprocessingtools:tools}\label{6_0_postprocessingtools::doc}\label{6_0_postprocessingtools:mast-post-processing-utilities}
 
 \section{Defect formation energy}
-\label{6_0_tools:defect-formation-energy}
+\label{6_0_postprocessingtools:defect-formation-energy}
 The defect formation energy tool goes through the output of finished recipes in \$MAST\_ARCHIVE and calculates defect formation energies. It is found in \$MAST\_INSTALL\_PATH/tools.
 
 The defect formation energy tool will create a \code{\textless{}recipe directory\textgreater{}\_dfe\_results} directory in the directory from which it is called.
@@ -3073,7 +3073,7 @@ The two-column printout is Fermi energy on the left, and defect formation energy
 
 
 \section{Diffusion coefficient}
-\label{6_0_tools:diffusion-coefficient}
+\label{6_0_postprocessingtools:diffusion-coefficient}
 Usage of diffusion coefficient calculation tool code:
 \begin{enumerate}
 \item {} 
@@ -3195,11 +3195,50 @@ vXp 4
 \end{Verbatim}
 
 
+\chapter{Standalone Tools}
+\label{8_0_standalonetools:standalone-tools}\label{8_0_standalonetools::doc}
+
 \section{Defect finder}
-\label{6_0_tools:defect-finder}
+\label{8_0_standalonetools:defect-finder}
 The defect finder takes a POSCAR file and finds vacancies and interstitials.
 The defect finder currently exists in a separate repository.
 You may test it online at materialshub.org \textgreater{} Resources \textgreater{} Tools \textgreater{} Defect Finder
+
+
+\section{Diffusion Connectivity}
+\label{8_0_standalonetools:diffusion-connectivity}
+
+\subsection{Diffusion Connectivity}
+\label{8_0_1_diffusionconnectivity::doc}\label{8_0_1_diffusionconnectivity:diffusionconnectivity}\label{8_0_1_diffusionconnectivity:diffusion-connectivity}
+A new section is introduced in the input file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\$site
+int1
+0.5 0.5 0.5
+0.5 0 0
+0 0.5 0
+0 0 0.5
+int2
+0.25 0.25 0.25
+0.75 0.25 0.25
+0.25 0.75 0.25
+0.25 0.25 0.75
+0.75 0.75 0.75
+0.25 0.75 0.75
+0.75 0.25 0.75
+0.75 0.75 0.25
+\$end
+\end{Verbatim}
+
+In this example, there are two types of local minimum (interstitial site) int1 and int2. The geometrically equivalent site coordinates are listed for each type.
+
+The create\_paths.py code first parses the perfect lattice with the defect sites, then finds the nth neighbor of possible pairs of both same and different site types, and detect if the path candidate crosses over the host lattice site or another defect site and delete it.
+If the lattice user provides is too small and not all the neighbors (up to nth) are found, the code will double, triple, etc. the size until all required neighbor pairs are found.
+
+The NEBcheck.py code will generate the MAST-input style defect structure for the possible pairs found in the create\_paths.py and write a new input file that calls MAST to generate NEB and phonon folders to check if these paths are appropriate. Currently the code ends at calling MAST and does not yet manage to handle the NEB and phonon results analysis.
+
+The usage is: python NEBcheck.py -i \textless{}input\textgreater{} -n \textless{}up-to-nth-neighbor\textgreater{}
 
 
 \chapter{External Packages}
