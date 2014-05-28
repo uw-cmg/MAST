@@ -130,7 +130,7 @@ def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
     print ("If you want to explore larger scaling factors L/M/N, "+ 
             "please rerun with larger maxNumAtoms input parameter.")
     print (" ")
-    print maxLMN
+
     #####The following section generates a list of candidates LMN's######   
     Vm_LMN_dict={}
     print ("The following are candiate supercells:")   
