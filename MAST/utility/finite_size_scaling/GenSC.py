@@ -127,8 +127,8 @@ def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
     maxLMN=int((maxNumAtoms/primordial_struct.composition.num_atoms)**(1/3.0))
     print ("Generating candidate supercells with the scaling factors"+
            " L/M/N less than or equal to "+str(maxLMN)+".")
-    print ("If you want to explore larger scaling factors L/M/N, \
-            please rerun with larger maxNumAtoms input parameter.")
+    print ("If you want to explore larger scaling factors L/M/N, "+ 
+            "please rerun with larger maxNumAtoms input parameter.")
     print (" ")
     print maxLMN
     #####The following section generates a list of candidates LMN's######   
@@ -214,8 +214,9 @@ def gensc(LMN_list,perf_primordial_struct,
        
     cwdir = os.getcwd()
     print("To run the following supercells:")
-    print ("ScalingLMN " "  V_M    " " Kpoint  " " Natoms")
-    print ("-------------------------------------") 
+#    print ("ScalingLMN " "  V_M    " " Kpoint  " " Natoms")
+    print ("ScalingLMN " " Kpoint  "   "   Label")
+    print ("---------------------------------") 
     for j in range(len(LMN_list)):
 
         dirname=str(LMN_list[j][0])+"x"+str(LMN_list[j][1])+"x"+str(LMN_list[j][2])
@@ -246,10 +247,17 @@ def gensc(LMN_list,perf_primordial_struct,
         def_primordial_incar.write_file('INCAR')
         
         def_primordial_potcar.write_file('POTCAR')
-        print (str(LMN_list[j])+"   %4.2f"
-               %EneVsVm.CalcV_M(dummystruct)+"   "+
-               str(dummykpnt.kpts[0])+"   "+
-               str(int(dummystruct.composition.num_atoms)))
+        print (str(LMN_list[j])+"   " \
+               #    +"%4.2f"      %EneVsVm.CalcV_M(dummystruct)+"   "+
+              +str(dummykpnt.kpts[0][0])+"x"+ \
+               str(dummykpnt.kpts[0][1])+"x"+ \
+               str(dummykpnt.kpts[0][2])+"   "
+               #+str(int(dummystruct.composition.num_atoms))
+               +"label="
+              +str(LMN_list[j][0])+"x"+ \
+               str(LMN_list[j][1])+"x"+ \
+               str(LMN_list[j][2])               
+               )
  
         os.chdir(cwdir)
         
@@ -267,7 +275,7 @@ if __name__ == "__main__":
     perfectContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
     os.chdir(cwdir)
 
-    #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_perfect directory##
+    #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_defect directory##
     os.chdir(defDir)       
     defectedContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
     defectedKpoints=mg.io.vaspio.Kpoints.from_file('KPOINTS')
