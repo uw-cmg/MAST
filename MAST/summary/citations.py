@@ -32,10 +32,12 @@ def get_citations(recipedir):
                     if ("pw" in mastxc.lower()) or ("paw" in mastxc.lower()):
                         mylist.append('vasp_paw')
             mastprogs = fileutil.grepme(myinput, "mast_program")
-            if len(mastprogs) >=1:
+            if len(mastprogs) >= 1:
                 for mastprog in mastprogs:
-                    if ("neb" in mastprog.lower()):
+                    if ("vasp_neb" in mastprog.lower()):
                         mylist.append('vaspneb')
+            if "tst" in mastexec.lower():
+                mylist.append('vaspneb')
         #if 'phon' in mastexec.lower():
         #    mylist.append('phon')
         if 'structopt' in mastexec.lower():
@@ -43,7 +45,12 @@ def get_citations(recipedir):
     citationpath = os.path.join(dirutil.get_mast_control_path(),"citations")
     citationfiles = os.listdir(citationpath)
     linelist = list()
-    for listitem in mylist:
+    uniquelist=list()
+    for mylistitem in mylist:
+        if not mylistitem in uniquelist:
+            uniquelist.append(mylistitem)
+    #print "UNIQUELIST: ", uniquelist
+    for listitem in uniquelist:
         for citationfile in citationfiles:
             if citationfile[:-3] == listitem: #all except number
                 cfpath = os.path.join(citationpath, citationfile)
