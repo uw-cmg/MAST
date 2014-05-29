@@ -1,19 +1,6 @@
 ####################
 Acknowledgments
 ####################
-==================
-Citing MAST
-==================
-
-To properly cite MAST and its dependencies, go to your completed recipe directory in ``$MAST_ARCHIVE`` and locate the following file ::
-
-    CITATIONS.bib
-
-For example::
-
-    cat $MAST_ARCHIVE/Optimization_Al_20140101T120000/CITATIONS.bib
-
-This Bibtex-formatted file may be used directly with LaTeX or imported into a reference manager such as EndNote or Mendeley.
 
 ==================
 The MAST Team
@@ -50,7 +37,7 @@ Alumni
 *  Jihad Naja (summer 2013)
 
 ========================
-Other Acknowledgments
+NSF
 ========================
 
 .. image:: _static/nsf1.jpg
@@ -58,6 +45,9 @@ Other Acknowledgments
 
 The MAterials Simulation Toolkit (MAST) was developed with funding from the National Science Foundation Grant 1148011. T. Mayeshiba gratefully acknowledges support from the National Science Foundation Graduate Research Fellowship Grant No. DGE-0718123.
 
+========================
+pymatgen
+========================
 
 .. image:: _static/pymatgen.png
     :scale: 50 %

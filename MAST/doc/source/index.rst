@@ -22,6 +22,7 @@ MAterials Simulation Toolkit (MAST) Manual
     7_0_externalpackages
     12_0_programming
     10_0_acknowledgments
+    15_0_citations
     14_0_contact
     11_0_license
 
