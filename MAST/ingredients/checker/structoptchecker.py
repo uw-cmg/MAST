@@ -15,7 +15,7 @@ from MAST.ingredients.checker import LammpsChecker
 from MAST.submit import queue_commands
 from pymatgen.core.structure import Structure
 from pymatgen.io.aseio import AseAtomsAdaptor
-from MAST.structopt import Optimizer
+from MAST.structopt.Optimizer import Optimizer
 from MAST.structopt import post_processing as pp
 from MAST.structopt import inp_out
 from MAST.structopt.switches import fitness_switch
@@ -49,8 +49,8 @@ class StructoptChecker(BaseChecker):
     def _structopt_get_non_mast_keywords(self):
         """Get the StructOpt keywords and make a dictionary."""
         input_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
-                        'ingredients','programkeys','structopt_allowed_keywords.py')
+        allowedpath = os.path.join(dirutil.get_mast_control_path(),
+                        'programkeys','structopt_allowed_keywords.py')
         allowed_list = self._structopt_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
             if not key[0:5] == "mast_":
@@ -505,8 +505,7 @@ class StructoptChecker(BaseChecker):
         except:
             raise MASTError(self.__class__.__name__,
                 "Cannot find Optimizer run file in 'structopt'! Current path: {0}".format(os.path.join(os.environ['MAST_CONTROL'],'Optimizer.py')))
-        optimizerpath = os.path.join(structoptpath,'Optimizer.py')
-        new_exec_line += ' {0} {1}'.format(optimizerpath,inputfile)
+        new_exec_line += ' {0} {1}'.format(structoptpath,inputfile)
         self.keywords['program_keys']['mast_exec'] = new_exec_line
         return
     
