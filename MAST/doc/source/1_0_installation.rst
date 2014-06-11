@@ -254,6 +254,12 @@ Obtain the latest source code from `<https://wiki.fysik.dtu.dk/ase/>`_
 
 Unzip the tar.gz file to your home directory
 
+Create the softlink as shown (use the version number you downloaded)::
+
+    ln -s python-ase-3.8.0.3420 ase
+
+DO NOT link to the ase folder within the unzipped tar.gz; only link to the top folder as shown above.
+
 In your user profile, add the following line::
 
     export PYTHONPATH=$PYTHONPATH:~/ase
