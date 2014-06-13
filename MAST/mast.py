@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 import time
 import shutil
@@ -19,6 +16,7 @@ from MAST.utility import MASTFile
 #from MAST.utility.picklemanager import PickleManager
 from MAST.utility.dirutil import *
 from MAST.utility import InputOptions
+from MAST.utility import loggerutils
 from MAST.parsers import InputParser
 from MAST.parsers import IndepLoopInputParser
 #from MAST.parsers import InputPythonCreator
@@ -62,8 +60,7 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        logging.basicConfig(filename="%s/mast.log" % os.getenv("MAST_CONTROL"), level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
+        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
 
     def check_independent_loops(self):
         """Checks for independent loops. If no independent loops are found,
@@ -145,7 +142,7 @@ class MAST(MASTObj):
     def create_recipe_metadata(self):
         """Create the recipe metadata file.
         """
-        topmeta = Metadata(metafile='%s/metadata.txt' % self.working_directory)
+        topmeta = Metadata(metafile="%s/metadata.txt" % self.working_directory)
         topmeta.write_data('directory_created', self.asctime)
         topmeta.write_data('system_name', self.sysname)
         topmeta.write_data('origin_dir', self.origin_dir)
@@ -195,6 +192,7 @@ class MAST(MASTObj):
     def set_class_attributes(self):
         """Set class attributes, other than input options
         """
+        time.sleep(1)
         self.timestamp = time.strftime('%Y%m%dT%H%M%S')
         self.asctime = time.asctime()
         self.set_sysname()
@@ -211,7 +209,9 @@ class MAST(MASTObj):
 
     def set_sysname(self):
         """Set system name."""
-        element_str = self.get_element_string()
+        element_str = self.get_element_map_string()
+        if element_str == None:
+            element_str = self.get_element_string()
         system_name = self.input_options.get_item("mast", "system_name", "sys")
         self.sysname = system_name + '_' + element_str
         return
@@ -220,8 +220,9 @@ class MAST(MASTObj):
         """Get the system name and working directory.
         """
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
-        dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
-        dir_path = os.path.join(self.input_options.get_item('mast', 'scratch_directory'), dir_name)
+        #dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
+        dir_name = "%s_%s" % (self.sysname, self.timestamp)
+        dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
         self.working_directory = dir_path
         return
 
@@ -239,4 +240,27 @@ class MAST(MASTObj):
             except KeyError:
                 elemok = 0
         return elemstr
+    def get_element_map_string(self):
+        """Get the element string from the elementmap section.
+            Returns:
+                elemstr <str>: element string from elementmap
+                                section of the input file,
+                                in order of X1, X2, etc.
+                If no elementmap section exists in the input file
+                (which, when put in dictionary form, has the
+                subsection name element_map), then the method
+                returns None
+        """
+        elemmap = self.input_options.get_item('structure','element_map')
+        if elemmap == None:
+            return None
+        elkeys = elemmap.keys()
+        elkeys.sort()
+        elstr=""
+        for elkey in elkeys:
+            elstr = elstr + elemmap[elkey]
+        if elstr == "":
+            return None
+        return elstr
+
 

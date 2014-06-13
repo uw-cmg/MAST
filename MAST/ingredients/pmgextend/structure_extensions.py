@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-19 by Zhewen Song
+# Last updated: 2014-04-25
 ##############################################################
 from pymatgen.io.vaspio import *
 import numpy as np
@@ -138,7 +138,7 @@ class StructureExtensions(MASTObj):
             if not (scalingsize == None):
                 scale = scalingsize.split('[')[1].split(']')[0]
                 try:
-                    scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                    scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
                     mycoord = mycoord / np.array(scaleinput)
                 except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                     scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
@@ -256,7 +256,7 @@ class StructureExtensions(MASTObj):
         if not (scalingsize == None):
             scale = scalingsize.split('[')[1].split(']')[0]
             try:
-                scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
                 pcscoord = pcscoord / np.array(scaleinput)
             except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
@@ -372,15 +372,13 @@ class StructureExtensions(MASTObj):
         scaledstr = self.keywords['struc_work1'].copy()
         scale = self.keywords['scaling_size']
         scale = scale.strip()
-        if len(scale.split()) == 3:
-            scaleinput = map(int, scale.split())
-        elif len(scale.split(',')) == 3:
-            try: scaleinput = map(int, scale.split(','))
+        if len(scale.split(',')) == 3:
+            try: scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])]
             except ValueError: 
-                scaleinput = [map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
         else:
             self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
-            raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
+            raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scalesplit)
             return None
         scaledstr.make_supercell(scaleinput)
         return scaledstr
@@ -403,15 +401,9 @@ class StructureExtensions(MASTObj):
         mycoords = np.array(defect['coordinates'])
         scale = self.keywords['scaling_size']
         scale = scale.strip()
-        if len(scale.split()) == 3: # input scaling size like '1 1 1'
-            scaleinput = map(float, scale.split())
-            #if newa is twice as big as olda, coordinate should be half as big
-            coorda = mycoords[0]/scaleinput[0]
-            coordb = mycoords[1]/scaleinput[1]
-            coordc = mycoords[2]/scaleinput[2]
-        elif len(scale.split(',')) == 3:
+        if len(scale.split(',')) == 3:
             try: 
-                scaleinput = map(int, scale.split(',')) # input scaling size like [2,1,2]
+                scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
                 coorda = mycoords[0]/scaleinput[0]
                 coordb = mycoords[1]/scaleinput[1]
                 coordc = mycoords[2]/scaleinput[2]

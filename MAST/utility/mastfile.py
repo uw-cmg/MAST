@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 import time
 from MAST.utility import dirutil
@@ -117,6 +123,19 @@ class MASTFile:
     def get_last_line_match(self, string_to_match):
         lastmatch=""
         for line in self.data:
+            if string_to_match in line:
+                lastmatch = line
+        if lastmatch == "":
+            return None
+        return lastmatch
+
+    def get_last_x_lines_line_match(self, string_to_match, x_lines):
+        lastmatch=""
+        x_int = int(x_lines)
+        if x_int == 0:
+            return self.get_last_line_match(string_to_match)
+        searchme = self.data[-1*x_int:]
+        for line in searchme:
             if string_to_match in line:
                 lastmatch = line
         if lastmatch == "":

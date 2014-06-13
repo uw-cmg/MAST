@@ -550,3 +550,5 @@ class RecipePlan:
                     self.ingredients[oneingred] = onestatus
                 else:
                     raise MASTError(self.__class__.__name__, "Ingredient %s is not in the original recipe's ingredients list." % oneingred)
+
+            

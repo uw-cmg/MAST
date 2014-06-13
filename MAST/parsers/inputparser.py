@@ -1,10 +1,13 @@
-##############################################################
-# This code is part of the MAterials Simulation Toolkit (MAST)
-# 
-# Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-19 by Zhewen Song
-##############################################################
-import os
+############################################################################
+# MAterials Simulation Toolbox (MAST)
+# Version: January 2013
+# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
+#              Kumaresh Visakan Murugan, Parker Sear
+# Created at the University of Wisconsin-Madison.
+# Replace this section with appropriate license text before shipping.
+# Add additional programmers and schools as necessary.
+############################################################################
+import os, re
 import time
 import fnmatch
 import logging

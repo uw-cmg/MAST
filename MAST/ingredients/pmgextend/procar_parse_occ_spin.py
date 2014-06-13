@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# This procar code should be replaced with pymatgen functions. 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 
 """
 Classes for reading/manipulating/writing VASP ouput files.

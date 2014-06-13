@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-###################################################
-# Diffusion Coefficent Tool
-# Version: Apr. 10, 2014
-# Programmers: Zhewen Song, Tam Mayeshiba, Henry Wu
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Zhewen Song
+# Last updated: 2014-04-25
 # Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
 # Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
-###################################################
+##############################################################
 
 import sys, getopt, os
 import numpy as np
@@ -85,6 +86,8 @@ class ParsingInputFiles(object):
                     elif line[0]=='type' and line[1]=='hcp_8freq':  
                         item_name = 8
                 elif keyword=='lattice' and 'lattice' in line[0]:
+                    item_name = line[1]
+                elif keyword=='plotdisplay' and 'plotdisplay' in line[0]:
                     item_name = line[1]
         return item_name
     
@@ -253,6 +256,10 @@ class DiffCoeff(ParsingInputFiles):
         Hdir = self.get_item_name('H')
         latt = self.get_item_name('lattice')
         model = self.get_item_name('type')
+        plotdisplay = self.get_item_name('plotdisplay')
+        if len(plotdisplay) == 0: #empty dictionary
+            plotdisplay=""
+        values['plotdisplay'] = plotdisplay
         numatom = self.get_latt(model,latt)['No.']
         values['a'] = self.get_latt(model,latt)['a']
         values['type'] = model
@@ -289,6 +296,7 @@ class DiffCoeff(ParsingInputFiles):
         enebarr = values['enebarr']
         v = values['v']
         a = values['a'] 
+        plotdisplay = values['plotdisplay']
         HVf = values['HVf'] 
         if model==8: 
             c = values['c'] 
@@ -346,6 +354,22 @@ class DiffCoeff(ParsingInputFiles):
                 print '%f  %E'%(t,D[i])
                 t = t + tempstep    
                 i = i + 1
+            if plotdisplay.lower() == "none": #No plot display
+                pass
+            else:
+                import matplotlib
+                if len(plotdisplay) == 0:
+                    pass
+                else:
+                    matplotlib.use(plotdisplay)
+                import matplotlib.pyplot as plt
+                tvals = np.linspace(tempstart, tempend, i)
+                plt.plot(tvals, np.log10(D), '.')
+                plt.xlabel('$10^3/T$ (K$^{-1}$)')
+                plt.ylabel('log$_{10}$$D$ (cm$^2$/s)')
+                plt.savefig('Diffusivity.png')
+                plt.show()
+
             
         elif model==8:
             fp = open('Diffusivity.txt','w+')
@@ -379,6 +403,21 @@ class DiffCoeff(ParsingInputFiles):
                 print '%f  %E  %E'%(t,Dperp[i],Dpara[i])
                 t = t + tempstep
                 i = i + 1
+            if plotdisplay.lower() == "none":
+                pass
+            else:
+                import matplotlib
+                if len(plotdisplay) == 0:
+                    pass
+                else:
+                    matplotlib.use(plotdisplay)
+                import matplotlib.pyplot as plt
+                tvals = np.linspace(tempstart, tempend, i)
+                plt.plot(tvals, np.log10(Dperp), '.', tvals, np.log10(Dpara), '+')
+                plt.xlabel('$10^3/T$ (K$^{-1}$)')
+                plt.ylabel('log$_{10}$$D$ (cm$^2$/s)')
+                plt.savefig('Diffusivity.png')
+                plt.show()
 
 def main():   
     argv = sys.argv[1:]

@@ -271,3 +271,4 @@ class IndepLoopInputParser(MASTObj):
             createdfiles.append(os.path.basename(newname))
             dct=dct+1
         return createdfiles
+

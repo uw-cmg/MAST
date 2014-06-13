@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Glen Jenness
+# Last updated: 2013-07-03
+##############################################################
 import sys
 
 """Helper function for handling errors within MAST

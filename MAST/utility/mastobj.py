@@ -1,12 +1,9 @@
-############################################################################
-# MAterials Simulation Toolbox (MAST)
-# Version: January 2013
-# Programmers: Tam Mayeshiba, Tom Angsten, Glen Jenness, Hyunwoo Kim,
-#              Kumaresh Visakan Murugan, Parker Sear
-# Created at the University of Wisconsin-Madison.
-# Replace this section with appropriate license text before shipping.
-# Add additional programmers and schools as necessary.
-############################################################################
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Glen Jenness
+# Last updated: 2013-07-01
+##############################################################
 
 #import numpy as np
 
@@ -77,7 +74,7 @@ class MASTObj(object):
             if isinstance(value, self.allowed_keys[key][0]):
                 keywords[key] = value
             else:
-                error = 'Keyword %s value %s invalid' % (key, str(value))
+                error = 'Keyword %s value %s invalid; expected type %s, got type %s' % (key, str(value), self.allowed_keys[key][0], type(value))
                 MASTError(self.__class__.__name__, error)
 #                raise RuntimeError('Keyword %s value invalid' % key)
 

@@ -1,9 +1,38 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 import os
 import sys
 import fnmatch
 import time
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
+
+def immediate_subdirs(existdir, verbose=0):
+    """Walk through directory and return immediate subdirectories
+        (only one level)
+        as directory names (not full paths)
+        Args:
+            existdir <str>: Directory, which should exist
+            verbose <int>: 0 - concise (default)
+                           1 - verbose
+    """
+    if not (os.path.exists(existdir)):
+        raise MASTError("utility","No directory at " +existdir)
+    listdir = os.listdir(existdir)
+    subdirs=list()
+    for myentry in listdir:
+        trydir = os.path.join(existdir, myentry)
+        if os.path.isdir(trydir):
+            subdirs.append(myentry)
+    subdirs.sort()
+    if verbose == 1:
+        print "subdirectories:", subdirs
+    return subdirs
+
 
 def walkdirs(existdir, mindepth=1, maxdepth=5, matchme=""):
     """Walk through directory and return list of subdirectories."""
@@ -220,18 +249,34 @@ def search_for_metadata_file(metastring="",dirname="", metafilename="metadata.tx
         print metamatch
     return metamatch
 
-def list_methods(myclass=None):
+def list_methods(myclass=None, printout=1):
     """List the methods in a class.
         Args:
             myclass <Class>: Class, like BaseIngredient
+            printout <int>: Print the list to screen
+                            1 - print (default)
+                            0 - do not print to screen
     """
     import inspect
     mylist=inspect.getmembers(myclass, predicate=inspect.ismethod)
     parsedlist=list()
     for myentry in mylist:
         parsedlist.append(myentry[0])
-    for myentry in parsedlist:
-        print myentry
+    if printout > 0:
+        for myentry in parsedlist:
+            print myentry
     return parsedlist
 
-                
+def dir_is_in_scratch(mydir):
+    """Check if the directory is in the $MAST_SCRATCH directory.
+        Args:
+            mydir <str>: directory name (not full path)
+        Returns:
+            True or False
+    """
+    scratch = get_mast_scratch_path()
+    dirs_in_scratch = os.listdir(scratch)
+    if (mydir in dirs_in_scratch):
+        return True
+    else:
+        return False

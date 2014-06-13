@@ -111,3 +111,4 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
 
     @property
     def to_dict(self): return {"@module": self.__class__.__module__, "@class": self.__class__.__name__, "output_filename": self.output_filename, "timeout": self.timeout}
+

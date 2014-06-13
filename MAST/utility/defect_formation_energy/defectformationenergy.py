@@ -1,10 +1,19 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Glen Jenness
+# Last updated: 2013-07-01
+##############################################################
 import sys, os
 
-from pymatgen.io.vaspio.vasp_output import Vasprun
+import pymatgen as pmg
+from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
 from pymatgen.io.smartio import read_structure
-
-from MAST.utility import PickleManager
+from MAST.utility import MASTError
+from MAST.utility import MASTFile
+#from MAST.utility import PickleManager
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment
+from MAST.utility.defect_formation_energy.gapplot import GapPlot
 from MAST.utility import Metadata
 from MAST.parsers import InputParser
 
@@ -16,28 +25,42 @@ class DefectFormationEnergy:
     def __init__(self, directory=None, plot_threshold=0.01):
         self.directory = directory
         self.plot_threshold = plot_threshold
-        ipparser = InputParser(inputfile=os.path.join(self.directory + 'input.inp'))
+        ipparser = InputParser(inputfile=os.path.join(self.directory,'input.inp'))
         self.input_options = ipparser.parse()
         #pm = PickleManager(self.directory + '/input_options.pickle')
         #self.input_options = pm.load_variable()
-        self.recipe_plan = PickleManager(self.directory + '/mast.pickle').load_variable()
+        from MAST.recipe.recipesetup import RecipeSetup
+        self.recipe_setup = RecipeSetup(inputOptions=self.input_options,recipeFile=os.path.join(self.directory,'personal_recipe.txt'),workingDirectory=self.directory)
+        self.recipe_plan = self.recipe_setup.start()
+        #PickleManager(self.directory + '/mast.pickle').load_variable()
 
         self.final_ingredients = list()
-        for ingredient in self.recipe_plan:
-            if (ingredient.children is None):
-                self.final_ingredients.append(ingredient.name)
+        ingredientlist = self.recipe_plan.ingredients.keys()
+        updatekeys = self.recipe_plan.update_methods.keys()
+        for ingredient in ingredientlist:
+            if not (ingredient in updatekeys): # has no children
+                self.final_ingredients.append(ingredient)
+            else:
+                if len(self.recipe_plan.update_methods[ingredient]) == 0:
+                    self.final_ingredients.append(ingredient)
         #print self.final_ingredients
 
-    def calculate_defect_formation_energies(self):
-        perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
+        self.e_defects = dict()
+    def _calculate_defect_formation_energies(self):
+        try:
+            perf_dir = [ingredient for ingredient in self.final_ingredients if ('perfect' in ingredient)][0]
+        except IndexError:
+            raise MASTError(self.__class__.__name__, "A perfect final directory (has no children and has the word 'perfect' in its name) could not be found. Check recipe %s for a perfect directory." % self.directory)
+
         def_dir = [ingredient for ingredient in self.final_ingredients if 'perfect' not in ingredient] 
-        for whatever in sorted(def_dir):
-            print whatever
+        #for whatever in sorted(def_dir):
+            #print whatever
 
         defects = self.input_options.get_item('defects', 'defects')
         chempot = self.input_options.get_item('chemical_potentials')
 
-        e_perf = self.get_total_energy(perf_dir)
+        perf_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, perf_dir))
+        e_perf = float(perf_meta.read_data('energy'))
         efermi = self.get_fermi_energy(perf_dir)
         struct_perf = self.get_structure(perf_dir)
 
@@ -49,20 +72,23 @@ class DefectFormationEnergy:
                 perf_species[str(site.specie)] += 1
 
         #print 'Perfect composition: ', perf_species
-        e_defects = dict() # dict of defect energies
 
         # First loop through the conditions for the defects
         for conditions, potentials in chempot.items():
             print 'Conditions:  %s' % conditions.upper()
-            defect_info = dict()
+            self.e_defects[conditions] = dict()
 
             # Loop through each defect
             for ddir in sorted(def_dir):
                 def_meta = Metadata(metafile='%s/%s/metadata.txt' % (self.directory, ddir))
+                #print def_meta
                 label = def_meta.read_data('defect_label')
                 charge = int(def_meta.read_data('charge'))
                 energy = float(def_meta.read_data('energy'))
                 structure = self.get_structure(ddir)
+
+                if (label not in self.e_defects[conditions]):
+                    self.e_defects[conditions][label] = list()
 
                 print 'Calculating DFEs for defect %s with charge %3i.' % (label, charge)
 
@@ -94,9 +120,12 @@ class DefectFormationEnergy:
                     #print str(specie), mu, number
                     e_def -= (number * mu)
                 e_def += charge * (efermi + alignment) # Add in the shift here!
+                #print '%-15s%-5i%12.5f%12.5f%12.5f%12.5f' % (label.split('_')[1], charge, energy, e_perf, efermi, alignment)
                 print 'DFE = %f' % e_def
+                self.e_defects[conditions][label].append( (charge, e_def) )
 
-        return e_defects
+        #print e_defects
+        #return e_defects
 
     def get_total_energy(self, directory):
         """Returns the total energy from a directory"""
@@ -113,6 +142,8 @@ class DefectFormationEnergy:
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).efermi
+        elif ('OUTCAR' in os.listdir(abspath)):
+            return Outcar('%s/OUTCAR' % abspath).efermi
 
     def get_structure(self, directory):
         """Returns the final structure from an optimization"""
@@ -121,6 +152,8 @@ class DefectFormationEnergy:
 
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
+        elif ('CONTCAR' in os.listdir(abspath)):
+            return pmg.read_structure('%s/CONTCAR' % abspath)
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""
@@ -136,16 +169,35 @@ class DefectFormationEnergy:
 
             return pa.get_potential_alignment(perfect_info, defect_info)
 
-    def print_table(self):
-        e_defects = self.calculate_defect_formation_energies()
+    def get_defect_formation_energies(self):
+        if not self.e_defects:
+            self._calculate_defect_formation_energies()
 
-        for conditions, defects in e_defects.items():
-            print '\n\nDefect formation energies for %s conditions.\n' % conditions.upper()
-            print '%-20s | %10s' % ('Defect', 'DFE')
-            print '---------------------------------'
+        return self.e_defects
+
+    @property
+    def defect_formation_energies(self):
+        return self.get_defect_formation_energies()
+
+    @property
+    def dfe(self):
+        return self.get_defect_formation_energies()
+
+    def print_table(self):
+        if not self.e_defects:
+            self._calculate_defect_formation_energies()
+
+        myfile = MASTFile()
+        for conditions, defects in self.e_defects.items():
+            myfile.data.append('\n\nDefect formation energies for %s conditions.\n' % conditions.upper())
+            myfile.data.append('%-20s | %10s\n' % ('Defect', 'DFE'))
+            myfile.data.append('---------------------------------\n')
             for defect, energies in defects.items():
                 for energy in energies:
-                    print '%-14s(q=%2i) | %8.4f' % (defect, energy[0], energy[1])
-                print str() # Add a blank line here
-            print '---------------------------------'
+                    myfile.data.append('%-14s(q=%2i) | %8.4f\n' % (defect, energy[0], energy[1]))
+                myfile.data.append(str()) # Add a blank line here
+            myfile.data.append('---------------------------------\n')
+        myfile.to_file(os.path.join(os.getcwd(),"dfe.txt"))
+        for line in myfile.data:
+            print line.strip()
 

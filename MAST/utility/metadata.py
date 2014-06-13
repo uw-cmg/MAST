@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Glen Jenness
+# Last updated: 2013-07-01
+##############################################################
 import os
 
 from MAST.utility import MASTObj
@@ -16,7 +22,7 @@ class Metadata(MASTObj):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
 
     def write_data(self, keyword, data):
-        """Writes a keyword and it's associated data to the metafile"""
+        """Writes a keyword and its associated data to the metafile"""
         with open(self.keywords['metafile'], 'a') as metafile:
             # First check to see if the keyword already exists in the metadata file
             if None in self.search_data(keyword):
