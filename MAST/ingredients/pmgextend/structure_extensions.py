@@ -138,7 +138,7 @@ class StructureExtensions(MASTObj):
             if not (scalingsize == None):
                 scale = scalingsize.split('[')[1].split(']')[0]
                 try:
-                    scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
+                    scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
                     mycoord = mycoord / np.array(scaleinput)
                 except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                     scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
@@ -256,7 +256,7 @@ class StructureExtensions(MASTObj):
         if not (scalingsize == None):
             scale = scalingsize.split('[')[1].split(']')[0]
             try:
-                scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
+                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
                 pcscoord = pcscoord / np.array(scaleinput)
             except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
@@ -373,8 +373,8 @@ class StructureExtensions(MASTObj):
         scale = self.keywords['scaling_size']
         scale = scale.strip()
         if len(scale.split(',')) == 3:
-            try: scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])]
-            except ValueError: 
+            try: scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+            except ValueError:  # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
         else:
             self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
@@ -403,7 +403,7 @@ class StructureExtensions(MASTObj):
         scale = scale.strip()
         if len(scale.split(',')) == 3:
             try: 
-                scaleinput = [int(scale.split(',')[0].split()[0]),int(scale.split(',')[1].split()[0]),int(scale.split(',')[2].split()[0])] # input scaling size like [2,1,2]
+                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
                 coorda = mycoords[0]/scaleinput[0]
                 coordb = mycoords[1]/scaleinput[1]
                 coordc = mycoords[2]/scaleinput[2]
