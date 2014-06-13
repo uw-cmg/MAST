@@ -3,7 +3,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Wei Xie
-# Last updated: 2014-05-14
+# Last updated: 2014-06-13 by Zhewen Song
 ##############################################################
 import sys
 import getopt 
