@@ -201,19 +201,20 @@ if __name__ == "__main__":
     defectDirs=[]
     mu=dict()
     for line in range(len(fp)):
-        if fp[line].strip('PlotTitle')[0].strip()=='': plotTitle=fp[line].split('PlotTitle')[1].strip()
-        if fp[line].strip('perfect')[0].strip()=='': perfectDir=fp[line].split()[1]  
-        if fp[line].strip('mu')[0].strip()=='': 
+        if fp[line].strip().split('PlotTitle')[0]=='': plotTitle=fp[line].split('PlotTitle')[1].strip()
+        if fp[line].strip().split('perfect')[0]=='': perfectDir=fp[line].split()[1]  
+        if fp[line].strip().split('mu')[0]=='': 
             labels=fp[line].split('mu')[1].split(',')
             for i in range(len(labels)):
                 mu[labels[i].split(':')[0].strip()]=float(labels[i].split(':')[1].strip())
-    '''
-    fp = open('personal_recipe.txt','r').readlines()
-    for line in range(len(fp)):
-        if 'madelung_utility' in fp[line]:
-            defectDirs.append(fp[line-1].split()[0])
-    '''
+    
+    #fp = open('personal_recipe.txt','r').readlines()
+    #for line in range(len(fp)):
+    #    if 'madelung_utility' in fp[line]:
+    #        defectDirs.append(fp[line-1].split()[0])
+   
     defectDirs = ru.read_recipe('personal_recipe.txt')[1]['madelung_utility']
+    
     saved = sys.stdout
     fout = file('madelung_utility/out.log', 'w')
     sys.stdout = writer(sys.stdout, fout)
