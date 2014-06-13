@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2014-06-13 by Zhewen Song
 ##############################################################
 from pymatgen.io.vaspio import *
 import numpy as np
