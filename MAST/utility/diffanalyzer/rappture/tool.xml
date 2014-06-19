@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<run>
+    <tool>
+        <title>Diffusion Analyzer</title>
+        <about>Diffusion Analyzer tool</about>
+        <command>@tool/../bin/mainc @driver</command>
+        <layout>wizard</layout>
+    </tool>
+    <input>
+        <note id="doc">
+            <contents>file://doc.html</contents>
+        </note>
+        <loader>
+            <about>
+                <label>Upload XDATCAR (VASP 5.3.2)</label>
+                <description>Upload XDATCAR file generated from VASP 5.3.2</description>
+            </about>
+            <default>https://materialshub.org/resources/34/download/Default_XDATCAR</default>
+            <upload>
+                <to>input.string(datFile)</to>
+                <prompt>Upload XDATCAR file</prompt>
+            </upload>
+        </loader>
+        <string id="datFile">
+            <about>
+                <label>XDATCAR file</label>
+                <enable>0</enable>
+            </about>
+        </string>
+        <number id="len">
+            <about>
+                <label>Supercell length (Ang)</label>
+                <description>Length of the cell size in number of lattice parameters * Lattice parameter of the simulated system in Angstrom</description>
+                <enable>1</enable>
+            </about>
+            <default>10.68786</default>
+        </number>
+        <integer id="buffLine">
+            <about>
+                <label>Number of header lines to remove</label>
+                <description>Number of lines before the first position line in the XDATCAR file</description>
+                <enable>1</enable>
+            </about>
+            <default>5</default>
+        </integer>
+        <integer id="nCut">
+            <about>
+                <label>Number of time steps to skip</label>
+                <description>Number of time steps at the beginning of the simulation removed from the linear fit</description>
+                <enable>1</enable>
+            </about>
+            <default>0</default>
+        </integer>
+        <integer id="numStep">
+            <about>
+                <label>Number of time steps to analyze</label>
+                <description>Number of time steps in the simulation</description>
+                <enable>1</enable>
+            </about>
+            <default>3000</default>
+        </integer>
+        <number id="delt">
+            <about>
+                <label>Time step size (fs)</label>
+                <description>Time step size in fs</description>
+                <enable>1</enable>
+            </about>
+            <default>2.0</default>
+        </number>
+    </input>
+    <output>
+        <string id="outTable">
+            <about>
+                <label>Output Table</label>
+                <description>Output table</description>
+            </about>
+        </string>
+    </output>
+</run>
