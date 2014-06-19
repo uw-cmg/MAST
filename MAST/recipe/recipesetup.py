@@ -82,7 +82,7 @@ class RecipeSetup(MASTObj):
 
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
-        mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
+        mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(';')
         defect_label=""
         neb_label=""
         charge=""
