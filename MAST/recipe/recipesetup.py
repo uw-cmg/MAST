@@ -256,7 +256,7 @@ class RecipeSetup(MASTObj):
             if scaling: labels.remove(scalingsize)
             phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
-        data=','.join(datalist)
+        data=';'.join(datalist)
         self.metafile.write_data(myingred, data)
 
     def create_ingredient(self, my_ingred_input_options):

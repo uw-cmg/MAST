@@ -29,7 +29,7 @@ class Metadata(MASTObj):
                 metafile.write('%s = %s\n' % (keyword, data))
             else:
                 entry = self.read_data(keyword)
-                entry += ', %s' % data
+                entry += '; %s' % data
                 self.clear_data(keyword)
                 metafile.write('%s = %s\n' % (keyword, entry))
 
