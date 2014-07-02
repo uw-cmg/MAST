@@ -114,7 +114,8 @@ class MAST(MASTObj):
     def create_recipe_plan(self):
         """Create the recipe plan object, and print its status.
         """
-        setup_obj = RecipeSetup(recipeFile=os.path.join(self.working_directory,'personal_recipe.txt'), 
+		personal_recipe_file_contents = self.input_options.get_item('personal_recipe', 'personal_recipe_file')
+        setup_obj = RecipeSetup(recipeFile=personal_recipe_file_contents, 
                 inputOptions=self.input_options,
                 structure=self.input_options.get_item('structure','structure'), 
                 workingDirectory=self.working_directory
@@ -181,14 +182,19 @@ class MAST(MASTObj):
     def parse_recipe_template(self):
         """Parses the recipe template file."""
 
-        recipe_file = self.input_options.get_item('recipe', 'recipe_file')
+        recipe_file_contents = self.input_options.get_item('recipe', 'recipe_file')
 
-        parser_obj = RecipeTemplateParser(templateFile=recipe_file, 
+        parser_obj = RecipeTemplateParser(templateFile=recipe_file_contents, 
             inputOptions=self.input_options,
-            personalRecipe=os.path.join(self.working_directory,'personal_recipe.txt'),
+            personalRecipe=os.path.join(self.working_directory,'input.inp'),
             working_directory=self.working_directory
             )
-        parser_obj.parse()
+        personal_recipe_list = parser_obj.parse()
+		#print personal_recipe_list
+		if not personal_recipe_list:
+			self.logger.info("Within mast/parse_recipe_template: Personal Recipe List is empty. Check whether input.inp has a personal_recipe section!")
+		else:
+			self.input_options.set_item('personal_recipe','personal_recipe_file',personal_recipe_list)
 
     def set_class_attributes(self):
         """Set class attributes, other than input options
@@ -220,7 +226,7 @@ class MAST(MASTObj):
     def set_working_directory(self):
         """Get the system name and working directory.
         """
-        recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
+        #recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         #dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
         dir_name = "%s_%s" % (self.sysname, self.timestamp)
         dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))

@@ -53,6 +53,9 @@ INGREDIENTS_KEYWORDS = ['singlepoint',
 RECIPE_KEYWORDS = {'recipe_file': None,
                   }
 
+PERS_RECP_KEYWORDS = {'personal_recipe_file': None,
+                      }
+
 class InputParser(MASTObj):
     """Class for parsing a *.inp format input file.
         Attributes:
@@ -73,7 +76,8 @@ class InputParser(MASTObj):
                 'recipe'   : self.parse_recipe_section,
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
-                'summary' : self.parse_summary_section
+                'summary' : self.parse_summary_section,
+				'personal_recipe' : self.parse_personal_recipe_section
                                }
         scratchpath = os.getenv("MAST_SCRATCH").strip('/')
         inputlocation = os.path.dirname(self.keywords['inputfile'])
@@ -128,7 +132,8 @@ class InputParser(MASTObj):
                         section_content, options)
                 self.logger.info('Finished parsing the %s section.' % section_name)
             else:
-                line = line.strip()
+				if (section_name != 'recipe') and (section_name != 'personal_recipe'): 
+                	line = line.strip()
                 if (line):
                     section_content.append(line)
         infile.close()
@@ -293,8 +298,8 @@ class InputParser(MASTObj):
         threshold = 1.e-4
 
         for line in section_content:
-            line = line.split(self.delimiter)
-
+            #line = line.split(self.delimiter)
+	    	line = line.split()
             if (line[0] == 'coord_type'):
                 coord_type = line[1]
             elif (line[0] == 'threshold'):
@@ -396,7 +401,7 @@ class InputParser(MASTObj):
         """Parses the recipe section and populates the options."""
         recipe_dict = RECIPE_KEYWORDS.copy()
 
-        for line in section_content:
+        """for line in section_content:
             line = line.split(self.delimiter)
             if (line[0] not in recipe_dict):
                 error = 'Section keyword %s not recognized' % line[0]
@@ -410,8 +415,46 @@ class InputParser(MASTObj):
                     MASTError(self.__class__.__name__, error) 
                 recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
             else:
-                recipe_dict[line[0]] = line[1]
+                recipe_dict[line[0]] = line[1] """
+
+		if not section_content:
+				error = 'Recipe section is not specified'
+                MASTError(self.__class__.__name__, error)
+                return	
+		else:
+				recipe_dict['recipe_file'] = section_content
+
         for key, value in recipe_dict.items():
+            options.set_item(section_name, key, value)
+
+    def parse_personal_recipe_section(self, section_name, section_content, options):
+        """Parses the recipe section and populates the options."""
+        personal_recipe_dict = PERS_RECP_KEYWORDS.copy()
+
+        """for line in section_content:
+            line = line.split(self.delimiter)
+            if (line[0] not in recipe_dict):
+                error = 'Section keyword %s not recognized' % line[0]
+                MASTError(self.__class__.__name__, error)
+                return
+            elif (line[0] == 'recipe_file'):
+                try:
+                    recipe_path = os.getenv('MAST_RECIPE_PATH')
+                except KeyError:
+                    error = 'MAST_RECIPE_PATH environment variable not set'
+                    MASTError(self.__class__.__name__, error)
+                recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
+            else:
+                recipe_dict[line[0]] = line[1] """
+
+        if not section_content:
+                error = 'Personal Recipe section is not specified or is empty'
+                MASTError(self.__class__.__name__, error)
+                return
+        else:
+                personal_recipe_dict['personal_recipe_file'] = section_content
+
+        for key, value in personal_recipe_dict.items():
             options.set_item(section_name, key, value)
 
     def parse_ingredients_section(self, section_name, section_content, options):

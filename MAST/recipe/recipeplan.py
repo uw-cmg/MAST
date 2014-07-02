@@ -51,8 +51,8 @@ class RecipePlan:
             self.recipe_logger <logging logger>: Recipe-level logger
             self.summary_options <InputOptions>: summary input options
     """
-    def __init__(self, name, working_directory):
-        self.name            = name
+    def __init__(self, working_directory):
+        #self.name            = name
         self.ingredients     = dict()  #name: status
         self.update_methods   = dict()
         self.parents_to_check= dict()
@@ -359,10 +359,10 @@ class RecipePlan:
 
 
         if verbose == 1:
-            namestring = "Recipe name: %s" % self.name
-            self.recipe_logger.info(namestring)
+            #namestring = "Recipe name: %s" % self.name
+            #self.recipe_logger.info(namestring)
             self.recipe_logger.info(time.asctime())
-            self.logger.info(namestring)
+            #self.logger.info(namestring)
             self.logger.info(time.asctime())
         for iname in ilist:
             if verbose == 1:
@@ -503,7 +503,7 @@ class RecipePlan:
     def __repr__(self):
         """Print information."""
         rlines=""
-        rlines=rlines + "Recipe name: %s\n" % self.name
+        #rlines=rlines + "Recipe name: %s\n" % self.name
         rlines=rlines + "Ingredients: \n"
         ikeys = self.ingredients.keys()
         ikeys.sort()

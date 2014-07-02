@@ -11,6 +11,7 @@ import logging
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import loggerutils
+from MAST.utility import InputOptions
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
 from MAST.utility import MASTFile
@@ -69,7 +70,12 @@ class MASTmon(object):
         os.chdir(fulldir) #need to change directories in order to submit jobs?
         myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
         myinputoptions = myipparser.parse()
-        rsetup = RecipeSetup(recipeFile=os.path.join(fulldir,'personal_recipe.txt'),
+		input_options_keys = myinputoptions.get_sections()
+		key = 'personal_recipe'
+        if key in input_options_keys:
+            self.logger.info("Key - personal recipe was found")
+		personal_recipe_contents = myinputoptions.get_item('personal_recipe', 'personal_recipe_file')
+        rsetup = RecipeSetup(recipeFile=personal_recipe_contents,
                 inputOptions=myinputoptions,
                 structure=myinputoptions.get_item('structure','structure'),
                 workingDirectory=fulldir)
