@@ -70,8 +70,8 @@ class MASTmon(object):
         os.chdir(fulldir) #need to change directories in order to submit jobs?
         myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
         myinputoptions = myipparser.parse()
-		input_options_keys = myinputoptions.get_sections()
-		key = 'personal_recipe'
+	input_options_keys = myinputoptions.get_sections()
+	key = 'personal_recipe'
         if key in input_options_keys:
             self.logger.info("Key - personal recipe was found")
 		personal_recipe_contents = myinputoptions.get_item('personal_recipe', 'personal_recipe_file')
