@@ -52,7 +52,7 @@ class RecipeTemplateParser(MASTObj):
 
         if not os.path.exists(self.template_file):
             raise MASTError(self.__class__.__name__, "Template file not found!")
-	"""
+        """
 
         if self.input_options is None:
             raise MASTError(self.__class__.__name__, "Input Options not provided!")
@@ -62,8 +62,8 @@ class RecipeTemplateParser(MASTObj):
         
         #fetch required paramaters
         #f_ptr           = open(self.template_file, "r")
-	recipe_contents = list(self.template_file)
-	#print recipe_contents
+        recipe_contents = list(self.template_file)
+        #print recipe_contents
         o_ptr           = open(self.personal_recipe, "a")
         system_name     = self.input_options.get_item("mast", "system_name", "sys")
         n_defects       = self.input_options.get_item("defects", "num_defects", 0)
@@ -91,18 +91,18 @@ class RecipeTemplateParser(MASTObj):
         #for chunk in self.chunks:
         #    print chunk
 	
-	input_options_keys = self.input_options.get_sections()
-	key = 'personal_recipe'	
+        input_options_keys = self.input_options.get_sections()
+        key = 'personal_recipe'	
         expandedlist=list()
-	if key in input_options_keys:
+        if key in input_options_keys:
             return expandedlist
-    	else:
-	    for chunk in self.chunks:
-	       	expanded=self.parse_chunk(chunk)
-	       	expandedlist.extend(expanded)
-	    o_ptr.write("$personal_recipe\n")
+        else:
+            for chunk in self.chunks:
+                expanded=self.parse_chunk(chunk)
+                expandedlist.extend(expanded)
+            o_ptr.write("$personal_recipe\n")
        	    o_ptr.writelines(expandedlist)
-	    o_ptr.write("$end\n")
+            o_ptr.write("$end\n")
             #f_ptr.close()
             o_ptr.close()
             return expandedlist

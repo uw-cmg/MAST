@@ -77,7 +77,7 @@ class InputParser(MASTObj):
                 'neb'      : self.parse_neb_section,
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                 'summary' : self.parse_summary_section,
-		'personal_recipe' : self.parse_personal_recipe_section
+                'personal_recipe' : self.parse_personal_recipe_section
                                }
         scratchpath = os.getenv("MAST_SCRATCH").strip('/')
         inputlocation = os.path.dirname(self.keywords['inputfile'])
@@ -132,8 +132,8 @@ class InputParser(MASTObj):
                         section_content, options)
                 self.logger.info('Finished parsing the %s section.' % section_name)
             else:
-		if (section_name != 'recipe') and (section_name != 'personal_recipe'): 
-                	line = line.strip()
+                if (section_name != 'recipe') and (section_name != 'personal_recipe'): 
+                        line = line.strip()
                 if (line):
                     section_content.append(line)
         infile.close()
@@ -417,12 +417,12 @@ class InputParser(MASTObj):
             else:
                 recipe_dict[line[0]] = line[1] """
 
-	if not section_content:
-		error = 'Recipe section is not specified'
+        if not section_content:
+                error = 'Recipe section is not specified'
                 MASTError(self.__class__.__name__, error)
                 return	
-	else:
-		recipe_dict['recipe_file'] = section_content
+        else:
+                recipe_dict['recipe_file'] = section_content
 
         for key, value in recipe_dict.items():
             options.set_item(section_name, key, value)
