@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<run>
+    <tool>
+  <id>diffcalc</id>
+  <name>Effective Grain Boundary Diffusivity Calculator</name>
+  <version>
+    <identifier>1.1</identifier>
+    <application>
+      <revision>5</revision>
+      <modified>2014-01-14 18:39:57 -0500 (Tue, 14 Jan 2014)</modified>
+      <installed>2014-01-14 18:40:50 EST</installed>
+      <directory id="top">/apps/diffcalc/r5</directory>
+      <directory id="tool">/apps/diffcalc/r5/rappture</directory>
+    </application>
+  </version>
+        <title>Effective Grain Boundary Diffusivity Calculator</title>
+        <about>In this simulation, we assume that two grain boundaries with different diffusivities are randomly distributed in a 3D Voronoi grain boundary network. The tool calculates the effective diffusivity across the system.
+The simulation time with the default parameter values is approximately 2 minutes. This can be reduced by decreasing the value of "Number of samples" parameter at the cost of reduced accuracy. For number of samples = 1000, the error is around 5%.</about>
+        <command>@tool/../bin/mainc @driver</command>
+        <layout>wizard</layout>
+    </tool>
+    <input>
+        <note id="doc">
+            <contents>file://doc.html</contents>
+        </note>
+        <number id="temp">
+            <about>
+                <label>Temperature (K)</label>
+                <description>Temperature (in Kelvin).</description>
+                <enable>1</enable>
+            </about>
+            <default>1373.0</default>
+        </number>
+        <number id="actengl">
+            <about>
+                <label>Energy barrier of slow grain boundary diffusivity (eV)</label>
+                <description>Energy barrier in the diffusivity of the grain boundary with low diffusivity (in eV).</description>
+                <enable>1</enable>
+            </about>
+            <default>3.95</default>
+        </number>
+        <number id="actengh">
+            <about>
+                <label>Energy barrier of fast grain boundary diffusivity (eV)</label>
+                <description>Energy barrier in the diffusivity of the grain boundary with high diffusivity (in eV).</description>
+                <enable>1</enable>
+            </about>
+            <default>3.95</default>
+        </number>
+        <number id="deff0l">
+            <about>
+                <label>Pre-factor of slow grain boundary diffusivity (m^2/s)</label>
+                <description>Pre-factor in the diffusivity of the grain boundary with low diffusivity (in m^2/s).</description>
+                <enable>1</enable>
+            </about>
+            <default>1.6E-7</default>
+        </number>
+        <number id="deff0h">
+            <about>
+                <label>Pre-factor of fast grain boundary diffusivity (m^2/s)</label>
+                <description>Pre-factor in the diffusivity of the grain boundary with high diffusivity (in m^2/s).</description>
+                <enable>1</enable>
+            </about>
+            <default>1.6E-5</default>
+        </number>
+        <number id="fraction">
+            <about>
+                <label>Fraction of grain boundaries with fast diffusivity</label>
+                <description>Fraction of grain boundaries with fast diffusivity.</description>
+                <enable>1</enable>
+            </about>
+            <default>0.5</default>
+        </number>
+        <integer id="nloop">
+            <about>
+                <label>Number of samples</label>
+                <description>Number of samples over which the effective diffusivity takes the average.</description>
+                <enable>1</enable>
+            </about>
+            <default>1000</default>
+            <min>0</min>
+            <max>10000</max>
+        </integer>
+    </input>
+    <output>
+        <curve id="plot">
+            <about>
+                <label>Effective diffusivity</label>
+                <description>Distribution of the effective diffusivity.</description>
+            </about>
+            <xaxis>
+                <label>Effective diffusivity (m^2/s)</label>
+                <description>Effective diffusivity (in m^2/s).</description>
+            </xaxis>
+            <yaxis>
+                <label>Probability</label>
+                <description>Probability</description>
+            </yaxis>
+        </curve>
+        <string id="table">
+            <about>
+                <label>Table</label>
+                <description>Output table</description>
+            </about>
+        </string>
+    </output>
+</run>

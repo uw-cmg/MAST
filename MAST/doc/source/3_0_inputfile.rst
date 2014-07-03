@@ -343,7 +343,7 @@ mast_write_method keyword values
 **write_singlerun**
 
 *  Write files for a single generic run.
-*  Programs supported: vasp, phon (phon assumes vasp-type output given by one of the .give_phonon. update children methods)
+*  Programs supported: vasp 
 
 **write_singlerun_automesh**
 
@@ -444,7 +444,7 @@ mast_complete_method keyword values
 **complete_singlerun**
 
 *  Check if run is complete
-*  Programs supported: vasp, phon (only entropy calculation)
+*  Programs supported: vasp 
 *  Note that for VASP, the phrase ``reached required accuracy`` is checked for, as well as a ``User time`` in seconds. The exceptions are:
 
     *  NSW of 0, NSW of -1, or NSW not specified in the ingredients section keywords is taken as a static calculation, and .EDIFF is reached. is checked instead of .reached required accuracy.
@@ -486,16 +486,6 @@ mast_update_children_method keyword values
 
 *  Give NEB output images structures as the starting point image input structures in another NEB
 *  Programs supported: vasp (01/.../0(N-1) CONTCAR files will be the child NEB ingredient.s starting 01/.../0(N-1) POSCAR files.
-
-**give_phonon_single_forces_and_displacements(self, childname)**
-
-*  Forward force and displacement information
-*  Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
-
-**give_phonon_multiple_forces_and_displacements**
-
-*  Combine individual phonon forces and displacements and forward this information
-*  Programs supported: vasp, for vasp-to-phon transition (DYNMAT, XDATCAR)
 
 **give_saddle_structure**
 

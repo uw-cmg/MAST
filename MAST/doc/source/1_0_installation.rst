@@ -254,6 +254,12 @@ Obtain the latest source code from `<https://wiki.fysik.dtu.dk/ase/>`_
 
 Unzip the tar.gz file to your home directory
 
+Create the softlink as shown (use the version number you downloaded)::
+
+    ln -s python-ase-3.8.0.3420 ase
+
+DO NOT link to the ase folder within the unzipped tar.gz; only link to the top folder as shown above.
+
 In your user profile, add the following line::
 
     export PYTHONPATH=$PYTHONPATH:~/ase
@@ -283,7 +289,7 @@ You may copy and paste the environment variables from the terminal into your use
     export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
     export MAST_SCRATCH=//home/username/MAST/SCRATCH
     export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-    export MAST_CONTROL=//home/username/MAST/CONTRO"
+    export MAST_CONTROL=//home/username/MAST/CONTROL"
     export MAST_PLATFORM=platform_name
 
 You will need to manually choose platform_name as one of the following::

@@ -82,7 +82,7 @@ class RecipeSetup(MASTObj):
 
         ingredient_name = os.path.join(self.work_dir, name)
         pkey_d = self.input_options.get_item('ingredients', ingredient_type).copy()
-        mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(',')
+        mydata = self.metafile.read_data(os.path.basename(ingredient_name)).split(';')
         defect_label=""
         neb_label=""
         charge=""
@@ -256,7 +256,7 @@ class RecipeSetup(MASTObj):
             if scaling: labels.remove(scalingsize)
             phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
-        data=','.join(datalist)
+        data=';'.join(datalist)
         self.metafile.write_data(myingred, data)
 
     def create_ingredient(self, my_ingred_input_options):
