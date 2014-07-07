@@ -60,7 +60,7 @@ class MAST(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        self.logger = loggerutils.initialize_short_logger(os.path.join(os.getenv("MAST_CONTROL"),"mast.log"))
+        self.logger = loggerutils.initialize_short_logger(os.path.join(get_mast_control_path(),"mast.log"))
 
 
     def check_independent_loops(self):
@@ -223,7 +223,7 @@ class MAST(MASTObj):
         recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         #dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
         dir_name = "%s_%s" % (self.sysname, self.timestamp)
-        dir_path = str(os.path.join(os.getenv("MAST_SCRATCH"), dir_name))
+        dir_path = str(os.path.join(get_mast_scratch_path()), dir_name))
         self.working_directory = dir_path
         return
 
