@@ -80,7 +80,7 @@ class PhonChecker(BaseChecker):
     def _phon_inphon_get_non_mast_keywords(self):
         """Sort out the non-PHON keywords and make a dictionary."""
         inphon_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
+        allowedpath = os.path.join(dirutil.get_mast_install_path(),
                         'ingredients','programkeys','phon_allowed_keywords.py')
         allowed_list = self._phon_inphon_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():

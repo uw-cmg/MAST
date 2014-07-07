@@ -339,7 +339,8 @@ class VaspChecker(BaseChecker):
     def _vasp_incar_get_non_mast_keywords(self):
         """Get the non-VASP keywords and make a dictionary."""
         incar_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_control_path(),
+        allowedpath = os.path.join(dirutil.get_mast_install_path(),
+                        'ingredients',
                         'programkeys','vasp_allowed_keywords.py')
         allowed_list = self._vasp_incar_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():

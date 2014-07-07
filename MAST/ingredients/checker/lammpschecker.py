@@ -263,7 +263,7 @@ class LammpsChecker(BaseChecker):
     def _lammps_input_get_non_mast_keywords(self):
         """Get the non-LAMMPS keywords and make a dictionary."""
         input_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_install_path(), 'MAST',
+        allowedpath = os.path.join(dirutil.get_mast_install_path(),
                         'ingredients','programkeys','lammps_allowed_keywords.py')
         allowed_list = self._lammps_input_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
