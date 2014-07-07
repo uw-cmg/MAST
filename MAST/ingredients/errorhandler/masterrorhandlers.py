@@ -54,6 +54,8 @@ class MASTWalltimeErrorHandler(ErrorHandler):
         for errline in errfile.data:
             if 'walltime' in errline.lower():
                 return True
+            elif 'time limit' in errline.lower():
+                return True
     
     def correct(self): 
         actions=list()
