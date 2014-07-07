@@ -10,6 +10,7 @@ from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import MASTError
 from MAST.utility import Metadata
+from MAST.utility import dirutil
 
 ALLOWED_KEYS = {\
                  'templateFile'    : (str, None, 'template file name'),\
@@ -47,7 +48,7 @@ class RecipeTemplateParser(MASTObj):
         if self.template_file is None:
             raise MASTError(self.__class__.__name__, "Template file not provided!")
         
-        self.template_file = os.path.join(os.getenv("MAST_RECIPE_PATH"),self.template_file)
+        self.template_file = os.path.join(dirutil.get_mast_recipe_path(),self.template_file)
 
 
         if not os.path.exists(self.template_file):

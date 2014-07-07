@@ -75,7 +75,7 @@ class InputParser(MASTObj):
                 'chemical_potentials' : self.parse_chemical_potentials_section,
                 'summary' : self.parse_summary_section
                                }
-        scratchpath = os.getenv("MAST_SCRATCH").strip('/')
+        scratchpath = dirutil.get_mast_scratch_path()
         inputlocation = os.path.dirname(self.keywords['inputfile'])
         if (inputlocation == ""):
             self.logger = logging.getLogger('mast')
@@ -404,7 +404,7 @@ class InputParser(MASTObj):
                 return
             elif (line[0] == 'recipe_file'):
                 try:
-                    recipe_path = os.getenv('MAST_RECIPE_PATH')
+                    recipe_path = dirutil.get_mast_recipe_path()
                 except KeyError:
                     error = 'MAST_RECIPE_PATH environment variable not set'
                     MASTError(self.__class__.__name__, error) 

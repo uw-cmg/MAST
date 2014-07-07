@@ -149,6 +149,11 @@ def get_mast_control_path():
     if getpath == None:
         raise MASTError("utility dirutil","No path set in environment variable MAST_CONTROL")
     return getpath
+def get_mast_recipe_path():
+    getpath = os.getenv('MAST_RECIPE_PATH')
+    if getpath == None:
+        raise MASTError("utility dirutil","No path set in environment variable MAST_RECIPE_PATH")
+    return getpath
 def directory_is_locked(dirname):
     if os.path.isfile(dirname + "/mast.write_files.lock"):
         return True
