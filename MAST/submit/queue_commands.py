@@ -93,7 +93,7 @@ def submit_from_submission_list():
         write_to_jobids_file(subentry, status)
         submitted[subentry]=status
     print_submitted_dict(submitted)
-    os.chdir(control)
+    os.chdir(mast_control)
 
 def write_to_jobids_file(subentry, status):
     """Write the job id to a jobids file in the ingredient directory.
