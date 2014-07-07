@@ -7,6 +7,8 @@
 import logging
 import os
 import time
+from MAST.utility import dirutil
+
 def validate_recipe_name(rname):
     """Validate the recipe name.
         Use $MAST_CONTROL if recipe name is not found in $MAST_SCRATCH.
@@ -16,9 +18,9 @@ def validate_recipe_name(rname):
             rnamevalid <str>: Validated recipe name
     """
     #check existence of rname:
-    mast_scratch = os.getenv("MAST_SCRATCH")
+    mast_scratch = dirutil.get_mast_scratch_path()
     rdirs = os.listdir(mast_scratch)
-    rnamevalid = os.getenv("MAST_CONTROL")
+    rnamevalid = dirutil.get_mast_control_path()
     for rdir in rdirs:
         if rdir in rname:
             rnamevalid = os.path.join(mast_scratch, rdir)
@@ -33,7 +35,7 @@ def config_for_recipe_and_control(rname):
     shortformatter = logging.Formatter(formatstrshort)
     recipehandler = logging.FileHandler(filename="%s/mast_recipe.log" % rnamevalid)
     recipehandler.setFormatter(longformatter)
-    controlhandler = logging.FileHandler(filename="%s/mast.log" % os.getenv("MAST_CONTROL"))
+    controlhandler = logging.FileHandler(filename="%s/mast.log" % dirutil.get_mast_control_path())
     controlhandler.setFormatter(shortformatter)
     logger=logging.getLogger('')
     if not getattr(logger, 'has_recipe_handler', None):
@@ -77,7 +79,7 @@ def add_handler_for_control(logger):
     #formatstr ='%(levelname)8s : %(name)10s: %(message)s'
     formatstr ='%(levelname)8s : %(message)s'
     formatter = logging.Formatter(formatstr)
-    controlhandler = logging.FileHandler(filename="%s/mast.log" % os.getenv("MAST_CONTROL"))
+    controlhandler = logging.FileHandler(filename="%s/mast.log" % dirutil.get_mast_control_path())
     controlhandler.setFormatter(formatter)
     controlfilter = ControlFilter()
     controlhandler.addFilter(controlfilter)
