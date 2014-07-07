@@ -49,7 +49,8 @@ class StructoptChecker(BaseChecker):
     def _structopt_get_non_mast_keywords(self):
         """Get the StructOpt keywords and make a dictionary."""
         input_dict=dict()
-        allowedpath = os.path.join(dirutil.get_mast_control_path(),
+        allowedpath = os.path.join(dirutil.get_mast_install_path(),
+                        'ingredients',
                         'programkeys','structopt_allowed_keywords.py')
         allowed_list = self._structopt_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
@@ -391,8 +392,7 @@ class StructoptChecker(BaseChecker):
             print "Clearing submission list."
             queue_commands.clear_submission_list()
 #             mycwd=os.getcwd()
-#             mast_control = os.getenv("MAST_CONTROL")
-#             os.chdir(mast_control)
+#             os.chdir(dirutil.get_mast_control_path())
 #             mycommand=queue_commands.queue_submission_command("mastmon_submit.sh") #run the mastmon_submit.sh script in $MAST_CONTROL which creates a mastmon in order to do status checking on a compute node
 #             mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #             mysub.wait()
@@ -534,8 +534,7 @@ class StructoptChecker(BaseChecker):
             if not Optinit.pot_file:
                 Optinit.pot_file = os.path.basename(self.structopt_parameters['potential_file'])
         Optinit.write(inputfile,restart=False)
-        mast_control = os.getenv("MAST_CONTROL")
-        runmastpath = os.path.join(mast_control,"runmast.py")
+        runmastpath = os.path.join(dirutil.get_mast_control_path(),"runmast.py")
         #mycommand=queue_commands.queue_submission_command("mastmon_submit.sh") 
         #"./"+os.path.join(mast_control,"mastmon_submit.sh")
         self.keywords['program_keys']['mast_exec'] = "python {0} >> $MAST_CONTROL/mastoutput 2> $MAST_CONTROL/errormast".format(runmastpath)
