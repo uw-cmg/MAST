@@ -130,11 +130,8 @@ def walkfiles(existdir, mindepth=1, maxdepth=5, matchme=""):
         return paredfilelist
 
 def get_mast_install_path():
-    raise NotImplementedError("MAST_INSTALL_PATH environment variable is no longer being used.")
-    getpath = os.getenv('MAST_INSTALL_PATH')
-    if getpath == None:
-        raise MASTError("utility dirutil","No path set in environment variable MAST_INSTALL_PATH")
-    return getpath
+    import MAST
+    return os.path.dirname(MAST.__file__)
 def get_mast_scratch_path():
     getpath = os.getenv('MAST_SCRATCH')
     if getpath == None:

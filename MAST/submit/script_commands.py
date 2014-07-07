@@ -15,8 +15,9 @@ import importlib
 
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
-
-mast_control = os.getenv("MAST_CONTROL")
+from MAST.utility import dirutil
+mast_control = dirutil.get_mast_control_path()
+mast_install = dirutil.get_mast_install_path() 
 platform_file = MASTFile("%s/set_platform" % mast_control)
 mast_platform = platform_file.data[0].strip()
 
@@ -82,7 +83,7 @@ def write_submit_script(keywords):
     newkey['mast_processors'] = mast_processors
     newkey['mast_name'] = name
     
-    my_template = MASTFile("%s/platforms/%s/submit_template.sh" % (mast_control, mast_platform))
+    my_template = MASTFile("%s/platforms/%s/submit_template.sh" % (mast_install, mast_platform))
     newdata = list()
     for myline in my_template.data:
         for mykey in newkey.keys():
