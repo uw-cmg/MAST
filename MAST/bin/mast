@@ -206,7 +206,7 @@ def check_env_variables():
         myfile.data.append(mast_platform)
         myfile.to_file("%s/set_platform" % mast_control)
     if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
-        shutil.copy("%s/platforms/%s/mastmon_submit.sh" % (mast_control, mast_platform), mast_control)
+        shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (dirutil.get_mast_install_path(), mast_platform), mast_control)
     return
 
 if __name__ == '__main__':
