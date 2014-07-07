@@ -21,7 +21,7 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import loggerutils
 
-mast_control = os.getenv("MAST_CONTROL")
+mast_control = dirutil.get_mast_control_path()
 platform_file = MASTFile("%s/set_platform" % mast_control)
 mast_platform = platform_file.data[0].strip()
 
@@ -45,8 +45,7 @@ def write_to_submit_list(mydir):
                         calculation to be submitted to the
                         queue
     """
-    control=dirutil.get_mast_control_path()
-    submitlist=os.path.join(control, "submitlist")
+    submitlist=os.path.join(mast_control, "submitlist")
     if os.path.isfile(submitlist):
         submitfile=MASTFile(submitlist)
     else:
@@ -61,8 +60,7 @@ def submit_from_submission_list():
         Adds a job number to the top of the "jobids" file in each
         ingredient directory.
     """
-    control=dirutil.get_mast_control_path()
-    submitlist=os.path.join(control, "submitlist")
+    submitlist=os.path.join(mast_control, "submitlist")
     if not os.path.isfile(submitlist):
         print "No submission list at %s" % submitlist
         return
@@ -122,7 +120,7 @@ def get_job_status_from_queue_snapshot(ingpath, jobid):
         Returns:
             Queue status for the job, according to $MAST_CONTROL/queue_snapshot
     """
-    myqs = MASTFile("%s/queue_snapshot" % os.getenv("MAST_CONTROL"))
+    myqs = MASTFile("%s/queue_snapshot" % mast_control)
     jobstatus = ""
     for qsline in myqs.data:
         if str(jobid) in qsline:
@@ -151,8 +149,7 @@ def clear_submission_list():
     """Clear all entries from the submission list at
         $MAST_CONTROL/submitlist
     """
-    control=dirutil.get_mast_control_path()
-    submitlist=os.path.join(control, "submitlist")
+    submitlist=os.path.join(mast_control, "submitlist")
     if not os.path.isfile(submitlist):
         print "No submission list at %s" % submitlist
         return
@@ -168,9 +165,8 @@ def print_submitted_dict(submitted):
             submitted <dict>: Dictionary of submitted runs,
                 with key as the directory name.
     """
-    control=dirutil.get_mast_control_path()
-    subprint=os.path.join(control, "submitted")
-    subrecent=os.path.join(control, "just_submitted")
+    subprint=os.path.join(mast_control, "submitted")
+    subrecent=os.path.join(mast_control, "just_submitted")
     if os.path.isfile(subprint):
         subprintfile=MASTFile(subprint)
     else:
