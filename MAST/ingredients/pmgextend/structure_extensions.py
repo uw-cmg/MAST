@@ -26,7 +26,7 @@ class StructureExtensions(MASTObj):
             'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
             'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe'),
             'scaling_size':(str,None,'Scaling size'),
-            'name': (str, os.getenv("MAST_CONTROL"), 'Name of ingredient')
+            'name': (str, get_mast_control_path(), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
         self.logger = logging.getLogger(self.keywords['name'])
