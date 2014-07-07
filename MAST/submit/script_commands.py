@@ -83,7 +83,7 @@ def write_submit_script(keywords):
     newkey['mast_processors'] = mast_processors
     newkey['mast_name'] = name
     
-    my_template = MASTFile("%s/platforms/%s/submit_template.sh" % (mast_install, mast_platform))
+    my_template = MASTFile("%s/submit/platforms/%s/submit_template.sh" % (mast_install, mast_platform))
     newdata = list()
     for myline in my_template.data:
         for mykey in newkey.keys():
