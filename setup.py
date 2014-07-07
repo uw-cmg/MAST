@@ -45,7 +45,25 @@ def output_env_variable_info():
     print ""
     print ""
     return
-    
+
+PKG = "MAST"
+VERSIONFILE = os.path.join(PKG, "_version.py")
+verstr = "unknown"
+try:
+    verstrline = open(VERSIONFILE, "rt").read()
+except EnvironmentError:
+    pass # Okay, there is no version file.
+else:
+    VSRE = r"^verstr = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        verstr = mo.group(1)
+    else:
+        print "unable to find version in %s" % (VERSIONFILE,)
+        raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
+
+
+
 class build_py(_build_py):
     """Specialized Python source builder."""
     print "Starting setup for the MAterials Simulation Toolkit."
@@ -54,7 +72,7 @@ class build_py(_build_py):
 setup(
         name="MAST",
         packages=find_packages(),
-        version="1.1.4",
+        version=verstr,
         #setup_requires=["numpy>=1.6.1"],
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.8.8", "custodian>=0.5.1"],
         scripts=["MAST/bin/mast",

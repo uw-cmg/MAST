@@ -308,3 +308,10 @@ def get_test_dir(testname):
         testdir = os.path.join(testdir, "test")
     testdir = os.path.join(testdir, testname)
     return testdir
+
+def get_version():
+    """Get MAST version from MAST/_version.py file"""
+    vfile = open(os.path.join(get_mast_install_path(),"_version.py"),"rb")
+    vline = vfile.readline()
+    vnum = vline.split("=")[1].strip().strip('"')
+    return vnum
