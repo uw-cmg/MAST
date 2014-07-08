@@ -403,22 +403,6 @@ class InputParser(MASTObj):
         """Parses the recipe section and populates the options."""
         recipe_dict = RECIPE_KEYWORDS.copy()
 
-        """for line in section_content:
-            line = line.split(self.delimiter)
-            if (line[0] not in recipe_dict):
-                error = 'Section keyword %s not recognized' % line[0]
-                MASTError(self.__class__.__name__, error)
-                return
-            elif (line[0] == 'recipe_file'):
-                try:
-                    recipe_path = dirutil.get_mast_recipe_path()
-                except KeyError:
-                    error = 'MAST_RECIPE_PATH environment variable not set'
-                    MASTError(self.__class__.__name__, error) 
-                recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
-            else:
-                recipe_dict[line[0]] = line[1] """
-
         if not section_content:
                 error = 'Recipe section is not specified'
                 MASTError(self.__class__.__name__, error)
@@ -432,22 +416,6 @@ class InputParser(MASTObj):
     def parse_personal_recipe_section(self, section_name, section_content, options):
         """Parses the recipe section and populates the options."""
         personal_recipe_dict = PERS_RECP_KEYWORDS.copy()
-
-        """for line in section_content:
-            line = line.split(self.delimiter)
-            if (line[0] not in recipe_dict):
-                error = 'Section keyword %s not recognized' % line[0]
-                MASTError(self.__class__.__name__, error)
-                return
-            elif (line[0] == 'recipe_file'):
-                try:
-                    recipe_path = os.getenv('MAST_RECIPE_PATH')
-                except KeyError:
-                    error = 'MAST_RECIPE_PATH environment variable not set'
-                    MASTError(self.__class__.__name__, error)
-                recipe_dict['recipe_file'] = '%s/%s' % (recipe_path, line[1])
-            else:
-                recipe_dict[line[0]] = line[1] """
 
         if not section_content:
                 error = 'Personal Recipe section is not specified or is empty'
