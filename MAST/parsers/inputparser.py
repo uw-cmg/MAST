@@ -404,11 +404,11 @@ class InputParser(MASTObj):
         recipe_dict = RECIPE_KEYWORDS.copy()
 
         if not section_content:
-                error = 'Recipe section is not specified'
-                MASTError(self.__class__.__name__, error)
-                return	
+            error = 'Recipe section is not specified'
+            MASTError(self.__class__.__name__, error)
+            return	
         else:
-                recipe_dict['recipe_file'] = section_content
+            recipe_dict['recipe_file'] = section_content
 
         for key, value in recipe_dict.items():
             options.set_item(section_name, key, value)
@@ -418,11 +418,11 @@ class InputParser(MASTObj):
         personal_recipe_dict = PERS_RECP_KEYWORDS.copy()
 
         if not section_content:
-                error = 'Personal Recipe section is not specified or is empty'
-                MASTError(self.__class__.__name__, error)
-                return
+            error = 'Personal Recipe section is not specified or is empty'
+            MASTError(self.__class__.__name__, error)
+            return
         else:
-                personal_recipe_dict['personal_recipe_file'] = section_content
+            personal_recipe_dict['personal_recipe_file'] = section_content
 
         for key, value in personal_recipe_dict.items():
             options.set_item(section_name, key, value)
