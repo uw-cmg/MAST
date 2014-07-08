@@ -29,10 +29,6 @@ end
 
 $end
 
-$recipe
-recipe_file u_ramping.txt
-$end
-
 $ingredients
 begin global
 mast_nodes 1
@@ -104,4 +100,12 @@ $end
 $summary
 without_u energy cutoff
 with_u energy uvalue
+$end
+
+$recipe
+#whether to start with U or not depends on experience and system
+dft_without_u (dft_without_u_type)
+    dft_with_u1 (dft_with_u1_type)
+        dft_with_u2 (dft_with_u2_type)
+            dft_with_u3 (dft_with_u3_type)
 $end
