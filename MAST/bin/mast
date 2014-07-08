@@ -96,8 +96,8 @@ def process_input_file(myinputfile):
     if myerrors == -1:
         return
     move_log()
-    from MAST.controllers.mast import MAST
-    mast = MAST(inputfile=myinputfile, outputfile="mastoutput.txt")
+    from MAST.controllers.mastinput import MASTInput
+    mast = MASTInput(inputfile=myinputfile, outputfile="mastoutput.txt")
     mast.check_independent_loops()
     print "Finished processing input file. Check $MAST_CONTROL/mast.log for logged information."
 
