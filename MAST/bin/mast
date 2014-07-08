@@ -195,7 +195,7 @@ def check_env_variables():
         if MAST_PLATFORM is set but the files do not exist.
     """
     env_varlist=["MAST_CONTROL","MAST_SCRATCH","MAST_ARCHIVE",
-                    "MAST_RECIPE_PATH","MAST_PLATFORM"]
+                    "MAST_PLATFORM"]
     for env_var in env_varlist:
         if os.getenv(env_var) == None:
             raise MASTError("bin/mast", "Environment variable %s must be set." % env_var)
