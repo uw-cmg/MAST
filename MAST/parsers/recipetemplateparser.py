@@ -13,7 +13,7 @@ from MAST.utility import Metadata
 from MAST.utility import dirutil
 
 ALLOWED_KEYS = {\
-                 'templateFile'    : (str, None, 'template file name'),\
+                 'templateFile'    : (list, None, 'template file name'),\
                  'inputOptions'    : (InputOptions, None, 'input options parsed using input parser'),\
                  'personalRecipe'  : (str, None, 'personalized recipe file'),\
                  'working_directory' : (str, None, 'Working directory'),
@@ -45,14 +45,8 @@ class RecipeTemplateParser(MASTObj):
         """ Parses the template recipe file and creates
             the personalized recipe file
         """
-        if self.template_file is None:
-            raise MASTError(self.__class__.__name__, "Template file not provided!")
-        
-        self.template_file = os.path.join(dirutil.get_mast_recipe_path(),self.template_file)
-
-
-        if not os.path.exists(self.template_file):
-            raise MASTError(self.__class__.__name__, "Template file not found!")
+        if len(self.template_file) == 0:
+            raise MASTError(self.__class__.__name__, "Recipe contents not provided!")
 
         if self.input_options is None:
             raise MASTError(self.__class__.__name__, "Input Options not provided!")
@@ -61,8 +55,10 @@ class RecipeTemplateParser(MASTObj):
             raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
         
         #fetch required paramaters
-        f_ptr           = open(self.template_file, "r")
-        o_ptr           = open(self.personal_recipe, "w")
+        #f_ptr           = open(self.template_file, "r")
+        recipe_contents = list(self.template_file)
+        #print recipe_contents
+        o_ptr           = open(self.personal_recipe, "a")
         system_name     = self.input_options.get_item("mast", "system_name", "sys")
         n_defects       = self.input_options.get_item("defects", "num_defects", 0)
         d_defects       = self.input_options.get_item("defects","defects")
@@ -74,7 +70,7 @@ class RecipeTemplateParser(MASTObj):
         chunkcount=0
         mychunk=list()
         modchunk=False
-        for line in f_ptr.readlines():
+        for line in recipe_contents: #f_ptr.readlines():
             if '\t' in line:
                 raise MASTError("parsers/recipetemplateparser","The tab character exists in recipe template %s. Please convert all tabs to the appropriate number of groups of four spaces." % self.template_file)
             if '{begin}' in line:
@@ -88,14 +84,22 @@ class RecipeTemplateParser(MASTObj):
             self.chunks.append(list(mychunk))
         #for chunk in self.chunks:
         #    print chunk
+	
+        input_options_keys = self.input_options.get_sections()
+        key = 'personal_recipe'	
         expandedlist=list()
-        for chunk in self.chunks:
-            expanded=self.parse_chunk(chunk)
-            expandedlist.extend(expanded)
-        o_ptr.writelines(expandedlist)
-        f_ptr.close()
-        o_ptr.close()
-        return recipe_name
+        if key in input_options_keys:
+            return expandedlist
+        else:
+            for chunk in self.chunks:
+                expanded=self.parse_chunk(chunk)
+                expandedlist.extend(expanded)
+            o_ptr.write("$personal_recipe\n")
+       	    o_ptr.writelines(expandedlist)
+            o_ptr.write("$end\n")
+            #f_ptr.close()
+            o_ptr.close()
+            return expandedlist
         #self.chunks[chunkcount]=dict()
         #self.chunks[chunkcount]['modify'] = modchunk
         #    #line             = line.strip()

@@ -27,17 +27,17 @@ def read_recipe(filename, verbose=0):
     logger=logging.getLogger('mast')
     logger=loggerutils.add_handler_for_control(logger)
 
-    rfile = MASTFile(filename)
+    rfile = list(filename) #MASTFile(filename)
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
-    for line in rfile.data:
+    for line in rfile:
         if '\t' in line:
             raise MASTError("recipe/recipeutility", "Recipe at %s contains tabs! Please convert all indentations to the appropriate number of groups of four spaces." % filename)
         myline = line.rstrip() #right-hand strip of carriage return only
         if len(myline) == 0: #blank line
             pass
-        elif (len(myline) > 6) and (myline[0:6].lower() == "recipe"):
-            rname = myline.split()[1]
+        #elif (len(myline) > 6) and (myline[0:6].lower() == "recipe"):
+            #rname = myline.split()[1]	  
         elif myline.strip()[0] == "#": #comment line, hash starting wherever
             pass
         else:
@@ -81,7 +81,7 @@ def read_recipe(filename, verbose=0):
         for ckey in clist:
             logger.info("%s: %s" % (ckey, howtorun[ckey]))
 
-    return [howtoupdate, parentstocheck, howtorun, rname]
+    return [howtoupdate, parentstocheck, howtorun]
 
 def split_into_subrecipes(mydata):
     """Split an entire recipe into subrecipes. Each new zero-level 

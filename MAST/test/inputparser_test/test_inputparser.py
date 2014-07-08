@@ -26,7 +26,7 @@ class TestInputparser(unittest.TestCase):
         pass
 
     def test___init__(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         s_dict = dict({\
                 'mast' : myip.parse_mast_section,
                 'structure' : myip.parse_structure_section,
@@ -36,21 +36,33 @@ class TestInputparser(unittest.TestCase):
                 'neb' : myip.parse_neb_section,
                 'chemical_potentials' : myip.parse_chemical_potentials_section,
                 'summary' : myip.parse_summary_section,
+                'personal_recipe' : myip.parse_personal_recipe_section
                                })
         self.assertItemsEqual(myip.section_parsers, s_dict)
         #self.testclass.__init__(**kwargs)
 
     def test_parse(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         myoptions = myip.parse()
-        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb','chemical_potentials'])
+        print myoptions.options.keys()
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','neb'])
+        #ofile = MASTFile()
+        #ofile.data = str(myoptions)
+        #ofile.to_file(os.path.join(os.getcwd(),"long_input_options_output.txt"))
+        #self.testclass.parse()
+        
+    def test_parse_defect_formation(self):
+        myip = InputParser(inputfile="defect_formation_energy.inp")
+        myoptions = myip.parse()
+        print myoptions.options.keys()
+        self.assertItemsEqual(myoptions.options.keys(),['mast','structure','defects','recipe','ingredients','chemical_potentials','summary'])
         #ofile = MASTFile()
         #ofile.data = str(myoptions)
         #ofile.to_file(os.path.join(os.getcwd(),"long_input_options_output.txt"))
         #self.testclass.parse()
 
     def test_parse_mast_section(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/mast_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -68,7 +80,7 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_mast_section(section_name, section_content, options)
 
     def test_parse_structure_section_noposfile(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/structure_noposfile_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -90,7 +102,7 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_structure_section(section_name, section_content, options)
     
     def test_parse_structure_section_posfile(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/structure_posfile_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -103,7 +115,7 @@ class TestInputparser(unittest.TestCase):
         mdict['structure']['posfile'] = os.path.join(testdir, "POSCAR_startpos")
         self.assertItemsEqual(myoptions.options.keys(), ['structure'])
         self.assertEqual(myoptions.options['structure']['posfile'],mdict['structure']['posfile']) 
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/structure_posfile_lines_nosuch.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -113,7 +125,7 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_structure_section(section_name, section_content, options)
 
     def test_parse_defects_section(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/defects_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -193,21 +205,23 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_defects_section(section_name, section_content, options)
 
     def test_parse_recipe_section(self):
-        myip = InputParser(inputfile="long_input.inp")
-        minput = MASTFile("%s/recipe_lines.txt" % testdir)
+        myip = InputParser(inputfile="neb_with_phonons.inp")
+        print testdir
+        minput = MASTFile("%s/recipe_neb.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
-            cleanlines.append(line.strip())
+            cleanlines.append(line)
         myoptions = InputOptions()
         myip.parse_recipe_section('recipe',cleanlines,myoptions)
         #print myoptions
         mdict=dict()
-        mdict['recipe_file'] = os.path.join(os.getenv("MAST_RECIPE_PATH"),'defects_test.txt')
+        #mdict['recipe_file'] = os.path.join(os.getenv("MAST_RECIPE_PATH"),'defects_test.txt')
+        mdict['recipe_file'] = cleanlines
         self.assertEqual(myoptions.options['recipe'],mdict)
         #self.testclass.parse_recipe_section(section_name, section_content, options)
 
     def test_parse_ingredients_section(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/ingredient_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -250,7 +264,7 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_ingredients_section(section_name, section_content, options)
 
     def test_parse_neb_section(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/neb_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -283,7 +297,7 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.parse_neb_section(section_name, section_content, options)
 
     def test_parse_chemical_potentials_section(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/chemical_potential_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -304,7 +318,7 @@ class TestInputparser(unittest.TestCase):
     def test_parse_phonon_section(self):
         raise SkipTest
         #Phonon section in input file is now obsolete!
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         minput = MASTFile("%s/phonon_lines.txt" % testdir)
         cleanlines = list()
         for line in minput.data:
@@ -342,17 +356,17 @@ class TestInputparser(unittest.TestCase):
         #self.testclass.perform_element_mapping(input_options)
 
     def test_validate_execs(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         myoptions = myip.parse()
         myoptions.options['ingredients']['global'].pop('mast_exec')
-        myoptions.options['ingredients']['phononparse'].pop('mast_exec')
+        myoptions.options['ingredients']['diffcoeff'].pop('mast_exec')
         self.assertRaises(MASTError,myip.validate_execs,myoptions)
         #self.testclass.validate_execs(input_options)
 
     def test_set_structure_from_inputs(self):
-        myip = InputParser(inputfile="long_input.inp")
+        myip = InputParser(inputfile="neb_with_phonons.inp")
         myoptions = myip.parse()
-        compare_struct = pymatgen.io.vaspio.Poscar.from_file("longinputposcar").structure
+        compare_struct = pymatgen.io.vaspio.Poscar.from_file("nebphononsposcar").structure
         self.assertEqual(myoptions.options['structure']['structure'],compare_struct)
         #self.testclass.set_structure_from_inputs(input_options)
 

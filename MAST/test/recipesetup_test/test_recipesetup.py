@@ -1,7 +1,7 @@
 """Tests for Recipesetup"""
 
 from MAST.recipe.recipesetup import RecipeSetup
-
+from MAST.parsers.inputparser import InputParser
 import unittest
 from unittest import SkipTest
 import os
@@ -23,24 +23,30 @@ class TestRecipeSetup(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
+        #pass
         if os.path.isdir(os.path.join(testdir,'workdir')):
             shutil.rmtree('workdir')
 
     def test___init__(self):
-        rfile=os.path.join(testdir,'personalized')
+        #raise SkipTest #SD
+        #rfile=os.path.join(testdir,'personalized')
         wdir=os.path.join(testdir,'workdir')
         struc=None
-        iopt=InputOptions()
+        #iopt=InputOptions()
+        #iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
+        iopt=InputParser(inputfile='input.inp').parse()
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         self.assertEqual(type(myrs.metafile),MAST.utility.metadata.Metadata)
         #self.testclass.__init__(**kwargs)
 
     def test_get_my_ingredient_options(self):
         raise SkipTest
-        rfile=os.path.join(testdir,'personalized')
+        #rfile=os.path.join(testdir,'personalized')
         wdir=os.path.join(testdir,'workdir')
         struc=None
         iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         print iopt
         self.assertEqual(type(myrs.metafile),MAST.utility.metadata.Metadata)
@@ -63,35 +69,49 @@ class TestRecipeSetup(unittest.TestCase):
         #self.testclass.create_ingredient(my_ingred_input_options)
 
     def test_start(self):
-        rfile=os.path.join(testdir,'personalized')
+        #rfile=os.path.join(testdir,'personalized')
         wdir=os.path.join(testdir,'workdir')
         struc=None
         iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         myrs.start()
         compare_metadata=MASTFile('compare_metadata.txt')
         myrs_metadata=MASTFile(os.path.join(wdir,'metadata.txt'))
         self.assertEqual(myrs_metadata.data, compare_metadata.data)
         dirlist=MAST.utility.dirutil.walkdirs(wdir)
+        print dirlist
         compare_dirlist=list()
+        compare_dirlist.append('defect_1nn_q=p0_opt1')
+        compare_dirlist.append('defect_1nn_q=p0_opt2')
+        compare_dirlist.append('defect_1nn_q=p0_stat')
+        compare_dirlist.append('defect_purefin_q=p0_opt1')
+        compare_dirlist.append('defect_purefin_q=p0_opt2')
+        compare_dirlist.append('defect_purefin_q=p0_stat')
+        compare_dirlist.append('defect_pureinit_q=p0_opt1')
+        compare_dirlist.append('defect_pureinit_q=p0_opt2')
+        compare_dirlist.append('defect_pureinit_q=p0_stat')
+        compare_dirlist.append('defect_solute_q=p0_opt1')
+        compare_dirlist.append('defect_solute_q=p0_opt2')
+        compare_dirlist.append('defect_solute_q=p0_stat')
+        compare_dirlist.append('diffcoeff_utility')
+        compare_dirlist.append('inducedefect_1nn')
+        compare_dirlist.append('inducedefect_purefin')
+        compare_dirlist.append('inducedefect_pureinit')
+        compare_dirlist.append('inducedefect_solute')
+        compare_dirlist.append('neb_1nn-solute_q=p0_opt1')
+        compare_dirlist.append('neb_1nn-solute_q=p0_opt2')
+        compare_dirlist.append('neb_1nn-solute_q=p0_stat')
+        compare_dirlist.append('neb_pureinit-purefin_q=p0_opt1')
+        compare_dirlist.append('neb_pureinit-purefin_q=p0_opt2')
+        compare_dirlist.append('neb_pureinit-purefin_q=p0_stat')
         compare_dirlist.append('perfect_opt1')
         compare_dirlist.append('perfect_opt2')
         compare_dirlist.append('perfect_stat')
-        compare_dirlist.append('inducedefect_group1')
-        compare_dirlist.append('inducedefect_group3')
-        compare_dirlist.append('defect_group1_q=n1_opt1')
-        compare_dirlist.append('defect_group1_q=n1_opt2')
-        compare_dirlist.append('defect_group1_q=n1_stat')
-        compare_dirlist.append('phonon_group1_q=n1_int')
-        compare_dirlist.append('phonon_group1_q=n1_int_parse')
-        compare_dirlist.append('defect_group3_q=n1_opt1')
-        compare_dirlist.append('defect_group3_q=n1_opt2')
-        compare_dirlist.append('defect_group3_q=n1_stat')
-        compare_dirlist.append('neb_group1-group3_q=n1_opt1')
-        compare_dirlist.append('neb_group1-group3_q=n1_opt2')
-        compare_dirlist.append('neb_group1-group3_q=n1_stat')
-        compare_dirlist.append('phonon_group1-group3_q=n1_host1')
-        compare_dirlist.append('phonon_group1-group3_q=n1_host1_parse')
+        compare_dirlist.append('phonon_1nn-solute_q=p0_movingsolute')
+        compare_dirlist.append('phonon_1nn_q=p0_solute')
+        compare_dirlist.append('phonon_pureinit-purefin_q=p0_movingsolvent')
+        compare_dirlist.append('phonon_pureinit_q=p0_solvent')
         compare_dirlist_withpath=list()
         for diritem in compare_dirlist:
             compare_dirlist_withpath.append(os.path.join(wdir,diritem))

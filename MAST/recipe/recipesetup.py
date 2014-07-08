@@ -17,7 +17,7 @@ from MAST.recipe import recipeutility as ru
 from MAST.recipe.recipeplan import RecipePlan
 from MAST.ingredients.baseingredient import BaseIngredient
 ALLOWED_KEYS = {
-                  'recipeFile'     : (str, None, 'Personalized recipe file'),\
+                  'recipeFile'     : (list, None, 'Personalized recipe file'),\
                   'inputOptions'   : (InputOptions, None, 'Input options parsed using input parser'),\
                   'structure'      : (Structure, None, 'Structure to be used to create the ingredient objects'),\
                   'ingredientsDict': (dict, dict(), 'Dictionary of ingredients'),\
@@ -50,7 +50,7 @@ class RecipeSetup(MASTObj):
         self.recipe_logger = loggerutils.add_handler_for_recipe(self.work_dir, self.recipe_logger)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
-        self.recipe_logger.info('Setting up the recipe based on %s' % (self.recipe_file))
+        self.recipe_logger.info('Setting up the recipe based on the personal recipe contents passed in self.recipe_file')
 
     def get_my_ingredient_options(self, name, ingredient_type):
         """Creates the ingredient based on the ingredient type.
@@ -189,9 +189,9 @@ class RecipeSetup(MASTObj):
         """
         import inspect
         #'GRJ DEBUG: %s.%s' % (self.__class__.__name__, inspect.stack()[0][3])
-        [how_to_update, parents_to_check, how_to_run, recipe_name] = ru.read_recipe(self.recipe_file)
+        [how_to_update, parents_to_check, how_to_run] = ru.read_recipe(self.recipe_file)
 
-        recipe_obj = RecipePlan(recipe_name, self.work_dir)
+        recipe_obj = RecipePlan(self.work_dir)
         ingredlist = how_to_run.keys()
         for ingred in ingredlist:
             self.update_top_meta_for_ingred(ingred)
@@ -286,11 +286,11 @@ class RecipeSetup(MASTObj):
            Use the input options and recipe info to
            create directories and classes required
         """
-        if self.recipe_file is None:
-            raise MASTError(self.__class__.__name__, "Recipe file not provided!")
+        if not self.recipe_file:
+            raise MASTError(self.__class__.__name__, "Recipe file contents is empty!")
 
-        if not os.path.exists(self.recipe_file):
-            raise MASTError(self.__class__.__name__, "Recipe file not Found!")
+        """if not os.path.exists(self.recipe_file):
+            raise MASTError(self.__class__.__name__, "Recipe file not Found!")"""
 
         if not self.input_options:
             raise MASTError(self.__class__.__name__, "Input Options not provided!")
