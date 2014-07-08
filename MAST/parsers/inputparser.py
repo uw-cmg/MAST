@@ -211,7 +211,7 @@ class InputParser(MASTObj):
         # an error.
         if (structure_dict['posfile'] is not None): # Do we have a geometry file?
             # First build a list of likely files
-            origindir = os.getcwd()
+            origindir = os.path.dirname(self.keywords['inputfile'])
             metatry = os.path.join(os.getcwd(), 'metadata.txt')
             if os.path.isfile(metatry):
                 myrecipemeta = Metadata(metafile=metatry)

@@ -15,7 +15,7 @@ from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
 from MAST.utility import MASTFile
 
-class MASTmon(object):
+class MASTMon(object):
     """The MAST monitor runs on a submission node and checks
         the status of each recipe in the MAST_SCRATCH directory.
         Attributes:
