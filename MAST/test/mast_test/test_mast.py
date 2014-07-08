@@ -7,7 +7,7 @@ from filecmp import dircmp
 import MAST
 import shutil
 from MAST.utility import dirutil
-from MAST.controllers.mast import MASTInput as controllerMAST
+from MAST.controllers.mastinput import MASTInput as controllerMAST
 testname ="mast_test"
 testdir = dirutil.get_test_dir(testname)
 oldcontrol = os.getenv("MAST_CONTROL")
