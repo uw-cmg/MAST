@@ -286,7 +286,6 @@ The pip installation should then warn you with an ATTENTION flag of environment 
 
 You may copy and paste the environment variables from the terminal into your user profile. In the examples below, ``username`` should have been changed to your username.::
     
-    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
     export MAST_SCRATCH=//home/username/MAST/SCRATCH
     export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
     export MAST_CONTROL=//home/username/MAST/CONTROL"
@@ -317,10 +316,6 @@ Remember to log out and log back in after modifying your user profile.
 Environment variable explanations
 -----------------------------------
 An explanation of each variable appears in the next section
-
-MAST_RECIPE_PATH: MAST looks for recipe templates in this folder. You will have been supplied with a few example templates, also corresponding to example input files in a newly-created ``//home/username/MAST/examples`` directory. ::
-    
-    export MAST_RECIPE_PATH=//home/username/MAST/recipe_templates
 
 MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory. ::
     

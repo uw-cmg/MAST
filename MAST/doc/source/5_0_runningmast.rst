@@ -27,7 +27,7 @@ If your input file specifies any POSCAR or CIF files, those files must be in you
 
 The input file will be parsed and a recipe directory should be created inside the ``$MAST_SCRATCH`` directory, with the appropriate ingredient subdirectories.
 
-Look at the ``personalized_recipe.txt``, ``input.inp``, ``archive_input_options.txt``, and ``archive_recipe_plan.txt`` files in the recipe directory to see if the setup agrees with what you think it should be.
+Look at the ``input.inp``, ``archive_input_options.txt``, and ``archive_recipe_plan.txt`` files in the recipe directory to see if the setup agrees with what you think it should be.
 
 *********************
 Running MAST
@@ -41,20 +41,18 @@ This command will do two things:
 
 1.  Submit all ingredient runs listed in the ``$MAST_CONTROL/submitlist`` list to the queue. 
 
-    *  The submission command (``sbatch``, ``qsub``, etc.) is based on the platform chosen when you ran ``python $MAST_INSTALL_PATH initialize.py`` during installation.
-    *  The exact commands can be found in ``$MAST_INSTALL_PATH/submit/platforms/<platform name>/queue_commands.py``.
-    *  If you make changes to that ``queue_commands.py`` file, run ``python $MAST_INSTALL_PATH initialize.py`` again.
+    *  The submission command (``sbatch``, ``qsub``, etc.) is based on the platform chosen when you set ``$MAST_PLATFORM``
+    *  The exact commands can be found in your MAST installation path under ``submit/platforms/<platform name>/queue_commands.py``.
 
 Individual ingredients' submission scripts are created automatically through a combination of the ``$ingredients`` section in the input file, and your the template submission script for your platform 
 
-    *  The template submission script is found in ``$MAST_INSTALL_PATH/submit/platforms/<platform name>/submit_template.sh``). 
-    *  If you make changes to the template, run ``python $MAST_INSTALL_PATH initialize.py`` again. 
+    *  The template submission script is found in your MAST installation path under ``submit/platforms/<platform name>/submit_template.sh``). 
 
 2.  Spawn a MAST monitor, or *mastmon*, process on the queue. 
 
-*  Your ``$MAST_INSTALL_PATH/submit/platforms/<platform name>/mastmon_submit.sh`` script is responsible for submitting this process.
+*  The ``mastmon_submit.sh`` and ``runmast.py`` files are copied from your MAST installation path ``submit/platforms/<platform name>`` folder into ``$MAST_CONTROL`` and are responsible for submitting this process.
 *  The script should be set up to use the shortest, fastest turnover queue available (e.g. a serial queue with a maximum walltime of 4 hours, or morganshort on bardeen).
-*  If you make changes to the script, run ``python $MAST_INSTALL_PATH initialize.py`` again. 
+*  You may make changes directly in ``$MAST_CONTROL/mastmon_submit.sh``
  
 The mastmon process will generate additional entries on ``$MAST_CONTROL/submitlist``, but these entries will not be submitted to the queue until MAST is called again.
 

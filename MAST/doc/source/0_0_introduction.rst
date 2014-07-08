@@ -28,20 +28,18 @@ Computing in the MAST Kitchen
     * Which calculations depend on each other and should be grouped into a Recipe? 
     * What are all of the conditions for each calculation (e.g. which ones can have volume change, and which ones should be at fixed volume? How fine a kpoint mesh does each calculation need? etc.)?
 
-#.  Start with some of the standard recipes in your $MAST_RECIPE_PATH directory or use a new template.
-#.  Create an input file, for example, test.inp.
-#.  Run the command ``mast -i test.inp`` to parse the input file. 
+#.  Start with some of the standard example input files in ``//home/user/MAST/examples``.
+#.  Run the command ``mast -i <examplename>.inp`` to parse the input file. 
 #.  Under ``$MAST_SCRATCH``, MAST creates a timestamped recipe directory. 
 #.  Within the recipe directory:
 
     #.  Each ingredient gets its own directory within the system_recipe_timestamp directory.
     #.  Additional files are created, including:
 
-        #. ``personal_recipe.txt``, which is your recipe template file filled in with information gathered from the input ``.inp`` file.
         #. ``archive_input_options.txt``, so you can see what the input options originally were
         #. ``archive_recipe_plan.txt``, which tells you how MAST interpreted the recipe file. You can check this file to see which ingredients are considered parents of which other ingredients, for troubleshootin
         #. ``status.txt``, which tells the status of all the ingredients.
-        #. ``input.inp``, which is a copy of the input file (or an individual loop of a looped input file)
+        #. ``input.inp``, which is a copy of the input file (or an individual loop of a looped input file) and also contains the personal recipe.
         #. ``metadata.txt``, which stores metadata information
         #. ``mast_recipe.log``, which stores recipe-level logging information.
 

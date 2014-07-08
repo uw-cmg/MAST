@@ -8,16 +8,12 @@ Introduction to the Recipe
 
 The recipe defines the relationships between ingredients, or which ingredients need to be run before which other ingredients.
 
-Out-of-the-box recipes are stored in ``$MAST_INSTALL_PATH/recipe_templates``. You may copy them into your ``$MAST_RECIPE_PATH`` directory (see :doc:`Installation <1_0_installation>`). If you create new recipes, they should also go in the  ``$MAST_RECIPE_PATH`` directory
-
-The full recipe name goes in the ``$recipe`` section of the input file::
-
-    $recipe
-    recipe_file neb.txt
-$end
+The recipe is located in the ``$recipe`` section of the input file.
+The ``$recipe`` section may contain a "template" recipe with tags to be filled in.
+When MAST parses the input file and creates a recipe directory, it will also create a copy of the input file (to be used by all subsequent MAST monitoring activities). In that copy of the input file, the full recipe, with all tags filled in, will be stored in the ``$personal_recipe`` section.
 
 ************************************
-The Recipe Template
+The Recipe Section
 ************************************
 
 **Important: when creating or editing recipes, do not use the Tab key. Instead, use 4 spaces to indent.** 
