@@ -287,7 +287,7 @@ class RecipeSetup(MASTObj):
            create directories and classes required
         """
         if not self.recipe_file:
-            raise MASTError(self.__class__.__name__, "Recipe file contents is empty!")
+            raise MASTError(self.__class__.__name__, "Recipe contents are empty!")
 
         """if not os.path.exists(self.recipe_file):
             raise MASTError(self.__class__.__name__, "Recipe file not Found!")"""
