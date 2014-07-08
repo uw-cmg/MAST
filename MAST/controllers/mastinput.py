@@ -192,9 +192,9 @@ class MASTInput(MASTObj):
         personal_recipe_list = parser_obj.parse()
         #print personal_recipe_list
         if not personal_recipe_list:
-                self.logger.info("Within mast/parse_recipe_template: Personal Recipe List is empty. Check whether input.inp has a personal_recipe section!")
+            self.logger.info("Within mast/parse_recipe_template: Personal Recipe List is empty. Check whether input.inp has a personal_recipe section!")
         else:
-                self.input_options.set_item('personal_recipe','personal_recipe_file',personal_recipe_list)
+            self.input_options.set_item('personal_recipe','personal_recipe_file',personal_recipe_list)
 
     def set_class_attributes(self):
         """Set class attributes, other than input options
