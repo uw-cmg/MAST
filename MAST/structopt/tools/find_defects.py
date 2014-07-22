@@ -1,7 +1,10 @@
-from ase import Atom, Atoms
+try:
+    from ase import Atom, Atoms
+    from ase.calculators.neighborlist import NeighborList
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt find_defects.py, ASE must be installed."
 import numpy
 import copy
-from ase.calculators.neighborlist import NeighborList
 from MAST.structopt.inp_out.write_xyz import write_xyz
 from MAST.structopt.tools.calc_dist import calc_dist
 

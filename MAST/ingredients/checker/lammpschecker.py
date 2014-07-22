@@ -16,12 +16,15 @@ import numpy as np
 import time
 import subprocess
 
-import ase
+try:
+    import ase
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use the LAMMPS checker, you must install ASE."
 import random
 from pymatgen.io.aseio import AseAtomsAdaptor
 from re import compile as re_compile, IGNORECASE
 import decimal as dec
-from ase import Atom, Atoms
 import shutil
 
 class LammpsChecker(BaseChecker):

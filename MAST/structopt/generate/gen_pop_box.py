@@ -1,7 +1,9 @@
 import random
 import numpy
-from ase import Atom, Atoms
-
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt gen_pop_box.py, ASE must be installed."
 def gen_pop_box(atomlist,size,crystal=False):
     """Function to generate a random structure of atoms.
     Inputs:

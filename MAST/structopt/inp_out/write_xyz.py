@@ -1,4 +1,7 @@
-from ase import Atom, Atoms
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt write_xyz.py, ASE must be installed."
 
 def write_xyz(fileobj,atms,data=0):
     """Function to write xyz file with some data

@@ -1,5 +1,7 @@
-from ase import Atom, Atoms
-
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt read_xyz.py, ASE must be installed."
 def read_xyz(fileobj,n=-1,data=False):
     """
     Function to read multi-atom xyz file with data

@@ -1,12 +1,15 @@
 import os
 from operator import attrgetter
-from ase import Atom, Atoms
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt BestInds.py, ASE must be installed."
 from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 try:
     from mpi4py import MPI
 except:
-    pass
+    print "NOTE: mpi4py is not installed. To use certain features in Structopt BestInds.py, mpi4py must be installed."
 
 def BestInds(pop, bests, Optimizer, writefile=False, fname=None):
     """Function to keep track of the best individuals throughout an optimization
