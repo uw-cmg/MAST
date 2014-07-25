@@ -268,6 +268,7 @@ class IndepLoopInputParser(MASTObj):
             newfile.data = list(datasets_dict[didx])
             newname="%s/loop_%s_%s.inp" % (dirstem, basename, str(dct).zfill(2))
             newfile.to_file(newname)
-            createdfiles.append(os.path.basename(newname))
+            #createdfiles.append(os.path.basename(newname))
+            createdfiles.append(newname)
             dct=dct+1
         return createdfiles
