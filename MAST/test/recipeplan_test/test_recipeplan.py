@@ -64,10 +64,10 @@ class TestRecipeplan(unittest.TestCase):
         os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         self.assertEquals(rp.working_directory,"recipedir")
         self.assertEquals(rp.status,"I")
-        self.assertEquals(rp.name,"test_recipe")
+        #self.assertEquals(rp.name,"test_recipe")
         #raise SkipTest
         #self.testclass.__init__(name, working_directory)
 
@@ -77,7 +77,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing2b'] = "I"
         kdict=dict()
         kdict['mast_program']='vasp'
@@ -102,7 +102,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "I"
         kdict=dict()
         kdict['mast_program']='vasp'
@@ -122,7 +122,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing2b'] = "I"
         kdict=dict()
         kdict['mast_program']='vasp'
@@ -144,7 +144,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing2b'] = "I"
         kdict=dict()
         kdict['mast_program']='vasp'
@@ -168,7 +168,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","%s/recipedir" % testdir)
+        rp = RecipePlan("%s/recipedir" % testdir)
         rp.ingredients['ing1'] = "I"
         kdict=dict()
         kdict['mast_program']='vasp'
@@ -203,7 +203,7 @@ class TestRecipeplan(unittest.TestCase):
         metad.to_file("recipedir/ing2b/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.to_file("recipedir/ing3/metadata.txt")
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "I"
         rp.ingredients['ing2a'] = "I"
         rp.ingredients['ing2b'] = "I"
@@ -247,7 +247,7 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.fast_forward_check_complete()
 
     def test_check_if_have_parents(self):
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "I"
         rp.ingredients['ing2a'] = "I"
         rp.ingredients['ing2b'] = "I"
@@ -265,7 +265,7 @@ class TestRecipeplan(unittest.TestCase):
         metad.to_file("recipedir/ing1/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.to_file("recipedir/ing2a/metadata.txt")
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "P"
         rp.ingredients['ing2a'] = "I"
         rp.ingredients['ing2b'] = "I"
@@ -296,7 +296,7 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.check_if_ready_to_proceed_are_complete()
 
     def test_check_if_parents_are_complete(self):
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "C"
         rp.ingredients['ing2a'] = "W"
         rp.ingredients['ing2b'] = "I"
@@ -315,7 +315,7 @@ class TestRecipeplan(unittest.TestCase):
         topmetad.to_file("recipedir/metadata.txt")
         #metad = MASTFile("files/metadata_single")
         #metad.to_file("%s/metadata.txt" % ingdir)
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1']="C"
         rp.ingredients['ing2a'] = "W"
         rp.ingredients['ing2b'] = "S"
@@ -353,7 +353,7 @@ class TestRecipeplan(unittest.TestCase):
         metad.to_file("recipedir/ing2b/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.to_file("recipedir/ing3/metadata.txt")
-        rp = RecipePlan("test_recipe","%s/recipedir" % testdir)
+        rp = RecipePlan("%s/recipedir" % testdir)
         rp.ingredients['ing1'] = "I"
         rp.ingredients['ing2a'] = "I"
         rp.ingredients['ing2b'] = "I"
@@ -405,7 +405,7 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.check_recipe_status(verbose=1)
 
     def test_print_status(self):
-        rp = RecipePlan("test_recipe","%s/recipedir" % testdir)
+        rp = RecipePlan("%s/recipedir" % testdir)
         rp.ingredients['ing1'] = "S"
         rp.ingredients['ing2a'] = "W"
         rp.ingredients['ing2b'] = "C"
@@ -430,7 +430,7 @@ class TestRecipeplan(unittest.TestCase):
         metad.to_file("recipedir/ing2b/metadata.txt")
         metad = MASTFile("files/metadata_single")
         metad.to_file("recipedir/ing3/metadata.txt")
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         rp.ingredients['ing1'] = "I"
         rp.ingredients['ing2a'] = "I"
         rp.ingredients['ing2b'] = "I"
@@ -495,7 +495,7 @@ class TestRecipeplan(unittest.TestCase):
         #self.testclass.__repr__()
 
     def test_get_statuses_from_file(self):
-        rp = RecipePlan("test_recipe","recipedir")
+        rp = RecipePlan("recipedir")
         mystatus = MASTFile("files/status_random.txt")
         self.assertRaises(MASTError, rp.get_statuses_from_file)
         mystatus.to_file("recipedir/status.txt")
