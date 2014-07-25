@@ -77,6 +77,9 @@ class RecipeTemplateParser(MASTObj):
         mychunk=list()
         modchunk=False
         for line in recipe_contents: #f_ptr.readlines():
+            duplicate = line
+            if ((len(duplicate) - len(duplicate.lstrip(' '))) % 4 != 0):
+                raise MASTError("parsers/recipetemplateparser", "Recipe at %s contains incorrect number of whitespace chars at the beginning of the line! Please convert all indentations to the appropriate number of groups of four spaces." % line)
             if '\t' in line:
                 raise MASTError("parsers/recipetemplateparser","The tab character exists in recipe template %s. Please convert all tabs to the appropriate number of groups of four spaces." % self.template_file)
             if '{begin}' in line:

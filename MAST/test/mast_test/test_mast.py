@@ -66,7 +66,7 @@ class TestMAST(unittest.TestCase):
                 lacksfolders = lacksfolders + 1
         lacksfiles=0
         for file in ['archive_input_options.txt','metadata.txt',
-                        'personal_recipe.txt', 'status.txt',
+                        'status.txt',
                         'archive_recipe_plan.txt', 'input.inp']:
             if not os.path.join(myfolders[-1],file) in myfiles:
                 lacksfiles = lacksfiles + 1

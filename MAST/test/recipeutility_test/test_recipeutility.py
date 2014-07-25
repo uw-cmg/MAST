@@ -8,6 +8,7 @@ import os
 import time
 import pymatgen
 from MAST.utility import dirutil
+from MAST.utility import MASTFile
 from MAST.recipe import recipeutility
 testname="recipeutility_test"
 testdir = dirutil.get_test_dir(testname)
@@ -21,7 +22,8 @@ class TestRecipeUtility(unittest.TestCase):
         pass
 
     def test_read_recipe(self):
-        [htu, ptc,htr, rname]=recipeutility.read_recipe(os.path.join(testdir,'short_test'))
+        file_contents = MASTFile(os.path.join(testdir,'neb_int_personalized'))
+        [htu, ptc,htr]=recipeutility.read_recipe(file_contents.data)
         #print htu
         #print ptc
         #print htr

@@ -10,6 +10,7 @@ import MAST
 import pymatgen
 from MAST.utility import dirutil
 from MAST.utility import InputOptions
+from MAST.parsers import InputParser
 from MAST.utility import MASTFile
 import shutil
 
@@ -38,8 +39,10 @@ class TestRecipetemplateparser(unittest.TestCase):
 
     def test_parse(self):
         #rt=os.path.join(testdir,'new_template.txt')
-        rt=os.path.join(testdir,'neb_int.txt')
+        rt=os.path.join(testdir,'phonon_with_neb.inp')
         wd=os.path.join(testdir,'workdir')
+        parser_obj = InputParser(inputfile=rt)
+        input_options = parser_obj.parse()
         iopt=InputOptions()
         iopt.options['neb']=dict()
         iopt.options['neb']['nebs']=dict()
@@ -61,15 +64,24 @@ class TestRecipetemplateparser(unittest.TestCase):
         iopt.options['defects']['defects']['group3']['charge']=[-1]
         iopt.options['defects']['defects']['group3']['phonon']=dict()
         iopt.options['defects']['defects']['group3']['phonon']['host1']=dict()
-        pr=os.path.join(testdir,'workdir','personal_recipe.txt')
-        myrtp=RecipeTemplateParser(inputOptions=iopt,working_directory=wd,templateFile=rt,personalRecipe=pr)
+        recipe_file_contents = input_options.get_item('recipe', 'recipe_file')
+        shutil.copy(rt,os.path.join(wd,'input.inp'))
+        pr=os.path.join(testdir,'workdir','input.inp')
+        myrtp=RecipeTemplateParser(inputOptions=iopt,working_directory=wd,templateFile=recipe_file_contents,personalRecipe=pr)
         rname=myrtp.parse()
-        self.assertEquals(len(myrtp.chunks),5)
-        mypr = MASTFile(pr)
-        for line in mypr.data:
+        prf=os.path.join(testdir,'Personal_Recipe_File.txt')
+        per_rec_file = open(prf, 'w')
+        print "SASWATI DE *********************************"
+        for line in rname:
             print line.rstrip()
+            per_rec_file.write("%s\n" % line.rstrip())
+        print "SASWATI DE *********************************"
+        self.assertEquals(len(myrtp.chunks),5)
+        #mypr = MASTFile(pr)
+        #for line in mypr.data:
+        #    print line.rstrip()
         compare_pr = MASTFile(os.path.join(testdir,'compare','neb_int_personalized'))
-        self.assertEquals(mypr.data, compare_pr.data)
+        self.assertEquals(rname, compare_pr.data)
         #self.testclass.parse()
 
     def test_parse_chunk(self):

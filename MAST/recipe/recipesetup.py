@@ -257,7 +257,7 @@ class RecipeSetup(MASTObj):
             phononlabel = '_'.join(labels)
             datalist.append("phonon_label: %s" % phononlabel)
         data=';'.join(datalist)
-        self.metafile.write_data(myingred, data)
+        self.metafile.write_data(myingred, data, 1)
 
     def create_ingredient(self, my_ingred_input_options):
         """Create the ingredient directory and metadata file.
