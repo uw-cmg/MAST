@@ -45,6 +45,7 @@ def write_to_submit_list(mydir):
                         calculation to be submitted to the
                         queue
     """
+    mast_control = dirutil.get_mast_control_path() #setting here instead of globally allows tests to run in isolated test_control folder
     submitlist=os.path.join(mast_control, "submitlist")
     if os.path.isfile(submitlist):
         submitfile=MASTFile(submitlist)

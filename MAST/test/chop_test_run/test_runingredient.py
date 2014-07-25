@@ -40,15 +40,8 @@ class TestRunIngredient(unittest.TestCase):
             os.mkdir("writedir/single_phonon_label1")
         if not os.path.isfile("test_control/set_platform"):
             shutil.copy(old_control + "/set_platform", "test_control/set_platform")
-        if not os.path.isdir("test_control/programkeys"):
-            shutil.copytree(old_control + "/programkeys", "test_control/programkeys")
-
     def tearDown(self):
         tearlist = list()
-        #tearlist.append("writedir/single_label1")
-        #tearlist.append("writedir/next_ingred")
-        #tearlist.append("writedir/neb_labelinit-labelfin_stat")
-        #tearlist.append("writedir/single_phonon_label1")
         tearlist.append("writedir")
         tearlist.append("test_control")
         for tearfolder in tearlist:
@@ -58,8 +51,8 @@ class TestRunIngredient(unittest.TestCase):
         os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):
-        self.assertTrue(True)
         #raise SkipTest
+        self.assertTrue(True)
         #self.testclass.__init__(**kwargs)
 
     def test_run_singlerun(self):
