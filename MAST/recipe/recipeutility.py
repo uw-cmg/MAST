@@ -31,6 +31,9 @@ def read_recipe(filename, verbose=0):
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
     for line in rfile:
+        duplicate = line
+        if ((len(duplicate) - len(duplicate.lstrip(' '))) % 4 != 0):
+            raise MASTError("recipe/recipeutility", "Recipe at %s contains incorrect number of whitespace chars at the beginning of the line! Please convert all indentations to the appropriate number of groups of four spaces." % filename)
         if '\t' in line:
             raise MASTError("recipe/recipeutility", "Recipe at %s contains tabs! Please convert all indentations to the appropriate number of groups of four spaces." % filename)
         myline = line.rstrip() #right-hand strip of carriage return only

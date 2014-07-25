@@ -21,17 +21,18 @@ class Metadata(MASTObj):
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
 
-    def write_data(self, keyword, data):
+    def write_data(self, keyword, data, option=0):
         """Writes a keyword and its associated data to the metafile"""
         with open(self.keywords['metafile'], 'a') as metafile:
             # First check to see if the keyword already exists in the metadata file
             if None in self.search_data(keyword):
                 metafile.write('%s = %s\n' % (keyword, data))
             else:
-                entry = self.read_data(keyword)
-                entry += '; %s' % data
-                self.clear_data(keyword)
-                metafile.write('%s = %s\n' % (keyword, entry))
+                if (option == 0):
+                    entry = self.read_data(keyword)
+                    entry += '; %s' % data
+                    self.clear_data(keyword)
+                    metafile.write('%s = %s\n' % (keyword, entry))
 
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
