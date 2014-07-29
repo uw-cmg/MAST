@@ -45,10 +45,18 @@ def main():
     if (mastopt.mode == 'interface'):
         submit_and_monitor()
     
+    if (mastopt.mode == 'submitonly'):
+        submit_and_monitor(1)
+
     if (mastopt.mode == 'input'):
         process_input_file(mastopt.input)
 
-def submit_and_monitor():
+def submit_and_monitor(submitonly=0):
+    """Submit jobs to the queue and submit a MAST monitor
+        Args:
+            submitonly <int>: 0 - submit and monitor (default)
+                              1 - submit only 
+    """
     from MAST.submit import queue_commands
     myerrors = display_errors()
     if myerrors == -1:
@@ -69,6 +77,8 @@ def submit_and_monitor():
     print "Getting queue snapshot."
     clear_and_get_queue_snapshot()
     dirutil.unlock_directory(dirutil.get_mast_scratch_path())
+    if submitonly == 1:
+        return
     print "Locking directory and submitting MAST monitor."
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
     mycwd=os.getcwd()
