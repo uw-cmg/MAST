@@ -52,7 +52,7 @@ class BaseIngredient(MASTObj):
 
         self.meta_dict = dict()
         if data:
-            for datum in data.split(','):
+            for datum in data.split(';'):
                 self.meta_dict[datum.split(':')[0]] = datum.split(':')[1].strip()
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
