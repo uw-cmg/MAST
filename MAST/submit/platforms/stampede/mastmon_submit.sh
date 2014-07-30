@@ -5,7 +5,6 @@
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -p serial
-#SBATCH --ntasks-per-node=1
 #SBATCH -o mastmon_submission_output
 #SBATCH -e mastmon_submission_errors
 module load python
