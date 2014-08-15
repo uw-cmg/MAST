@@ -25,9 +25,8 @@ class TestRecipetemplateparser(unittest.TestCase):
             os.mkdir(os.path.join(testdir,'workdir'))
 
     def tearDown(self):
-        pass
-        #if os.path.isdir(os.path.join(testdir,'workdir')):
-        #    shutil.rmtree(os.path.join(testdir,'workdir'))
+        if os.path.isdir(os.path.join(testdir,'workdir')):
+            shutil.rmtree(os.path.join(testdir,'workdir'))
 
     def test___init__(self):
         raise SkipTest
@@ -40,50 +39,28 @@ class TestRecipetemplateparser(unittest.TestCase):
         #self.testclass.__init__(**kwargs)
 
     def test_parse(self):
-        #rt=os.path.join(testdir,'new_template.txt')
-        rt=os.path.join(testdir,'phonon_with_neb.inp')
-        wd=os.path.join(testdir,'workdir')
-        parser_obj = InputParser(inputfile=rt)
+        #ipfile='small_workflow_with_scaling.inp'
+        ipfile='phonon_with_neb.inp'
+        workdir = os.path.join(testdir,'workdir')
+        shutil.copy(os.path.join(testdir,ipfile),workdir)
+        input_file = os.path.join(workdir,ipfile)
+        parser_obj = InputParser(inputfile=input_file)
         input_options = parser_obj.parse()
-        iopt=InputOptions()
-        iopt.options['neb']=dict()
-        iopt.options['neb']['nebs']=dict()
-        iopt.options['neb']['nebs']['group1-group2']=dict()
-        iopt.options['neb']['nebs']['group1-group2']['phonon']=dict()
-        iopt.options['neb']['nebs']['group1-group2']['phonon']['solvent']=dict()
-        iopt.options['neb']['nebs']['group1-group2']['phonon']['solute']=dict()
-        iopt.options['neb']['nebs']['group1-group3']=dict()
-        iopt.options['neb']['nebs']['group1-group3']['phonon']=dict()
-        iopt.options['defects']=dict()
-        iopt.options['defects']['defects']=dict()
-        iopt.options['defects']['defects']['group1']=dict()
-        iopt.options['defects']['defects']['group1']['charge']=[-1,1,2,3]
-        iopt.options['defects']['defects']['group1']['phonon']=dict()
-        iopt.options['defects']['defects']['group2']=dict()
-        iopt.options['defects']['defects']['group2']['charge']=[1,2,3]
-        iopt.options['defects']['defects']['group2']['phonon']=dict()
-        iopt.options['defects']['defects']['group3']=dict()
-        iopt.options['defects']['defects']['group3']['charge']=[-1]
-        iopt.options['defects']['defects']['group3']['phonon']=dict()
-        iopt.options['defects']['defects']['group3']['phonon']['host1']=dict()
-        recipe_file_contents = input_options.get_item('recipe', 'recipe_file')
-        shutil.copy(rt,os.path.join(wd,'input.inp'))
-        pr=os.path.join(testdir,'workdir','input.inp')
-        myrtp=RecipeTemplateParser(inputOptions=iopt,working_directory=wd,templateFile=recipe_file_contents,personalRecipe=pr)
-        rname=myrtp.parse()
-        prf=os.path.join(testdir,'Personal_Recipe_File.txt')
-        per_rec_file = open(prf, 'w')
-        print "SASWATI DE *********************************"
-        for line in rname:
-            print line.rstrip()
-            per_rec_file.write("%s\n" % line.rstrip())
-        print "SASWATI DE *********************************"
+        recipe_file_contents = input_options.get_item('recipe','recipe_file')
+        myrtp = RecipeTemplateParser(inputOptions=input_options,
+            working_directory=workdir,
+            templateFile=recipe_file_contents,
+            personalRecipe=input_file)
+        parsed_lines = myrtp.parse()
+        output_parsed = MASTFile()
+        output_parsed.data = list(parsed_lines)
+        output_parsed.to_file('workdir/personal_recipe_test_output.txt')
         self.assertEquals(len(myrtp.chunks),5)
         #mypr = MASTFile(pr)
         #for line in mypr.data:
         #    print line.rstrip()
-        compare_pr = MASTFile(os.path.join(testdir,'compare','neb_int_personalized'))
-        self.assertEquals(rname, compare_pr.data)
+        compare_pr = MASTFile(os.path.join(testdir,'compare','personal_recipe_test_output.txt'))
+        self.assertEquals(parsed_lines, compare_pr.data)
         #self.testclass.parse()
 
     def test_parse_chunk(self):

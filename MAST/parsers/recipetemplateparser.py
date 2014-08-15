@@ -50,7 +50,6 @@ class RecipeTemplateParser(MASTObj):
 
         if self.input_options is None:
             raise MASTError(self.__class__.__name__, "Input Options not provided!")
-
         if self.personal_recipe is None:
             raise MASTError(self.__class__.__name__, "Personal recipe file not provided!")
         
@@ -87,9 +86,9 @@ class RecipeTemplateParser(MASTObj):
             self.chunks.append(list(mychunk))
         #for chunk in self.chunks:
         #    print chunk
-	
+
         input_options_keys = self.input_options.get_sections()
-        key = 'personal_recipe'	
+        key = 'personal_recipe'
         expandedlist=list()
         if key in input_options_keys:
             return expandedlist
@@ -98,7 +97,7 @@ class RecipeTemplateParser(MASTObj):
                 expanded=self.parse_chunk(chunk)
                 expandedlist.extend(expanded)
             o_ptr.write("$personal_recipe\n")
-       	    o_ptr.writelines(expandedlist)
+            o_ptr.writelines(expandedlist)
             o_ptr.write("$end\n")
             #f_ptr.close()
             o_ptr.close()
@@ -149,10 +148,11 @@ class RecipeTemplateParser(MASTObj):
         d_scaling       = self.input_options.get_item("structure","scaling")
         d_defects       = self.input_options.get_item("defects","defects")
         d_nebs          = self.input_options.get_item("neb","nebs")
+        
         if needsscaling == 1:
             scalingsize = d_scaling.keys()
             scalingsize.sort()
-        else: scalingsize = '1x1x1'
+        else: scalingsize = ['1x1x1']
 
         for size in scalingsize:
             if needsdefects == 1:
