@@ -3,7 +3,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Wei Xie
-# Last updated: 2014-05-14
+# Last updated: 2014-06-13 by Zhewen Song
 ##############################################################
 import sys
 import getopt 
@@ -32,17 +32,6 @@ class writer:
         for w in self.writers:
             w.write(text)
 
-def mkdir_p(path):
-    """
-    This is a helper method that makes a directory minicking shell's mkdir -p
-    """
-    try:
-        os.makedirs(path)
-    except OSError as exc: 
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise      
 def num_atoms_speciewise(inputstruct):
     """
     This is a helper method that output a list giving the number of atoms for 
@@ -66,22 +55,6 @@ def num_atoms_speciewise(inputstruct):
 
     return numAtomsSpeciewise           
     
-def defChg(inputStruct,inputPotcar,inputIncar):
-    """
-    This is a helper method that calculates the defect charge based on input files
-    POSCAR, INCAR and POTCAR (not the file name, but objects of pymatgen's 
-    corresponding Poscar, Incar, and Potcar class.
-    """
-    if ('NELECT' not in inputIncar): 
-        raise RuntimeError("cannot find NELECT in input INCAR")
-    natoms_el=num_atoms_speciewise(inputStruct)
-    zval_el=[None]*len(inputPotcar)
-    defchg=0
-    for i in range(len(inputPotcar)):
-        zval_el[i]=inputPotcar[i].ZVAL
-        defchg=defchg+zval_el[i]*natoms_el[i]
-    defchg=defchg-inputIncar['NELECT']
-    return defchg   
                         
 def minVertDist(inputlat):
     """
@@ -106,6 +79,22 @@ def minVertDist(inputlat):
                np.linalg.norm(dummyMat[0]-dummyMat[1]+dummyMat[2]),
                np.linalg.norm(dummyMat[0]-dummyMat[1]-dummyMat[2])
                )
+def defChg(inputStruct,inputPotcar,inputIncar):
+    """
+    This is a helper method that calculates the defect charge based on input files
+    POSCAR, INCAR and POTCAR (not the file name, but objects of pymatgen's 
+    corresponding Poscar, Incar, and Potcar class.
+    """
+    if ('NELECT' not in inputIncar): 
+        raise RuntimeError("cannot find NELECT in input INCAR")
+    natoms_el=num_atoms_speciewise(inputStruct)
+    zval_el=[None]*len(inputPotcar)
+    defchg=0
+    for i in range(len(inputPotcar)):
+        zval_el[i]=inputPotcar[i].ZVAL
+        defchg=defchg+zval_el[i]*natoms_el[i]
+    defchg=defchg-inputIncar['NELECT']
+    return defchg  
 
 def roof_mean(intA,intB):
     """
@@ -130,7 +119,7 @@ def genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5):
     print ("If you want to explore larger scaling factors L/M/N, "+ 
             "please rerun with larger maxNumAtoms input parameter.")
     print (" ")
-
+    print maxLMN
     #####The following section generates a list of candidates LMN's######   
     Vm_LMN_dict={}
     print ("The following are candiate supercells:")   
@@ -208,8 +197,6 @@ def gensc(LMN_list,perf_primordial_struct,
                 "please manually reset MAGMOM in the supercell INCAR "
                 "to match it to the number of atoms. Otherwise the job will crash.")
     
-    defchg=defChg(def_primordial_struct,def_primordial_potcar,def_primordial_incar)
-    print("The defect charge is "+str(defchg)+" in the defected primordial cell.")
     print""               
        
     cwdir = os.getcwd()
@@ -218,35 +205,14 @@ def gensc(LMN_list,perf_primordial_struct,
     print ("ScalingLMN " " Kpoint  "   "   Label")
     print ("---------------------------------") 
     for j in range(len(LMN_list)):
-
-        dirname=str(LMN_list[j][0])+"x"+str(LMN_list[j][1])+"x"+str(LMN_list[j][2])
-        mkdir_p(dirname)
-        os.chdir(dirname)
-        
         dummystruct=perf_primordial_struct.copy()
         dummystruct.make_supercell(LMN_list[j])
-        ####The next section does embeding#######            
-
-        ####The above section does embeding#######
-        mg.write_structure(dummystruct,'POSCAR') 
-       
         kppra=round((def_primordial_kpnt.kpts[0][0]*
                 def_primordial_kpnt.kpts[0][1]*
                 def_primordial_kpnt.kpts[0][2])/
                 (1/def_primordial_struct.composition.num_atoms))        
         dummykpnt=mg.io.vaspio.Kpoints.automatic_density(dummystruct,kppra)
         dummykpnt.style=def_primordial_kpnt.style
-        dummykpnt.write_file('KPOINTS')
-                
-        dummystruct_natoms_el=num_atoms_speciewise(dummystruct)
-        dummynelect=-defchg
-        for i in range(len(def_primordial_potcar)):
-            dummyZval=def_primordial_potcar[i].ZVAL
-            dummynelect=dummynelect+dummyZval*dummystruct_natoms_el[i]
-        def_primordial_incar.__setitem__('NELECT',dummynelect)
-        def_primordial_incar.write_file('INCAR')
-        
-        def_primordial_potcar.write_file('POTCAR')
         print (str(LMN_list[j])+"   " \
                #    +"%4.2f"      %EneVsVm.CalcV_M(dummystruct)+"   "+
               +str(dummykpnt.kpts[0][0])+"x"+ \
@@ -266,8 +232,8 @@ if __name__ == "__main__":
     fout = file('out.log', 'w')
     sys.stdout = writer(sys.stdout, fout)
     
-    perfDir = "primordial_perfect"
-    defDir = "primordial_defected"
+    perfDir = "perfect_opt"
+    defDir = "defect"
     
     ###read CONTCAR from primordial_perfect directory########
     cwdir=os.getcwd()

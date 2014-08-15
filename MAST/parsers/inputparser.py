@@ -2,9 +2,9 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-05-12 by Zhewen Song
+# Last updated: 2014-06-13 by Zhewen Song
 ##############################################################
-import os
+import os, re
 import time
 import fnmatch
 import logging
@@ -149,7 +149,7 @@ class InputParser(MASTObj):
         mast_dict = MAST_KEYWORDS.copy()
 
         for line in section_content:
-            line = line.split(self.delimiter)
+            line = line.split()
             if (line[0] not in mast_dict):
                 error = 'Section keyword %s not recognized' % line[0]
                 MASTError(self.__class__.__name__, error)
@@ -191,8 +191,13 @@ class InputParser(MASTObj):
         structure_dict = STRUCTURE_KEYWORDS.copy() 
 
         subsection_dict = dict()
+        matrix = []
         for myline in section_content:
-            line = myline.split(self.delimiter, 1)
+            if '[' and ']' in myline:
+                matrix.append(myline.split('[')[1].split(']')[0])
+                myline = myline.split(']')[1].strip()
+                line = myline.split()
+            line = myline.split()
 
             if (line[0] in structure_dict):
                 structure_dict[line[0]] = line[1]
@@ -200,7 +205,7 @@ class InputParser(MASTObj):
                 subsection = line[1]
                 subsection_list = list()
             elif ('end' not in line):
-                lsplit = myline.split(self.delimiter)
+                lsplit = myline.split()
                 lineval = list()
                 for lval in lsplit:
                     lval.strip()
@@ -267,14 +272,35 @@ class InputParser(MASTObj):
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
             if (key == 'scaling'):
+                index = 0
+                scsize = []
                 for scline in value:
-                    scsize = scline[0].strip()
-                    sckmesh = scline[1].strip()
-                    scktype = scline[2].strip()
+                    try:
+                        sckmesh = scline[0].strip()
+                    except: raise MASTError(self.__class__.__name__, "No kpoint mesh given!")
                     sckshift = "0.0 0.0 0.0"
-                    try: sckshift = "%s %s %s"%(scline[3],scline[4],scline[5])
+                    scktype = 'M'
+                    try: 
+                        if scline[1].strip().upper()=='M' or scline[1].strip().upper()=='G':
+                            scktype = scline[1].strip()
                     except IndexError: pass
-                    scaling[scsize]=[sckmesh,scktype,sckshift]
+                    if 'label=' in scline[-1]:
+                        scsize.append(scline[-1].strip().split('label=')[1])
+                        try:                                     
+                            sckshift = "%s %s %s"%(float(scline[-4]), float(scline[-3]), float(scline[-2]))
+                        except: pass                            
+                    else:
+                        label = 1
+                        while 'size%s'%label in scsize:
+                            label += 1
+                        scsize.append('size%s'%label)
+                        try: 
+                            sckshift = "%s %s %s"%(float(scline[-3]), float(scline[-2]), float(scline[-1]))
+                        except: pass
+                    if scsize[index] in scaling.keys():
+                        raise MASTError(self.__class__.__name__, "Label %s conflicted with the default label. Please rename this label!"%scsize[index])
+                    scaling[scsize[index]]=[matrix[index],sckmesh,scktype,sckshift]
+                    index += 1
                 structure_dict['scaling'] = scaling
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
@@ -287,7 +313,6 @@ class InputParser(MASTObj):
 
         for key, value in structure_dict.items():
             options.set_item(section_name, key, value)
-
     def parse_defects_section(self, section_name, section_content, options):
         """Parses the defects section and populates the options.
         """
@@ -571,10 +596,10 @@ class InputParser(MASTObj):
         for line in section_content:
             line = line.strip()
             #if 'images' in line:
-            #    line = line.split(self.delimiter)
+            #    line = line.split()
             #    images = int(line[1])
             if 'begin' in line:
-                line = line.split(self.delimiter)
+                line = line.split()
                 neblabel = line[1].strip()
                 nebs[neblabel]=dict()
                 nebs[neblabel]['lines']=list()
@@ -689,13 +714,13 @@ class InputParser(MASTObj):
         for line in section_content:
             line = line.strip()
             if 'begin' in line:
-                line = line.split(self.delimiter)
+                line = line.split()
                 label = line[1].strip()
                 phonon[label]=dict()
             elif 'end' in line:
                 pass
             else:
-                line = line.split(self.delimiter, 1)
+                line = line.split()
                 phonon[label][line[0]] = line[1]
 
         options.set_item(section_name, 'phonon', phonon)
@@ -783,7 +808,7 @@ class InputParser(MASTObj):
         """Parses the summary section and populates the options."""
         mast_dict = dict()
         for line in section_content:
-            line = line.split(self.delimiter, 1)
+            line = line.split()
             mast_dict.setdefault(line[0], []).append(line[1].strip())
 
         for key, value in mast_dict.items():

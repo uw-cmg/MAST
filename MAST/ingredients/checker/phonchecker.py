@@ -1,3 +1,9 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# PHON checker is obsolete, as PHON is no longer being supported. 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
 from pymatgen.io.vaspio import Poscar
 from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Potcar

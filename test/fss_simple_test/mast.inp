@@ -1,0 +1,122 @@
+# Test file
+$mast
+system_name GaAs_defects
+$end
+
+$structure
+posfile POSCAR.ga4as4
+$end
+
+$defects
+threshold 1e-4
+coord_type fractional
+
+begin group1
+vacancy 0.0 0.0 0.0 Ga 
+charge=-3,-2
+end
+
+begin group2
+substitution 0.25 0.25 0.25 Bi
+vacancy 0.0 0.0 0.0 Ga
+end
+
+begin group3
+antisite 0.0 0.0 0.0 As
+charge=2,2
+end
+$end
+
+$recipe
+recipe_file recipe_scale_defects.txt 
+#recipe_file debug.txt
+$end
+
+$ingredients
+begin ingredients_global
+mast_kpoints 1x1x1
+mast_xc PBE
+mast_ppn 1
+mast_queue default
+mast_exec //share/apps/vasp5.2_cNEB > vasp.out
+mast_pp_setup Ga=Ga_d Bi=Bi_d
+ispin 2
+lwave False
+lcharg False
+encut 313
+ibrion 2
+nsw 191
+mast_program vasp
+mast_write_method write_singlerun
+mast_ready_method ready_singlerun
+mast_complete_method complete_singlerun
+mast_run_method run_singlerun
+mast_update_children_method give_structure
+end
+
+begin static
+ibrion -1
+nsw 0
+mast_write_method write_singlerun_automesh
+mast_kpoint_density 500
+end
+
+begin scaledefect_1
+mast_ready_method ready_structure
+mast_run_method run_defect
+mast_write_method no_setup
+mast_complete_method complete_structure
+end
+
+begin scaledefect_2
+mast_ready_method ready_structure
+mast_run_method run_scale_defect
+mast_write_method no_setup
+mast_complete_method complete_structure
+mast_scale 2
+end
+
+begin scaledefect_3
+mast_ready_method ready_structure
+mast_run_method run_scale_defect
+mast_write_method no_setup
+mast_complete_method complete_structure
+mast_scale 3
+end
+
+begin scaleperfect_2
+mast_ready_method ready_structure
+mast_run_method run_scale
+mast_write_method no_setup
+mast_complete_method complete_structure
+mast_scale 2
+end
+
+begin scaleperfect_3
+mast_ready_method ready_structure
+mast_run_method run_scale
+mast_write_method no_setup
+mast_complete_method complete_structure
+mast_scale 3
+end
+
+begin optimize_scaled
+mast_write_method write_singlerun_automesh
+mast_kpoint_density 500
+end
+$end
+
+$chemical_potentials
+begin Ga rich
+Ga -3.6080
+As -6.0383
+Bi -4.5650
+end
+
+begin As rich
+Ga -4.2543
+As -5.3920
+Bi -4.5650
+end
+$end
+

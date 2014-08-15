@@ -166,4 +166,4 @@ if __name__ == "__main__":
         print pickSubList(testlist,n)
          
     sys.stdout = saved
-    fout.close()                
+    fout.close()   

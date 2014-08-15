@@ -3,7 +3,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Wei Xie
-# Last updated: 2014-05-19
+# Last updated: 2014-06-13 by Zhewen Song
 ##############################################################
 import sys, getopt, os
 import shutil
@@ -37,18 +37,13 @@ def CalcV_M(structure):
 
 
         
-def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
-    #mu_e is the chemical potential of electron 
-    #mu_i is a dictionary of chemical potentials for atomic species
+def collectEformV_M(perfectDir,defectDirs,defectChg,mu):
+    #mu is the chemical potential needed 
     
     Eform = [None]*len(defectDirs)
     V_M = [None]*len(defectDirs)
-
  
-    cwdir = os.getcwd()
-    os.chdir(perfectDir)
-    
-    prf=mg.io.vaspio.vasp_output.Vasprun("vasprun.xml")
+    prf=mg.io.vaspio.vasp_output.Vasprun(perfectDir+"/vasprun.xml")
 
     prf_ene=prf.final_energy
     #TotEnePr = psTotEne("OSZICAR")
@@ -64,13 +59,11 @@ def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
     #gap,cbm,vbm,ifdirectgap=prf.eigenvalue_band_properties
     #print (defectDirs[i]+" "+str(V_M[i])+" "+str(gap)+" "+str(cbm)+" "+str(vbm))
 
-    os.chdir(cwdir)
     
     all_elmnts = prf_elmnts               
     for i in range(len(defectDirs)):
-        os.chdir(defectDirs[i])
         
-        dfct=mg.io.vaspio.vasp_output.Vasprun("vasprun.xml")
+        dfct=mg.io.vaspio.vasp_output.Vasprun(defectDirs[i]+'/vasprun.xml')
 
         dfct_strct=dfct.structures[len(dfct.structures)-1]
         #defct_strct=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
@@ -112,20 +105,19 @@ def collectEformV_M(perfectDir,defectDirs,defectChg,mu_e,mu_i):
 
         Eform[i] =  dfct_ene - scalingF*prf_ene 
 
-        #Eform[i] += defectChg*(vbm+mu_e*gap)
-        Eform[i] += defectChg*mu_e
+        #Eform[i] += defectChg*(vbm+mu['e']*gap)
+        Eform[i] += defectChg*mu['e']
 
         for k in range(len(all_elmnts)):
 
             if all_amnt_change[k] != 0:
 
-                if all_elmnts[k].symbol in mu_i:                    
-                    Eform[i] += mu_i[all_elmnts[k].symbol]*all_amnt_change[k]
+                if all_elmnts[k].symbol in mu:                    
+                    Eform[i] += mu[all_elmnts[k].symbol]*all_amnt_change[k]
                 else:
                     raise RuntimeError("Chemical potential of "+all_elmnts[k].symbol
                                         +"is not provided!")       
 
-        os.chdir(cwdir)
 
     return(V_M,Eform)
 
@@ -203,45 +195,37 @@ def plotFit(listX,listY,Xlabel,Ylabel,slpIntcpt,figTitle,dirNames):
     plt.show()    
 
 if __name__ == "__main__":
+    from MAST.recipe import recipeutility as ru
+    fp = open('madelung_utility/V_M.txt','r').readlines()
+    plotTitle='Madelung Plot'
+    defectDirs=[]
+    mu=dict()
+    for line in range(len(fp)):
+        if fp[line].strip().split('PlotTitle')[0]=='': plotTitle=fp[line].split('PlotTitle')[1].strip()
+        if fp[line].strip().split('perfect')[0]=='': perfectDir=fp[line].split()[1]  
+        if fp[line].strip().split('mu')[0]=='': 
+            labels=fp[line].split('mu')[1].split(',')
+            for i in range(len(labels)):
+                mu[labels[i].split(':')[0].strip()]=float(labels[i].split(':')[1].strip())
     
-    #plotTitle='VO2+,O rich, mu_e=VBM'
-    #perfectDir =  "../primordial_perfect/8x8x4_kmesh"
-    #defectDirs = ["2x2x1","2x2x2","2x2x3","3x3x1","3x3x2","4x4x1"]
-    #mu_e=6.268
-    #mu_i={'Al':-3.74,'O':-4.20}
-
-    plotTitle='VO2+,O rich, mu_e=VBM'
-    perfectDir = "../../primordial_perfect/12x12x12_kmesh"
-    defectDirs = ["1x2x2","1x2x3","1x3x4","2x2x2","2x3x4","3x3x3"]   
-    mu_e=4.999
-    mu_i={'Mg':-7.40,'O':-4.57}
-
-    #plotTitle='VSi2-,C rich, mu_e=VBM'
-    #perfectDir = "../primordial_perfect/12x12x12_kmesh"
-    #defectDirs = ["2x2x2","2x2x3","2x3x3","3x3x3"]
-    #defectDirs = ["2x2x2","2x2x3","2x2x4","2x3x3","3x3x3"]
-    #mu_e=8.423
-    #Si rich
-    #mu_i={'Si':-5.44,'C':-9.65}
-    #C rich
-    #mu_i={'Si':-5.89,'C':-9.20}
-    #Si/O equally rich
-    #mu_i={'Si':-5.67,'C':-9.43}    
-        
+    #fp = open('personal_recipe.txt','r').readlines()
+    #for line in range(len(fp)):
+    #    if 'madelung_utility' in fp[line]:
+    #        defectDirs.append(fp[line-1].split()[0])
+   
+    defectDirs = ru.read_recipe('personal_recipe.txt')[1]['madelung_utility']
+    
     saved = sys.stdout
-    fout = file('out.log', 'w')
+    fout = file('madelung_utility/out.log', 'w')
     sys.stdout = writer(sys.stdout, fout)
     
-    cwdir=os.getcwd()
-    os.chdir(defectDirs[0])    
-    sc_struct=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
-    sc_potcar=mg.io.vaspio.Potcar.from_file('POTCAR')
-    sc_incar=mg.io.vaspio.Incar.from_file('INCAR') 
+    sc_struct=mg.io.vaspio.Poscar.from_file(defectDirs[0]+'/POSCAR').structure
+    sc_potcar=mg.io.vaspio.Potcar.from_file(defectDirs[0]+'/POTCAR')
+    sc_incar=mg.io.vaspio.Incar.from_file(defectDirs[0]+'/INCAR') 
     defchg=GenSC.defChg(sc_struct,sc_potcar,sc_incar)
     print "defect charge: ", defchg
-    os.chdir(cwdir)
             
-    (V_M,Eform_orig)=collectEformV_M(perfectDir,defectDirs,defchg,mu_e,mu_i)
+    (V_M,Eform_orig)=collectEformV_M(perfectDir,defectDirs,defchg,mu)
 
     slpintcpt=linearFit(V_M,Eform_orig) 
     FS_corr=-np.array(V_M)*slpintcpt[0]
