@@ -23,15 +23,17 @@ class TestDefectformationenergy(unittest.TestCase):
 
     def tearDown(self):
         os.environ['MAST_ARCHIVE'] = oldarchive
-        if os.path.isdir("GaAs_defects_AsGa_recipe_defects_20131125T220427_dfe_results"):
-            shutil.rmtree("GaAs_defects_AsGa_recipe_defects_20131125T220427_dfe_results")
+        if os.path.isdir("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results"):
+            shutil.rmtree("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results")
 
     def test_dfe_tool(self):
         import subprocess
-        mydfetest=subprocess.Popen(["mast_defect_formation_energy"],shell=True)
+        os.chdir("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient")
+        mydfetest=subprocess.Popen(["mast_defect_formation_energy dfe_input.txt"],shell=True)
         mydfetest.wait()
+        os.chdir(testdir)
         compare_walk = dirutil.walkfiles("compare_results")
-        res_walk = dirutil.walkfiles("GaAs_defects_AsGa_recipe_defects_20131125T220427_dfe_results")
+        res_walk = dirutil.walkfiles("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results")
         compare_walk.sort()
         res_walk.sort()
         self.assertEqual(len(compare_walk), len(res_walk))
