@@ -740,7 +740,7 @@ class ChopIngredient(BaseIngredient):
         if scalingsize == None: scalingsize = '1 1 1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]
-        else: raise MASTError("Error in scaling size for the ingredient %s"%self.keywords['name'])
+        else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s" % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
         self.checker.write_final_structure_file(scaled)
@@ -756,7 +756,7 @@ class ChopIngredient(BaseIngredient):
         if scalingsize == None: scalingsize = '1 1 1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]        
-        else: raise MASTError("Error in scaling size for the ingredient %s"%self.keywords['name'])        
+        else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s"%self.keywords['name'])        
         defect = self.keywords['program_keys']['mast_defect_settings']
         scaled = base_structure.copy()
         for key in defect:

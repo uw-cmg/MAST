@@ -204,16 +204,23 @@ class TestSE(unittest.TestCase):
         self.assertEqual(strained, strain_compare)
         self.assertEqual(strained.lattice, strain_compare.lattice)
         self.assertEqual(strained.sites, strain_compare.sites)
-    def test_scale_structure(self):
+    def test_scale_structure_three(self):
         hcp = pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP").structure
-        sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2 2 2", name=testdir)
+        sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2,2,2", name=testdir)
+        scaled = sxtend.scale_structure()
+        self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
+        self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+    def test_scale_structure_nine(self):
+        hcp = pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP").structure
+        sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2 0 0,0 2 0,0 0 2", name=testdir)
         scaled = sxtend.scale_structure()
         self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
         self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
         self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
     def test_scale_defect(self):
         perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
-        scalingsize = "2 2 2"
+        scalingsize = "2,2,2"
         sxtend = StructureExtensions(struc_work1=perfect, scaling_size=scalingsize, name=testdir)
         scaled = sxtend.scale_structure()
         sxtend2 = StructureExtensions(struc_work1=scaled, struc_work2=perfect, scaling_size=scalingsize, name=testdir)

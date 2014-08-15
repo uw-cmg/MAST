@@ -377,8 +377,8 @@ class StructureExtensions(MASTObj):
             except ValueError:  # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
         else:
-            self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
-            raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scalesplit)
+            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+            raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scale)
             return None
         scaledstr.make_supercell(scaleinput)
         return scaledstr
@@ -411,8 +411,8 @@ class StructureExtensions(MASTObj):
                 scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
                 [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
         else:
-            self.logger.error("Wrong number of inputs for scaling: %s " % scalesplit)
-            raise MASTError("Wrong number of inputs for scaling: %s " % scalesplit)
+            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+            raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
             return None
         newdict = dict(defect)
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')

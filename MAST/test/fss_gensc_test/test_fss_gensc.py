@@ -10,6 +10,7 @@ import pymatgen
 import numpy as np
 from MAST.utility.finite_size_scaling.GenSC import genLMNs
 from MAST.utility.finite_size_scaling.GenSC import gensc
+from MAST.utility import dirutil
 testname ="fss_gensc_test"
 #oldcontrol = os.getenv("MAST_CONTROL")
 #oldrecipe = os.getenv("MAST_RECIPE_PATH")
@@ -18,7 +19,7 @@ testname ="fss_gensc_test"
 #print oldcontrol
 #print oldrecipe
 #print oldscratch
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = os.path.join(dirutil.get_mast_install_path(),'test',testname)
 
 
 class TestGenSC(unittest.TestCase):

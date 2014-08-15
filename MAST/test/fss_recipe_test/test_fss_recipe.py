@@ -9,7 +9,7 @@ import pymatgen
 from MAST.utility import dirutil
 
 testname="fss_recipe_test"
-testdir = os.path.join(os.getenv("MAST_INSTALL_PATH"),'test',testname)
+testdir = os.path.join(dirutil.get_mast_install_path(),'test',testname)
 
 class TestRecipeUtility(unittest.TestCase):
 
