@@ -11,6 +11,7 @@ import sys
 
 def main():
     """Strip $TEMP directory out of the submission list."""
+    homedir=os.getenv("HOME")
     subname="%s/submitlist" % os.getenv("MAST_CONTROL")
     sublist=open(subname,"rb")
     mylines = sublist.readlines()
@@ -23,7 +24,7 @@ def main():
             mysplit = myline.split("/")
             ingname = mysplit[-1]
             recipename = mysplit[-2]
-            newline = "MAST/SCRATCH/%s/%s\n" % (recipename, ingname)
+            newline = "%s/MAST/SCRATCH/%s/%s\n" % (homedir, recipename, ingname)
             newlines.append(newline)
         else:
             newlines.append(myline)
