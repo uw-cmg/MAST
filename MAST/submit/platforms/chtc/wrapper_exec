@@ -1,0 +1,9 @@
+#!/bin/sh
+###TTM 2014-08-27
+###program to run should be argument 1
+###number of processors should be argument 2
+mybaseexec=`basename $1`
+myhost=`grep -m 1 "Machine = " $_CONDOR_MACHINE_AD | awk -F\" '{print $2}'`
+echo $myhost" slots="$2 > myhostfile
+./openmpi/bin/mpiexec --prefix $TEMP/openmpi -wdir $TEMP -hostfile myhostfile -np $2 ./$mybaseexec
+exit 0

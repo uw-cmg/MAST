@@ -1,0 +1,216 @@
+#!/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
+
+import os
+import time
+import shutil
+import optparse # Allows for some command line option parsing
+import glob
+import subprocess 
+import logging
+
+from MAST.utility import MASTFile
+from MAST.parsers import InputParser
+from MAST.utility import dirutil
+from MAST.utility import MASTError
+from MAST.utility import loggerutils
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option('-m', '--mode', dest='mode', default='interface',
+                      help='Determines which mode is used (see README for more info)')
+    parser.add_option('-i', '--input', dest='input', default=None,
+                      help='Input file to use to run MAST with (sets mode to input)')
+
+    (mastopt, mastarg) = parser.parse_args()
+
+    print "---------------------------------------------------"
+    print "Welcome to the MAterials Simulation Toolkit (MAST),"
+    print "(version coracle 1.1.0)"
+    print "---------------------------------------------------"
+
+    # Set mode to input if an input file is given
+    if (mastopt.input is not None):
+        mastopt.mode = 'input'
+
+    # Set a default file name
+    if (mastopt.mode == 'input') and (mastopt.input is None):
+        mastopt.input = 'mast.inp'
+
+    if (mastopt.mode == 'interface'):
+        submit_and_monitor()
+    
+    if (mastopt.mode == 'input'):
+        process_input_file(mastopt.input)
+
+def submit_and_monitor():
+    from MAST.submit import queue_commands
+    myerrors = display_errors()
+    if myerrors == -1:
+        return
+    display_displayme_lines()
+    mastscratch = dirutil.get_mast_scratch_path()
+    if dirutil.directory_is_locked(mastscratch):
+        print "The $MAST_SCRATCH directory is locked by a MAST monitor. Please wait for that monitor to complete, or check the $MAST_CONTROL/errormast file."
+        return
+    dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1) 
+    print "Moving log file."
+    move_log()
+    print "Submitting from submission list."
+    queue_commands.submit_from_submission_list()
+    print "Clearing submission list."
+    queue_commands.clear_submission_list()
+    display_recent_submissions()
+    print "Getting queue snapshot."
+    clear_and_get_queue_snapshot()
+    dirutil.unlock_directory(dirutil.get_mast_scratch_path())
+    print "Locking directory and submitting MAST monitor."
+    #dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
+    mycwd=os.getcwd()
+    mast_control = os.getenv("MAST_CONTROL")
+    os.chdir(mast_control)
+    mycommand="bash mastmon_submit.sh"
+    #mycommand=queue_commands.queue_submission_command("mastmon_submit.sh") #run the mastmon_submit.sh script in $MAST_CONTROL which creates a mastmon in order to do status checking on a compute node
+    mysub = subprocess.Popen(mycommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #mysub.wait()
+    os.chdir(mycwd)
+
+def clear_and_get_queue_snapshot():
+    """Clear the $MAST_CONTROL/queue_snapshot file and get a new one."""
+    from MAST.submit import queue_commands
+    mast_control = os.getenv("MAST_CONTROL")
+    qspath = "%s/queue_snapshot" % mast_control
+    if os.path.isfile(qspath):
+        os.remove(qspath)
+    myqs=queue_commands.queue_snap_command()
+    qsopen = open(qspath, 'wb')
+    mysub = subprocess.Popen(myqs, shell=True, stdout=qsopen, stderr=subprocess.PIPE)
+    mysub.wait()
+    qsopen.close()
+
+def process_input_file(myinputfile):
+    myerrors = display_errors()
+    if myerrors == -1:
+        return
+    move_log()
+    from MAST.controllers.mast import MAST
+    mast = MAST(inputfile=myinputfile, outputfile="mastoutput.txt")
+    mast.check_independent_loops()
+    print "Finished processing input file. Check $MAST_CONTROL/mast.log for logged information."
+
+def move_log():
+    """Move logfile to archive.timestamp.log
+    """
+    logfile = "%s/mast.log" % os.getenv("MAST_CONTROL")
+    errorpath = "%s/errormast" % os.getenv("MAST_CONTROL")
+    if os.path.isfile(logfile):
+        shutil.move(logfile, "%s/archive.log.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+    if os.path.isfile(errorpath):
+        errorfile = MASTFile(errorpath)
+        if len(errorfile.data) > 0:
+            shutil.move(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+
+def display_errors():
+    """Display errors."""
+    mastscratch = dirutil.get_mast_scratch_path()
+    errorpath="%s/errormast" % os.getenv("MAST_CONTROL")
+    if not os.path.isfile(errorpath):
+        return
+    myerrormast = MASTFile(errorpath)
+    has_traceback = False
+    for line in myerrormast.data:
+        if "traceback" in line.lower():
+            has_traceback = True
+            break
+    if has_traceback == False:
+        shutil.move(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+        if dirutil.directory_is_locked(mastscratch):
+            dirutil.unlock_directory(mastscratch)
+        return 0
+    if len(myerrormast.data) > 0:
+        print "--------------------------"
+        print "Errors below indicate that MAST errored out the last time it ran."
+        print "Please take the following steps:"
+        print "1. Correct the error(s). Some errors may have been automatically corrected."
+        print "2. Remove the $MAST_CONTROL/errormast file."
+        print "3. Re-run MAST."
+        print ""
+        for eline in myerrormast.data:
+            print eline.strip()
+        print "--------------------------"
+        print "Please take the following steps:"
+        print "1. Correct the error(s). Some errors may have been automatically corrected."
+        print "2. Remove the $MAST_CONTROL/errormast file."
+        print "3. Re-run MAST."
+        print ""
+        shutil.copy(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
+        if dirutil.directory_is_locked(mastscratch):
+            dirutil.unlock_directory(mastscratch)
+        return -1
+
+def display_recent_submissions():
+    """Display recent submissions to the queue."""
+    justsubmitted=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'just_submitted'))
+    if len(justsubmitted.data) > 1:
+        print "--------------------------"
+        print "Jobs submitted to the queue: (%s/just_submitted):" % os.getenv("MAST_CONTROL")
+        print "--------------------------"
+        for line in justsubmitted.data:
+            print line.strip()
+
+def display_displayme_lines():
+    """Display all lines from the previous mast.log logfile.
+    """
+    logpath = os.path.join(os.getenv("MAST_CONTROL"),'mast.log')
+    if not os.path.isfile(logpath):
+        return
+    print "-------------------------"
+    print " Recipe information from previous MAST run:"
+    print "-------------------------"
+    alllog=MASTFile(os.path.join(os.getenv("MAST_CONTROL"),'mast.log'))
+    for line in alllog.data:
+        displine=line.strip()
+        print displine
+    #    rname=displine[2]
+    #    rmsg=displine[3]
+    #    if not rname in immeddict.keys():
+    #        immeddict[rname]=list()
+    #    immeddict[rname].append(rmsg)
+    #rkeys=immeddict.keys()
+    #rkeys.sort()
+    #for rkey in rkeys:
+    #    print "%s:" % rkey
+    #    for msgline in immeddict[rkey]:
+    #        print "    %s" % msgline
+    #mycheck = subprocess.Popen(['grep DISPLAY_ME %s/mast.log' % os.getenv("MAST_CONTROL")],shell=True)
+    #mycheck.wait()
+
+def check_env_variables():
+    """Check for the presence of environment variables.
+        Raise an error if a crucial variable is not set.
+        Additionally, set up necessary platform files
+        if MAST_PLATFORM is set but the files do not exist.
+    """
+    env_varlist=["MAST_CONTROL","MAST_SCRATCH","MAST_ARCHIVE",
+                    "MAST_RECIPE_PATH","MAST_PLATFORM"]
+    for env_var in env_varlist:
+        if os.getenv(env_var) == None:
+            raise MASTError("bin/mast", "Environment variable %s must be set." % env_var)
+    mast_control = os.getenv("MAST_CONTROL")
+    mast_platform = os.getenv("MAST_PLATFORM").lower()
+    if not os.path.isfile("%s/set_platform" % mast_control):
+        myfile = MASTFile()
+        myfile.data.append(mast_platform)
+        myfile.to_file("%s/set_platform" % mast_control)
+    if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
+        shutil.copy("%s/platforms/%s/mastmon_submit.sh" % (mast_control, mast_platform), mast_control)
+    return
+
+if __name__ == '__main__':
+    check_env_variables()
+    main()
+
