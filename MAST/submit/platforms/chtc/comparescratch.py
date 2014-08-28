@@ -104,6 +104,7 @@ def zip_only_changed():
             recipe=ritem.split(":")[0]
             ingred=ritem.split(":")[1]
             totarfile.data.append(os.path.join("MAST/SCRATCH",recipe,ingred)+"\n")
+            totarfile.data.append(os.path.join("MAST/SCRATCH",recipe,"status.txt") + "\n")
         elif ":archived" in ritem:
             recipe=ritem.split(":")[0]
             totarfile.data.append(os.path.join("MAST/ARCHIVE",recipe)+"\n") 
