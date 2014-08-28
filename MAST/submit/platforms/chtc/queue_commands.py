@@ -50,6 +50,13 @@ def queue_status_from_text(jobid, queuetext):
     qmat = queuetext.split()
     if len(qmat) < 5:
         return 'E'
+    mystat=qmat[5]
+    if mystat in ["I","<"]:
+        return 'Q'
+    elif mystat in ["R","C","X"]:
+        return 'R'
+    else:
+        return 'E'
     return qmat[5] #TTM 1/17/12 qstat returns differently than qstat -a does
 
 def extract_submitted_jobid(string):

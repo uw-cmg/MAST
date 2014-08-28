@@ -69,7 +69,7 @@ def submit_and_monitor():
     clear_and_get_queue_snapshot()
     dirutil.unlock_directory(dirutil.get_mast_scratch_path())
     print "Locking directory and submitting MAST monitor."
-    #dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
+    dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
     mycwd=os.getcwd()
     mast_control = os.getenv("MAST_CONTROL")
     os.chdir(mast_control)
