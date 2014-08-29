@@ -2,8 +2,18 @@
 ###TTM 2014-08-27
 ###program to run should be argument 1
 ###number of processors should be argument 2
-mybaseexec=`basename $1`
+#Step 1. Get and untar openmpi from proxy fileserver
+curl -H "Pragma:" --fail --retry 30 --retry-delay 6 -o openmpi.tar.gz http://proxy.chtc.wisc.edu/SQUID/mayeshiba openmpi.tar.gz
+tar -xzvf openmpi.tar.gz
+#Step 2. Get exec from proxy fileserver
+curl -H "Pragma:" --fail --retry 30 --retry-delay 6 -o $1 http://proxy.chtc.wisc.edu/SQUID/mayeshiba/$1
+#Step 3. Set up hostfile for openmpi
 myhost=`grep -m 1 "Machine = " $_CONDOR_MACHINE_AD | awk -F\" '{print $2}'`
 echo $myhost" slots="$2 > myhostfile
-./openmpi/bin/mpiexec --prefix $TEMP/openmpi -wdir $TEMP -hostfile myhostfile -np $2 ./$mybaseexec
+#Step 4. Run executable with hostfile
+./openmpi/bin/mpiexec --prefix $TEMP/openmpi -wdir $TEMP -hostfile myhostfile -np $2 ./$1
+#Step 5. Clean up files
+rm openmpi.tar.gz
+rm $1
+rm -r openmpi
 exit 0
