@@ -753,7 +753,7 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
-        if scalingsize == None: scalingsize = '1 1 1'
+        if scalingsize == None: scalingsize = '1,1,1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]        
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s"%self.keywords['name'])        
