@@ -1,7 +1,9 @@
 #!/bin/bash
 ###TTM 2014-08-27 post-mast steps
-rm MAST_workdirs.tar.gz
+mysquid="/squid/mayeshiba"
+rm $mysquid/MAST_workdirs.tar.gz
 tar -xzvf back.tar.gz
-//home/tmayeshi/bin/stripsubmitlist.py
 sleep 10
+~/bin/stripsubmitlist.py
+sleep 2
 mast -m submitonly

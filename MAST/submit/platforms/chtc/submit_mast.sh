@@ -1,7 +1,7 @@
 ################################
 universe = vanilla
-executable = //home/tmayeshi/bin/submit_mast_wrapper.sh
-transfer_input_files =  //home/tmayeshi/bin/comparescratch.py, //home/tmayeshi/canopy_local.tar.gz, //home/tmayeshi/MAST_workdirs.tar.gz, //home/tmayeshi/vasp_pps.tar.gz
+executable = //home/mayeshiba/bin/submit_mast_wrapper.sh
+transfer_input_files =  //home/mayeshiba/bin/comparescratch.py
 should_transfer_files = yes
 when_to_transfer_output = on_exit
 request_cpus = 1

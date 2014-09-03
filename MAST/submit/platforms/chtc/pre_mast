@@ -1,4 +1,7 @@
 #!/bin/bash
 ###TTM 2014-08-27 pre-mast steps
-nice -n 19 tar -czvf MAST_workdirs.tar.gz MAST
-condor_submit //home/tmayeshi/bin/submit_mast.sh
+
+mysquid="/squid/mayeshiba"
+
+nice -n 19 tar -czvf $mysquid/MAST_workdirs.tar.gz MAST
+condor_submit $HOME/bin/submit_mast.sh
