@@ -22,6 +22,9 @@ sleep 100
 ./comparescratch.py -m zip
 rm -r $MAST_CONTROL/statusfiles
 tar -czvf back.tar.gz -T tarthis
+rm vsquid_pps.tar.gz
+rm canopy_local.tar.gz
+rm MAST_workdirs.tar.gz
 rm -r vasp_pps
 rm -r canopy_local
 rm -r MAST
