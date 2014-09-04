@@ -9,13 +9,13 @@ request_cpus = ?mast_ppn?
 request_memory = 1000
 request_disk = 1000
 
-Requirements = CAN_RUN_WHOLE_MACHINE
+#Requirements = CAN_RUN_WHOLE_MACHINE
 
 log = log
 output = output
 error  = error
 getenv = true
-+RequiresWholeMachine=true
+#+RequiresWholeMachine=true
 #+AccountingGroup = MSE_Morgan
 +WantFlocking = True
 +WantGlideIn = True
