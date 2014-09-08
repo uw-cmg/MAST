@@ -1,7 +1,7 @@
 ################################
 universe = vanilla
-executable = //home/mayeshiba/bin/wrapper_exec
-arguments = ?mast_exec? ?mast_ppn?
+executable = //home/mayeshiba/bin/wrapper_exec_?mast_exec?
+arguments = ?mast_ppn?
 transfer_input_files = ./
 should_transfer_files = yes
 when_to_transfer_output = on_exit
