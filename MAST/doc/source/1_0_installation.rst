@@ -94,133 +94,76 @@ Check that numpy and scipy are installed, which they should be::
     import scipy
 
 ==============================================
-Download and install dependencies
+Install dependencies
 ==============================================
-Download the following .tar.gz files from the Python Package Index 
+MAST requires pymatgen and custodian, each of which has several dependencies, which also have their own dependencies.
 
-==============================================
-Verify setuptools (easy_install) and pip
-==============================================
-Check if easy_install and pip are available:
+---------------------------------
+pip note for the python-savvy
+---------------------------------
+If you have ``pip``, it is possible but sometimes unusually complicated to use pip to install MAST and its dependencies. 
 
-    *  ``which pip``
-    *  ``which easy_install``
+*  If the ``pip`` command does not exist (``which pip`` does not return anything), go on to :ref:`manual-installation`.
 
-Example::
+If you have the ``pip`` command, it may be worth trying the following::
+
+    pip install pymatgen --user
+    pip install custodian --user
+    pip install MAST --user
+
+*  If this series of commands actually worked without errors, skip to :ref:`vasp-psp-dir`. 
+*  If you have never used pip before, and using pip created a ``$HOME/.local`` folder for you for the first time, and you encounter errors, delete the ``$HOME/.local`` folder and go on to :ref:`manual-installation`.
+*  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to manual installation.
+
+.. _manual-installation:
+
+----------------------------------------
+Manual installation of dependencies
+----------------------------------------
+
+Download ``tar.gz`` files for the following dependencies from the `Python Package Index <https://pypi.python.org>`_
+
+*  The versions listed are known to be compatible with MAST and with each other.
+
+*  Using other version numbers may require adjustments to the entire list.
+Look at ``install_requires`` inside the ``setup.py`` file to see which version numbers may be required.
+
+Dependency list::
+
+    PyCifRW-3.6.2.tar.gz
+    pybtex-0.18.tar.gz
+    pyhull-1.4.5.tar.gz
+    monty-0.3.4.tar.gz
+    PyYAML-3.11.tar.gz
+    requests-2.3.0.tar.gz
+    pymatgen-2.7.9.tar.gz
+    custodian-0.7.5.tar.gz
+
+Upload each of these .tar.gz files onto your cluster.
+Uncompress and untar each of these files (``tar -xzvf <tar.gz filename>``, for example, ``tar -xzvf PyCifRW-3.6.2.tar.gz``).
+
+In the order that they are given, go to the untarred directory for each package and run the setup script as follows::
+
+    tar -xzvf PyCifRW-3.6.2.tar.gz
+    cd PyCifRW-3.6.2
+    python setup.py install (--user, depending on the notes below)
+
+And so on for all the packages, in the order that they appear.
+
+If you are using a system-wide python, like from the module system or in a shared directory, then you need the ``--user`` tag, and will use the command::
     
-    [username@aci-service-2 ~]$ which pip
-    //home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin/pip
-    [username@aci-service-2 ~]$ which easy_install
-    //home/username/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin/easy_install
+    python setup.py install --user
     
-pip must be version 1.3 or later (``pip --version``)
+In this case, the modules will end up in a folder like ``//home/<username>/.local/lib/python2.7/site-packages``.
 
-If either easy_install or pip is missing, install them as follows.
+If you are using your own locally-installed python, you can just use::
 
-Get setuptools (easy_install)
-
-    *  `setuptools <https://pypi.python.org/pypi/setuptools>`_
-    *  ``wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py``
-    *  ``python ez_setup.py`` if you are using your own locally-installed python
-    *  ``python ez_setup.py --user`` if you are using a root-installed python
-
-Get pip
-
-    *  `pip <https://pypi.python.org/pypi/pip>`_
-    *  ``curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py``
-    *  ``python get-pip.py`` if you are using your own locally-installed python
-    *  ``python get-pip.py --user`` if you are using a root-installed python
-
-easy_install and pip should now be located either wherever your installed python is, or in the ``$HOME/.local/bin`` directory
-Check their locations and the pip version again.
-
-=========================================
-Verify or install numpy and scipy
-=========================================
-Check if numpy and scipy available::
-
-    python
-    import numpy
-    import scipy
-
-If numpy and scipy are not available, we recommend that you go back and install a local version of python which already includes numpy and scipy.
-
-Scipy is optional at this stage (used in the MAST defect finder).
-
---------------------------------------------
-Install numpy (not recommended)
---------------------------------------------  
-If numpy is not available, try pip installation::
-
-    pip install --user numpy
-
-(If you are using a user-installed pip with a root-installed python, use the command ``$HOME/.local/bin/pip`` instead of ``pip``.)
-
-If pip does not work, follow Quick install of numpy here. This will install Numpy without external library support. It is a quick and easy way to install Numpy, and will suite you for the purposes of running MAST.
-
-    *  Grab the most recent stable release of numpy from `<http://www.scipy.org/install.html>`_
-    *  Untar with command ``tar -zxvf numpy-<version>.tar.gz``
-    *  ``cd numpy-<version>``
-    *  Put the following in your command line, all as one line::
-
-        BLAS=None LAPACK=None ATLAS=None 
-        python setup.py config build install 
-        --prefix=<location where you want numpy installed, recommend $HOME/lib>
-
-    *  Get something to drink; this'll take about 5-10 minutes.
-    *  Add to your .bashrc::
-        
-        NUMPY=<location you specified above>
-        export PYTHONPATH=$NUMPY:$PYTHONPATH
-
-    *  source $HOME/.bashrc
-
-============================================
-Verify or install pymatgen and custodian
-============================================   
-Check if pymatgen and custodian are available::
-
-    python
-    import pymatgen
-    import custodian
-
-If pymatgen and custodian are not available, install them.
-
---------------------------------
-Install pymatgen and custodian
---------------------------------
-
-Make sure you explicitly use the correct pip and easy_install, e.g. //home/username/.local/bin/pip and //home/username/.local/bin/easy_install or other such paths, corresponding to the correct version of python.
-
-Use the ``--user`` tag if you are not using the easy_install and pip from your own installation of python. Otherwise, you can omit this tag.
-
-Upgrade the *distribute* package. You **MUST** upgrade this package, even if it is freshly installed. (8/9/13) ::
+    python setup.py install
     
-    nice -n 19 easy_install --user --upgrade distribute
+In this case, the modules will end up in your python installation directory, for example, ``//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/lib/python2.7/site-packages``.
 
-pip install pymatgen and custodian::
 
-    nice -n 19 pip install --user pymatgen
-    nice -n 19 pip install --user custodian
-
-If the pymatgen installation does not work, failing with PyCifRW, install PyCifRW manually first, using the paths that correspond to your system (python line is all one line)::
-
-    cd $HOME/.local/lib/python2.7/site-packages/setuptools-2.1-py2.7.egg
-
-    python ./easy_install.py --user https://bitbucket.org/
-        jamesrhester/pycifrw/downloads/PyCifRW-3.5-py2.7-linux-i686.egg
-
-If pip does not work, try making your own temp directory. ::
-            
-    mkdir //home/<username>/tmp
-    export TMPDIR=.//home/<username>/tmp.
-
-Then try running the pip commands again.
-            
-Remove any pip directory if it exists. ::
-    
-    cd //tmp
-    rm -r pip-build
+.. _vasp-psp-dir:
 
 ======================================
 Set up the pymatgen VASP_PSP_DIR
