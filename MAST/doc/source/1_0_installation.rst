@@ -111,7 +111,7 @@ If you have the ``pip`` command, it may be worth trying the following::
     pip install custodian --user
     pip install MAST --user
 
-*  If this series of commands actually worked without errors, skip to :ref:`vasp-psp-dir`. 
+*  If this series of commands actually worked without errors, skip to :ref:`add-local-bin`. 
 *  If you have never used pip before, and using pip created a ``$HOME/.local`` folder for you for the first time, and you encounter errors, delete the ``$HOME/.local`` folder and go on to :ref:`manual-installation`.
 *  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to manual installation.
 
@@ -162,18 +162,48 @@ If you are using your own locally-installed python, you can just use::
     
 In this case, the modules will end up in your python installation directory, for example, ``//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/lib/python2.7/site-packages``.
 
+If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.
+
+.. _add-local-bin:
+
+------------------------------------------------
+Adding the .local/bin directory, if necessary
+------------------------------------------------
+
+If you have a ``$HOME/.local/bin`` directory from a ``--user`` installation from any of the previous steps, add it to your PATH by modifying your user profile.
+For example::
+    
+    vi ~/.bashrc
+    export PATH=$HOME/.local/bin:$PATH
+
+(This line can go either before or after any other ``export PATH`` lines you might have.)
+
+Then log out and log back in.
+
+If you were using your own locally-installed python, then you would have already added the correct bin directory to your user profile in the :ref:`install-local-python` step. 
+
 
 .. _vasp-psp-dir:
 
 ======================================
 Set up the pymatgen VASP_PSP_DIR
 ======================================
-On DLX and bardeen, skip to the NEXT NUMBERED STEP
+This step is necessary if you are running VASP with MAST. If you are not running VASP with MAST, you may skip this step.
 
-Locate the VASP pseudopotentials
+Locate the VASP pseudopotentials. If you cannot locate the VASP pseudopotentials, contact your system administrator or another person who uses VASP on the cluster.
 
-*  On bardeen, this is ``//share/apps/vasp_pseudopotentials``
-*  On DLX it is ``//home/adozier/VASP``
+``which potcar_setup.py`` should return the pymatgen utility for setting up your pseudopotential directories in the way that pymatgen requires.
+
+Usually, if pymatgen has been propery
+set up the pymatgen VASP_PSP_DIR: 6.1 first find potcar_setup.py. usually if pymatgen has been properly installed, you can find potcar_setup.py by simply calling: which porcar_setup.py. However, in the rare case that porcar_setup.py is not in your path, you can find it under the installation path of pymatgen. Here’s how to find where pymatgen was installed: 1) find the paths for your site packages: >>> import site; site.getsitepackages() 2)check each of the site package path given above until finding the one containing a folder named pymatgen*.egg (e.g., pymatgen-2.10.2-py2.7-linux-x86_64.egg). 3). potcar_setup.py is in pymatgen*.egg/EGG-INFO/scripts/
+
+6.2 run potcar_setup.py.
+the “POT_GGA_PAW_PBE” directory address you give to potcar_setup.py is the directory that contains a few subdirectories, for example: potpaw_GGA potpaw_LDA.52 potpaw_PBE.52 potUSPP_LDA potpaw_LDA potpaw_PBE potUSPP_GGA. These subdirectory again contain many sub-subdirectory with element names like Ac, Ac_s, …, Zr_sv.
+
+6.3 I found the following two sentences confusing:
+• Rename the PBE folder POT_GGA_PAW_PBE to correspond to mast_xc pbe
+• Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91
+Now I got their meaning. I originally thought I need to rename “POT_GGA_PAW_PBE” to “mast_xc pbe”. So maybe we can add quotation marks and or change the font for “the PBE folder” and “POT_GGA_PAW_PBE”.
     
 Run pymatgen's python setup tool. This tool should be located wherever pymatgen was installed, either ``~/.local/bin/potcar_setup.py`` if you installed it with ``--user``, or wherever python is, otherwise. ::
 
