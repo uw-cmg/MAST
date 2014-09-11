@@ -139,6 +139,12 @@ Dependency list::
     pymatgen-2.7.9.tar.gz
     custodian-0.7.5.tar.gz
 
+Also get::
+
+    python-ase-3.8.1.3440.tar.gz
+    
+from the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_
+
 Upload each of these .tar.gz files onto your cluster.
 Uncompress and untar each of these files (``tar -xzvf <tar.gz filename>``, for example, ``tar -xzvf PyCifRW-3.6.2.tar.gz``).
 
@@ -242,25 +248,6 @@ cd $VASP_PSP_DIR
 
 *  Make sure you are getting to the right directory, which has the POT_GGA_PAW_PBE etc. folders inside it.
 
-===============================
-Install ASE
-===============================
-
-Obtain the latest source code from `<https://wiki.fysik.dtu.dk/ase/>`_
-
-Unzip the tar.gz file to your home directory
-
-Create the softlink as shown (use the version number you downloaded)::
-
-    ln -s python-ase-3.8.0.3420 ase
-
-DO NOT link to the ase folder within the unzipped tar.gz; only link to the top folder as shown above.
-
-In your user profile, add the following line::
-
-    export PYTHONPATH=$PYTHONPATH:~/ase
-
-Log out and log back in.
 
 ===============================
 Install MAST
