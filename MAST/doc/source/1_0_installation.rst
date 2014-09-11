@@ -17,50 +17,65 @@ Verify your Python version
 ================================
 Check your version of python: ``python --version``
 
-If your version of python is not 2.7.3, try to locate an existing version of python 2.7.3.
-Then, make sure that this version of python is defaulted to be used first. You may need to add a line to your user profile. Your user profile may be located in ``//home/username/.bashrc`` or a similar file.
+If your version of python is not a 2.7 version (e.g. 2.7.3), try to locate an existing version of python 2.7.
 
-For bardeen, the line you need to add is::
-    
+-------------------------------------------------------------------
+Locating and using an available but non-default version of python
+-------------------------------------------------------------------
+For clusters using the "module" system, like Stampede or DLX, check which modules are available using ``module avail python``, or ``module avail``
+
+For clusters not using the module system, you may need to look in ``//share/apps`` or a similar shared directory, or ask your system administrator.
+
+If you cannot find an existing version of python 2.7, skip to :ref:`install-local-python`.
+
+If you did find an existing version of python 2.7, now make sure that it is defaulted to be used first.
+You may need to add a line to your user profile. 
+Your user profile may be located in ``//home/username/.bashrc`` or a similar file.
+
+If the version found was a module, add a line like::
+
+    module load python
+
+The actual wording may depend on the module name.
+
+If the version found was found in an explicit directory and not through the module system, add a line like::
+
+    export PATH=<path_to_python2.7>:$PATH
+
+For example::
+
     export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
 
 Then, log out and log back in. 
 
-For platforms with the "module" system like stampede or DLX, check which modules are available (``module avail``) and add a line something like::
-
-    module load python
-    module load Python
-
-Then, log out and log back in.
-
 Type ``which python`` to make sure you have the right version, or ``python --version``.
 
-If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact the development team. ::
-        
+If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact your system administrator or the MAST development team.
+
 If you do not have or cannot find Python 2.7.3, then you must install it. 
 
----------------------
-Install python
----------------------
+.. _install-local-python:
+
+----------------------------------------
+Installing a local version of python
+----------------------------------------
 The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from `EPD Free Canopy <https://www.enthought.com/downloads/>`_
 
-*  Version 2.7.5 is okay
-*  On DLX, go into interactive setup with the command ``srun -u bash -i``
-*  ``bash ./canopy-1.0.3-rh5-64.sh``
-*  Follow the prompts (use spacebar to scroll through the license file)
+*  Run the setup script. (e.g. ``bash ./canopy-1.0.3-rh5-64.sh``)
+*  Follow the prompts and specify a local installation (use spacebar to scroll through the license file)
 
-Add lines to your profile to make this python installation your default python::
+Add lines to your user profile to make this python installation your default python, for example::
 
     vi ~/.bashrc
     #EPD (Canopy) python
     export PATH=//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH
 
-*  Do not just use the .Canopy/bin. directory - python modules will not load properly
-*  Log out and log in
+*  Do not just use the ``Canopy/bin`` directory, as python modules will not load properly
+*  Log out and log back in.
 
 Check your version of python: ``python --version``
 
-The version given must be the correct version. If not, for all subsequent commands that say *python*, give the full path to your version of python, e.g. ``//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python``
+The version given must be the correct version.
         
 ==============================================
 Verify setuptools (easy_install) and pip
