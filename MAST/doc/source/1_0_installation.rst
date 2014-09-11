@@ -111,7 +111,7 @@ If you have the ``pip`` command, it may be worth trying the following::
     pip install custodian --user
     pip install MAST --user
 
-*  If this series of commands actually worked without errors, skip to :ref:`add-local-bin`. 
+*  If this series of commands actually worked without errors, then do a quick installation of ASE following the instructions on the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_ and then skip to :ref:`add-local-bin`. 
 *  If you have never used pip before, and using pip created a ``$HOME/.local`` folder for you for the first time, and you encounter errors, delete the ``$HOME/.local`` folder and go on to :ref:`manual-installation`.
 *  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to manual installation.
 
