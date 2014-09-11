@@ -193,25 +193,19 @@ This step is necessary if you are running VASP with MAST. If you are not running
 Locate the VASP pseudopotentials. If you cannot locate the VASP pseudopotentials, contact your system administrator or another person who uses VASP on the cluster.
 
 ``which potcar_setup.py`` should return the pymatgen utility for setting up your pseudopotential directories in the way that pymatgen requires.
+If this command does not return a file location, then probably ``$HOME/.local/bin`` or ``<python installation directory>/bin`` is missing from your ``$PATH`` environment variable. See :ref:`add-local-bin`.
 
-Usually, if pymatgen has been propery
-set up the pymatgen VASP_PSP_DIR: 6.1 first find potcar_setup.py. usually if pymatgen has been properly installed, you can find potcar_setup.py by simply calling: which porcar_setup.py. However, in the rare case that porcar_setup.py is not in your path, you can find it under the installation path of pymatgen. Here’s how to find where pymatgen was installed: 1) find the paths for your site packages: >>> import site; site.getsitepackages() 2)check each of the site package path given above until finding the one containing a folder named pymatgen*.egg (e.g., pymatgen-2.10.2-py2.7-linux-x86_64.egg). 3). potcar_setup.py is in pymatgen*.egg/EGG-INFO/scripts/
+Run ``potcar_setup.py``::
 
-6.2 run potcar_setup.py.
-the “POT_GGA_PAW_PBE” directory address you give to potcar_setup.py is the directory that contains a few subdirectories, for example: potpaw_GGA potpaw_LDA.52 potpaw_PBE.52 potUSPP_LDA potpaw_LDA potpaw_PBE potUSPP_GGA. These subdirectory again contain many sub-subdirectory with element names like Ac, Ac_s, …, Zr_sv.
+    potcar_setup.py
 
-6.3 I found the following two sentences confusing:
-• Rename the PBE folder POT_GGA_PAW_PBE to correspond to mast_xc pbe
-• Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91
-Now I got their meaning. I originally thought I need to rename “POT_GGA_PAW_PBE” to “mast_xc pbe”. So maybe we can add quotation marks and or change the font for “the PBE folder” and “POT_GGA_PAW_PBE”.
-    
-Run pymatgen's python setup tool. This tool should be located wherever pymatgen was installed, either ``~/.local/bin/potcar_setup.py`` if you installed it with ``--user``, or wherever python is, otherwise. ::
+The directory address that you first give to the utility is the directory that contains a few subdirectories, for example: potpaw_GGA potpaw_LDA.52 potpaw_PBE.52 potUSPP_LDA potpaw_LDA potpaw_PBE potUSPP_GGA. These subdirectories again contain many sub-subdirectory with element names like Ac, Ac_s, Zr_sv, etc.
 
-    python .local/bin/potcar_setup.py or python potcar_setup.py or simply potcar_setup.py
-        
-(Remember to use the correct version of python, determined in step 2, e.g. //share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python .local/bin/potcar_setup.py)
+Once the new pymatgen-structured folders have been created, rename the GGA PBE folder to ``POT_GGA_PAW_PBE``.
 
-Take the paw directory if you are using PAW. Do not take the top directory, or the GGA/LDA/etc folders will overwrite.
+Later on, ingredients with a value of ``pbe`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of this folder (see :ref:`2_0_ingredients.rst`). 
+
+Rename the GGA PW91 folder to ``POT_GGA_PAW_PW91``. Ingredients with a value of ``pw91`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of this folder.
 
 Example of running the python setup tool::
         
@@ -225,29 +219,28 @@ Example of running the python setup tool::
     //home/<username>/.local/vasp_pps
 
 Rename the folders under ``//home/<username>/.local/vasp_pps``:
-    
-*  Rename the PBE folder POT_GGA_PAW_PBE to correspond to mast_xc pbe
-*  Rename the GGA folder POT_GGA_PAW_PW91 to correspond to mast_xc pw91
 
-==============================================
+    mv //home/<username>/.local/vasp_pps/<pbe_name> //home/<username>/.local/vasp_pps/POT_GGA_PAW_PBE
+    mv //home/<username>/.local/vasp_pps/<pw91_name> //home/<username>/.local/vasp_pps/POT_GGA_PAW_PW91
+
+For assistance with potcar_setup.py, please contact the
+`Pymatgen support group <https://groups.google.com/forum/#!forum/pymatgen>`_
+
+---------------------------------------------
 Add the VASP_PSP_DIR to your user profile
-==============================================
-Add a line to your .bashrc file exporting the environment variable VASP_PSP_DIR to this VASP directory.
+---------------------------------------------
+Add a line to your user profile exporting the environment variable VASP_PSP_DIR to this VASP directory.
 
-*  On bardeen, it should look something like::
+For example::
 
     export VASP_PSP_DIR=//home/<username>/.local/vasp_pps
 
-*  On DLX, use the directories already created::
+Log out and log back in.
+Test the change::
     
-    export VASP_PSP_DIR=//home/adozier/VASP/resources
-    export VASP_PSP_DIR=<whichever path you used in the potcar_setup.py script>
-*  Remember to save your .bashrc file. Test the change::
-    
-    source ~/.bashrc
-    cd $VASP_PSP_DIR
+cd $VASP_PSP_DIR
 
-*  Make sure you are getting to the right directory, which has POT_GGA_POW_PBE etc. folders inside it.
+*  Make sure you are getting to the right directory, which has the POT_GGA_PAW_PBE etc. folders inside it.
 
 ===============================
 Install ASE
