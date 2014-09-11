@@ -52,13 +52,23 @@ Type ``which python`` to make sure you have the right version, or ``python --ver
 
 If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact your system administrator or the MAST development team.
 
-If you do not have or cannot find Python 2.7.3, then you must install it. 
+Now, check to see if your python version has numpy and scipy::
+
+    python
+
+And then, from the python prompt::
+
+    import numpy
+    import scipy
+
+If you receive an ImportError, then you must install a local version of python which has numpy and scipy. Go to :ref:`install-local-python`.
 
 .. _install-local-python:
 
-----------------------------------------
-Installing a local version of python
-----------------------------------------
+------------------------------------------------------------
+Installing a local version of python with numpy and scipy
+------------------------------------------------------------
+
 The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from `EPD Free Canopy <https://www.enthought.com/downloads/>`_
 
 *  Run the setup script. (e.g. ``bash ./canopy-1.0.3-rh5-64.sh``)
@@ -76,7 +86,18 @@ Add lines to your user profile to make this python installation your default pyt
 Check your version of python: ``python --version``
 
 The version given must be the correct version.
-        
+
+Check that numpy and scipy are installed, which they should be::
+
+    python
+    import numpy
+    import scipy
+
+==============================================
+Download and install dependencies
+==============================================
+Download the following .tar.gz files from the Python Package Index 
+
 ==============================================
 Verify setuptools (easy_install) and pip
 ==============================================
