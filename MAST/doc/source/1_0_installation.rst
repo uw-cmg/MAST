@@ -446,39 +446,24 @@ The name of this file will depend on what is specified in ``submit_template.sh``
 ================================
 Additional setup
 ================================
-Figure out the correct mast_exec calls for your system, to be used in the :doc:`Input File<3_0_inputfile>`. Examples are below.
 
-*  Bardeen: ``mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1``  (or any of the other vasp executables) 
-*  DLX: ``mast_exec //home/username/bin/vaspmpirun``, where vaspmpirun is the following script (indentations are all part of the previous line)::
+You may need to do any or all of the following:
 
-    #!/bin/bash
-    export PERL5LIB=/opt/moab/lib/perl5
-    export MIC_LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/
-        apps/intel/ict/composer_xe_2013.0.079/compiler/lib/mic
-    export LD_LIBRARY_PATH=/share/cluster/RHEL6.2/x86_64/apps/
-        openmpi/1.6.2/lib:
-        /share/cluster/RHEL6.2/x86_64/apps/intel/ict/
-        composer_xe_2013.0.079/compiler/lib/intel64:
-        /share/cluster/RHEL6.2/x86_64/apps/intel/ict/
-        composer_xe_2013.0.079/mkl/lib/intel64
-    export INTEL_MKL_LIBS=/share/cluster/RHEL6.2/x86_64/
-        apps/intel/ict/composer_xe_2013.0.079/mkl/lib/intel64
-    export QTLIB=/usr/lib64/qt-3.3/lib
-    PATH=$PATH:$HOME/bin:$HOME/bin/convaspTest
-    export PATH
-    VaspPath=//home/adozier/VASP/vasp.5.2
-    export OMP_NUM_THREADS=1
-    ulimit -s unlimited
-    ulimit -l unlimited
-    #mpirun $VaspPath/vasp
-    //share/cluster/RHEL6.2/x86_64/apps/openmpi/1.6.2/bin/
-        mpirun $VaspPath/vasp
+* Identify the correct ``mast_exec`` call for your system.
 
-Modify ~/.bashrc if necessary
-    
-*  ACI/HPC, add: ``export LD_LIBRARY_PATH=$LD_LIBRARY_PATH://opt/intel/lib/intel64``
+For example, if you run VASP like this::
 
-To ensure recipes are created correctly, add python whitespace tab stops to your ~/.vimrc file::
+   //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1
+
+then in your input files, the ``mast_exec`` keyword would be specified like this::
+
+    mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1
+
+*  Add additional lines to your user profile which allow you to run VASP, including any modules that need to be imported, additions to your library path, unlimiting the stack size, and so on.
+
+*  Modify your text editor settings so that tabs become four spaces (or so that you have such an option readily available). This setting is very important to ensure that MAST can read the input file, especially the recipe section of the input file.
+
+If you use VIM (``vi``), add the following lines to your ``~/.vimrc`` file::
     
     " VIM settings for python in a group below:
     set tabstop=4
@@ -495,21 +480,21 @@ Follow the testing instructions from :ref:`test-on-cluster`
 *********************************
 Test that MAST can run
 *********************************
-#.  Go to ``//home/username/MAST/examples``
+#.  Go to ``$HOME/MAST/examples`` (or ``$WORK/MAST/examples`` or a similar folder, if you moved the ``$HOME/MAST`` folder from its default location.)
 #.  Select one of the examples. The fastest one is ``simple_optimization.inp``
 #.  Copy that file::
 
         cp simple_optimization.inp test.inp
 
-#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, and other settings described in :doc:`Input File<3_0_inputfile>`
+#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, ``mast_walltime``, and other settings described in :doc:`Input File<3_0_inputfile>`
 
 #.  Try to parse the input file, entering the following command as one line::
 
         nice -n 19 mast -i test.inp 
 
-    *  The .nice -n 19. keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
-    *  The -i signals to MAST that it is processing an input file.
-#. Your ``//home/username/MAST/SCRATCH`` directory should now have a recipe directory in it.
+    *  The ``nice -n 19`` keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
+    *  The ``-i`` signals to MAST that it is processing an input file.
+#. Your ``$MAST_SCRATCH`` directory should now have a recipe directory in it.
 
     * The recipe directory will have a name corresponding to the elements and the input file, and ending with a timestamp of YYYYMMDD"T"hhmmss. 
     * The recipe directory will contain several subfolders, which are ingredient directories.
@@ -524,21 +509,21 @@ Test that MAST can run
         *  ``cat archive_input_options.txt`` (should show Al instead of element X1)
     *  To see information about the ingredient relationships MAST detected from the recipe template:
 
-        *  ``cat personal_recipe.txt``
         *  ``cat archive_recipe_plan.txt``
-
+        
+        *  Look at the ``$personal_recipe`` section in the ``input.inp`` file
+    
     *  To see ingredient statuses at a glance:
 
         *  ``cat status.txt``
 
 #.  Run mast once: ``nice -n 19 mast``
-#.  You should see a `mastmon` job appear on the queue specified in $MAST_CONTROL/mastmon_submit.sh (which should be morganshort for bardeen).
+#.  You should see a `mastmon` job appear on the queue specified in ``$MAST_CONTROL/mastmon_submit.sh``
 #.  MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
 #.  Now you should see ``perfect_opt1`` appear on the queue.
-#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` is queued.
-#.  If you forgot some step above (like you forgot to create the submitlist file) and are running into strange problems, delete the PhononNebTest... folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
+#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` has a status of "Proceed to Queue", or "P".
+#.  If you forgot some step above, remove the recipe folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
 #.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
-
 
 
 *************************
