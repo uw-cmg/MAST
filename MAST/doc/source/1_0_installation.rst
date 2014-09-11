@@ -263,7 +263,7 @@ In your user profile, add the following line::
 Log out and log back in.
 
 ===============================
-Get MAST
+Install MAST
 ===============================
 * Get the latest MAST package from the Python package index::
     
