@@ -252,29 +252,46 @@ cd $VASP_PSP_DIR
 ===============================
 Install MAST
 ===============================
-* Get the latest MAST package from the Python package index::
+* Get the latest MAST package from the `Python Package Index <https://pypi.python.org>`
+(If ``MAST`` does not search properly, use ``Materials Simulation Toolkit``.)
+
+* Run ``python setup.py install`` or ``python setup.py install --user`` as you did with the other packages.
+
+-----------------------------------------------------
+The MAST folder, and setting environment variables
+-----------------------------------------------------
+The MAST setup.py script should have set up a ``MAST`` directory in your home directory, that is, ``//home/<username>/MAST``.
+*  This directory is primarily for storing calculations, and should not be confused with the python module directory, which is where the actual MAST python code resides.
+
+Inside ``$HOME/MAST`` there should be:
+#  A ``SCRATCH`` folder: Each time an input file is given to MAST, MAST will create a recipe directory inside this folder. The recipe directory will itself contain ingredient, or calculation, directories. Calculations will be submitted to the queue from inside these ingredient directories. Multiple recipes may reside in ``SCRATCH`` at the same time, and MAST will evaluate them alphabetically.
+#  An ``ARCHIVE`` folder: When a recipe directory is complete, MAST will move it from ``SCRATCH`` to ``ARCHIVE``.
+#  A ``CONTROL`` folder: MAST requires some control files in order to run. It also does some higher-level logging, and stores that output here.
+
+*  On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate "work" or "scratch" directory. In this case, move the entire ``$HOME/MAST`` directory into the work or scratch directory, for example::
+
+    mv $HOME/MAST $WORK/.
+
+In this case, the environment variables below should therefore say ``$WORK`` instead of ``$HOME``.
+
+*  You can also move the MAST directory anywhere else, as long as you set the environment variables correcty.
+
+Copy and paste the environment variables into your user profile, setting the paths correctly if you have moved the ``$HOME/MAST`` directory::
+
+    export MAST_SCRATCH=$HOME/MAST/SCRATCH
+    export MAST_ARCHIVE=$HOME/MAST/ARCHIVE
+    export MAST_CONTROL=$HOME/MAST/CONTROL
+    export MAST_PLATFORM=<platform_name> (see below for instructions)
+
+Log out and log back in.
+
+.. _modify-submission-for-platform:
+
+--------------------------------------------------
+Modifying submission details for your platform
+--------------------------------------------------
     
-    nice -n 19 pip install --upgrade --no-deps --user MAST
-
-The no-dependencies tag is on because we are assuming pymatgen and custodian have been properly installed as above. It is recommended to install them separately.
-
-Use the ``--user`` tag if you are not using the easy_install and pip from your own installation of python. Otherwise, you can omit this tag.
-    
-======================================
-Set up the environment variables
-======================================
-The pip installation should set up a ``MAST`` directory in ``//home/username/MAST`` with several subdirectories.
-
-The pip installation should then warn you with an ATTENTION flag of environment variables that must be set. 
-
-You may copy and paste the environment variables from the terminal into your user profile. In the examples below, ``username`` should have been changed to your username.::
-    
-    export MAST_SCRATCH=//home/username/MAST/SCRATCH
-    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
-    export MAST_CONTROL=//home/username/MAST/CONTROL"
-    export MAST_PLATFORM=platform_name
-
-You will need to manually choose platform_name as one of the following::
+For platform_name, you will need to manually choose one of the following::
     
     aci
     bardeen
@@ -289,81 +306,55 @@ You will need to manually choose platform_name as one of the following::
 
 For example::
 
-    export MAST_PLATFORM=sge_generic
+    export MAST_PLATFORM=stampede
 
-You must choose one of the platforms presented. Choose the best match. If your choice is not matched exactly, choose something anyway, complete the rest of this step, and go on to the following step.
+If your platform was not matched exactly, run the following command. It should produce some errors, but ignore those and just see where MAST is installed::
 
-Remember to log out and log back in after modifying your user profile.
+    mast -i none
 
------------------------------------
-Environment variable explanations
------------------------------------
-An explanation of each variable appears in the next section
+For example, output may be::
 
-MAST_SCRATCH: This variable may be set to any directory. MAST will look for recipes in this directory. ::
-    
-    export MAST_SCRATCH=//home/username/MAST/SCRATCH
+    ------------------------------------------------------
+    Welcome to the MAterials Simulation Toolkit (MAST)
+    Version: 1.1.5
+    Installed in: .local/lib/python2.7/site-packages/MAST
+    ------------------------------------------------------
 
-MAST_ARCHIVE: This variable may be set to any directory. MAST will move completed recipes from ``$MAST_SCRATCH`` into this directory. ::
-    
-    export MAST_ARCHIVE=//home/username/MAST/ARCHIVE
+and then an error about how there is no input file named 'none'.
 
-MAST_CONTROL: This variable may be set to any directory. MAST monitor log files, MAST monitor error files, and other MAST monitor output will be written to this directory. ::
-    
-    export MAST_CONTROL=//home/username/MAST/CONTROL
+Go to the "installed in" directory, and then::
 
-MAST_CONTROL also has several subfolders. If you move your $MAST_CONTROL to a different path, please copy the subfolders with it.
+    cd submit/platforms
 
-MAST_PLATFORM: This variable switches among platforms. Note that it looks both in $MAST_CONTROL/platforms and in the platforms folder in your MAST installation directory (often in some path like //home/username/.local/lib/python2.7/site-packages/MAST or //share/apps/EPD.../lib/python2.7/site-packages/MAST). ::
+Identify the closest-matching directory to your actual platform (for example, if you have an SGE platform, this directory would be sge_generic)
 
-    export MAST_PLATFORM=bardeen
+Copy this directory into a new directory inside the ``platforms`` folder, for example::
 
-VASP_PSP_DIR: This variable is necessary if VASP and VASP pseudopotential files are being used. See the documentation for the `Materials Project's <http://materialsproject.org>`_ `pymatgen <http://pymatgen.org>`_ code. The VASP_PSP_DIR should be set to a path which contains folder such as POT_GGA_PAW_PBE (for functional PBE, or mast_xc PBE in Ingredients) or POT_GGA_PAW_PW91 (for functional PW91). ::
-    
-    export VASP_PSP_DIR=//share/apps/MAST/vasp_pps
+    cp -r sge_generic my_custom_sge
 
-PATH: If you have created a local MAST installation using ``pip --install --no-deps --user``, then this variable should be appended with the ``//home/username/.local/bin`` directory so that the mast* executables may be found. ::
-    
-    export PATH=$PATH://home/username/.local/bin
-
-Otherwise, if the mast executables are in ``//home/username/bin``, no such modification is needed.
-
-=================================================
-Modify submission details for your platform
-=================================================
-If your platform was not matched exactly, you or your system administrator should look where MAST was installed (e.g. often under some python folder, for example ``//share/apps/EPD...etc./lib/python-2.7/site-packages``, or, for a local installation, ``//home/username/.local/lib/python-2.7/site-packages``) and go to ``MAST/submit/platforms``.
-
-Copy the closest-matching set of files into a new directory inside the ``platforms`` folder.
-Then, modify each of the following files as necessary for your platform::
+Then, inside your new folder, like ``my_custom_sge``, modify each of the following files as necessary for your platform::
 
     submit_template.sh
     mastmon_submit.sh
     queue_commands.py
 
-* Copy this new folder into your ``$MAST_CONTROL/platforms`` folder with the other platform folders.
-* Edit ``$MAST_CONTROL/set_platform`` so that the word in it is the name of the new folder.
-* Copy the new ``mastmon_submit.sh`` as ``$MAST_CONTROL/mastmon_submit.sh``
+Explanations for each file are given in the following sections. Modify and test each file in your new custom platform folder.
 
----------------------------------
-mastmon_submit.sh
----------------------------------
-This submission script is responsible for submitting to the ingredient- and recipe-checking script to the queue every time ``mast`` is called.
+Then, in your user profile, use your new custom folder for the platform name of ``$MAST_PLATFORM``::
 
-It should be set up to run on the shortest-wallclock, fastest-turnaround queue on your system (e.g. a serial queue, morganshort, etc.)
+    export MAST_PLATFORM=my_custom_sge
 
-The script is copied into the $MAST_CONTROL directory by the ``initialize.py`` script and will be run from there.
-
-Test mastmon_submit.sh by submitting it to the queue. A "mastmon" process should briefly appear on the queue. Continue to modify submit.sh until the "mastmon" process successfully runs on the queue.
-
-Use commands similar to these (``sbatch`` instead of ``qsub`` for slurm)::
-
-    cd $MAST_CONTROL
-    qsub mastmon_submit.sh
+Log out and log back in.
 
 ------------------------------------------
 submit_template.sh
 ------------------------------------------
-This submission script template will be used to build submission scripts for the ingredients. Use ``?mast_keyword?`` to denote a place where the following MAST keywords (see :doc:`Input File <3_0_inputfile>` for more information on keywords) may be substituted in.
+
+``submit_template.sh`` is the generic submission template from which ingredient submission templates will be created.
+
+*  MAST will replace anything inside question marks, for example ``?mast_ppn?`` with the value of the appropriate keyword.
+
+The following keywords may be used; see :doc:`Input File <3_0_inputfile>` for more information on each keyword.
 
 * mast_processors or a combination of mast_ppn and mast_nodes
 * mast_queue
@@ -374,10 +365,83 @@ This submission script template will be used to build submission scripts for the
 
 Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.
 
+*  The provided template should be a good match for its platform, but otherwise you can take one of your normal submission templates and put in the ``?mast_xxx?`` fields where appropriate.
+
+*  Or, vice versa, you can take the provided template, replace the ``?mast_xxx?`` fields with some reasonable values, and see if the submission template will then run a job if submitted normally using ``qsub``, ``sbatch``, etc.
+
+---------------------------------
+mastmon_submit.sh
+---------------------------------
+
+``mastmon_submit.sh`` is the submission template that will submit the MAST Monitor to the queue every time ``mast`` is called.
+
+The MAST Monitor will check the completion status of every recipe and ingredient in the ``$MAST_SCRATCH`` folder.
+
+*  If you have a recipe you would like to skip temporarily, manually put a file named ``MAST_SKIP`` inside that recipe's folder in ``$MAST_SCRATCH``. ``MAST_SKIP`` can be an empty file, or it can contain notes; MAST does not check its contents.
+
+*  ``mastmon_submit.sh`` should be set to run on the shortest-wallclock, fastest-turnaround queue available, e.g. a serial queue
+
+The ``mastmon_submit.sh`` script is copied into the ``$MAST_CONTROL`` directory the first time you run ``mast``.
+
+If you see that after you type ``mast``, no "mastmon" process appears on the queue, then test the submission script directly::
+
+    cd $MAST_CONTROL
+    qsub mastmon_submit.sh (or use sbatch for slurm, etc.)
+
+*  Modify the ``$MAST_CONTROL/mastmon_submit.sh`` file (and not the one in the MAST installation directory /submit/platforms/<platform> folder) until the "mastmon" process successfully runs on the queue.
+
+
 -----------------------------
 queue_commands.py
 -----------------------------
-These queue commands will be used to submit ingredients to the queue.
+These queue commands will be used to submit ingredients to the queue and retrieve the job IDs and statuses of ingredients on the queue.
+
+For a custom platform, you will modify the ``queue_commands.py`` file residing in ``<MAST installation directory>/submit/platforms/<your custom platform>``.
+
+The file in ``<MAST installation directory/submit/queue_commands.py`` should not be modified.
+
+Modify the corresponding python functions as necessary so that they:
+
+*  Decide on the correct queue submission command: ``queue_submission_command``
+
+For example, this function should return ``qsub`` on PBS/Torque, or ``sbatch`` on slurm.
+
+*  Parse the job ID, given the text that returns to screen when you submit a job: ``extract_submitted_jobid``
+
+For example, the function should return ``456789`` as the jobid for the following job submission and result::
+    login2.mycluster$ sbatch submit.sh 
+    -----------------------------------------------------------------
+              Welcome to the Supercomputer              
+    -----------------------------------------------------------------
+    --> Verifying valid submit host (login2)...OK
+    --> Verifying valid jobname...OK
+    --> Enforcing max jobs per user...OK
+    --> Verifying job request is within current queue limits...OK
+    Submitted batch job 456789
+
+Or also for this one::
+
+    [user1@mycluster test_job]$ qsub submit.sh
+    456789.mycluster.abcd.univ.edu
+
+*  Show a summary of your current submitted jobs, which we call the ``queue_snapshot``: ``queue_snap_command``
+
+For example, the queue snapshot command should return something like the following (platform-dependent)::
+    
+    JOBID   PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+    456789      normal test1 user1 PD       0:00      4 (Resources)
+    456788      normal test2 user1 PD       0:00      1 (Resources)
+    456774      normal test3 user1  R    6:14:53      1 c123-124
+    456775      normal test4 user1  R    6:15:34      1 c125-126
+
+*  Decide the status of a specific job, based on job number: ``queue_status_from_text``
+
+For example, job 456789 above, with status "PD" should correspond to a "Q" status (queued status) for MAST.
+Job 456775 above, with status "R", should correspond to an "R" status (running status) for MAST.
+
+*  Identify the job error file: ``get_approx_job_error_file``
+
+The name of this file will depend on what is specified in ``submit_template.sh`` and is usually something like ``slurm.<jobnumber>`` or ``<jobname>.e<jobnumber>``
 
 ================================
 Additional setup
