@@ -7,16 +7,10 @@ Installation
 *********************************
 
 ===========================
-Pre-steps 
+Cluster Usage
 ===========================
-Skip this step if you are on bardeen.
-
-*  If you are on ACI/HPC, make sure you are using the compile node for all installation tasks. (aci-service-2 as of Dec. 2013) Use the submit node only to submit jobs.
-
-*  Have the owner of //tmp/pip-build remove the directory if it exists (see `pip issue 729 <https://github.com/pypa/pip/issues/729>`_)::
-
-    cd //tmp
-    rm -r pip-build
+Please follow the correct procedures to avoid excessive headnode use on your cluster.
+For example, you may want to preface every command with ``nice -n 19`` to reduce headnode load. Or, your cluster may have a dedicated compile node or support interactive queue submission. Please check with your cluster administrator if you are not sure.
 
 ================================
 Verify your Python version
