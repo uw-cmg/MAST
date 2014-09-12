@@ -43,7 +43,7 @@ setup(
         name="MAST",
         packages=find_packages(),
         version=verstr,
-        install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen==2.7.9", "custodian==0.7.5"],
+        install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.7.9", "custodian>=0.7.5"],
         scripts=["MAST/bin/mast",
                 "MAST/bin/mast_diffusion_coefficient",
                 "MAST/bin/mast_defect_formation_energy"],
@@ -76,3 +76,15 @@ setup(
         keywords=["MAST","materials","simulation","diffusion","defects","ab initio","high throughput", "DFT", "density functional theory", "defect formation"],
         #cmdclass={'build_py': build_py}
 )
+
+print "***************************"
+print "        ATTENTION!         "
+print "***************************"
+print "Please see the MAST documentation at http://pythonhosted.org/MAST"
+print "in order to set up the following environment variables:"
+print "MAST_SCRATCH"
+print "MAST_ARCHIVE"
+print "MAST_CONTROL"
+print "MAST_PLATFORM"
+print "(optionally, VASP_PSP_DIR)"
+

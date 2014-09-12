@@ -9,6 +9,7 @@ MAterials Simulation Toolkit (MAST) Manual
 
 .. toctree::
     :maxdepth: 2
+    :numbered:
 
     0_0_introduction
     1_0_installation

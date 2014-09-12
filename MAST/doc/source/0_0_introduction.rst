@@ -20,7 +20,7 @@ MAST uses kitchen terminology to organize the materials simulation workflow.
 Computing in the MAST Kitchen
 =============================
 
-#.  Install MAST (see :ref:`1_0_installation`).
+#.  Install MAST (see :doc:`1_0_installation`).
 
 #.  Plan your workflow. 
 
