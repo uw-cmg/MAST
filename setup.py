@@ -46,6 +46,7 @@ setup(
         install_requires=["numpy>=1.6.1", "scipy>=0.10.1", "pymatgen>=2.7.9", "custodian>=0.7.5"],
         scripts=["MAST/bin/mast",
                 "MAST/bin/mast_diffusion_coefficient",
+                "MAST/bin/mast_finite_size_scaling_sizes",
                 "MAST/bin/mast_defect_formation_energy"],
         data_files=[
             ("%s/MAST/examples" % myhome,
