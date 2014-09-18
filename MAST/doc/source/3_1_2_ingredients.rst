@@ -2,17 +2,39 @@
 The Ingredients section
 ###################################
 
-The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each ingredient type. 
+The ``$ingredients`` section contains a section for global ingredient keywords and then a section for each **ingredient type**.
+
+Each ingredient type in the recipe should have a subsection denoted by ``begin <ingredient type>``.
+
+Example ``$ingredients`` section::
+
+    $ingredients
+
+    begin ingredients_global
+    keyword1 k1value1
+    end
+
+    begin ingredient_type1
+    keyword1 k1value2
+    keyword2 k2value1
+    end
+
+    begin ingredient_type2
+    keyword2 k2value2
+    end
+
+    $end
 
 Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with ``mast_``. 
 
-Each ingredient type in the recipe should have a subsection denoted by ::
+If there are no changes from the ingredients_global section, just add an empty subsection for that ingredient type::
 
     begin ingredient_type
-    (keywords here)
     end
 
-even if there are no keywords within that section, in which case the ``end`` line directly follows the ``begin`` line.
+For a specific ingredient type, if a keyword is not specified in that ingredient type's subsection but is specified in the **ingredients_global** subsection, then, the value for that keyword will be taken from ingredients_global. 
+
+*  In the example above, ``ingredient_type2`` would inherit ``keyword1 k1value1`` from ingredients_global.
 
 ========================================
 Program-specific keywords
