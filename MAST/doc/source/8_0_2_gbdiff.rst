@@ -1,6 +1,6 @@
-###################################################
+================================================
 Effective Grain Boundary Diffusivity Calculator
-###################################################
+================================================
 Author: Jie Deng
 
 Calculates the effective diffusivity in a grain boundary network with two types of randomly distributed grain boundaries.

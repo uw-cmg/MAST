@@ -2,13 +2,9 @@
 Installation
 #############
  
-*****************************************
-How to install MAST and its dependencies
-*****************************************
-
-=============================
-Before you start
-=============================
+=================================
+Do pre-installation steps
+=================================
 
 -----------------------------
 Locate your user profile
@@ -42,9 +38,9 @@ If you cannot locate your user profile, please contact your system administrator
 
 .. _use-cluster-correctly:
 
-==============================
+------------------------------
 Use your cluster correctly
-==============================
+------------------------------
 For this installation, please follow the correct procedures in order to avoid excessive headnode use on your cluster.
 
 *  For example, you may want to preface every command with ``nice -n 19`` in order to reduce headnode load. 
@@ -332,9 +328,7 @@ Install MAST
 ===============================
 (If you successfully used ``pip`` to install MAST, go to :ref:`mast-setup`.)
 
-* Get the latest MAST package from the `Python Package Index <https://pypi.python.org>`_
-
-(If ``MAST`` does not search properly, search ``Materials Simulation Toolkit``.)
+* Get the `latest MAST package from the Python Package Index <https://pypi.python.org/pypi/MAST>`_
 
 * Extract the package using ``tar -xzvf MAST-<version number>.tar.gz``
 
@@ -608,70 +602,11 @@ You may need to do any or all of the following:
         set softtabstop=4
         set autoindent
 
-Once you have completed any additional setup and have identified what ``mast_exec`` should be, go to :ref:`test-on-cluster`
+Once you have completed any additional setup and have identified what ``mast_exec`` should be, go to :doc:`17_0_testmast`.
 
-.. _test-on-cluster:
-
-*********************************
-Test that MAST can run
-*********************************
-#.  Go to ``$HOME/MAST/examples`` (or ``$WORK/MAST/examples`` or a similar folder, if you moved the ``$HOME/MAST`` folder from its default location.)
-#.  Select one of the examples. The fastest one is ``simple_optimization.inp``
-#.  Copy that file::
-
-        cp simple_optimization.inp test.inp
-
-#.  Modify the test.inp file with the correct ``mast_exec``, ``mast_ppn``, ``mast_queue``, ``mast_walltime``, and other settings described in :doc:`Input File<3_0_inputfile>`
-
-#.  Try to parse the input file, entering the following command as one line::
-
-        nice -n 19 mast -i test.inp 
-
-    *  The ``nice -n 19`` keeps this command low priority, since it is being run on the headnode (but it is not too intensive).
-    *  The ``-i`` signals to MAST that it is processing an input file.
-#. Your ``$MAST_SCRATCH`` directory should now have a recipe directory in it.
-
-    * The recipe directory will have a name corresponding to the elements and the input file, and ending with a timestamp of YYYYMMDD"T"hhmmss. 
-    * The recipe directory will contain several subfolders, which are ingredient directories.
-#. Go to that recipe directory.
-
-    *  To see the input options:
-
-        *  ``cat input.inp`` (should be identical to test.inp since no looping was used)
-        
-            *  Note that you can use other viewing commands, not just ``cat``, but be careful not to edit any of these files.
-
-        *  ``cat archive_input_options.txt`` (should show Al instead of element X1)
-    *  To see information about the ingredient relationships MAST detected from the recipe template:
-
-        *  ``cat archive_recipe_plan.txt``
-        
-        *  Look at the ``$personal_recipe`` section in the ``input.inp`` file
-    
-    *  To see ingredient statuses at a glance:
-
-        *  ``cat status.txt``
-
-#.  Run mast once: ``nice -n 19 mast``
-
-#.  You should see a "mastmon" job appear on the queue specified in ``$MAST_CONTROL/mastmon_submit.sh``
-
-#.  MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: ``nice -n 19 mast``
-
-#.  Now you should see ``perfect_opt1`` appear on the queue.
-
-#. ``status.txt`` in the recipe directory in ``$MAST_SCRATCH`` should show that ``perfect_opt1`` has a status of "Proceed to Queue", or "P".
-
-#.  When the queued ``perfect_opt1`` job starts running, you should be able to see output files inside ``$MAST_SCRATCH/<recipe directory>/perfect_opt1``
-
-#.  If you forgot some step above, or you encounter some errors, remove the recipe folder from ``$MAST_SCRATCH`` and start again from the beginning of this section.
-
-#.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
-
-
-*************************
-Run unit tests
-*************************
+===========================
+Run unit tests (optional)
+===========================
 
 To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. <python installation path>/lib/python2.7/site-packages/MAST/test) and run the command ::
 

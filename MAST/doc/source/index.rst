@@ -8,13 +8,15 @@ MAterials Simulation Toolkit (MAST) Manual
 ===========================================
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :numbered:
 
     0_0_introduction
+    16_0_whatsnew
     1_0_installation
-    2_0_ingredients
+    17_0_testmast
     3_0_inputfile
+    2_0_ingredients
     4_0_recipe
     9_0_examples
     5_0_runningmast

@@ -8,20 +8,23 @@ Each ingredient is responsible for updating its child ingredients through an upd
 
 Each ingredient is given:
 
-*  A name, which is the full path to the ingredient.s directory and is automatically generated using the system name and the recipe template. (Do not use parentheses in ingredient names.) Some ingredient names must be structured specifically. For examples of naming conventions, see the :doc:`Recipe  <4_0_recipe>`. In particular:
+*  A name, which is the full path to the ingredient's directory and is automatically generated from information in the input file.
 
-*  An ingredient which is supposed to correspond to values given by the ``$defects`` section of the :doc:`Input File <3_0_inputfile>` should always be named with ``inducedefect_`` (for the structural creation of the defect) or ``defect_`` (for an actual defect calculation)
+    *  Some ingredient names must be structured specifically. For examples of naming conventions, see the :doc:`Recipe  <4_0_recipe>`. In particular:
 
-*  An ingredient which is supposed to correspond to values in the ``$neb`` section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with ``neb_``
+    *  An ingredient which is supposed to correspond to values given by the ``$defects`` section of the :doc:`Input File <3_0_inputfile>` should always be named with ``inducedefect_`` (for the structural creation of the defect) or ``defect_`` (for an actual defect calculation)
 
-*  A phonon calculation should always be named with ``phonon_``, and a subsequent calculation of phonon results should be named with ``phonon_...parse``
+    *  An ingredient which is supposed to correspond to values in the ``$neb`` section, such as a nudged elastic band (NEB) calculation or the static image calculations of an NEB calculation, should always be named with ``neb_``
 
-*  The letters **q=** are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name
+    *  A phonon calculation should always be named with ``phonon_``, and a subsequent calculation of phonon results should be named with ``phonon_...parse``
+
+    *  The letters **q=** are reserved (generated automatically by the recipe template in some cases) and should not otherwise be put in an ingredient name
     
 
 *  A dictionary of program-specific keywords, which come from each ingredient.s section in the ``$ingredients`` section of the :doc:`Input File <3_0_inputfile>`.
 
 *  A pymatgen structure object representing the very first structure created from the ``$structure`` section in the input file.
+
 *  A type, which is specified in the recipe, next to the ingredient name, in parentheses. The ingredient type corresponds to the ingredient type subsection in the ``$ingredients`` section of the input file. The information given in these subsections includes:
 
     *  Program-specific keywords
