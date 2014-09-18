@@ -14,7 +14,7 @@ Using the keyword ``posfile``, a VASP POSCAR-type file or a CIF file can be inse
     posfile POSCAR_fcc
     $end
 
-The file should be located in the same directory as the input file.
+The file should be located in the same directory as the input file at the time you call MAST, and should not be moved until the recipe is complete.
 
 A CIF file should end with .cif.
 
@@ -30,7 +30,7 @@ To specify a structure, use the following subsections:
 
 **lattice**: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.
 
-**elementmap**: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed later).
+**elementmap**: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed in :doc:`3_0_inputfile`).
 
 The elementmap subsection works in conjunction with the coordinates subsection.
 

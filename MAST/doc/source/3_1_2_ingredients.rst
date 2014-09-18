@@ -42,7 +42,7 @@ Program-specific keywords
 
 VASP keywords such as ``IBRION``, ``ISIF``, ``LCHARG``, ``LWAVE``, and so on, can be specified under each ingredient type in the ``$ingredients`` section of the input file.
 
-Such program-specific keywords are only allowed if they are listed in the program-specific file located in the ``$MAST_INSTALL_PATH/MAST/ingredients/programkeys/`` folder, for example, ``$MAST_INSTALL_PATH/MAST/ingredients/programkeys/vasp_allowed_keywords.py``.
+Such program-specific keywords are only allowed if they are listed in the program-specific file located in the ``<MAST installation directory>/MAST/ingredients/programkeys/`` folder, for example, ``<MAST installation directory>/MAST/ingredients/programkeys/vasp_allowed_keywords.py``.
 
 These program-specific keywords will be turned into uppercase keywords. The values will not change case, and should be given in the case required by the program. For example, ``lwave False`` will be translated into ``LWAVE False`` in the VASP INCAR file.
 
@@ -209,7 +209,7 @@ Some common open-ended methods are:
 
 *  **copy_fullpath_file <full path file name> <copy_to_filename>**: This method is for copying some system file like //home/user/some_template, not an ingredient-specific file
 
-*  **write_ingred_input_file <filename> <allowed file> <uppercase keywords> <delimiter>**: The allowed file specifies an allowed keywords file name in ``$MAST_INSTALL_PATH/MAST/ingredients/programkeys``. 
+*  **write_ingred_input_file <filename> <allowed file> <uppercase keywords> <delimiter>**: The allowed file specifies an allowed keywords file name in ``<MAST installation directory>/MAST/ingredients/programkeys``. 
 
     *  Use "all" to put any non-mast keywords into the input file. 
     *  Use 1 to uppercase all keywords, or 0 to leave them as entered. 

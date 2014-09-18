@@ -19,7 +19,6 @@ MAterials Simulation Toolkit (MAST) Manual
     17_0_testmast
     3_0_inputfile
     3_1_inputsections
-    9_0_examples
     5_0_runningmast
     6_0_postprocessingtools
     8_0_standalonetools

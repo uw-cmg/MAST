@@ -4,23 +4,26 @@
 MAST post-processing utilities
 ####################################
 
+These utilities are meant to be used as part of a MAST workflow.
+See ``//home/<username>/MAST/examples`` for examples on how to use them.
+
 ******************************
 Defect formation energy
 ******************************
 
-The defect formation energy tool goes through the output of finished recipes in $MAST_ARCHIVE and calculates defect formation energies. It is found in $MAST_INSTALL_PATH/tools. 
+The defect formation energy tool goes through the output of finished recipes in $MAST_ARCHIVE and calculates defect formation energies. It should be copied into the bin directory.
 
 The defect formation energy tool will create a ``<recipe directory>_dfe_results`` directory in the directory from which it is called.
 
 To run without prompts::
 
-    python $MAST_INSTALL_PATH/tools/defect_formation_energy <DFT bandgap> <experimental bandgap>
+    python mast_defect_formation_energy <DFT bandgap> <experimental bandgap>
 
 where DFT bandgap is a float for an LDA or GGA bandgap, and experimental bandgap is a float for an experimental or more accurate hybrid calculation bandgap.
 
 To run with prompts::
 
-    python $MAST_INSTALL_PATH/tools/defect_formation_energy prompt
+    python mast_defect_formation_energy prompt
 
 *  Select the desired recipe
 *  Follow the prompts for chemical potential conditions, band gap energy levels, and band gaps for adjustment
@@ -37,7 +40,7 @@ Usage of diffusion coefficient calculation tool code:
 
 2.  The code currently will work in the same directory with other MAST generated folders (``neb_vac*``, ``phonon_vac*``, etc.)
 
-3.  Type ``$MAST_INSTALL_PATH/MAST/utility/diffusion_coefficient/diff_v2.py -i <input>`` to run.
+3.  Type ``mast_diffusion_coefficient -i <input>`` to run.
 
 4.  The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
 

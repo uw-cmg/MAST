@@ -1,5 +1,5 @@
 ########################
-Testing MAST
+Trying out MAST
 ########################
 #.  Go to ``$HOME/MAST/examples`` (or ``$WORK/MAST/examples`` or a similar folder, if you moved the ``$HOME/MAST`` folder from its default location.)
 #.  Select one of the examples. The fastest one is ``simple_optimization.inp``
