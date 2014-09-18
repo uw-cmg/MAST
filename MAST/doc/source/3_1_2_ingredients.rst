@@ -134,28 +134,28 @@ Structure manipulation keywords
 This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%
 
 ---------------------------
-mast_XXX_method keywords
+mast_xxx_method keywords
 ---------------------------
 
 The following keywords have individual sections:
 
-**mast_write_method**: The .write. method, which specifies files the ingredient should write out before running (e.g., create the INCAR) 
+**mast_write_method**: Specifies what the ingredient should write out before running (e.g., create the INCAR)
 
-**mast_ready_method**: The .ready. method, which specifies how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
+**mast_ready_method**: Specifies how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)). 
 
-**mast_run_method**: The .run. method, which specifies what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
+**mast_run_method**: Specifies what MAST should do to run the ingredient (e.g. submit a submission script to a queue, or perform some other action)
 
-**mast_complete_method**: The .complete. method, which specifies how MAST can tell if the ingredient is considered complete
+**mast_complete_method**: Specifies how MAST can tell if the ingredient is considered complete
 
-**mast_update_children_method**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
+**mast_update_children_method**: Specifies what information an ingredient passes on to its children, and how it does so.
 
    
-**Important notes on using mast_xxx_method keywords**
 Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.::
 
     mast_write_method write_singlerun
 
 They depend on having an appropriate program set in ``mast_program``.
+
 However, you may choose to specify arguments where available, e.g.::
     
     mast_complete_method file_has_string myoutput "End of Execution"
@@ -308,7 +308,7 @@ mast_run_method keyword values
 **run_scale**
 
 *  Scale the structure (e.g. a 2-atom unit cell scaled by 2 becomes a 16-atom supercell)
-*  Requires the ``$scaling`` subsection in the input file (see :doc:`3_0_1_structure`).
+*  Requires the ``$scaling`` subsection in the input file (see :doc:`3_1_1_structure`).
 *  Must not be run on the starting ingredient.
 
 
