@@ -50,9 +50,7 @@ Subsections are denoted by ``begin <subsection name>`` and ``end``.::
 *****************************
 Sections of the input file
 *****************************
-
-Each section of the input file is described briefly below, with a link to a more detailed page.
-
+The sections of the input file are as follows:
 .. toctree::
 
     3_0_0_mast

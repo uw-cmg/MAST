@@ -1,55 +1,3 @@
-###################################
-Input File
-###################################
-
-**********************************
-Introduction to the Input File
-**********************************
-
-The MAST program is driven by two main files: an input file which contains all the various keywords required for setting up the recipe (i.e. workflow), and a :doc:`Recipe Template <4_0_recipe>` which organizes all the ingredients (i.e. calculations) in the recipe. In this section, we will discuss the input file
-
-The input file contains several sections and subsections.
-Bounds of sections are denoted by ``$sectionname`` and ``$end``.
-Bounds of subsections within a section are denoted by ``begin subsectionname`` and ``end``.
-
-*Comments in the input file are allowed only as separate lines starting with #. A comment may not be appended to a line.*
-
-Example of the ``$structure`` section, with three subsections, **elementmap**, **coordinates**, and **lattice**::
-
-    $structure
-    coord_type fractional
-    
-    begin elementmap
-    X1 Ga
-    X2 As
-    end
-    
-    begin coordinates
-    X1 0.000000 0.000000 0.000000
-    X1 0.500000 0.500000 0.000000
-    X2 0.250000 0.250000 0.250000
-    X2 0.750000 0.750000 0.250000
-    end
-    
-    begin lattice
-    6.0 0.0 0.0
-    0.0 6.0 0.0
-    0.0 0.0 6.0
-    end
-    $end
-
-Each section is described in detail below.
-
-************************
-The MAST section
-************************
-The ``$mast`` section contains this keyword:
-
-*  system_name: Specify a single descriptive word here, like EpitaxialStrain. This keyword will become part of the recipe directory.s name and allow you to spot the recipe in the ``$MAST_SCRATCH`` directory::
-
-    system_name EpitaxialStrain
-
-
 *****************************
 The Structure section
 *****************************
@@ -122,6 +70,54 @@ Example::
     end
     
     $end
+
+
+================================
+Finite-size scaling
+================================
+Finite size scaling is supported with a special "scaling" subsection.
+
+Defect positions will be automatically scaled.
+
+    * For example, ``0.25 0.0 0.0`` in the original supercell would become ``0.125 0.0 0.0`` in a 2x1x1 cell. 
+
+Special notes:
+*  :doc:`3_0_2_ingredients` should include an "inducescaling" ingredient with a ``mast_run_method`` of ``run_scale``
+
+*  :doc:`3_0_3_recipe` should include ``inducescaling_<S>`` and ``defect_<S>`` ingredients.
+
+    *  The "<S>" tags will correspond to the scaling sizes and labels.
+
+The scaling section has the syntax:
+
+    * Scaling matrix of integers ``[M, N, P]`` or ``[M1 M2 M3, N1 N2 N3, P1 P2 P3]``
+    
+    * Kpoint mesh in the form ``QxRxS``
+
+    * Kpoint mesh type, M for Monkhorst-Pack and G for Gamma-point centered
+
+    * (Optional) Kpoint mesh shift, in floats, e.g. ``0.1 0.2 0.3``
+
+    * (Optional) Label, in the form ``label=<labelname>``
+
+Example::
+  
+    begin scaling
+    [1 0 0,0 1 0, 0 0 1] 4x4x4 M label=1x1x1
+    [2 0 0,0 2 0, 0 0 1] 2x2x4 M label=2x2x1
+    [2 0 0,0 2 0, 0 0 2] 2x2x2 M label=2x2x2
+    [3 0 0,0 3 0, 0 0 3] 1x1x1 M label=3x3x3
+    #old style below
+    #1x1x1 4x4x4 M
+    #2x2x1 2x2x4 M
+    #2x2x2 2x2x2 M
+    #3x3x3 1x1x1 M
+    end
+
+In order to figure out which scaling sizes to use for finite-size scaling, MAST includes a Madelung potential utility:
+
+
+
 
 *************************
 The Ingredients section
