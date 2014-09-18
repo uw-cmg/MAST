@@ -50,18 +50,7 @@ Subsections are denoted by ``begin <subsection name>`` and ``end``.::
 *****************************
 Sections of the input file
 *****************************
-The sections of the input file are as follows:
-.. toctree::
-
-    3_0_0_mast
-
-.. toctree::
-   
-    3_0_1_structure
-
-.. toctree::
-
-    3_0_2_ingredients
+See :doc:`3_1_inputsections`
 
 ******************************
 Looping in the input file

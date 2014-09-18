@@ -82,9 +82,10 @@ Defect positions will be automatically scaled.
     * For example, ``0.25 0.0 0.0`` in the original supercell would become ``0.125 0.0 0.0`` in a 2x1x1 cell. 
 
 Special notes:
-*  :doc:`3_0_2_ingredients` should include an "inducescaling" ingredient with a ``mast_run_method`` of ``run_scale``
 
-*  :doc:`3_0_3_recipe` should include ``inducescaling_<S>`` and ``defect_<S>`` ingredients.
+*  :doc:`3_1_2_ingredients` should include an "inducescaling" ingredient with a ``mast_run_method`` of ``run_scale``
+
+*  :doc:`3_1_3_recipe` should include ``inducescaling_<S>`` and ``defect_<S>`` ingredients.
 
     *  The "<S>" tags will correspond to the scaling sizes and labels.
 
@@ -107,31 +108,27 @@ Example::
     [2 0 0,0 2 0, 0 0 1] 2x2x4 M label=2x2x1
     [2 0 0,0 2 0, 0 0 2] 2x2x2 M label=2x2x2
     [3 0 0,0 3 0, 0 0 3] 1x1x1 M label=3x3x3
-    #old style below
-    #1x1x1 4x4x4 M
-    #2x2x1 2x2x4 M
-    #2x2x2 2x2x2 M
-    #3x3x3 1x1x1 M
     end
 
 In order to figure out which scaling sizes to use for finite-size scaling, MAST includes a Madelung potential utility.
 
-This utility generates a distribution of cell sizes for best scaling, according to the method in:
-Hine, N. D. M., Frensch, K., Foulkes, W. M. C. & Finnis, M. W. Supercell size scaling of density functional theory formation energies of charged defects. Physical Review B 79, 13, doi:10.1103/PhysRevB.79.024112 (2009).
+This utility generates a distribution of cell sizes for best scaling, according to the method in::
 
+    Hine, N. D. M., Frensch, K., Foulkes, W. M. C. & Finnis, M. W. Supercell size scaling of density functional theory formation energies of charged defects. Physical Review B 79, 13, doi:10.1103/PhysRevB.79.024112 (2009).
 
-Run this utility as follows: in order to generate a cut-and-paste for the scaling section. ::
+Run this utility as follows in order to generate a cut-and-paste for the scaling section. ::
 
     mast_finite_size_scaling_sizes perfDir defDir minDefDist maxNumAtoms numStructAsked
 
-* perfDir: perfect primordial (small) cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.
+* **perfDir**: perfect primordial (small) cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.
 
-* defDir: defected primordial cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.
+* **defDir**: defected primordial cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.
 
-* minDefDist (default 3): minimum defect-defect distance between periodic images, in Angstroms.
+* **minDefDist** (default 3): minimum defect-defect distance between periodic images, in Angstroms.
 
-* maxNumAtoms (default 600): maximum number of atoms in a given supercell size
+* **maxNumAtoms** (default 600): maximum number of atoms for supercell size evaluations
 
-* numStructAsked (default 5): number of structures to return in the distribution 
+* **numStructAsked** (default 5): number of structures to return in the distribution 
+
 * Note that you will have to manually adjust the kpoint mesh in your cut-and-paste.
 
