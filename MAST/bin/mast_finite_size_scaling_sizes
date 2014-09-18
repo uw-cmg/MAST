@@ -1,0 +1,80 @@
+#!/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Interface to Wei Xie's GenSC code for Zhewen Song's FSS tags.
+# Last updated: 2014-09-18
+##############################################################
+from MAST.utility.finite_size_scaling.GenSC import genLMNs
+from MAST.utility.finite_size_scaling.GenSC import gensc
+from MAST.utility.finite_size_scaling.GenSC import writer
+import sys
+import os
+import pymatgen as mg
+from MAST.utility import MASTError
+
+if __name__ == "__main__":
+    saved = sys.stdout
+    fout = file('out.log', 'w')
+    sys.stdout = writer(sys.stdout, fout)
+    
+    perfDir=""
+    defDir=""
+    mindefdist=0
+    maxnumatoms=0
+    numstructasked=0
+
+    lensys = len(sys.argv)
+    if lensys > 1:
+        perfDir = sys.argv[1]
+    else:
+        perfDir = "perfect_opt"
+
+    if lensys > 2:
+        defDir = sys.argv[2]
+    else:
+        defDir = "defect"
+
+    if lensys > 3:
+        mindefdist = float(sys.argv[3])
+    else:
+        mindefdist = 5
+
+    if lensys > 4:
+        maxnumatoms = int(sys.argv[4])
+    else:
+        maxnumatoms = 600
+
+    if lensys > 5:
+        numstructasked = int(sys.argv[5])
+    else:
+        numstructasked = 5
+
+    if not os.path.isdir(perfDir):
+        print "%s is not an existing directory. Enter the directory of the perfect primordial." % perfDir
+        sys.exit()
+
+    if not os.path.isdir(defDir):
+        print "%s is not an existing directory. Enter the directory of the defected primordial." % defDir
+        sys.exit()
+
+    ###read CONTCAR from primordial_perfect directory########
+    cwdir=os.getcwd()
+    os.chdir(perfDir)
+    perfectContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    os.chdir(cwdir)
+    #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_defect directory##
+    os.chdir(defDir)
+    defectedContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    defectedKpoints=mg.io.vaspio.Kpoints.from_file('KPOINTS')
+    defectedPotcar=mg.io.vaspio.Potcar.from_file('POTCAR')
+    defectedIncar=mg.io.vaspio.Incar.from_file('INCAR')
+    os.chdir(cwdir)
+    ##calculate and select a list of LMN scaling factors to run
+    LMN_list=genLMNs(perfectContcar,mindefdist,maxnumatoms,numstructasked)
+    ##generate the input files for the above scaling factors
+    gensc(LMN_list,perfectContcar,
+        defectedContcar,defectedKpoints,defectedPotcar,defectedIncar)
+    sys.stdout = saved
+    fout.close()
