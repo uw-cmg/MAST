@@ -20,7 +20,7 @@ MAST uses kitchen terminology to organize the materials simulation workflow.
 
     * As in a cooking recipe, ingredients may need to be addressed in a logical order, with some ingredients depending on other ingredients.
 
-    * The :doc:`Recipe<4_0_recipe>` Section of the :doc:`Input File<3_0_inputfile>` defines this order, or workflow.
+    * :doc:`3_1_3_recipe` defines this order, or workflow.
 
 When MAST reads an input file, it creates a recipe in the ``$MAST_SCRATCH`` directory.
 

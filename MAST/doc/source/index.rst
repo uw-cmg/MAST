@@ -11,14 +11,14 @@ MAterials Simulation Toolkit (MAST) Manual
     :maxdepth: 1
     :numbered:
 
-    0_0_introduction
     16_0_whatsnew
+    0_0_introduction
+    2_0_ingredients
+    4_0_recipe
     1_0_installation
     17_0_testmast
     3_0_inputfile
     3_1_inputsections
-    2_0_ingredients
-    4_0_recipe
     9_0_examples
     5_0_runningmast
     6_0_postprocessingtools
