@@ -15,7 +15,7 @@ Each ingredient type in the recipe should have a subsection denoted by ::
 even if there are no keywords within that section, in which case the ``end`` line directly follows the ``begin`` line.
 
 ========================================
-Ingredients that are VASP calculations
+Program-specific keywords
 ========================================
 
 VASP keywords such as ``IBRION``, ``ISIF``, ``LCHARG``, ``LWAVE``, and so on, can be specified under each ingredient type in the ``$ingredients`` section of the input file.
@@ -33,24 +33,57 @@ For VASP ingredients, please include ::
 
 in your ingredient global keywords in order to avoid writing the large VASP files CHGCAR and WAVECAR, unless you really need these files.
 
+=================================
+Special MAST keywords
+=================================
 
-Any keyword that starts with ``mast_`` is considered a special keyword utilized by MAST and will not be written into the VASP INCAR file.
+Any keyword that starts with ``mast_`` is considered a special keyword utilized by MAST and will not be written into the VASP INCAR file or any custom input file.
 
-===================================
-Special MAST ingredient keywords:
-===================================
+-----------------------------------------
+Submission script keywords
+-----------------------------------------
 
-Some of these special MAST keywords are only appropriate for VASP calculations.
+The following queue submission keywords are platform-dependent and are used along to create the submission script (see :doc:`1_0_installation`).
 
-**mast_program**: Specify which program to run (``vasp``, ``vasp_neb``, ``phon``, or ``None`` for a generic program, are currently supported) ::
+**mast_exec**: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in ``mast_program``, and it should include any MPI commands. ::
+
+    mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
+
+**mast_nodes**: The number of nodes requested.
+
+**mast_ppn**: The number of processors per node requested.
+
+**mast_queue**: The queue requested.
+
+**mast_walltime**: The walltime requested, in whole number of hours
+
+**mast_memory**: The memory per processor requested.
+
+------------------------------------
+MAST control flow keywords
+------------------------------------
+
+**mast_program**: Specify which program to run (``vasp``, ``vasp_neb``, or ``None`` for a generic program, are currently supported) ::
 
     mast_program vasp
 
 *  This keyword must be in lowercase
 
+**mast_frozen_seconds**: A number of seconds before a job is considered frozen, if its output file has not been updated within this amount of time. If not set, 21000 seconds is used.
+
+**mast_auto_correct**: Specify whether mast should automatically correct errors.
+
+*  The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.
+*  If set to False, MAST will attempt to find errors, then write them into a ``MAST_ERROR`` file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the ``MAST_ERROR`` file is manually deleted by the user.
+
+
+-----------------------------------
+VASP-specific keywords
+-----------------------------------
+
 **mast_kpoints**: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered. :: 
 
-mast_kpoints = 3x3x3 G
+    mast_kpoints = 3x3x3 G
 
 *  Either this keyword or ``mast_kpoint_density`` is required for VASP calculations.
 
@@ -91,37 +124,18 @@ mast_kpoints = 3x3x3 G
 
 *  This keyword cannot be used with programs other than VASP, cartesian coordinates, and special ingredients like inducedefect-type ingredients, whose write or run methods are different.
 
+---------------------------------
+Structure manipulation keywords
+---------------------------------
 **mast_strain**: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with ``mast_run_method`` of ``run_strain`` ::
 
     mast_strain 1.01 1.03 0.98 
 
 This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%
 
-**mast_frozen_seconds**: A number of seconds before a job is considered frozen, if its output file has not been updated within this amount of time. If not set, 21000 seconds is used.
-
-**mast_auto_correct**: Specify whether mast should automatically correct errors.
-
-*  The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.
-*  If set to False, MAST will attempt to find errors, then write them into a ``MAST_ERROR`` file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the ``MAST_ERROR`` file is manually deleted by the user.
-
-The following keyword is used only for generic programs (not VASP, PHON, or any other named programs). 
-
-The following queue-submission keywords are platform dependent and are used along to create the submission script:
-
-**mast_exec**: The command used in the submission script to execute the program. Note that this is a specific command rather than the .class. of program, given in ``mast_program``, and it should include any MPI commands. ::
-
-    mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
-
-**mast_nodes**: The number of nodes requested.
-
-**mast_ppn**: The number of processors per node requested.
-
-**mast_queue**: The queue requested.
-
-**mast_walltime**: The walltime requested, in whole number of hours
-
-**mast_memory**: The memory per processor requested.
-
+---------------------------
+mast_XXX_method keywords
+---------------------------
 
 The following keywords have individual sections:
 
@@ -135,15 +149,13 @@ The following keywords have individual sections:
 
 **mast_update_children_method**: the .update children. method, which specifies what information an ingredient passes on to its children, and how it does so.
 
-.. _important_notes:
    
---------------------------------------------------
-Important notes on using mast_xxx_method keywords
---------------------------------------------------
+**Important notes on using mast_xxx_method keywords**
 Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.::
 
     mast_write_method write_singlerun
 
+They depend on having an appropriate program set in ``mast_program``.
 However, you may choose to specify arguments where available, e.g.::
     
     mast_complete_method file_has_string myoutput "End of Execution"
@@ -354,37 +366,6 @@ mast_update_children_method keyword values
 
 *  Forward the highest-energy structure of all subfolder structures
 *  Programs supported: vasp
-
-The following keywords are deprecated. Please use the generic methods in :ref:`important_notes` instead.
-
-give_structure_and_restart_files (same as give_structure_and_restart_files_softlinks)
-
-*  Forward the relaxed structure and additional files
-*  Programs supported: vasp (CONTCAR to POSCAR, and softlinks to parent.s WAVECAR and CHGCAR files)
-
-give_structure_and_restart_files_full_copies
-
-*  Forward the relaxed structure and additional files
-*  Programs supported: vasp (CONTCAR to POSCAR, and full copies of parent.s WAVECAR and CHGCAR files)
-
-give_structure_and_charge_density_full_copy
-
-*  Forward the relaxed structure and charge density file; copies the file
-*  Programs supported: vasp (CONTCAR to POSCAR, and copy over CHGCAR)
-
-give_structure_and_charge_density_softlink
-
-*  Forward the relaxed structure and charge density file as a softlink
-*  Programs supported: vasp (CONTCAR to POSCAR, and softlink to CHGCAR)
-
-give_structure_and_wavefunction_full_copy
-*  Forward the relaxed structure and wavefunction file; copies the file
-*  Programs supported: vasp (CONTCAR to POSCAR, and copy over WAVECAR)
-
-give_structure_and_wavefunction_softlink
-
-*  Forward the relaxed structure and wavefunction file as a softlink
-*  Programs supported: vasp (CONTCAR to POSCAR, and softlink to WAVECAR)
 
 -------------------------------
 Example Ingredients section
