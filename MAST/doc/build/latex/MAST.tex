@@ -108,6 +108,8 @@
 \def\PYGZrb{]}
 \makeatother
 
+\renewcommand\PYGZsq{\textquotesingle}
+
 \begin{document}
 
 \maketitle
@@ -504,14 +506,14 @@ If the version found was located in an explicit directory and not found through 
 Add a line like the following:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export PATH=\textless{}path\_to\_python2.7\textgreater{}:\$PATH
+export PATH=\textless{}path\PYGZus{}to\PYGZus{}python2.7\textgreater{}:\PYGZdl{}PATH
 \end{Verbatim}
 
 \item {} 
 For example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export PATH=//share/apps/EPD\_64bit/epd\_free-7.3-2-rh5-x86\_64/bin:\$PATH
+export PATH=//share/apps/EPD\PYGZus{}64bit/epd\PYGZus{}free-7.3-2-rh5-x86\PYGZus{}64/bin:\PYGZdl{}PATH
 \end{Verbatim}
 
 \end{itemize}
@@ -566,7 +568,7 @@ Follow the prompts and specify a local installation (use spacebar to scroll thro
 Add a line to your user profile to make this python installation your default python, for example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export PATH=//home/\textless{}username\textgreater{}/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\_64/bin:\$PATH
+export PATH=//home/\textless{}username\textgreater{}/Canopy/appdata/canopy-1.0.3.1262.rh5-x86\PYGZus{}64/bin:\PYGZdl{}PATH
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -704,7 +706,7 @@ If pymatgen cannot be installed because gcc cannot be found in order to compile 
 If you have a \code{\$HOME/.local/bin} directory from a \code{-{-}user} installation from any of the previous steps, add this directory to your \code{\$PATH} environment variable by adding a line to your user profile, for example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export PATH=\$HOME/.local/bin:\$PATH
+export PATH=\PYGZdl{}HOME/.local/bin:\PYGZdl{}PATH
 \end{Verbatim}
 
 (This line can go either before or after any other \code{export PATH} lines you might have in your user profile.)
@@ -754,25 +756,25 @@ Rename the GGA PW91 folder to \code{POT\_GGA\_PAW\_PW91}. Ingredients with a val
 Example of running the python setup tool:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Please enter full path where the POT\_GGA\_PAW\_PBE, etc.
+Please enter full path where the POT\PYGZus{}GGA\PYGZus{}PAW\PYGZus{}PBE, etc.
 subdirs are present.
 If you obtained the PSPs directly from VASP, this should
 typically be the directory that you untar the files to :
 
-//share/apps/vasp\_pseudopotentials/paw
+//share/apps/vasp\PYGZus{}pseudopotentials/paw
 
 Please enter the fullpath of the where you want to create
 your pymatgen resources directory:
 
-//home/\textless{}username\textgreater{}/.local/vasp\_pps
+//home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps
 \end{Verbatim}
 
 Rename the folders under \code{//home/\textless{}username\textgreater{}/.local/vasp\_pps}:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mv //home/\textless{}username\textgreater{}/.local/vasp\_pps/\textless{}pbe\_name\textgreater{} //home/\textless{}username\textgreater{}/.local/vasp\_pps/POT\_GGA\_PAW\_PBE
+mv //home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps/\textless{}pbe\PYGZus{}name\textgreater{} //home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps/POT\PYGZus{}GGA\PYGZus{}PAW\PYGZus{}PBE
 
-mv //home/\textless{}username\textgreater{}/.local/vasp\_pps/\textless{}pw91\_name\textgreater{} //home/\textless{}username\textgreater{}/.local/vasp\_pps/POT\_GGA\_PAW\_PW91
+mv //home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps/\textless{}pw91\PYGZus{}name\textgreater{} //home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps/POT\PYGZus{}GGA\PYGZus{}PAW\PYGZus{}PW91
 \end{Verbatim}
 
 For assistance with potcar\_setup.py, please contact the
@@ -786,7 +788,7 @@ Add a line to your user profile exporting the environment variable \code{\$VASP\
 For example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export VASP\_PSP\_DIR=//home/\textless{}username\textgreater{}/.local/vasp\_pps
+export VASP\PYGZus{}PSP\PYGZus{}DIR=//home/\textless{}username\textgreater{}/.local/vasp\PYGZus{}pps
 \end{Verbatim}
 
 Log out and log back in.
@@ -794,7 +796,7 @@ Log out and log back in.
 Test the change:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cd \$VASP\_PSP\_DIR
+cd \PYGZdl{}VASP\PYGZus{}PSP\PYGZus{}DIR
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -868,7 +870,7 @@ MAST requires some control files in order to run. It also does some higher-level
 On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate ``work'' or ``scratch'' directory. In this case, move the entire \code{\$HOME/MAST} directory into the work or scratch directory, for example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mv \$HOME/MAST \$WORK/.
+mv \PYGZdl{}HOME/MAST \PYGZdl{}WORK/.
 \end{Verbatim}
 
 \end{itemize}
@@ -883,10 +885,10 @@ You can also move the MAST directory anywhere else, as long as you set the envir
 Copy and paste the environment variables into your user profile, setting the paths correctly if you have moved the \code{\$HOME/MAST} directory:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export MAST\_SCRATCH=\$HOME/MAST/SCRATCH
-export MAST\_ARCHIVE=\$HOME/MAST/ARCHIVE
-export MAST\_CONTROL=\$HOME/MAST/CONTROL
-export MAST\_PLATFORM=\textless{}platform\_name\textgreater{}
+export MAST\PYGZus{}SCRATCH=\PYGZdl{}HOME/MAST/SCRATCH
+export MAST\PYGZus{}ARCHIVE=\PYGZdl{}HOME/MAST/ARCHIVE
+export MAST\PYGZus{}CONTROL=\PYGZdl{}HOME/MAST/CONTROL
+export MAST\PYGZus{}PLATFORM=\textless{}platform\PYGZus{}name\textgreater{}
 \end{Verbatim}
 
 For platform\_name, choose from one of the following:
@@ -907,7 +909,7 @@ For platform\_name, choose from one of the following:
 For example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export MAST\_PLATFORM=stampede
+export MAST\PYGZus{}PLATFORM=stampede
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -972,7 +974,7 @@ Identify the closest-matching directory to your actual platform (for example, if
 Copy this directory into a new directory inside the \code{platforms} folder, for example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cp -r sge\_generic my\_custom\_sge
+cp -r sge\PYGZus{}generic my\PYGZus{}custom\PYGZus{}sge
 \end{Verbatim}
 
 Then, inside your new folder, like \code{my\_custom\_sge}, modify each of the following files as necessary for your platform:
@@ -988,7 +990,7 @@ Explanations for each file are given in the following sections. Modify and test 
 Then, in your user profile, use your new custom folder for the platform name of \code{\$MAST\_PLATFORM}:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-export MAST\_PLATFORM=my\_custom\_sge
+export MAST\PYGZus{}PLATFORM=my\PYGZus{}custom\PYGZus{}sge
 \end{Verbatim}
 
 Log out and log back in.
@@ -1066,8 +1068,8 @@ The \code{mastmon\_submit.sh} script is copied into the \code{\$MAST\_CONTROL} d
 If you see that after you type \code{mast}, no ``mastmon'' process appears on the queue, then test the submission script directly:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cd \$MAST\_CONTROL
-qsub mastmon\_submit.sh (or use sbatch for slurm, etc.)
+cd \PYGZdl{}MAST\PYGZus{}CONTROL
+qsub mastmon\PYGZus{}submit.sh (or use sbatch for slurm, etc.)
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -1111,7 +1113,7 @@ This function should parse the job ID, given the text that returns to screen whe
 For example, it should return \code{456789} as the jobid for the following job submission and resulting screen text:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-login2.mycluster\$ sbatch submit.sh
+login2.mycluster\PYGZdl{} sbatch submit.sh
 -----------------------------------------------------------------
           Welcome to the Supercomputer
 -----------------------------------------------------------------
@@ -1126,7 +1128,7 @@ Submitted batch job 456789
 On a different cluster, it would return \code{456789} as the jobid for the following submission and resulting screen text:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-[user1@mycluster test\_job]\$ qsub submit.sh
+[user1@mycluster test\PYGZus{}job]\PYGZdl{} qsub submit.sh
 456789.mycluster.abcd.univ.edu
 \end{Verbatim}
 
@@ -1190,14 +1192,14 @@ Identify the correct \code{mast\_exec} call for your system.
 For example, suppose you run VASP like this:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-//opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_par\_opt1
+//opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\PYGZus{}par\PYGZus{}opt1
 \end{Verbatim}
 
 \item {} 
 Then, in your input files, the \code{mast\_exec} keyword would be specified like this:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\_par\_opt1
+mast\PYGZus{}exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2\PYGZus{}par\PYGZus{}opt1
 \end{Verbatim}
 
 \end{itemize}
@@ -1228,20 +1230,6 @@ set autoindent
 Once you have completed any additional setup and have identified what \code{mast\_exec} should be, go to {\hyperref[17_0_testmast::doc]{\emph{Trying out MAST}}}.
 
 
-\section{Run unit tests (optional)}
-\label{1_0_installation:run-unit-tests-optional}
-To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. \textless{}python installation path\textgreater{}/lib/python2.7/site-packages/MAST/test) and run the command
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
-\end{Verbatim}
-
-The \code{nocapture} option allows print statements.
-The \code{verbose} option gives verbose results.
-
-The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
-
-
 \chapter{Trying out MAST}
 \label{17_0_testmast:trying-out-mast}\label{17_0_testmast::doc}\begin{enumerate}
 \item {} 
@@ -1254,7 +1242,7 @@ Select one of the examples. The fastest one is \code{simple\_optimization.inp}
 Copy that file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cp simple\_optimization.inp test.inp
+cp simple\PYGZus{}optimization.inp test.inp
 \end{Verbatim}
 
 \item {} 
@@ -1381,29 +1369,29 @@ MAST will refer to this recipe-local \code{input.inp} file for all subsequent co
 The input file has many sections. Sections are denoted by \code{\$\textless{}section name\textgreater{}} and \code{\$end}:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$section
+\PYGZdl{}section
 
-section\_text
-section\_keyword keyword\_value
+section\PYGZus{}text
+section\PYGZus{}keyword keyword\PYGZus{}value
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 Within each section there may also be subsections, with keywords and values.
 Subsections are denoted by \code{begin \textless{}subsection name\textgreater{}} and \code{end}.:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$section
+\PYGZdl{}section
 
-section\_text
-section\_keyword keyword\_value
+section\PYGZus{}text
+section\PYGZus{}keyword keyword\PYGZus{}value
 
 begin subsection
-subsection\_text
-subsection\_keyword subsection\_keyword\_value
+subsection\PYGZus{}text
+subsection\PYGZus{}keyword subsection\PYGZus{}keyword\PYGZus{}value
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -1534,11 +1522,11 @@ The number of items in parentheses should be equal for all instances of the \cod
 Complex example (for looping only - many other necessary lines in the input file are skipped):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$mast
-pegloop1 system\_name (strain1,strain2,strain3)
-\$end
+\PYGZdl{}mast
+pegloop1 system\PYGZus{}name (strain1,strain2,strain3)
+\PYGZdl{}end
 
-\$structure
+\PYGZdl{}structure
 begin lattice
 pegloop1 (3,4,5) 0 0
 pegloop1 0 (3,4,5) 0
@@ -1548,25 +1536,25 @@ end
 begin elementmap
 pegloop2 X1 (Cr,Mn)
 end
-\$end
+\PYGZdl{}end
 
-\$ingredients
-begin ingredients\_global
-indeploop mast\_xc (pw91,pbe)
+\PYGZdl{}ingredients
+begin ingredients\PYGZus{}global
+indeploop mast\PYGZus{}xc (pw91,pbe)
 LDAUJ 1
 pegloop2 LDAUU (4.5,5)
 end
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 The above example would create 3*2*2 = 12 input files and corresponding recipes. The input file for the one of the recipes would look like:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$mast
-system\_name strain2
-\$end
+\PYGZdl{}mast
+system\PYGZus{}name strain2
+\PYGZdl{}end
 
-\$structure
+\PYGZdl{}structure
 begin lattice
 4 0 0
 0 4 0
@@ -1576,15 +1564,15 @@ end
 begin elementmap
 X1 Mn
 end
-\$end
+\PYGZdl{}end
 
-\$ingredients
-begin ingredients\_global
-indeploop mast\_xc pbe
+\PYGZdl{}ingredients
+begin ingredients\PYGZus{}global
+indeploop mast\PYGZus{}xc pbe
 LDAUJ 1
 LDAUU 5
 end
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -1609,17 +1597,17 @@ Loops are otherwise differentiated by elements, if you were looping over element
 Example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$mast
-system\_name epitaxialstrain
-\$end
+\PYGZdl{}mast
+system\PYGZus{}name epitaxialstrain
+\PYGZdl{}end
 \end{Verbatim}
 
 Example for pegged loop:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$mast
-pegloop1 system\_name (strain1,strain2,strain3)
-\$end
+\PYGZdl{}mast
+pegloop1 system\PYGZus{}name (strain1,strain2,strain3)
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -1633,9 +1621,9 @@ The \code{\$structure} section contains the coordinate type, coordinates, and la
 Using the keyword \code{posfile}, a VASP POSCAR-type file or a CIF file can be inserted here in this section:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$structure
-posfile POSCAR\_fcc
-\$end
+\PYGZdl{}structure
+posfile POSCAR\PYGZus{}fcc
+\PYGZdl{}end
 \end{Verbatim}
 
 The file should be located in the same directory as the input file at the time you call MAST, and should not be moved until the recipe is complete.
@@ -1666,9 +1654,9 @@ Each fractional coordinate must be preceded by either an element symbol or an X\
 Example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-begin \$structure
+begin \PYGZdl{}structure
 
-coord\_type fractional
+coord\PYGZus{}type fractional
 
 begin lattice
 6.0 0.0 0.0
@@ -1692,7 +1680,7 @@ X2 0.250000 0.750000 0.750000
 X2 0.750000 0.250000 0.750000
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -1763,7 +1751,7 @@ Hine, N. D. M., Frensch, K., Foulkes, W. M. C. \& Finnis, M. W. Supercell size s
 Run this utility as follows in order to generate a cut-and-paste for the scaling section.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_finite\_size\_scaling\_sizes perfDir defDir minDefDist maxNumAtoms numStructAsked
+mast\PYGZus{}finite\PYGZus{}size\PYGZus{}scaling\PYGZus{}sizes perfDir defDir minDefDist maxNumAtoms numStructAsked
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -1796,22 +1784,22 @@ Each ingredient type in the recipe should have a subsection denoted by \code{beg
 Example \code{\$ingredients} section:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$ingredients
+\PYGZdl{}ingredients
 
-begin ingredients\_global
+begin ingredients\PYGZus{}global
 keyword1 k1value1
 end
 
-begin ingredient\_type1
+begin ingredient\PYGZus{}type1
 keyword1 k1value2
 keyword2 k2value1
 end
 
-begin ingredient\_type2
+begin ingredient\PYGZus{}type2
 keyword2 k2value2
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with \code{mast\_}.
@@ -1819,7 +1807,7 @@ Program-specific keywords such as VASP INCAR keywords are included in these sect
 If there are no changes from the ingredients\_global section, just add an empty subsection for that ingredient type:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-begin ingredient\_type
+begin ingredient\PYGZus{}type
 end
 \end{Verbatim}
 
@@ -1863,7 +1851,7 @@ The following queue submission keywords are platform-dependent and are used alon
 \textbf{mast\_exec}: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in \code{mast\_program}, and it should include any MPI commands.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_exec //opt/mpiexec/bin/mpiexec \textasciitilde{}/bin/vasp\_5.2
+mast\PYGZus{}exec //opt/mpiexec/bin/mpiexec \PYGZti{}/bin/vasp\PYGZus{}5.2
 \end{Verbatim}
 
 \textbf{mast\_nodes}: The number of nodes requested.
@@ -1882,7 +1870,7 @@ mast\_exec //opt/mpiexec/bin/mpiexec \textasciitilde{}/bin/vasp\_5.2
 \textbf{mast\_program}: Specify which program to run (\code{vasp}, \code{vasp\_neb}, or \code{None} for a generic program, are currently supported)
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_program vasp
+mast\PYGZus{}program vasp
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -1908,7 +1896,7 @@ If set to False, MAST will attempt to find errors, then write them into a \code{
 \textbf{mast\_kpoints}: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_kpoints = 3x3x3 G
+mast\PYGZus{}kpoints = 3x3x3 G
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -1929,7 +1917,7 @@ Either this keyword or \code{mast\_kpoints} is required for VASP calculations.
 \textbf{mast\_pp\_setup}: Specify which pseudopotential goes to which element:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_pp\_setup La=La Mn=Mn\_pv O=O\_s
+mast\PYGZus{}pp\PYGZus{}setup La=La Mn=Mn\PYGZus{}pv O=O\PYGZus{}s
 \end{Verbatim}
 
 \textbf{mast\_xc}: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)
@@ -1964,14 +1952,14 @@ A positive charge is the REMOVAL of electrons. For example, Na+ with a +1 charge
 \textbf{mast\_coordinates}: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the \$structure section of the input file. The coordinates must be fractional coordinates.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_coordinates POSCAR\_initialize
+mast\PYGZus{}coordinates POSCAR\PYGZus{}initialize
 \end{Verbatim}
 \begin{itemize}
 \item {} 
 For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_coordinates POSCAR\_im1,POSCAR\_im2,POSCAR\_im3
+mast\PYGZus{}coordinates POSCAR\PYGZus{}im1,POSCAR\PYGZus{}im2,POSCAR\PYGZus{}im3
 \end{Verbatim}
 
 \item {} 
@@ -1988,7 +1976,7 @@ This keyword cannot be used with programs other than VASP, cartesian coordinates
 \textbf{mast\_strain}: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with \code{mast\_run\_method} of \code{run\_strain}
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_strain 1.01 1.03 0.98
+mast\PYGZus{}strain 1.01 1.03 0.98
 \end{Verbatim}
 
 This example will stretch the lattice along lattice vector a by 1\%, stretch the lattice along lattice vector b by 3\%, and compress the lattice along lattice vector c by 2\%
@@ -2011,7 +1999,7 @@ The following keywords have individual sections:
 Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_write\_method write\_singlerun
+mast\PYGZus{}write\PYGZus{}method write\PYGZus{}singlerun
 \end{Verbatim}
 
 They depend on having an appropriate program set in \code{mast\_program}.
@@ -2019,14 +2007,14 @@ They depend on having an appropriate program set in \code{mast\_program}.
 However, you may choose to specify arguments where available, e.g.:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_complete\_method file\_has\_string myoutput "End of Execution"
+mast\PYGZus{}complete\PYGZus{}method file\PYGZus{}has\PYGZus{}string myoutput "End of Execution"
 \end{Verbatim}
 
 You may also choose to specify multiple methods. These methods will be performed in the order listed. For \code{mast\_ready\_method} or \code{mast\_complete\_method}, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
 Use a semicolon to separate out the methods:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_complete\_method file\_has\_string myoutput "End of Execution"; file\_exists Parsed\_Structures
+mast\PYGZus{}complete\PYGZus{}method file\PYGZus{}has\PYGZus{}string myoutput "End of Execution"; file\PYGZus{}exists Parsed\PYGZus{}Structures
 \end{Verbatim}
 
 In the example above, the file ``myoutput'' must exist and contain the phrase ``End of Execution'', and the file ``Parsed\_Structures'' must exist, in order for the ingredient to be considered complete.
@@ -2034,7 +2022,7 @@ In the example above, the file ``myoutput'' must exist and contain the phrase ``
 Update-children methods will always get the child name appended as the end of the argument string. For example,
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_update\_children\_method copy\_file EndStructure BeginStructure
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method copy\PYGZus{}file EndStructure BeginStructure
 \end{Verbatim}
 
 will copy the file EndStructure of the parent ingredient folder to a new file BeginStructure in the child ingredient folder. There is no separate argument denoting the child ingredient.
@@ -2074,8 +2062,8 @@ Leave off the delimiter argument in order to use a single space.
 Examples:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-write\_ingred\_input\_file input.txt all 0 =
-write\_ingred\_input\_file input.txt phon\_allowed\_keys.py 1
+write\PYGZus{}ingred\PYGZus{}input\PYGZus{}file input.txt all 0 =
+write\PYGZus{}ingred\PYGZus{}input\PYGZus{}file input.txt phon\PYGZus{}allowed\PYGZus{}keys.py 1
 \end{Verbatim}
 
 \end{itemize}
@@ -2099,7 +2087,7 @@ Please stick to common text characters.
 Example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_run\_method run\_command "//home/user/myscripts/my\_custom\_parsing.py 25 0.01"
+mast\PYGZus{}run\PYGZus{}method run\PYGZus{}command "//home/user/myscripts/my\PYGZus{}custom\PYGZus{}parsing.py 25 0.01"
 \end{Verbatim}
 
 \item {} 
@@ -2408,16 +2396,16 @@ Programs supported: vasp
 Here is an example ingredients section:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$ingredients
-begin ingredients\_global
-mast\_program    vasp
-mast\_nodes      1
-mast\_multiplyencut 1.5
-mast\_ppn        1
-mast\_queue      default
-mast\_exec       mpiexec //home/mayeshiba/bin/vasp.5.3.3\_vtst\_static
-mast\_kpoints    2x2x2 M
-mast\_xc PW91
+\PYGZdl{}ingredients
+begin ingredients\PYGZus{}global
+mast\PYGZus{}program    vasp
+mast\PYGZus{}nodes      1
+mast\PYGZus{}multiplyencut 1.5
+mast\PYGZus{}ppn        1
+mast\PYGZus{}queue      default
+mast\PYGZus{}exec       mpiexec //home/mayeshiba/bin/vasp.5.3.3\PYGZus{}vtst\PYGZus{}static
+mast\PYGZus{}kpoints    2x2x2 M
+mast\PYGZus{}xc PW91
 isif 2
 ibrion 2
 nsw 191
@@ -2426,56 +2414,56 @@ sigma 0.2
 lwave False
 lcharg False
 prec Accurate
-mast\_program   vasp
-mast\_write\_method           write\_singlerun
-mast\_ready\_method           ready\_singlerun
-mast\_run\_method             run\_singlerun
-mast\_complete\_method        complete\_singlerun
-mast\_update\_children\_method  give\_structure
+mast\PYGZus{}program   vasp
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}singlerun
+mast\PYGZus{}ready\PYGZus{}method           ready\PYGZus{}singlerun
+mast\PYGZus{}run\PYGZus{}method             run\PYGZus{}singlerun
+mast\PYGZus{}complete\PYGZus{}method        complete\PYGZus{}singlerun
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}structure
 end
 
-begin volrelax\_to\_singlerun
+begin volrelax\PYGZus{}to\PYGZus{}singlerun
 isif 3
 end
 
-begin singlerun\_to\_phonon
+begin singlerun\PYGZus{}to\PYGZus{}phonon
 ibrion -1
 nsw 0
-mast\_update\_children\_method  give\_structure\_and\_restart\_files
-mast\_multiplyencut 1.25
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}structure\PYGZus{}and\PYGZus{}restart\PYGZus{}files
+mast\PYGZus{}multiplyencut 1.25
 lwave True
 lcharge True
 end
 
 begin inducedefect
-mast\_write\_method           no\_setup
-mast\_ready\_method           ready\_defect
-mast\_run\_method             run\_defect
-mast\_complete\_method        complete\_structure
+mast\PYGZus{}write\PYGZus{}method           no\PYGZus{}setup
+mast\PYGZus{}ready\PYGZus{}method           ready\PYGZus{}defect
+mast\PYGZus{}run\PYGZus{}method             run\PYGZus{}defect
+mast\PYGZus{}complete\PYGZus{}method        complete\PYGZus{}structure
 end
 
-begin singlerun\_vac1
-mast\_coordinates            POSCAR\_vac1
+begin singlerun\PYGZus{}vac1
+mast\PYGZus{}coordinates            POSCAR\PYGZus{}vac1
 end
 
-begin singlerun\_vac2
-mast\_coordinates            POSCAR\_vac2
+begin singlerun\PYGZus{}vac2
+mast\PYGZus{}coordinates            POSCAR\PYGZus{}vac2
 end
 
-begin singlerun\_to\_neb
+begin singlerun\PYGZus{}to\PYGZus{}neb
 ibrion -1
 nsw 0
-mast\_update\_children\_method  give\_structure\_and\_energy\_to\_neb
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}structure\PYGZus{}and\PYGZus{}energy\PYGZus{}to\PYGZus{}neb
 lwave True
 lcharge True
 end
 
-begin neb\_to\_neb\_vac1-vac2
-mast\_coordinates            POSCAR\_nebim1,POSCAR\_nebim2,POSCAR\_nebim3
-mast\_write\_method           write\_neb
-mast\_update\_children\_method  give\_neb\_structures\_to\_neb
-mast\_nodes                  3
-mast\_kpoints                1x1x1 G
+begin neb\PYGZus{}to\PYGZus{}neb\PYGZus{}vac1-vac2
+mast\PYGZus{}coordinates            POSCAR\PYGZus{}nebim1,POSCAR\PYGZus{}nebim2,POSCAR\PYGZus{}nebim3
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}neb
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}neb\PYGZus{}structures\PYGZus{}to\PYGZus{}neb
+mast\PYGZus{}nodes                  3
+mast\PYGZus{}kpoints                1x1x1 G
 ibrion 1
 potim 0.5
 images 3
@@ -2483,12 +2471,12 @@ lclimb True
 spring -5
 end
 
-begin neb\_to\_neb\_vac1-vac3
-mast\_coordinates            POSCAR\_nebim1\_set2,POSCAR\_nebim2\_set2,POSCAR\_nebim3\_set2
-mast\_write\_method           write\_neb
-mast\_update\_children\_method  give\_neb\_structures\_to\_neb
-mast\_nodes                  3
-mast\_kpoints                1x1x1 G
+begin neb\PYGZus{}to\PYGZus{}neb\PYGZus{}vac1-vac3
+mast\PYGZus{}coordinates            POSCAR\PYGZus{}nebim1\PYGZus{}set2,POSCAR\PYGZus{}nebim2\PYGZus{}set2,POSCAR\PYGZus{}nebim3\PYGZus{}set2
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}neb
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}neb\PYGZus{}structures\PYGZus{}to\PYGZus{}neb
+mast\PYGZus{}nodes                  3
+mast\PYGZus{}kpoints                1x1x1 G
 ibrion 1
 potim 0.5
 images 3
@@ -2496,10 +2484,10 @@ lclimb True
 spring -5
 end
 
-begin neb\_to\_nebstat
-mast\_write\_method           write\_neb
-mast\_update\_children\_method  give\_neb\_structures\_to\_neb
-mast\_nodes                  3
+begin neb\PYGZus{}to\PYGZus{}nebstat
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}neb
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}neb\PYGZus{}structures\PYGZus{}to\PYGZus{}neb
+mast\PYGZus{}nodes                  3
 ibrion 1
 potim 0.5
 images 3
@@ -2507,22 +2495,22 @@ lclimb True
 spring -5
 end
 
-begin nebstat\_to\_nebphonon
+begin nebstat\PYGZus{}to\PYGZus{}nebphonon
 ibrion -1
 nsw 0
-mast\_write\_method           write\_neb\_subfolders
-mast\_ready\_method           ready\_neb\_subfolders
-mast\_run\_method             run\_neb\_subfolders
-mast\_complete\_method        complete\_neb\_subfolders
-mast\_update\_children\_method  give\_saddle\_structure
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}neb\PYGZus{}subfolders
+mast\PYGZus{}ready\PYGZus{}method           ready\PYGZus{}neb\PYGZus{}subfolders
+mast\PYGZus{}run\PYGZus{}method             run\PYGZus{}neb\PYGZus{}subfolders
+mast\PYGZus{}complete\PYGZus{}method        complete\PYGZus{}neb\PYGZus{}subfolders
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}saddle\PYGZus{}structure
 end
 
-begin phonon\_to\_phononparse
-mast\_write\_method           write\_phonon\_multiple
-mast\_ready\_method           ready\_subfolders
-mast\_run\_method             run\_subfolders
-mast\_complete\_method        complete\_subfolders
-mast\_update\_children\_method  give\_phonon\_multiple\_forces\_and\_displacements
+begin phonon\PYGZus{}to\PYGZus{}phononparse
+mast\PYGZus{}write\PYGZus{}method           write\PYGZus{}phonon\PYGZus{}multiple
+mast\PYGZus{}ready\PYGZus{}method           ready\PYGZus{}subfolders
+mast\PYGZus{}run\PYGZus{}method             run\PYGZus{}subfolders
+mast\PYGZus{}complete\PYGZus{}method        complete\PYGZus{}subfolders
+mast\PYGZus{}update\PYGZus{}children\PYGZus{}method  give\PYGZus{}phonon\PYGZus{}multiple\PYGZus{}forces\PYGZus{}and\PYGZus{}displacements
 ibrion 5
 nfree 2
 potim 0.01
@@ -2530,7 +2518,7 @@ istart 1
 icharg 1
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -2546,7 +2534,7 @@ This information complements the \code{mast\_update\_children\_method} keyword g
 An ingredient in the recipe is referred to by:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\textless{}ingredient name\textgreater{} (ingredient type in \$ingredients section)
+\textless{}ingredient name\textgreater{} (ingredient type in \PYGZdl{}ingredients section)
 \end{Verbatim}
 
 For example:
@@ -2627,9 +2615,9 @@ Also make sure that the recipe you are working with has not somehow been convert
 Each indentation level marks a parent-child relationship.:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-perfect\_opt1 (volrelax\_lowmesh)
-    perfect\_opt2
-        perfect\_opt3
+perfect\PYGZus{}opt1 (volrelax\PYGZus{}lowmesh)
+    perfect\PYGZus{}opt2
+        perfect\PYGZus{}opt3
 \end{Verbatim}
 
 The ingredient type of an ingredient is specified in parentheses after the ingredient.
@@ -2645,23 +2633,23 @@ In the recipe:
 In the input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$ingredients
+\PYGZdl{}ingredients
 
-begin volrelax\_lowmesh
-mast\_run\_method run\_singlerun
+begin volrelax\PYGZus{}lowmesh
+mast\PYGZus{}run\PYGZus{}method run\PYGZus{}singlerun
 ...
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 If the parent needs to update several children in different ways, create new trees where the originating parent is the same parent name, but with a different ingredient type:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-perfect\_stat (stat\_to\_defect)
-    defect\_opt
-perfect\_stat (stat\_to\_phonon)
-    phonon\_opt1
+perfect\PYGZus{}stat (stat\PYGZus{}to\PYGZus{}defect)
+    defect\PYGZus{}opt
+perfect\PYGZus{}stat (stat\PYGZus{}to\PYGZus{}phonon)
+    phonon\PYGZus{}opt1
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -2675,11 +2663,11 @@ They should have all the same other keywords.
 If two children need to be the parent of one ingredient, also create a new tree:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-perfect\_stat
-    defect\_1\_opt
-    defect\_2\_opt
-defect\_1\_opt, defect\_2\_opt
-    neb\_1-2\_opt
+perfect\PYGZus{}stat
+    defect\PYGZus{}1\PYGZus{}opt
+    defect\PYGZus{}2\PYGZus{}opt
+defect\PYGZus{}1\PYGZus{}opt, defect\PYGZus{}2\PYGZus{}opt
+    neb\PYGZus{}1-2\PYGZus{}opt
 \end{Verbatim}
 
 Parent-child relationships are name-based, and the name must also include correct formats for size-scaling labels \textless{}S\textgreater{}, defect labels \textless{}N, B, or E\textgreater{}, neb labels \textless{}B-E\textgreater{}, charge labels \textless{}Q\textgreater{}, and phonon labels \textless{}P\textgreater{}.
@@ -2711,13 +2699,13 @@ Use \textless{}N\textgreater{} in a recipe unless specifying that a defect is a 
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}N\textgreater{}\_opt1 (relax)
-    defect\_\textless{}N\textgreater{}\_stat (static)
+defect\PYGZus{}\textless{}N\textgreater{}\PYGZus{}opt1 (relax)
+    defect\PYGZus{}\textless{}N\textgreater{}\PYGZus{}stat (static)
 \PYGZob{}end\PYGZcb{}
 
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}B\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}E\textgreater{}\_stat (static\_to\_neb)
-    neb\_\textless{}B-E\textgreater{}\_opt1 (neb)
+defect\PYGZus{}\textless{}B\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb), defect\PYGZus{}\textless{}E\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb)
+    neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}opt1 (neb)
 \PYGZob{}end\PYGZcb{}
 \end{Verbatim}
 
@@ -2755,12 +2743,12 @@ Note that defect endpoints need to be the parents of all NEB optimizations and N
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}B\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}E\textgreater{}\_stat (static\_to\_neb)
-    neb\_\textless{}B-E\textgreater{}\_opt1 (neb)
-        neb\_\textless{}B-E\textgreater{}\_opt2 (neb)
-            neb\_\textless{}B-E\textgreater{}\_stat (neb\_static)
-    neb\_\textless{}B-E\textgreater{}\_opt2 (neb)
-    neb\_\textless{}B-E\textgreater{}\_stat (neb\_static)
+defect\PYGZus{}\textless{}B\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb), defect\PYGZus{}\textless{}E\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb)
+    neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}opt1 (neb)
+        neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}opt2 (neb)
+            neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}stat (neb\PYGZus{}static)
+    neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}opt2 (neb)
+    neb\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}stat (neb\PYGZus{}static)
 \PYGZob{}end\PYGZcb{}
 \end{Verbatim}
 
@@ -2769,34 +2757,34 @@ defect\_\textless{}B\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}E
 Full example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$recipe
-perfect\_opt1 (lowmesh)
-    perfect\_opt2
-        perfect\_stat (static)
+\PYGZdl{}recipe
+perfect\PYGZus{}opt1 (lowmesh)
+    perfect\PYGZus{}opt2
+        perfect\PYGZus{}stat (static)
         \PYGZob{}begin\PYGZcb{}
-        inducescaling\_\textless{}S\textgreater{}
-            inducedefect\_\textless{}S\textgreater{}\_\textless{}N\textgreater{} (inducedefect)
-                defect\_\textless{}S\textgreater{}\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (lowmesh\_defect)
-                    defect\_\textless{}S\textgreater{}\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (defect\_relax)
-                        defect\_\textless{}S\textgreater{}\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
+        inducescaling\PYGZus{}\textless{}S\textgreater{}
+            inducedefect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{} (inducedefect)
+                defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}opt1 (lowmesh\PYGZus{}defect)
+                    defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}opt2 (defect\PYGZus{}relax)
+                        defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (static)
         \PYGZob{}end\PYGZcb{}
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}S\textgreater{}\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
-    phonon\_\textless{}S\textgreater{}\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
+defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (static)
+    phonon\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}\textless{}P\textgreater{} (phonon)
 \PYGZob{}end\PYGZcb{}
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}S\textgreater{}\_\textless{}B\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb), defect\_\textless{}S\textgreater{}\_\textless{}E\textgreater{}\_\textless{}Q\textgreater{}\_stat (static\_to\_neb)
-    neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt1 (neb\_to\_neb)
-        neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
-            neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
-    neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_opt2 (neb\_to\_nebstat)
-    neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
+defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb), defect\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (static\PYGZus{}to\PYGZus{}neb)
+    neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}opt1 (neb\PYGZus{}to\PYGZus{}neb)
+        neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}opt2 (neb\PYGZus{}to\PYGZus{}nebstat)
+            neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (nebstat\PYGZus{}to\PYGZus{}phonon)
+    neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}opt2 (neb\PYGZus{}to\PYGZus{}nebstat)
+    neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (nebstat\PYGZus{}to\PYGZus{}phonon)
 \PYGZob{}end\PYGZcb{}
 \PYGZob{}begin\PYGZcb{}
-neb\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_stat (nebstat\_to\_phonon)
-    phonon\_\textless{}S\textgreater{}\_\textless{}B-E\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
+neb\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (nebstat\PYGZus{}to\PYGZus{}phonon)
+    phonon\PYGZus{}\textless{}S\textgreater{}\PYGZus{}\textless{}B-E\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}\textless{}P\textgreater{} (phonon)
 \PYGZob{}end\PYGZcb{}
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -2862,9 +2850,9 @@ The \code{threshold} keyword specifies the absolute threshold for finding the de
 Example \code{\$defects} section:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$defects
+\PYGZdl{}defects
 
-coord\_type fractional
+coord\PYGZus{}type fractional
 threshold 1e-4
 
 vacancy 0 0 0 Mg
@@ -2872,7 +2860,7 @@ vacancy 0.5 0.5 0.5 Mg
 interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct recipe in {\hyperref[3_1_3_recipe::doc]{\emph{The Recipe section}}}, four separate ingredients, each containing one of the defects above, will be created.
@@ -2880,9 +2868,9 @@ The above section specifies 4 point defects (2 vacancies and 2 interstitials) to
 Multiple point defects can be also grouped together as a combined defect within a \code{\textless{}defect label\textgreater{}} subsection such as:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$defects
+\PYGZdl{}defects
 
-coord\_type fractional
+coord\PYGZus{}type fractional
 threshold 1e-4
 
 begin doublevac
@@ -2893,7 +2881,7 @@ end
 interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 In this case, there will be three separate defect ingredients: one ingredient with two vacancies together (where the defect group is labeled \code{doublevac}), one interstitial, and another interstitial.
@@ -2980,9 +2968,9 @@ Because phonons are cycled with the defects, a new parent loop must be provided 
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYGZob{}begin\PYGZcb{}
-defect\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_stat (static)
-    phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{} (phonon)
-        phonon\_\textless{}N\textgreater{}\_\textless{}Q\textgreater{}\_\textless{}P\textgreater{}\_parse (phononparse)
+defect\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}stat (static)
+    phonon\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}\textless{}P\textgreater{} (phonon)
+        phonon\PYGZus{}\textless{}N\textgreater{}\PYGZus{}\textless{}Q\textgreater{}\PYGZus{}\textless{}P\textgreater{}\PYGZus{}parse (phononparse)
 \PYGZob{}end\PYGZcb{}
 \end{Verbatim}
 
@@ -3044,9 +3032,9 @@ If the frequencies of a moving atom are desired for the phonon calculations, and
 Example defect and NEB section together:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$defects
+\PYGZdl{}defects
 
-coord\_type fractional
+coord\PYGZus{}type fractional
 threshold 1e-4
 
 vacancy 0.0 0.0 0.0 Mg label=vac1
@@ -3054,9 +3042,9 @@ vacancy 0.0 0.5 0.5 Mg label=vac2
 interstitial 0.25 0.0 0.0 Al label=int1
 interstitial 0.0 0.25 0.0 Al label=int2
 
-\$end
+\PYGZdl{}end
 
-\$neb
+\PYGZdl{}neb
 
 begin vac1-vac2
 images 1
@@ -3069,7 +3057,7 @@ images 3
 phonon movingatom 0.125 0.125 0.0 1.0
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -3080,7 +3068,7 @@ The \code{\$chemical\_potentials} section lists chemical potentials, used for de
 Currently, chemical potentials must be set ahead of time. Each chemical potential subsection may be labeled descriptively.
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$chemical\_potentials
+\PYGZdl{}chemical\PYGZus{}potentials
 
 begin Ga rich
 Ga -3.6080
@@ -3094,7 +3082,7 @@ As -5.3920
 Bi -4.5650
 end
 
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 
@@ -3421,13 +3409,13 @@ Crontab commands are as follows:
 This crontab line will run mast every hour at minute 15, and is usually suitable for everyday use:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-15 * * * * . \$HOME/.bashrc; nice -n 19 mast
+15 * * * * . \PYGZdl{}HOME/.bashrc; nice -n 19 mast
 \end{Verbatim}
 
 This crontab line will run mast every 15 minutes and is ONLY suitable for short testing:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-*/15 * * * * . \$HOME/.bashrc; nice -n 19 mast
+*/15 * * * * . \PYGZdl{}HOME/.bashrc; nice -n 19 mast
 \end{Verbatim}
 
 
@@ -3467,13 +3455,13 @@ If you do not have such an ingredient in the recipe directory, you may manually 
 The \code{dfe\_input.txt} file for a manually-created or embedded workflow ingredient (see \code{//home/\textless{}username\textgreater{}/MAST/example/defect\_formation\_energy.inp}) should contain the following information:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-dfe\_label1=perfect\_label defected\_label
-dfe\_label2=perfect\_label defected\_label
-dfe\_label3=perfect\_label defected\_label
+dfe\PYGZus{}label1=perfect\PYGZus{}label defected\PYGZus{}label
+dfe\PYGZus{}label2=perfect\PYGZus{}label defected\PYGZus{}label
+dfe\PYGZus{}label3=perfect\PYGZus{}label defected\PYGZus{}label
 (etc. for more defects)
-bandgap\_lda\_or\_gga=\textless{}float\textgreater{}
-bandgap\_hse\_or\_expt=\textless{}float\textgreater{}
-plot\_threshold \textless{}float\textgreater{}: Plotting threshold value
+bandgap\PYGZus{}lda\PYGZus{}or\PYGZus{}gga=\textless{}float\textgreater{}
+bandgap\PYGZus{}hse\PYGZus{}or\PYGZus{}expt=\textless{}float\textgreater{}
+plot\PYGZus{}threshold \textless{}float\textgreater{}: Plotting threshold value
 \end{Verbatim}
 \begin{itemize}
 \item {} 
@@ -3496,7 +3484,7 @@ In addition, {\hyperref[3_1_7_chemicalpotentials::doc]{\emph{The Chemical Potent
 Run the utility as:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-mast\_defect\_formation\_energy dfe\_input.txt
+mast\PYGZus{}defect\PYGZus{}formation\PYGZus{}energy dfe\PYGZus{}input.txt
 \end{Verbatim}
 
 A directory named \code{dfe\_results} should be created within the ingredient directory. Inside that directory:
@@ -3787,7 +3775,7 @@ Leland Barnard (2014), "Particle Trajectory Diffusion Analysis," https://materia
 A new section is introduced in the input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\$site
+\PYGZdl{}site
 int1
 0.5 0.5 0.5
 0.5 0 0
@@ -3802,7 +3790,7 @@ int2
 0.25 0.75 0.75
 0.75 0.25 0.75
 0.75 0.75 0.25
-\$end
+\PYGZdl{}end
 \end{Verbatim}
 
 In this example, there are two types of local minimum (interstitial site) int1 and int2. The geometrically equivalent site coordinates are listed for each type.
@@ -3890,6 +3878,26 @@ When used as an update method, please remember that the last argument to a metho
 
 Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of \code{MAST/ingredients/baseingredient.py}.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)
+
+
+\section{Source code}
+\label{12_0_programming:source-code}
+To program with MAST, clone from the dev branch at \href{https://github.com/uw-cmg/MAST}{the MAST github repository}
+
+Prepend the clone directory to your \code{\$PYTHONPATH} environment variable.
+
+The command \code{mast} should reveal the clone directory instead of any other MAST installation directories.
+
+To run unit tests and verify that the MAST code is sound, go to the test directory in \code{\textless{}clone directory\textgreater{}/MAST/test} and run the command:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{nosetests} \PYG{o}{-}\PYG{n}{v} \PYG{o}{-}\PYG{o}{-}\PYG{n}{nocapture}
+\end{Verbatim}
+
+The \code{nocapture} option allows print statements.
+The \code{verbose} option gives verbose results.
+
+The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
 
 
 \chapter{Acknowledgments}
@@ -3990,7 +3998,7 @@ To properly cite MAST and its dependencies, go to your completed recipe director
 For example:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-cat \$MAST\_ARCHIVE/Optimization\_Al\_20140101T120000/CITATIONS.bib
+cat \PYGZdl{}MAST\PYGZus{}ARCHIVE/Optimization\PYGZus{}Al\PYGZus{}20140101T120000/CITATIONS.bib
 \end{Verbatim}
 
 This Bibtex-formatted file may be used directly with LaTeX or imported into a reference manager such as EndNote or Mendeley.

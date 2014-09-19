@@ -30,6 +30,10 @@
 \RequirePackage{wrapfig}
 % Separate paragraphs by space by default.
 \RequirePackage{parskip}
+% For parsed-literal blocks.
+\RequirePackage{alltt}
+% Display "real" single quotes in literal blocks.
+\RequirePackage{upquote}
 
 % Redefine these colors to your liking in the preamble.
 \definecolor{TitleColor}{rgb}{0.126,0.263,0.361}
@@ -238,9 +242,11 @@
   \def\productioncont##1{\\& &\code{##1}}
   \parindent=2em
   \indent
-  \begin{tabular}{lcl}
+  \setlength{\LTpre}{0pt}
+  \setlength{\LTpost}{0pt}
+  \begin{longtable}[l]{lcl}
 }{%
-  \end{tabular}
+  \end{longtable}
 }
 
 % Notices / Admonitions
