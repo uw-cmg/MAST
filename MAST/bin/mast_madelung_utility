@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# 
+# Maintainer: Tam Mayeshiba
+# Just a wrapper for Wei and Zhewen's __main__ in EneVsVm
+# Last updated: 2014-09-19
+##############################################################
+import sys, getopt, os
+from MAST.utility import dirutil
+
+install_dir = dirutil.get_mast_install_path()
+
+import subprocess
+runline = "python %s" % os.path.join(install_dir,"utility/finite_size_scaling/EneVsVm.py")
+outputfile = open('madelung_utility_screen_output.log','wb')
+util=subprocess.Popen(runline, shell=True, stdout=outputfile, stderr=outputfile)
+
+util.wait()
+outputfile.close()
