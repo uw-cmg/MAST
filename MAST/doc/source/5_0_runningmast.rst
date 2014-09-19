@@ -5,12 +5,12 @@ Running MAST for real
 *************************
 General notes
 *************************
-Depending on your cluster, you might find it polite to *nice* your processes::
+Depending on your cluster, you might find it necessary to *nice* your processes::
 
     nice -n 19 mast -i input.inp
     nice -n 19 mast
 
-Nice-ing allows the headnode to put its regular functions before the mast processes. MAST should start running within several seconds.
+Nice-ing allows the headnode to put its regular functions before the MAST processes. MAST should start running within several seconds.
 
 *************************
 Inputting an input file
@@ -23,7 +23,11 @@ or ::
 
     mast -i //full/path/to/input/file/myinput.inp
 
-If your input file specifies any POSCAR or CIF files, those files must be in your current working directory at the time you call MAST.
+If your input file specifies any POSCAR or CIF files:
+
+*  Those files must be in the same path as the original input file.
+
+*  Those files may not be moved until the recipe is complete.
 
 The input file will be parsed and a recipe directory should be created inside the ``$MAST_SCRATCH`` directory, with the appropriate ingredient subdirectories.
 
@@ -41,16 +45,18 @@ This command will do two things:
 
 1.  Submit all ingredient runs listed in the ``$MAST_CONTROL/submitlist`` list to the queue. 
 
-    *  The submission command (``sbatch``, ``qsub``, etc.) is based on the platform chosen when you set ``$MAST_PLATFORM``
+    *  The submission command (``sbatch``, ``qsub``, etc.) is based on the platform chosen when you set ``$MAST_PLATFORM``. See :doc:`1_0_installation`.
+
     *  The exact commands can be found in your MAST installation path under ``submit/platforms/<platform name>/queue_commands.py``.
 
-Individual ingredients' submission scripts are created automatically through a combination of the ``$ingredients`` section in the input file, and your the template submission script for your platform 
+Individual ingredients' submission scripts are created automatically through a combination of :doc:`3_1_2_ingredients` in the input file, and your the template submission script for your platform 
 
     *  The template submission script is found in your MAST installation path under ``submit/platforms/<platform name>/submit_template.sh``). 
 
 2.  Spawn a MAST monitor, or *mastmon*, process on the queue. 
 
-*  The ``mastmon_submit.sh`` and ``runmast.py`` files are copied from your MAST installation path ``submit/platforms/<platform name>`` folder into ``$MAST_CONTROL`` and are responsible for submitting this process.
+*  The ``mastmon_submit.sh`` and ``runmast.py`` files, originally located in your MAST installation path ``submit/platforms/<platform name>`` and then copied into ``$MAST_CONTROL`` when you first run mast, are are responsible for submitting this process.
+
 *  The script should be set up to use the shortest, fastest turnover queue available (e.g. a serial queue with a maximum walltime of 4 hours, or morganshort on bardeen).
 *  You may make changes directly in ``$MAST_CONTROL/mastmon_submit.sh``
  
@@ -60,11 +66,21 @@ The mastmon process will generate additional entries on ``$MAST_CONTROL/submitli
 The MAST monitor
 =======================
 
-The MAST monitor, or mastmon, process goes through the ``$MAST_SCRATCH`` directory. It looks at the folders there, which are recipe directories. For each recipe directory, the MAST monitor builds a .recipe plan. from a combination of the input.inp file, the personal_recipe.txt file, and the status.txt file. It then uses the recipe plan to assess the next steps appropriate for the recipe.
+The MAST monitor, or mastmon, process goes through the ``$MAST_SCRATCH`` directory. 
 
-For human troubleshooting of a recipe, the archive_recipe_plan.txt file gives information about which ingredients are parents/children of which other ingredients, and which method each parent should use to update each of its child ingredients.
+*  It looks at the recipe directories under ``$MAST_SCRATCH``.
 
-The status.txt files gives the status of each ingredient.
+*  For each recipe directory, the MAST monitor builds a :doc:`4_0_recipe` plan object from information in the recipe directory, using a combination of the ``input.inp`` and ``status.txt`` files in the recipe directory.
+
+*  MAST then uses the recipe plan object to assess the next steps appropriate for the recipe, creating objects for the separate :doc:`2_0_ingredients` and evaluating them. 
+
+======================================
+Troubleshooting in a recipe directory
+======================================
+
+For human troubleshooting of a recipe, the ``archive_recipe_plan.txt`` file gives information about which ingredients are parents/children of which other ingredients, and which method each parent should use to update each of its child ingredients.
+
+The ``status.txt`` files gives the status of each ingredient.
 
 Ingredient statuses are:
 
@@ -84,7 +100,7 @@ Ingredient statuses are:
 
 The MAST monitor checks the status of all ingredients whose status is not yet complete. The MAST monitor updates each ingredient status in the recipe plan. 
 
-Each ingredient is checked to see if it is complete (this is a redundant fast-forward check, since sometimes it is useful to copy over previously completed runs into a MAST ingredient directory.)
+Each non-complete ingredient is checked to see if it is complete (this is a redundant fast-forward check, since sometimes it is useful to copy over previously completed runs into a MAST ingredient directory.)
 
 If complete, the ingredient updates its children and is changed to Complete
 
@@ -139,7 +155,8 @@ Skipping recipes or ingredients in the SCRATCH folder
 
 If a certain recipe has some sort of flaw, or if you want to stop tracking it halfway through, you may have MAST skip over this recipe:
 
-* Create an empty (or not, the contents don.t matter) file named MAST_SKIP in the recipe directory. 
+* Create an empty (or not, the contents do not matter) file named ``MAST_SKIP`` in the recipe directory. 
+
 * Go through $MAST_CONTROL/submitlist and delete all ingredients associated with that recipe to keep them from being submitted during the next MAST run.
 
 If you would like to skip certain ingredients of a single recipe, edit the recipe's status.txt file and replace ingredients to be skipped with the status *skip* (use the whole word).

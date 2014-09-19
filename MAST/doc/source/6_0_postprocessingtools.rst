@@ -5,123 +5,126 @@ MAST post-processing utilities
 ####################################
 
 These utilities are meant to be used as part of a MAST workflow.
-See ``//home/<username>/MAST/examples`` for examples on how to use them.
+See example files in ``$HOME/MAST/examples`` or wherever you may have moved the initally-created ``$HOME/MAST/examples`` folder for examples on how to use them.
+
+These utilities should have been copied into your bin or .local/bin directory (see :doc:`1_0_installation`).
 
 ******************************
 Defect formation energy
 ******************************
 
-The defect formation energy tool goes through the output of finished recipes in $MAST_ARCHIVE and calculates defect formation energies. It should be copied into the bin directory.
+The defect formation energy tool is intended to be run as another ingredient folder in the recipe directory.
 
-The defect formation energy tool will create a ``<recipe directory>_dfe_results`` directory in the directory from which it is called.
+If you do not have such an ingredient in the recipe directory, you may manually create the ingredient folder and give it a ``dfe_input.txt`` file.
 
-To run without prompts::
+The ``dfe_input.txt`` file for a manually-created or embedded workflow ingredient (see ``//home/<username>/MAST/example/defect_formation_energy.inp``) should contain the following information::
 
-    python mast_defect_formation_energy <DFT bandgap> <experimental bandgap>
+    dfe_label1=perfect_label defected_label
+    dfe_label2=perfect_label defected_label
+    dfe_label3=perfect_label defected_label
+    (etc. for more defects)
+    bandgap_lda_or_gga=<float>
+    bandgap_hse_or_expt=<float>
+    plot_threshold <float>: Plotting threshold value
 
-where DFT bandgap is a float for an LDA or GGA bandgap, and experimental bandgap is a float for an experimental or more accurate hybrid calculation bandgap.
+*  <perfect_label> and <defected_label> are the ingredient names of the perfected and corresponding defected cells.
 
-To run with prompts::
+*  bandgap_lda_or_gga should be a float value indicating a DFT-calculated bandgap, usually expected to be underestimated.
 
-    python mast_defect_formation_energy prompt
+*  bandgap_hse_or_expt should be a float value indicating an experimental or more accurate bandgap, e.g. from a hybrid calculation.
 
-*  Select the desired recipe
-*  Follow the prompts for chemical potential conditions, band gap energy levels, and band gaps for adjustment
+*  In addition, :doc:`3_1_7_chemicalpotentials` should exist in the ``input.inp`` input file inside the recipe directory.
 
-The two-column printout is Fermi energy on the left, and defect formation energy on the right.
+Run the utility as::
+
+    mast_defect_formation_energy dfe_input.txt
+
+A directory named ``dfe_results`` should be created within the ingredient directory. Inside that directory:
+
+*  The two-column printout for each chemical potential-labeled text file contains Fermi energy on the left, and defect formation energy on the right.
+
+*  The ``dfe.txt`` printout contains defect formation energy information for each charge state.
 
 *************************
 Diffusion coefficient
 *************************
 
-Usage of diffusion coefficient calculation tool code:
+The diffusion coefficient calculation tool supports the 5(fcc) and 8(hcp) frequency models as follows:
 
-1.  This code currently supports 5(fcc) and 8(hcp) frequency models.
+*  Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
+*  Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
 
-2.  The code currently will work in the same directory with other MAST generated folders (``neb_vac*``, ``phonon_vac*``, etc.)
+The tool is designed to be used as a separate ingredient within the recipe directory. See ``$HOME/MAST/examples/neb_with_phonons.inp`` for an example input fileof a full workflow.
 
-3.  Type ``mast_diffusion_coefficient -i <input>`` to run.
+If the ingredient was not created within the workflow, an ingredient directory may be manually created for the tool.
 
-4.  The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.
+The tool will use an input text file like ``diffcoeff_input.txt``, which should contain the following lines. The order of the lines does not matter.
 
-*  The order of different lines does not matter.
+*  Names of the directories of energies and attempt rates, which are specified with respect to different frequencies for the model:
+    
+    *  **E** and **v** means energy and attempt rate, respectively. (There is no support for other characters such as w).
 
-*  There can be as many ``\n`` between lines or as many spaces between words, and they will not affect the code. 
+    *  For 5-freq, **E0 through E4** should be used to specify the relations with certain directories
 
-*  The keyword at the beginning of each line matters:
-
-    *  **type** means which frequency model to choose. Either ``5`` or ``fcc`` tells the code that the five-frequency model should be applied, while either ``8`` or ``hcp`` tell the code that the eight-frequency model should be applied.
-
-    *  **E** and **v** means energy and attempting rate, respectively. (Currently does not support other characters such as w).
-
-    *  For 5-freq, **E0~E4** should be used to specify the relations with certain directories
     *  For 8-freq, **Ea, Eb, Ec, EX, Eap (p means prime), Ebp, Ecp, and EXp** should be used. Note they are all case sensitive and should be exactly the same as written here.
 
-*  Generally speaking, each keyword (Exx or vxx) is followed by two words. The first indicates the configuration of the starting point of NEB and the second represents the saddle point. This order should not be changed.
+    *  Generally speaking, each keyword (Exx or vxx) is followed by two ingredient names. 
+    
+        *  The first name indicates the ingredient name corresponding to the configuration of the starting point of NEB.
+        
+        *  The second name indicates the ingredient name corresponding to the configuration of the saddle point of the NEB.
+        
+        *  This order should not be changed.
 
-*  The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.
+        *  For each name, the utility will expect two files to be present within the ingredient diretory of the diffusion coefficient tool:
+        
+            * <ingredient_name>_OUTCAR
 
-*  **HVf** means the formation energy of vacancy and **HB** means binding energy (4 configurations will be used for *HB*, so 4 words or 1 float are expected after *HB*). 
+            * <ingredient_name>_OSZICAR
 
-*  The current code is not likely to work if these keywords are spelled incorrectly.
+            * If you are manually creating a diffusion coefficient tool ingredient, you will have to manually copy files from each of the completed ingredients specified.
 
-*  **lattice** indicates the directory in which to find a lattice file.
-
-*  **plotdisplay** indicates whether to use matplotlib.pyplot in order to create a plot, or whether to skip plotting. Use "plotdisplay none" to skip plotting, omit this keyword to use a default display, or use "plotdiplay tkagg" etc. or another display string to specify a matplotlib display.
-
-*  This script is meant to be run in a recipe directory, as it needs access to all ingredient folders. If running this script from an ingredient, use ::
-
-    mast_write_method write_ingred_input_file diffcoeff_input.txt all 0;write_submit_script
-    mast_exec cd ..; python $MAST_INSTALL_PATH/tools/diff.py -i <ingredient_name>/diffcoeff_input.txt
-
-Below are two examples of input files::
-
-    Ex1:
-    $freq
-    type 5
-
-    v1 vac1 vac10-vac1 
-    v2  2
-    v3 vac3 vac4-vac3 
-    v4  5 
-    v0 vac0 vac00-vac0 
-
-    E1  vac1 vac10-vac1
-
-    E2 vac2   vac20-vac2 
-    E3   0.5
-    E4 vac4 vac4-vac3 
-    E0 vac0 vac00-vac0
-    HVf  0.5
-    #HVf can also be given as 'perfect vac'
-    HB  perfect  sub  vac-sub  vac
-    $end
+    *  The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.
 
 
-    Ex2:
-    $freq
+*  **type** means which frequency model to choose. Either ``5`` or ``fcc`` tells the code that the five-frequency model should be applied, while either ``8`` or ``hcp`` tell the code that the eight-frequency model should be applied.
 
-    type hcp
 
-    HVf 0.44
-    HB -0.1
-    Ea 0.5
-    Eb 0.5 
-    Ec 0.5 
-    EX 0.5 
-    Eap 0.5
-    Ebp 0.5
-    Ecp 0.5
-    EXp 0.5
-    va 5 
-    vb 5 
-    vc 5
-    vX 3
-    vap 5
-    vbp 5
-    vcp 3
-    vXp 4
+*  **HVf** means the formation energy of the vacancy
 
-     
-    $end
+    * Either 1 float or two ingredient names are expected after this keyword.
+
+    * If ingredient names are used, in the order <perfect_ingredient> <defected_ingredient>, then the utility will expect two energy files to be present in the utility's ingredient directory:
+
+        * <perfect_ingredient>_OSZICAR
+
+        * <defected_ingredient>_OSZICAR
+
+        * Charged defects are not currently supported.
+
+*  **HB** means the binding energy, and is only applicable for the 8-frequency model.
+
+    * Either 1 float or four ingredient names are expected after this keyword.
+    
+    * If ingredient names are used:
+
+        * Use the order <perfect ingredient> <vacancy and substitution> <substitution only> <vacancy only>
+
+        * Supply an <ingredient_name>_OSZICAR file in the utility's ingredient directory.
+    
+*  **lattice** indicates the ingredient name for the ingredient in which to find a lattice file.
+
+    *  This ingredient typically corresponds to an undefected supercell. 
+    
+    *  The utility expects to find a <lattice_ingredient_name>_POSCAR file inside the diffusion coefficient utility ingredient directory.
+
+*  **plotdisplay** indicates whether to use matplotlib.pyplot in order to create a plot, or whether to skip plotting. 
+
+    *  Use "plotdisplay none" to skip plotting
+
+    *  Omit this keyword to use a default display
+
+    *  Use "plotdiplay tkagg" etc. or another display string to specify a matplotlib display.
+
+Run as ``mast_diffusion_coefficient -i <input>``
 

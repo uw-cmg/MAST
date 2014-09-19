@@ -2,7 +2,7 @@ What's new in version 1.2.0
 ============================
 **Additions:**
 
-* Finite size scaling support (the "<S>" tag) has been added. See :doc:`3_0_inputfile`.
+* Finite size scaling support (the "<S>" tag) has been added. See :doc:`3_1_1_structure` and :doc:`3_1_3_recipe`.
 
 **Fixes:**
 
