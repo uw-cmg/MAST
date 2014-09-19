@@ -5,11 +5,14 @@ Author: Jie Deng
 
 Calculates the effective diffusivity in a grain boundary network with two types of randomly distributed grain boundaries.
 
+
 `Version 1.3 - published on 21 Feb 2014 <https://materialshub.org/resources/diffcalc>`_
 
 `Look for a new version in late 2014 <https://materialshub.org/resources/gbdiff>`_
 
-* Uncompiled source code is in MAST/utility/gbdiff
+The source code must be downloaded from github. It does not exist in the pypi package. See :doc:`12_0_programming`.
+    
+    * Uncompiled source code is in MAST/utility/gbdiff
 
 This tool calculates the effective diffusivity in a grain boundary network represented by a three-dimensional Voronoi diagram. 
 Two types of grain boundaries with different diffusivities are randomly distributed in the domain. 

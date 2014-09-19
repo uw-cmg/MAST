@@ -2,11 +2,11 @@ What's new in version 1.2.0
 ============================
 **Additions:**
 
-* Finite size scaling support (the "<S>" tag) has been added. See :doc:`3_1_1_structure` and :doc:`3_1_3_recipe`.
+* Finite size scaling support (the "<S>" tag) has been added. See :doc:`3_1_1_structure`, :doc:`3_1_3_recipe`, and :doc:`6_0_postprocessingtools`.
 
 **Fixes:**
 
-* The :doc:`8_0_2_gbdiff` and :doc:`8_0_3_diffanalyzer` are now properly included in the .tar.gz package.
+* The :doc:`8_0_2_gbdiff` and :doc:`8_0_3_diffanalyzer` documentation is updated to reflect that source code for these packages is only on github, and does not get packaged into the pypi package.
 
 **Changes for users:**
 
