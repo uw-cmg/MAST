@@ -35,7 +35,7 @@ class TestRecipeSetup(unittest.TestCase):
         #iopt=InputOptions()
         #iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
         iopt=InputParser(inputfile='input.inp').parse()
-        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_list')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         self.assertEqual(type(myrs.metafile),MAST.utility.metadata.Metadata)
         #self.testclass.__init__(**kwargs)
@@ -46,7 +46,7 @@ class TestRecipeSetup(unittest.TestCase):
         wdir=os.path.join(testdir,'workdir')
         struc=None
         iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
-        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_list')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         print iopt
         self.assertEqual(type(myrs.metafile),MAST.utility.metadata.Metadata)
@@ -73,7 +73,7 @@ class TestRecipeSetup(unittest.TestCase):
         wdir=os.path.join(testdir,'workdir')
         struc=None
         iopt=MAST.parsers.inputparser.InputParser(inputfile='input.inp').parse()
-        rfile = iopt.get_item('personal_recipe', 'personal_recipe_file')
+        rfile = iopt.get_item('personal_recipe', 'personal_recipe_list')
         myrs=RecipeSetup(recipeFile=rfile, workingDirectory=wdir, inputOptions=iopt, structure=struc)
         myrs.start()
         compare_metadata=MASTFile('compare_metadata.txt')

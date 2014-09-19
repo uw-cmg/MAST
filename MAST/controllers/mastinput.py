@@ -114,8 +114,8 @@ class MASTInput(MASTObj):
     def create_recipe_plan(self):
         """Create the recipe plan object, and print its status.
         """
-        personal_recipe_file_contents = self.input_options.get_item('personal_recipe', 'personal_recipe_file')
-        setup_obj = RecipeSetup(recipeFile=personal_recipe_file_contents, 
+        personal_recipe_contents = self.input_options.get_item('personal_recipe', 'personal_recipe_list')
+        setup_obj = RecipeSetup(recipeFile=personal_recipe_contents, 
                 inputOptions=self.input_options,
                 structure=self.input_options.get_item('structure','structure'), 
                 workingDirectory=self.working_directory
@@ -194,7 +194,7 @@ class MASTInput(MASTObj):
         if not personal_recipe_list:
             self.logger.info("Within mast/parse_recipe_template: Personal Recipe List is empty. Check whether input.inp has a personal_recipe section!")
         else:
-            self.input_options.set_item('personal_recipe','personal_recipe_file',personal_recipe_list)
+            self.input_options.set_item('personal_recipe','personal_recipe_list',personal_recipe_list)
 
     def set_class_attributes(self):
         """Set class attributes, other than input options

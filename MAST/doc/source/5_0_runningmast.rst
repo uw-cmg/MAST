@@ -55,7 +55,7 @@ Individual ingredients' submission scripts are created automatically through a c
 
 2.  Spawn a MAST monitor, or *mastmon*, process on the queue. 
 
-*  The ``mastmon_submit.sh`` and ``runmast.py`` files, originally located in your MAST installation path ``submit/platforms/<platform name>`` and then copied into ``$MAST_CONTROL`` when you first run mast, are are responsible for submitting this process.
+*  The ``mastmon_submit.sh`` and ``runmast.py`` files, originally located in your MAST installation path ``submit/platforms/<platform name>`` and ``submit`` folders, respectively, and then copied into ``$MAST_CONTROL`` when you first run mast, are are responsible for submitting this process.
 
 *  The script should be set up to use the shortest, fastest turnover queue available (e.g. a serial queue with a maximum walltime of 4 hours, or morganshort on bardeen).
 *  You may make changes directly in ``$MAST_CONTROL/mastmon_submit.sh``

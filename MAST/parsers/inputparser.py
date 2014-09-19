@@ -53,7 +53,7 @@ INGREDIENTS_KEYWORDS = ['singlepoint',
 RECIPE_KEYWORDS = {'recipe_file': None,
                   }
 
-PERS_RECP_KEYWORDS = {'personal_recipe_file': None,
+PERS_RECP_KEYWORDS = {'personal_recipe_list': None,
                       }
 
 class InputParser(MASTObj):
@@ -447,7 +447,7 @@ class InputParser(MASTObj):
             MASTError(self.__class__.__name__, error)
             return
         else:
-            personal_recipe_dict['personal_recipe_file'] = section_content
+            personal_recipe_dict['personal_recipe_list'] = section_content
 
         for key, value in personal_recipe_dict.items():
             options.set_item(section_name, key, value)

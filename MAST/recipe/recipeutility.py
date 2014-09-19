@@ -11,11 +11,11 @@ from MAST.utility import MASTFile
 from MAST.utility import MASTError
 
 """Utility to read the indented recipe file."""
-def read_recipe(filename, verbose=0):
+def read_recipe(rawrlist, verbose=0):
     """Read the indented recipe.
         "Recipe" is a protected keyword signaling the recipe name.
         Args:
-            filename <str>: Full path to recipe file
+            rawrlist <list of str>: List of recipe lines from $recipe section of input file
         Returns:
             totpdict <dict>: Dictionary of 
                 [parentname][child]=[parent method group]
@@ -27,7 +27,7 @@ def read_recipe(filename, verbose=0):
     logger=logging.getLogger('mast')
     logger=loggerutils.add_handler_for_control(logger)
 
-    rfile = list(filename) #MASTFile(filename)
+    rfile = list(rawrlist) #MASTFile(filename)
     rdata = list()
     #preprocess by removing blank lines and any "recipe" line
     for line in rfile:

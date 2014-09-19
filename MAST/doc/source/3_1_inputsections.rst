@@ -33,3 +33,7 @@ Sections of the Input File
 .. toctree::
 
    3_1_7_chemicalpotentials
+
+.. toctree::
+
+   3_1_8_summary

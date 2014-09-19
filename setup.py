@@ -52,6 +52,7 @@ setup(
             ("%s/MAST/examples" % myhome,
                 ["MAST/examples/README",
                 "MAST/examples/neb_with_phonons.inp",
+                "MAST/examples/finite_size_scaling.inp",
                 "MAST/examples/simple_optimization.inp",
                 "MAST/examples/u_ramping.inp",
                 "MAST/examples/defect_formation_energy.inp",
