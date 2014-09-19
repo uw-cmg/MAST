@@ -13,6 +13,7 @@ You may test it online at materialshub.org > Resources > Tools > Defect Finder
 *************************************************
 Effective Grain Boundary Diffusivity Calculator
 *************************************************
+
 .. toctree::
     
     8_0_2_gbdiff
@@ -20,6 +21,7 @@ Effective Grain Boundary Diffusivity Calculator
 ***************************************
 Particle Trajectory Diffusion Analyzer
 ***************************************
+
 .. toctree::
     
     8_0_3_diffanalyzer
@@ -28,6 +30,7 @@ Particle Trajectory Diffusion Analyzer
 ************************************
 Diffusion Connectivity
 ************************************
+
 .. toctree::
     
     8_0_1_diffusionconnectivity

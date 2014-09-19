@@ -173,7 +173,7 @@ If you have the ``pip`` command, it may be worth trying the following::
 
 *  If you have never used pip before, and using pip created a ``$HOME/.local`` folder for you for the first time, and you encounter errors, delete the ``$HOME/.local`` folder and go on to :ref:`manual-installation`.
 
-*  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to :ref:`manual installation`.
+*  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to :ref:`manual-installation`.
 
 .. _manual-installation:
 
