@@ -31,7 +31,7 @@ class DefectFormationEnergy:
         self.input_options = ipparser.parse()
         #pm = PickleManager(self.directory + '/input_options.pickle')
         #self.input_options = pm.load_variable()
-        self.recipe_setup = RecipeSetup(inputOptions=self.input_options,recipeFile=os.path.join(self.directory,'personal_recipe.txt'),workingDirectory=self.directory)
+        self.recipe_setup = RecipeSetup(inputOptions=self.input_options,recipeFile=self.input_options.get_item("personal_recipe","personal_recipe_list"),workingDirectory=self.directory)
         self.recipe_plan = self.recipe_setup.start()
         self.e_defects = dict()
     def _calculate_defect_formation_energies(self,scsize):
@@ -43,7 +43,7 @@ class DefectFormationEnergy:
         if len(perf_dirs)==0:
             raise MASTError(self.__class__.__name__, "A perfect final directory (has no children and has the word 'perfect' in its name) could not be found. Check recipe %s for a perfect directory." % self.directory)
 
-        def_dir = ru.read_recipe(self.directory+'/personal_recipe.txt')[1]['madelung_utility']
+        def_dir = ru.read_recipe(self.input_options.get_item("personal_recipe","personal_recipe_list"))[1]['madelung_utility']
         defects = self.input_options.get_item('defects', 'defects')
         chempot = self.input_options.get_item('chemical_potentials')
         for i in range(len(perf_dirs)):

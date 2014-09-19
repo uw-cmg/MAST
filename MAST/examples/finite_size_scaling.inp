@@ -96,12 +96,12 @@ end
 
 begin madelung
 mast_program None
-mast_write_method write_ingred_input_file V_M.txt  madelung_allowed_keywords.py 0;write_submit_script
-mast_ready_method file_exists V_M.txt
+mast_write_method no_setup
+mast_ready_method no_setup
 mast_run_method run_singlerun
 mast_complete_method no_setup
 mast_update_children_method no_update
-mast_exec python $MAST_INSTALL_PATH/MAST/utility/finite_size_scaling/EneVsVm.py
+mast_exec python mast_madelung_utility
 end
 
 $end

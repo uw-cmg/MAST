@@ -47,6 +47,7 @@ setup(
         scripts=["MAST/bin/mast",
                 "MAST/bin/mast_diffusion_coefficient",
                 "MAST/bin/mast_finite_size_scaling_sizes",
+                "MAST/bin/mast_madelung_utility",
                 "MAST/bin/mast_defect_formation_energy"],
         data_files=[
             ("%s/MAST/examples" % myhome,
