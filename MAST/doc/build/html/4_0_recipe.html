@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>4. Recipes &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="next" title="5. Installation" href="1_0_installation.html" />
+    <link rel="prev" title="3. Ingredients" href="2_0_ingredients.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="5. Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="2_0_ingredients.html" title="3. Ingredients"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="recipes">
+<h1>4. Recipes<a class="headerlink" href="#recipes" title="Permalink to this headline">¶</a></h1>
+<p>Each recipe is a collection of ingredients.</p>
+<p>The recipe directory will contain:</p>
+<ul class="simple">
+<li>An <tt class="docutils literal"><span class="pre">input.inp</span></tt> file, which is a copy of the original input file and is used by MAST when checking the recipe. The original input file is not used. This copy also contains <a class="reference internal" href="3_1_4_personalrecipe.html"><em>The Personal Recipe section</em></a>, which is not in the original input file.</li>
+<li>Archive files from the initial setup of the recipe directory</li>
+<li>Ingredient directories</li>
+<li>A top-level <tt class="docutils literal"><span class="pre">metadata.txt</span></tt> file, which stores important information for MAST</li>
+<li>A <tt class="docutils literal"><span class="pre">status.txt</span></tt> file listing the status of each ingredient</li>
+<li>A <tt class="docutils literal"><span class="pre">mast_recipe.log</span></tt> file logging actions taken by MAST on the recipe and its ingredients</li>
+</ul>
+<p>A recipe object (created by MAST from the input file, and accessible to MAST while MAST is running) will have:</p>
+<ul>
+<li><p class="first">A name, which is the full path to the recipe&#8217;s directory</p>
+</li>
+<li><p class="first">Several dictionaries which specify:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Which ingredient directories exist</p>
+</li>
+<li><p class="first">Which ingredients have parents, and the names of those parent ingredients</p>
+</li>
+<li><p class="first">Which method(s) each ingredient should run for each mast_xxx_method (see <a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a>)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Which method(s) each ingredient should run for its mast_update_children_method, depending on the name of the child ingredient</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="2_0_ingredients.html"
+                        title="previous chapter">3. Ingredients</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="1_0_installation.html"
+                        title="next chapter">5. Installation</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="1_0_installation.html" title="5. Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="2_0_ingredients.html" title="3. Ingredients"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

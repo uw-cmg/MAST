@@ -1,0 +1,724 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. Installation &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="next" title="6. Trying out MAST" href="17_0_testmast.html" />
+    <link rel="prev" title="4. Recipes" href="4_0_recipe.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="17_0_testmast.html" title="6. Trying out MAST"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="4_0_recipe.html" title="4. Recipes"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<h1>5. Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="do-pre-installation-steps">
+<h2>5.1. Do pre-installation steps<a class="headerlink" href="#do-pre-installation-steps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="locate-your-user-profile">
+<h3>5.1.1. Locate your user profile<a class="headerlink" href="#locate-your-user-profile" title="Permalink to this headline">¶</a></h3>
+<p>Your user profile will set up environment variables like <tt class="docutils literal"><span class="pre">$PATH</span></tt> when you log in.</p>
+<p>This installation will ask you to modify your user profile several times.</p>
+<p>If you are comfortable modifying your user profile, please skip to <a class="reference internal" href="#use-cluster-correctly"><em>Use your cluster correctly</em></a>.</p>
+<p>For others:</p>
+<ul>
+<li><p class="first">Your user profile is probably located in your home directory as <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/&lt;user</span> <span class="pre">profile</span> <span class="pre">name&gt;</span></tt>, for example, <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.bashrc</span></tt></p>
+</li>
+<li><p class="first">Common user profile names are <tt class="docutils literal"><span class="pre">.bashrc</span></tt>, <tt class="docutils literal"><span class="pre">.bash_profile</span></tt>, <tt class="docutils literal"><span class="pre">.profile</span></tt>, and <tt class="docutils literal"><span class="pre">.profile_user</span></tt></p>
+<blockquote>
+<div><ul>
+<li><p class="first">These names usually start with a dot.</p>
+</li>
+<li><p class="first">You may need to use the command <tt class="docutils literal"><span class="pre">ls</span> <span class="pre">-a</span></tt> to see these &#8220;hidden&#8221; files.</p>
+</li>
+<li><p class="first">Sometimes you may need to create your own user profile file.</p>
+<blockquote>
+<div><ul class="simple">
+<li>For example, you may have a <tt class="docutils literal"><span class="pre">.profile</span></tt> file listed, but when you look at it, it tells you to create and modify a <tt class="docutils literal"><span class="pre">.profile_user</span></tt> file.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><strong>After you save your changes to the user profile, you need to log out and then log back in, in order to see the changes take effect.</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li>Alternately, you can <tt class="docutils literal"><span class="pre">source</span> <span class="pre">&lt;user</span> <span class="pre">profile</span> <span class="pre">name&gt;</span></tt>, but occasionally this command will produce complications, for example, in path order.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>If you cannot locate your user profile, please contact your system administrator.</p>
+</div>
+<div class="section" id="use-your-cluster-correctly">
+<span id="use-cluster-correctly"></span><h3>5.1.2. Use your cluster correctly<a class="headerlink" href="#use-your-cluster-correctly" title="Permalink to this headline">¶</a></h3>
+<p>For this installation, please follow the correct procedures in order to avoid excessive headnode use on your cluster.</p>
+<ul class="simple">
+<li>For example, you may want to preface every command with <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span></tt> in order to reduce headnode load.</li>
+<li>Or, your cluster may have a dedicated compile node, or it may support interactive queue submission.</li>
+</ul>
+<p>Please check with your cluster administrator if you are unsure of the correct procedures to user.</p>
+</div>
+</div>
+<div class="section" id="verify-your-python-version">
+<h2>5.2. Verify your Python version<a class="headerlink" href="#verify-your-python-version" title="Permalink to this headline">¶</a></h2>
+<p>Check your version of python: <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt></p>
+<ul class="simple">
+<li>If your version of python is a 2.7 version (e.g. 2.7.3), skip to <a class="reference internal" href="#verify-numpy-scipy"><em>Verify that python has numpy and scipy</em></a>.</li>
+<li>Otherwise, go to <a class="reference internal" href="#locate-other-python"><em>Locate and use an available but non-default 2.7 version of python</em></a>.</li>
+</ul>
+<div class="section" id="locate-and-use-an-available-but-non-default-2-7-version-of-python">
+<span id="locate-other-python"></span><h3>5.2.1. Locate and use an available but non-default 2.7 version of python<a class="headerlink" href="#locate-and-use-an-available-but-non-default-2-7-version-of-python" title="Permalink to this headline">¶</a></h3>
+<p>For clusters using the &#8220;module&#8221; system, like Stampede or DLX, check which modules are available using <tt class="docutils literal"><span class="pre">module</span> <span class="pre">avail</span> <span class="pre">python</span></tt> or <tt class="docutils literal"><span class="pre">module</span> <span class="pre">avail</span></tt></p>
+<p>For clusters not using the module system, you may need to look in <tt class="docutils literal"><span class="pre">//share/apps</span></tt> or in a similar shared directory, or ask your system administrator.</p>
+<ul>
+<li><p class="first">If you cannot find an existing version of python 2.7, skip to <a class="reference internal" href="#install-local-python"><em>Install a local version of python with numpy and scipy</em></a>.</p>
+</li>
+<li><p class="first">If you did find an existing version of python 2.7, make sure that it is defaulted to be used first.</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">Add the appropriate line to your user profile.</p>
+<ul>
+<li><p class="first">If the version found was a module, then:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Add a line like the following:</p>
+<div class="highlight-python"><pre>module load python</pre>
+</div>
+</li>
+<li><p class="first">The actual wording may depend on the module name. Here, we are assuming that &#8220;python&#8221; is the module name.</p>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If the version found was located in an explicit directory and not found through the module system:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Add a line like the following:</p>
+<div class="highlight-python"><pre>export PATH=&lt;path_to_python2.7&gt;:$PATH</pre>
+</div>
+</li>
+<li><p class="first">For example:</p>
+<div class="highlight-python"><pre>export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH</pre>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</li>
+<li><p class="first">Then, log out and log back in.</p>
+</li>
+<li><p class="first">Type <tt class="docutils literal"><span class="pre">which</span> <span class="pre">python</span></tt> or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt> to make sure your default version is now the correct version.</p>
+</li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+<p>If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact your system administrator or the MAST development team.</p>
+<p>Otherwise, go on to <a class="reference internal" href="#verify-numpy-scipy"><em>Verify that python has numpy and scipy</em></a>.</p>
+</div>
+<div class="section" id="verify-that-python-has-numpy-and-scipy">
+<span id="verify-numpy-scipy"></span><h3>5.2.2. Verify that python has numpy and scipy<a class="headerlink" href="#verify-that-python-has-numpy-and-scipy" title="Permalink to this headline">¶</a></h3>
+<p>Check to see if your python version has numpy and scipy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span>
+</pre></div>
+</div>
+<p>And then, from the python prompt:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+</pre></div>
+</div>
+<p>If you receive an ImportError, then you must install a local version of python which has numpy and scipy. Go to <a class="reference internal" href="#install-local-python"><em>Install a local version of python with numpy and scipy</em></a>.</p>
+</div>
+<div class="section" id="install-a-local-version-of-python-with-numpy-and-scipy">
+<span id="install-local-python"></span><h3>5.2.3. Install a local version of python with numpy and scipy<a class="headerlink" href="#install-a-local-version-of-python-with-numpy-and-scipy" title="Permalink to this headline">¶</a></h3>
+<p>The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from <a class="reference external" href="https://www.enthought.com/downloads/">EPD Free Canopy</a></p>
+<ul class="simple">
+<li>Run the setup script. (e.g. <tt class="docutils literal"><span class="pre">bash</span> <span class="pre">./canopy-1.0.3-rh5-64.sh</span></tt>)</li>
+<li>Follow the prompts and specify a local installation (use spacebar to scroll through the license file).</li>
+</ul>
+<p>Add a line to your user profile to make this python installation your default python, for example:</p>
+<div class="highlight-python"><pre>export PATH=//home/&lt;username&gt;/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH</pre>
+</div>
+<ul class="simple">
+<li>Do not just use the <tt class="docutils literal"><span class="pre">Canopy/bin</span></tt> directory, as python modules will not load properly</li>
+<li>Log out and log back in.</li>
+</ul>
+<p>Check your version of python: <tt class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></tt></p>
+<p>The version given must be the correct version.</p>
+<p>Check that numpy and scipy are installed, which they should be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">python</span>
+</pre></div>
+</div>
+<p>And then at the python prompt:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="install-dependencies">
+<h2>5.3. Install dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>MAST requires pymatgen and custodian, each of which has several dependencies, which also have their own dependencies.</p>
+<div class="section" id="pip-note-for-the-python-savvy">
+<h3>5.3.1. pip note for the python-savvy<a class="headerlink" href="#pip-note-for-the-python-savvy" title="Permalink to this headline">¶</a></h3>
+<p>If you have <tt class="docutils literal"><span class="pre">pip</span></tt>, it is possible but sometimes unusually complicated to use pip to install MAST and its dependencies.</p>
+<ul class="simple">
+<li>If the <tt class="docutils literal"><span class="pre">pip</span></tt> command does not exist (<tt class="docutils literal"><span class="pre">which</span> <span class="pre">pip</span></tt> does not return anything), go on to <a class="reference internal" href="#manual-installation"><em>Install dependencies manually</em></a>.</li>
+</ul>
+<p>If you have the <tt class="docutils literal"><span class="pre">pip</span></tt> command, it may be worth trying the following:</p>
+<div class="highlight-python"><pre>pip install pymatgen==2.7.9 --user
+pip install custodian==0.7.5 --user
+pip install MAST --user</pre>
+</div>
+<ul class="simple">
+<li>If this series of commands actually worked without errors, then do a quick installation of ASE following the instructions on the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">ASE website</a> and then skip to <a class="reference internal" href="#add-local-bin"><em>Add the .local/bin directory, if necessary</em></a>.</li>
+<li>If you have never used pip before, and using pip created a <tt class="docutils literal"><span class="pre">$HOME/.local</span></tt> folder for you for the first time, and you encounter errors, delete the <tt class="docutils literal"><span class="pre">$HOME/.local</span></tt> folder and go on to <a class="reference internal" href="#manual-installation"><em>Install dependencies manually</em></a>.</li>
+<li>If you encountered errors and your <tt class="docutils literal"><span class="pre">$HOME/.local</span></tt> folder already existed, carefully remove the most recent package folders under <tt class="docutils literal"><span class="pre">$HOME/.local/lib/python2.7/site-packages</span></tt> and go on to <em class="xref std std-ref">manual installation</em>.</li>
+</ul>
+</div>
+<div class="section" id="install-dependencies-manually">
+<span id="manual-installation"></span><h3>5.3.2. Install dependencies manually<a class="headerlink" href="#install-dependencies-manually" title="Permalink to this headline">¶</a></h3>
+<p>Download <tt class="docutils literal"><span class="pre">tar.gz</span></tt> files for the following dependencies from the <a class="reference external" href="https://pypi.python.org">Python Package Index</a></p>
+<ul>
+<li><p class="first">The versions listed are known to be compatible with MAST and with each other.</p>
+</li>
+<li><p class="first">Using other version numbers may require adjustments to the entire list.</p>
+<blockquote>
+<div><ul class="simple">
+<li>In this case, look at <tt class="docutils literal"><span class="pre">install_requires</span></tt> inside the <tt class="docutils literal"><span class="pre">setup.py</span></tt> file to see which version numbers may be required.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Dependency list:</p>
+<div class="highlight-python"><pre>PyCifRW-3.6.2.tar.gz
+pybtex-0.18.tar.gz
+pyhull-1.4.5.tar.gz
+monty-0.3.4.tar.gz
+PyYAML-3.11.tar.gz
+requests-2.3.0.tar.gz
+pymatgen-2.7.9.tar.gz
+custodian-0.7.5.tar.gz</pre>
+</div>
+<p>Also get:</p>
+<div class="highlight-python"><pre>python-ase-3.8.1.3440.tar.gz</pre>
+</div>
+<p>from the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">ASE website</a></p>
+<p>Upload each of these .tar.gz files onto your cluster.
+Uncompress and untar each of these files (<tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-xzvf</span> <span class="pre">&lt;tar.gz</span> <span class="pre">filename&gt;</span></tt>, for example, <tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-xzvf</span> <span class="pre">PyCifRW-3.6.2.tar.gz</span></tt>).</p>
+<p>Following the order listed above, go to the untarred directory for each package and run the setup script as follows:</p>
+<div class="highlight-python"><pre>tar -xzvf PyCifRW-3.6.2.tar.gz
+cd PyCifRW-3.6.2
+python setup.py install (--user, depending on the notes below)</pre>
+</div>
+<p>And so on for all the packages.</p>
+<p>If you are using a system-wide python, like from the module system or in a shared directory, then you need the <tt class="docutils literal"><span class="pre">--user</span></tt> tag, and will use the command:</p>
+<div class="highlight-python"><pre>python setup.py install --user</pre>
+</div>
+<p>In this case, the modules will end up in a folder like <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.local/lib/python2.7/site-packages</span></tt>.</p>
+<p>If you are using your own locally-installed python, you can just use:</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+<p>In this case, the modules will end up in your python installation directory, for example, <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/lib/python2.7/site-packages</span></tt>.</p>
+<p>If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.</p>
+</div>
+<div class="section" id="add-the-local-bin-directory-if-necessary">
+<span id="add-local-bin"></span><h3>5.3.3. Add the .local/bin directory, if necessary<a class="headerlink" href="#add-the-local-bin-directory-if-necessary" title="Permalink to this headline">¶</a></h3>
+<p>If you have a <tt class="docutils literal"><span class="pre">$HOME/.local/bin</span></tt> directory from a <tt class="docutils literal"><span class="pre">--user</span></tt> installation from any of the previous steps, add this directory to your <tt class="docutils literal"><span class="pre">$PATH</span></tt> environment variable by adding a line to your user profile, for example:</p>
+<div class="highlight-python"><pre>export PATH=$HOME/.local/bin:$PATH</pre>
+</div>
+<p>(This line can go either before or after any other <tt class="docutils literal"><span class="pre">export</span> <span class="pre">PATH</span></tt> lines you might have in your user profile.)</p>
+<p>Then log out and log back in.</p>
+<p>If you were using your own locally-installed python, then you would have already added the correct bin directory to your user profile in the <a class="reference internal" href="#install-local-python"><em>Install a local version of python with numpy and scipy</em></a> step.</p>
+</div>
+</div>
+<div class="section" id="set-up-the-pymatgen-vasp-psp-dir">
+<span id="vasp-psp-dir"></span><h2>5.4. Set up the pymatgen VASP_PSP_DIR<a class="headerlink" href="#set-up-the-pymatgen-vasp-psp-dir" title="Permalink to this headline">¶</a></h2>
+<p>This step is necessary if you are running VASP with MAST. If you are not running VASP with MAST, skip to <a class="reference internal" href="#install-mast"><em>Install MAST</em></a>.</p>
+<div class="section" id="set-up-the-pseudopotential-folders">
+<h3>5.4.1. Set up the pseudopotential folders<a class="headerlink" href="#set-up-the-pseudopotential-folders" title="Permalink to this headline">¶</a></h3>
+<p>Locate the VASP pseudopotentials. If you cannot locate the VASP pseudopotentials, contact your system administrator or another person who uses VASP on the cluster.</p>
+<p><tt class="docutils literal"><span class="pre">which</span> <span class="pre">potcar_setup.py</span></tt> should return the pymatgen utility for setting up your pseudopotential directories in the way that pymatgen requires.
+If this command does not return a file location, then probably <tt class="docutils literal"><span class="pre">$HOME/.local/bin</span></tt> or <tt class="docutils literal"><span class="pre">&lt;python</span> <span class="pre">installation</span> <span class="pre">directory&gt;/bin</span></tt> is missing from your <tt class="docutils literal"><span class="pre">$PATH</span></tt> environment variable. See <a class="reference internal" href="#add-local-bin"><em>Add the .local/bin directory, if necessary</em></a>.</p>
+<p>Run <tt class="docutils literal"><span class="pre">potcar_setup.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">potcar_setup</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">The first directory address that you give to the utility is the directory that contains a few subdirectories, for example: potpaw_GGA, potpaw_LDA.52, potpaw_PBE.52, potUSPP_LDA, potpaw_LDA, potpaw_PBE, potUSPP_GGA.</p>
+<blockquote>
+<div><ul class="simple">
+<li>These subdirectories themselves contain many sub-subdirectories with element names like Ac, Ac_s, Zr_sv, etc.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">The second directory address that you give should be a new directory that you create.</p>
+</li>
+</ul>
+<p>Once the new pymatgen-structured folders have been created, rename the GGA PBE folder to <tt class="docutils literal"><span class="pre">POT_GGA_PAW_PBE</span></tt>.</p>
+<p>Later on, ingredients with a value of <tt class="docutils literal"><span class="pre">pbe</span></tt> for the ingredient keyword <tt class="docutils literal"><span class="pre">mast_xc</span></tt> will draw pseudopotentials out of this folder (see <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>).</p>
+<p>Rename the GGA PW91 folder to <tt class="docutils literal"><span class="pre">POT_GGA_PAW_PW91</span></tt>. Ingredients with a value of <tt class="docutils literal"><span class="pre">pw91</span></tt> for the ingredient keyword <tt class="docutils literal"><span class="pre">mast_xc</span></tt> will draw pseudopotentials out of this folder.</p>
+<p>Example of running the python setup tool:</p>
+<div class="highlight-python"><pre>Please enter full path where the POT_GGA_PAW_PBE, etc.
+subdirs are present.
+If you obtained the PSPs directly from VASP, this should
+typically be the directory that you untar the files to :
+
+//share/apps/vasp_pseudopotentials/paw
+
+Please enter the fullpath of the where you want to create
+your pymatgen resources directory:
+
+//home/&lt;username&gt;/.local/vasp_pps</pre>
+</div>
+<p>Rename the folders under <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.local/vasp_pps</span></tt>:</p>
+<div class="highlight-python"><pre>mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pbe_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PBE
+
+mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PW91</pre>
+</div>
+<p>For assistance with potcar_setup.py, please contact the
+<a class="reference external" href="https://groups.google.com/forum/#!forum/pymatgen">Pymatgen support group</a></p>
+</div>
+<div class="section" id="add-the-vasp-psp-dir-to-your-user-profile">
+<h3>5.4.2. Add the VASP_PSP_DIR to your user profile<a class="headerlink" href="#add-the-vasp-psp-dir-to-your-user-profile" title="Permalink to this headline">¶</a></h3>
+<p>Add a line to your user profile exporting the environment variable <tt class="docutils literal"><span class="pre">$VASP_PSP_DIR</span></tt> to the new pseudopotential directory created above.</p>
+<p>For example:</p>
+<div class="highlight-python"><pre>export VASP_PSP_DIR=//home/&lt;username&gt;/.local/vasp_pps</pre>
+</div>
+<p>Log out and log back in.</p>
+<p>Test the change:</p>
+<div class="highlight-python"><pre>cd $VASP_PSP_DIR</pre>
+</div>
+<ul class="simple">
+<li>Make sure you are getting to the right directory, which has the <tt class="docutils literal"><span class="pre">POT_GGA_PAW_PBE</span></tt> etc. folders inside it.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="install-mast">
+<span id="id2"></span><h2>5.5. Install MAST<a class="headerlink" href="#install-mast" title="Permalink to this headline">¶</a></h2>
+<p>(If you successfully used <tt class="docutils literal"><span class="pre">pip</span></tt> to install MAST, go to <a class="reference internal" href="#mast-setup"><em>Set the MAST environment variables</em></a>.)</p>
+<ul class="simple">
+<li>Get the <a class="reference external" href="https://pypi.python.org/pypi/MAST">latest MAST package from the Python Package Index</a></li>
+<li>Extract the package using <tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-xzvf</span> <span class="pre">MAST-&lt;version</span> <span class="pre">number&gt;.tar.gz</span></tt></li>
+<li>Change into the package directory and run <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt> or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span> <span class="pre">--user</span></tt> as you did with the other packages in <a class="reference internal" href="#manual-installation"><em>Install dependencies manually</em></a>.</li>
+</ul>
+<p>You should be prompted to set the MAST environment variables, which is covered in <a class="reference internal" href="#mast-setup"><em>Set the MAST environment variables</em></a>.</p>
+<div class="section" id="set-the-mast-environment-variables">
+<span id="mast-setup"></span><h3>5.5.1. Set the MAST environment variables<a class="headerlink" href="#set-the-mast-environment-variables" title="Permalink to this headline">¶</a></h3>
+<p>The MAST setup.py script should have set up a <tt class="docutils literal"><span class="pre">MAST</span></tt> directory in your home directory, that is, <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/MAST</span></tt>.</p>
+<ul class="simple">
+<li>This directory is primarily for storing calculations, and should not be confused with the python module directory, which is where the actual MAST python code resides.</li>
+</ul>
+<p>Inside <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> there should be:</p>
+<ol class="arabic simple">
+<li>A <tt class="docutils literal"><span class="pre">SCRATCH</span></tt> folder:<ul>
+<li>Each time an input file is given to MAST, MAST will create a recipe directory inside this folder.</li>
+<li>Each recipe directory will itself contain ingredient, or calculation, directories. Calculations will be submitted to the queue from inside these ingredient directories.</li>
+<li>Multiple recipes may reside in <tt class="docutils literal"><span class="pre">SCRATCH</span></tt> at the same time, and MAST will evaluate them alphabetically.</li>
+</ul>
+</li>
+<li>An <tt class="docutils literal"><span class="pre">ARCHIVE</span></tt> folder:<ul>
+<li>When a recipe directory is complete, MAST will move it from <tt class="docutils literal"><span class="pre">SCRATCH</span></tt> to <tt class="docutils literal"><span class="pre">ARCHIVE</span></tt>.</li>
+</ul>
+</li>
+<li>A <tt class="docutils literal"><span class="pre">CONTROL</span></tt> folder:<ul>
+<li>MAST requires some control files in order to run. It also does some higher-level logging, and stores that output here.</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p class="first">On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate &#8220;work&#8221; or &#8220;scratch&#8221; directory. In this case, move the entire <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> directory into the work or scratch directory, for example:</p>
+<div class="highlight-python"><pre>mv $HOME/MAST $WORK/.</pre>
+</div>
+</li>
+</ul>
+<p>In this case, the environment variables below should therefore say <tt class="docutils literal"><span class="pre">$WORK</span></tt> instead of <tt class="docutils literal"><span class="pre">$HOME</span></tt>.</p>
+<ul class="simple">
+<li>You can also move the MAST directory anywhere else, as long as you set the environment variables correcty.</li>
+</ul>
+<p>Copy and paste the environment variables into your user profile, setting the paths correctly if you have moved the <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> directory:</p>
+<div class="highlight-python"><pre>export MAST_SCRATCH=$HOME/MAST/SCRATCH
+export MAST_ARCHIVE=$HOME/MAST/ARCHIVE
+export MAST_CONTROL=$HOME/MAST/CONTROL
+export MAST_PLATFORM=&lt;platform_name&gt;</pre>
+</div>
+<p>For platform_name, choose from one of the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aci</span>
+<span class="n">bardeen</span>
+<span class="n">dlx</span>
+<span class="n">korczak</span>
+<span class="n">no_queue_system</span>
+<span class="n">pbs_generic</span>
+<span class="n">sge_generic</span>
+<span class="n">slurm_generic</span>
+<span class="n">stampede</span>
+<span class="n">turnbull</span>
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="highlight-python"><pre>export MAST_PLATFORM=stampede</pre>
+</div>
+<ul>
+<li><p class="first">If your platform is available by name (not _generic), then:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Add the four environment variable lines to your user profile as above.</li>
+<li>Log out and log back in.</li>
+<li>Go to <a class="reference internal" href="#additional-setup"><em>Additional setup</em></a>.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If your platform is not matched exactly, or you would choose one of the generic choices:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Set the three other environment variables (MAST_SCRATCH, MAST_ARCHIVE, and MAST_CONTROL) in your user profile.</li>
+<li>Log out and log back in.</li>
+<li>Go to <a class="reference internal" href="#make-custom-platform"><em>Make a custom platform, if necessary</em></a>.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="make-a-custom-platform-if-necessary">
+<span id="make-custom-platform"></span><h3>5.5.2. Make a custom platform, if necessary<a class="headerlink" href="#make-a-custom-platform-if-necessary" title="Permalink to this headline">¶</a></h3>
+<p>Run the following command. It should produce some errors, but ignore those and just see where MAST is installed:</p>
+<div class="highlight-python"><pre>mast -i none</pre>
+</div>
+<p>For example, output may be:</p>
+<div class="highlight-python"><pre>------------------------------------------------------
+Welcome to the MAterials Simulation Toolkit (MAST)
+Version: 1.1.5
+Installed in: .local/lib/python2.7/site-packages/MAST
+------------------------------------------------------</pre>
+</div>
+<p>and then some errors.</p>
+<p>Go to the &#8220;installed in&#8221; directory, and then:</p>
+<div class="highlight-python"><pre>cd submit/platforms</pre>
+</div>
+<p>Identify the closest-matching directory to your actual platform (for example, if you have an SGE platform, this directory would be sge_generic)</p>
+<p>Copy this directory into a new directory inside the <tt class="docutils literal"><span class="pre">platforms</span></tt> folder, for example:</p>
+<div class="highlight-python"><pre>cp -r sge_generic my_custom_sge</pre>
+</div>
+<p>Then, inside your new folder, like <tt class="docutils literal"><span class="pre">my_custom_sge</span></tt>, modify each of the following files as necessary for your platform:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">submit_template</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">mastmon_submit</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">queue_commands</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Explanations for each file are given in the following sections. Modify and test each file in your new custom platform folder.</p>
+<p>Then, in your user profile, use your new custom folder for the platform name of <tt class="docutils literal"><span class="pre">$MAST_PLATFORM</span></tt>:</p>
+<div class="highlight-python"><pre>export MAST_PLATFORM=my_custom_sge</pre>
+</div>
+<p>Log out and log back in.</p>
+<div class="section" id="submit-template-sh">
+<h4>5.5.2.1. submit_template.sh<a class="headerlink" href="#submit-template-sh" title="Permalink to this headline">¶</a></h4>
+<p><tt class="docutils literal"><span class="pre">submit_template.sh</span></tt> is the generic submission template from which ingredient submission templates will be created.</p>
+<ul class="simple">
+<li>MAST will replace anything inside question marks, for example <tt class="docutils literal"><span class="pre">?mast_ppn?</span></tt> with the value of the appropriate keyword.</li>
+</ul>
+<p>The following keywords may be used; see <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a> for more information on each keyword.</p>
+<ul class="simple">
+<li>mast_processors</li>
+<li>mast_ppn</li>
+<li>mast_nodes</li>
+<li>mast_queue</li>
+<li>mast_exec</li>
+<li>mast_walltime</li>
+<li>mast_memory</li>
+<li>mast_name (the ingredient name)</li>
+</ul>
+<p>Examine the template carefully, as an error here will prevent your ingredients from running successfully on the queue.</p>
+<ul>
+<li><p class="first">The provided template should be a good match for its platform.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Otherwise, you can take one of your normal submission templates and substitute in <tt class="docutils literal"><span class="pre">?mast_xxx?</span></tt> fields where appropriate.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Or, vice versa, you can take the provided template, replace the <tt class="docutils literal"><span class="pre">?mast_xxx?</span></tt> fields with some reasonable values, and see if filled-in submission template will run a job if submitted normally using <tt class="docutils literal"><span class="pre">qsub</span></tt>, <tt class="docutils literal"><span class="pre">sbatch</span></tt>, etc.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="mastmon-submit-sh">
+<h4>5.5.2.2. mastmon_submit.sh<a class="headerlink" href="#mastmon-submit-sh" title="Permalink to this headline">¶</a></h4>
+<p><tt class="docutils literal"><span class="pre">mastmon_submit.sh</span></tt> is the submission template that will submit the MAST Monitor to the queue every time <tt class="docutils literal"><span class="pre">mast</span></tt> is called.</p>
+<p>The MAST Monitor will check the completion status of every recipe and ingredient in the <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> folder.</p>
+<ul class="simple">
+<li>If you have a recipe you would like to skip temporarily, manually put a file named <tt class="docutils literal"><span class="pre">MAST_SKIP</span></tt> inside that recipe&#8217;s folder in <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt>. <tt class="docutils literal"><span class="pre">MAST_SKIP</span></tt> can be an empty file, or it can contain notes; MAST does not check its contents.</li>
+<li><tt class="docutils literal"><span class="pre">mastmon_submit.sh</span></tt> should be set to run on the shortest-wallclock, fastest-turnaround queue available, e.g. a serial queue</li>
+</ul>
+<p>The <tt class="docutils literal"><span class="pre">mastmon_submit.sh</span></tt> script is copied into the <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt> directory the first time you run <tt class="docutils literal"><span class="pre">mast</span></tt>.</p>
+<p>If you see that after you type <tt class="docutils literal"><span class="pre">mast</span></tt>, no &#8220;mastmon&#8221; process appears on the queue, then test the submission script directly:</p>
+<div class="highlight-python"><pre>cd $MAST_CONTROL
+qsub mastmon_submit.sh (or use sbatch for slurm, etc.)</pre>
+</div>
+<ul class="simple">
+<li>Modify the <tt class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></tt> file (and not the one in the MAST installation directory /submit/platforms/&lt;platform&gt; folder) until the &#8220;mastmon&#8221; process successfully runs on the queue.</li>
+</ul>
+</div>
+<div class="section" id="queue-commands-py">
+<h4>5.5.2.3. queue_commands.py<a class="headerlink" href="#queue-commands-py" title="Permalink to this headline">¶</a></h4>
+<p>These queue commands will be used to submit ingredients to the queue and retrieve the job IDs and statuses of ingredients on the queue.</p>
+<ul class="simple">
+<li>For a custom platform, modify the <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/submit/platforms/&lt;your</span> <span class="pre">custom</span> <span class="pre">platform&gt;/queue_commands.py</span></tt> file.</li>
+<li>Do not modify the <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory/submit/queue_commands.py</span></tt> file.</li>
+</ul>
+<p>Modify the following python functions as necessary:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">queue_submission_command</span></tt>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>This function should return the correct queue submission command,</li>
+<li>For example, this function should return <tt class="docutils literal"><span class="pre">qsub</span></tt> on PBS/Torque, or <tt class="docutils literal"><span class="pre">sbatch</span></tt> on slurm.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">extract_submitted_jobid</span></tt>:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">This function should parse the job ID, given the text that returns to screen when you submit a job.</p>
+</li>
+<li><p class="first">For example, it should return <tt class="docutils literal"><span class="pre">456789</span></tt> as the jobid for the following job submission and resulting screen text:</p>
+<div class="highlight-python"><pre>login2.mycluster$ sbatch submit.sh
+-----------------------------------------------------------------
+          Welcome to the Supercomputer
+-----------------------------------------------------------------
+--&gt; Verifying valid submit host (login2)...OK
+--&gt; Verifying valid jobname...OK
+--&gt; Enforcing max jobs per user...OK
+--&gt; Verifying job request is within current queue limits...OK
+Submitted batch job 456789</pre>
+</div>
+</li>
+<li><p class="first">On a different cluster, it would return <tt class="docutils literal"><span class="pre">456789</span></tt> as the jobid for the following submission and resulting screen text:</p>
+<div class="highlight-python"><pre>[user1@mycluster test_job]$ qsub submit.sh
+456789.mycluster.abcd.univ.edu</pre>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">queue_snap_command</span></tt>:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">This function should show a summary of your current submitted jobs, which we call the <tt class="docutils literal"><span class="pre">queue_snapshot</span></tt>.</p>
+</li>
+<li><p class="first">For example, the queue snapshot command should return something like the following (platform-dependent):</p>
+<div class="highlight-python"><pre>JOBID   PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+456789      normal test1 user1 PD       0:00      4 (Resources)
+456788      normal test2 user1 PD       0:00      1 (Resources)
+456774      normal test3 user1  R    6:14:53      1 c123-124
+456775      normal test4 user1  R    6:15:34      1 c125-126</pre>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">queue_status_from_text</span></tt>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>This function should return the status of a specific job, based on the job number.</li>
+<li>For example, job 456789 in the queue snapshot above, with status &#8220;PD&#8221; should correspond to a &#8220;Q&#8221; status (queued status) for MAST.</li>
+<li>Job 456775 in the queue snapshot above, with status &#8220;R&#8221;, should correspond to an &#8220;R&#8221; status (running status) for MAST.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">get_approx_job_error_file</span></tt>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>This function should return the name of the job error file.</li>
+<li>The name of this file will depend on what is specified in <tt class="docutils literal"><span class="pre">submit_template.sh</span></tt> and is usually something like <tt class="docutils literal"><span class="pre">slurm.&lt;jobnumber&gt;</span></tt> or <tt class="docutils literal"><span class="pre">&lt;jobname&gt;.e&lt;jobnumber&gt;</span></tt></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="additional-setup">
+<span id="id3"></span><h2>5.6. Additional setup<a class="headerlink" href="#additional-setup" title="Permalink to this headline">¶</a></h2>
+<p>You may need to do any or all of the following:</p>
+<ul>
+<li><p class="first">Identify the correct <tt class="docutils literal"><span class="pre">mast_exec</span></tt> call for your system.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">For example, suppose you run VASP like this:</p>
+<div class="highlight-python"><pre>//opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1</pre>
+</div>
+</li>
+<li><p class="first">Then, in your input files, the <tt class="docutils literal"><span class="pre">mast_exec</span></tt> keyword would be specified like this:</p>
+<div class="highlight-python"><pre>mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1</pre>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add additional lines to your user profile which allow you to run VASP, including any modules that need to be imported, additions to your library path, unlimiting the stack size, and so on.</p>
+</li>
+<li><p class="first">Modify your text editor settings so that tabs become four spaces (or so that you have such an option readily available). This setting is very important to ensure that MAST can read the input file, especially the recipe section of the input file.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">If you use VIM (<tt class="docutils literal"><span class="pre">vi</span></tt>), add the following lines to your <tt class="docutils literal"><span class="pre">~/.vimrc</span></tt> file:</p>
+<div class="highlight-python"><pre>" VIM settings for python in a group below:
+set tabstop=4
+set shiftwidth=4
+set smarttab
+set expandtab
+set softtabstop=4
+set autoindent</pre>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Once you have completed any additional setup and have identified what <tt class="docutils literal"><span class="pre">mast_exec</span></tt> should be, go to <a class="reference internal" href="17_0_testmast.html"><em>Trying out MAST</em></a>.</p>
+</div>
+<div class="section" id="run-unit-tests-optional">
+<h2>5.7. Run unit tests (optional)<a class="headerlink" href="#run-unit-tests-optional" title="Permalink to this headline">¶</a></h2>
+<p>To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. &lt;python installation path&gt;/lib/python2.7/site-packages/MAST/test) and run the command</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">nocapture</span></tt> option allows print statements.
+The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gives verbose results.</p>
+<p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. Installation</a><ul>
+<li><a class="reference internal" href="#do-pre-installation-steps">5.1. Do pre-installation steps</a><ul>
+<li><a class="reference internal" href="#locate-your-user-profile">5.1.1. Locate your user profile</a></li>
+<li><a class="reference internal" href="#use-your-cluster-correctly">5.1.2. Use your cluster correctly</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#verify-your-python-version">5.2. Verify your Python version</a><ul>
+<li><a class="reference internal" href="#locate-and-use-an-available-but-non-default-2-7-version-of-python">5.2.1. Locate and use an available but non-default 2.7 version of python</a></li>
+<li><a class="reference internal" href="#verify-that-python-has-numpy-and-scipy">5.2.2. Verify that python has numpy and scipy</a></li>
+<li><a class="reference internal" href="#install-a-local-version-of-python-with-numpy-and-scipy">5.2.3. Install a local version of python with numpy and scipy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#install-dependencies">5.3. Install dependencies</a><ul>
+<li><a class="reference internal" href="#pip-note-for-the-python-savvy">5.3.1. pip note for the python-savvy</a></li>
+<li><a class="reference internal" href="#install-dependencies-manually">5.3.2. Install dependencies manually</a></li>
+<li><a class="reference internal" href="#add-the-local-bin-directory-if-necessary">5.3.3. Add the .local/bin directory, if necessary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#set-up-the-pymatgen-vasp-psp-dir">5.4. Set up the pymatgen VASP_PSP_DIR</a><ul>
+<li><a class="reference internal" href="#set-up-the-pseudopotential-folders">5.4.1. Set up the pseudopotential folders</a></li>
+<li><a class="reference internal" href="#add-the-vasp-psp-dir-to-your-user-profile">5.4.2. Add the VASP_PSP_DIR to your user profile</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#install-mast">5.5. Install MAST</a><ul>
+<li><a class="reference internal" href="#set-the-mast-environment-variables">5.5.1. Set the MAST environment variables</a></li>
+<li><a class="reference internal" href="#make-a-custom-platform-if-necessary">5.5.2. Make a custom platform, if necessary</a><ul>
+<li><a class="reference internal" href="#submit-template-sh">5.5.2.1. submit_template.sh</a></li>
+<li><a class="reference internal" href="#mastmon-submit-sh">5.5.2.2. mastmon_submit.sh</a></li>
+<li><a class="reference internal" href="#queue-commands-py">5.5.2.3. queue_commands.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#additional-setup">5.6. Additional setup</a></li>
+<li><a class="reference internal" href="#run-unit-tests-optional">5.7. Run unit tests (optional)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="4_0_recipe.html"
+                        title="previous chapter">4. Recipes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="17_0_testmast.html"
+                        title="next chapter">6. Trying out MAST</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="17_0_testmast.html" title="6. Trying out MAST"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="4_0_recipe.html" title="4. Recipes"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

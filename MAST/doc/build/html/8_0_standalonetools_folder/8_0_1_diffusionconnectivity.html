@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Diffusion Connectivity &mdash; MAST coracle 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'coracle 1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MAST coracle 1.1.0 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">MAST coracle 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="diffusion-connectivity">
+<span id="diffusionconnectivity"></span><h1>Diffusion Connectivity<a class="headerlink" href="#diffusion-connectivity" title="Permalink to this headline">¶</a></h1>
+<p>A new section is introduced in the input file:</p>
+<div class="highlight-python"><pre>$site
+int1
+0.5 0.5 0.5
+0.5 0 0
+0 0.5 0
+0 0 0.5
+int2
+0.25 0.25 0.25
+0.75 0.25 0.25
+0.25 0.75 0.25
+0.25 0.25 0.75
+0.75 0.75 0.75
+0.25 0.75 0.75
+0.75 0.25 0.75
+0.75 0.75 0.25
+$end</pre>
+</div>
+<p>In this example, there are two types of local minimum (interstitial site) int1 and int2. The geometrically equivalent site coordinates are listed for each type.</p>
+<p>The create_paths.py code first parses the perfect lattice with the defect sites, then finds the nth neighbor of possible pairs of both same and different site types, and detect if the path candidate crosses over the host lattice site or another defect site and delete it.
+If the lattice user provides is too small and not all the neighbors (up to nth) are found, the code will double, triple, etc. the size until all required neighbor pairs are found.</p>
+<p>The NEBcheck.py code will generate the MAST-input style defect structure for the possible pairs found in the create_paths.py and write a new input file that calls MAST to generate NEB and phonon folders to check if these paths are appropriate. Currently the code ends at calling MAST and does not yet manage to handle the NEB and phonon results analysis.</p>
+<p>The usage is: python NEBcheck.py -i &lt;input&gt; -n &lt;up-to-nth-neighbor&gt;</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">MAST coracle 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

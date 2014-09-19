@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MAST post-processing utilities &mdash; MAST coracle 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'coracle 1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST coracle 1.1.0 documentation" href="index.html" />
+    <link rel="next" title="Diffusion Connectivity" href="6_0_1_diffusionconnectivity.html" />
+    <link rel="prev" title="Running MAST" href="5_0_runningmast.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="6_0_1_diffusionconnectivity.html" title="Diffusion Connectivity"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="5_0_runningmast.html" title="Running MAST"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST coracle 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mast-post-processing-utilities">
+<span id="tools"></span><h1>MAST post-processing utilities<a class="headerlink" href="#mast-post-processing-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="defect-formation-energy">
+<h2>Defect formation energy<a class="headerlink" href="#defect-formation-energy" title="Permalink to this headline">¶</a></h2>
+<p>The defect formation energy tool goes through the output of finished recipes in $MAST_ARCHIVE and calculates defect formation energies. It is found in $MAST_INSTALL_PATH/tools.</p>
+<p>The defect formation energy tool will create a <tt class="docutils literal"><span class="pre">&lt;recipe</span> <span class="pre">directory&gt;_dfe_results</span></tt> directory in the directory from which it is called.</p>
+<p>To run without prompts:</p>
+<div class="highlight-python"><pre>python $MAST_INSTALL_PATH/tools/defect_formation_energy &lt;DFT bandgap&gt; &lt;experimental bandgap&gt;</pre>
+</div>
+<p>where DFT bandgap is a float for an LDA or GGA bandgap, and experimental bandgap is a float for an experimental or more accurate hybrid calculation bandgap.</p>
+<p>To run with prompts:</p>
+<div class="highlight-python"><pre>python $MAST_INSTALL_PATH/tools/defect_formation_energy prompt</pre>
+</div>
+<ul class="simple">
+<li>Select the desired recipe</li>
+<li>Follow the prompts for chemical potential conditions, band gap energy levels, and band gaps for adjustment</li>
+</ul>
+<p>The two-column printout is Fermi energy on the left, and defect formation energy on the right.</p>
+</div>
+<div class="section" id="diffusion-coefficient">
+<h2>Diffusion coefficient<a class="headerlink" href="#diffusion-coefficient" title="Permalink to this headline">¶</a></h2>
+<p>Usage of diffusion coefficient calculation tool code:</p>
+<ol class="arabic simple">
+<li>This code currently supports 5(fcc) and 8(hcp) frequency models.</li>
+<li>The code currently will work in the same directory with other MAST generated folders (<tt class="docutils literal"><span class="pre">neb_vac*</span></tt>, <tt class="docutils literal"><span class="pre">phonon_vac*</span></tt>, etc.)</li>
+<li>Type <tt class="docutils literal"><span class="pre">$MAST_INSTALL_PATH/MAST/utility/diffusion_coefficient/diff_v2.py</span> <span class="pre">-i</span> <span class="pre">&lt;input&gt;</span></tt> to run.</li>
+<li>The input file should contain the following lines, naming the directories of energies and attempt rates which are specified with respect to different frequencies for the model.</li>
+</ol>
+<ul>
+<li><p class="first">The order of different lines does not matter.</p>
+</li>
+<li><p class="first">There can be as many <tt class="docutils literal"><span class="pre">\n</span></tt> between lines or as many spaces between words, and they will not affect the code.</p>
+</li>
+<li><p class="first">The keyword at the beginning of each line matters:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>type</strong> means which frequency model to choose. Either <tt class="docutils literal"><span class="pre">5</span></tt> or <tt class="docutils literal"><span class="pre">fcc</span></tt> tells the code that the five-frequency model should be applied, while either <tt class="docutils literal"><span class="pre">8</span></tt> or <tt class="docutils literal"><span class="pre">hcp</span></tt> tell the code that the eight-frequency model should be applied.</li>
+<li><strong>E</strong> and <strong>v</strong> means energy and attempting rate, respectively. (Currently does not support other characters such as w).</li>
+<li>For 5-freq, <strong>E0~E4</strong> should be used to specify the relations with certain directories</li>
+<li>For 8-freq, <strong>Ea, Eb, Ec, EX, Eap (p means prime), Ebp, Ecp, and EXp</strong> should be used. Note they are all case sensitive and should be exactly the same as written here.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Generally speaking, each keyword (Exx or vxx) is followed by two words. The first indicates the configuration of the starting point of NEB and the second represents the saddle point. This order should not be changed.</p>
+</li>
+<li><p class="first">The user can also type only one single float behind the keyword, and the code will then not refer to the directory for the related energy or attempting rate, but simply use the data given.</p>
+</li>
+<li><p class="first"><strong>HVf</strong> means the formation energy of vacancy and <strong>HB</strong> means binding energy (4 configurations will be used for <em>HB</em>, so 4 words or 1 float are expected after <em>HB</em>).</p>
+</li>
+<li><p class="first">The current code is not likely to work if these keywords are spelled incorrectly.</p>
+</li>
+<li><p class="first"><strong>lattice</strong> indicates the directory in which to find a lattice file.</p>
+</li>
+<li><p class="first"><strong>plotdisplay</strong> indicates whether to use matplotlib.pyplot in order to create a plot, or whether to skip plotting. Use &#8220;plotdisplay none&#8221; to skip plotting, omit this keyword to use a default display, or use &#8220;plotdiplay tkagg&#8221; etc. or another display string to specify a matplotlib display.</p>
+</li>
+<li><p class="first">This script is meant to be run in a recipe directory, as it needs access to all ingredient folders. If running this script from an ingredient, use</p>
+<div class="highlight-python"><pre>mast_write_method write_ingred_input_file diffcoeff_input.txt all 0;write_submit_script
+mast_exec cd ..; python $MAST_INSTALL_PATH/tools/diff.py -i &lt;ingredient_name&gt;/diffcoeff_input.txt</pre>
+</div>
+</li>
+</ul>
+<p>Below are two examples of input files:</p>
+<div class="highlight-python"><pre>Ex1:
+$freq
+type 5
+
+v1 vac1 vac10-vac1
+v2  2
+v3 vac3 vac4-vac3
+v4  5
+v0 vac0 vac00-vac0
+
+E1  vac1 vac10-vac1
+
+E2 vac2   vac20-vac2
+E3   0.5
+E4 vac4 vac4-vac3
+E0 vac0 vac00-vac0
+HVf  0.5
+#HVf can also be given as 'perfect vac'
+HB  perfect  sub  vac-sub  vac
+$end
+
+
+Ex2:
+$freq
+
+type hcp
+
+HVf 0.44
+HB -0.1
+Ea 0.5
+Eb 0.5
+Ec 0.5
+EX 0.5
+Eap 0.5
+Ebp 0.5
+Ecp 0.5
+EXp 0.5
+va 5
+vb 5
+vc 5
+vX 3
+vap 5
+vbp 5
+vcp 3
+vXp 4
+
+
+$end</pre>
+</div>
+</div>
+<div class="section" id="defect-finder">
+<h2>Defect finder<a class="headerlink" href="#defect-finder" title="Permalink to this headline">¶</a></h2>
+<p>The defect finder takes a POSCAR file and finds vacancies and interstitials.
+The defect finder currently exists in a separate repository.
+You may test it online at materialshub.org &gt; Resources &gt; Tools &gt; Defect Finder</p>
+</div>
+</div>
+<div class="section" id="other-tools">
+<h1>Other tools<a class="headerlink" href="#other-tools" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="6_0_1_diffusionconnectivity.html">Diffusion Connectivity</a></li>
+</ul>
+</div>
+<div class="section" id="diffusionconnectivity">
+<h2><a class="reference internal" href="6_0_1_diffusionconnectivity.html"><em>Diffusion Connectivity</em></a><a class="headerlink" href="#diffusionconnectivity" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">MAST post-processing utilities</a><ul>
+<li><a class="reference internal" href="#defect-formation-energy">Defect formation energy</a></li>
+<li><a class="reference internal" href="#diffusion-coefficient">Diffusion coefficient</a></li>
+<li><a class="reference internal" href="#defect-finder">Defect finder</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-tools">Other tools</a><ul>
+<li><a class="reference internal" href="#diffusionconnectivity"><tt class="docutils literal"><span class="pre">6_0_1_diffusionconnectivity</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="5_0_runningmast.html"
+                        title="previous chapter">Running MAST</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="6_0_1_diffusionconnectivity.html"
+                        title="next chapter">Diffusion Connectivity</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="6_0_1_diffusionconnectivity.html" title="Diffusion Connectivity"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="5_0_runningmast.html" title="Running MAST"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST coracle 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>

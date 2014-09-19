@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. What’s new in version 1.2.0 &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="next" title="2. Introduction" href="0_0_introduction.html" />
+    <link rel="prev" title="MAterials Simulation Toolkit (MAST) Manual" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="0_0_introduction.html" title="2. Introduction"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MAterials Simulation Toolkit (MAST) Manual"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="what-s-new-in-version-1-2-0">
+<h1>1. What&#8217;s new in version 1.2.0<a class="headerlink" href="#what-s-new-in-version-1-2-0" title="Permalink to this headline">¶</a></h1>
+<p><strong>Additions:</strong></p>
+<ul class="simple">
+<li>Finite size scaling support (the &#8220;&lt;S&gt;&#8221; tag) has been added. See <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a> and <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</li>
+</ul>
+<p><strong>Fixes:</strong></p>
+<ul class="simple">
+<li>The <a class="reference internal" href="8_0_2_gbdiff.html"><em>Effective Grain Boundary Diffusivity Calculator</em></a> and <a class="reference internal" href="8_0_3_diffanalyzer.html"><em>Particle Trajectory Diffusion Analysis</em></a> are now properly included in the .tar.gz package.</li>
+</ul>
+<p><strong>Changes for users:</strong></p>
+<ul>
+<li><p class="first">The <tt class="docutils literal"><span class="pre">$recipe</span></tt> section of the input file now requires the recipe to be entered directly.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Do not use a text file name any more.</li>
+<li>Do not start with a recipe name line.</li>
+<li>The <tt class="docutils literal"><span class="pre">MAST_RECIPE_PATH</span></tt> environment variable is no longer necessary.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">When the input file is processed, it will create a <tt class="docutils literal"><span class="pre">$personal_recipe</span></tt> section directly in the input file.</p>
+<blockquote>
+<div><ul class="simple">
+<li>There is no longer a <tt class="docutils literal"><span class="pre">personal_recipe.txt</span></tt> file in the recipe directory.</li>
+<li>If copying an input file for use in a new recipe, delete the <tt class="docutils literal"><span class="pre">$personal_recipe</span></tt> section from the new copy of the input file.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">MAST will now tell you where it was installed when you run <tt class="docutils literal"><span class="pre">mast</span></tt>.</p>
+</li>
+<li><p class="first">Platform support is now all under <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/submit/platforms/</span></tt>.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The <tt class="docutils literal"><span class="pre">platforms</span></tt> folder is no longer copied to <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt>. See <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a> for creating and modifying platforms.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>Changes for programmers:</strong></p>
+<ul class="simple">
+<li>Automatic citation support files are no longer copied to <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt>. They are located in <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/summary/citations</span></tt>.</li>
+<li>Program key files are no longer copied to <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt>. They are located in <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/ingredients/programkeys</span></tt>.</li>
+<li>Optimizer.py is no longer copied to <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt>. It is located in <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/structopt</span></tt></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">MAterials Simulation Toolkit (MAST) Manual</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="0_0_introduction.html"
+                        title="next chapter">2. Introduction</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="0_0_introduction.html" title="2. Introduction"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MAterials Simulation Toolkit (MAST) Manual"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
