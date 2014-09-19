@@ -58,7 +58,8 @@
 <li>This information complements the <tt class="docutils literal"><span class="pre">mast_update_children_method</span></tt> keyword given for each ingredient.</li>
 </ul>
 <p>An ingredient in the recipe is referred to by:</p>
-<div class="highlight-python"><pre>&lt;ingredient name&gt; (ingredient type in $ingredients section)</pre>
+<div class="highlight-python"><div class="highlight"><pre>&lt;ingredient name&gt; (ingredient type in $ingredients section)
+</pre></div>
 </div>
 <p>For example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">lowmesh_relaxation</span><span class="p">)</span>
@@ -113,9 +114,10 @@
 <div class="section" id="syntax">
 <h2>8.4.1. Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>Each indentation level marks a parent-child relationship.:</p>
-<div class="highlight-python"><pre>perfect_opt1 (volrelax_lowmesh)
+<div class="highlight-python"><div class="highlight"><pre>perfect_opt1 (volrelax_lowmesh)
     perfect_opt2
-        perfect_opt3</pre>
+        perfect_opt3
+</pre></div>
 </div>
 <p>The ingredient type of an ingredient is specified in parentheses after the ingredient.</p>
 <p>The ingredient type should correspond to ingredient subsections within <a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a>. If no ingredient type is specified, the ingredient gets all default values from the ingredients_global subsection.</p>
@@ -124,31 +126,34 @@
 </pre></div>
 </div>
 <p>In the input file:</p>
-<div class="highlight-python"><pre>$ingredients
+<div class="highlight-python"><div class="highlight"><pre>$ingredients
 
 begin volrelax_lowmesh
 mast_run_method run_singlerun
 ...
 end
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>If the parent needs to update several children in different ways, create new trees where the originating parent is the same parent name, but with a different ingredient type:</p>
-<div class="highlight-python"><pre>perfect_stat (stat_to_defect)
+<div class="highlight-python"><div class="highlight"><pre>perfect_stat (stat_to_defect)
     defect_opt
 perfect_stat (stat_to_phonon)
-    phonon_opt1</pre>
+    phonon_opt1
+</pre></div>
 </div>
 <ul class="simple">
 <li>Those different ingredient types should have different mast_update_children_method keyword values in the input file.</li>
 <li>They should have all the same other keywords.</li>
 </ul>
 <p>If two children need to be the parent of one ingredient, also create a new tree:</p>
-<div class="highlight-python"><pre>perfect_stat
+<div class="highlight-python"><div class="highlight"><pre>perfect_stat
     defect_1_opt
     defect_2_opt
 defect_1_opt, defect_2_opt
-    neb_1-2_opt</pre>
+    neb_1-2_opt
+</pre></div>
 </div>
 <p>Parent-child relationships are name-based, and the name must also include correct formats for size-scaling labels &lt;S&gt;, defect labels &lt;N, B, or E&gt;, neb labels &lt;B-E&gt;, charge labels &lt;Q&gt;, and phonon labels &lt;P&gt;.</p>
 <ul class="simple">
@@ -164,7 +169,7 @@ For defects, the &lt;N&gt; tag will correspond to labels in <a class="reference 
 <p>The NEB labels will correspond to labels in <a class="reference internal" href="3_1_6_neb.html"><em>The NEB section</em></a></p>
 <p>NEB label names must match up exactly with defect label names. For example, defect_vac1 and defect_vac2 must match up with neb_vac1-vac2.</p>
 <p>Use &lt;N&gt; in a recipe unless specifying that a defect is a parent of an NEB, in which case use &lt;B&gt; or &lt;E&gt;:</p>
-<div class="highlight-python"><pre>{begin}
+<div class="highlight-python"><div class="highlight"><pre>{begin}
 defect_&lt;N&gt;_opt1 (relax)
     defect_&lt;N&gt;_stat (static)
 {end}
@@ -172,7 +177,8 @@ defect_&lt;N&gt;_opt1 (relax)
 {begin}
 defect_&lt;B&gt;_stat (static_to_neb), defect_&lt;E&gt;_stat (static_to_neb)
     neb_&lt;B-E&gt;_opt1 (neb)
-{end}</pre>
+{end}
+</pre></div>
 </div>
 <p><strong>The &lt;Q&gt; tag</strong>
 The &lt;Q&gt; tag will correspond to charges given in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</p>
@@ -195,19 +201,20 @@ The &lt;Q&gt; tag will correspond to charges given in <a class="reference intern
 <li><p class="first">Use a new {begin} and {end} when you have a new tree branch or unindentation in the recipe that switches between &lt;N&gt; and &lt;B&gt; or &lt;E&gt;</p>
 </li>
 <li><p class="first">Note that defect endpoints need to be the parents of all NEB optimizations and NEB static calculations. Therefore, the endpoint-neb parent-child block may look like the following:</p>
-<div class="highlight-python"><pre>{begin}
+<div class="highlight-python"><div class="highlight"><pre>{begin}
 defect_&lt;B&gt;_stat (static_to_neb), defect_&lt;E&gt;_stat (static_to_neb)
     neb_&lt;B-E&gt;_opt1 (neb)
         neb_&lt;B-E&gt;_opt2 (neb)
             neb_&lt;B-E&gt;_stat (neb_static)
     neb_&lt;B-E&gt;_opt2 (neb)
     neb_&lt;B-E&gt;_stat (neb_static)
-{end}</pre>
+{end}
+</pre></div>
 </div>
 </li>
 </ul>
 <p>Full example:</p>
-<div class="highlight-python"><pre>$recipe
+<div class="highlight-python"><div class="highlight"><pre>$recipe
 perfect_opt1 (lowmesh)
     perfect_opt2
         perfect_stat (static)
@@ -234,7 +241,8 @@ defect_&lt;S&gt;_&lt;B&gt;_&lt;Q&gt;_stat (static_to_neb), defect_&lt;S&gt;_&lt;
 neb_&lt;S&gt;_&lt;B-E&gt;_&lt;Q&gt;_stat (nebstat_to_phonon)
     phonon_&lt;S&gt;_&lt;B-E&gt;_&lt;Q&gt;_&lt;P&gt; (phonon)
 {end}
-$end</pre>
+$end
+</pre></div>
 </div>
 </div>
 </div>
@@ -297,7 +305,7 @@ $end</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

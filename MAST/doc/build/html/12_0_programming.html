@@ -101,6 +101,19 @@
 <p>Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of <tt class="docutils literal"><span class="pre">MAST/ingredients/baseingredient.py</span></tt>.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)</p>
 </div>
+<div class="section" id="source-code">
+<h2>12.3. Source code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<p>To program with MAST, clone from the dev branch at <a class="reference external" href="https://github.com/uw-cmg/MAST">the MAST github repository</a></p>
+<p>Prepend the clone directory to your <tt class="docutils literal"><span class="pre">$PYTHONPATH</span></tt> environment variable.</p>
+<p>The command <tt class="docutils literal"><span class="pre">mast</span></tt> should reveal the clone directory instead of any other MAST installation directories.</p>
+<p>To run unit tests and verify that the MAST code is sound, go to the test directory in <tt class="docutils literal"><span class="pre">&lt;clone</span> <span class="pre">directory&gt;/MAST/test</span></tt> and run the command:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">nocapture</span></tt> option allows print statements.
+The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gives verbose results.</p>
+<p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.</p>
+</div>
 </div>
 
 
@@ -117,6 +130,7 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
 <li><a class="reference internal" href="#">12. Programming for MAST</a><ul>
 <li><a class="reference internal" href="#object-hierarchy">12.1. Object hierarchy</a></li>
 <li><a class="reference internal" href="#code-hooks-in-the-input-file">12.2. Code hooks in the input file</a></li>
+<li><a class="reference internal" href="#source-code">12.3. Source code</a></li>
 </ul>
 </li>
 </ul>
@@ -161,7 +175,7 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

@@ -56,7 +56,7 @@
 <p>The <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section contains a section for global ingredient keywords and then a section for each <strong>ingredient type</strong>.</p>
 <p>Each ingredient type in the recipe should have a subsection denoted by <tt class="docutils literal"><span class="pre">begin</span> <span class="pre">&lt;ingredient</span> <span class="pre">type&gt;</span></tt>.</p>
 <p>Example <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section:</p>
-<div class="highlight-python"><pre>$ingredients
+<div class="highlight-python"><div class="highlight"><pre>$ingredients
 
 begin ingredients_global
 keyword1 k1value1
@@ -71,12 +71,14 @@ begin ingredient_type2
 keyword2 k2value2
 end
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with <tt class="docutils literal"><span class="pre">mast_</span></tt>.</p>
 <p>If there are no changes from the ingredients_global section, just add an empty subsection for that ingredient type:</p>
-<div class="highlight-python"><pre>begin ingredient_type
-end</pre>
+<div class="highlight-python"><div class="highlight"><pre>begin ingredient_type
+end
+</pre></div>
 </div>
 <p>For a specific ingredient type, if a keyword is not specified in that ingredient type&#8217;s subsection but is specified in the <strong>ingredients_global</strong> subsection, then, the value for that keyword will be taken from ingredients_global.</p>
 <ul class="simple">
@@ -89,8 +91,9 @@ end</pre>
 <p>These program-specific keywords will be turned into uppercase keywords. The values will not change case, and should be given in the case required by the program. For example, <tt class="docutils literal"><span class="pre">lwave</span> <span class="pre">False</span></tt> will be translated into <tt class="docutils literal"><span class="pre">LWAVE</span> <span class="pre">False</span></tt> in the VASP INCAR file.</p>
 <p>One exception for VASP keywords is the <tt class="docutils literal"><span class="pre">IMAGES</span></tt> keyword, which signals a nudged elastic band run, and should instead be set in the <tt class="docutils literal"><span class="pre">$neb</span></tt> section of the input file.</p>
 <p>For VASP ingredients, please include</p>
-<div class="highlight-python"><pre>lcharg False
-lwave False</pre>
+<div class="highlight-python"><div class="highlight"><pre>lcharg False
+lwave False
+</pre></div>
 </div>
 <p>in your ingredient global keywords in order to avoid writing the large VASP files CHGCAR and WAVECAR, unless you really need these files.</p>
 </div>
@@ -101,7 +104,8 @@ lwave False</pre>
 <h3>8.3.2.1. Submission script keywords<a class="headerlink" href="#submission-script-keywords" title="Permalink to this headline">¶</a></h3>
 <p>The following queue submission keywords are platform-dependent and are used along to create the submission script (see <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>).</p>
 <p><strong>mast_exec</strong>: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in <tt class="docutils literal"><span class="pre">mast_program</span></tt>, and it should include any MPI commands.</p>
-<div class="highlight-python"><pre>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
+</pre></div>
 </div>
 <p><strong>mast_nodes</strong>: The number of nodes requested.</p>
 <p><strong>mast_ppn</strong>: The number of processors per node requested.</p>
@@ -112,7 +116,8 @@ lwave False</pre>
 <div class="section" id="mast-control-flow-keywords">
 <h3>8.3.2.2. MAST control flow keywords<a class="headerlink" href="#mast-control-flow-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_program</strong>: Specify which program to run (<tt class="docutils literal"><span class="pre">vasp</span></tt>, <tt class="docutils literal"><span class="pre">vasp_neb</span></tt>, or <tt class="docutils literal"><span class="pre">None</span></tt> for a generic program, are currently supported)</p>
-<div class="highlight-python"><pre>mast_program vasp</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_program vasp
+</pre></div>
 </div>
 <ul class="simple">
 <li>This keyword must be in lowercase</li>
@@ -127,7 +132,8 @@ lwave False</pre>
 <div class="section" id="vasp-specific-keywords">
 <h3>8.3.2.3. VASP-specific keywords<a class="headerlink" href="#vasp-specific-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_kpoints</strong>: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered.</p>
-<div class="highlight-python"><pre>mast_kpoints = 3x3x3 G</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_kpoints = 3x3x3 G
+</pre></div>
 </div>
 <ul class="simple">
 <li>Either this keyword or <tt class="docutils literal"><span class="pre">mast_kpoint_density</span></tt> is required for VASP calculations.</li>
@@ -138,7 +144,8 @@ lwave False</pre>
 <li>Either this keyword or <tt class="docutils literal"><span class="pre">mast_kpoints</span></tt> is required for VASP calculations.</li>
 </ul>
 <p><strong>mast_pp_setup</strong>: Specify which pseudopotential goes to which element:</p>
-<div class="highlight-python"><pre>mast_pp_setup La=La Mn=Mn_pv O=O_s</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_pp_setup La=La Mn=Mn_pv O=O_s
+</pre></div>
 </div>
 <p><strong>mast_xc</strong>: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)</p>
 <ul class="simple">
@@ -156,11 +163,13 @@ lwave False</pre>
 <li>A positive charge is the REMOVAL of electrons. For example, Na+ with a +1 charge has one FEWER electron than Na neutral.</li>
 </ul>
 <p><strong>mast_coordinates</strong>: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the $structure section of the input file. The coordinates must be fractional coordinates.</p>
-<div class="highlight-python"><pre>mast_coordinates POSCAR_initialize</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_coordinates POSCAR_initialize
+</pre></div>
 </div>
 <ul>
 <li><p class="first">For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images:</p>
-<div class="highlight-python"><pre>mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
+</pre></div>
 </div>
 </li>
 <li><p class="first">The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt>); once the <tt class="docutils literal"><span class="pre">input.inp</span></tt> file is created in the recipe directory, it will store a full path back to these poscar-type files.</p>
@@ -172,7 +181,8 @@ lwave False</pre>
 <div class="section" id="structure-manipulation-keywords">
 <h3>8.3.2.4. Structure manipulation keywords<a class="headerlink" href="#structure-manipulation-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_strain</strong>: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with <tt class="docutils literal"><span class="pre">mast_run_method</span></tt> of <tt class="docutils literal"><span class="pre">run_strain</span></tt></p>
-<div class="highlight-python"><pre>mast_strain 1.01 1.03 0.98</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_strain 1.01 1.03 0.98
+</pre></div>
 </div>
 <p>This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%</p>
 </div>
@@ -185,19 +195,23 @@ lwave False</pre>
 <p><strong>mast_complete_method</strong>: Specifies how MAST can tell if the ingredient is considered complete</p>
 <p><strong>mast_update_children_method</strong>: Specifies what information an ingredient passes on to its children, and how it does so.</p>
 <p>Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.:</p>
-<div class="highlight-python"><pre>mast_write_method write_singlerun</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_write_method write_singlerun
+</pre></div>
 </div>
 <p>They depend on having an appropriate program set in <tt class="docutils literal"><span class="pre">mast_program</span></tt>.</p>
 <p>However, you may choose to specify arguments where available, e.g.:</p>
-<div class="highlight-python"><pre>mast_complete_method file_has_string myoutput "End of Execution"</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;
+</pre></div>
 </div>
 <p>You may also choose to specify multiple methods. These methods will be performed in the order listed. For <tt class="docutils literal"><span class="pre">mast_ready_method</span></tt> or <tt class="docutils literal"><span class="pre">mast_complete_method</span></tt>, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
 Use a semicolon to separate out the methods:</p>
-<div class="highlight-python"><pre>mast_complete_method file_has_string myoutput "End of Execution"; file_exists Parsed_Structures</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;; file_exists Parsed_Structures
+</pre></div>
 </div>
 <p>In the example above, the file &#8220;myoutput&#8221; must exist and contain the phrase &#8220;End of Execution&#8221;, and the file &#8220;Parsed_Structures&#8221; must exist, in order for the ingredient to be considered complete.</p>
 <p>Update-children methods will always get the child name appended as the end of the argument string. For example,</p>
-<div class="highlight-python"><pre>mast_update_children_method copy_file EndStructure BeginStructure</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_update_children_method copy_file EndStructure BeginStructure
+</pre></div>
 </div>
 <p>will copy the file EndStructure of the parent ingredient folder to a new file BeginStructure in the child ingredient folder. There is no separate argument denoting the child ingredient.</p>
 <p>All arguments are passed as strings. Arguments in quotation marks are kept together.</p>
@@ -223,8 +237,9 @@ Use a semicolon to separate out the methods:</p>
 <li><p class="first">Leave off the delimiter argument in order to use a single space.</p>
 </li>
 <li><p class="first">Examples:</p>
-<div class="highlight-python"><pre>write_ingred_input_file input.txt all 0 =
-write_ingred_input_file input.txt phon_allowed_keys.py 1</pre>
+<div class="highlight-python"><div class="highlight"><pre>write_ingred_input_file input.txt all 0 =
+write_ingred_input_file input.txt phon_allowed_keys.py 1
+</pre></div>
 </div>
 </li>
 </ul>
@@ -242,7 +257,8 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1</pre>
 <li><p class="first">Please stick to common text characters.</p>
 </li>
 <li><p class="first">Example:</p>
-<div class="highlight-python"><pre>mast_run_method run_command "//home/user/myscripts/my_custom_parsing.py 25 0.01"</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_run_method run_command &quot;//home/user/myscripts/my_custom_parsing.py 25 0.01&quot;
+</pre></div>
 </div>
 </li>
 <li><p class="first">In the example above, the numbers 25 and 0.01 will actually be passed into sys.argv as a string.</p>
@@ -416,7 +432,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1</pre>
 <div class="section" id="example-ingredients-section">
 <h3>8.3.2.11. Example Ingredients section<a class="headerlink" href="#example-ingredients-section" title="Permalink to this headline">¶</a></h3>
 <p>Here is an example ingredients section:</p>
-<div class="highlight-python"><pre>$ingredients
+<div class="highlight-python"><div class="highlight"><pre>$ingredients
 begin ingredients_global
 mast_program    vasp
 mast_nodes      1
@@ -538,7 +554,8 @@ istart 1
 icharg 1
 end
 
-$end</pre>
+$end
+</pre></div>
 </div>
 </div>
 </div>
@@ -616,7 +633,7 @@ $end</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

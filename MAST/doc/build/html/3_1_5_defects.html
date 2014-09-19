@@ -79,7 +79,7 @@
 <p>The <tt class="docutils literal"><span class="pre">coord_type</span></tt> keyword specifies fractional or cartesian coordinates for the defects.</p>
 <p>The <tt class="docutils literal"><span class="pre">threshold</span></tt> keyword specifies the absolute threshold for finding the defect coordinate, since relaxation of the perfect structure may result in changed coordinates.</p>
 <p>Example <tt class="docutils literal"><span class="pre">$defects</span></tt> section:</p>
-<div class="highlight-python"><pre>$defects
+<div class="highlight-python"><div class="highlight"><pre>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -89,11 +89,12 @@ vacancy 0.5 0.5 0.5 Mg
 interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>, four separate ingredients, each containing one of the defects above, will be created.</p>
 <p>Multiple point defects can be also grouped together as a combined defect within a <tt class="docutils literal"><span class="pre">&lt;defect</span> <span class="pre">label&gt;</span></tt> subsection such as:</p>
-<div class="highlight-python"><pre>$defects
+<div class="highlight-python"><div class="highlight"><pre>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -106,28 +107,33 @@ end
 interstitial 0.25 0.25 0 Mg
 interstitial 0.25 0.75 0 Mg
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>In this case, there will be three separate defect ingredients: one ingredient with two vacancies together (where the defect group is labeled <tt class="docutils literal"><span class="pre">doublevac</span></tt>), one interstitial, and another interstitial.</p>
 <div class="section" id="charges-for-defects">
 <h2>8.6.1. Charges for defects<a class="headerlink" href="#charges-for-defects" title="Permalink to this headline">¶</a></h2>
 <p>Charges can be specified as <tt class="docutils literal"><span class="pre">charge=0,10</span></tt>, where a comma denotes the lower and upper ranges for the charges.</p>
 <p>Let&#8217;s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):</p>
-<div class="highlight-python"><pre>vacancy 0 0 0 Mg charge=0,3</pre>
+<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg charge=0,3
+</pre></div>
 </div>
 <p>Let&#8217;s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a><a class="reference external" href="mailto:-Vac&#37;&#52;&#48;Mg">-Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><pre>begin Vac@Mg-Vac@Mg
+<div class="highlight-python"><div class="highlight"><pre>begin Vac@Mg-Vac@Mg
 vacancy 0.0 0.0 0.0 Mg
 vacancy 0.5 0.5 0.5 Mg
 charge=0,3
-end</pre>
+end
+</pre></div>
 </div>
 <p>For a single defect, charges and labels can be given at the same time:</p>
 <p>Let&#8217;s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><pre>vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg</pre>
+<div class="highlight-python"><div class="highlight"><pre>vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
+</pre></div>
 </div>
 <p>The charge and label keywords are interchangeable, i.e. we could also have typed:</p>
-<div class="highlight-python"><pre>vacancy 0 0 0 Mg label=Vac@Mg charge=0,3</pre>
+<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg label=Vac@Mg charge=0,3
+</pre></div>
 </div>
 <p>If you use charges in the defects section like this, then you must use a tagged <tt class="docutils literal"><span class="pre">defect_&lt;N&gt;_&lt;Q&gt;</span></tt> type recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
 </div>
@@ -144,21 +150,23 @@ end</pre>
 <li>An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used).</li>
 </ul>
 <p>Multiple separate phonon calculations may be obtained for each defect, for example:</p>
-<div class="highlight-python"><pre>begin int1
+<div class="highlight-python"><div class="highlight"><pre>begin int1
 interstitial 0.25 0.25 0.25 X2
 phonon host3 0.3 0.3 0.4 2.5 0.01
 phonon solute 0.1 0.1 0.2 0.5
-end</pre>
+end
+</pre></div>
 </div>
 <p>In the example above, <em>host3</em> is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site.</p>
 <p>In the example above, <em>solute</em> is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.</p>
 <p>The recipe template file for phonons may include either the explicit phonon labels and other labels, or &lt;S&gt;, &lt;N&gt;, &lt;Q&gt;, &lt;P&gt;. See <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
 <p>Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example:</p>
-<div class="highlight-python"><pre>{begin}
+<div class="highlight-python"><div class="highlight"><pre>{begin}
 defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
     phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt; (phonon)
         phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt;_parse (phononparse)
-{end}</pre>
+{end}
+</pre></div>
 </div>
 </div>
 </div>
@@ -222,7 +230,7 @@ defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

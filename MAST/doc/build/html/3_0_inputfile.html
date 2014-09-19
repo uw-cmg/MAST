@@ -65,16 +65,17 @@
 <div class="section" id="general-structure-of-the-input-file">
 <h2>7.1. General structure of the input file<a class="headerlink" href="#general-structure-of-the-input-file" title="Permalink to this headline">¶</a></h2>
 <p>The input file has many sections. Sections are denoted by <tt class="docutils literal"><span class="pre">$&lt;section</span> <span class="pre">name&gt;</span></tt> and <tt class="docutils literal"><span class="pre">$end</span></tt>:</p>
-<div class="highlight-python"><pre>$section
+<div class="highlight-python"><div class="highlight"><pre>$section
 
 section_text
 section_keyword keyword_value
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>Within each section there may also be subsections, with keywords and values.
 Subsections are denoted by <tt class="docutils literal"><span class="pre">begin</span> <span class="pre">&lt;subsection</span> <span class="pre">name&gt;</span></tt> and <tt class="docutils literal"><span class="pre">end</span></tt>.:</p>
-<div class="highlight-python"><pre>$section
+<div class="highlight-python"><div class="highlight"><pre>$section
 
 section_text
 section_keyword keyword_value
@@ -84,7 +85,8 @@ subsection_text
 subsection_keyword subsection_keyword_value
 end
 
-$end</pre>
+$end
+</pre></div>
 </div>
 <ul class="simple">
 <li>Comments in the input file are allowed only as separate lines, starting with the # sign.</li>
@@ -104,35 +106,43 @@ $end</pre>
 <li><tt class="docutils literal"><span class="pre">indeploop</span></tt> may be used multiple times in an input file.</li>
 </ul>
 <p>When <tt class="docutils literal"><span class="pre">indeploop</span></tt> is present at the beginning of the line, input file permutations will be created depending on the values in parentheses.</p>
-<div class="highlight-python"><pre>indeploop keyword1 (k1value1,k1value2)</pre>
+<div class="highlight-python"><div class="highlight"><pre>indeploop keyword1 (k1value1,k1value2)
+</pre></div>
 </div>
 <p>The previous line would create two input files and corresponding recipes.
 On the line that used to have <tt class="docutils literal"><span class="pre">indeploop</span></tt> on it, one input file would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value1</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value1
+</pre></div>
 </div>
 <p>The other input file would have:</p>
-<div class="highlight-python"><pre>keyword1 l1value2</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 l1value2
+</pre></div>
 </div>
 <p>If indeploop tags are present multiple times in the recipe, input files are created combinatorially:</p>
-<div class="highlight-python"><pre>indeploop keyword1 (k1value1,k1value2)
-indeploop keyword2 (k2value1,k2value2)</pre>
+<div class="highlight-python"><div class="highlight"><pre>indeploop keyword1 (k1value1,k1value2)
+indeploop keyword2 (k2value1,k2value2)
+</pre></div>
 </div>
 <p>The previous two lines in an input file would create four input files and corresponding recipes.
 One input file would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value1
-keyword2 k2value1</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value1
+keyword2 k2value1
+</pre></div>
 </div>
 <p>Another would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value1
-keyword2 k2value2</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value1
+keyword2 k2value2
+</pre></div>
 </div>
 <p>A third would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value2
-kewyord2 k2value1</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value2
+kewyord2 k2value1
+</pre></div>
 </div>
 <p>A fourth would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value2
-keyword2 k2value2</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value2
+keyword2 k2value2
+</pre></div>
 </div>
 <p>Sometimes, instead of combinatorial looping, some loops are meant to go together. In this case, the <tt class="docutils literal"><span class="pre">pegloop1</span></tt> and <tt class="docutils literal"><span class="pre">pegloop2</span></tt> tags may be used.</p>
 <ul class="simple">
@@ -142,22 +152,25 @@ keyword2 k2value2</pre>
 </ul>
 <p>Every line that starts with <tt class="docutils literal"><span class="pre">pegloop1</span></tt> (the same will apply for <tt class="docutils literal"><span class="pre">pegloop2</span></tt>) will loop over keyword values, much like <tt class="docutils literal"><span class="pre">indeploop</span></tt>. However, the point of the pegged loops is to have two or more keywords loop together.</p>
 <p>For example:</p>
-<div class="highlight-python"><pre>pegloop1 keyword1 (k1value1,k1value2)
-pegloop1 keyword2 (k2value1,k2value2)</pre>
+<div class="highlight-python"><div class="highlight"><pre>pegloop1 keyword1 (k1value1,k1value2)
+pegloop1 keyword2 (k2value1,k2value2)
+</pre></div>
 </div>
 <p>Using the <tt class="docutils literal"><span class="pre">pegloop1</span></tt> tag, the lines above would not produce four input files and corresponding recipes, as they would when using the <tt class="docutils literal"><span class="pre">indeploop</span></tt> tag. Instead, they would produce only two input files and corresponding recipes.</p>
 <p>One input file would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value1
-keyword2 k2value1</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value1
+keyword2 k2value1
+</pre></div>
 </div>
 <p>The other input file would have:</p>
-<div class="highlight-python"><pre>keyword1 k1value2
-keyword2 k2value2</pre>
+<div class="highlight-python"><div class="highlight"><pre>keyword1 k1value2
+keyword2 k2value2
+</pre></div>
 </div>
 <p>The number of items in parentheses should be equal for all instances of the <tt class="docutils literal"><span class="pre">pegloop1</span></tt> (or, separately, the <tt class="docutils literal"><span class="pre">pegloop2</span></tt>) tag.</p>
 <p><tt class="docutils literal"><span class="pre">pegloop1</span></tt>, <tt class="docutils literal"><span class="pre">pegloop2</span></tt>, and all instances of <tt class="docutils literal"><span class="pre">indeploop</span></tt> will work combinatorially with each other.</p>
 <p>Complex example (for looping only - many other necessary lines in the input file are skipped):</p>
-<div class="highlight-python"><pre>$mast
+<div class="highlight-python"><div class="highlight"><pre>$mast
 pegloop1 system_name (strain1,strain2,strain3)
 $end
 
@@ -179,10 +192,11 @@ indeploop mast_xc (pw91,pbe)
 LDAUJ 1
 pegloop2 LDAUU (4.5,5)
 end
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>The above example would create 3*2*2 = 12 input files and corresponding recipes. The input file for the one of the recipes would look like:</p>
-<div class="highlight-python"><pre>$mast
+<div class="highlight-python"><div class="highlight"><pre>$mast
 system_name strain2
 $end
 
@@ -204,7 +218,8 @@ indeploop mast_xc pbe
 LDAUJ 1
 LDAUU 5
 end
-$end</pre>
+$end
+</pre></div>
 </div>
 </div>
 </div>
@@ -268,7 +283,7 @@ $end</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

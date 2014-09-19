@@ -122,7 +122,8 @@
 <blockquote>
 <div><ul>
 <li><p class="first">Add a line like the following:</p>
-<div class="highlight-python"><pre>module load python</pre>
+<div class="highlight-python"><div class="highlight"><pre>module load python
+</pre></div>
 </div>
 </li>
 <li><p class="first">The actual wording may depend on the module name. Here, we are assuming that &#8220;python&#8221; is the module name.</p>
@@ -134,11 +135,13 @@
 <blockquote>
 <div><ul>
 <li><p class="first">Add a line like the following:</p>
-<div class="highlight-python"><pre>export PATH=&lt;path_to_python2.7&gt;:$PATH</pre>
+<div class="highlight-python"><div class="highlight"><pre>export PATH=&lt;path_to_python2.7&gt;:$PATH
+</pre></div>
 </div>
 </li>
 <li><p class="first">For example:</p>
-<div class="highlight-python"><pre>export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH</pre>
+<div class="highlight-python"><div class="highlight"><pre>export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
+</pre></div>
 </div>
 </li>
 </ul>
@@ -178,7 +181,8 @@
 <li>Follow the prompts and specify a local installation (use spacebar to scroll through the license file).</li>
 </ul>
 <p>Add a line to your user profile to make this python installation your default python, for example:</p>
-<div class="highlight-python"><pre>export PATH=//home/&lt;username&gt;/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH</pre>
+<div class="highlight-python"><div class="highlight"><pre>export PATH=//home/&lt;username&gt;/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH
+</pre></div>
 </div>
 <ul class="simple">
 <li>Do not just use the <tt class="docutils literal"><span class="pre">Canopy/bin</span></tt> directory, as python modules will not load properly</li>
@@ -207,9 +211,10 @@
 <li>If the <tt class="docutils literal"><span class="pre">pip</span></tt> command does not exist (<tt class="docutils literal"><span class="pre">which</span> <span class="pre">pip</span></tt> does not return anything), go on to <a class="reference internal" href="#manual-installation"><em>Install dependencies manually</em></a>.</li>
 </ul>
 <p>If you have the <tt class="docutils literal"><span class="pre">pip</span></tt> command, it may be worth trying the following:</p>
-<div class="highlight-python"><pre>pip install pymatgen==2.7.9 --user
+<div class="highlight-python"><div class="highlight"><pre>pip install pymatgen==2.7.9 --user
 pip install custodian==0.7.5 --user
-pip install MAST --user</pre>
+pip install MAST --user
+</pre></div>
 </div>
 <ul class="simple">
 <li>If this series of commands actually worked without errors, then do a quick installation of ASE following the instructions on the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">ASE website</a> and then skip to <a class="reference internal" href="#add-local-bin"><em>Add the .local/bin directory, if necessary</em></a>.</li>
@@ -232,33 +237,38 @@ pip install MAST --user</pre>
 </li>
 </ul>
 <p>Dependency list:</p>
-<div class="highlight-python"><pre>PyCifRW-3.6.2.tar.gz
+<div class="highlight-python"><div class="highlight"><pre>PyCifRW-3.6.2.tar.gz
 pybtex-0.18.tar.gz
 pyhull-1.4.5.tar.gz
 monty-0.3.4.tar.gz
 PyYAML-3.11.tar.gz
 requests-2.3.0.tar.gz
 pymatgen-2.7.9.tar.gz
-custodian-0.7.5.tar.gz</pre>
+custodian-0.7.5.tar.gz
+</pre></div>
 </div>
 <p>Also get:</p>
-<div class="highlight-python"><pre>python-ase-3.8.1.3440.tar.gz</pre>
+<div class="highlight-python"><div class="highlight"><pre>python-ase-3.8.1.3440.tar.gz
+</pre></div>
 </div>
 <p>from the <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/download.html">ASE website</a></p>
 <p>Upload each of these .tar.gz files onto your cluster.
 Uncompress and untar each of these files (<tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-xzvf</span> <span class="pre">&lt;tar.gz</span> <span class="pre">filename&gt;</span></tt>, for example, <tt class="docutils literal"><span class="pre">tar</span> <span class="pre">-xzvf</span> <span class="pre">PyCifRW-3.6.2.tar.gz</span></tt>).</p>
 <p>Following the order listed above, go to the untarred directory for each package and run the setup script as follows:</p>
-<div class="highlight-python"><pre>tar -xzvf PyCifRW-3.6.2.tar.gz
+<div class="highlight-python"><div class="highlight"><pre>tar -xzvf PyCifRW-3.6.2.tar.gz
 cd PyCifRW-3.6.2
-python setup.py install (--user, depending on the notes below)</pre>
+python setup.py install (--user, depending on the notes below)
+</pre></div>
 </div>
 <p>And so on for all the packages.</p>
 <p>If you are using a system-wide python, like from the module system or in a shared directory, then you need the <tt class="docutils literal"><span class="pre">--user</span></tt> tag, and will use the command:</p>
-<div class="highlight-python"><pre>python setup.py install --user</pre>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py install --user
+</pre></div>
 </div>
 <p>In this case, the modules will end up in a folder like <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.local/lib/python2.7/site-packages</span></tt>.</p>
 <p>If you are using your own locally-installed python, you can just use:</p>
-<div class="highlight-python"><pre>python setup.py install</pre>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py install
+</pre></div>
 </div>
 <p>In this case, the modules will end up in your python installation directory, for example, <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/lib/python2.7/site-packages</span></tt>.</p>
 <p>If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.</p>
@@ -266,7 +276,8 @@ python setup.py install (--user, depending on the notes below)</pre>
 <div class="section" id="add-the-local-bin-directory-if-necessary">
 <span id="add-local-bin"></span><h3>5.3.3. Add the .local/bin directory, if necessary<a class="headerlink" href="#add-the-local-bin-directory-if-necessary" title="Permalink to this headline">¶</a></h3>
 <p>If you have a <tt class="docutils literal"><span class="pre">$HOME/.local/bin</span></tt> directory from a <tt class="docutils literal"><span class="pre">--user</span></tt> installation from any of the previous steps, add this directory to your <tt class="docutils literal"><span class="pre">$PATH</span></tt> environment variable by adding a line to your user profile, for example:</p>
-<div class="highlight-python"><pre>export PATH=$HOME/.local/bin:$PATH</pre>
+<div class="highlight-python"><div class="highlight"><pre>export PATH=$HOME/.local/bin:$PATH
+</pre></div>
 </div>
 <p>(This line can go either before or after any other <tt class="docutils literal"><span class="pre">export</span> <span class="pre">PATH</span></tt> lines you might have in your user profile.)</p>
 <p>Then log out and log back in.</p>
@@ -300,7 +311,7 @@ If this command does not return a file location, then probably <tt class="docuti
 <p>Later on, ingredients with a value of <tt class="docutils literal"><span class="pre">pbe</span></tt> for the ingredient keyword <tt class="docutils literal"><span class="pre">mast_xc</span></tt> will draw pseudopotentials out of this folder (see <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>).</p>
 <p>Rename the GGA PW91 folder to <tt class="docutils literal"><span class="pre">POT_GGA_PAW_PW91</span></tt>. Ingredients with a value of <tt class="docutils literal"><span class="pre">pw91</span></tt> for the ingredient keyword <tt class="docutils literal"><span class="pre">mast_xc</span></tt> will draw pseudopotentials out of this folder.</p>
 <p>Example of running the python setup tool:</p>
-<div class="highlight-python"><pre>Please enter full path where the POT_GGA_PAW_PBE, etc.
+<div class="highlight-python"><div class="highlight"><pre>Please enter full path where the POT_GGA_PAW_PBE, etc.
 subdirs are present.
 If you obtained the PSPs directly from VASP, this should
 typically be the directory that you untar the files to :
@@ -310,12 +321,14 @@ typically be the directory that you untar the files to :
 Please enter the fullpath of the where you want to create
 your pymatgen resources directory:
 
-//home/&lt;username&gt;/.local/vasp_pps</pre>
+//home/&lt;username&gt;/.local/vasp_pps
+</pre></div>
 </div>
 <p>Rename the folders under <tt class="docutils literal"><span class="pre">//home/&lt;username&gt;/.local/vasp_pps</span></tt>:</p>
-<div class="highlight-python"><pre>mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pbe_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PBE
+<div class="highlight-python"><div class="highlight"><pre>mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pbe_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PBE
 
-mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PW91</pre>
+mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username&gt;/.local/vasp_pps/POT_GGA_PAW_PW91
+</pre></div>
 </div>
 <p>For assistance with potcar_setup.py, please contact the
 <a class="reference external" href="https://groups.google.com/forum/#!forum/pymatgen">Pymatgen support group</a></p>
@@ -324,11 +337,13 @@ mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username
 <h3>5.4.2. Add the VASP_PSP_DIR to your user profile<a class="headerlink" href="#add-the-vasp-psp-dir-to-your-user-profile" title="Permalink to this headline">¶</a></h3>
 <p>Add a line to your user profile exporting the environment variable <tt class="docutils literal"><span class="pre">$VASP_PSP_DIR</span></tt> to the new pseudopotential directory created above.</p>
 <p>For example:</p>
-<div class="highlight-python"><pre>export VASP_PSP_DIR=//home/&lt;username&gt;/.local/vasp_pps</pre>
+<div class="highlight-python"><div class="highlight"><pre>export VASP_PSP_DIR=//home/&lt;username&gt;/.local/vasp_pps
+</pre></div>
 </div>
 <p>Log out and log back in.</p>
 <p>Test the change:</p>
-<div class="highlight-python"><pre>cd $VASP_PSP_DIR</pre>
+<div class="highlight-python"><div class="highlight"><pre>cd $VASP_PSP_DIR
+</pre></div>
 </div>
 <ul class="simple">
 <li>Make sure you are getting to the right directory, which has the <tt class="docutils literal"><span class="pre">POT_GGA_PAW_PBE</span></tt> etc. folders inside it.</li>
@@ -369,7 +384,8 @@ mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username
 </ol>
 <ul>
 <li><p class="first">On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate &#8220;work&#8221; or &#8220;scratch&#8221; directory. In this case, move the entire <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> directory into the work or scratch directory, for example:</p>
-<div class="highlight-python"><pre>mv $HOME/MAST $WORK/.</pre>
+<div class="highlight-python"><div class="highlight"><pre>mv $HOME/MAST $WORK/.
+</pre></div>
 </div>
 </li>
 </ul>
@@ -378,10 +394,11 @@ mv //home/&lt;username&gt;/.local/vasp_pps/&lt;pw91_name&gt; //home/&lt;username
 <li>You can also move the MAST directory anywhere else, as long as you set the environment variables correcty.</li>
 </ul>
 <p>Copy and paste the environment variables into your user profile, setting the paths correctly if you have moved the <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> directory:</p>
-<div class="highlight-python"><pre>export MAST_SCRATCH=$HOME/MAST/SCRATCH
+<div class="highlight-python"><div class="highlight"><pre>export MAST_SCRATCH=$HOME/MAST/SCRATCH
 export MAST_ARCHIVE=$HOME/MAST/ARCHIVE
 export MAST_CONTROL=$HOME/MAST/CONTROL
-export MAST_PLATFORM=&lt;platform_name&gt;</pre>
+export MAST_PLATFORM=&lt;platform_name&gt;
+</pre></div>
 </div>
 <p>For platform_name, choose from one of the following:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">aci</span>
@@ -397,7 +414,8 @@ export MAST_PLATFORM=&lt;platform_name&gt;</pre>
 </pre></div>
 </div>
 <p>For example:</p>
-<div class="highlight-python"><pre>export MAST_PLATFORM=stampede</pre>
+<div class="highlight-python"><div class="highlight"><pre>export MAST_PLATFORM=stampede
+</pre></div>
 </div>
 <ul>
 <li><p class="first">If your platform is available by name (not _generic), then:</p>
@@ -423,22 +441,26 @@ export MAST_PLATFORM=&lt;platform_name&gt;</pre>
 <div class="section" id="make-a-custom-platform-if-necessary">
 <span id="make-custom-platform"></span><h3>5.5.2. Make a custom platform, if necessary<a class="headerlink" href="#make-a-custom-platform-if-necessary" title="Permalink to this headline">¶</a></h3>
 <p>Run the following command. It should produce some errors, but ignore those and just see where MAST is installed:</p>
-<div class="highlight-python"><pre>mast -i none</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast -i none
+</pre></div>
 </div>
 <p>For example, output may be:</p>
-<div class="highlight-python"><pre>------------------------------------------------------
+<div class="highlight-python"><div class="highlight"><pre>------------------------------------------------------
 Welcome to the MAterials Simulation Toolkit (MAST)
 Version: 1.1.5
 Installed in: .local/lib/python2.7/site-packages/MAST
-------------------------------------------------------</pre>
+------------------------------------------------------
+</pre></div>
 </div>
 <p>and then some errors.</p>
 <p>Go to the &#8220;installed in&#8221; directory, and then:</p>
-<div class="highlight-python"><pre>cd submit/platforms</pre>
+<div class="highlight-python"><div class="highlight"><pre>cd submit/platforms
+</pre></div>
 </div>
 <p>Identify the closest-matching directory to your actual platform (for example, if you have an SGE platform, this directory would be sge_generic)</p>
 <p>Copy this directory into a new directory inside the <tt class="docutils literal"><span class="pre">platforms</span></tt> folder, for example:</p>
-<div class="highlight-python"><pre>cp -r sge_generic my_custom_sge</pre>
+<div class="highlight-python"><div class="highlight"><pre>cp -r sge_generic my_custom_sge
+</pre></div>
 </div>
 <p>Then, inside your new folder, like <tt class="docutils literal"><span class="pre">my_custom_sge</span></tt>, modify each of the following files as necessary for your platform:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">submit_template</span><span class="o">.</span><span class="n">sh</span>
@@ -448,7 +470,8 @@ Installed in: .local/lib/python2.7/site-packages/MAST
 </div>
 <p>Explanations for each file are given in the following sections. Modify and test each file in your new custom platform folder.</p>
 <p>Then, in your user profile, use your new custom folder for the platform name of <tt class="docutils literal"><span class="pre">$MAST_PLATFORM</span></tt>:</p>
-<div class="highlight-python"><pre>export MAST_PLATFORM=my_custom_sge</pre>
+<div class="highlight-python"><div class="highlight"><pre>export MAST_PLATFORM=my_custom_sge
+</pre></div>
 </div>
 <p>Log out and log back in.</p>
 <div class="section" id="submit-template-sh">
@@ -491,8 +514,9 @@ Installed in: .local/lib/python2.7/site-packages/MAST
 </ul>
 <p>The <tt class="docutils literal"><span class="pre">mastmon_submit.sh</span></tt> script is copied into the <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt> directory the first time you run <tt class="docutils literal"><span class="pre">mast</span></tt>.</p>
 <p>If you see that after you type <tt class="docutils literal"><span class="pre">mast</span></tt>, no &#8220;mastmon&#8221; process appears on the queue, then test the submission script directly:</p>
-<div class="highlight-python"><pre>cd $MAST_CONTROL
-qsub mastmon_submit.sh (or use sbatch for slurm, etc.)</pre>
+<div class="highlight-python"><div class="highlight"><pre>cd $MAST_CONTROL
+qsub mastmon_submit.sh (or use sbatch for slurm, etc.)
+</pre></div>
 </div>
 <ul class="simple">
 <li>Modify the <tt class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></tt> file (and not the one in the MAST installation directory /submit/platforms/&lt;platform&gt; folder) until the &#8220;mastmon&#8221; process successfully runs on the queue.</li>
@@ -521,7 +545,7 @@ qsub mastmon_submit.sh (or use sbatch for slurm, etc.)</pre>
 <li><p class="first">This function should parse the job ID, given the text that returns to screen when you submit a job.</p>
 </li>
 <li><p class="first">For example, it should return <tt class="docutils literal"><span class="pre">456789</span></tt> as the jobid for the following job submission and resulting screen text:</p>
-<div class="highlight-python"><pre>login2.mycluster$ sbatch submit.sh
+<div class="highlight-python"><div class="highlight"><pre>login2.mycluster$ sbatch submit.sh
 -----------------------------------------------------------------
           Welcome to the Supercomputer
 -----------------------------------------------------------------
@@ -529,12 +553,14 @@ qsub mastmon_submit.sh (or use sbatch for slurm, etc.)</pre>
 --&gt; Verifying valid jobname...OK
 --&gt; Enforcing max jobs per user...OK
 --&gt; Verifying job request is within current queue limits...OK
-Submitted batch job 456789</pre>
+Submitted batch job 456789
+</pre></div>
 </div>
 </li>
 <li><p class="first">On a different cluster, it would return <tt class="docutils literal"><span class="pre">456789</span></tt> as the jobid for the following submission and resulting screen text:</p>
-<div class="highlight-python"><pre>[user1@mycluster test_job]$ qsub submit.sh
-456789.mycluster.abcd.univ.edu</pre>
+<div class="highlight-python"><div class="highlight"><pre>[user1@mycluster test_job]$ qsub submit.sh
+456789.mycluster.abcd.univ.edu
+</pre></div>
 </div>
 </li>
 </ul>
@@ -546,11 +572,12 @@ Submitted batch job 456789</pre>
 <li><p class="first">This function should show a summary of your current submitted jobs, which we call the <tt class="docutils literal"><span class="pre">queue_snapshot</span></tt>.</p>
 </li>
 <li><p class="first">For example, the queue snapshot command should return something like the following (platform-dependent):</p>
-<div class="highlight-python"><pre>JOBID   PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+<div class="highlight-python"><div class="highlight"><pre>JOBID   PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
 456789      normal test1 user1 PD       0:00      4 (Resources)
 456788      normal test2 user1 PD       0:00      1 (Resources)
 456774      normal test3 user1  R    6:14:53      1 c123-124
-456775      normal test4 user1  R    6:15:34      1 c125-126</pre>
+456775      normal test4 user1  R    6:15:34      1 c125-126
+</pre></div>
 </div>
 </li>
 </ul>
@@ -585,11 +612,13 @@ Submitted batch job 456789</pre>
 <blockquote>
 <div><ul>
 <li><p class="first">For example, suppose you run VASP like this:</p>
-<div class="highlight-python"><pre>//opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1</pre>
+<div class="highlight-python"><div class="highlight"><pre>//opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1
+</pre></div>
 </div>
 </li>
 <li><p class="first">Then, in your input files, the <tt class="docutils literal"><span class="pre">mast_exec</span></tt> keyword would be specified like this:</p>
-<div class="highlight-python"><pre>mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_exec //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_par_opt1
+</pre></div>
 </div>
 </li>
 </ul>
@@ -601,13 +630,14 @@ Submitted batch job 456789</pre>
 <blockquote>
 <div><ul>
 <li><p class="first">If you use VIM (<tt class="docutils literal"><span class="pre">vi</span></tt>), add the following lines to your <tt class="docutils literal"><span class="pre">~/.vimrc</span></tt> file:</p>
-<div class="highlight-python"><pre>" VIM settings for python in a group below:
+<div class="highlight-python"><div class="highlight"><pre>&quot; VIM settings for python in a group below:
 set tabstop=4
 set shiftwidth=4
 set smarttab
 set expandtab
 set softtabstop=4
-set autoindent</pre>
+set autoindent
+</pre></div>
 </div>
 </li>
 </ul>
@@ -615,16 +645,6 @@ set autoindent</pre>
 </li>
 </ul>
 <p>Once you have completed any additional setup and have identified what <tt class="docutils literal"><span class="pre">mast_exec</span></tt> should be, go to <a class="reference internal" href="17_0_testmast.html"><em>Trying out MAST</em></a>.</p>
-</div>
-<div class="section" id="run-unit-tests-optional">
-<h2>5.7. Run unit tests (optional)<a class="headerlink" href="#run-unit-tests-optional" title="Permalink to this headline">¶</a></h2>
-<p>To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. &lt;python installation path&gt;/lib/python2.7/site-packages/MAST/test) and run the command</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
-</pre></div>
-</div>
-<p>The <tt class="docutils literal"><span class="pre">nocapture</span></tt> option allows print statements.
-The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gives verbose results.</p>
-<p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.</p>
 </div>
 </div>
 
@@ -673,7 +693,6 @@ The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gi
 </ul>
 </li>
 <li><a class="reference internal" href="#additional-setup">5.6. Additional setup</a></li>
-<li><a class="reference internal" href="#run-unit-tests-optional">5.7. Run unit tests (optional)</a></li>
 </ul>
 </li>
 </ul>
@@ -718,7 +737,7 @@ The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gi
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

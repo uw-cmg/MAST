@@ -54,15 +54,17 @@
 <div class="section" id="general-notes">
 <h2>9.1. General notes<a class="headerlink" href="#general-notes" title="Permalink to this headline">¶</a></h2>
 <p>Depending on your cluster, you might find it necessary to <em>nice</em> your processes:</p>
-<div class="highlight-python"><pre>nice -n 19 mast -i input.inp
-nice -n 19 mast</pre>
+<div class="highlight-python"><div class="highlight"><pre>nice -n 19 mast -i input.inp
+nice -n 19 mast
+</pre></div>
 </div>
 <p>Nice-ing allows the headnode to put its regular functions before the MAST processes. MAST should start running within several seconds.</p>
 </div>
 <div class="section" id="inputting-an-input-file">
 <h2>9.2. Inputting an input file<a class="headerlink" href="#inputting-an-input-file" title="Permalink to this headline">¶</a></h2>
 <p>To parse an input file, use</p>
-<div class="highlight-python"><pre>mast -i input.inp</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast -i input.inp
+</pre></div>
 </div>
 <p>or</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="o">//</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="nb">input</span><span class="o">/</span><span class="nb">file</span><span class="o">/</span><span class="n">myinput</span><span class="o">.</span><span class="n">inp</span>
@@ -215,10 +217,12 @@ nice -n 19 mast</pre>
 <li><tt class="docutils literal"><span class="pre">crontab</span> <span class="pre">-r</span></tt> to remove your crontab</li>
 </ul>
 <p>This crontab line will run mast every hour at minute 15, and is usually suitable for everyday use:</p>
-<div class="highlight-python"><pre>15 * * * * . $HOME/.bashrc; nice -n 19 mast</pre>
+<div class="highlight-python"><div class="highlight"><pre>15 * * * * . $HOME/.bashrc; nice -n 19 mast
+</pre></div>
 </div>
 <p>This crontab line will run mast every 15 minutes and is ONLY suitable for short testing:</p>
-<div class="highlight-python"><pre>*/15 * * * * . $HOME/.bashrc; nice -n 19 mast</pre>
+<div class="highlight-python"><div class="highlight"><pre>*/15 * * * * . $HOME/.bashrc; nice -n 19 mast
+</pre></div>
 </div>
 </div>
 </div>
@@ -293,7 +297,7 @@ nice -n 19 mast</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

@@ -604,15 +604,3 @@ You may need to do any or all of the following:
 
 Once you have completed any additional setup and have identified what ``mast_exec`` should be, go to :doc:`17_0_testmast`.
 
-===========================
-Run unit tests (optional)
-===========================
-
-To run unit tests and verify that the MAST code is sound, go to the test directory in your MAST installation path (e.g. <python installation path>/lib/python2.7/site-packages/MAST/test) and run the command ::
-
-    nosetests -v --nocapture
-
-The ``nocapture`` option allows print statements.
-The ``verbose`` option gives verbose results.
-
-The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.

@@ -57,9 +57,10 @@
 <div class="section" id="structure-by-file">
 <h2>8.2.1. Structure by file<a class="headerlink" href="#structure-by-file" title="Permalink to this headline">¶</a></h2>
 <p>Using the keyword <tt class="docutils literal"><span class="pre">posfile</span></tt>, a VASP POSCAR-type file or a CIF file can be inserted here in this section:</p>
-<div class="highlight-python"><pre>$structure
+<div class="highlight-python"><div class="highlight"><pre>$structure
 posfile POSCAR_fcc
-$end</pre>
+$end
+</pre></div>
 </div>
 <p>The file should be located in the same directory as the input file at the time you call MAST, and should not be moved until the recipe is complete.</p>
 <p>A CIF file should end with .cif.</p>
@@ -76,7 +77,7 @@ $end</pre>
 <p>Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.</p>
 <p>Each fractional coordinate must be preceded by either an element symbol or an X# symbol corresponding to the symbols assigned in the elementmap section.</p>
 <p>Example:</p>
-<div class="highlight-python"><pre>begin $structure
+<div class="highlight-python"><div class="highlight"><pre>begin $structure
 
 coord_type fractional
 
@@ -102,7 +103,8 @@ X2 0.250000 0.750000 0.750000
 X2 0.750000 0.250000 0.750000
 end
 
-$end</pre>
+$end
+</pre></div>
 </div>
 </div>
 <div class="section" id="finite-size-scaling">
@@ -137,19 +139,22 @@ $end</pre>
 </ul>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-python"><pre>begin scaling
+<div class="highlight-python"><div class="highlight"><pre>begin scaling
 [1 0 0,0 1 0, 0 0 1] 4x4x4 M label=1x1x1
 [2 0 0,0 2 0, 0 0 1] 2x2x4 M label=2x2x1
 [2 0 0,0 2 0, 0 0 2] 2x2x2 M label=2x2x2
 [3 0 0,0 3 0, 0 0 3] 1x1x1 M label=3x3x3
-end</pre>
+end
+</pre></div>
 </div>
 <p>In order to figure out which scaling sizes to use for finite-size scaling, MAST includes a Madelung potential utility.</p>
 <p>This utility generates a distribution of cell sizes for best scaling, according to the method in:</p>
-<div class="highlight-python"><pre>Hine, N. D. M., Frensch, K., Foulkes, W. M. C. &amp; Finnis, M. W. Supercell size scaling of density functional theory formation energies of charged defects. Physical Review B 79, 13, doi:10.1103/PhysRevB.79.024112 (2009).</pre>
+<div class="highlight-python"><div class="highlight"><pre>Hine, N. D. M., Frensch, K., Foulkes, W. M. C. &amp; Finnis, M. W. Supercell size scaling of density functional theory formation energies of charged defects. Physical Review B 79, 13, doi:10.1103/PhysRevB.79.024112 (2009).
+</pre></div>
 </div>
 <p>Run this utility as follows in order to generate a cut-and-paste for the scaling section.</p>
-<div class="highlight-python"><pre>mast_finite_size_scaling_sizes perfDir defDir minDefDist maxNumAtoms numStructAsked</pre>
+<div class="highlight-python"><div class="highlight"><pre>mast_finite_size_scaling_sizes perfDir defDir minDefDist maxNumAtoms numStructAsked
+</pre></div>
 </div>
 <ul class="simple">
 <li><strong>perfDir</strong>: perfect primordial (small) cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.</li>
@@ -222,7 +227,7 @@ end</pre>
     </div>
     <div class="footer">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

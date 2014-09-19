@@ -48,3 +48,21 @@ In the input file, the ``mast_xxxx_method`` keywords are direct hooks to methods
 
 Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of ``MAST/ingredients/baseingredient.py``.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)
+
+=============================
+Source code
+=============================
+To program with MAST, clone from the dev branch at `the MAST github repository <https://github.com/uw-cmg/MAST>`_
+
+Prepend the clone directory to your ``$PYTHONPATH`` environment variable.
+
+The command ``mast`` should reveal the clone directory instead of any other MAST installation directories.
+
+To run unit tests and verify that the MAST code is sound, go to the test directory in ``<clone directory>/MAST/test`` and run the command:: 
+
+    nosetests -v --nocapture
+
+The ``nocapture`` option allows print statements.
+The ``verbose`` option gives verbose results.
+
+The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
