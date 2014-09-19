@@ -9,9 +9,25 @@ See example files in ``$HOME/MAST/examples`` or wherever you may have moved the 
 
 These utilities should have been copied into your bin or .local/bin directory (see :doc:`1_0_installation`).
 
-******************************
-Defect formation energy
-******************************
+***********************************************************************
+Defect formation energy with finite-size scaling
+***********************************************************************
+
+Initially determining the sizes for finite-size scaling is covered in :doc:`3_1_1_structure` with the utility ``mast_finite_size_scaling_sizes``.
+
+The ``mast_madelung_utility`` utility runs as the last ingredient in a finite-size scaling defect workflow (see ``$HOME/MAST/examples/finite_size_scaling.inp``).
+
+Run the utility as ``mast_madelung_utility``. All inputs are derived from the recipe-local ``input.inp`` file in the recipe directory.
+
+*  The utility should generate a series of tables and .png plots that display the finite-size-scaling-corrected and original defect formation energies for different chemical potentials.
+
+* :doc:`3_1_7_chemicalpotentials` of the input file should be set in order for the utility to work.
+
+***********************************************************************
+Defect formation energy versus fermi level 
+***********************************************************************
+
+The ``mast_defect_formation_energy`` tool plots defect formation energy versus Fermi level. 
 
 The defect formation energy tool is intended to be run as another ingredient folder in the recipe directory.
 
@@ -49,7 +65,7 @@ A directory named ``dfe_results`` should be created within the ingredient direct
 Diffusion coefficient
 *************************
 
-The diffusion coefficient calculation tool supports the 5(fcc) and 8(hcp) frequency models as follows:
+The ``mast_diffusion_coefficient`` diffusion coefficient calculation tool supports the 5(fcc) and 8(hcp) frequency models as follows:
 
 *  Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
 *  Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
