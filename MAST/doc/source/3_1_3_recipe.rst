@@ -28,7 +28,7 @@ The ingredient name has some restrictions:
         * **<P>**: The ``phonon`` keyword in :doc:`3_1_5_defects` and `3_1_6_neb`
         * **<B>, <E>, <B-E>**: :doc:`3_1_6_neb`
 
-        * The filled-in tags will be evident in :doc:`3_1_4_personal_recipe` of the ``input.inp`` file in the recipe directory, once MAST has read the input file and set up the recipe directory.
+        * The filled-in tags will be evident in :doc:`3_1_4_personalrecipe` of the ``input.inp`` file in the recipe directory, once MAST has read the input file and set up the recipe directory.
 
     *  When tags are used, certain conventions must be followed:
     
@@ -147,6 +147,7 @@ In the recipe, {begin} and {end} will loop over, match up, and fill in scaling l
 * Use a new {begin} and {end} when you have a new tree branch or unindentation in the recipe that switches between <N> and <B> or <E>
 
 * Note that defect endpoints need to be the parents of all NEB optimizations and NEB static calculations. Therefore, the endpoint-neb parent-child block may look like the following::
+
     {begin}
     defect_<B>_stat (static_to_neb), defect_<E>_stat (static_to_neb)
         neb_<B-E>_opt1 (neb)

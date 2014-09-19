@@ -24,10 +24,10 @@ Run the utility as ``mast_madelung_utility``. All inputs are derived from the re
 * :doc:`3_1_7_chemicalpotentials` of the input file should be set in order for the utility to work.
 
 ***********************************************************************
-Defect formation energy versus fermi level 
+Defect formation energy versus Fermi energy
 ***********************************************************************
 
-The ``mast_defect_formation_energy`` tool plots defect formation energy versus Fermi level. 
+The ``mast_defect_formation_energy`` tool plots defect formation energy versus Fermi energy. 
 
 The defect formation energy tool is intended to be run as another ingredient folder in the recipe directory.
 
@@ -48,6 +48,8 @@ The ``dfe_input.txt`` file for a manually-created or embedded workflow ingredien
 *  bandgap_lda_or_gga should be a float value indicating a DFT-calculated bandgap, usually expected to be underestimated.
 
 *  bandgap_hse_or_expt should be a float value indicating an experimental or more accurate bandgap, e.g. from a hybrid calculation.
+
+*  plot_threshold should be a float value indicating the threshold for transitions.
 
 *  In addition, :doc:`3_1_7_chemicalpotentials` should exist in the ``input.inp`` input file inside the recipe directory.
 

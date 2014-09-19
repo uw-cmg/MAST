@@ -22,7 +22,6 @@ MAterials Simulation Toolkit (MAST) Manual
     5_0_runningmast
     6_0_postprocessingtools
     8_0_standalonetools
-    7_0_externalpackages
     12_0_programming
     10_0_acknowledgments
     15_0_citations
