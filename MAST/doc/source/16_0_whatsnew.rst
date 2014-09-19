@@ -1,10 +1,10 @@
 #############################
-Changes in version 1 2 0
+What's new in version 1.2.0
 #############################
 
 **Additions:**
 
-* Finite size scaling support (the "<S>" tag) has been added. See :doc:`3_1_1_structure`, :doc:`3_1_3_recipe`, and :doc:`6_0_postprocessingtools`.
+* Finite size scaling support (the <S> tag) has been added. See :doc:`3_1_1_structure`, :doc:`3_1_3_recipe`, and :doc:`6_0_postprocessingtools`.
 
 **Fixes:**
 

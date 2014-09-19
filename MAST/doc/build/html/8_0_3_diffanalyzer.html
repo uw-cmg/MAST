@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>11.3.1. Particle Trajectory Diffusion Analysis &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="up" title="11. Standalone Tools" href="8_0_standalonetools.html" />
+    <link rel="next" title="11.4.1. Diffusion Connectivity" href="8_0_1_diffusionconnectivity.html" />
+    <link rel="prev" title="11.2.1. Effective Grain Boundary Diffusivity Calculator" href="8_0_2_gbdiff.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="8_0_1_diffusionconnectivity.html" title="11.4.1. Diffusion Connectivity"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="8_0_2_gbdiff.html" title="11.2.1. Effective Grain Boundary Diffusivity Calculator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="8_0_standalonetools.html" accesskey="U">11. Standalone Tools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="particle-trajectory-diffusion-analysis">
+<h1>11.3.1. Particle Trajectory Diffusion Analysis<a class="headerlink" href="#particle-trajectory-diffusion-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Author: Leland Barnard
+Acknowledgments to: Amy Bengtson, Saumitra Saha</p>
+<p>Computes mean squared displacements and tracer diffusion coefficients from particle position data as a function of time.</p>
+<p><a class="reference external" href="https://materialshub.org/resources/diffanalyzer">Version 1.13 - published on 28 Mar 2014</a></p>
+<p>The source code must be downloaded from github. It does not exist in the pypi package. See <a class="reference internal" href="12_0_programming.html"><em>Programming for MAST</em></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li>Uncompiled source code is in MAST/utility/diffanalyzer</li>
+</ul>
+</div></blockquote>
+<p>This tool takes as input particle position data from methods such as molecular dynamics or kinetic Monte Carlo and computes the mean squared displacement for all particles as a function of time.
+For a system with multiple types of particles, the mean squared displacement is computed for each particle type.
+The tracer diffusion coefficient is then calculated from the slope of the mean squared displacement vs time curve.</p>
+<p>The tool is based on <em>The Working Man&#8217;s Guide to Obtaining Self Diffusion Coefficients from Molecular Dynamics Simulations</em> by Professor David Keffer from UT Knoxville.</p>
+<div class="section" id="input-file-format">
+<h2>11.3.1.1. Input file format:<a class="headerlink" href="#input-file-format" title="Permalink to this headline">¶</a></h2>
+<p>This tool reads in atomic position data in the VASP XDATCAR format. This file format begins with the following set of lines:</p>
+<div class="highlight-python"><div class="highlight"><pre>Name
+C1 C2 C3 ...
+N1 N2 N3 ...
+Direct
+</pre></div>
+</div>
+<ul class="simple">
+<li>The first line is a name or description of the file. It is not read by the tool.</li>
+<li>The second line are the names of the components in the system. These will be element names in the case of an atomic simulation.</li>
+<li>The third line are the number of particles of each component in the system.</li>
+<li>The final line is a VASP generated line that specifies direct atomic coordinates.</li>
+<li>Following these 4 lines, the file must have 1 blank line, and then the particle position data begins on line 6. Particle positions must be in fractional or direct coordinates, and a single line must separate the blocks of particle positions at each time step throughout the file.</li>
+</ul>
+</div>
+<div class="section" id="calculation-of-error-on-the-diffusion-coefficient">
+<h2>11.3.1.2. Calculation of error on the diffusion coefficient:<a class="headerlink" href="#calculation-of-error-on-the-diffusion-coefficient" title="Permalink to this headline">¶</a></h2>
+<p>The error bars on the mean squared displacements represent a single standard deviation in the measurements of the squared displacements over all time origins.</p>
+<p>The error in the diffusion coefficient represents the standard error in the slope of the weighted least squares fit to the mean squared displacement, using the variance in the squared displacements as the error weight.</p>
+</div>
+<div class="section" id="references">
+<h2>11.3.1.3. References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>&#8220;The Working Man&#8217;s Guide to Obtaining Self Diffusion Coefficients from Molecular Dynamics Simulations&#8221; by Professor David Keffer from UT Knoxville, which may be found here: <a class="reference external" href="http://www.cs.unc.edu/Research/nbody/pubs/external/Keffer/selfD.pdf">http://www.cs.unc.edu/Research/nbody/pubs/external/Keffer/selfD.pdf</a></p>
+</div>
+<div class="section" id="cite-this-work">
+<h2>11.3.1.4. Cite this work<a class="headerlink" href="#cite-this-work" title="Permalink to this headline">¶</a></h2>
+<p>Researchers should cite this work as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>Leland Barnard (2014), &quot;Particle Trajectory Diffusion Analysis,&quot; https://materialshub.org/resources/diffanalyzer.
+
+@misc { 31,
+    title = {Particle Trajectory Diffusion Analysis},
+    month = {Feb},
+    url = {https://materialshub.org/resources/31},
+    year = {2014},
+    author = {Barnard , Leland}
+}
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">11.3.1. Particle Trajectory Diffusion Analysis</a><ul>
+<li><a class="reference internal" href="#input-file-format">11.3.1.1. Input file format:</a></li>
+<li><a class="reference internal" href="#calculation-of-error-on-the-diffusion-coefficient">11.3.1.2. Calculation of error on the diffusion coefficient:</a></li>
+<li><a class="reference internal" href="#references">11.3.1.3. References</a></li>
+<li><a class="reference internal" href="#cite-this-work">11.3.1.4. Cite this work</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="8_0_2_gbdiff.html"
+                        title="previous chapter">11.2.1. Effective Grain Boundary Diffusivity Calculator</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="8_0_1_diffusionconnectivity.html"
+                        title="next chapter">11.4.1. Diffusion Connectivity</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="8_0_1_diffusionconnectivity.html" title="11.4.1. Diffusion Connectivity"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="8_0_2_gbdiff.html" title="11.2.1. Effective Grain Boundary Diffusivity Calculator"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="8_0_standalonetools.html" >11. Standalone Tools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

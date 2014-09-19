@@ -272,6 +272,7 @@ mast_write_method keyword values
 
 *  Write a phonon run, where the frequency calculation for each atom and each direction is a separate run, using selective dynamics. CHGCAR and WAVECAR must have been given to the ingredient previously; these files will be softlinked into each subfolder.
 *  Programs supported: vasp
+
 -----------------------------------------
 mast_ready_method keyword values
 -----------------------------------------
@@ -334,9 +335,9 @@ mast_run_method keyword values
 *  Must not be run on the starting ingredient.
 
 
-----------------------------------
+------------------------------------
 mast_complete_method keyword values
-----------------------------------
+------------------------------------
 
 **complete_singlerun**
 

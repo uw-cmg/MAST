@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>8.9. The Summary section &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="up" title="8. Sections of the Input File" href="3_1_inputsections.html" />
+    <link rel="next" title="9. Running MAST for real" href="5_0_runningmast.html" />
+    <link rel="prev" title="8.8. The Chemical Potentials section" href="3_1_7_chemicalpotentials.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="5_0_runningmast.html" title="9. Running MAST for real"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="3_1_7_chemicalpotentials.html" title="8.8. The Chemical Potentials section"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-summary-section">
+<h1>8.9. The Summary section<a class="headerlink" href="#the-summary-section" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="docutils literal"><span class="pre">$summary</span></tt> section of the input file will cause a <tt class="docutils literal"><span class="pre">SUMMARY.txt</span></tt> file to be printed into the recipe directory, once the recipe is complete.</p>
+<p>Each line in the summary section follows the format:</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;ingredient name search string&gt; &lt;summary information&gt;
+</pre></div>
+</div>
+<ul>
+<li><p class="first">&lt;search string&gt; is a search string for matching ingredient names.</p>
+</li>
+<li><p class="first">&lt;summary information&gt; refers to a python file in <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/summary</span></tt> which is supposed to extract information from a given ingredient directory.</p>
+</li>
+<li><p class="first">For example, the following section would extract energies from each ingredient matching <tt class="docutils literal"><span class="pre">vac</span></tt> in its name.</p>
+<blockquote>
+<div><p>$summary
+vac energy
+$end</p>
+</div></blockquote>
+</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="3_1_7_chemicalpotentials.html"
+                        title="previous chapter">8.8. The Chemical Potentials section</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="5_0_runningmast.html"
+                        title="next chapter">9. Running MAST for real</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="5_0_runningmast.html" title="9. Running MAST for real"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="3_1_7_chemicalpotentials.html" title="8.8. The Chemical Potentials section"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

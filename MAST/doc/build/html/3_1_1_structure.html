@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>8.2. The Structure section &mdash; MAST 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MAST 1.2.0 documentation" href="index.html" />
+    <link rel="up" title="8. Sections of the Input File" href="3_1_inputsections.html" />
+    <link rel="next" title="8.3. The Ingredients section" href="3_1_2_ingredients.html" />
+    <link rel="prev" title="8.1. The MAST section" href="3_1_0_mast.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="3_1_2_ingredients.html" title="8.3. The Ingredients section"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="3_1_0_mast.html" title="8.1. The MAST section"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-structure-section">
+<h1>8.2. The Structure section<a class="headerlink" href="#the-structure-section" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="docutils literal"><span class="pre">$structure</span></tt> section contains the coordinate type, coordinates, and lattice, or, optionally, the name of a structure file (either CIF or VASP POSCAR-type).</p>
+<div class="section" id="structure-by-file">
+<h2>8.2.1. Structure by file<a class="headerlink" href="#structure-by-file" title="Permalink to this headline">¶</a></h2>
+<p>Using the keyword <tt class="docutils literal"><span class="pre">posfile</span></tt>, a VASP POSCAR-type file or a CIF file can be inserted here in this section:</p>
+<div class="highlight-python"><div class="highlight"><pre>$structure
+posfile POSCAR_fcc
+$end
+</pre></div>
+</div>
+<p>The file should be located in the same directory as the input file at the time you call MAST, and should not be moved until the recipe is complete.</p>
+<p>A CIF file should end with .cif.</p>
+<p>A POSCAR-type filename must start with <tt class="docutils literal"><span class="pre">POSCAR_</span></tt> or <tt class="docutils literal"><span class="pre">CONTCAR_</span></tt> in order for pymatgen to recognize it. The elements will be obtained from the POSCAR unless you also have a POTCAR in the directory, in which case, check your output carefully because the elements might be given by the POTCAR instead, no matter what elements are written in the POSCAR file.</p>
+</div>
+<div class="section" id="structure-by-specification">
+<h2>8.2.2. Structure by specification<a class="headerlink" href="#structure-by-specification" title="Permalink to this headline">¶</a></h2>
+<p>To specify a structure, use the following subsections:</p>
+<p><strong>coord_type</strong>: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.</p>
+<p><strong>lattice</strong>: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.</p>
+<p><strong>elementmap</strong>: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed in <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>).</p>
+<p>The elementmap subsection works in conjunction with the coordinates subsection.</p>
+<p><strong>coordinates</strong>: The coordinates subsection specifies the coordinates in order.</p>
+<p>Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.</p>
+<p>Each fractional coordinate must be preceded by either an element symbol or an X# symbol corresponding to the symbols assigned in the elementmap section.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>begin $structure
+
+coord_type fractional
+
+begin lattice
+6.0 0.0 0.0
+0.0 6.0 0.0
+0.0 0.0 6.0
+end
+
+begin elementmap
+X1 Ga
+X2 As
+end
+
+begin coordinates
+X1 0.000000 0.000000 0.000000
+X1 0.500000 0.500000 0.000000
+X1 0.000000 0.500000 0.500000
+X1 0.500000 0.000000 0.500000
+X2 0.250000 0.250000 0.250000
+X2 0.750000 0.750000 0.250000
+X2 0.250000 0.750000 0.750000
+X2 0.750000 0.250000 0.750000
+end
+
+$end
+</pre></div>
+</div>
+</div>
+<div class="section" id="finite-size-scaling">
+<h2>8.2.3. Finite-size scaling<a class="headerlink" href="#finite-size-scaling" title="Permalink to this headline">¶</a></h2>
+<p>Finite size scaling is supported with a special &#8220;scaling&#8221; subsection.</p>
+<p>Defect positions will be automatically scaled.</p>
+<blockquote>
+<div><ul class="simple">
+<li>For example, <tt class="docutils literal"><span class="pre">0.25</span> <span class="pre">0.0</span> <span class="pre">0.0</span></tt> in the original supercell would become <tt class="docutils literal"><span class="pre">0.125</span> <span class="pre">0.0</span> <span class="pre">0.0</span></tt> in a 2x1x1 cell.</li>
+</ul>
+</div></blockquote>
+<p>Special notes:</p>
+<ul>
+<li><p class="first"><a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a> should include an &#8220;inducescaling&#8221; ingredient with a <tt class="docutils literal"><span class="pre">mast_run_method</span></tt> of <tt class="docutils literal"><span class="pre">run_scale</span></tt></p>
+</li>
+<li><p class="first"><a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a> should include <tt class="docutils literal"><span class="pre">inducescaling_&lt;S&gt;</span></tt> and <tt class="docutils literal"><span class="pre">defect_&lt;S&gt;</span></tt> ingredients.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The &#8220;&lt;S&gt;&#8221; tags will correspond to the scaling sizes and labels.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>The scaling section has the syntax:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Scaling matrix of integers <tt class="docutils literal"><span class="pre">[M,</span> <span class="pre">N,</span> <span class="pre">P]</span></tt> or <tt class="docutils literal"><span class="pre">[M1</span> <span class="pre">M2</span> <span class="pre">M3,</span> <span class="pre">N1</span> <span class="pre">N2</span> <span class="pre">N3,</span> <span class="pre">P1</span> <span class="pre">P2</span> <span class="pre">P3]</span></tt></li>
+<li>Kpoint mesh in the form <tt class="docutils literal"><span class="pre">QxRxS</span></tt></li>
+<li>Kpoint mesh type, M for Monkhorst-Pack and G for Gamma-point centered</li>
+<li>(Optional) Kpoint mesh shift, in floats, e.g. <tt class="docutils literal"><span class="pre">0.1</span> <span class="pre">0.2</span> <span class="pre">0.3</span></tt></li>
+<li>(Optional) Label, in the form <tt class="docutils literal"><span class="pre">label=&lt;labelname&gt;</span></tt></li>
+</ul>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre>begin scaling
+[1 0 0,0 1 0, 0 0 1] 4x4x4 M label=1x1x1
+[2 0 0,0 2 0, 0 0 1] 2x2x4 M label=2x2x1
+[2 0 0,0 2 0, 0 0 2] 2x2x2 M label=2x2x2
+[3 0 0,0 3 0, 0 0 3] 1x1x1 M label=3x3x3
+end
+</pre></div>
+</div>
+<p>In order to figure out which scaling sizes to use for finite-size scaling, MAST includes a Madelung potential utility.</p>
+<p>This utility generates a distribution of cell sizes for best scaling, according to the method in:</p>
+<div class="highlight-python"><div class="highlight"><pre>Hine, N. D. M., Frensch, K., Foulkes, W. M. C. &amp; Finnis, M. W. Supercell size scaling of density functional theory formation energies of charged defects. Physical Review B 79, 13, doi:10.1103/PhysRevB.79.024112 (2009).
+</pre></div>
+</div>
+<p>Run this utility as follows in order to generate a cut-and-paste for the scaling section.</p>
+<div class="highlight-python"><div class="highlight"><pre>mast_finite_size_scaling_sizes perfDir defDir minDefDist maxNumAtoms numStructAsked
+</pre></div>
+</div>
+<ul class="simple">
+<li><strong>perfDir</strong>: perfect primordial (small) cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.</li>
+<li><strong>defDir</strong>: defected primordial cell directory, which should already have run and include VASP CONTCAR, OSZICAR, etc. files.</li>
+<li><strong>minDefDist</strong> (default 3): minimum defect-defect distance between periodic images, in Angstroms.</li>
+<li><strong>maxNumAtoms</strong> (default 600): maximum number of atoms for supercell size evaluations</li>
+<li><strong>numStructAsked</strong> (default 5): number of structures to return in the distribution</li>
+<li>Note that you will have to manually adjust the kpoint mesh in your cut-and-paste.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">8.2. The Structure section</a><ul>
+<li><a class="reference internal" href="#structure-by-file">8.2.1. Structure by file</a></li>
+<li><a class="reference internal" href="#structure-by-specification">8.2.2. Structure by specification</a></li>
+<li><a class="reference internal" href="#finite-size-scaling">8.2.3. Finite-size scaling</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="3_1_0_mast.html"
+                        title="previous chapter">8.1. The MAST section</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="3_1_2_ingredients.html"
+                        title="next chapter">8.3. The Ingredients section</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="3_1_2_ingredients.html" title="8.3. The Ingredients section"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="3_1_0_mast.html" title="8.1. The MAST section"
+             >previous</a> |</li>
+        <li><a href="index.html">MAST 1.2.0 documentation</a> &raquo;</li>
+          <li><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
