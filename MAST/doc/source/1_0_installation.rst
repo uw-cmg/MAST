@@ -165,7 +165,7 @@ If you have ``pip``, it is possible but sometimes unusually complicated to use p
 
 If you have the ``pip`` command, it may be worth trying the following::
 
-    pip install pymatgen==2.7.9 --user
+    pip install pymatgen==2.8.7 --user
     pip install custodian==0.7.5 --user
     pip install MAST --user
 
@@ -197,7 +197,7 @@ Dependency list::
     monty-0.3.4.tar.gz
     PyYAML-3.11.tar.gz
     requests-2.3.0.tar.gz
-    pymatgen-2.7.9.tar.gz
+    pymatgen-2.8.7.tar.gz
     custodian-0.7.5.tar.gz
 
 Also get::
