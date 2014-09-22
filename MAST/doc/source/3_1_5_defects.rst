@@ -19,7 +19,7 @@ The ``$defects`` section specifies defects by:
 
 *  However, once a defect is formed, structures are RESORTED by element ELECTRONEGATIVITY.  Therefore, if you are using substitutional defects or non-self-interstitials, you may find that later element-specific keywords (mast_setmagmom, LDAUU, LDAUJ) may be OUT OF ORDER FOR YOUR DEFECTED STRUCTURE.
 
-*  Please check your files carefully! You may want a separate input file for each chemical system (possible created through looping, see :doc:`3_0_inputfile`, in order to synchronize the elements and element-specific keywords.
+*  Please check your files carefully! You may want a separate input file for each chemical system (possibly created through looping (see :doc:`3_0_inputfile`) in order to synchronize the elements and element-specific keywords.
 
 The ``coord_type`` keyword specifies fractional or cartesian coordinates for the defects.
 
