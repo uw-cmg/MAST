@@ -13,6 +13,14 @@ The ``$defects`` section specifies defects by:
 *  defect element symbol
     *  Note that if an ``elementmap`` subsection is given in :doc:`3_1_1_structure`, then the mapped designations ``X1``, ``X2``, and so on can be given instead of an element symbol.
 
+**ATTENTION:** 
+
+*  Elements in the initial structure, given in :doc:`3_1_1_structure`, will appear in order as entered, by posfile keyword or through the coordinates and/or elementmap subsections.
+
+*  However, once a defect is formed, structures are RESORTED by element ELECTRONEGATIVITY.  Therefore, if you are using substitutional defects or non-self-interstitials, you may find that later element-specific keywords (mast_setmagmom, LDAUU, LDAUJ) may be OUT OF ORDER FOR YOUR DEFECTED STRUCTURE.
+
+*  Please check your files carefully! You may want a separate input file for each chemical system (possible created through looping, see :doc:`3_0_inputfile`, in order to synchronize the elements and element-specific keywords.
+
 The ``coord_type`` keyword specifies fractional or cartesian coordinates for the defects.
 
 The ``threshold`` keyword specifies the absolute threshold for finding the defect coordinate, since relaxation of the perfect structure may result in changed coordinates.

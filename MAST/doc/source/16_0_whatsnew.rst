@@ -8,7 +8,7 @@ What's new in version 1.2.0
 
 **Fixes:**
 
-* The :doc:`8_0_2_gbdiff` and :doc:`8_0_3_diffanalyzer` documentation is updated to reflect that source code for the non-python packages is only on github, and does not get packaged into the pypi package.
+* The :doc:`8_0_2_gbdiff` and :doc:`8_0_3_diffanalyzer` packages are now properly included in the installation directory after running ``setup.py``. 
 
 **Changes for users:**
 
