@@ -14,8 +14,8 @@
 
 
 \title{MAST Documentation}
-\date{September 19, 2014}
-\release{1.2.0}
+\date{September 22, 2014}
+\release{1.2.6}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
 \renewcommand{\releasename}{Release}
@@ -124,19 +124,19 @@
 
 
 
-\chapter{Changes in version 1 2 0}
-\label{16_0_whatsnew::doc}\label{16_0_whatsnew:changes-in-version-1-2-0}\label{16_0_whatsnew:materials-simulation-toolkit-mast-manual}
+\chapter{What's new in version 1.2.0}
+\label{16_0_whatsnew::doc}\label{16_0_whatsnew:what-s-new-in-version-1-2-0}\label{16_0_whatsnew:materials-simulation-toolkit-mast-manual}
 \textbf{Additions:}
 \begin{itemize}
 \item {} 
-Finite size scaling support (the ``\textless{}S\textgreater{}'' tag) has been added. See {\hyperref[3_1_1_structure::doc]{\emph{The Structure section}}}, {\hyperref[3_1_3_recipe::doc]{\emph{The Recipe section}}}, and {\hyperref[6_0_postprocessingtools::doc]{\emph{MAST post-processing utilities}}}.
+Finite size scaling support (the \textless{}S\textgreater{} tag) has been added. See {\hyperref[3_1_1_structure::doc]{\emph{The Structure section}}}, {\hyperref[3_1_3_recipe::doc]{\emph{The Recipe section}}}, and {\hyperref[6_0_postprocessingtools::doc]{\emph{MAST post-processing utilities}}}.
 
 \end{itemize}
 
 \textbf{Fixes:}
 \begin{itemize}
 \item {} 
-The {\hyperref[8_0_2_gbdiff::doc]{\emph{Effective Grain Boundary Diffusivity Calculator}}} and {\hyperref[8_0_3_diffanalyzer::doc]{\emph{Particle Trajectory Diffusion Analysis}}} documentation is updated to reflect that source code for the non-python packages is only on github, and does not get packaged into the pypi package.
+The {\hyperref[8_0_2_gbdiff::doc]{\emph{Effective Grain Boundary Diffusivity Calculator}}} and {\hyperref[8_0_3_diffanalyzer::doc]{\emph{Particle Trajectory Diffusion Analysis}}} packages are now properly included in the installation directory after running \code{setup.py}.
 
 \end{itemize}
 
@@ -620,7 +620,7 @@ If the \code{pip} command does not exist (\code{which pip} does not return anyth
 If you have the \code{pip} command, it may be worth trying the following:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-pip install pymatgen==2.7.9 \PYGZhy{}\PYGZhy{}user
+pip install pymatgen==2.8.7 \PYGZhy{}\PYGZhy{}user
 pip install custodian==0.7.5 \PYGZhy{}\PYGZhy{}user
 pip install MAST \PYGZhy{}\PYGZhy{}user
 \end{Verbatim}
@@ -663,7 +663,7 @@ pyhull\PYGZhy{}1.4.5.tar.gz
 monty\PYGZhy{}0.3.4.tar.gz
 PyYAML\PYGZhy{}3.11.tar.gz
 requests\PYGZhy{}2.3.0.tar.gz
-pymatgen\PYGZhy{}2.7.9.tar.gz
+pymatgen\PYGZhy{}2.8.7.tar.gz
 custodian\PYGZhy{}0.7.5.tar.gz
 \end{Verbatim}
 
@@ -2849,6 +2849,19 @@ Note that if an \code{elementmap} subsection is given in {\hyperref[3_1_1_struct
 
 \end{itemize}
 
+\textbf{ATTENTION:}
+\begin{itemize}
+\item {} 
+Elements in the initial structure, given in {\hyperref[3_1_1_structure::doc]{\emph{The Structure section}}}, will appear in order as entered, by posfile keyword or through the coordinates and/or elementmap subsections.
+
+\item {} 
+However, once a defect is formed, structures are RESORTED by element ELECTRONEGATIVITY.  Therefore, if you are using substitutional defects or non-self-interstitials, you may find that later element-specific keywords (mast\_setmagmom, LDAUU, LDAUJ) may be OUT OF ORDER FOR YOUR DEFECTED STRUCTURE.
+
+\item {} 
+Please check your files carefully! You may want a separate input file for each chemical system (possible created through looping, see {\hyperref[3_0_inputfile::doc]{\emph{Input File}}}, in order to synchronize the elements and element-specific keywords.
+
+\end{itemize}
+
 The \code{coord\_type} keyword specifies fractional or cartesian coordinates for the defects.
 
 The \code{threshold} keyword specifies the absolute threshold for finding the defect coordinate, since relaxation of the perfect structure may result in changed coordinates.
@@ -3663,11 +3676,9 @@ Calculates the effective diffusivity in a grain boundary network with two types 
 \href{https://materialshub.org/resources/diffcalc}{Version 1.3 - published on 21 Feb 2014}
 
 \href{https://materialshub.org/resources/gbdiff}{Look for a new version in late 2014}
-
-The source code must be downloaded from github. It does not exist in the pypi package. See {\hyperref[12_0_programming::doc]{\emph{Programming for MAST}}}.
 \begin{itemize}
 \item {} 
-Uncompiled source code is in MAST/utility/gbdiff
+Source code is in MAST/utility/gbdiff
 
 \end{itemize}
 
@@ -3709,7 +3720,7 @@ Computes mean squared displacements and tracer diffusion coefficients from parti
 The source code must be downloaded from github. It does not exist in the pypi package. See {\hyperref[12_0_programming::doc]{\emph{Programming for MAST}}}.
 \begin{itemize}
 \item {} 
-Uncompiled source code is in MAST/utility/diffanalyzer
+Source code is in MAST/utility/diffanalyzer
 
 \end{itemize}
 

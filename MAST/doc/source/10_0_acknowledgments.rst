@@ -52,4 +52,5 @@ pymatgen
 
 .. image:: _static/pymatgen.png
     :scale: 50 %
+
 Many underlying MAST functions are built using pymatgen (http://pymatgen.org), and the MAST team would especially like to thank pymatgen developers Shyue Ping Ong and Anubhav Jain for their assistance.
