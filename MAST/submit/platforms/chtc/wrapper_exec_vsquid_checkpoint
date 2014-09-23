@@ -1,0 +1,77 @@
+#!/bin/sh
+###TTM 2014-09-05
+###each wrapper_exec_?mast_exec? should correspond to an 
+###executable found on squid, compiled with cde, and located in 
+###cde-package_?mast_exec?.tar.gz
+###number of processors should be argument 1
+cat //proc/cpuinfo
+###Step 0. Change squid to your squid.
+mysquid="mayeshiba"
+
+###Step 1. Get MPI. This step should be the same for all MPI programs.
+curl -H "Pragma:" --fail --retry 30 --retry-delay 6 -o cde-package_mpiexec_vsquid.tar.gz http://proxy.chtc.wisc.edu/SQUID/$mysquid/cde-package_mpiexec_vsquid.tar.gz
+tar -xzvf cde-package_mpiexec_vsquid.tar.gz
+cderoot="cde-package_mpiexec_vasp/cde-root"
+mvapichlib="/usr/mpi/intel/mvapich2-1.9/lib"
+intellib="/scratch/custom_software/dell_pe_c6220/intel/composer_xe_2013.5.192/compiler/lib/intel64"
+export LD_LIBRARY_PATH=$cderoot$mvapichlib:$cderoot$intellib:$LD_LIBRARY_PATH
+mpiexec="cde-package_mpiexec_vasp/cde-root/usr/mpi/intel/mvapich2-1.9/bin/mpiexec"
+
+###Step 2. Get the program. This step needs to be modified for the paths
+###        of the actual program used.
+pname="cde-package_vsquid.tar.gz"
+
+curl -H "Pragma:" --fail --retry 30 --retry-delay 6 -o $pname http://proxy.chtc.wisc.edu/SQUID/$mysquid/$pname
+
+tar -xzvf $pname
+
+cdeexecprogram="cde-package_vasp/cde-exec"
+programexec="/home/mayeshiba/vasp.5.3.3_20140904_cNEB_for_CHTC/std/vasp"
+
+###Step 3. Run the program using mpiexec.
+###Step 3a. SPECIFIC: check to see if job had previously been checkpointed
+if [ -f CONTCAR ]
+    then
+        clines=`wc -l CONTCAR | awk '{print $1}'`
+        if [ $clines -gt 0 ]
+            then
+                date
+                echo "Non-empty CONTCAR was found. Archive and copy CONTCAR to POSCAR."
+                mydate=`date +%Y%m%d%H%M%S` 
+                cp POSCAR POSCAR_$mydate
+                cp CONTCAR CONTCAR_$mydate
+                cp OUTCAR OUTCAR_$mydate
+                cp OSZICAR OSZICAR_$mydate
+                cp CONTCAR POSCAR
+            else
+                date
+                echo "CONTCAR was empty! Fail out."
+                exit 1
+            fi
+    else
+        date
+        echo "No CONTCAR yet. Continue."
+fi
+
+$mpiexec -np $1 $cdeexecprogram $programexec > vasp.out
+
+###Step 4. Clean up ONLY IF finished.
+if [ -f OUTCAR ]
+    then
+        uct=`grep -c User OUTCAR`
+        if [ $uct -gt 0 ]
+            then
+                date
+                echo "OUTCAR has user time. Exit normally."
+                rm cde-package_mpiexec_vsquid.tar.gz
+                rm $pname
+                exit 0
+            else
+                date
+                echo "No User time found in OUTCAR. Needs to keep running."
+        fi
+    else
+        date
+        echo "No OUTCAR found. Fail out!"
+        exit 1
+fi
