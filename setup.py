@@ -46,7 +46,7 @@ print "SETUP PATH: %s" % mysetuppath
 def get_total_package_data():
     """Get total package data:
         * All files in MAST.submit.platforms.<platform name>
-        * All files in MAST.summary.citations
+        * All files in MAST.summary.citation_files
         * All files in MAST.test.<test_name>
         * All files in MAST.utility.gbdiff (standalone, non-python)
         * All files in MAST.utility.diffanalyzer (standalone, non-python)
@@ -69,7 +69,7 @@ def get_total_package_data():
         else:
             pass
     #get citations files
-    citationstem = os.path.join(mysetuppath,"MAST","summary","citations")
+    citationstem = os.path.join(mysetuppath,"MAST","summary","citation_files")
     citationlist = os.listdir(citationstem)
     mydict["MAST.summary.citations"] = list(citationlist)
     #get standalone files

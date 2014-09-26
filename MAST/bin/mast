@@ -48,14 +48,18 @@ def main():
     if (mastopt.mode == 'submitonly'):
         submit_and_monitor(1)
 
+    if (mastopt.mode == 'monitoronly'):
+        submit_and_monitor(2)
+
     if (mastopt.mode == 'input'):
         process_input_file(mastopt.input)
 
-def submit_and_monitor(submitonly=0):
+def submit_and_monitor(only=0):
     """Submit jobs to the queue and submit a MAST monitor
         Args:
-            submitonly <int>: 0 - submit and monitor (default)
+            only <int>: 0 - submit and monitor (default)
                               1 - submit only 
+                              2 - monitor only
     """
     from MAST.submit import queue_commands
     myerrors = display_errors()
@@ -69,15 +73,18 @@ def submit_and_monitor(submitonly=0):
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1) 
     print "Moving log file."
     move_log()
-    print "Submitting from submission list."
-    queue_commands.submit_from_submission_list()
-    print "Clearing submission list."
-    queue_commands.clear_submission_list()
-    display_recent_submissions()
-    print "Getting queue snapshot."
-    clear_and_get_queue_snapshot()
+    if only==2:
+        pass
+    else: 
+        print "Submitting from submission list."
+        queue_commands.submit_from_submission_list()
+        print "Clearing submission list."
+        queue_commands.clear_submission_list()
+        display_recent_submissions()
+        print "Getting queue snapshot."
+        clear_and_get_queue_snapshot()
     dirutil.unlock_directory(dirutil.get_mast_scratch_path())
-    if submitonly == 1:
+    if only == 1:
         return
     print "Locking directory and submitting MAST monitor."
     dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
@@ -212,10 +219,10 @@ def check_env_variables():
             raise MASTError("bin/mast", "Environment variable %s must be set." % env_var)
     mast_control = os.getenv("MAST_CONTROL")
     mast_platform = os.getenv("MAST_PLATFORM").lower()
-    if not os.path.isfile("%s/set_platform" % mast_control):
-        myfile = MASTFile()
-        myfile.data.append(mast_platform)
-        myfile.to_file("%s/set_platform" % mast_control)
+    #if not os.path.isfile("%s/set_platform" % mast_control):
+    #    myfile = MASTFile()
+    #    myfile.data.append(mast_platform)
+    #    myfile.to_file("%s/set_platform" % mast_control)
     if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
         shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (dirutil.get_mast_install_path(), mast_platform), mast_control)
     return
