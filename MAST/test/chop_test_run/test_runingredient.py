@@ -38,8 +38,6 @@ class TestRunIngredient(unittest.TestCase):
             os.mkdir("writedir/neb_labelinit-labelfin_stat")
         if not os.path.isdir("writedir/single_phonon_label1"):
             os.mkdir("writedir/single_phonon_label1")
-        if not os.path.isfile("test_control/set_platform"):
-            shutil.copy(old_control + "/set_platform", "test_control/set_platform")
     def tearDown(self):
         tearlist = list()
         tearlist.append("writedir")

@@ -32,8 +32,6 @@ class TestRecipeplan(unittest.TestCase):
             os.mkdir("recipedir/ing2b")
         if not os.path.isdir("recipedir/ing3"):
             os.mkdir("recipedir/ing3")
-        if not os.path.isfile("test_control/set_platform"):
-            shutil.copy(old_control + "/set_platform", "test_control/set_platform")
         os.environ['MAST_CONTROL'] = testdir + "/test_control"
         os.environ['MAST_RECIPE_PATH'] = testdir
         os.environ['MAST_SCRATCH'] = testdir
