@@ -1,5 +1,5 @@
 #############################
-What's new in version 1.3.0
+What's new in version 1.2.X
 #############################
 
 **Additions:**
@@ -41,3 +41,6 @@ What's new in version 1.3.0
 
 * Optimizer.py is no longer copied to ``$MAST_CONTROL``. It is located in ``<MAST installation directory>/structopt``
 
+* mastmon_submit.sh is now copied from ``<MAST installation directory>/submit/platforms/<platform name>`` into ``$MAST_CONTROL`` each time that MAST is run. Edits should therefore be made to ``<MAST installation directory>/submit/platforms/<platform name>/mastmon_submit.sh`` if they are necessary.
+
+* The ``$MAST_CONTROL/set_platform`` file is no longer used and references to it have been removed.

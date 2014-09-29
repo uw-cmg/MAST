@@ -54,3 +54,13 @@ Trying out MAST
 
 #.  The ``$MAST_CONTROL`` folder gives you error messages and other information. See :doc:`Running MAST <5_0_runningmast>` for tips.
 
+----------------------
+Unit testing
+----------------------
+
+To check the validity of the MAST source code, navigate to ``<MAST installation directory>/MAST/test`` and run the unit tests with::
+
+    nosetests --exe
+
+Some tests may have been designated to be skipped.
+Errors should be reported to the MAST development team as an issue on the github site (see :doc:`<12_0_programming>`).

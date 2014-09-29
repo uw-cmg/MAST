@@ -495,15 +495,16 @@ The MAST Monitor will check the completion status of every recipe and ingredient
 
 *  ``mastmon_submit.sh`` should be set to run on the shortest-wallclock, fastest-turnaround queue available, e.g. a serial queue
 
-The ``mastmon_submit.sh`` script is copied into the ``$MAST_CONTROL`` directory the first time you run ``mast``.
+The ``mastmon_submit.sh`` script is copied into the ``$MAST_CONTROL`` directory every time you run ``mast``.
 
 If you see that after you type ``mast``, no "mastmon" process appears on the queue, then test the submission script directly::
 
     cd $MAST_CONTROL
     qsub mastmon_submit.sh (or use sbatch for slurm, etc.)
 
-*  Modify the ``$MAST_CONTROL/mastmon_submit.sh`` file (and not the one in the MAST installation directory /submit/platforms/<platform> folder) until the "mastmon" process successfully runs on the queue.
+*  Modify the ``$MAST_CONTROL/mastmon_submit.sh`` file until it the "mastmon" process successfully runs on the queue.
 
+*  Copy your changes into the ``<MAST installation directory>/submit/platforms/<platform>/mastmon_submit.sh`` file so that your changes will be reflected the next time that you run MAST.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 queue_commands.py
