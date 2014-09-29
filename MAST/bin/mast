@@ -219,8 +219,7 @@ def check_env_variables():
             raise MASTError("bin/mast", "Environment variable %s must be set." % env_var)
     mast_control = dirutil.get_mast_control_path()
     mast_platform = dirutil.get_mast_platform()
-    if not os.path.isfile("%s/mastmon_submit.sh" % mast_control):
-        shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (dirutil.get_mast_install_path(), mast_platform), mast_control)
+    shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (dirutil.get_mast_install_path(), mast_platform), mast_control)
     return
 
 if __name__ == '__main__':
