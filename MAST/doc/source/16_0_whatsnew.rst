@@ -1,5 +1,5 @@
 #############################
-What's new in version 1.2.0
+What's new in version 1.3.0
 #############################
 
 **Additions:**

@@ -22,10 +22,8 @@ from MAST.utility import dirutil
 from MAST.utility import loggerutils
 
 mast_control = dirutil.get_mast_control_path()
-platform_file = MASTFile("%s/set_platform" % mast_control)
-mast_platform = platform_file.data[0].strip()
 
-myqc = "MAST.submit.platforms.%s.queue_commands" % mast_platform
+myqc = "MAST.submit.platforms.%s.queue_commands" % dirutil.get_mast_platform()
 my_queue_commands = importlib.import_module(myqc)
 
 def direct_shell_command(scriptname="submit.sh"):

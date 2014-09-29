@@ -18,8 +18,7 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 mast_control = dirutil.get_mast_control_path()
 mast_install = dirutil.get_mast_install_path() 
-platform_file = MASTFile("%s/set_platform" % mast_control)
-mast_platform = platform_file.data[0].strip()
+mast_platform = dirutil.get_mast_platform()
 
 #mysc = "submit.platforms.script_commands_%s" % mast_platform
 #my_script_commands = importlib.import_module(mysc)
