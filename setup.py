@@ -71,7 +71,7 @@ def get_total_package_data():
     #get citations files
     citationstem = os.path.join(mysetuppath,"MAST","summary","citation_files")
     citationlist = os.listdir(citationstem)
-    mydict["MAST.summary.citations"] = list(citationlist)
+    mydict["MAST.summary.citation_files"] = list(citationlist)
     #get standalone files
     mystandalones=['gbdiff','diffanalyzer']
     for standalone in mystandalones:
