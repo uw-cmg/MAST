@@ -63,4 +63,4 @@ To check the validity of the MAST source code, navigate to ``<MAST installation 
     nosetests --exe
 
 Some tests may have been designated to be skipped.
-Errors should be reported to the MAST development team as an issue on the github site (see :doc:`<12_0_programming>`).
+Errors should be reported to the MAST development team as an issue on the github site (see :doc:`Programming for MAST <12_0_programming>`).

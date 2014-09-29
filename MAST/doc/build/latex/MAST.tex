@@ -14,8 +14,8 @@
 
 
 \title{MAST Documentation}
-\date{September 22, 2014}
-\release{1.2.6}
+\date{September 29, 2014}
+\release{1.2.9.3}
 \author{University of Wisconsin-Madison Computational Materials Group}
 \newcommand{\sphinxlogo}{\includegraphics{MAST_logo_200px.png}\par}
 \renewcommand{\releasename}{Release}
@@ -124,8 +124,8 @@
 
 
 
-\chapter{What's new in version 1.2.0}
-\label{16_0_whatsnew::doc}\label{16_0_whatsnew:what-s-new-in-version-1-2-0}\label{16_0_whatsnew:materials-simulation-toolkit-mast-manual}
+\chapter{What's new in version 1.2.X}
+\label{16_0_whatsnew::doc}\label{16_0_whatsnew:what-s-new-in-version-1-2-x}\label{16_0_whatsnew:materials-simulation-toolkit-mast-manual}
 \textbf{Additions:}
 \begin{itemize}
 \item {} 
@@ -190,6 +190,12 @@ Program key files are no longer copied to \code{\$MAST\_CONTROL}. They are locat
 
 \item {} 
 Optimizer.py is no longer copied to \code{\$MAST\_CONTROL}. It is located in \code{\textless{}MAST installation directory\textgreater{}/structopt}
+
+\item {} 
+mastmon\_submit.sh is now copied from \code{\textless{}MAST installation directory\textgreater{}/submit/platforms/\textless{}platform name\textgreater{}} into \code{\$MAST\_CONTROL} each time that MAST is run. Edits should therefore be made to \code{\textless{}MAST installation directory\textgreater{}/submit/platforms/\textless{}platform name\textgreater{}/mastmon\_submit.sh} if they are necessary.
+
+\item {} 
+The \code{\$MAST\_CONTROL/set\_platform} file is no longer used and references to it have been removed.
 
 \end{itemize}
 
@@ -1069,7 +1075,7 @@ If you have a recipe you would like to skip temporarily, manually put a file nam
 
 \end{itemize}
 
-The \code{mastmon\_submit.sh} script is copied into the \code{\$MAST\_CONTROL} directory the first time you run \code{mast}.
+The \code{mastmon\_submit.sh} script is copied into the \code{\$MAST\_CONTROL} directory every time you run \code{mast}.
 
 If you see that after you type \code{mast}, no ``mastmon'' process appears on the queue, then test the submission script directly:
 
@@ -1079,7 +1085,10 @@ qsub mastmon\PYGZus{}submit.sh (or use sbatch for slurm, etc.)
 \end{Verbatim}
 \begin{itemize}
 \item {} 
-Modify the \code{\$MAST\_CONTROL/mastmon\_submit.sh} file (and not the one in the MAST installation directory /submit/platforms/\textless{}platform\textgreater{} folder) until the ``mastmon'' process successfully runs on the queue.
+Modify the \code{\$MAST\_CONTROL/mastmon\_submit.sh} file until it the ``mastmon'' process successfully runs on the queue.
+
+\item {} 
+Copy your changes into the \code{\textless{}MAST installation directory\textgreater{}/submit/platforms/\textless{}platform\textgreater{}/mastmon\_submit.sh} file so that your changes will be reflected the next time that you run MAST.
 
 \end{itemize}
 
@@ -1345,6 +1354,18 @@ If you forgot some step above, or you encounter some errors, remove the recipe f
 The \code{\$MAST\_CONTROL} folder gives you error messages and other information. See {\hyperref[5_0_runningmast::doc]{\emph{Running MAST}}} for tips.
 
 \end{enumerate}
+
+
+\section{Unit testing}
+\label{17_0_testmast:unit-testing}
+To check the validity of the MAST source code, navigate to \code{\textless{}MAST installation directory\textgreater{}/MAST/test} and run the unit tests with:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{nosetests} \PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZhy{}}\PYG{n}{exe}
+\end{Verbatim}
+
+Some tests may have been designated to be skipped.
+Errors should be reported to the MAST development team as an issue on the github site (see {\hyperref[12_0_programming::doc]{\emph{Programming for MAST}}}).
 
 
 \chapter{Input File}
@@ -3828,6 +3849,39 @@ The usage is: python NEBcheck.py -i \textless{}input\textgreater{} -n \textless{
 \chapter{Programming for MAST}
 \label{12_0_programming:programming-for-mast}\label{12_0_programming::doc}
 
+\section{Source code}
+\label{12_0_programming:source-code}
+The MAST github repository is located at \href{https://github.com/uw-cmg/MAST}{https://github.com/uw-cmg/MAST}.
+
+To report any issues, please create an issue in this repository.
+
+To program with MAST:
+\begin{enumerate}
+\item {} 
+Clone from the dev branch. (See github's instructions for cloning.)
+
+\item {} 
+Prepend the clone directory to your \code{\$PYTHONPATH} environment variable.
+\begin{itemize}
+\item {} 
+The command \code{mast} should reveal the clone directory instead of any other MAST installation directories.
+
+\end{itemize}
+
+\end{enumerate}
+
+To run unit tests and verify that the MAST code is sound, go to the test directory in \code{\textless{}clone directory\textgreater{}/MAST/test} and run the command:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{nosetests} \PYG{o}{\PYGZhy{}}\PYG{n}{v} \PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZhy{}}\PYG{n}{nocapture}
+\end{Verbatim}
+
+The \code{nocapture} option allows print statements.
+The \code{verbose} option gives verbose results.
+
+The development team may have designated some tests to be skipped. However, any errors should be reported to the development team as a github issue.
+
+
 \section{Object hierarchy}
 \label{12_0_programming:object-hierarchy}
 Several objects are created in MAST. The classes for these objects are in similarly named files, for example, class MyClass in file myclass.py.
@@ -3900,26 +3954,6 @@ When used as an update method, please remember that the last argument to a metho
 
 Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of \code{MAST/ingredients/baseingredient.py}.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)
-
-
-\section{Source code}
-\label{12_0_programming:source-code}
-To program with MAST, clone from the dev branch at \href{https://github.com/uw-cmg/MAST}{the MAST github repository}
-
-Prepend the clone directory to your \code{\$PYTHONPATH} environment variable.
-
-The command \code{mast} should reveal the clone directory instead of any other MAST installation directories.
-
-To run unit tests and verify that the MAST code is sound, go to the test directory in \code{\textless{}clone directory\textgreater{}/MAST/test} and run the command:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{nosetests} \PYG{o}{\PYGZhy{}}\PYG{n}{v} \PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZhy{}}\PYG{n}{nocapture}
-\end{Verbatim}
-
-The \code{nocapture} option allows print statements.
-The \code{verbose} option gives verbose results.
-
-The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.
 
 
 \chapter{Acknowledgments}

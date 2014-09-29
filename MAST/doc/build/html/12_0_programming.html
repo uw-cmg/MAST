@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>12. Programming for MAST &mdash; MAST 1.2.6 documentation</title>
+    <title>12. Programming for MAST &mdash; MAST 1.2.9.3 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.6',
+        VERSION:     '1.2.9.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.2.6 documentation" href="index.html" />
+    <link rel="top" title="MAST 1.2.9.3 documentation" href="index.html" />
     <link rel="next" title="13. Acknowledgments" href="10_0_acknowledgments.html" />
     <link rel="prev" title="11.4.1. Diffusion Connectivity" href="8_0_1_diffusionconnectivity.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="8_0_1_diffusionconnectivity.html" title="11.4.1. Diffusion Connectivity"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MAST 1.2.9.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,8 +51,32 @@
             
   <div class="section" id="programming-for-mast">
 <h1>12. Programming for MAST<a class="headerlink" href="#programming-for-mast" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="source-code">
+<h2>12.1. Source code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<p>The MAST github repository is located at <a class="reference external" href="https://github.com/uw-cmg/MAST">https://github.com/uw-cmg/MAST</a>.</p>
+<p>To report any issues, please create an issue in this repository.</p>
+<p>To program with MAST:</p>
+<ol class="arabic">
+<li><p class="first">Clone from the dev branch. (See github&#8217;s instructions for cloning.)</p>
+</li>
+<li><p class="first">Prepend the clone directory to your <tt class="docutils literal"><span class="pre">$PYTHONPATH</span></tt> environment variable.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The command <tt class="docutils literal"><span class="pre">mast</span></tt> should reveal the clone directory instead of any other MAST installation directories.</li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+<p>To run unit tests and verify that the MAST code is sound, go to the test directory in <tt class="docutils literal"><span class="pre">&lt;clone</span> <span class="pre">directory&gt;/MAST/test</span></tt> and run the command:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">nocapture</span></tt> option allows print statements.
+The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gives verbose results.</p>
+<p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team as a github issue.</p>
+</div>
 <div class="section" id="object-hierarchy">
-<h2>12.1. Object hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline">¶</a></h2>
+<h2>12.2. Object hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>Several objects are created in MAST. The classes for these objects are in similarly named files, for example, class MyClass in file myclass.py.</p>
 <ul>
 <li><p class="first">When the user types <tt class="docutils literal"><span class="pre">mast</span></tt> or when crontab executes <tt class="docutils literal"><span class="pre">mast</span></tt>, a <strong>MAST monitor</strong> object is created (class MASTmon in MAST). This monitor is responsible for looking through the <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> directory for recipe folders.</p>
@@ -76,7 +100,7 @@
 </ul>
 </div>
 <div class="section" id="code-hooks-in-the-input-file">
-<h2>12.2. Code hooks in the input file<a class="headerlink" href="#code-hooks-in-the-input-file" title="Permalink to this headline">¶</a></h2>
+<h2>12.3. Code hooks in the input file<a class="headerlink" href="#code-hooks-in-the-input-file" title="Permalink to this headline">¶</a></h2>
 <p>The most common modifications to MAST are expected to be:</p>
 <ul>
 <li><p class="first">Adding support for new programs, e.g. besides VASP</p>
@@ -101,19 +125,6 @@
 <p>Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of <tt class="docutils literal"><span class="pre">MAST/ingredients/baseingredient.py</span></tt>.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)</p>
 </div>
-<div class="section" id="source-code">
-<h2>12.3. Source code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
-<p>To program with MAST, clone from the dev branch at <a class="reference external" href="https://github.com/uw-cmg/MAST">the MAST github repository</a></p>
-<p>Prepend the clone directory to your <tt class="docutils literal"><span class="pre">$PYTHONPATH</span></tt> environment variable.</p>
-<p>The command <tt class="docutils literal"><span class="pre">mast</span></tt> should reveal the clone directory instead of any other MAST installation directories.</p>
-<p>To run unit tests and verify that the MAST code is sound, go to the test directory in <tt class="docutils literal"><span class="pre">&lt;clone</span> <span class="pre">directory&gt;/MAST/test</span></tt> and run the command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
-</pre></div>
-</div>
-<p>The <tt class="docutils literal"><span class="pre">nocapture</span></tt> option allows print statements.
-The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gives verbose results.</p>
-<p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team.</p>
-</div>
 </div>
 
 
@@ -128,9 +139,9 @@ The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gi
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">12. Programming for MAST</a><ul>
-<li><a class="reference internal" href="#object-hierarchy">12.1. Object hierarchy</a></li>
-<li><a class="reference internal" href="#code-hooks-in-the-input-file">12.2. Code hooks in the input file</a></li>
-<li><a class="reference internal" href="#source-code">12.3. Source code</a></li>
+<li><a class="reference internal" href="#source-code">12.1. Source code</a></li>
+<li><a class="reference internal" href="#object-hierarchy">12.2. Object hierarchy</a></li>
+<li><a class="reference internal" href="#code-hooks-in-the-input-file">12.3. Code hooks in the input file</a></li>
 </ul>
 </li>
 </ul>
@@ -170,7 +181,7 @@ The <tt class="docutils literal"><span class="pre">verbose</span></tt> option gi
         <li class="right" >
           <a href="8_0_1_diffusionconnectivity.html" title="11.4.1. Diffusion Connectivity"
              >previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MAST 1.2.9.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
