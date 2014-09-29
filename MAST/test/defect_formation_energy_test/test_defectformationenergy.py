@@ -33,6 +33,8 @@ class TestDefectformationenergy(unittest.TestCase):
         mydfetest.wait()
         os.chdir(testdir)
         compare_walk = dirutil.walkfiles("compare_results")
+        compare_walk.remove("compare_results/__init__.py")
+        compare_walk.remove("compare_results/__init__.pyc")
         res_walk = dirutil.walkfiles("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results")
         compare_walk.sort()
         res_walk.sort()
