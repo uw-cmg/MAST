@@ -34,3 +34,13 @@ Diffusion Connectivity
 .. toctree::
     
     8_0_1_diffusionconnectivity
+
+*************************
+StructOpt
+*************************
+
+.. toctree::
+
+    8_0_4_structopt
+
+
