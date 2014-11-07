@@ -71,26 +71,30 @@ then
     done
 else
     if [ -f CONTCAR ]
-        then
-            clines=`wc -l CONTCAR | awk '{print $1}'`
-            if [ $clines -gt 0 ]
-                then
-                    date
-                    echo "Non-empty CONTCAR was found. Archive and copy CONTCAR to POSCAR."
-                    mydate=`date +%Y%m%d%H%M%S` 
-                    cp POSCAR POSCAR_$mydate
-                    cp CONTCAR CONTCAR_$mydate
-                    cp OUTCAR OUTCAR_$mydate
-                    cp OSZICAR OSZICAR_$mydate
-                    cp CONTCAR POSCAR
-                else
-                    date
-                    echo "CONTCAR was empty! Fail out."
-                    exit 1
-                fi
+    then
+        clines=`wc -l CONTCAR | awk '{print $1}'`
+        if [ $clines -gt 0 ]
+            then
+                date
+                echo "Non-empty CONTCAR was found. Archive and copy CONTCAR to POSCAR."
+                mydate=`date +%Y%m%d%H%M%S` 
+                cp POSCAR POSCAR_$mydate
+                cp CONTCAR CONTCAR_$mydate
+                cp OUTCAR OUTCAR_$mydate
+                cp OSZICAR OSZICAR_$mydate
+                cp CONTCAR POSCAR
+        elif [[ `grep IBRION INCAR` == *"5"* ]]
+            then
+                date
+                echo "IBRION equals 5 and some CONTCAR was found. Take no action."
         else
             date
-            echo "No CONTCAR yet. Continue."
+            echo "CONTCAR was empty! Fail out."
+            exit 1
+        fi
+    else
+        date
+        echo "No CONTCAR yet. Continue."
     fi
 fi
 
