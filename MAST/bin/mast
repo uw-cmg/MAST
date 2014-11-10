@@ -42,6 +42,9 @@ def main():
     if (mastopt.mode == 'input') and (mastopt.input is None):
         mastopt.input = 'mast.inp'
 
+    if (mastopt.mode == 'modify'):
+        modify_recipe()
+
     if (mastopt.mode == 'interface'):
         submit_and_monitor()
     
@@ -221,6 +224,24 @@ def check_env_variables():
     mast_platform = dirutil.get_mast_platform()
     shutil.copy("%s/submit/platforms/%s/mastmon_submit.sh" % (dirutil.get_mast_install_path(), mast_platform), mast_control)
     return
+
+def modify_recipe():
+    """Check to see if we are in a recipe directory in $MAST_SCRATCH
+        and modify the recipe according to the $recipe section of the
+        input file:
+            modify the $personal_recipe section
+            add any folders that need to be added, with metadata, and status
+    """
+    mast_scratch = dirutil.get_mast_scratch_path()
+    curdir = os.getcwd()
+    if not (mast_scratch in curdir):
+        raise MASTError("bin/mast", "modify_recipe called, but the current directory %s is not in $MAST_SCRATCH" % curdir)
+    from mast.controllers.modifyrecipe import ModifyRecipe
+    modrec = ModifyRecipe(recdir=curdir)
+    modrec.modify()
+    print "Finished modifying recipe. Check folders, status.txt, and input.inp."
+    return
+
 
 if __name__ == '__main__':
     check_env_variables()
