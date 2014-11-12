@@ -238,7 +238,7 @@ def modify_recipe():
         raise MASTError("bin/mast", "modify_recipe called, but the current directory %s is not in $MAST_SCRATCH" % curdir)
     from MAST.controllers.modifyrecipe import ModifyRecipe
     modrec = ModifyRecipe(recdir=curdir)
-    modrec.modify()
+    modrec.modify_recipe()
     print "Finished modifying recipe. Check folders, status.txt, and input.inp."
     return
 

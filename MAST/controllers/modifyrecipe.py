@@ -83,7 +83,6 @@ class ModifyRecipe(MASTObj):
         self.set_input_options()
         self.set_class_attributes()
         self.update_recipe_metadata()
-        self.copy_input_file()
         self.parse_recipe_template()
         self.create_recipe_plan()
         self.create_archive_files()
@@ -118,11 +117,11 @@ class ModifyRecipe(MASTObj):
         """
         inputsave = MASTFile()
         inputsave.data = repr(self.input_options)
-        inputsave.to_file(os.path.join(self.working_directory, 'archive_input_options_%s.txt' % self.timestamp))
+        inputsave.to_file(os.path.join(self.recdir, 'archive_input_options_%s.txt' % self.timestamp))
 
         recipesave = MASTFile()
         recipesave.data = repr(self.recipe_plan)
-        recipesave.to_file(os.path.join(self.working_directory, 'archive_recipe_plan_%s.txt' % self.timestamp))
+        recipesave.to_file(os.path.join(self.recdir, 'archive_recipe_plan_%s.txt' % self.timestamp))
 
         return
 
@@ -136,8 +135,8 @@ class ModifyRecipe(MASTObj):
 
         parser_obj = RecipeTemplateParser(templateFile=recipe_file_contents, 
             inputOptions=self.input_options,
-            personalRecipe=os.path.join(self.working_directory,'input.inp'),
-            working_directory=self.working_directory
+            personalRecipe=os.path.join(self.recdir,'input.inp'),
+            working_directory=self.recdir
             )
         personal_recipe_list = parser_obj.parse()
         #print personal_recipe_list
