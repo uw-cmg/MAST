@@ -42,7 +42,7 @@ def main():
     if (mastopt.mode == 'input') and (mastopt.input is None):
         mastopt.input = 'mast.inp'
 
-    if (mastopt.mode == 'modify'):
+    if (mastopt.mode == 'modifyrecipe'):
         modify_recipe()
 
     if (mastopt.mode == 'interface'):
@@ -236,7 +236,7 @@ def modify_recipe():
     curdir = os.getcwd()
     if not (mast_scratch in curdir):
         raise MASTError("bin/mast", "modify_recipe called, but the current directory %s is not in $MAST_SCRATCH" % curdir)
-    from mast.controllers.modifyrecipe import ModifyRecipe
+    from MAST.controllers.modifyrecipe import ModifyRecipe
     modrec = ModifyRecipe(recdir=curdir)
     modrec.modify()
     print "Finished modifying recipe. Check folders, status.txt, and input.inp."
