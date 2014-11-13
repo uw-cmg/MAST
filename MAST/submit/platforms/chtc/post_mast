@@ -12,7 +12,7 @@ sleep 2
 while read sdir
 do 
     echo $sdir
-    if [[ $sdir == "neb"* ]]
+    if [[ $sdir == *"/neb"* ]]
     then 
         echo "NEB detected; switching submission script"
         cp $MAST_CHTC/submit_neb.sh $sdir/submit.sh
