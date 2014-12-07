@@ -280,6 +280,7 @@ class RecipeSetup(MASTObj):
                         structure=my_ingred_input_options['structure'],
                         program_keys=my_ingred_input_options['program_keys'])
         myingred.write_directory()
+        myingred.close_logger()
         return
 
 
