@@ -25,73 +25,22 @@ def main():
         print "No option selected. Exiting."
     return
 
-
-def save_recipe_files(listfilename="",whichfilename=""):
-    """Save off old files from recipe in $MAST_SCRATCH
-       into $MAST_CONTROL
-       Args:
-        listfilename <str>: File name for the list of files to be saved
-        whichfilename <str>: Short file name to be saved (identical file
-                                for all recipes)
-    """
-    if listfilename == "":
-        raise NameError("No list file name given.")
-    if whichfilename == "":
-        raise NameError("No file name given for which files to save.")
-    mastcontrol=dirutil.get_mast_control_path()
-    if not os.path.exists(os.path.join(mastcontrol,listfilename)):
-        os.mkdir(os.path.join(mastcontrol,listfilename))
-    mastscratch=dirutil.get_mast_scratch_path()
-    recipedirs=dirutil.immediate_subdirs(mastscratch)
-    for recipedir in recipedirs:
-        statusfile = MASTFile(os.path.join(mastscratch,recipedir,whichfilename))
-        trydir = os.path.join(mastcontrol,listfilename,recipedir)
-        if not os.path.exists(trydir):
-            os.mkdir(trydir)
-        statusfile.to_file("%s/%s" % (trydir, whichfilename))
-    return True
-
-def save_ingredient_files(listfilename="",whichfilename=""):
-    """Save off old files from ingredients in $MAST_SCRATCH
-       into $MAST_CONTROL
-       Args:
-        listfilename <str>: File name for the list of files to be saved
-        whichfilename <str>: Short file name to be saved (identical file
-                                for all recipes)
-    """
-    if listfilename == "":
-        raise NameError("No list file name given.")
-    if whichfilename == "":
-        raise NameError("No file name given for which files to save.")
-    mastcontrol=dirutil.get_mast_control_path()
-    if not os.path.exists(os.path.join(mastcontrol,listfilename)):
-        os.mkdir(os.path.join(mastcontrol,listfilename))
-    mastscratch=dirutil.get_mast_scratch_path()
-    recipedirs=dirutil.immediate_subdirs(mastscratch)
-    for recipedir in recipedirs:
-        recipefulldir=os.path.join(mastscratch,recipedir)
-        ingreddirs=dirutil.immediate_subdirs(recipefulldir)
-        for ingreddir in ingreddirs:
-            statfilepath = os.path.join(recipefulldir, ingreddir, whichfilename)
-            if os.path.exists(statfilepath):
-                statusfile = MASTFile(statfilepath)
-                trydir = os.path.join(mastcontrol,listfilename,recipedir,ingreddir)
-                if not os.path.exists(os.path.join(trydir):
-                    os.mkdir(trydir)
-                statusfile.to_file("%s/%s" % (trydir, whichfilename))
-    return True
-
 def save_old_status_files():
     """Save off old status files from $MAST_SCRATCH
        into $MAST_CONTROL
     """
-    return save_recipe_files("statusfiles","status.txt")
-
-def save_old_change_status_files():
-    """Save off old change_status.txt files from ingredient directories
-        into $MAST_CONTROL
-    """
-    return save_ingredient_files("changestatusfiles","change_status.txt")
+    mastcontrol=dirutil.get_mast_control_path()
+    if not os.path.exists(os.path.join(mastcontrol,"statusfiles")):
+        os.mkdir(os.path.join(mastcontrol,"statusfiles"))
+    mastscratch=dirutil.get_mast_scratch_path()
+    recipedirs=dirutil.immediate_subdirs(mastscratch)
+    for recipedir in recipedirs:
+        statusfile = MASTFile(os.path.join(mastscratch,recipedir,"status.txt"))
+        trydir = os.path.join(mastcontrol,"statusfiles",recipedir)
+        if not os.path.exists(trydir):
+            os.mkdir(trydir)
+        statusfile.to_file("%s/status.txt" % trydir)
+    return True
 
 def compare_old_and_new_status_files():
     """Compare old and new status files from $MAST_CONTROL
@@ -135,15 +84,6 @@ def compare_old_and_new_status_files():
                              rdict[recipedir][ingred]="send"
                     myidx = myidx + 1
         rdict[recipedir]["MAIN"]=mystatus
-    recipedirs=dirutil.immedate_subdirs(os.path.join(mastcontrol,"changestatusfiles"))
-    for recipedir in recipedirs:
-        ingreddirs=dirutil.immediate_subdirs(os.path.join(mastcontrol,"changestatusfiles",recipedir))
-        for ingreddir in ingreddirs:
-            oldchangestatus=MASTFile(os.path.join(mastcontrol,"changestatusfiles",recipedir,ingreddir,"change_status.txt"))
-            newchangestatus=MASTFile(os.path.join(mastscratch,recipedir,ingreddir,"change_status.txt")
-            if not (oldchangestatus.data == newchangestatus.data):
-                rdict[recipedir]["MAIN"]="changed"
-                rdict[recipedir][ingreddir]="send"
     rchangefile = MASTFile()
     for rdir in rdict.keys():
         for key, value in rdict[rdir].iteritems():
