@@ -140,7 +140,7 @@ def compare_old_and_new_status_files():
         ingreddirs=dirutil.immediate_subdirs(os.path.join(mastcontrol,"changestatusfiles",recipedir))
         for ingreddir in ingreddirs:
             oldchangestatus=MASTFile(os.path.join(mastcontrol,"changestatusfiles",recipedir,ingreddir,"change_status.txt"))
-            newchangestatus=MASTFile(os.path.join(mastscratch,recipedir,ingreddir,"change_status.txt")
+            newchangestatus=MASTFile(os.path.join(mastscratch,recipedir,ingreddir,"change_status.txt"))
             if not (oldchangestatus.data == newchangestatus.data):
                 rdict[recipedir]["MAIN"]="changed"
                 rdict[recipedir][ingreddir]="send"
