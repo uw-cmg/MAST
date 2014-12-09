@@ -110,6 +110,7 @@ class MASTInput(MASTObj):
         self.parse_recipe_template()
         self.create_recipe_plan()
         self.create_archive_files()
+        self.copy_posfile()
 
     def create_recipe_plan(self):
         """Create the recipe plan object, and print its status.
@@ -270,4 +271,11 @@ class MASTInput(MASTObj):
             return None
         return elstr
 
-
+    def copy_posfile(self):
+        """Copy structure section's posfile into the recipe directory,
+            if the posfile keyword was specified.
+        """
+        useposfile=self.input_options.get_item('structure','posfile')
+        if not (useposfile == None):
+            shutil.copy(useposfile, self.working_directory)
+        return True
