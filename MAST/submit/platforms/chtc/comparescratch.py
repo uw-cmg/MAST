@@ -76,7 +76,7 @@ def save_ingredient_files(listfilename="",whichfilename=""):
             if os.path.exists(statfilepath):
                 statusfile = MASTFile(statfilepath)
                 trydir = os.path.join(mastcontrol,listfilename,recipedir,ingreddir)
-                if not os.path.exists(os.path.join(trydir):
+                if not os.path.exists(trydir):
                     os.mkdir(trydir)
                 statusfile.to_file("%s/%s" % (trydir, whichfilename))
     return True
