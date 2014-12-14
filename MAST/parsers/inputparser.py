@@ -35,7 +35,9 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'coordinates': None,
                       'lattice': None,
                       'primitive': False,
-                      'structure': None
+                      'structure': None,
+                      'use_structure_index': True,
+                      'structure_index': None
                      }
 
 DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
@@ -807,6 +809,29 @@ class InputParser(MASTObj):
             error = 'Cannot build structure from file %s' % strposfile
             raise MASTError(self.__class__.__name__, error)
         input_options.update_item('structure','structure',structure)
+        if not input_options.get_item('structure','use_structure_index'):
+            pass
+        else:
+            self.do_structure_indexing(input_options)
+        return
+
+    def do_structure_indexing(self, input_options):
+        """Index the structure into a dictionary.
+        """
+        if os.path.isfile(structure_index_file):
+            return
+        sdict=dict()
+        spad=16 #pad to 16
+        sdx=0
+        startstructure=input_options.get_item('structure','structure')
+        for site in startstructure.sites():
+            skey=hex(sdx).zfill(spad)
+            sdict[skey]=dict()
+            sdict[skey]['original_frac_coords']=site.frac_coords
+            sdx=sdx+1
+        input_options.update_item('structure','structure_index',sdict)
+        structure_index_file.write() #will also need to copy it into the recipe's working directory once that directory is assigned
+        return
 
     def parse_summary_section(self, section_name, section_content, options):
         """Parses the summary section and populates the options."""
