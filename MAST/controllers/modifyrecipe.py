@@ -69,7 +69,9 @@ class ModifyRecipe(MASTObj):
         """
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
-
+        if self.input_options.get_item('structure','use_structure_index') == True:
+            raise MASTError(self.__class__.__name__, "Set use_structure_index to False for modifying a recipe. Modifying a recipe does not currently work with structure indexing. (2014-12-16)")
+            return None
 
     def set_up_recipe(self):
         """Set up the recipe.
