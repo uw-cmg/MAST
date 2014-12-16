@@ -26,6 +26,7 @@ class StructureExtensions(MASTObj):
             'struc_work2': (Structure, None, 'Second working Pymatgen Structure object'),
             'struc_init': (Structure, None, 'Initial structure at the beginning of the MAST recipe'),
             'scaling_size':(str,None,'Scaling size'),
+            'struc_dict': (dict, None, 'Structure dictionary'),
             'name': (str, get_mast_control_path(), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
@@ -418,3 +419,35 @@ class StructureExtensions(MASTObj):
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)
         return returnstr
+
+    def build_structure_dictionary(self):
+        """Build a structure dictionary. Sets struc_dict.
+        """
+        sdict=dict()
+        spad=16 #pad to 16
+        sdx=0
+        for site in self.keywords['struc_work1'].sites:
+            skey=hex(sdx).zfill(spad)
+            sdict[skey]=dict()
+            sdict[skey]['original_frac_coords']=site.frac_coords
+            sdict[skey]['element']=site.species_string
+            sdict[skey]['specie']=site.specie
+            sdx=sdx+1
+        self.keywords['struc_dict']=sdict
+        return self.keywords['struc_dict']
+
+    def write_structure_dictionary_file(self, sfilename):
+        """Write a structure diciontary file from self.struc_dict
+            Args:
+                sfilename <str>: file name
+        """
+        if self.keywords['struc_dict'] == None:
+            self.logger.error('No structure dictionary to write.')
+            return None
+        sdict=self.keywords['struc_dict']
+        with open('%s.csv' % sfilename, 'wb') as sfile:
+            sfile.write('atomkey;original_frac_coords;element\n')
+            satomindices=sdict.keys()
+            for satomidx in satomindices:
+                sfile.write('%s;%s;%s\n' % (satomidx, sdict[satomidx]['original_frac_coords'], sdict[satomidx]['element']))
+        return
