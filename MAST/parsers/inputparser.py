@@ -818,20 +818,80 @@ class InputParser(MASTObj):
     def do_structure_indexing(self, input_options):
         """Index the structure into a dictionary.
         """
-        if os.path.isfile(structure_index_file):
+        if os.path.isfile('start_structure_index'): #also need to copy to recipe directory
             return
+        startstr=input_options.get_item('structure','structure')
+        startstrdict=self.build_structure_dictionary(startstr)
+        self.write_structure_index_file(startstrdict,'start_structure_index')
+        scaling=input_options.get_item('structure','scaling')
+        if scaling == None:
+            return
+        for scalelabel in scaling.keys():
+            scaledstr=self.scale_structure(scalelabel,input_options)
+            scaleddict=self.build_structure_dictionary(scaledstr)
+            self.write_structure_index_file(scaleddict,'%s_structure_index' % scalelabel)
+        return
+
+
+
+    def write_structure_index_file(self, sdictionary, sfilename):
+        """Write a structure index file
+            Args:
+                sdictionary <dict>: dictionary of structure information
+                sfilename <str>: file name
+        """
+        with open('%s.csv' % sfilename, 'wb') as sfile:
+            sfile.write('atomkey;original_frac_coords;element\n')
+            satomindices=sdictionary.keys()
+            for satomidx in satomindices:
+                sfile.write('%s;%s;%s\n' % (satomidx, sdictionary[satomidx]['original_frac_coords'], sdictionary[satomidx]['element']))
+        return
+
+    def build_structure_dictionary(self, mystructure):
+        """Build a structure dictionary
+            Args:
+                mystructure <pymatgen Structure>: structure of which to make
+                                                  dictionary
+            Returns:
+                sdict <dict>: structure dictionary
+        """
         sdict=dict()
         spad=16 #pad to 16
         sdx=0
-        startstructure=input_options.get_item('structure','structure')
-        for site in startstructure.sites():
+        for site in mystructure.sites:
             skey=hex(sdx).zfill(spad)
             sdict[skey]=dict()
             sdict[skey]['original_frac_coords']=site.frac_coords
+            sdict[skey]['element']=site.species_string
+            sdict[skey]['specie']=site.specie
             sdx=sdx+1
-        input_options.update_item('structure','structure_index',sdict)
-        structure_index_file.write() #will also need to copy it into the recipe's working directory once that directory is assigned
-        return
+        return sdict
+
+    def scale_structure(self,label,input_options):
+        """Scale a structure based on input options and scaling label
+            Args:
+                label <str>: Scaling size label from scaling section
+                input_options <Input Options>: input options
+            Returns:
+                scaledstr <pymatgen Structure>: scaled structure
+        """
+        startstructure=input_options.get_item('structure','structure')
+        scaling=input_options.get_item('structure','scaling')
+        if not (label in scaling.keys()):
+            self.logger.error("Label %s not found in the scaling section keys" % label)
+            return None
+        scale=scaling[label][0].strip()
+        if len(scale.split(',')) == 3:
+            try: scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+            except ValueError:  # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+        else:
+            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+            raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scale)
+            return None
+        scaledstr=startstructure.copy()
+        scaledstr.make_supercell(scaleinput)
+        return scaledstr
 
     def parse_summary_section(self, section_name, section_content, options):
         """Parses the summary section and populates the options."""
