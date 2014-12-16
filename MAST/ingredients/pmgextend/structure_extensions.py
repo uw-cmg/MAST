@@ -445,7 +445,7 @@ class StructureExtensions(MASTObj):
             self.logger.error('No structure dictionary to write.')
             return None
         sdict=self.keywords['struc_dict']
-        with open('%s.csv' % sfilename, 'wb') as sfile:
+        with open('%s' % sfilename, 'wb') as sfile:
             sfile.write('atomkey;original_frac_coords;element\n')
             satomindices=sdict.keys()
             for satomidx in satomindices:

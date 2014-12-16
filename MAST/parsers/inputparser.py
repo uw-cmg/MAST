@@ -818,7 +818,7 @@ class InputParser(MASTObj):
     def do_structure_indexing(self, input_options):
         """Index the structure into a dictionary.
         """
-        if os.path.isfile('start_structure_index'): #also need to copy to recipe directory
+        if os.path.isfile('start_structure_index'): 
             return
         from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions as SE
         startstr=input_options.get_item('structure','structure')
