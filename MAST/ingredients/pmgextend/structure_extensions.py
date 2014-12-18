@@ -420,6 +420,31 @@ class StructureExtensions(MASTObj):
         returnstr = self.induce_defect(newdict, coord_type, threshold)
         return returnstr
 
+    def get_scaled_coordinates(self, mycoords):
+        """Get scaled coordinates for a defect.
+            Args:
+                mycoords <numpy array of float>: unscaled coordinates
+            Returns:
+                newcoords <numpy array of float>: new coordinates
+        """
+        scale = self.keywords['scaling_size']
+        scale = scale.strip()
+        if len(scale.split(',')) == 3:
+            try: 
+                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+                coorda = mycoords[0]/scaleinput[0]
+                coordb = mycoords[1]/scaleinput[1]
+                coordc = mycoords[2]/scaleinput[2]
+            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
+        else:
+            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+            raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
+            return None
+        newcoords = np.array([coorda, coordb, coordc],'float')
+        return newcoords
+
     def build_structure_dictionary(self):
         """Build a structure dictionary. Sets struc_dict.
         """
@@ -446,8 +471,11 @@ class StructureExtensions(MASTObj):
         atomidx=hex(aint).zfill(spad)
         return atomidx
 
-    def add_defect_info_to_structure_dictionary(self, input_options):
+    def add_defect_info_to_structure_dictionary(self, input_options, otherlabels=""):
         """Add defect information to structure dictionary.
+            Args: 
+                input_options <InputOptions>
+                otherlabels <str>: other labels for the manifest files
         """
         #print input_options
         defect_dict=input_options.get_item('defects','defects')
@@ -459,14 +487,16 @@ class StructureExtensions(MASTObj):
             for dsubkey in dsubkeys:
                 if "subdefect_" in dsubkey:
                     dtype=defect_dict[dlabel][dsubkey]['type']
+                    dcoords=defect_dict[dlabel][dsubkey]['coordinates']
+                    if not (self.keywords['scaling_size']==None):
+                        dcoords = self.get_scaled_coordinates(dcoords)
                     if dtype == "interstitial":
                         newdict=dict()
-                        newdict['original_frac_coords']=defect_dict[dlabel][dsubkey]['coordinates']
+                        newdict['original_frac_coords']=dcoords
                         newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
                         self.add_structure_dictionary_entry(sdict, newdict)
                     else:
-                        defcoords=defect_dict[dlabel][dsubkey]['coordinates']
-                        didx=self.find_orig_frac_coord_in_structure_dictionary(sdict, defcoords)
+                        didx=self.find_orig_frac_coord_in_structure_dictionary(sdict, dcoords)
                         if not dlabel in sdict.keys():
                             if dtype in ['substitution','antisite']:
                                 sdict[didx]['element'] = defect_dict[dlabel][dsubkey]['symbol']
@@ -474,7 +504,7 @@ class StructureExtensions(MASTObj):
                                 sdict.pop(didx,"None")
                         else:
                             raise MASTError(self.__class__.__name__,"Defect label %s already exists for atom index %s" % (dlabel, didx))
-            self.write_structure_dictionary_file(sdict, "%s_structure_index" % dlabel)
+            self.write_structure_dictionary_file(sdict, "defect_%s%s_structure_index" % (otherlabels, dlabel))
         return sdict
 
     def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001):
