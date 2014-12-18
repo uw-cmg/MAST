@@ -824,7 +824,8 @@ class InputParser(MASTObj):
         startstr=input_options.get_item('structure','structure')
         startstrex=SE(struc_work1 = startstr)
         startstrex.build_structure_dictionary()
-        startstrex.write_structure_dictionary_file('start_structure_index')
+        startstrex.add_defect_info_to_structure_dictionary(input_options)
+        startstrex.write_structure_dictionary_file(startstrex.keywords['struc_dict'],'start_structure_index')
         scaling=input_options.get_item('structure','scaling')
         if scaling == None:
             return
@@ -832,7 +833,7 @@ class InputParser(MASTObj):
             scalestrex=SE(struc_work1 = startstr, scaling_size=scaling[scalelabel][0])
             scalestrex.keywords['struc_work1']=scalestrex.scale_structure()
             scalestrex.build_structure_dictionary()
-            scalestrex.write_structure_dictionary_file('%s_structure_index' % scalelabel)
+            scalestrex.write_structure_dictionary_file(scalestrex.keywords['struc_dict'],'%s_structure_index' % scalelabel)
         return
 
     def parse_summary_section(self, section_name, section_content, options):
