@@ -38,6 +38,7 @@ def main(comp="La0.5Sr0.5MnO3", energy=-43.3610, ostart="", oend="", ostep=""):
     mycomp=Composition(comp)
     print "Composition: ", mycomp
     myenergy=energy
+    print "Energy: ", myenergy
     myPDEntry = PDEntry(mycomp, myenergy)
 
     elements = mycomp.elements
@@ -61,7 +62,7 @@ def main(comp="La0.5Sr0.5MnO3", energy=-43.3610, ostart="", oend="", ostep=""):
         print "Decomposition: ", eabove[0]
         return eabove
     else: #Grand potential phase diagram
-        orange = np.arange(ostart, oend, ostep)
+        orange = np.arange(ostart, oend+ostep, ostep) #add ostep because otherwise the range ends before oend
         for o_chem_pot in orange:
             entries = list(chemsys_entries)
             myGrandPDEntry = GrandPotPDEntry(myPDEntry,{Element('O'): float(o_chem_pot)}) #need grand pot pd entry for GPPD
@@ -91,15 +92,15 @@ if __name__=="__main__":
     else:
         energy=float(sys.argv[2])
     if lensys < 4:
-        ostart=-9.0
+        ostart=""
     else:
         ostart=float(sys.argv[3])
     if lensys < 5:
-        oend=0.0
+        oend=""
     else:
         oend=float(sys.argv[4])
     if lensys < 6:
-        ostep=1.0
+        ostep=""
     else:
         ostep=float(sys.argv[5])
     main(comp, energy, ostart, oend, ostep)
