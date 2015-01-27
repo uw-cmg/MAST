@@ -34,7 +34,7 @@ from tempfile import mkdtemp, NamedTemporaryFile, mktemp as uns_mktemp
 import numpy as np
 import decimal as dec
 from ase import Atoms
-#from ase.parallel import paropen
+from ase.parallel import paropen
 from ase.units import GPa
 
 __all__ = ['LAMMPS', 'write_lammps_data']
@@ -122,7 +122,7 @@ class LAMMPS:
                 os.mkdir(self.tmp_dir, 0755)
         
         for f in files:
-            shutil.copy(f, os.path.join(self.tmp_dir, os.path.basename(f)))
+            shutil.copy(f, os.path.join(self.tmp_dir, f))
 
     def clean(self, force=False):
 
@@ -196,7 +196,7 @@ class LAMMPS:
             lammps_cmd_line[0] = os.path.abspath(lammps_cmd_line[0])
 
         else:
-            self.clean()
+	    self.clean()
             raise RuntimeError('Please set LAMMPS_COMMAND environment variable')
         if 'LAMMPS_OPTIONS' in os.environ:
             lammps_options = shlex.split(os.environ['LAMMPS_OPTIONS'])
@@ -224,12 +224,7 @@ class LAMMPS:
             self.write_lammps_data(lammps_data=lammps_data_fd)
             lammps_data = lammps_data_fd.name
             lammps_data_fd.flush()
-        
-        #Save names of the files just in case
-        self.trajfile = lammps_trj_fd.name
-        self.infile = lammps_in
-        self.logfile = lammps_log
-        self.datafile = lammps_data
+
 
         # see to it that LAMMPS is started
         if not self._lmp_alive():
@@ -290,6 +285,13 @@ class LAMMPS:
         lammps_trj_fd.close()
         if not self.no_data_file:
             lammps_data_fd.close()
+#         try:
+#             lammps_in.close()
+#             lammps_log.close()
+#             lammps_trj_fd.close()
+#             lammps_data_fd.close()
+#         except:
+#             pass
 
         os.chdir(cwd)
 
@@ -304,8 +306,7 @@ class LAMMPS:
         """Method which writes a LAMMPS in file with run parameters and settings."""
 
         if isinstance(lammps_in, str):
-            #f = paropen(lammps_in, 'w')
-            f = open(lammps_in, 'w')
+            f = paropen(lammps_in, 'w')
             close_in_file = True
         else:
             # Expect lammps_in to be a file-like object
@@ -422,7 +423,6 @@ class LAMMPS:
 
         f.write('print "%s"\n' % CALCULATION_END_MARK)
         f.write('log /dev/stdout\n') # Force LAMMPS to flush log
-        f.write('undump dump_all\n') # Force LAMMPS to flush trj
 
         if close_in_file:
             f.close()
@@ -434,8 +434,7 @@ class LAMMPS:
             lammps_log = self.label + '.log'
 
         if isinstance(lammps_log, str):
-            #f = paropen(lammps_log, 'w')
-            f = open(lammps_log, 'w')
+            f = paropen(lammps_log, 'w')
             close_log_file = True
         else:
             # Expect lammps_in to be a file-like object
@@ -469,15 +468,12 @@ class LAMMPS:
         if (lammps_trj == None):
             lammps_trj = self.label + '.lammpstrj'
 
-        #f = paropen(lammps_trj, 'r')
-        f = open(lammps_trj, 'r')
-        nlines = 0
+        f = paropen(lammps_trj, 'r')
         while True:
             line = f.readline()
 
             if not line:
                 break
-            nlines+=1
 
             #TODO: extend to proper dealing with multiple steps in one trajectory file
             if 'ITEM: TIMESTEP' in line:
@@ -516,8 +512,7 @@ class LAMMPS:
                     velocities.append( [ float(fields[atom_attributes[x]]) for x in ['vx', 'vy', 'vz'] ] )
                     forces.append( [ float(fields[atom_attributes[x]]) for x in ['fx', 'fy', 'fz'] ] )
         f.close()
-        if nlines==0:
-            raise RuntimeError('Failed to retreive any output from trajectory file: {0}\n'.format(lammps_trj))
+
         # determine cell tilt (triclinic case!)
         if (len(tilt) >= 3):
             # for >=lammps-7Jul09 use labels behind "ITEM: BOX BOUNDS" to assign tilt (vector) elements ...
@@ -587,6 +582,8 @@ class LAMMPS:
 
         self.forces = forces_atoms
 
+
+
 class special_tee:
     """A special purpose, with limited applicability, tee-like thing.
 
@@ -617,6 +614,7 @@ class special_tee:
     def flush(self):
         self._orig_fd.flush()
         self._out_fd.flush()
+
 
 class prism:
     def __init__(self, cell, pbc=(True,True,True), digits=10):
@@ -725,12 +723,12 @@ class prism:
         prism = self.get_lammps_prism()
         axy, axz, ayz = [np.abs(x) for x in prism[3:]]
         return (axy >= acc) or (axz >= acc) or (ayz >= acc)
+        
 
 def write_lammps_data(fileobj, atoms, specorder=[], force_skew=False, prismobj=None):
     """Method which writes atomic structure data to a LAMMPS data file."""
     if isinstance(fileobj, str):
-        #f = paropen(fileobj, 'w')
-        f = open(fileobj, 'w')
+        f = paropen(fileobj, 'w')
         close_file = True
     else:
         # Presume fileobj acts like a fileobj
@@ -781,6 +779,7 @@ def write_lammps_data(fileobj, atoms, specorder=[], force_skew=False, prismobj=N
     
     if close_file:
         f.close()
+
 
 if __name__ == '__main__':
 

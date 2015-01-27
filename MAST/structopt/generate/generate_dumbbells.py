@@ -1,7 +1,4 @@
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt generate_dumbbells.py, ASE must be installed."
+from ase import Atom, Atoms
 import random
 
 def generate_dumbbells(ndumbbells,dumbbellsym,nindiv,solid,symbol=None,size=None):

@@ -1,9 +1,6 @@
 from MAST.structopt.tools.lammps import LAMMPS
-try:
-    from ase.calculators.vasp import Vasp
-    from ase.calculators.lj import LennardJones
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt setup_calculator.py, ASE must be installed."
+from ase.calculators.vasp import Vasp
+from ase.calculators.lj import LennardJones
 import os
 try:
     from mpi4py import MPI

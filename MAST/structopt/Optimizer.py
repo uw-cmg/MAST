@@ -12,10 +12,7 @@ from MAST.structopt import switches
 from MAST.structopt.switches.predator_switch import predator_switch
 from MAST.structopt import fingerprinting
 from MAST.structopt import post_processing as pp
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt Optimizer.py, ASE must be installed."
+from ase import Atom, Atoms
 try:
     from mpi4py import MPI
 except ImportError:

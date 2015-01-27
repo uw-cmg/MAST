@@ -1,23 +1,20 @@
 import os
-try:
-    from ase import Atom, Atoms
-    from ase.calculators.vasp import Vasp
-    from ase.optimize import BFGS
-    from ase.units import GPa
-    from ase.calculators.neighborlist import NeighborList
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt eval_energy.py, ASE must be installed."
+from ase import Atom, Atoms
 from MAST.structopt.inp_out.write_xyz import write_xyz
 from MAST.structopt.tools.setup_calculator import setup_calculator
 from MAST.structopt.tools.find_defects import find_defects
 from MAST.structopt.tools.check_cell_type import check_cell_type
 from MAST.structopt.fingerprinting import get_fingerprint
 from MAST.structopt.tools.lammps import LAMMPS
+from ase.calculators.vasp import Vasp
+from ase.optimize import BFGS
+from ase.units import GPa
+from ase.calculators.neighborlist import NeighborList
 import numpy
 try:
     from mpi4py import MPI
 except ImportError:
-    print "NOTE: mpi4py is not installed. To use certain features in Structopt eval_energy.py, mpi4py must be installed."
+    pass
 import logging
 import pdb
 import shutil
