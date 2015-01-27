@@ -1,8 +1,10 @@
 from MAST.structopt.inp_out import read_xyz
 from MAST.structopt.tools import find_top_layer
 from MAST.structopt.switches import moves_switch
-from MAST.structopt.generate.Individual import Individual
-
+try:
+    from MAST.structopt.generate.Individual import Individual
+except NameError:
+    print "NOTE: ASE is not installed. ASE must be installed for Structopt Individual.py to work correctly."
 def get_surface_indiv(Optimizer):
     """
     Function to generate an structopt Individual class object containing as surface structure.

@@ -1,7 +1,12 @@
 from MAST.structopt.inp_out.read_xyz import read_xyz
-from MAST.structopt.generate.Individual import Individual
-from ase import Atom, Atoms
-
+try:
+    from MAST.structopt.generate.Individual import Individual
+except NameError:
+    print "NOTE: ASE is not installed. ASE must be installed for Structopt Individual.py to work correctly."
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is note installed. To use Structopt read_individual.py, ASE must be installed."
 def read_individual(indivfile, n=-1):
     """Function to write the data of an individual class object to a flat file
     Input:

@@ -1,5 +1,8 @@
 from MAST.structopt.tools.find_defects import find_defects
-from ase import Atom, Atoms
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt rattle.py, ASE must be installed."
 
 def rattle(indiv):
     """Function to slightly alter atoms in structure. Intended for use in defect function.

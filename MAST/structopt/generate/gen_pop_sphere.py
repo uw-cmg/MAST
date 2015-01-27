@@ -1,7 +1,9 @@
 import random
 import numpy
-from ase import Atom, Atoms
-
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt gen_pop_sphere.py, ASE must be installed."
 def gen_pop_sphere(atomlist,size,crystal=False):
     """Function to generate a random structure of atoms within a sphere of given size.
     Inputs:

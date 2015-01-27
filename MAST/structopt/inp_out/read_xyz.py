@@ -2,7 +2,6 @@ try:
     from ase import Atom, Atoms
 except ImportError:
     print "NOTE: ASE is not installed. To use Structopt read_xyz.py, ASE must be installed."
-
 def read_xyz(fileobj,n=-1,data=False):
     """
     Function to read multi-atom xyz file with data
@@ -19,39 +18,31 @@ def read_xyz(fileobj,n=-1,data=False):
         datalist(Optional) = String of data read from xyz file or list 
             of data strings read from xyz file
     """
-    try:
-        from pymatgen.io.vaspio import Poscar
-        mystructure = Poscar.from_file(fileobj).structure
-        from pymatgen.io.aseio import AseAtomsAdaptor
-        myatoms = AseAtomsAdaptor.get_atoms(mystructure)
-        return myatoms
-    except:
-        if isinstance(fileobj, str):
-            fileobj = open(fileobj,'r')
-        lines = fileobj.readlines()
-        atmslist = []
-        datalist = []
-        while len(lines)>0:
-            natoms = int(lines[0])
-            datalist.append(lines[1])
-            atm1 = Atoms()
-            i =- 1
-            for i in range(natoms):
-                a = lines[i+2].split()
-                sym = a[0]
-                position = [float(a[1]),float(a[2]),float(a[3])]
-                atm1.append(Atom(symbol=sym,position=position))
-            atmslist.append(atm1)
-            lines = lines[i+3::]
-        if n == 'All':
-            if data == True:
-                return atmslist, datalist
-            else:
-                return atmslist
+    if isinstance(fileobj, str):
+        fileobj = open(fileobj,'r')
+    lines = fileobj.readlines()
+    atmslist = []
+    datalist = []
+    while len(lines)>0:
+        natoms = int(lines[0])
+        datalist.append(lines[1])
+        atm1 = Atoms()
+        i =- 1
+        for i in range(natoms):
+            a = lines[i+2].split()
+            sym = a[0]
+            position = [float(a[1]),float(a[2]),float(a[3])]
+            atm1.append(Atom(symbol=sym,position=position))
+        atmslist.append(atm1)
+        lines = lines[i+3::]
+    if n == 'All':
+        if data == True:
+            return atmslist, datalist
         else:
-            if data == True:
-                return atmslist[n],datalist[n]
-            else:
-                return atmslist[n]
-
+            return atmslist
+    else:
+        if data == True:
+            return atmslist[n],datalist[n]
+        else:
+            return atmslist[n]
 

@@ -1,6 +1,9 @@
 import os
-from ase import Atom, Atoms
-from ase.io import read
+try:
+    from ase import Atom, Atoms
+    from ase.io import read
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt gen_solid.py, ASE must be installed."
 from MAST.structopt.inp_out import read_xyz, write_xyz
 
 def gen_solid(solidfile,solidcell,outfilename,calc=False,calcmeth=None):

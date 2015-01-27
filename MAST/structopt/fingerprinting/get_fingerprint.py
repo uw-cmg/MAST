@@ -1,6 +1,9 @@
 import numpy
 import math
-from ase import Atom, Atoms
+try:
+    from ase import Atom, Atoms
+except ImportError:
+    print "NOTE: ASE is not installed. To use Structopt get_fingerprint.py, ASE must be installed."
 from MAST.structopt.fingerprinting import dirac
 
 def get_fingerprint(Optimizer,indiv,binsize,cutoffdist):
