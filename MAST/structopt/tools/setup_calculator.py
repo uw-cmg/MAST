@@ -147,7 +147,7 @@ def setup_calculator(Optimizer):
                 parameters = {'pair_style' : Optimizer.ps_name, \
                 'pair_coeff': Optimizer.pair_coeff, 'mass': mass}
             if Optimizer.pot_file !=None:
-                filesL=Optimizer.pot_file
+                filesL= [ Optimizer.pot_file ]
             else:
                 filesL=None
         else:
