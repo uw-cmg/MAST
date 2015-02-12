@@ -66,10 +66,15 @@ class AtomIndex(MASTObj):
             sdx=sdx+1
         return sdict
     
-    def make_entry_from_site(self):
+    def make_entry(self, site="", otherkey="", otherval=""):
+        """Make a single dictionary entry for the atom index
         """
-        """
-        return
+        entrydict=dict()
+        if not (site==""):
+            entrydict['original_frac_coords']=site.frac_coords
+            entrydict['element']=site.species_string
+            entrydict['specie']=site.specie
+        return entrydict
 
     def add_atom_specific_keywords_to_structure_dictionary(self):
         """Add atom specific keywords using the coordinates section
