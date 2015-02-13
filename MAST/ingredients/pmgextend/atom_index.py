@@ -115,6 +115,111 @@ class AtomIndex(MASTObj):
             adict[akey] = aval
         return adict
 
+    def make_manifest_file(self, scaling_label="", defect_label="", neb_label="", phonon_label=""):
+        """Make manifest file.
+            Args:
+                scaling_label <str>: Scaling label
+                defect_label <str>: Defect label. NEBs should ALSO contain
+                            a defect_label to specify which endpoint manifest
+                            is being created
+                neb_label <str>: NEB label
+                phonon_label <str> phonon label
+        """
+        fname="manifest:%s:%s:%s:%s" % (scaling_label, defect_label, neb_label, phonon_label)
+        fname = os.path.join("structure_index_files", fname)
+        if scaling_label == "":
+            sdict = dict(self.startdict)
+            defdict = dict(self.startdefects)
+            defphondict = dict(self.startdefectphonons)
+            nebdict = dict(self.startnebs)
+            nebphondict = dict(self.startnebphonons)
+        else:
+            sdict = dict(self.scalingdicts[scaling_label])
+            defdict = dict(self.scalingdefects[scaling_label])
+            defphondict = dict(self.scalingdefectphonons[scaling_label])
+            nebdict = dict(self.scalingnebs[scaling_label])
+            nebphondict = dict(self.scalingnebphonons[scaling_label])
+        alist = list(sdict.keys()) #typically these are already in element order
+        if not (defect_label == ""):
+            for addme in defdict[defect_label]['add'].keys():
+                alist.append(addme)
+            for removeme in defdict[defect_label]['remove'].keys():
+                alist.remove(removeme)
+        if not (neb_label == ""):
+            matchlist = list(nebdict[neb_label]['match'])
+            nebsplit = neb_label.split("-")
+            if defect_label in nebsplit[0]:
+                whichep = 0
+            else:
+                whichep = 1
+            for matchline in matchlist:
+                alist.remove(matchline[whichep]) #remove from middle
+                alist.append(matchline[whichep]) #add to the bottom
+        self.write_manifest_file(alist, fname)
+        return
+
+    def make_manifest_files(self):
+        """Make manifest files.
+        """
+        self.make_manifest_file()
+        for defect_label in self.startdefects.keys():
+            self.make_manifest_file("",defect_label)
+            for scaling_label in self.scaling.keys():
+                self.make_manifest_file(scaling_label,defect_label)
+            for neb_label in self.startnebs.keys():
+                self.make_manifest_file("",defect_label,neb_label)
+                for scaling_label in self.scaling.keys():
+                    self.make_manifest_file(scaling_label,defect_label,neb_label)
+        return
+
+    def get_atoms_for_phonons(self):
+        """
+        """
+        return
+
+    def OLD_set_structure_from_inputs(self, input_options):
+        """Make a pymatgen structure and update the
+            structure key.
+            Args:
+                input_options <InputOptions>
+        """
+        strposfile = input_options.get_item('structure','posfile')
+        if strposfile is None:
+            iopscoords=input_options.get_item('structure','coordinates')
+            iopslatt=input_options.get_item('structure','lattice')
+            iopsatoms=input_options.get_item('structure','atom_list')
+            iopsctype=input_options.get_item('structure','coord_type')
+            structure = MAST2Structure(lattice=iopslatt,
+                coordinates=iopscoords, atom_list=iopsatoms,
+                coord_type=iopsctype)
+        elif ('poscar' in strposfile.lower()):
+            from pymatgen.io.vaspio import Poscar
+            structure = Poscar.from_file(strposfile).structure
+        elif ('cif' in strposfile.lower()):
+            from pymatgen.io.cifio import CifParser
+            structure = CifParser(strposfile).get_structures()[0]
+        else:
+            error = 'Cannot build structure from file %s' % strposfile
+            raise MASTError(self.__class__.__name__, error)
+        input_options.update_item('structure','structure',structure)
+        if not input_options.get_item('structure','use_structure_index'):
+            pass
+        else:
+            self.do_structure_indexing(input_options)
+        return
+
+    def write_manifest_file(self, aidxlist, fname):
+        """Make a manifest file.
+            Args:
+                aidxlist <list of str>: List of atom indices
+                fname <str>: File name
+        """
+        myfile = MASTFile()
+        myfile.data = aidxlist
+        myfile.to_file(fname)
+        return
+
+    
     def combine_structure_dictionaries(self):
         """Combine structure dictionaries into single comprehensive dictionary.
         """
