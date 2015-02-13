@@ -288,7 +288,8 @@ class MASTInput(MASTObj):
         """
         usestridx=self.input_options.get_item('structure','use_structure_index')
         if usestridx:
-            import glob
-            for stridxfile in glob.glob('*structure_index*'):
-                shutil.move(stridxfile, self.working_directory)
+            shutil.move("structure_index_files", self.working_directory)
+            #import glob
+            #for stridxfile in glob.glob('*structure_index*'):
+            #    shutil.move(stridxfile, self.working_directory)
         return True

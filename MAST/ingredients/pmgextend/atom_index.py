@@ -44,6 +44,7 @@ class AtomIndex(MASTObj):
         if self.scaling == None:
             self.scaling = dict()
         self.atomcount=1
+        self.allatoms = ""
         return
 
     def set_up_initial_index(self):
@@ -52,17 +53,84 @@ class AtomIndex(MASTObj):
         self.get_structure_extensions()
         self.startdict = self.build_structure_dictionary(self.startSE)
         [self.startdefects, self.startdefectphonons] = self.make_defects_instruction_dictionary("")
+        [self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
         for scaling_label in self.scaling.keys():
             self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
             [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label]] = self.make_defects_instruction_dictionary(scaling_label)
+            [self.scalingnebs[scaling_label], self.scalingnebphonons[scaling_label]] = self.make_neb_instruction_dictionary(scaling_label)
         print self.startdict
         print self.startdefects
         print self.startdefectphonons
+        print self.startnebs
+        print self.startnebphonons
         for scaling_label in self.scaling.keys():
             print self.scalingdicts[scaling_label]
             print self.scalingdefects[scaling_label]
             print self.scalingdefectphonons[scaling_label]
+            print self.scalingnebs[scaling_label]
+            print self.scalingnebphonons[scaling_label]
+        self.allatoms = self.combine_structure_dictionaries()
+        print self.allatoms
+        print self.input_options
+        self.make_structure_index_directory()
         return
+
+    def make_structure_index_directory(self):
+        """Make structure index directory
+        """
+        if os.path.isdir("structure_index_files"):
+            import time
+            time.sleep(1)
+        if os.path.isdir("structure_index_files"):
+            raise MASTError(self.__class__.__name__, "Structure index directory already exists!")
+        os.mkdir("structure_index_files")
+        self.write_atom_index_files()
+        return
+
+    def write_atom_index_files(self):
+        """Write atomic index files
+        """
+        for akey in self.allatoms:
+            aname = os.path.join("structure_index_files","atom_index_%s" % akey)
+            afile = open(aname,'wb')
+            afile.write("%20s:%20s\n" % ("name",akey))
+            for key, value in self.allatoms[akey].iteritems():
+                afile.write("%20s:%20s\n" % (key, value))
+            afile.close()
+        return
+
+    def read_atom_index_file(self, filename):
+        """Read an atom index file.
+            Args:
+                filename <str>: File name to read
+        """
+        adict=dict()
+        afile = open(filename, 'rb')
+        alines = afile.readlines()
+        afile.close()
+        for aline in alines:
+            asplit = aline.split(":",1)
+            akey = asplit[0].strip()
+            aval = asplit[1].strip()
+            adict[akey] = aval
+        return adict
+
+    def combine_structure_dictionaries(self):
+        """Combine structure dictionaries into single comprehensive dictionary.
+        """
+        largedict=dict()
+        for skey in self.startdict.keys():
+            largedict[skey]=dict(self.startdict[skey])
+        for dkey in self.startdefects.keys():
+            for addkey in self.startdefects[dkey]['add'].keys():
+                largedict[addkey]=dict(self.startdefects[dkey]['add'][addkey])
+        for scaling_label in self.scaling.keys():
+            for skey in self.scalingdicts[scaling_label].keys():
+                largedict[skey]= dict(self.scalingdicts[scaling_label][skey])
+            for dkey in self.scalingdefects[scaling_label].keys():
+                for addkey in self.scalingdefects[scaling_label][dkey]['add'].keys():
+                    largedict[addkey]=dict(self.scalingdefects[scaling_label][dkey]['add'][addkey])
+        return largedict
 
     def get_structure_extensions(self):
         """Get starting structure extension object and scaled structure 
@@ -71,15 +139,19 @@ class AtomIndex(MASTObj):
         startstr=self.input_options.get_item('structure','structure')
         self.startSE = SE(struc_work1 = startstr)
         for scaling_label in self.scaling.keys():
-            scaleSE = SE(struc_work1 = self.startSE.copy(), scaling_size=self.scaling[scaling_label][0])
-            self.scalingSEs[scaling_label] = SE(struc_work1 = scaleSE.scale_structure())
+            scaleSE = SE(struc_work1 = self.startSE.keywords['struc_work1'].copy(), scaling_size=self.scaling[scaling_label][0])
+            self.scalingSEs[scaling_label] = scaleSE
         return 
 
     def build_structure_dictionary(self, mySE):
         """Build a structure dictionary.
         """
         sdict=dict()
-        for site in mySE.keywords['struc_work1'].sites:
+        if 'scaling_label' in mySE.keywords.keys():
+            mystruc = mySE.scale_structure()
+        else:
+            mystruc = mySE.keywords['struc_work1']
+        for site in mystruc:
             skey=self.get_new_key() # starts at 1
             sdict[skey]=dict()
             sdict[skey]['original_frac_coords']=site.frac_coords
@@ -116,7 +188,7 @@ class AtomIndex(MASTObj):
 
 
     def make_defects_instruction_dictionary(self, scaling_label=""):
-        """Make a defect instruction dictionary.
+        """Make a defect instruction dictionary and a defects phonon dictionary.
             Args: 
                 scaling_label <str>: scaling label. Leave blank for no scaling.            
         """
@@ -129,6 +201,8 @@ class AtomIndex(MASTObj):
             sdict = dict(self.scalingdicts[scaling_label])
             mySE = self.scalingSEs[scaling_label]
         defect_dict=self.input_options.get_item('defects','defects')
+        if defect_dict == None:
+            return [dict(), dict()]
         dlabels=defect_dict.keys()
         for dlabel in dlabels:
             mydefdict[dlabel] = dict()
@@ -170,6 +244,49 @@ class AtomIndex(MASTObj):
         return [mydefdict, myphondict]
 
     #'phonon': {'solute': {'phonon_center_site': '0.25 0.50 0.25', 'threshold': 0.1, 'phonon_center_radius': 0.5}
+    
+    #'mast_neb_settings': {'images': 1, 'phonon': {'movingsolvent': {'phonon_center_site': '0.375 0.5 0.375', 'threshold': 0.1, 'phonon_center_radius': 0.5}}, 'lines': [['Al', ' 0.25 0.5 0.25', ' 0.5 0.5 0.5']]}, 'mast_ppn': '1', 'ismear': '1', 'nebs': {'1nn-solute': {'images': 1, 'phonon': {'movingsolute': {'phonon_center_site': '0.375 0.500 0.375', 'threshold': 0.1, 'phonon_center_radius': 0.5}}, 'lines': [['Mg', ' 0.25 0.50 0.25', ' 0.5 0.5 0.5']]}, 'pureinit-purefin': {'images': 1, 'phonon': {'movingsolvent': {'phonon_center_site': '0.375 0.5 0.375', 'threshold': 0.1, 'phonon_center_radius': 0.5}}, 'lines': [['Al', ' 0.25 0.5 0.25', ' 0.5 0.5 0.5']]}}
+    def make_neb_instruction_dictionary(self, scaling_label=""):
+        """Make a neb instruction dictionary and a neb phonon dictionary.
+            Args: 
+                scaling_label <str>: scaling label. Leave blank for no scaling.            
+        """
+        mynebdict=dict()
+        myphondict=dict()
+        if scaling_label == "":
+            sdict = dict(self.startdict)
+            mySE = self.startSE
+        else:
+            sdict = dict(self.scalingdicts[scaling_label])
+            mySE = self.scalingSEs[scaling_label]
+        neb_dict=self.input_options.get_item('neb','nebs')
+        if neb_dict == None:
+            return [dict(), dict()]
+        nlabels=neb_dict.keys()
+        for nlabel in nlabels:
+            mynebdict[nlabel] = dict()
+            mynebdict[nlabel]['match'] = list()
+            myphondict[nlabel] = dict()
+            nsubkeys=neb_dict[nlabel].keys()
+            for nsubkey in nsubkeys:
+                if "lines" in nsubkey:
+                    nlines = list(neb_dict[nlabel][nsubkey])
+                    for nline in nlines:
+                        ncoord1 = np.array(nline[1].split(), 'float')
+                        ncoord2 = np.array(nline[2].split(), 'float')
+                        nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1)
+                        nidx2 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord2)
+                        mynebdict[nlabel]['match'].append([nidx1, nidx2])
+                if "phonon" in nsubkey:
+                    for phonlabel in neb_dict[nlabel][nsubkey].keys():
+                        pcoordsraw = neb_dict[nlabel][nsubkey][phonlabel]['phonon_center_site']
+                        pthresh = neb_dict[nlabel][nsubkey][phonlabel]['threshold']
+                        pcrad = neb_dict[nlabel][nsubkey][phonlabel]['phonon_center_radius']
+                        pcoords = np.array(pcoordsraw.split(),'float')
+                        
+                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                        myphondict[nlabel][phonlabel] = list(pindices)
+        return [mynebdict, myphondict]
 
     def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001, find_multiple=False):
         """Find the atomic index of an original FRACTIONAL coordinate in the 
