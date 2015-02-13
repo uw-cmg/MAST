@@ -818,23 +818,9 @@ class InputParser(MASTObj):
     def do_structure_indexing(self, input_options):
         """Index the structure into a dictionary.
         """
-        if os.path.isfile('start_structure_index'): 
-            return
-        from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions as SE
-        startstr=input_options.get_item('structure','structure')
-        startstrex=SE(struc_work1 = startstr)
-        startstrex.build_structure_dictionary()
-        startstrex.add_defect_info_to_structure_dictionary(input_options)
-        startstrex.write_structure_dictionary_file(startstrex.keywords['struc_dict'],'start_structure_index')
-        scaling=input_options.get_item('structure','scaling')
-        if scaling == None:
-            return
-        for scalelabel in scaling.keys():
-            scalestrex=SE(struc_work1 = startstr, scaling_size=scaling[scalelabel][0])
-            scalestrex.keywords['struc_work1']=scalestrex.scale_structure()
-            scalestrex.build_structure_dictionary()
-            scalestrex.add_defect_info_to_structure_dictionary(input_options, scalelabel+"_")
-            scalestrex.write_structure_dictionary_file(scalestrex.keywords['struc_dict'],'%s_structure_index' % scalelabel)
+        from MAST.ingredients.pmgextend.atom_index import AtomIndex
+        myindex = AtomIndex(input_options = input_options)
+        myindex.set_up_initial_index()
         return
 
     def parse_summary_section(self, section_name, section_content, options):

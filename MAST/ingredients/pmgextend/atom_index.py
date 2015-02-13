@@ -24,25 +24,27 @@ class AtomIndex(MASTObj):
     """
     def __init__(self, **kwargs):
         allowed_keys = {
-            #'startSE': (SE, None, 'Structure extensions class')
             'input_options': (InputOptions, None, 'Input options')
-    }
-    self.startSE = ""
-    self.startdict = ""
-    self.startdefects = ""
-    self.startdefectphonons = ""
-    self.startnebs = ""
-    self.startnebphonons = ""
-    self.scalingSEs = dict()
-    self.scalingdicts = dict()
-    self.scalingdefects = dict()
-    self.scalingdefectphonons = dict()
-    self.scalingnebs = dict()
-    self.scalingnebphonons = dict()
-    self.input_options = self.keywords['input_options']
-    self.scaling = self.input_options.get_item('structure','scaling')
-    self.atomcount=1
-    return
+        }
+        MASTObj.__init__(self, allowed_keys, **kwargs)            
+        self.startSE = ""
+        self.startdict = ""
+        self.startdefects = ""
+        self.startdefectphonons = ""
+        self.startnebs = ""
+        self.startnebphonons = ""
+        self.scalingSEs = dict()
+        self.scalingdicts = dict()
+        self.scalingdefects = dict()
+        self.scalingdefectphonons = dict()
+        self.scalingnebs = dict()
+        self.scalingnebphonons = dict()
+        self.input_options = self.keywords['input_options']
+        self.scaling = self.input_options.get_item('structure','scaling')
+        if self.scaling == None:
+            self.scaling = dict()
+        self.atomcount=1
+        return
 
     def set_up_initial_index(self):
         """Set up the initial index (first time).
@@ -50,13 +52,13 @@ class AtomIndex(MASTObj):
         self.get_structure_extensions()
         self.startdict = self.build_structure_dictionary(self.startSE)
         [self.startdefects, self.startdefectphonons] = self.make_defects_instruction_dictionary("")
-        for scaling_label in scaling.keys():
+        for scaling_label in self.scaling.keys():
             self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
-            [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label] = self.make_defects_instruction_dictionary(scaling_label)
+            [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label]] = self.make_defects_instruction_dictionary(scaling_label)
         print self.startdict
         print self.startdefects
         print self.startdefectphonons
-        for scaling_label in scaling.keys():
+        for scaling_label in self.scaling.keys():
             print self.scalingdicts[scaling_label]
             print self.scalingdefects[scaling_label]
             print self.scalingdefectphonons[scaling_label]
@@ -120,12 +122,12 @@ class AtomIndex(MASTObj):
         """
         mydefdict=dict()
         myphondict=dict()
-        if scaling == "":
+        if scaling_label == "":
             sdict = dict(self.startdict)
             mySE = self.startSE
         else:
             sdict = dict(self.scalingdicts[scaling_label])
-            mySE = self.scalingSEs[scaling_label])
+            mySE = self.scalingSEs[scaling_label]
         defect_dict=self.input_options.get_item('defects','defects')
         dlabels=defect_dict.keys()
         for dlabel in dlabels:
@@ -163,7 +165,7 @@ class AtomIndex(MASTObj):
                         pcrad = defect_dict[dlabel][dsubkey][phonlabel]['phonon_center_radius']
                         pcoords = np.array(pcoordsraw.split(),'float')
                         
-                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad)
+                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
                         myphondict[dlabel][phonlabel] = list(pindices)
         return [mydefdict, myphondict]
 
@@ -193,7 +195,7 @@ class AtomIndex(MASTObj):
         if not find_multiple:
             if (len(matches) > 1):
                 raise MASTError(self.__class__.__name__,
-                    "Multiple matches found for coordinate %s" % coord)
+                    "Multiple matches found for coordinate %s: %s" % (coord, matches))
             if len(matches) == 1:
                 return matches[0]
             else:
