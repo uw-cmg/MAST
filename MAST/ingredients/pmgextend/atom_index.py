@@ -30,51 +30,60 @@ class AtomIndex(MASTObj):
     self.startSE = ""
     self.startdict = ""
     self.startdefects = ""
+    self.startdefectphonons = ""
     self.startnebs = ""
+    self.startnebphonons = ""
     self.scalingSEs = dict()
     self.scalingdicts = dict()
     self.scalingdefects = dict()
-    self.scalingnebs = ""
+    self.scalingdefectphonons = dict()
+    self.scalingnebs = dict()
+    self.scalingnebphonons = dict()
     self.input_options = self.keywords['input_options']
+    self.scaling = self.input_options.get_item('structure','scaling')
+    self.atomcount=1
     return
 
     def set_up_initial_index(self):
         """Set up the initial index (first time).
         """
-        self.startSE = self.get_start_structure()
-        self.startdict = self.build_structure_dictionary(self, self.startSE)
+        self.get_structure_extensions()
+        self.startdict = self.build_structure_dictionary(self.startSE)
+        [self.startdefects, self.startdefectphonons] = self.make_defects_instruction_dictionary("")
+        for scaling_label in scaling.keys():
+            self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
+            [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label] = self.make_defects_instruction_dictionary(scaling_label)
+        print self.startdict
+        print self.startdefects
+        print self.startdefectphonons
+        for scaling_label in scaling.keys():
+            print self.scalingdicts[scaling_label]
+            print self.scalingdefects[scaling_label]
+            print self.scalingdefectphonons[scaling_label]
+        return
 
-
-    def get_start_structure(self):
-        """Get starting structure. 
+    def get_structure_extensions(self):
+        """Get starting structure extension object and scaled structure 
+            extension objects
         """
         startstr=self.input_options.get_item('structure','structure')
-        return SE(struc_work1 = startstr)
-    
+        self.startSE = SE(struc_work1 = startstr)
+        for scaling_label in self.scaling.keys():
+            scaleSE = SE(struc_work1 = self.startSE.copy(), scaling_size=self.scaling[scaling_label][0])
+            self.scalingSEs[scaling_label] = SE(struc_work1 = scaleSE.scale_structure())
+        return 
 
     def build_structure_dictionary(self, mySE):
         """Build a structure dictionary.
         """
         sdict=dict()
-        sdx=0
         for site in mySE.keywords['struc_work1'].sites:
-            skey=self.convert_int_to_atomidx(sdx)
+            skey=self.get_new_key() # starts at 1
             sdict[skey]=dict()
             sdict[skey]['original_frac_coords']=site.frac_coords
             sdict[skey]['element']=site.species_string
             sdict[skey]['specie']=site.specie
-            sdx=sdx+1
         return sdict
-    
-    def make_entry(self, site="", otherkey="", otherval=""):
-        """Make a single dictionary entry for the atom index
-        """
-        entrydict=dict()
-        if not (site==""):
-            entrydict['original_frac_coords']=site.frac_coords
-            entrydict['element']=site.species_string
-            entrydict['specie']=site.specie
-        return entrydict
 
     def add_atom_specific_keywords_to_structure_dictionary(self):
         """Add atom specific keywords using the coordinates section
@@ -85,6 +94,12 @@ class AtomIndex(MASTObj):
         """Add element specific keywords using the elementmap section
         """
         return
+
+    def get_new_key(self):
+        """Get a new key.
+        """
+        self.atomcount = self.atomcount + 1
+        return self.convert_int_to_atomidx(self.atomcount)
 
     def convert_int_to_atomidx(self, aint):
         """Convert an integer to an atom index.
@@ -97,23 +112,27 @@ class AtomIndex(MASTObj):
         atomidx=hex(aint).zfill(spad)
         return atomidx
 
-    def make_defects_dictionary(self, scaling_label=""):
-        """Make a defect dictionary.
+
+    def make_defects_instruction_dictionary(self, scaling_label=""):
+        """Make a defect instruction dictionary.
             Args: 
                 scaling_label <str>: scaling label. Leave blank for no scaling.            
         """
         mydefdict=dict()
+        myphondict=dict()
         if scaling == "":
             sdict = dict(self.startdict)
             mySE = self.startSE
         else:
             sdict = dict(self.scalingdicts[scaling_label])
             mySE = self.scalingSEs[scaling_label])
-        #print input_options
         defect_dict=self.input_options.get_item('defects','defects')
-        #print defect_dict
         dlabels=defect_dict.keys()
         for dlabel in dlabels:
+            mydefdict[dlabel] = dict()
+            mydefdict[dlabel]['add'] = dict()
+            mydefdict[dlabel]['remove'] = dict()
+            myphondict[dlabel] = dict()
             dsubkeys=defect_dict[dlabel].keys()
             for dsubkey in dsubkeys:
                 if "subdefect_" in dsubkey:
@@ -125,28 +144,43 @@ class AtomIndex(MASTObj):
                         newdict=dict()
                         newdict['original_frac_coords']=dcoords
                         newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
-                        self.add_structure_dictionary_entry(sdict, newdict)
+                        
+                        mydefdict[dlabel]['add'][self.get_new_key()]=newdict
                     else:
                         didx=self.find_orig_frac_coord_in_structure_dictionary(sdict, dcoords)
-                        if not dlabel in sdict.keys():
-                            if dtype in ['substitution','antisite']:
-                                sdict[didx]['element'] = defect_dict[dlabel][dsubkey]['symbol']
-                            elif dtype == 'vacancy':
-                                sdict.pop(didx,"None")
-                        else:
-                            raise MASTError(self.__class__.__name__,"Defect label %s already exists for atom index %s" % (dlabel, didx))
-            self.write_structure_dictionary_file(sdict, "defect_%s%s_structure_index" % (otherlabels, dlabel))
-        return sdict
+                        if dtype in ['substitution','antisite']:
+                            mydefdict[dlabel]['remove'][didx] = 'remove'
+                            newdict=dict()
+                            newdict['original_frac_coords']=dcoords
+                            newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
+                            mydefdict[dlabel]['add'][self.get_new_key()]=newdict
+                        elif dtype == 'vacancy':
+                            mydefdict[dlabel]['remove'][didx] = 'remove'
+                if "phonon" in dsubkey:
+                    for phonlabel in defect_dict[dlabel][dsubkey].keys():
+                        pcoordsraw = defect_dict[dlabel][dsubkey][phonlabel]['phonon_center_site']
+                        pthresh = defect_dict[dlabel][dsubkey][phonlabel]['threshold']
+                        pcrad = defect_dict[dlabel][dsubkey][phonlabel]['phonon_center_radius']
+                        pcoords = np.array(pcoordsraw.split(),'float')
+                        
+                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad)
+                        myphondict[dlabel][phonlabel] = list(pindices)
+        return [mydefdict, myphondict]
 
-    def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001):
+    #'phonon': {'solute': {'phonon_center_site': '0.25 0.50 0.25', 'threshold': 0.1, 'phonon_center_radius': 0.5}
+
+    def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001, find_multiple=False):
         """Find the atomic index of an original FRACTIONAL coordinate in the 
             structure dictionary.
             Args:
                 sdict <dictionary>: structure dictioary
                 coord <numpy array of float>: coordinate to find
                 tol <float>: tolerance
+                find_multiple <boolean>: allow multiple matches. Default False.
             Returns:
-                atomic index <hex string>: atomic index of match
+                atomic index <hex string>: atomic index of match, 
+                    if find_multiple is false
+                list of atomic indices of matches, if find_multiple is true
                 Returns None if no match is found
         """
         rtol=tol*100
@@ -156,10 +190,19 @@ class AtomIndex(MASTObj):
             atom_ofc=sdict[atomidx]['original_frac_coords']
             if np.allclose(atom_ofc,coord,rtol,tol):
                 matches.append(atomidx)
-        if len(matches) > 1:
-            raise MASTError(self.__class__.__name__,
-                "Multiple matches found for coordinate %s" % coord)
-        return matches[0]
+        if not find_multiple:
+            if (len(matches) > 1):
+                raise MASTError(self.__class__.__name__,
+                    "Multiple matches found for coordinate %s" % coord)
+            if len(matches) == 1:
+                return matches[0]
+            else:
+                return None
+        else:
+            if len(matches) >= 1:
+                return matches
+            else:
+                return None
 
         
     def add_structure_dictionary_entry(self, sdict, adict):
