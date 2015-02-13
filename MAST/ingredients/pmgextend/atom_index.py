@@ -73,6 +73,7 @@ class AtomIndex(MASTObj):
         print self.allatoms
         print self.input_options
         self.make_structure_index_directory()
+        self.make_manifest_files()
         return
 
     def make_structure_index_directory(self):
