@@ -401,8 +401,9 @@ class AtomIndex(MASTObj):
                     for nline in nlines:
                         ncoord1 = np.array(nline[1].split(), 'float')
                         ncoord2 = np.array(nline[2].split(), 'float')
-                        nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1) #TTM ERROR is in needing to also match the correct element
-                        nidx2 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord2)
+                        nelem = nline[0]
+                        nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1, 0.001, False, nelem) 
+                        nidx2 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord2, 0.001, False, nelem)
                         mynebdict[nlabel]['match'].append([nidx1, nidx2])
                 if "phonon" in nsubkey:
                     for phonlabel in neb_dict[nlabel][nsubkey].keys():
@@ -415,7 +416,7 @@ class AtomIndex(MASTObj):
                         myphondict[nlabel][phonlabel] = list(pindices)
         return [mynebdict, myphondict]
 
-    def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001, find_multiple=False):
+    def find_orig_frac_coord_in_structure_dictionary(self, sdict, coord, tol=0.0001, find_multiple=False, element=""):
         """Find the atomic index of an original FRACTIONAL coordinate in the 
             structure dictionary.
             Args:
@@ -423,6 +424,7 @@ class AtomIndex(MASTObj):
                 coord <numpy array of float>: coordinate to find
                 tol <float>: tolerance
                 find_multiple <boolean>: allow multiple matches. Default False.
+                element <str>: element symbol to match
             Returns:
                 atomic index <hex string>: atomic index of match, 
                     if find_multiple is false
@@ -435,7 +437,11 @@ class AtomIndex(MASTObj):
         for atomidx in atomidxs:
             atom_ofc=sdict[atomidx]['original_frac_coords']
             if np.allclose(atom_ofc,coord,rtol,tol):
-                matches.append(atomidx)
+                if element == "":
+                    matches.append(atomidx)
+                else:
+                    if element == sdict[atomidx]['element']:
+                        matches.append(atomidx)
         if not find_multiple:
             if (len(matches) > 1):
                 raise MASTError(self.__class__.__name__,
