@@ -162,10 +162,28 @@ class AtomIndex(MASTObj):
         for akey in self.allatoms:
             aname = os.path.join("structure_index_files","atom_index_%s" % akey)
             afile = open(aname,'wb')
-            afile.write("%20s:%20s\n" % ("name",akey))
+            afile.write("%20s:%20s\n" % ("atomindex",akey))
             for key, value in self.allatoms[akey].iteritems():
                 afile.write("%20s:%20s\n" % (key, value))
             afile.close()
+        return
+
+    def read_manifest_file(self, filename):
+        """Read a manifest file.
+        """
+        mlist=list()
+        mfile = open(filename, 'rb')
+        mlines = mfiles.readlines()
+        mfile.close()
+        for mline in mlines:
+            mline = mline.strip()
+            mlist.append(mline)
+        return mlist
+
+
+    def sort_poscar_according_to_new_manifest(self, poscarname, manifestname):
+        """Sort a POSCAR according to a manifest file.
+        """
         return
 
     def read_atom_index_file(self, filename):
@@ -203,7 +221,7 @@ class AtomIndex(MASTObj):
                 neb_label <str>: NEB label
                 phonon_label <str> phonon label
         """
-        fname="manifest:%s:%s:%s:%s" % (scaling_label, defect_label, neb_label, phonon_label)
+        fname="manifest_%s_%s_%s_%s" % (scaling_label, defect_label, neb_label, phonon_label)
         fname = os.path.join("structure_index_files", fname)
         
         if scaling_label == "":
@@ -219,6 +237,7 @@ class AtomIndex(MASTObj):
             nebdict = dict(self.scalingnebs[scaling_label])
             nebphondict = dict(self.scalingnebphonons[scaling_label])
         alist = list(sdict.keys()) #typically these are already in element order
+        alist.sort() #sorts IN PLACE
         if not (defect_label == ""):
             for addme in defdict[defect_label]['add'].keys():
                 alist.append(addme)
@@ -333,10 +352,10 @@ class AtomIndex(MASTObj):
         """Build a structure dictionary.
         """
         sdict=dict()
-        if 'scaling_label' in mySE.keywords.keys():
-            mystruc = mySE.scale_structure()
-        else:
+        if mySE.keywords['scaling_size'] == None:
             mystruc = mySE.keywords['struc_work1']
+        else:
+            mystruc = mySE.scale_structure()
         for site in mystruc:
             skey=self.get_new_key() # starts at 1
             sdict[skey]=dict()
