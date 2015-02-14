@@ -53,10 +53,12 @@ class AtomIndex(MASTObj):
         self.get_structure_extensions()
         self.startdict = self.build_structure_dictionary(self.startSE)
         [self.startdefects, self.startdefectphonons] = self.make_defects_instruction_dictionary("")
-        [self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
         for scaling_label in self.scaling.keys():
             self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
             [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label]] = self.make_defects_instruction_dictionary(scaling_label)
+        self.allatoms = self.combine_structure_dictionaries()
+        [self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
+        for scaling_label in self.scaling.keys():
             [self.scalingnebs[scaling_label], self.scalingnebphonons[scaling_label]] = self.make_neb_instruction_dictionary(scaling_label)
         print self.startdict
         print self.startdefects
@@ -69,7 +71,6 @@ class AtomIndex(MASTObj):
             print self.scalingdefectphonons[scaling_label]
             print self.scalingnebs[scaling_label]
             print self.scalingnebphonons[scaling_label]
-        self.allatoms = self.combine_structure_dictionaries()
         print self.allatoms
         print self.input_options
         self.make_structure_index_directory()
@@ -116,6 +117,15 @@ class AtomIndex(MASTObj):
             adict[akey] = aval
         return adict
 
+    
+    def error_check_print_list(self, mylist, mylabel):
+        """
+        """
+        print "LIST: ", mylabel
+        for myentry in mylist:
+            print myentry
+        return
+    
     def make_manifest_file(self, scaling_label="", defect_label="", neb_label="", phonon_label=""):
         """Make manifest file.
             Args:
@@ -128,6 +138,9 @@ class AtomIndex(MASTObj):
         """
         fname="manifest:%s:%s:%s:%s" % (scaling_label, defect_label, neb_label, phonon_label)
         fname = os.path.join("structure_index_files", fname)
+        print "DEFECT:",defect_label
+        print "NEB:",neb_label
+        
         if scaling_label == "":
             sdict = dict(self.startdict)
             defdict = dict(self.startdefects)
@@ -141,11 +154,13 @@ class AtomIndex(MASTObj):
             nebdict = dict(self.scalingnebs[scaling_label])
             nebphondict = dict(self.scalingnebphonons[scaling_label])
         alist = list(sdict.keys()) #typically these are already in element order
+        self.error_check_print_list(alist, "initial")
         if not (defect_label == ""):
             for addme in defdict[defect_label]['add'].keys():
                 alist.append(addme)
             for removeme in defdict[defect_label]['remove'].keys():
                 alist.remove(removeme)
+        self.error_check_print_list(alist, "after defects")
         if not (neb_label == ""):
             matchlist = list(nebdict[neb_label]['match'])
             nebsplit = neb_label.split("-")
@@ -153,7 +168,9 @@ class AtomIndex(MASTObj):
                 whichep = 0
             else:
                 whichep = 1
+            print whichep
             for matchline in matchlist:
+                print matchline
                 alist.remove(matchline[whichep]) #remove from middle
                 alist.append(matchline[whichep]) #add to the bottom
         self.write_manifest_file(alist, fname)
@@ -168,9 +185,10 @@ class AtomIndex(MASTObj):
             for scaling_label in self.scaling.keys():
                 self.make_manifest_file(scaling_label,defect_label)
             for neb_label in self.startnebs.keys():
-                self.make_manifest_file("",defect_label,neb_label)
-                for scaling_label in self.scaling.keys():
-                    self.make_manifest_file(scaling_label,defect_label,neb_label)
+                if defect_label in neb_label:
+                    self.make_manifest_file("",defect_label,neb_label)
+                    for scaling_label in self.scaling.keys():
+                        self.make_manifest_file(scaling_label,defect_label,neb_label)
         return
 
     def get_atoms_for_phonons(self):
@@ -215,9 +233,10 @@ class AtomIndex(MASTObj):
                 aidxlist <list of str>: List of atom indices
                 fname <str>: File name
         """
-        myfile = MASTFile()
-        myfile.data = aidxlist
-        myfile.to_file(fname)
+        myfile = open(fname, 'wb')
+        for aidx in aidxlist:
+            myfile.write("%s\n" % aidx)
+        myfile.close()
         return
 
     
@@ -360,10 +379,12 @@ class AtomIndex(MASTObj):
         mynebdict=dict()
         myphondict=dict()
         if scaling_label == "":
-            sdict = dict(self.startdict)
+            sdict = dict(self.allatoms)
+            defdict = dict(self.startdefects)
             mySE = self.startSE
         else:
-            sdict = dict(self.scalingdicts[scaling_label])
+            sdict = dict(self.allatoms)
+            defdict = dict(self.scalingdefects[scaling_label])
             mySE = self.scalingSEs[scaling_label]
         neb_dict=self.input_options.get_item('neb','nebs')
         if neb_dict == None:
@@ -380,7 +401,7 @@ class AtomIndex(MASTObj):
                     for nline in nlines:
                         ncoord1 = np.array(nline[1].split(), 'float')
                         ncoord2 = np.array(nline[2].split(), 'float')
-                        nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1)
+                        nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1) #TTM ERROR is in needing to also match the correct element
                         nidx2 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord2)
                         mynebdict[nlabel]['match'].append([nidx1, nidx2])
                 if "phonon" in nsubkey:
