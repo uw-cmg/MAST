@@ -87,6 +87,73 @@ class AtomIndex(MASTObj):
             raise MASTError(self.__class__.__name__, "Structure index directory already exists!")
         os.mkdir("structure_index_files")
         self.write_atom_index_files()
+        self.write_defect_instruction_dict()
+        self.write_neb_instruction_dict()
+        return
+
+    def write_defect_instruction_dict(self):
+        """
+        """
+        dname = os.path.join("structure_index_files","defect_instruction_index")
+        dpname = os.path.join("structure_index_files","defect_phonon_instruction_index")
+        dfile = open(dname, 'wb')
+        dpfile = open(dpname, 'wb')
+        for defect_label in self.startdefects.keys():
+            for arkey in self.startdefects[defect_label].keys():
+                for aidxkey in self.startdefects[defect_label][arkey].keys():
+                    dfile.write("%s:%s:%s\n" % (defect_label, arkey, aidxkey))
+            for pkey in self.startdefectphonons[defect_label].keys():
+                for pentry in self.startdefectphonons[defect_label][pkey]:
+                    dpfile.write("%s:%s:%s\n" % (defect_label, pkey, pentry))
+        dfile.close()
+        dpfile.close()
+        for scaling_label in self.scaling.keys():
+            dname = os.path.join("structure_index_files","defect_instruction_index_%s" % scaling_label)
+            dpname = os.path.join("structure_index_files","defect_phonon_instruction_index_%s" % scaling_label)
+            dfile = open(dname, 'wb')
+            dpfile = open(dpname, 'wb')
+            for defect_label in self.scalingdefects[scaling_label].keys():
+                for arkey in self.scalingdefects[scaling_label][defect_label].keys():
+                    for aidxkey in self.scalingdefects[scaling_label][defect_label][arkey].keys():
+                        dfile.write("%s:%s:%s\n" % (defect_label, arkey, aidxkey))
+                for pkey in self.scalingdefectphonons[scaling_label][defect_label].keys():
+                    for pentry in self.scalingdefectphonons[scaling_label][defect_label][pkey]:
+                        dpfile.write("%s:%s:%s\n" % (defect_label, pkey, pentry))
+            dfile.close()
+            dpfile.close()
+
+        return
+
+    def write_neb_instruction_dict(self):
+        """
+        """
+        nname = os.path.join("structure_index_files","neb_instruction_index")
+        npname = os.path.join("structure_index_files","neb_phonon_instruction_index")
+        nfile = open(nname, 'wb')
+        npfile = open(npname, 'wb')
+        for neb_label in self.startnebs.keys():
+            for matchkey in self.startnebs[neb_label].keys():
+                for matchentry in self.startnebs[neb_label][matchkey]:
+                    nfile.write("%s:%s:%s\n" % (neb_label, matchkey, matchentry))
+            for pkey in self.startnebphonons[neb_label].keys():
+                for pentry in self.startnebphonons[neb_label][pkey]:
+                    npfile.write("%s:%s:%s\n" % (neb_label, pkey, pentry))
+        nfile.close()
+        npfile.close()
+        for scaling_label in self.scaling.keys():
+            nname = os.path.join("structure_index_files","neb_instruction_index_%s" % scaling_label)
+            npname = os.path.join("structure_index_files","neb_phonon_instruction_index_%s" % scaling_label)
+            nfile = open(nname, 'wb')
+            npfile = open(npname, 'wb')
+            for neb_label in self.scalingnebs[scaling_label].keys():
+                for matchkey in self.scalingnebs[scaling_label][neb_label].keys():
+                    for matchentry in self.scalingnebs[scaling_label][neb_label][matchkey]:
+                        nfile.write("%s:%s:%s\n" % (neb_label, matchkey, matchentry))
+                for pkey in self.scalingnebphonons[scaling_label][neb_label].keys():
+                    for pentry in self.scalingnebphonons[scaling_label][neb_label][pkey]:
+                        npfile.write("%s:%s:%s\n" % (neb_label, pkey, pentry))
+            nfile.close()
+            npfile.close()
         return
 
     def write_atom_index_files(self):
@@ -138,8 +205,6 @@ class AtomIndex(MASTObj):
         """
         fname="manifest:%s:%s:%s:%s" % (scaling_label, defect_label, neb_label, phonon_label)
         fname = os.path.join("structure_index_files", fname)
-        print "DEFECT:",defect_label
-        print "NEB:",neb_label
         
         if scaling_label == "":
             sdict = dict(self.startdict)
@@ -154,13 +219,11 @@ class AtomIndex(MASTObj):
             nebdict = dict(self.scalingnebs[scaling_label])
             nebphondict = dict(self.scalingnebphonons[scaling_label])
         alist = list(sdict.keys()) #typically these are already in element order
-        self.error_check_print_list(alist, "initial")
         if not (defect_label == ""):
             for addme in defdict[defect_label]['add'].keys():
                 alist.append(addme)
             for removeme in defdict[defect_label]['remove'].keys():
                 alist.remove(removeme)
-        self.error_check_print_list(alist, "after defects")
         if not (neb_label == ""):
             matchlist = list(nebdict[neb_label]['match'])
             nebsplit = neb_label.split("-")
@@ -168,9 +231,7 @@ class AtomIndex(MASTObj):
                 whichep = 0
             else:
                 whichep = 1
-            print whichep
             for matchline in matchlist:
-                print matchline
                 alist.remove(matchline[whichep]) #remove from middle
                 alist.append(matchline[whichep]) #add to the bottom
         self.write_manifest_file(alist, fname)
