@@ -78,10 +78,10 @@ class AtomIndex(MASTObj):
             manname=os.path.join(self.sdir,"manifest_undefected_%s" % scaling_label)
             for site in mystruc:
                 akey=self.get_new_key()
-                aname="atomindex_%s" % akey
+                aname="atom_index_%s" % akey
                 aname = os.path.join(self.sdir, aname)
                 ameta = Metadata(metafile=aname)
-                ameta.write_data("atomindex",akey)
+                ameta.write_data("atom_index",akey)
                 ameta.write_data("original_frac_coords", site.frac_coords)
                 ameta.write_data("element", site.species_string)
                 ameta.write_data("scaling_label", scaling_label)
@@ -149,10 +149,10 @@ class AtomIndex(MASTObj):
                             didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
                             if didx == None:
                                 akey=self.get_new_key()
-                                aname="atomindex_%s" % akey
+                                aname="atom_index_%s" % akey
                                 aname = os.path.join(self.sdir, aname)
                                 ameta = Metadata(metafile=aname)
-                                ameta.write_data("atomindex",akey)
+                                ameta.write_data("atom_index",akey)
                                 ameta.write_data("original_frac_coords", dcoords)
                                 ameta.write_data("element", delement)
                                 ameta.write_data("scaling_label", scaling_label)
@@ -173,10 +173,10 @@ class AtomIndex(MASTObj):
                             didxsub=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001) #leave element empty; just search coords
                             if didxsub == None:
                                 akey=self.get_new_key()
-                                aname="atomindex_%s" % akey
+                                aname="atom_index_%s" % akey
                                 aname = os.path.join(self.sdir, aname)
                                 ameta = Metadata(metafile=aname)
-                                ameta.write_data("atomindex",akey)
+                                ameta.write_data("atom_index",akey)
                                 ameta.write_data("original_frac_coords", dcoords)
                                 ameta.write_data("element", delement) #sub element here
                                 ameta.write_data("scaling_label", scaling_label)
@@ -191,7 +191,7 @@ class AtomIndex(MASTObj):
         """
         mlist=list()
         mfile = open(filename, 'rb')
-        mlines = mfiles.readlines()
+        mlines = mfile.readlines()
         mfile.close()
         for mline in mlines:
             mline = mline.strip()
@@ -204,7 +204,9 @@ class AtomIndex(MASTObj):
             Args:
                 coord <numpy array of float>: coordinate to find
                 element <str>: element symbol to match
-                scaling_label <str>: scaling label ("" for no scaling)
+                                If blank, matches any element.
+                scaling_label <str>: scaling label
+                                    If blank, must match NO scaling (blank)
                 find_multiple <boolean>: allow multiple matches. Default False.
                 tol <float>: tolerance
             Returns:
@@ -222,7 +224,7 @@ class AtomIndex(MASTObj):
         scaling_matches=list()
         for aname in idxnames:
             ameta=Metadata(metafile=aname)
-            aidx=ameta.read_data("atomindex")
+            aidx=ameta.read_data("atom_index")
             atom_ofc=ameta.read_data("original_frac_coords")
             atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
             if np.allclose(atom_ofc_arr,coord,rtol,tol):
@@ -235,14 +237,11 @@ class AtomIndex(MASTObj):
                 atom_elem=ameta.read_data("element")
                 if (element == atom_elem):
                     elem_matches.append(aidx)
-        if scaling_label == "":
-            scaling_matches = list(elem_matches)
-        else:
-            for aidx in elem_matches:
-                ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
-                ascale=ameta.read_data("scaling_label")
-                if (scaling_label == ascale):
-                    scaling_matches.append(aidx)
+        for aidx in elem_matches:
+            ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+            ascale=ameta.read_data("scaling_label")
+            if (scaling_label == ascale):
+                scaling_matches.append(aidx)
         allmatches = list(scaling_matches)
         if len(allmatches) == 0:
             return None
@@ -257,7 +256,7 @@ class AtomIndex(MASTObj):
                 return allmatches[0]
             else:
                 return allmatches
-       return None
+        return None
 
     def write_defected_phonon_sd_manifests(self):
         """Write defected phonon structure dynamics manifests.
@@ -286,11 +285,11 @@ class AtomIndex(MASTObj):
                      
                     #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
                     pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
-                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s" % (dlabel, phonon_label, scaling_label))
+                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (dlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return 
 
-    def write_neb_endpoint_manifests():
+    def write_neb_endpoint_manifests(self):
         """Make NEB endpoint manifests.
         """
         neb_dict=self.input_options.get_item('neb','nebs')
@@ -328,15 +327,14 @@ class AtomIndex(MASTObj):
                     maddtoend1.append(nidx1) #resort matches to the bottom
                     mlist2.remove(nidx2)
                     maddtoend2.append(nidx2)
-                for midx in [0:len(mlist1)]:
-                    if not (mlist1[midx] == mlist2[midx]):
-                        raise MASTError("NEB %s truncated manifests do not match: %s, %s" % (nlabel, mlist1, mlist2))
+                if not (mlist1==mlist2):
+                    raise MASTError("NEB %s truncated manifests do not match: %s, %s" % (nlabel, mlist1, mlist2))
                 mlist1.extend(maddtoend1)
                 mlist2.extend(maddtoend2)
                 self.write_manifest_file(mlist1, manname1)
                 self.write_manifest_file(mlist2, manname2)
         return
-    def write_neb_phonon_sd_manifests():
+    def write_neb_phonon_sd_manifests(self):
         """Make NEB phonon manifests.
         """
         neb_dict=self.input_options.get_item('neb','nebs')
@@ -352,7 +350,7 @@ class AtomIndex(MASTObj):
             else:
                 mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
             for nlabel in nlabels:
-                pdict = dict(neb_dict[nlabel]["phonon"]
+                pdict = dict(neb_dict[nlabel]["phonon"])
                 for phonon_label in pdict.keys():
                     pcoordsraw = pdict[phonon_label]['phonon_center_site']
                     pthresh = pdict[phonon_label]['threshold']
@@ -363,7 +361,7 @@ class AtomIndex(MASTObj):
                      
                     #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
                     pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
-                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s" % (nlabel, phonon_label, scaling_label))
+                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (nlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return
 
@@ -524,7 +522,7 @@ class AtomIndex(MASTObj):
         """
         aname = os.path.join("structure_index_files","atom_index_%s" % aidx)
         ameta = Metadata(metafile=aname)
-        ameta.write_data("atomindex", aidx)
+        ameta.write_data("atom_index", aidx)
         for key, value in self.allatoms[aidx].iteritems():
             ameta.write_data(key, value)
         return
