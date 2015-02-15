@@ -59,10 +59,6 @@ class AtomIndex(MASTObj):
         if os.path.isdir(self.sdir):
             raise MASTError(self.__class__.__name__, "Structure index directory already exists!")
         os.mkdir(self.sdir)
-        #self.write_atom_index_files()
-        #self.write_initial_manifests()
-        #self.write_defect_instructions()
-        #self.write_neb_instructions()
         return
 
     def write_undefected_atom_indices(self):
@@ -136,10 +132,8 @@ class AtomIndex(MASTObj):
             alist=list(self.read_manifest_file("manifest_undefected_%s" % scaling_label))
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
-                mystruc=mySE.keywords['struc_work1']
             else:
                 mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
-                mystruc=mySE.scale_structure()
             for dlabel in dlabels:
                 dlist = list(alist)
                 manname=os.path.join(self.sdir,"manifest_defect_%s_%s" % (dlabel, scaling_label))
@@ -176,6 +170,7 @@ class AtomIndex(MASTObj):
                             ameta.write_data("element", delement) #sub element here
                             ameta.write_data("scaling_label", scaling_label)
                             dlist.append(akey)
+                self.write_manifest_file(dlist, manname)
         return 
     
     def read_manifest_file(self, filename):
@@ -251,6 +246,36 @@ class AtomIndex(MASTObj):
                 return allmatches
        return None
 
+    def write_defected_phonon_sd_manifests(self):
+        """Write defected phonon structure dynamics manifests.
+        """
+        defect_dict=self.input_options.get_item('defects','defects')
+        if defect_dict == None:
+            return None
+        dlabels=defect_dict.keys()
+        
+        scales = self.scaling.keys()
+        scales.append("")
+        for scaling_label in scales:
+            if scaling_label == "":
+                mySE=SE(struc_work1=self.startstr.copy())
+            else:
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+            for dlabel in dlabels:
+                pdict=dict(defect_dict[dlabel]["phonon"])
+                for phonon_label in pdict.keys():
+                    pcoordsraw = pdict[phonon_label]['phonon_center_site']
+                    pthresh = pdict[phonon_label]['threshold']
+                    pcrad = pdict[phonon_label]['phonon_center_radius']
+                    pcoords = np.array(pcoordsraw.split(),'float')
+                    if not (scaling_label == ""):
+                        pcoords = mySE.get_scaled_coordinates(pcoords)
+                     
+                    #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                    pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
+                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s" % (dlabel, phonon_label, scaling_label))
+                    self.write_manifest_file(pindices, manname) 
+        return 
 
 
 
