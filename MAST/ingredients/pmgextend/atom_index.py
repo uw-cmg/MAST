@@ -53,13 +53,15 @@ class AtomIndex(MASTObj):
         """
         self.get_structure_extensions()
         self.startdict = self.build_structure_dictionary(self.startSE)
-        [self.startdefects, self.startdefectphonons] = self.make_defects_instruction_dictionary("")
+        self.startdefects = self.make_defects_instruction_dictionary("")
         for scaling_label in self.scaling.keys():
             self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
-            [self.scalingdefects[scaling_label], self.scalingdefectphonons[scaling_label]] = self.make_defects_instruction_dictionary(scaling_label)
+            self.scalingdefects[scaling_label] = self.make_defects_instruction_dictionary(scaling_label)
         self.allatoms = self.combine_structure_dictionaries()
+        self.startdefectphonons = self.make_defects_phonon_dictionary("")
         [self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
         for scaling_label in self.scaling.keys():
+            self.scalingdefectphonons[scaling_label] = self.make_defects_phonon_dictionary(scaling_label)
             [self.scalingnebs[scaling_label], self.scalingnebphonons[scaling_label]] = self.make_neb_instruction_dictionary(scaling_label)
         print self.startdict
         print self.startdefects
@@ -381,12 +383,11 @@ class AtomIndex(MASTObj):
 
 
     def make_defects_instruction_dictionary(self, scaling_label=""):
-        """Make a defect instruction dictionary and a defects phonon dictionary.
+        """Make a defect instruction dictionary 
             Args: 
                 scaling_label <str>: scaling label. Leave blank for no scaling.            
         """
         mydefdict=dict()
-        myphondict=dict()
         if scaling_label == "":
             sdict = dict(self.startdict)
             mySE = self.startSE
@@ -395,14 +396,13 @@ class AtomIndex(MASTObj):
             mySE = self.scalingSEs[scaling_label]
         defect_dict=self.input_options.get_item('defects','defects')
         if defect_dict == None:
-            return [dict(), dict()]
+            return None
         dlabels=defect_dict.keys()
         for dlabel in dlabels:
             mydefdict[dlabel] = dict()
             mydefdict[dlabel]['add'] = dict()
             mydefdict[dlabel]['replace'] = dict()
             mydefdict[dlabel]['remove'] = dict()
-            myphondict[dlabel] = dict()
             dsubkeys=defect_dict[dlabel].keys()
             for dsubkey in dsubkeys:
                 if "subdefect_" in dsubkey:
@@ -426,16 +426,38 @@ class AtomIndex(MASTObj):
                             mydefdict[dlabel]['replace'][didx][self.get_new_key()]=newdict
                         elif dtype == 'vacancy':
                             mydefdict[dlabel]['remove'][didx] = 'remove'
+        return mydefdict
+    
+    def make_defects_phonon_dictionary(self, scaling_label=""):
+        """
+        """
+        myphondict=dict()
+        sdict = dict(self.allatoms)
+        if scaling_label == "":
+            mySE = self.startSE
+        else:
+            mySE = self.scalingSEs[scaling_label]
+        defect_dict=self.input_options.get_item('defects','defects')
+        if defect_dict == None:
+            return dict()
+        dlabels=defect_dict.keys()
+        for dlabel in dlabels:
+            myphondict[dlabel] = dict()
+            dsubkeys=defect_dict[dlabel].keys()
+            for dsubkey in dsubkeys:
                 if "phonon" in dsubkey:
                     for phonlabel in defect_dict[dlabel][dsubkey].keys():
                         pcoordsraw = defect_dict[dlabel][dsubkey][phonlabel]['phonon_center_site']
                         pthresh = defect_dict[dlabel][dsubkey][phonlabel]['threshold']
                         pcrad = defect_dict[dlabel][dsubkey][phonlabel]['phonon_center_radius']
                         pcoords = np.array(pcoordsraw.split(),'float')
-                        
-                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                        if not (scaling_label == ""):
+                            pcoords = mySE.get_scaled_coordinates(pcoords)
+                         
+                        #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, 0.001+pcrad, True)
                         myphondict[dlabel][phonlabel] = list(pindices)
-        return [mydefdict, myphondict]
+        return myphondict
 
     #'phonon': {'solute': {'phonon_center_site': '0.25 0.50 0.25', 'threshold': 0.1, 'phonon_center_radius': 0.5}
     
@@ -449,11 +471,9 @@ class AtomIndex(MASTObj):
         myphondict=dict()
         if scaling_label == "":
             sdict = dict(self.allatoms)
-            defdict = dict(self.startdefects)
             mySE = self.startSE
         else:
             sdict = dict(self.allatoms)
-            defdict = dict(self.scalingdefects[scaling_label])
             mySE = self.scalingSEs[scaling_label]
         neb_dict=self.input_options.get_item('neb','nebs')
         if neb_dict == None:
@@ -470,6 +490,9 @@ class AtomIndex(MASTObj):
                     for nline in nlines:
                         ncoord1 = np.array(nline[1].split(), 'float')
                         ncoord2 = np.array(nline[2].split(), 'float')
+                        if not (scaling_label == ""):
+                            ncoord1 = mySE.get_scaled_coordinates(ncoord1)
+                            ncoord2 = mySE.get_scaled_coordinates(ncoord2)
                         nelem = nline[0]
                         nidx1 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord1, 0.001, False, nelem) 
                         nidx2 = self.find_orig_frac_coord_in_structure_dictionary(sdict, ncoord2, 0.001, False, nelem)
@@ -480,8 +503,11 @@ class AtomIndex(MASTObj):
                         pthresh = neb_dict[nlabel][nsubkey][phonlabel]['threshold']
                         pcrad = neb_dict[nlabel][nsubkey][phonlabel]['phonon_center_radius']
                         pcoords = np.array(pcoordsraw.split(),'float')
+                        if not (scaling_label == ""):
+                            pcoords = mySE.get_scaled_coordinates(pcoords)
                         
-                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                        #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                        pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, 0.001+pcrad, True)
                         myphondict[nlabel][phonlabel] = list(pindices)
         return [mynebdict, myphondict]
 
