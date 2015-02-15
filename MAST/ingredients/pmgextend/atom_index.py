@@ -92,7 +92,79 @@ class AtomIndex(MASTObj):
                 alist.append(akey)
             self.write_manifest_file(alist,manname)
         return 
+    
+    def get_new_key(self):
+        """Get a new key.
+        """
+        self.atomcount = self.atomcount + 1
+        return self.convert_int_to_atomidx(self.atomcount)
 
+    def convert_int_to_atomidx(self, aint):
+        """Convert an integer to an atom index.
+            Args:
+                aint <int>: integer
+            Returns:
+                atomidx <str>: atom index string
+        """
+        spad=16
+        atomidx=hex(aint).zfill(spad)
+        return atomidx
+    
+    def write_manifest_file(self, aidxlist, fname):
+        """Make a manifest file.
+            Args:
+                aidxlist <list of str>: List of atom indices
+                fname <str>: File name
+        """
+        myfile = open(fname, 'wb')
+        for aidx in aidxlist:
+            myfile.write("%s\n" % aidx)
+        myfile.close()
+        return
+
+    def write_defect_atom_indices(self):
+        """Write any additional defect atom indices and make manifests.
+        """
+        mydefdict=dict()
+        if scaling_label == "":
+            sdict = dict(self.startdict)
+            mySE = self.startSE
+        else:
+            sdict = dict(self.scalingdicts[scaling_label])
+            mySE = self.scalingSEs[scaling_label]
+        defect_dict=self.input_options.get_item('defects','defects')
+        if defect_dict == None:
+            return None
+        dlabels=defect_dict.keys()
+        for dlabel in dlabels:
+            mydefdict[dlabel] = dict()
+            mydefdict[dlabel]['add'] = dict()
+            mydefdict[dlabel]['replace'] = dict()
+            mydefdict[dlabel]['remove'] = dict()
+            dsubkeys=defect_dict[dlabel].keys()
+            for dsubkey in dsubkeys:
+                if "subdefect_" in dsubkey:
+                    dtype=defect_dict[dlabel][dsubkey]['type']
+                    dcoords=defect_dict[dlabel][dsubkey]['coordinates']
+                    if not (scaling_label == ""):
+                        dcoords = mySE.get_scaled_coordinates(dcoords)
+                    if dtype == "interstitial":
+                        newdict=dict()
+                        newdict['original_frac_coords']=dcoords
+                        newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
+                        
+                        mydefdict[dlabel]['add'][self.get_new_key()]=newdict
+                    else:
+                        didx=self.find_orig_frac_coord_in_structure_dictionary(sdict, dcoords)
+                        if dtype in ['substitution','antisite']:
+                            newdict=dict()
+                            newdict['original_frac_coords']=dcoords
+                            newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
+                            mydefdict[dlabel]['replace'][didx]=dict()
+                            mydefdict[dlabel]['replace'][didx][self.get_new_key()]=newdict
+                        elif dtype == 'vacancy':
+                            mydefdict[dlabel]['remove'][didx] = 'remove'
+        return mydefdict
 
 
     def set_up_initial_index(self):
@@ -329,17 +401,6 @@ class AtomIndex(MASTObj):
             self.do_structure_indexing(input_options)
         return
 
-    def write_manifest_file(self, aidxlist, fname):
-        """Make a manifest file.
-            Args:
-                aidxlist <list of str>: List of atom indices
-                fname <str>: File name
-        """
-        myfile = open(fname, 'wb')
-        for aidx in aidxlist:
-            myfile.write("%s\n" % aidx)
-        myfile.close()
-        return
 
     
     def combine_structure_dictionaries(self):
@@ -402,22 +463,6 @@ class AtomIndex(MASTObj):
         """
         return
 
-    def get_new_key(self):
-        """Get a new key.
-        """
-        self.atomcount = self.atomcount + 1
-        return self.convert_int_to_atomidx(self.atomcount)
-
-    def convert_int_to_atomidx(self, aint):
-        """Convert an integer to an atom index.
-            Args:
-                aint <int>: integer
-            Returns:
-                atomidx <str>: atom index string
-        """
-        spad=16
-        atomidx=hex(aint).zfill(spad)
-        return atomidx
 
 
     def make_defects_instruction_dictionary(self, scaling_label=""):
