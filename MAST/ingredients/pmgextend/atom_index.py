@@ -129,7 +129,7 @@ class AtomIndex(MASTObj):
         scales = self.scaling.keys()
         scales.append("")
         for scaling_label in scales:
-            alist=list(self.read_manifest_file("manifest_undefected_%s" % scaling_label))
+            alist=list(self.read_manifest_file("%s/manifest_undefected_%s" % (self.sdir, scaling_label)))
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
@@ -277,6 +277,85 @@ class AtomIndex(MASTObj):
                     self.write_manifest_file(pindices, manname) 
         return 
 
+    def write_neb_endpoint_manifests():
+        """Make NEB endpoint manifests.
+        """
+        neb_dict=self.input_options.get_item('neb','nebs')
+        if neb_dict == None:
+            return None
+        nlabels=neb_dict.keys()
+        
+        scales = self.scaling.keys()
+        scales.append("")
+        for scaling_label in scales:
+            if scaling_label == "":
+                mySE=SE(struc_work1=self.startstr.copy())
+            else:
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+            for nlabel in nlabels:
+                def1 = nlabel.split("-")[0].strip()
+                def2 = nlabel.split("-")[1].strip()
+                manname1=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def1, scaling_label))
+                manname2=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def2, scaling_label))
+                mlist1=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def1, scaling_label)))
+                mlist2=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def2, scaling_label)))
+                nlines=list(neb_dict[nlabel]["lines"])
+                for nline in nlines:
+                    ncoord1 = np.array(nline[1].split(), 'float')
+                    ncoord2 = np.array(nline[2].split(), 'float')
+                    if not (scaling_label == ""):
+                        ncoord1 = mySE.get_scaled_coordinates(ncoord1)
+                        ncoord2 = mySE.get_scaled_coordinates(ncoord2)
+                    nelem = nline[0]
+                    nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
+                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
+                    mlist1.remove(nidx1)
+                    mlist1.append(nidx1) #resort to the bottom
+                    mlist2.remove(nidx2)
+                    mlist2.append(nidx2)
+                self.write_manifest_file(mlist1, manname1)
+                self.write_manifest_file(mlist2, manname2)
+        return
+    def write_neb_endpoint_manifests():
+        """Make NEB endpoint manifests.
+        """
+        neb_dict=self.input_options.get_item('neb','nebs')
+        if neb_dict == None:
+            return None
+        nlabels=neb_dict.keys()
+        
+        scales = self.scaling.keys()
+        scales.append("")
+        for scaling_label in scales:
+            if scaling_label == "":
+                mySE=SE(struc_work1=self.startstr.copy())
+            else:
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+            for nlabel in nlabels:
+                def1 = nlabel.split("-")[0].strip()
+                def2 = nlabel.split("-")[1].strip()
+                manname1=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def1, scaling_label))
+                manname2=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def2, scaling_label))
+                mlist1=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def1, scaling_label)))
+                mlist2=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def2, scaling_label)))
+                nlines=list(neb_dict[nlabel]["lines"])
+                for nline in nlines:
+                    ncoord1 = np.array(nline[1].split(), 'float')
+                    ncoord2 = np.array(nline[2].split(), 'float')
+                    if not (scaling_label == ""):
+                        ncoord1 = mySE.get_scaled_coordinates(ncoord1)
+                        ncoord2 = mySE.get_scaled_coordinates(ncoord2)
+                    nelem = nline[0]
+                    nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
+                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
+                    mlist1.remove(nidx1)
+                    mlist1.append(nidx1) #resort to the bottom
+                    mlist2.remove(nidx2)
+                    mlist2.append(nidx2)
+                self.write_manifest_file(mlist1, manname1)
+                self.write_manifest_file(mlist2, manname2)
+        return
+
 
 
     def set_up_initial_index(self):
@@ -284,8 +363,9 @@ class AtomIndex(MASTObj):
         """
         self.make_structure_index_directory()
         self.write_undefected_atom_indices()
-
-
+        self.write_defected_atom_indices()
+        self.write_defected_phonon_sd_manifests()
+        self.write_neb_endpoint_manifests()
         
         ##
         self.get_structure_extensions()
