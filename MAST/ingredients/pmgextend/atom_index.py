@@ -122,49 +122,136 @@ class AtomIndex(MASTObj):
         myfile.close()
         return
 
-    def write_defect_atom_indices(self):
+    def write_defected_atom_indices(self):
         """Write any additional defect atom indices and make manifests.
         """
-        mydefdict=dict()
-        if scaling_label == "":
-            sdict = dict(self.startdict)
-            mySE = self.startSE
-        else:
-            sdict = dict(self.scalingdicts[scaling_label])
-            mySE = self.scalingSEs[scaling_label]
         defect_dict=self.input_options.get_item('defects','defects')
         if defect_dict == None:
             return None
         dlabels=defect_dict.keys()
-        for dlabel in dlabels:
-            mydefdict[dlabel] = dict()
-            mydefdict[dlabel]['add'] = dict()
-            mydefdict[dlabel]['replace'] = dict()
-            mydefdict[dlabel]['remove'] = dict()
-            dsubkeys=defect_dict[dlabel].keys()
-            for dsubkey in dsubkeys:
-                if "subdefect_" in dsubkey:
-                    dtype=defect_dict[dlabel][dsubkey]['type']
-                    dcoords=defect_dict[dlabel][dsubkey]['coordinates']
-                    if not (scaling_label == ""):
-                        dcoords = mySE.get_scaled_coordinates(dcoords)
-                    if dtype == "interstitial":
-                        newdict=dict()
-                        newdict['original_frac_coords']=dcoords
-                        newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
-                        
-                        mydefdict[dlabel]['add'][self.get_new_key()]=newdict
-                    else:
-                        didx=self.find_orig_frac_coord_in_structure_dictionary(sdict, dcoords)
-                        if dtype in ['substitution','antisite']:
-                            newdict=dict()
-                            newdict['original_frac_coords']=dcoords
-                            newdict['element']=defect_dict[dlabel][dsubkey]['symbol']
-                            mydefdict[dlabel]['replace'][didx]=dict()
-                            mydefdict[dlabel]['replace'][didx][self.get_new_key()]=newdict
-                        elif dtype == 'vacancy':
-                            mydefdict[dlabel]['remove'][didx] = 'remove'
-        return mydefdict
+        
+        scales = self.scaling.keys()
+        scales.append("")
+        for scaling_label in scales:
+            alist=list(self.read_manifest_file("manifest_undefected_%s" % scaling_label))
+            if scaling_label == "":
+                mySE=SE(struc_work1=self.startstr.copy())
+                mystruc=mySE.keywords['struc_work1']
+            else:
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mystruc=mySE.scale_structure()
+            for dlabel in dlabels:
+                dlist = list(alist)
+                manname=os.path.join(self.sdir,"manifest_defect_%s_%s" % (dlabel, scaling_label))
+                dsubkeys=defect_dict[dlabel].keys()
+                for dsubkey in dsubkeys:
+                    if "subdefect_" in dsubkey:
+                        dtype=defect_dict[dlabel][dsubkey]['type']
+                        dcoords=defect_dict[dlabel][dsubkey]['coordinates']
+                        delement=defect_dict[dlabel][dsubkey]['symbol']
+                        if not (scaling_label == ""):
+                            dcoords = mySE.get_scaled_coordinates(dcoords)
+                        if dtype == "interstitial":
+                            akey=self.get_new_key()
+                            aname="atomindex_%s" % akey
+                            aname = os.path.join(self.sdir, aname)
+                            ameta = Metadata(metafile=aname)
+                            ameta.write_data("atomindex",akey)
+                            ameta.write_data("original_frac_coords", dcoords)
+                            ameta.write_data("element", delement)
+                            ameta.write_data("scaling_label", scaling_label)
+                            dlist.append(akey)
+                        elif dtype == "vacancy":
+                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
+                            dlist.remove(didx)
+                        elif dtype in ["substitution","antisite"]:
+                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, False, 0.001) #leave element empty; just search coords
+                            dlist.remove(didx)
+                            akey=self.get_new_key()
+                            aname="atomindex_%s" % akey
+                            aname = os.path.join(self.sdir, aname)
+                            ameta = Metadata(metafile=aname)
+                            ameta.write_data("atomindex",akey)
+                            ameta.write_data("original_frac_coords", dcoords)
+                            ameta.write_data("element", delement) #sub element here
+                            ameta.write_data("scaling_label", scaling_label)
+                            dlist.append(akey)
+        return 
+    
+    def read_manifest_file(self, filename):
+        """Read a manifest file.
+        """
+        mlist=list()
+        mfile = open(filename, 'rb')
+        mlines = mfiles.readlines()
+        mfile.close()
+        for mline in mlines:
+            mline = mline.strip()
+            mlist.append(mline)
+        return mlist
+    
+    def find_orig_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001):
+        """Find the atomic index of an original FRACTIONAL coordinate in the 
+            structure dictionary.
+            Args:
+                coord <numpy array of float>: coordinate to find
+                element <str>: element symbol to match
+                scaling_label <str>: scaling label ("" for no scaling)
+                find_multiple <boolean>: allow multiple matches. Default False.
+                tol <float>: tolerance
+            Returns:
+                atomic index <hex string>: atomic index of match, 
+                    if find_multiple is false
+                list of atomic indices of matches, if find_multiple is true
+                Returns None if no match is found
+        """
+        import glob
+        matchstring = "%s/atom_index_*" % self.sdir
+        idxnames = glob.glob(matchstring)
+        rtol=tol*100
+        coord_matches=list()
+        elem_matches=list()
+        scaling_matches=list()
+        for aname in idxnames:
+            ameta=Metadata(metafile=aname)
+            aidx=ameta.read_data("atomindex")
+            atom_ofc=ameta.read_data("original_frac_coords")
+            atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
+            if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                coord_matches.append(aidx)
+        if element == "":
+            elem_matches = list(coord_matches)
+        else:
+            for aidx in coord_matches:
+                ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+                atom_elem=ameta.read_data("element")
+                if (element == atom_elem):
+                    elem_matches.append(aidx)
+        if scaling_label == "":
+            scaling_matches = list(elem_matches)
+        else:
+            for aidx in elem_matches:
+                ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+                ascale=ameta.read_data("scaling_label")
+                if (scaling_label == ascale):
+                    scaling_matches.append(aidx)
+        allmatches = list(scaling_matches)
+        if len(allmatches) == 0:
+            return None
+        if len(allmatches) > 1:
+            if not find_multiple:
+                raise MASTError(self.__class__.__name__,
+                    "Multiple matches found for coordinate %s: %s" % (coord, allmatches))
+            else:
+                return allmatches
+        if len(allmatches) == 1:
+            if not find_multiple:
+                return allmatches[0]
+            else:
+                return allmatches
+       return None
+
+
 
 
     def set_up_initial_index(self):
@@ -326,17 +413,6 @@ class AtomIndex(MASTObj):
             ameta.write_data(key, value)
         return
 
-    def read_manifest_file(self, filename):
-        """Read a manifest file.
-        """
-        mlist=list()
-        mfile = open(filename, 'rb')
-        mlines = mfiles.readlines()
-        mfile.close()
-        for mline in mlines:
-            mline = mline.strip()
-            mlist.append(mline)
-        return mlist
 
     def read_atom_index_file(self, filename):
         """Read an atom index file.
