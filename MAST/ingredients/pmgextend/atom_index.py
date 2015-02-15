@@ -161,7 +161,10 @@ class AtomIndex(MASTObj):
                                 dlist.append(didx)
                         elif dtype == "vacancy":
                             didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
-                            dlist.remove(didx)
+                            try:
+                                dlist.remove(didx)
+                            except ValueError:
+                                raise MASTError(self.__class__.__name__, "For defect %s, cannot remove atom index %s from list: %s" % (dlabel, didx, dlist))
                         elif dtype in ["substitution","antisite"]:
                             didxlist=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, True, 0.001) #leave element empty; just search coords
                             for didx in didxlist:
@@ -322,10 +325,16 @@ class AtomIndex(MASTObj):
                         ncoord2 = mySE.get_scaled_coordinates(ncoord2)
                     nelem = nline[0]
                     nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
-                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
-                    mlist1.remove(nidx1)
+                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord2, nelem, scaling_label, False, 0.001)
+                    try:
+                        mlist1.remove(nidx1)
+                    except ValueError:
+                        raise MASTError(self.__class__.__name__, "For neb %s, cannot remove atom index %s from mlist1: %s" % (nlabel, nidx1, mlist1))
                     maddtoend1.append(nidx1) #resort matches to the bottom
-                    mlist2.remove(nidx2)
+                    try:
+                        mlist2.remove(nidx2)
+                    except ValueError:
+                        raise MASTError(self.__class__.__name__, "For neb %s, cannot remove atom index %s from mlist2: %s" % (nlabel, nidx2, mlist2))
                     maddtoend2.append(nidx2)
                 if not (mlist1==mlist2):
                     raise MASTError("NEB %s truncated manifests do not match: %s, %s" % (nlabel, mlist1, mlist2))
