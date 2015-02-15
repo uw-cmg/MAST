@@ -28,6 +28,7 @@ class AtomIndex(MASTObj):
             'input_options': (InputOptions, None, 'Input options')
         }
         MASTObj.__init__(self, allowed_keys, **kwargs)            
+        self.sdir = "structure_index_files"
         self.startSE = ""
         self.startdict = ""
         self.startdefects = ""
@@ -44,13 +45,65 @@ class AtomIndex(MASTObj):
         self.scaling = self.input_options.get_item('structure','scaling')
         if self.scaling == None:
             self.scaling = dict()
+        self.startstr = self.input_options.get_item('structure','structure')
         self.atomcount=1
         self.allatoms = ""
         return
+    
+    def make_structure_index_directory(self):
+        """Make structure index directory
+        """
+        if os.path.isdir(self.sdir):
+            import time
+            time.sleep(1)
+        if os.path.isdir(self.sdir):
+            raise MASTError(self.__class__.__name__, "Structure index directory already exists!")
+        os.mkdir(self.sdir)
+        #self.write_atom_index_files()
+        #self.write_initial_manifests()
+        #self.write_defect_instructions()
+        #self.write_neb_instructions()
+        return
+
+    def write_undefected_atom_indices(self):
+        """Write undefected atom indices, including scaled indices.
+            Also write an undefected manifest file.
+        """
+        scales = self.scaling.keys()
+        scales.append("")
+        for scaling_label in scales:
+            if scaling_label == "":
+                mySE=SE(struc_work1=self.startstr.copy())
+                mystruc=mySE.keywords['struc_work1']
+            else:
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mystruc=mySE.scale_structure()
+            alist=list()
+            manname=os.path.join(self.sdir,"manifest_undefected_%s" % scaling_label)
+            for site in mystruc:
+                akey=self.get_new_key()
+                aname="atomindex_%s" % akey
+                aname = os.path.join(self.sdir, aname)
+                ameta = Metadata(metafile=aname)
+                ameta.write_data("atomindex",akey)
+                ameta.write_data("original_frac_coords", site.frac_coords)
+                ameta.write_data("element", site.species_string)
+                ameta.write_data("scaling_label", scaling_label)
+                alist.append(akey)
+            self.write_manifest_file(alist,manname)
+        return 
+
+
 
     def set_up_initial_index(self):
         """Set up the initial index (first time).
         """
+        self.make_structure_index_directory()
+        self.write_undefected_atom_indices()
+
+
+        
+        ##
         self.get_structure_extensions()
         self.startdict = self.build_structure_dictionary(self.startSE)
         self.startdefects = self.make_defects_instruction_dictionary("")
@@ -76,23 +129,8 @@ class AtomIndex(MASTObj):
             print self.scalingnebphonons[scaling_label]
         print self.allatoms
         print self.input_options
-        self.make_structure_index_directory()
         return
 
-    def make_structure_index_directory(self):
-        """Make structure index directory
-        """
-        if os.path.isdir("structure_index_files"):
-            import time
-            time.sleep(1)
-        if os.path.isdir("structure_index_files"):
-            raise MASTError(self.__class__.__name__, "Structure index directory already exists!")
-        os.mkdir("structure_index_files")
-        self.write_atom_index_files()
-        self.write_initial_manifests()
-        self.write_defect_instructions()
-        self.write_neb_instructions()
-        return
 
     def write_initial_manifests(self):
         """Write initial structure manifests.
