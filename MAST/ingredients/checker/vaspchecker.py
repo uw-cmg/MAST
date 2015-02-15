@@ -73,6 +73,7 @@ class VaspChecker(BaseChecker):
             Args:
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
+            #TTM add atom index
         """
         return self.copy_a_file(childpath, "CONTCAR", newname)
 
@@ -246,6 +247,7 @@ class VaspChecker(BaseChecker):
 
     def _vasp_poscar_setup(self):
         """Set up the POSCAR file for a single VASP run.
+            #TTM add atom index
         """
         name = self.keywords['name']
         pospath = os.path.join(name, "POSCAR")

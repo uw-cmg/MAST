@@ -469,6 +469,7 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 [struct_init, struct_fin]: pymatgen Structure objects
+            #TTM add atom index
         """
         header = os.path.join(self.keywords['name'], "parent_structure_")
         mylabel = BaseIngredient.get_my_label(self, "neb_label").split("-")
@@ -497,6 +498,7 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 list of <Structure>: list of pymatgen Structure objects
+            #TTM add atom index
         """
         header = "parent_structure_"
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
@@ -575,6 +577,7 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
+            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
@@ -608,6 +611,7 @@ class ChopIngredient(BaseIngredient):
 
     def write_phonon_single(self):
         """Write the phonon files to a directory.
+            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
