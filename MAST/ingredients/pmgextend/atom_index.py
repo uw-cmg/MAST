@@ -352,28 +352,19 @@ class AtomIndex(MASTObj):
             else:
                 mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
             for nlabel in nlabels:
-                def1 = nlabel.split("-")[0].strip()
-                def2 = nlabel.split("-")[1].strip()
-                manname1=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def1, scaling_label))
-                manname2=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def2, scaling_label))
-                mlist1=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def1, scaling_label)))
-                mlist2=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def2, scaling_label)))
-                nlines=list(neb_dict[nlabel]["lines"])
-                for nline in nlines:
-                    ncoord1 = np.array(nline[1].split(), 'float')
-                    ncoord2 = np.array(nline[2].split(), 'float')
+                pdict = dict(neb_dict[nlabel]["phonon"]
+                for phonon_label in pdict.keys():
+                    pcoordsraw = pdict[phonon_label]['phonon_center_site']
+                    pthresh = pdict[phonon_label]['threshold']
+                    pcrad = pdict[phonon_label]['phonon_center_radius']
+                    pcoords = np.array(pcoordsraw.split(),'float')
                     if not (scaling_label == ""):
-                        ncoord1 = mySE.get_scaled_coordinates(ncoord1)
-                        ncoord2 = mySE.get_scaled_coordinates(ncoord2)
-                    nelem = nline[0]
-                    nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
-                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
-                    mlist1.remove(nidx1)
-                    mlist1.append(nidx1) #resort to the bottom
-                    mlist2.remove(nidx2)
-                    mlist2.append(nidx2)
-                self.write_manifest_file(mlist1, manname1)
-                self.write_manifest_file(mlist2, manname2)
+                        pcoords = mySE.get_scaled_coordinates(pcoords)
+                     
+                    #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
+                    pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
+                    manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s" % (nlabel, phonon_label, scaling_label))
+                    self.write_manifest_file(pindices, manname) 
         return
 
 
@@ -386,33 +377,33 @@ class AtomIndex(MASTObj):
         self.write_defected_atom_indices()
         self.write_defected_phonon_sd_manifests()
         self.write_neb_endpoint_manifests()
-        
+        self.write_neb_phonon_sd_manifests() 
         ##
-        self.get_structure_extensions()
-        self.startdict = self.build_structure_dictionary(self.startSE)
-        self.startdefects = self.make_defects_instruction_dictionary("")
-        for scaling_label in self.scaling.keys():
-            self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
-            self.scalingdefects[scaling_label] = self.make_defects_instruction_dictionary(scaling_label)
-        self.allatoms = self.combine_structure_dictionaries()
-        self.startdefectphonons = self.make_defects_phonon_dictionary("")
-        [self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
-        for scaling_label in self.scaling.keys():
-            self.scalingdefectphonons[scaling_label] = self.make_defects_phonon_dictionary(scaling_label)
-            [self.scalingnebs[scaling_label], self.scalingnebphonons[scaling_label]] = self.make_neb_instruction_dictionary(scaling_label)
-        print self.startdict
-        print self.startdefects
-        print self.startdefectphonons
-        print self.startnebs
-        print self.startnebphonons
-        for scaling_label in self.scaling.keys():
-            print self.scalingdicts[scaling_label]
-            print self.scalingdefects[scaling_label]
-            print self.scalingdefectphonons[scaling_label]
-            print self.scalingnebs[scaling_label]
-            print self.scalingnebphonons[scaling_label]
-        print self.allatoms
-        print self.input_options
+        #self.get_structure_extensions()
+        #self.startdict = self.build_structure_dictionary(self.startSE)
+        #self.startdefects = self.make_defects_instruction_dictionary("")
+        #for scaling_label in self.scaling.keys():
+        #    self.scalingdicts[scaling_label] = self.build_structure_dictionary(self.scalingSEs[scaling_label])
+        #    self.scalingdefects[scaling_label] = self.make_defects_instruction_dictionary(scaling_label)
+        #self.allatoms = self.combine_structure_dictionaries()
+        #self.startdefectphonons = self.make_defects_phonon_dictionary("")
+        #[self.startnebs, self.startnebphonons] = self.make_neb_instruction_dictionary("")
+        #for scaling_label in self.scaling.keys():
+        #    self.scalingdefectphonons[scaling_label] = self.make_defects_phonon_dictionary(scaling_label)
+        #    [self.scalingnebs[scaling_label], self.scalingnebphonons[scaling_label]] = self.make_neb_instruction_dictionary(scaling_label)
+        #print self.startdict
+        #print self.startdefects
+        #print self.startdefectphonons
+        #print self.startnebs
+        #print self.startnebphonons
+        #for scaling_label in self.scaling.keys():
+        #    print self.scalingdicts[scaling_label]
+        #    print self.scalingdefects[scaling_label]
+        #    print self.scalingdefectphonons[scaling_label]
+        #    print self.scalingnebs[scaling_label]
+        #    print self.scalingnebphonons[scaling_label]
+        #print self.allatoms
+        #print self.input_options
         return
 
 
