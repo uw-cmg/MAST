@@ -146,30 +146,43 @@ class AtomIndex(MASTObj):
                         if not (scaling_label == ""):
                             dcoords = mySE.get_scaled_coordinates(dcoords)
                         if dtype == "interstitial":
-                            akey=self.get_new_key()
-                            aname="atomindex_%s" % akey
-                            aname = os.path.join(self.sdir, aname)
-                            ameta = Metadata(metafile=aname)
-                            ameta.write_data("atomindex",akey)
-                            ameta.write_data("original_frac_coords", dcoords)
-                            ameta.write_data("element", delement)
-                            ameta.write_data("scaling_label", scaling_label)
-                            dlist.append(akey)
+                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
+                            if didx == None:
+                                akey=self.get_new_key()
+                                aname="atomindex_%s" % akey
+                                aname = os.path.join(self.sdir, aname)
+                                ameta = Metadata(metafile=aname)
+                                ameta.write_data("atomindex",akey)
+                                ameta.write_data("original_frac_coords", dcoords)
+                                ameta.write_data("element", delement)
+                                ameta.write_data("scaling_label", scaling_label)
+                                dlist.append(akey)
+                            else:
+                                dlist.append(didx)
                         elif dtype == "vacancy":
                             didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
                             dlist.remove(didx)
                         elif dtype in ["substitution","antisite"]:
-                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, False, 0.001) #leave element empty; just search coords
-                            dlist.remove(didx)
-                            akey=self.get_new_key()
-                            aname="atomindex_%s" % akey
-                            aname = os.path.join(self.sdir, aname)
-                            ameta = Metadata(metafile=aname)
-                            ameta.write_data("atomindex",akey)
-                            ameta.write_data("original_frac_coords", dcoords)
-                            ameta.write_data("element", delement) #sub element here
-                            ameta.write_data("scaling_label", scaling_label)
-                            dlist.append(akey)
+                            didxlist=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, True, 0.001) #leave element empty; just search coords
+                            for didx in didxlist:
+                                dmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, didx))
+                                dmetaelem = dmeta.read_data("element")
+                                if not (delement == dmetaelem):
+                                    if didx in dlist:
+                                        dlist.remove(didx)
+                            didxsub=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001) #leave element empty; just search coords
+                            if didxsub == None:
+                                akey=self.get_new_key()
+                                aname="atomindex_%s" % akey
+                                aname = os.path.join(self.sdir, aname)
+                                ameta = Metadata(metafile=aname)
+                                ameta.write_data("atomindex",akey)
+                                ameta.write_data("original_frac_coords", dcoords)
+                                ameta.write_data("element", delement) #sub element here
+                                ameta.write_data("scaling_label", scaling_label)
+                                dlist.append(akey)
+                            else:
+                                dlist.append(didxsub)
                 self.write_manifest_file(dlist, manname)
         return 
     
@@ -299,6 +312,8 @@ class AtomIndex(MASTObj):
                 manname2=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def2, scaling_label))
                 mlist1=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def1, scaling_label)))
                 mlist2=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def2, scaling_label)))
+                maddtoend1=list()
+                maddtoend2=list()
                 nlines=list(neb_dict[nlabel]["lines"])
                 for nline in nlines:
                     ncoord1 = np.array(nline[1].split(), 'float')
@@ -310,14 +325,19 @@ class AtomIndex(MASTObj):
                     nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
                     nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
                     mlist1.remove(nidx1)
-                    mlist1.append(nidx1) #resort to the bottom
+                    maddtoend1.append(nidx1) #resort matches to the bottom
                     mlist2.remove(nidx2)
-                    mlist2.append(nidx2)
+                    maddtoend2.append(nidx2)
+                for midx in [0:len(mlist1)]:
+                    if not (mlist1[midx] == mlist2[midx]):
+                        raise MASTError("NEB %s truncated manifests do not match: %s, %s" % (nlabel, mlist1, mlist2))
+                mlist1.extend(maddtoend1)
+                mlist2.extend(maddtoend2)
                 self.write_manifest_file(mlist1, manname1)
                 self.write_manifest_file(mlist2, manname2)
         return
-    def write_neb_endpoint_manifests():
-        """Make NEB endpoint manifests.
+    def write_neb_phonon_sd_manifests():
+        """Make NEB phonon manifests.
         """
         neb_dict=self.input_options.get_item('neb','nebs')
         if neb_dict == None:
