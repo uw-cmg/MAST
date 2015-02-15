@@ -75,7 +75,7 @@ class AtomIndex(MASTObj):
                 mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
                 mystruc=mySE.scale_structure()
             alist=list()
-            manname=os.path.join(self.sdir,"manifest_undefected_%s" % scaling_label)
+            manname=os.path.join(self.sdir,"manifest_%s__" % scaling_label)
             for site in mystruc:
                 akey=self.get_new_key()
                 aname="atom_index_%s" % akey
@@ -129,14 +129,14 @@ class AtomIndex(MASTObj):
         scales = self.scaling.keys()
         scales.append("")
         for scaling_label in scales:
-            alist=list(self.read_manifest_file("%s/manifest_undefected_%s" % (self.sdir, scaling_label)))
+            alist=list(self.read_manifest_file("%s/manifest_%s__" % (self.sdir, scaling_label)))
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
                 mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
             for dlabel in dlabels:
                 dlist = list(alist)
-                manname=os.path.join(self.sdir,"manifest_defect_%s_%s" % (dlabel, scaling_label))
+                manname=os.path.join(self.sdir,"manifest_%s_%s_" % (scaling_label, dlabel))
                 dsubkeys=defect_dict[dlabel].keys()
                 for dsubkey in dsubkeys:
                     if "subdefect_" in dsubkey:
@@ -310,10 +310,10 @@ class AtomIndex(MASTObj):
             for nlabel in nlabels:
                 def1 = nlabel.split("-")[0].strip()
                 def2 = nlabel.split("-")[1].strip()
-                manname1=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def1, scaling_label))
-                manname2=os.path.join(self.sdir,"manifest_neb_%s_%s_%s" % (nlabel, def2, scaling_label))
-                mlist1=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def1, scaling_label)))
-                mlist2=list(self.read_manifest_file("%s/manifest_defect_%s_%s" % (self.sdir, def2, scaling_label)))
+                manname1=os.path.join(self.sdir,"manifest_%s_%s_%s" % (scaling_label, def1, nlabel))
+                manname2=os.path.join(self.sdir,"manifest_%s_%s_%s" % (scaling_label, def2, nlabel))
+                mlist1=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def1)))
+                mlist2=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def2)))
                 maddtoend1=list()
                 maddtoend2=list()
                 nlines=list(neb_dict[nlabel]["lines"])
@@ -387,36 +387,58 @@ class AtomIndex(MASTObj):
         self.write_neb_phonon_sd_manifests() 
         return
 
-    def OLD_set_structure_from_inputs(self, input_options):
-        """Make a pymatgen structure and update the
-            structure key.
+    def update_atom_indices_from_structure(self, mystr, ing_label="", scaling_label="", defect_label="", neb_label=""):
+        """Add new information to each atom index
             Args:
-                input_options <InputOptions>
+                mystr <pymatgen Structure object>
+                ing_label <str>: Ingredient name
+                scaling_label <str>
+                defect_label <str>
+                neb_label <str>
         """
-        strposfile = input_options.get_item('structure','posfile')
-        if strposfile is None:
-            iopscoords=input_options.get_item('structure','coordinates')
-            iopslatt=input_options.get_item('structure','lattice')
-            iopsatoms=input_options.get_item('structure','atom_list')
-            iopsctype=input_options.get_item('structure','coord_type')
-            structure = MAST2Structure(lattice=iopslatt,
-                coordinates=iopscoords, atom_list=iopsatoms,
-                coord_type=iopsctype)
-        elif ('poscar' in strposfile.lower()):
-            from pymatgen.io.vaspio import Poscar
-            structure = Poscar.from_file(strposfile).structure
-        elif ('cif' in strposfile.lower()):
-            from pymatgen.io.cifio import CifParser
-            structure = CifParser(strposfile).get_structures()[0]
-        else:
-            error = 'Cannot build structure from file %s' % strposfile
-            raise MASTError(self.__class__.__name__, error)
-        input_options.update_item('structure','structure',structure)
-        if not input_options.get_item('structure','use_structure_index'):
-            pass
-        else:
-            self.do_structure_indexing(input_options)
+        mlist = list(self.read_manifest_file("%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label)))
+        for midx in range(0, len(mlist)):
+            ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
+            ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
         return
+
+    def make_coordinate_and_element_list_from_manifest(self, manname, ing_label=""):
+        """
+            Args:
+                ing_label <str>: If blank, use orig_frac_coords.
+                                Otherwise, use <ing_label>_frac_coords
+        """
+        if ing_label == "":
+            ing_label = "orig"
+        coordlist=list()
+        elemlist=list()
+        mlist=list(self.read_manifest_file(manname))
+        for aidx in mlist:
+            ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+            frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            elem = ameta.read_data("element")
+            frac_array = np.array(frac_coords[1:-1].split(), 'float')
+            coordlist.append(frac_array)
+            elemlist.append(elem)
+        return [coordlist, elemlist]
+
+    def graft_new_coordinates_from_manifest(self, mystr, manname, ingfrom):
+        """Graft new coordinates onto an existing structure.
+            Args:
+                mystr <pymatgen Structure object>
+                manname <str>: Manifest name
+                ingfrom <str>: Ingredient label from which to draw coordinates
+        """ 
+        [coordlist, elemlist]=self.make_coordinate_and_element_list_from_manifest(manname, ingfrom)
+        newstr = mystr.copy()
+        lenoldsites = len(newstr.sites())
+        newstr.remove_sites(range(0, lenoldsites))
+        for cct in range(0, len(coordlist)):
+            newstr.append(elemlist[cct], 
+                            coordlist[cct],
+                            coords_are_cartesian=False,
+                            validate_proximity=True)
+        return newstr
 
     def add_atom_specific_keywords_to_structure_dictionary(self):
         """Add atom specific keywords using the coordinates section
