@@ -76,7 +76,7 @@ class VaspChecker(BaseChecker):
         """
         return self.copy_a_file(childpath, "CONTCAR", newname)
 
-    def update_atom_index_for_complete(self):
+    def update_atom_index_for_complete(self, nebpiece=""):
         """Update atom index files with positions for the 
             completed ingredient.
         """
@@ -89,9 +89,22 @@ class VaspChecker(BaseChecker):
             return
         mymeta=Metadata(metafile="%s/metadata.txt" % mydir)
         scaling_label=mymeta.read_data("scaling_label")
+        if scaling_label == None:
+            scaling_label = ""
         defect_label=mymeta.read_data("defect_label")
-
-
+        if defect_label == None:
+            defect_label = ""
+        neb_label=mymeta.read_data("neb_label")
+        if neb_label == None:
+            neb_label = ""
+        if neb_piece == 0:
+            defect_label = neb_label.split("-")[0].strip()
+        elif neb_piece == 1:
+            defect_label = neb_label.split("-")[1].strip()
+        mystr=Poscar("CONTCAR").structure
+        ing_label=os.path.basename(mydir)
+        manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+        self.update_atom_indices_from_structure(mystr, ing_label, manname)
         return
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):

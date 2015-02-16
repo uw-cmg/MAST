@@ -387,16 +387,14 @@ class AtomIndex(MASTObj):
         self.write_neb_phonon_sd_manifests() 
         return
 
-    def update_atom_indices_from_structure(self, mystr, ing_label="", scaling_label="", defect_label="", neb_label=""):
+    def update_atom_indices_from_structure(self, mystr, ing_label="", manname=""):
         """Add new information to each atom index
             Args:
                 mystr <pymatgen Structure object>
                 ing_label <str>: Ingredient name
-                scaling_label <str>
-                defect_label <str>
-                neb_label <str>
+                manname <str>: Manifest name
         """
-        mlist = list(self.read_manifest_file("%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label)))
+        mlist = list(self.read_manifest_file("%s/%s" (self.sdir, manname))
         for midx in range(0, len(mlist)):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
             ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
