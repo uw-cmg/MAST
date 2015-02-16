@@ -145,6 +145,8 @@ class BaseIngredient(MASTObj):
                     if 'get_energy_from_energy_file' in dirutil.list_methods(self.checker,0):
                         energy = self.checker.get_energy_from_energy_file()
                         self.metafile.write_data('energy', energy)
+                    if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                        self.checker.update_atom_index_for_complete()
                     return True
                 else:
                     return False

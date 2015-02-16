@@ -73,9 +73,26 @@ class VaspChecker(BaseChecker):
             Args:
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
-            #TTM add atom index
         """
         return self.copy_a_file(childpath, "CONTCAR", newname)
+
+    def update_atom_index_for_complete(self):
+        """Update atom index files with positions for the 
+            completed ingredient.
+        """
+        proceed=False
+        mydir = self.keywords['name']
+        workdir=os.path.dirname(mydir)
+        if os.path.exists(os.path.join(workdir, "structure_index_files")):
+            proceed=True
+        if not proceed:
+            return
+        mymeta=Metadata(metafile="%s/metadata.txt" % mydir)
+        scaling_label=mymeta.read_data("scaling_label")
+        defect_label=mymeta.read_data("defect_label")
+
+
+        return
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
         """Forward the initial structure.
