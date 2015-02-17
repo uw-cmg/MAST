@@ -26,28 +26,18 @@ class AtomIndex(MASTObj):
     def __init__(self, **kwargs):
         allowed_keys = {
             'input_options': (InputOptions, None, 'Input options')
+            'working_directory': (str, "structure_index_files", "Working directory")
         }
         MASTObj.__init__(self, allowed_keys, **kwargs)            
-        self.sdir = "structure_index_files"
-        self.startSE = ""
-        self.startdict = ""
-        self.startdefects = ""
-        self.startdefectphonons = ""
-        self.startnebs = ""
-        self.startnebphonons = ""
-        self.scalingSEs = dict()
-        self.scalingdicts = dict()
-        self.scalingdefects = dict()
-        self.scalingdefectphonons = dict()
-        self.scalingnebs = dict()
-        self.scalingnebphonons = dict()
+        self.sdir = self.keywords['working_directory']
         self.input_options = self.keywords['input_options']
+        if self.input_options == None:
+            return
         self.scaling = self.input_options.get_item('structure','scaling')
         if self.scaling == None:
             self.scaling = dict()
         self.startstr = self.input_options.get_item('structure','structure')
         self.atomcount=1
-        self.allatoms = ""
         return
     
     def make_structure_index_directory(self):

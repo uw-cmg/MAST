@@ -18,6 +18,7 @@ from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
+from MAST.ingredients.pmgextend.atom_index import AtomIndex
 import os
 import shutil
 import logging
@@ -74,9 +75,37 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
         """
-        return self.copy_a_file(childpath, "CONTCAR", newname)
+        workdir=os.path.dirname(mydir)
+        if os.path.exists(os.path.join(workdir, "structure_index_files")):
+            proceed=True
+        if not proceed:
+            return self.copy_a_file(childpath, "CONTCAR", newname)
+        childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
+        scaling_label=childmeta.read_data("scaling_label")
+        defect_label=childmeta.read_data("defect_label")
+        neb_label=childmeta.read_data("neb_label")
+        if scaling_label == None:
+            scaling_label = ""
+        if defect_label == None:
+            defect_label = ""
+        if neb_label == None:
+            neb_label = ""
+        if neb_piece == 0:
+            defect_label = neb_label.split("-")[0].strip()
+        elif neb_piece == 1:
+            defect_label = neb_label.split("-")[1].strip()
+        #get child manifest
+        childmanifest="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+        #build structure from atom indices using parent name_frac_coords
+        ing_label=os.path.basename(self.keywords['name'])
+        mystr=Poscar("CONTCAR").structure
+        myatomindex=AtomIndex(working_directory=workdir)
+        newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
+        newposcar=Poscar(newstr)
+        newposcar.write_file(os.path.join(childpath,newname))
+        return
 
-    def update_atom_index_for_complete(self, nebpiece=""):
+    def update_atom_index_for_complete(self, neb_piece=""):
         """Update atom index files with positions for the 
             completed ingredient.
         """
@@ -86,15 +115,16 @@ class VaspChecker(BaseChecker):
         if os.path.exists(os.path.join(workdir, "structure_index_files")):
             proceed=True
         if not proceed:
+            self.logger.warning("Called update atom index for ingredient %s, but no atom indices exist." % self.keywords['name'])
             return
         mymeta=Metadata(metafile="%s/metadata.txt" % mydir)
         scaling_label=mymeta.read_data("scaling_label")
+        defect_label=mymeta.read_data("defect_label")
+        neb_label=mymeta.read_data("neb_label")
         if scaling_label == None:
             scaling_label = ""
-        defect_label=mymeta.read_data("defect_label")
         if defect_label == None:
             defect_label = ""
-        neb_label=mymeta.read_data("neb_label")
         if neb_label == None:
             neb_label = ""
         if neb_piece == 0:
@@ -104,7 +134,8 @@ class VaspChecker(BaseChecker):
         mystr=Poscar("CONTCAR").structure
         ing_label=os.path.basename(mydir)
         manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
-        self.update_atom_indices_from_structure(mystr, ing_label, manname)
+        myatomindex=AtomIndex(working_directory=workdir)
+        myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
         return
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
