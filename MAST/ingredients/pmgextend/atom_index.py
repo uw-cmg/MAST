@@ -397,7 +397,7 @@ class AtomIndex(MASTObj):
                                 Otherwise, use <ing_label>_frac_coords
         """
         if ing_label == "":
-            ing_label = "orig"
+            ing_label = "original"
         coordlist=list()
         elemlist=list()
         mlist=list(self.read_manifest_file("%s/%s" % (self.sdir,manname)))
