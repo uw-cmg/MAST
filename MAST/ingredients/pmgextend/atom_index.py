@@ -384,7 +384,7 @@ class AtomIndex(MASTObj):
                 ing_label <str>: Ingredient name
                 manname <str>: Manifest name
         """
-        mlist = list(self.read_manifest_file("%s/%s" (self.sdir, manname)))
+        mlist = list(self.read_manifest_file("%s/%s" % (self.sdir, manname)))
         for midx in range(0, len(mlist)):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
             ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
