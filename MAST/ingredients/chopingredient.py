@@ -735,6 +735,9 @@ class ChopIngredient(BaseIngredient):
         return
 
     def run_scale(self):
+        """
+            #TTM add atom index; use index instead of scaling if index exists
+        """
         try:
             base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure

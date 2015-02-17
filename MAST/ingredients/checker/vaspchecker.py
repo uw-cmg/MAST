@@ -317,6 +317,15 @@ class VaspChecker(BaseChecker):
             #parent should have given a structure
         else: #this is an originating run; mast should give it a structure
             my_poscar = Poscar(self.keywords['structure'])
+            workdir=os.path.dirname(name)
+            if os.path.exists("%s/structure_index_files" % workdir):
+                mystr=my_poscar.structure
+                manname="manifest_"
+                myatomindex=AtomIndex(working_directory=workdir)
+                newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, manname, "")
+                self.logger.info("Getting original coordinates from manifest.")
+                new_pos=Poscar(newstr)
+                my_poscar=new_pos
             self.logger.info("No POSCAR found from a parent; base structure used for %s" % self.keywords['name'])
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
             sxtend = StructureExtensions(struc_work1=my_poscar.structure, name=self.keywords['name'])

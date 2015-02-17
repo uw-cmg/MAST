@@ -410,12 +410,13 @@ class AtomIndex(MASTObj):
             elemlist.append(elem)
         return [coordlist, elemlist]
 
-    def graft_new_coordinates_from_manifest(self, mystr, manname, ingfrom):
+    def graft_new_coordinates_from_manifest(self, mystr, manname, ingfrom=""):
         """Graft new coordinates onto an existing structure.
             Args:
                 mystr <pymatgen Structure object>
                 manname <str>: Manifest name
-                ingfrom <str>: Ingredient label from which to draw coordinates
+                ingfrom <str>: Ingredient label from which to draw coordinates.
+                                Leave blank to use original coordinates
         """ 
         [coordlist, elemlist]=self.make_coordinate_and_element_list_from_manifest(manname, ingfrom)
         newstr = mystr.copy()
