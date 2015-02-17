@@ -736,7 +736,6 @@ class ChopIngredient(BaseIngredient):
 
     def run_scale(self):
         """
-            #TTM add atom index; use index instead of scaling if index exists
         """
         try:
             base_structure = self.checker.get_initial_structure_from_directory()
@@ -744,12 +743,25 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
+        workdir=os.path.dirname(self.keywords['name'])
         if scalingsize == None: scalingsize = '1 1 1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s" % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
+        if os.path.exists("%s/structure_index_files" % workdir): #TTM add atom index; use index coordinates instead of scaling if index exists
+            myatomindex=AtomIndex(working_directory=workdir)
+            mymeta=Metadata(metafile="metadata.txt")
+            scaling_label=mymeta.read_data("scaling_label")
+            if scaling_label == None:
+                scaling_label = ""
+            defect_label=mymeta.read_data("defect_label")
+            if defect_label == None:
+                defect_label = ""
+            manname="manifest_%s_%s_" % (scaling_label, defect_label)
+            scaled=myatomindex.graft_new_coordinates_from_manifest(scaled, manname, "")
+            self.logger.info("Getting coordinates from manifest.")
         self.checker.write_final_structure_file(scaled)
         return
 

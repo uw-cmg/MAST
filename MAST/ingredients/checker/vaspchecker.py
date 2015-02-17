@@ -308,7 +308,6 @@ class VaspChecker(BaseChecker):
 
     def _vasp_poscar_setup(self):
         """Set up the POSCAR file for a single VASP run.
-            #TTM add atom index
         """
         name = self.keywords['name']
         pospath = os.path.join(name, "POSCAR")
@@ -320,7 +319,7 @@ class VaspChecker(BaseChecker):
             workdir=os.path.dirname(name)
             if os.path.exists("%s/structure_index_files" % workdir):
                 mystr=my_poscar.structure
-                manname="manifest_"
+                manname="manifest___"
                 myatomindex=AtomIndex(working_directory=workdir)
                 newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, manname, "")
                 self.logger.info("Getting original coordinates from manifest.")

@@ -226,6 +226,7 @@ class RecipeSetup(MASTObj):
                 if sckeys in myingred:
                     scalingsize = sckeys
             if scalingsize:
+                datalist.append("scaling_label: %s" % scalingsize) #TTM add scaling label for atom index
                 datalist.append("scaling_size: [%s]" % scaling[scalingsize][0])
                 datalist.append("kpoints: %s %s %s" % (scaling[scalingsize][-3],scaling[scalingsize][-2],scaling[scalingsize][-1]))
         if 'defect_' in myingred:
