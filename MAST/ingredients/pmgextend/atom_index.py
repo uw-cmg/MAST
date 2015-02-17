@@ -429,6 +429,51 @@ class AtomIndex(MASTObj):
                             validate_proximity=True)
         return newstr
 
+    def get_sd_array(self, ing_label, multiple=False):
+        """Get a selective dynamics array.
+            Args:
+                ing_label <str>: Ingredient name
+                multiple <bool>: Multiple (T F F, F T F, etc. for each atom and direction) or 
+                    single (T T T for all indicated atoms) array
+        """
+        mymeta=Metadata(metafile="%s/%s/metadata.txt" % (self.sdir, ing_label))
+        neb_label = mymeta.read_data("neb_label")
+        defect_label = mymeta.read_data("defect_label")
+        if defect_label == None:
+            if neb_label == None:
+                nord_label = ""
+                defect_label = ""
+                neb_label = ""
+            else:
+                nord_label = neb_label
+                defect_label = nord_label.split()[0] #always define phonon from first endpoint
+        else:
+            nord_label = defect_label
+            neb_label = ""
+        phononman="%s/manifest_phonon_sd_%s_%s_%s" % (self.sdir, nord_label, phonon_label, scaling_label)
+        structureman="%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label) 
+        phononlist = self.read_manifest_file(phononman)
+        structurelist = self.read_manifest_file(structureman)
+        lensites=len(structurelist)
+        if not multiple:
+            mysd=np.zeros([lensites,3],bool)
+            for lidx in range(0, lensites):
+                if structurelist[lidx] in phononlist:
+                    mysd[lidx]=np.ones(3,bool)
+            return mysd
+        elif multiple:
+            mysdlist=list()
+            for lidx in range(0, lensites):
+                for myct in range(0,3):
+                    mysd = np.zeros([lensites,3],bool)
+                    mysd[lidx]=np.zeros(3,bool)
+                    if structurelist[lidx] in phononlist:
+                        mysd[lidx][myct]=1
+                        mysdlist.append(mysd)
+            return mysdlist 
+        return
+
+    
     def add_atom_specific_keywords_to_structure_dictionary(self):
         """Add atom specific keywords using the coordinates section
         """

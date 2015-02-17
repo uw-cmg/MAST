@@ -582,9 +582,14 @@ class ChopIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr,thresh] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr, thresh)
+        workdir = os.path.dirname(self.keywords['name'])
+        if os.path.exists("%s/structure_index_files"):
+            myatomindex=AtomIndex(working_directory=workdir)
+            sdarrlist=myatomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
+        else:
+            [pcs,pcr,thresh] = self.get_my_phonon_params()
+            sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
+            sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr, thresh)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
         sct=1
@@ -615,12 +620,17 @@ class ChopIngredient(BaseIngredient):
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
-        mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr,thresh] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
-        if sdarr == None:
-            return
+        workdir = os.path.dirname(self.keywords['name'])
+        if os.path.exists("%s/structure_index_files"):
+            myatomindex=AtomIndex(working_directory=workdir)
+            sdarr=myatomindex.get_sd_array(os.path.basename(self.keywords['name']))
+        else:
+            mystructure = self.checker.get_initial_structure_from_directory()
+            [pcs,pcr,thresh] = self.get_my_phonon_params()
+            sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
+            sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
+            if sdarr == None:
+                return
         self.checker.add_selective_dynamics_to_structure_file(sdarr)
 
     def get_my_phonon_params(self):
