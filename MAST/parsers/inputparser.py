@@ -818,6 +818,8 @@ class InputParser(MASTObj):
     def do_structure_indexing(self, input_options):
         """Index the structure into a dictionary.
         """
+        if os.path.exists("structure_index_files"):
+            return
         from MAST.ingredients.pmgextend.atom_index import AtomIndex
         myindex = AtomIndex(input_options = input_options)
         myindex.set_up_initial_index()

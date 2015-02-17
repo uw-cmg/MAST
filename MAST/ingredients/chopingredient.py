@@ -582,9 +582,9 @@ class ChopIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        workdir = os.path.dirname(self.keywords['name'])
-        if os.path.exists("%s/structure_index_files"):
-            myatomindex=AtomIndex(working_directory=workdir)
+        sdir = os.path.join(os.path.dirname(self.keywords['name'],"structure_index_files"))
+        if os.path.exists(sdir):
+            myatomindex=AtomIndex(structure_index_directory=sdir)
             sdarrlist=myatomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
         else:
             [pcs,pcr,thresh] = self.get_my_phonon_params()
@@ -620,9 +620,9 @@ class ChopIngredient(BaseIngredient):
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
-        workdir = os.path.dirname(self.keywords['name'])
-        if os.path.exists("%s/structure_index_files"):
-            myatomindex=AtomIndex(working_directory=workdir)
+        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
+        if os.path.exists(sdir):
+            myatomindex=AtomIndex(structure_index_directory=sdir)
             sdarr=myatomindex.get_sd_array(os.path.basename(self.keywords['name']))
         else:
             mystructure = self.checker.get_initial_structure_from_directory()
@@ -760,8 +760,9 @@ class ChopIngredient(BaseIngredient):
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s" % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
-        if os.path.exists("%s/structure_index_files" % workdir): #TTM add atom index; use index coordinates instead of scaling if index exists
-            myatomindex=AtomIndex(working_directory=workdir)
+        sdir=os.path.join(workdir,"structure_index_files") #use index coordinates if index exits
+        if os.path.exists(sdir):
+            myatomindex=AtomIndex(structure_index_directory=sdir)
             mymeta=Metadata(metafile="metadata.txt")
             scaling_label=mymeta.read_data("scaling_label")
             if scaling_label == None:

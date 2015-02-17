@@ -76,7 +76,8 @@ class VaspChecker(BaseChecker):
                 newname <str>: new name (default 'POSCAR')
         """
         workdir=os.path.dirname(mydir)
-        if os.path.exists(os.path.join(workdir, "structure_index_files")):
+        sdir=os.path.join(workdir,"structure_index_files")
+        if os.path.exists(sdir):
             proceed=True
         if not proceed:
             return self.copy_a_file(childpath, "CONTCAR", newname)
@@ -99,7 +100,7 @@ class VaspChecker(BaseChecker):
         #build structure from atom indices using parent name_frac_coords
         ing_label=os.path.basename(self.keywords['name'])
         mystr=Poscar("CONTCAR").structure
-        myatomindex=AtomIndex(working_directory=workdir)
+        myatomindex=AtomIndex(structure_index_directory=sdir)
         newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
         newposcar=Poscar(newstr)
         newposcar.write_file(os.path.join(childpath,newname))
@@ -112,7 +113,8 @@ class VaspChecker(BaseChecker):
         proceed=False
         mydir = self.keywords['name']
         workdir=os.path.dirname(mydir)
-        if os.path.exists(os.path.join(workdir, "structure_index_files")):
+        sdir=os.path.join(workdir,"structure_index_files")
+        if os.path.exists(sdir):
             proceed=True
         if not proceed:
             self.logger.warning("Called update atom index for ingredient %s, but no atom indices exist." % self.keywords['name'])
@@ -134,7 +136,7 @@ class VaspChecker(BaseChecker):
         mystr=Poscar("CONTCAR").structure
         ing_label=os.path.basename(mydir)
         manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
-        myatomindex=AtomIndex(working_directory=workdir)
+        myatomindex=AtomIndex(structure_index_directory=sdir)
         myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
         return
 

@@ -25,11 +25,11 @@ class AtomIndex(MASTObj):
     """
     def __init__(self, **kwargs):
         allowed_keys = {
-            'input_options': (InputOptions, None, 'Input options')
-            'working_directory': (str, "structure_index_files", "Working directory")
+            'input_options': (InputOptions, None, 'Input options'),
+            'structure_index_directory': (str, "structure_index_files", "Working directory")
         }
         MASTObj.__init__(self, allowed_keys, **kwargs)            
-        self.sdir = self.keywords['working_directory']
+        self.sdir = self.keywords['structure_index_directory']
         self.input_options = self.keywords['input_options']
         if self.input_options == None:
             return
@@ -384,7 +384,7 @@ class AtomIndex(MASTObj):
                 ing_label <str>: Ingredient name
                 manname <str>: Manifest name
         """
-        mlist = list(self.read_manifest_file("%s/%s" (self.sdir, manname))
+        mlist = list(self.read_manifest_file("%s/%s" (self.sdir, manname)))
         for midx in range(0, len(mlist)):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
             ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
