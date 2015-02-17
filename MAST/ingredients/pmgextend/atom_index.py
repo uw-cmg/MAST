@@ -404,8 +404,10 @@ class AtomIndex(MASTObj):
         for aidx in mlist:
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            frac_coords=frac_coords.split("[")[1]
+            frac_coords=frac_coords.split("]")[0]
+            frac_array = np.array(frac_coords.split(), 'float')
             elem = ameta.read_data("element")
-            frac_array = np.array(frac_coords[1:-1].split(), 'float')
             coordlist.append(frac_array)
             elemlist.append(elem)
         return [coordlist, elemlist]
