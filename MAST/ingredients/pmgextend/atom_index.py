@@ -420,7 +420,7 @@ class AtomIndex(MASTObj):
         """ 
         [coordlist, elemlist]=self.make_coordinate_and_element_list_from_manifest(manname, ingfrom)
         newstr = mystr.copy()
-        lenoldsites = len(newstr.sites())
+        lenoldsites = len(newstr.sites)
         newstr.remove_sites(range(0, lenoldsites))
         for cct in range(0, len(coordlist)):
             newstr.append(elemlist[cct], 
