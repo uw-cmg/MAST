@@ -404,6 +404,8 @@ class AtomIndex(MASTObj):
         for aidx in mlist:
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            if frac_coords == None:
+                raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords in manifest %s/%s" % (ing_label, self.sdir, manname))
             frac_coords=frac_coords.split("[")[1]
             frac_coords=frac_coords.split("]")[0]
             frac_array = np.array(frac_coords.split(), 'float')
