@@ -319,10 +319,11 @@ class VaspChecker(BaseChecker):
         else: #this is an originating run; mast should give it a structure
             my_poscar = Poscar(self.keywords['structure'])
             workdir=os.path.dirname(name)
-            if os.path.exists("%s/structure_index_files" % workdir):
+            sdir=os.path.join(workdir,"structure_index_files")
+            if os.path.exists(sdir):
                 mystr=my_poscar.structure
                 manname="manifest___"
-                myatomindex=AtomIndex(working_directory=workdir)
+                myatomindex=AtomIndex(structure_index_directory=sdir)
                 newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, manname, "")
                 self.logger.info("Getting original coordinates from manifest.")
                 new_pos=Poscar(newstr)

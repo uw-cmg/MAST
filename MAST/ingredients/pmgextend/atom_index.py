@@ -26,7 +26,7 @@ class AtomIndex(MASTObj):
     def __init__(self, **kwargs):
         allowed_keys = {
             'input_options': (InputOptions, None, 'Input options'),
-            'structure_index_directory': (str, "structure_index_files", "Working directory")
+            'structure_index_directory': (str, "structure_index_files", "Structure index directory")
         }
         MASTObj.__init__(self, allowed_keys, **kwargs)            
         self.sdir = self.keywords['structure_index_directory']
