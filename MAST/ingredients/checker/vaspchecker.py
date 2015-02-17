@@ -68,7 +68,7 @@ class VaspChecker(BaseChecker):
             mydir = self.keywords['name']
         return Poscar.from_file("%s/CONTCAR" % mydir).structure
     
-    def forward_final_structure_file(self, childpath, newname="POSCAR"):
+    def forward_final_structure_file(self, childpath, newname="POSCAR", neb_piece=""):
         """Forward the final structure.
             For VASP, this is the CONTCAR.
             Args:

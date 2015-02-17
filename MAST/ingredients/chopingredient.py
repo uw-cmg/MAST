@@ -1035,7 +1035,12 @@ class ChopIngredient(BaseIngredient):
     def give_structure_and_energy_to_neb(self, childname):
         childname = self._fullpath_childname(childname)
         label = BaseIngredient.get_my_label(self, "defect_label")
-        self.checker.forward_final_structure_file(childname,"parent_structure_" + label)
+        nebsplit = os.path.basename(self.keywords['name']).split()
+        if label in nebsplit[0]:
+            neb_piece = 0
+        elif label in nebsplit[1]:
+            neb_piece = 1
+        self.checker.forward_final_structure_file(childname,"parent_structure_" + label, neb_piece)
         self.checker.forward_energy_file(childname, "parent_energy_" + label)
     def give_structure_and_restart_files_softlinks(self, childname):
         childname = self._fullpath_childname(childname)
