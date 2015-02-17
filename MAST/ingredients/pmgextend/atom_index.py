@@ -400,7 +400,7 @@ class AtomIndex(MASTObj):
             ing_label = "orig"
         coordlist=list()
         elemlist=list()
-        mlist=list(self.read_manifest_file(manname))
+        mlist=list(self.read_manifest_file("%s/%s" % (self.sdir,manname)))
         for aidx in mlist:
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
