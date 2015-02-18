@@ -157,12 +157,16 @@ class AtomIndex(MASTObj):
                                 raise MASTError(self.__class__.__name__, "For defect %s, cannot remove atom index %s from list: %s" % (dlabel, didx, dlist))
                         elif dtype in ["substitution","antisite"]:
                             didxlist=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, True, 0.001) #leave element empty; just search coords
+                            idxtorepl=list()
                             for didx in didxlist:
                                 dmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, didx))
                                 dmetaelem = dmeta.read_data("element")
                                 if not (delement == dmetaelem):
                                     if didx in dlist:
                                         dlist.remove(didx)
+                                        idxtorepl.append(didx)
+                            if len(idxtorepl) > 1:
+                                raise MASTError(self.__class__.__name__, "Interstitial %s is attempting to replace more than one atom: %s" % (dlabel, idxtorepl))
                             didxsub=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001) #leave element empty; just search coords
                             if didxsub == None:
                                 akey=self.get_new_key()
@@ -173,9 +177,9 @@ class AtomIndex(MASTObj):
                                 ameta.write_data("original_frac_coords", dcoords)
                                 ameta.write_data("element", delement) #sub element here
                                 ameta.write_data("scaling_label", scaling_label)
-                                dlist.append(akey)
+                                dlist.append("%s;%s" % (akey, idxtorepl[0]))
                             else:
-                                dlist.append(didxsub)
+                                dlist.append("%s;%s" % (didxsub, idxtorepl[0]))
                 self.write_manifest_file(dlist, manname)
         return 
     
@@ -404,8 +408,10 @@ class AtomIndex(MASTObj):
         for aidx in mlist:
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            if frac_coords == None: #might be interstitial or substitution
+                frac_coords = ameta.read_data("original_frac_coords" % ing_label)
             if frac_coords == None:
-                raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords in manifest %s/%s" % (ing_label, self.sdir, manname))
+                raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             frac_coords=frac_coords.split("[")[1]
             frac_coords=frac_coords.split("]")[0]
             frac_array = np.array(frac_coords.split(), 'float')
