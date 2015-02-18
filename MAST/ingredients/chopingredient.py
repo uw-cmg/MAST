@@ -798,6 +798,8 @@ class ChopIngredient(BaseIngredient):
             if scaling_label == None:
                 scaling_label = ""
             defect_label=mymeta.read_data("defect_label")
+            if defect_label == None:
+                raise MASTError(self.__class__.__name__,"Ingredient %s has no defect_label in metadata. Cannot get manifest." % self.keywords['name'])
             parent=mymeta.read_data("parent") 
             manname="manifest_%s_%s_" % (scaling_label, defect_label)
             sxtend = StructureExtensions(struc_work1=scaled, scaling_size=scalingsize, name=self.keywords['name'])
