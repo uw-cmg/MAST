@@ -146,9 +146,9 @@ class AtomIndex(MASTObj):
                                 ameta.write_data("original_frac_coords", dcoords)
                                 ameta.write_data("element", delement)
                                 ameta.write_data("scaling_label", scaling_label)
-                                dlist.append(akey)
+                                dlist.append("%s;int" % akey) #interstitial label
                             else:
-                                dlist.append(didx)
+                                dlist.append("%s;int" % didx)
                         elif dtype == "vacancy":
                             didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
                             try:
@@ -414,6 +414,8 @@ class AtomIndex(MASTObj):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             if idxtorepl == "":
                 frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            elif idxtorepl == "int": #interstitial
+                frac_coords = ameta.read_data("original_frac_coords")
             else: #substitution
                 replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
                 frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
