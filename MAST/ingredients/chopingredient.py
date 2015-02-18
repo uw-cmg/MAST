@@ -582,7 +582,7 @@ class ChopIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        sdir = os.path.join(os.path.dirname(self.keywords['name'],"structure_index_files"))
+        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
         if os.path.exists(sdir):
             myatomindex=AtomIndex(structure_index_directory=sdir)
             sdarrlist=myatomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
@@ -783,7 +783,7 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
-        sdir = os.path.join(os.path.dirname(self.keywords['name'],"structure_index_files"))
+        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
         if os.path.exists(sdir):
             myatomindex=AtomIndex(structure_index_directory=sdir)
             mymeta=Metadata(metafile="metadata.txt")
