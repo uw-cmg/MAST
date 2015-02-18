@@ -23,6 +23,7 @@ from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.pmgextend.atom_index import AtomIndex
 
 class ChopIngredient(BaseIngredient):
     def __init__(self, **kwargs):
