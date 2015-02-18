@@ -783,6 +783,20 @@ class ChopIngredient(BaseIngredient):
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
+        sdir = os.path.join(os.path.dirname(self.keywords['name'],"structure_index_files"))
+        if os.path.exists(sdir):
+            myatomindex=AtomIndex(structure_index_directory=sdir)
+            mymeta=Metadata(metafile="metadata.txt")
+            scaling_label=mymeta.read_data("scaling_label")
+            if scaling_label == None:
+                scaling_label = ""
+            defect_label=mymeta.read_data("defect_label")
+            parent=mymeta.read_data("parent") 
+            manname="manifest_%s_%s_" % (scaling_label, defect_label)
+            scaled=myatomindex.graft_new_coordinates_from_manifest(scaled, manname, parent)
+            self.logger.info("Getting coordinates from manifest.")
+            self.checker.write_final_structure_file(scaled)
+            return
         if scalingsize == None: scalingsize = '1,1,1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]        
