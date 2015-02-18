@@ -414,7 +414,7 @@ class AtomIndex(MASTObj):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             if idxtorepl == "":
                 frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
-            else: #interstitial
+            else: #substitution
                 replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
                 frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
             if frac_coords == None:
