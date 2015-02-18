@@ -405,11 +405,18 @@ class AtomIndex(MASTObj):
         coordlist=list()
         elemlist=list()
         mlist=list(self.read_manifest_file("%s/%s" % (self.sdir,manname)))
-        for aidx in mlist:
+        for aidxline in mlist:
+            aidxsplit=aidxline.split(";")
+            aidx=aidxsplit[0]
+            idxtorepl=""
+            if len(aidxsplit) > 1:
+                idxtorepl=aidxsplit[1]
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
-            frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
-            if frac_coords == None: #might be interstitial or substitution
-                frac_coords = ameta.read_data("original_frac_coords" % ing_label)
+            if idxtorepl == "":
+                frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+            else: #interstitial
+                replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
+                frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
             if frac_coords == None:
                 raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             frac_coords=frac_coords.split("[")[1]
