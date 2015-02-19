@@ -100,7 +100,7 @@ class VaspChecker(BaseChecker):
         #build structure from atom indices using parent name_frac_coords
         ing_label=os.path.basename(self.keywords['name'])
         childmeta.write_data("parent",ing_label)
-        mystr=Poscar.from_file("CONTCAR").structure
+        mystr=Poscar.from_file("%s/CONTCAR" % self.keywords['name']).structure
         myatomindex=AtomIndex(structure_index_directory=sdir)
         newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
         newposcar=Poscar(newstr)
@@ -134,7 +134,7 @@ class VaspChecker(BaseChecker):
             defect_label = neb_label.split("-")[0].strip()
         elif neb_piece == 1:
             defect_label = neb_label.split("-")[1].strip()
-        mystr=Poscar.from_file("CONTCAR").structure
+        mystr=Poscar.from_file("%s/CONTCAR" % self.keywords["name"]).structure
         ing_label=os.path.basename(mydir)
         manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
         myatomindex=AtomIndex(structure_index_directory=sdir)
