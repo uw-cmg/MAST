@@ -23,7 +23,6 @@ from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import VaspChecker
-from MAST.ingredients.pmgextend.atom_index import AtomIndex
 
 class ChopIngredient(BaseIngredient):
     def __init__(self, **kwargs):
@@ -583,10 +582,8 @@ class ChopIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
-        if os.path.exists(sdir):
-            myatomindex=AtomIndex(structure_index_directory=sdir)
-            sdarrlist=myatomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
+        if self.atomindex:
+            sdarrlist=self.atomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
         else:
             [pcs,pcr,thresh] = self.get_my_phonon_params()
             sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
@@ -621,10 +618,8 @@ class ChopIngredient(BaseIngredient):
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
-        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
-        if os.path.exists(sdir):
-            myatomindex=AtomIndex(structure_index_directory=sdir)
-            sdarr=myatomindex.get_sd_array(os.path.basename(self.keywords['name']))
+        if self.atomindex:
+            sdarr=self.atomindex.get_sd_array(os.path.basename(self.keywords['name']))
         else:
             mystructure = self.checker.get_initial_structure_from_directory()
             [pcs,pcr,thresh] = self.get_my_phonon_params()
@@ -761,9 +756,7 @@ class ChopIngredient(BaseIngredient):
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s" % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
-        sdir=os.path.join(workdir,"structure_index_files") #use index coordinates if index exits
-        if os.path.exists(sdir):
-            myatomindex=AtomIndex(structure_index_directory=sdir)
+        if self.atomindex:
             mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
             scaling_label=mymeta.read_data("scaling_label")
             if scaling_label == None:
@@ -772,7 +765,7 @@ class ChopIngredient(BaseIngredient):
             if defect_label == None:
                 defect_label = ""
             manname="manifest_%s_%s_" % (scaling_label, defect_label)
-            scaled=myatomindex.graft_new_coordinates_from_manifest(scaled, manname, "")
+            scaled=self.atomindex.graft_new_coordinates_from_manifest(scaled, manname, "")
             self.logger.info("Getting coordinates from manifest.")
         self.checker.write_final_structure_file(scaled)
         return
@@ -790,9 +783,7 @@ class ChopIngredient(BaseIngredient):
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s"%self.keywords['name'])        
         defect = self.keywords['program_keys']['mast_defect_settings']
         scaled = base_structure.copy()
-        sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
-        if os.path.exists(sdir):
-            myatomindex=AtomIndex(structure_index_directory=sdir)
+        if self.atomindex:
             mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
             scaling_label=mymeta.read_data("scaling_label")
             if scaling_label == None:
@@ -804,7 +795,7 @@ class ChopIngredient(BaseIngredient):
             manname="manifest_%s_%s_" % (scaling_label, defect_label)
             sxtend = StructureExtensions(struc_work1=scaled, scaling_size=scalingsize, name=self.keywords['name'])
             scaled = sxtend.scale_structure()
-            scaled=myatomindex.graft_new_coordinates_from_manifest(scaled, manname, parent)
+            scaled=self.atomindex.graft_new_coordinates_from_manifest(scaled, manname, parent)
             self.logger.info("Getting coordinates from manifest.")
             self.checker.write_final_structure_file(scaled)
             return
