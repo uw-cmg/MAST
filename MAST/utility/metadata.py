@@ -35,7 +35,7 @@ class Metadata(MASTObj):
                     metafile.write('%s = %s\n' % (keyword, entry))
                 elif (option == 1):
                     self.clear_data(keyword)
-                    metafile.write('%s = %s\n' % (keyword, entry))
+                    metafile.write('%s = %s\n' % (keyword, data))
 
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
