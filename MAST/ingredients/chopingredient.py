@@ -764,7 +764,7 @@ class ChopIngredient(BaseIngredient):
         sdir=os.path.join(workdir,"structure_index_files") #use index coordinates if index exits
         if os.path.exists(sdir):
             myatomindex=AtomIndex(structure_index_directory=sdir)
-            mymeta=Metadata(metafile="metadata.txt")
+            mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
             scaling_label=mymeta.read_data("scaling_label")
             if scaling_label == None:
                 scaling_label = ""
@@ -793,7 +793,7 @@ class ChopIngredient(BaseIngredient):
         sdir = os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
         if os.path.exists(sdir):
             myatomindex=AtomIndex(structure_index_directory=sdir)
-            mymeta=Metadata(metafile="metadata.txt")
+            mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
             scaling_label=mymeta.read_data("scaling_label")
             if scaling_label == None:
                 scaling_label = ""
