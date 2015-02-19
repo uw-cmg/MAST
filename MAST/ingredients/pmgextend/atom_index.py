@@ -391,7 +391,7 @@ class AtomIndex(MASTObj):
         mlist = list(self.read_manifest_file("%s/%s" % (self.sdir, manname)))
         for midx in range(0, len(mlist)):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
-            ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords, 1)
+            ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
         return
 
     def make_coordinate_and_element_list_from_manifest(self, manname, ing_label=""):
