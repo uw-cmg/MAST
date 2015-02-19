@@ -393,6 +393,9 @@ class AtomIndex(MASTObj):
             msplit=mlist[midx].split(";")
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, msplit[0]))
             ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
+            if len(msplit) > 1 and not (msplit[1] == "int"):
+                ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, msplit[1]))
+                ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
         return
 
     def make_coordinate_and_element_list_from_manifest(self, manname, ing_label=""):
