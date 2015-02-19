@@ -390,7 +390,8 @@ class AtomIndex(MASTObj):
         """
         mlist = list(self.read_manifest_file("%s/%s" % (self.sdir, manname)))
         for midx in range(0, len(mlist)):
-            ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, mlist[midx]))
+            msplit=mlist[midx].split(";")
+            ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, msplit[0]))
             ameta.write_data("%s_frac_coords" % ing_label, mystr.sites[midx].frac_coords)
         return
 
@@ -414,13 +415,17 @@ class AtomIndex(MASTObj):
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
             if idxtorepl == "":
                 frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
+                if frac_coords == None:
+                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             elif idxtorepl == "int": #interstitial
                 frac_coords = ameta.read_data("original_frac_coords")
+                if frac_coords == None:
+                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             else: #substitution
                 replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
                 frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
-            if frac_coords == None:
-                raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
+                if frac_coords == None:
+                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s for coordinates and atom index %s for element" % (ing_label, self.sdir, manname, idxtorepl,aidx))
             frac_coords=frac_coords.split("[")[1]
             frac_coords=frac_coords.split("]")[0]
             frac_array = np.array(frac_coords.split(), 'float')
