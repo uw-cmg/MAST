@@ -806,6 +806,8 @@ class ChopIngredient(BaseIngredient):
             scaled = sxtend.scale_structure()
             scaled=myatomindex.graft_new_coordinates_from_manifest(scaled, manname, parent)
             self.logger.info("Getting coordinates from manifest.")
+            ing_label = os.path.basename(self.keywords(["name"]))
+            myatomindex.update_atom_indices_from_structure(scaled, ing_label, manname)
             self.checker.write_final_structure_file(scaled)
             return
         for key in defect:
