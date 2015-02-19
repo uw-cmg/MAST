@@ -900,9 +900,17 @@ class ChopIngredient(BaseIngredient):
     def complete_structure(self):
         if self.directory_is_locked():
             return False
-        return self.checker.has_ending_structure_file()
+        iscomplete = self.checker.has_ending_structure_file()
+        if iscomplete:
+            if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                self.checker.update_atom_index_for_complete()
+        return iscomplete
     def complete_singlerun(self):
-        return BaseIngredient.is_complete(self)
+        iscomplete = BaseIngredient.is_complete(self)
+        if iscomplete:
+            if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                self.checker.update_atom_index_for_complete()
+        return iscomplete
     def complete_neb_subfolders(self):
         """Make sure all subfolders are complete."""
         myname=self.keywords['name']
