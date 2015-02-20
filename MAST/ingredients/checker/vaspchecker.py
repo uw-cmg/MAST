@@ -102,6 +102,8 @@ class VaspChecker(BaseChecker):
         childmeta.write_data("parent",ing_label)
         mystr=Poscar.from_file("%s/CONTCAR" % self.keywords['name']).structure
         myatomindex=AtomIndex(structure_index_directory=sdir)
+        if "inducescaling" in childpath: #initial scaled coords have no parent
+            ing_label="original"
         newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
         newposcar=Poscar(newstr)
         newposcar.write_file(os.path.join(childpath,newname))

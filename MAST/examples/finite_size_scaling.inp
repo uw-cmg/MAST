@@ -10,6 +10,7 @@ perfect_opt (no_run)
             inducedefect_<S>_<N>_<Q> (inducedefect)
                 defect_<S>_<N>_<Q>_opt (relax)
                     madelung_utility (madelung)
+                    phonon_<S>_<N>_<Q>_<P> (phonon)
     {end}
 $end
 
@@ -45,7 +46,7 @@ begin no_run
 mast_write_method write_singlerun
 mast_ready_method file_exists POSCAR
 mast_run_method copy_file POSCAR CONTCAR
-mast_complete_method file_exists CONTCAR
+mast_complete_method complete_structure
 end
 
 begin inducescaling
@@ -154,6 +155,7 @@ threshold 1e-4
 coord_type fractional
 begin vac
 vacancy 0.0000000000000000  0.0000000000000000  0 X1
+phonon onephon 0.5 0.0 0.5 0.0001
 charge=-3,-3
 end
 begin sub
