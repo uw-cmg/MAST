@@ -306,8 +306,20 @@ class AtomIndex(MASTObj):
                 def2 = nlabel.split("-")[1].strip()
                 manname1=os.path.join(self.sdir,"manifest_%s_%s_%s" % (scaling_label, def1, nlabel))
                 manname2=os.path.join(self.sdir,"manifest_%s_%s_%s" % (scaling_label, def2, nlabel))
-                mlist1=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def1)))
-                mlist2=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def2)))
+                mlist1raw=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def1)))
+                mlist2raw=list(self.read_manifest_file("%s/manifest_%s_%s_" % (self.sdir, scaling_label, def2)))
+                mlist1=list()
+                mlist2=list()
+                for mitem in mlist1raw: #clean up leftover semicolons from defect manifests
+                    if ";" in mitem:
+                        mlist1.append(mitem.split(";")[0])
+                    else:
+                        mlist1.append(mitem)
+                for mitem in mlist2raw: #clean up leftover semicolons from defect manifests
+                    if ";" in mitem:
+                        mlist2.append(mitem.split(";")[0])
+                    else:
+                        mlist2.append(mitem)
                 maddtoend1=list()
                 maddtoend2=list()
                 nlines=list(neb_dict[nlabel]["lines"])
