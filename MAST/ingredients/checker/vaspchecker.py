@@ -75,6 +75,7 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
         """
+        proceed=False
         workdir=os.path.dirname(self.keywords['name'])
         sdir=os.path.join(workdir,"structure_index_files")
         if os.path.exists(sdir):
