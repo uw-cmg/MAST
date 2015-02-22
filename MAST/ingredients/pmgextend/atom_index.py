@@ -477,20 +477,18 @@ class AtomIndex(MASTObj):
         """
         mymeta=Metadata(metafile="%s/metadata.txt" % (ing_label))
         phonon_label = mymeta.read_data("phonon_label")
-        neb_label = mymeta.read_data("neb_label")
-        defect_label = mymeta.read_data("defect_label")
-        if defect_label == None:
-            if neb_label == None:
-                nord_label = ""
-                defect_label = ""
-                neb_label = ""
-            else:
-                nord_label = neb_label
-                defect_label = nord_label.split()[0] #always define phonon from first endpoint
+        scaling_label = mymeta.read_data("scaling_label")
+        if scaling_label == None:
+            scaling_label = ""
+        nord_label = phonon_label.split("_")[0]
+        if "-" in nord_label:
+            neb_label = nord_label
+            defect_label = neb_label.split('-')[0] #always parse from first ep
         else:
-            nord_label = defect_label
             neb_label = ""
-        phononman="%s/manifest_phonon_sd_%s_%s_%s" % (self.sdir, nord_label, phonon_label, scaling_label)
+            defect_label = nord_label
+        phonon_only_label = phonon_label.split("_")[-1]
+        phononman="%s/manifest_phonon_sd_%s_%s_%s" % (self.sdir, nord_label, phonon_only_label, scaling_label)
         structureman="%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label) 
         phononlist = self.read_manifest_file(phononman)
         structurelist = self.read_manifest_file(structureman)
