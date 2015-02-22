@@ -471,11 +471,12 @@ class AtomIndex(MASTObj):
     def get_sd_array(self, ing_label, multiple=False):
         """Get a selective dynamics array.
             Args:
-                ing_label <str>: Ingredient name
+                ing_label <str>: Ingredient name (fullpath)
                 multiple <bool>: Multiple (T F F, F T F, etc. for each atom and direction) or 
                     single (T T T for all indicated atoms) array
         """
-        mymeta=Metadata(metafile="%s/%s/metadata.txt" % (self.sdir, ing_label))
+        mymeta=Metadata(metafile="%s/metadata.txt" % (ing_label))
+        phonon_label = mymeta.read_data("phonon_label")
         neb_label = mymeta.read_data("neb_label")
         defect_label = mymeta.read_data("defect_label")
         if defect_label == None:

@@ -583,7 +583,7 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
         if self.atomindex:
-            sdarrlist=self.atomindex.get_sd_array(os.path.basename(self.keywords['name']), True)
+            sdarrlist=self.atomindex.get_sd_array(self.keywords['name'], True)
         else:
             [pcs,pcr,thresh] = self.get_my_phonon_params()
             sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
@@ -619,7 +619,7 @@ class ChopIngredient(BaseIngredient):
         self.checker.set_up_program_input()
         self.write_submit_script()
         if self.atomindex:
-            sdarr=self.atomindex.get_sd_array(os.path.basename(self.keywords['name']))
+            sdarr=self.atomindex.get_sd_array(self.keywords['name'])
         else:
             mystructure = self.checker.get_initial_structure_from_directory()
             [pcs,pcr,thresh] = self.get_my_phonon_params()
@@ -983,7 +983,8 @@ class ChopIngredient(BaseIngredient):
             self.checker.keywords['name'] = impath
             self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
-    
+        return
+
     def give_supercell_subfolder_file(self, oldfname, newfname, childname):
         """Give each CONTCAR to a corresponding scale1 through scale5
             child folder.
@@ -1064,12 +1065,7 @@ class ChopIngredient(BaseIngredient):
     def give_structure_and_energy_to_neb(self, childname):
         childname = self._fullpath_childname(childname)
         label = BaseIngredient.get_my_label(self, "defect_label")
-        nebsplit = os.path.basename(self.keywords['name']).split()
-        if label in nebsplit[0]:
-            neb_piece = 0
-        elif label in nebsplit[1]:
-            neb_piece = 1
-        self.checker.forward_final_structure_file(childname,"parent_structure_" + label, neb_piece)
+        self.checker.forward_final_structure_file(childname,"parent_structure_" + label)
         self.checker.forward_energy_file(childname, "parent_energy_" + label)
     def give_structure_and_restart_files_softlinks(self, childname):
         childname = self._fullpath_childname(childname)

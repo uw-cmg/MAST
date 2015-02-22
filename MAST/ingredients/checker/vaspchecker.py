@@ -68,7 +68,7 @@ class VaspChecker(BaseChecker):
             mydir = self.keywords['name']
         return Poscar.from_file("%s/CONTCAR" % mydir).structure
     
-    def forward_final_structure_file(self, childpath, newname="POSCAR", neb_piece=""):
+    def forward_final_structure_file(self, childpath, newname="POSCAR"):
         """Forward the final structure.
             For VASP, this is the CONTCAR.
             Args:
@@ -82,21 +82,35 @@ class VaspChecker(BaseChecker):
         if not proceed:
             return self.copy_a_file(childpath, "CONTCAR", newname)
         childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
-        scaling_label=childmeta.read_data("scaling_label")
-        defect_label=childmeta.read_data("defect_label")
-        neb_label=childmeta.read_data("neb_label")
-        if scaling_label == None:
-            scaling_label = ""
-        if defect_label == None:
-            defect_label = ""
-        if neb_label == None:
-            neb_label = ""
-        if neb_piece == 0:
-            defect_label = neb_label.split("-")[0].strip()
-        elif neb_piece == 1:
-            defect_label = neb_label.split("-")[1].strip()
+        child_scaling_label=childmeta.read_data("scaling_label")
+        child_defect_label=childmeta.read_data("defect_label")
+        child_neb_label=childmeta.read_data("neb_label")
+        child_phonon_label=childmeta.read_data("phonon_label")
+        if child_scaling_label == None:
+            child_scaling_label = ""
+        if child_defect_label == None:
+            child_defect_label = ""
+        if child_neb_label == None:
+            child_neb_label = ""
+        if child_phonon_label == None:
+            child_phonon_label = ""
+        parentmeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
+        parent_defect_label=parentmeta.read_data("defect_label")
+        parent_neb_label=parentmeta.read_data("neb_label")
+        if parent_defect_label == None:
+            parent_defect_label = ""
+        if parent_neb_label == None:
+            parent_neb_label = ""
+        if (not (child_neb_label == "")) and (not (parent_defect_label == "")):
+            child_defect_label = parent_defect_label
+        if (not (child_phonon_label == "")):
+            if (not (parent_defect_label == "")):
+                child_defect_label = parent_defect_label
+            if (not (parent_neb_label == "")):
+                child_neb_label = parent_neb_label
+                child_defect_label = parent_neb_label.split('-')[0].strip() # always define phonons from first endpoint
         #get child manifest
-        childmanifest="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+        childmanifest="manifest_%s_%s_%s" % (child_scaling_label, child_defect_label, child_neb_label)
         #build structure from atom indices using parent name_frac_coords
         ing_label=os.path.basename(self.keywords['name'])
         childmeta.write_data("parent",ing_label)
@@ -109,7 +123,7 @@ class VaspChecker(BaseChecker):
         newposcar.write_file(os.path.join(childpath,newname))
         return
 
-    def update_atom_index_for_complete(self, neb_piece=""):
+    def update_atom_index_for_complete(self):
         """Update atom index files with positions for the 
             completed ingredient.
         """
@@ -132,15 +146,23 @@ class VaspChecker(BaseChecker):
             defect_label = ""
         if neb_label == None:
             neb_label = ""
-        if neb_piece == 0:
-            defect_label = neb_label.split("-")[0].strip()
-        elif neb_piece == 1:
-            defect_label = neb_label.split("-")[1].strip()
-        mystr=Poscar.from_file("%s/CONTCAR" % self.keywords["name"]).structure
-        ing_label=os.path.basename(mydir)
-        manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
-        myatomindex=AtomIndex(structure_index_directory=sdir)
-        myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
+        if neb_label == "":
+            mystr=Poscar.from_file("%s/CONTCAR" % self.keywords["name"]).structure
+            ing_label=os.path.basename(mydir)
+            manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+            myatomindex=AtomIndex(structure_index_directory=sdir)
+            myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
+        else:
+            nebdirs = dirutil.immediate_subdirs(self.keywords["name"])
+            for mysubdir in nebdirs:
+                if os.path.isfile("%s/%s/CONTCAR" % (self.keywords["name"],mysubdir)):
+                    mystr=Poscar.from_file("%s/%s/CONTCAR" % (self.keywords["name"], mysubdir)).structure
+                    ing_label=os.path.join(os.path.basename(mydir), mysubdir)
+                    for defect_label in neb_label.split("-"):
+                        manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+                        myatomindex=AtomIndex(structure_index_directory=sdir)
+                        myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
+                
         return
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
