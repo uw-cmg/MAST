@@ -62,16 +62,23 @@ class ModifyRecipe(MASTObj):
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST modifying recipe started at %s using input file %s in directory %s" % (self.asctime, self.keywords['inputfile'], self.recdir))
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        self.check_for_structure_index_files()
         self.set_up_recipe()
+
+    def check_for_structure_index_files(self):
+        """Check for structure_index_files directory.
+            If it exists, archive it.
+        """
+        if os.path.exists("%s/structure_index_files" % self.recdir):
+            shutil.move("%s/structure_index_files" % self.recdir, "%s/archive_sif_%s" % (self.recdir, self.asctime))
+            self.logger.info("Structure index file directory detected. Moved to an archive folder.")
+        return
 
     def set_input_options(self):
         """Set input options.
         """
         parser_obj = InputParser(inputfile=self.keywords['inputfile'])
         self.input_options = parser_obj.parse()
-        if self.input_options.get_item('structure','use_structure_index') == True:
-            raise MASTError(self.__class__.__name__, "Set use_structure_index to False for modifying a recipe. Modifying a recipe does not currently work with structure indexing. (2014-12-16)")
-            return None
 
     def set_up_recipe(self):
         """Set up the recipe.
