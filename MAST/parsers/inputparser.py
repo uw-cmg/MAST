@@ -36,8 +36,7 @@ STRUCTURE_KEYWORDS = {'posfile': None,
                       'lattice': None,
                       'primitive': False,
                       'structure': None,
-                      'use_structure_index': True,
-                      'structure_index': None
+                      'use_structure_index': "False"
                      }
 
 DEFECTS_KEYWORDS = {'coord_type': 'cartesian',
@@ -809,9 +808,7 @@ class InputParser(MASTObj):
             error = 'Cannot build structure from file %s' % strposfile
             raise MASTError(self.__class__.__name__, error)
         input_options.update_item('structure','structure',structure)
-        if not input_options.get_item('structure','use_structure_index'):
-            pass
-        else:
+        if input_options.get_item('structure','use_structure_index') == 'True':
             self.do_structure_indexing(input_options)
         return
 
