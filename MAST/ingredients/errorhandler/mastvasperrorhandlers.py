@@ -66,7 +66,7 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         if not (os.path.isfile(ofile)):
             ofile = "%s/01/OUTCAR" % self.ingpath
         if not (os.path.isfile(ofile)):
-            self.logger.error("No OUTCAR file at %s or %s/01." % self.ingpath)
+            self.logger.error("No OUTCAR file at %s or %s/01." % (self.ingpath, self.ingpath))
             return False
         myiters = fileutil.grepme(ofile, "Iter")
         if len(myiters) == 0:
