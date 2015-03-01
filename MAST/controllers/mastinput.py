@@ -287,7 +287,7 @@ class MASTInput(MASTObj):
             be repeat scaling label names if looping is used.
         """
         usestridx=self.input_options.get_item('structure','use_structure_index')
-        if usestridx=="True":
+        if usestridx in ["True","true","T","t"]:
             shutil.move("structure_index_files", self.working_directory)
             #import glob
             #for stridxfile in glob.glob('*structure_index*'):
