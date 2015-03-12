@@ -221,7 +221,10 @@ class StructureExtensions(MASTObj):
             raise MASTError(self.__class__.__name__, "No initial state structure for %s" % self.keywords['name'])
         if self.keywords['struc_work2'] == None:
             raise MASTError(self.__class__.__name__, "No final state structure for %s" % self.keywords['name'])
-        structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
+        if os.path.exists(os.path.join(self.keywords['name'],'structure_index_files'):
+            structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1, False, True, 0)
+        else:
+            structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
     def get_sd_array(self, phonon_center_site, phonon_center_radius, threshold=1e-1):
