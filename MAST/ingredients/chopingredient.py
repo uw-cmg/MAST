@@ -11,7 +11,6 @@ import shutil
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
-from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
 from MAST.utility import MASTObj
