@@ -8,7 +8,7 @@ MAST focuses on diffusion and defect workflows that use density functional theor
 
 However, MAST can be generalized to other workflows and codes.
 
-`MAST is available from the Python Package Index <https://pypi.python.org/pypi/MAST>`_
+`MAST is available from the Python Package Index. <https://pypi.python.org/pypi/MAST>`_
 
 ==================
 The MAST Kitchen
