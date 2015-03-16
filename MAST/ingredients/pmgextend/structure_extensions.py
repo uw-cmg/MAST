@@ -30,8 +30,9 @@ class StructureExtensions(MASTObj):
             'name': (str, get_mast_control_path(), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
-        self.logger = logging.getLogger(self.keywords['name'])
-        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        rname=os.path.dirname(self.keywords['name'])
+        self.logger = logging.getLogger(rname)
+        self.logger = loggerutils.add_handler_for_recipe(rname, self.logger)
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def induce_defect(self, defect, coord_type, threshold):
@@ -221,7 +222,9 @@ class StructureExtensions(MASTObj):
             raise MASTError(self.__class__.__name__, "No initial state structure for %s" % self.keywords['name'])
         if self.keywords['struc_work2'] == None:
             raise MASTError(self.__class__.__name__, "No final state structure for %s" % self.keywords['name'])
+        self.logger.info("Do_interpolate name %s" % self.keywords['name'])
         if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
+            self.logger.info("Attempting interpolation without auto sorting.")
             structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1, False, True, 0)
         else:
             structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
