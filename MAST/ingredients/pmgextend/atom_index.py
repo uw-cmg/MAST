@@ -544,7 +544,7 @@ class AtomIndex(MASTObj):
         manname="%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label) 
         return manname
 
-    def make_temp_manifest_from_scrambled_structure(self, ingdir, mystr, scrambledman, namelabel):
+    def make_temp_manifest_from_scrambled_structure(self, ingdir, mystr, scrambledman):
         """Make a temporary manifest from a scrambled structure.
             Args:
                 ingdir <str>: Ingredient directory (need scaling label)
