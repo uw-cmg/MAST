@@ -446,7 +446,7 @@ class ChopIngredient(BaseIngredient):
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
             image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
             if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
-                image_structures_raw = image_structures.copy()
+                image_structures_raw = list(image_structures)
                 image_structures = list()
                 self.logger.info("Attempting interpolation without auto sorting.")
                 self.logger.info("STRUCTURE LIST: %s" % structure_list)
