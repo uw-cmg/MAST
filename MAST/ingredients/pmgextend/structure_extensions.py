@@ -17,7 +17,6 @@ from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 from pymatgen.core.sites import PeriodicSite
-from MAST.ingredients.pmgextend.atom_index import AtomIndex
 
 class StructureExtensions(MASTObj):
     """Structure extensions
@@ -223,28 +222,7 @@ class StructureExtensions(MASTObj):
             raise MASTError(self.__class__.__name__, "No initial state structure for %s" % self.keywords['name'])
         if self.keywords['struc_work2'] == None:
             raise MASTError(self.__class__.__name__, "No final state structure for %s" % self.keywords['name'])
-        self.logger.info("Do_interpolate name %s" % self.keywords['name'])
-        if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
-            self.logger.info("Attempting interpolation without auto sorting.")
-            structure_list_raw = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
-            self.logger.info("STRUCTURE LIST: %s" % structure_list)
-            self.logger.info("Attempt to unsort.")
-            myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
-            manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
-            manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
-            myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],structure_list_raw[0],'scrambledep1')
-            myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],structure_list_raw[-1],'scrambledep2')
-            structure_list=list()
-            for sidx in range(0,len(structure_list_raw)-1):
-                onestruc = structure_list_raw[sidx]
-                newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"scrambledep1"))
-                structure_list.append(newstruc)
-            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], structure_list_raw[-1], manifestep2, os.path.join(self.keywords['name'],"scrambledep2"))
-            structure_list.append(newstruc)
-
-
-        else:
-            structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
+        structure_list = self.keywords['struc_work1'].interpolate(self.keywords['struc_work2'], numim+1)
         return structure_list
 
     def get_sd_array(self, phonon_center_site, phonon_center_radius, threshold=1e-1):
