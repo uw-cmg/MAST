@@ -280,7 +280,7 @@ class AtomIndex(MASTObj):
         elem_matches=list()
         scaling_matches=list()
         namelist=list()
-        allfolders=dirutil.immediate_subdirs(self.sdir)
+        allfolders=immediate_subdirs(os.path.dirname(self.sdir)) #ing dirs
         for folder in allfolders:
             namelist.append("%s_frac_coords" % folder)
         for nametofind in namelist:
@@ -288,8 +288,10 @@ class AtomIndex(MASTObj):
                 ameta=Metadata(metafile=aname)
                 aidx=ameta.read_data("atom_index")
                 atom_ofc=ameta.read_data(nametofind)
+                if atom_ofc == None:
+                    continue
                 if ";" in atom_ofc:
-                    atom_ofc = atom_ofc.split(';')[-1] # get most updated
+                    atom_ofc = atom_ofc.split(';')[-1].strip() # get most updated
                 atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
                 if np.allclose(atom_ofc_arr,coord,rtol,tol):
                     coord_matches.append(aidx)
