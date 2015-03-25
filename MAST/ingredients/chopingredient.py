@@ -448,8 +448,6 @@ class ChopIngredient(BaseIngredient):
             if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
                 image_structures_raw = list(image_structures)
                 image_structures = list()
-                self.logger.info("Attempting interpolation without auto sorting.")
-                self.logger.info("STRUCTURE LIST: %s" % structure_list)
                 self.logger.info("Attempt to unsort.")
                 myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
                 manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
