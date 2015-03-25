@@ -254,6 +254,73 @@ class AtomIndex(MASTObj):
             else:
                 return allmatches
         return None
+    
+    def find_any_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001):
+        """Find the atomic index of any FRACTIONAL coordinate in the 
+            structure dictionary.
+            Args:
+                coord <numpy array of float>: coordinate to find
+                element <str>: element symbol to match
+                                If blank, matches any element.
+                scaling_label <str>: scaling label
+                                    If blank, must match NO scaling (blank)
+                find_multiple <boolean>: allow multiple matches. Default False.
+                tol <float>: tolerance
+            Returns:
+                atomic index <hex string>: atomic index of match, 
+                    if find_multiple is false
+                list of atomic indices of matches, if find_multiple is true
+                Returns None if no match is found
+        """
+        import glob
+        matchstring = "%s/atom_index_*" % self.sdir
+        idxnames = glob.glob(matchstring)
+        rtol=tol*100
+        coord_matches=list()
+        elem_matches=list()
+        scaling_matches=list()
+        namelist=list()
+        allfolders=dirutil.immediate_subdirs(self.sdir)
+        for folder in allfolders:
+            namelist.append("%s_frac_coords" % folder)
+        for nametofind in namelist:
+            for aname in idxnames:
+                ameta=Metadata(metafile=aname)
+                aidx=ameta.read_data("atom_index")
+                atom_ofc=ameta.read_data(nametofind)
+                if ";" in atom_ofc:
+                    atom_ofc = atom_ofc.split(';')[-1] # get most updated
+                atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
+                if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                    coord_matches.append(aidx)
+        if element == "":
+            elem_matches = list(coord_matches)
+        else:
+            for aidx in coord_matches:
+                ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+                atom_elem=ameta.read_data("element")
+                if (element == atom_elem):
+                    elem_matches.append(aidx)
+        for aidx in elem_matches:
+            ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
+            ascale=ameta.read_data("scaling_label")
+            if (scaling_label == ascale):
+                scaling_matches.append(aidx)
+        allmatches = list(scaling_matches)
+        if len(allmatches) == 0:
+            return None
+        if len(allmatches) > 1:
+            if not find_multiple:
+                raise MASTError(self.__class__.__name__,
+                    "Multiple matches found for coordinate %s: %s" % (coord, allmatches))
+            else:
+                return allmatches
+        if len(allmatches) == 1:
+            if not find_multiple:
+                return allmatches[0]
+            else:
+                return allmatches
+        return None
 
     def write_defected_phonon_sd_manifests(self):
         """Write defected phonon structure dynamics manifests.
@@ -477,12 +544,13 @@ class AtomIndex(MASTObj):
         manname="%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label) 
         return manname
 
-    def make_temp_manifest_from_scrambled_structure(self, ingdir, mystr, scrambledman):
+    def make_temp_manifest_from_scrambled_structure(self, ingdir, mystr, scrambledman, namelabel):
         """Make a temporary manifest from a scrambled structure.
             Args:
                 ingdir <str>: Ingredient directory (need scaling label)
                 mystr <pymatgen Structure>: Scrambled structure that does not match a manifest
                 scrambledman <str>: Scrambled manifest list that the structure does match
+                namelabel <str>: Parent label of frac coords to find
             Returns:
                 writes to scrambledman
         """
@@ -493,7 +561,7 @@ class AtomIndex(MASTObj):
         
         scrambledlist=list()
         for site in mystr.sites:
-            fidx=self.find_orig_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.001)
+            fidx=self.find_any_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.001)
             scrambledlist.append(fidx)
 
         self.write_manifest_file(scrambledlist, scrambledman)
