@@ -486,7 +486,7 @@ class AtomIndex(MASTObj):
             Returns:
                 writes to scrambledman
         """
-        mymeta=Metadata("%s/metadata.txt" % ingdir)
+        mymeta=Metadata(metafile="%s/metadata.txt" % ingdir)
         scaling_label = mymeta.read_data("scaling_label")
         if scaling_label == None:
             scaling_label=""
