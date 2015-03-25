@@ -309,6 +309,7 @@ class AtomIndex(MASTObj):
             if (scaling_label == ascale):
                 scaling_matches.append(aidx)
         allmatches = list(scaling_matches)
+        allmatches = list(set(allmatches)) # get unique values
         if len(allmatches) == 0:
             return None
         if len(allmatches) > 1:
