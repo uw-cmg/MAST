@@ -449,6 +449,84 @@ class AtomIndex(MASTObj):
             elemlist.append(elem)
         return [coordlist, elemlist]
 
+    def guess_manifest_from_ingredient_metadata(self, ingdir, nebpc=0):
+        """Guess the manifest name from the ingredient.
+            Not for phonon manifests.
+            Args:
+                ingdir <str>: ingredient name, full path
+                nebpc <int>: 0 for first endpoint (default)
+                                1 for final endpoint
+            Returns:
+                manname <str>: manifest name guess; returns None if errors
+        """
+        mymeta=Metadata(metafile="%s/metadata.txt" % (ingdir))
+        #phonon_label = mymeta.read_data("phonon_label")
+        scaling_label = mymeta.read_data("scaling_label")
+        neb_label = mymeta.read_data("neb_label")
+        defect_label = mymeta.read_data("defect_label")
+        if scaling_label == None:
+            scaling_label=""
+        if defect_label == None:
+            if neb_label == None:
+                defect_label=""
+            else:
+                if nebpc == 0:
+                    defect_label = neb_label.split("-")[0].strip()
+                else:
+                    defect_label = neb_label.split("-")[1].strip()
+        manname="%s/manifest_%s_%s_%s" % (self.sdir, scaling_label, defect_label, neb_label) 
+        return manname
+
+    def make_temp_manifest_from_scrambled_structure(self, ingdir, mystr, scrambledman):
+        """Make a temporary manifest from a scrambled structure.
+            Args:
+                ingdir <str>: Ingredient directory (need scaling label)
+                mystr <pymatgen Structure>: Scrambled structure that does not match a manifest
+                scrambledman <str>: Scrambled manifest list that the structure does match
+            Returns:
+                writes to scrambledman
+        """
+        mymeta=Metadata("%s/metadata.txt" % ingdir)
+        scaling_label = mymeta.read_data("scaling_label")
+        if scaling_label == None:
+            scaling_label=""
+        
+        scrambledlist=list()
+        for site in mystr.sites:
+            fidx=self.find_orig_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.001)
+            scrambledlist.append(fidx)
+
+        self.write_manifest_file(scrambledlist, scrambledman)
+
+        return
+
+
+    def unscramble_a_scrambled_structure(self, ingdir, mystr, manname, scrambledman):
+        """Unscramble a scrambled structure.
+            Args:
+                ingdir <str>: Ingredient directory
+                mystr <pymatgen Structure>: Scrambled structure that does not match a manifest
+                manname <str>: Manifest list the structure is supposed to match
+                scrambledman <str>: Scrambled manifest list that the structure does match
+            Returns:
+                Unscrambled structure
+        """
+        manlist = self.read_manifest_file(manname)
+        scrambledlist = self.read_manifest_file(scrambledman)
+        
+        newstr = mystr.copy()
+        lenoldsites = len(newstr.sites)
+        newstr.remove_sites(range(0, lenoldsites))
+
+        for midx in manlist:
+            scrambledidx = scrambledlist.index(midx)
+            newsite = mystr.sites[scrambledidx]
+            newstr.append(newsite.species_string, 
+                            newsite.frac_coords,
+                            coords_are_cartesian=False,
+                            validate_proximity=True)
+        return newstr
+
     def graft_new_coordinates_from_manifest(self, mystr, manname, ingfrom=""):
         """Graft new coordinates onto an existing structure.
             Args:
