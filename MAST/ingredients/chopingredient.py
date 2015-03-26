@@ -476,6 +476,58 @@ class ChopIngredient(BaseIngredient):
         return
 
 
+    def write_pathfinder_neb(self, chgcarfolder):
+        """Get the parent structures, sort and match atoms, and interpolate.
+            Write images to the appropriate folders.
+        """
+        parentstructures = self.get_parent_structures()
+        parentimagestructures = self.get_parent_image_structures()
+        image_structures = list()
+        if len(parentimagestructures) > 0:
+            raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb without mast_coordinates, or on initial NEB setup.")
+        
+
+
+        #sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
+        #image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+
+        s1 = parentstructures[0]
+        s2 = parentstructures[1]
+        #s1 = Poscar.from_file(args.s1).structure
+        #s2 = Poscar.from_file(args.s2).structure
+        
+        #Must be an interstitial
+        mysi = os.path.join(os.path.dirname(self.keywords['name']),
+                "structure_index_files")
+        if not os.path.isdir(mysi):
+            raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb with structure indexing turned on.")
+
+        myai=AtomIndex(structure_index_directory=mysi)
+        manname=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        #get aidxs from ;int lines of defect manifests
+        #match aidx to position in sorted NEB manifests
+        #get those sites
+
+        # Find diffusing species site indices
+        #mg_sites = []
+        #for site_i, site in enumerate(s1.sites):
+        #    if site.specie == Element("Mg"):
+        #        mg_sites.append(site_i)
+
+        # Interpolate
+        #use a param for perf_stat or othe ing label for chgcar
+        #print("Using CHGCAR potential mode.")
+        #chg = Chgcar.from_file(args.chg)
+        #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
+
+
+        if image_structures == None:
+            raise MASTError(self.__class__.__name__,"Bad number of images")
+        self.checker.keywords['program_keys']['mast_neb_settings']['image_structures']=image_structures
+        self.checker.set_up_program_input()
+        self.place_parent_energy_files()
+        self.write_submit_script()
+        return
 
 
 
