@@ -477,7 +477,8 @@ class ChopIngredient(BaseIngredient):
 
 
     def write_pathfinder_neb(self, chgcarfolder):
-        """Get the parent structures, sort and match atoms, and interpolate.
+        """Get the parent structures, sort and match atoms, and interpolate
+            using Daniil Kitchaev's NEB Pathfinder
             Write images to the appropriate folders.
         """
         parentstructures = self.get_parent_structures()
@@ -501,9 +502,7 @@ class ChopIngredient(BaseIngredient):
                 "structure_index_files")
         if not os.path.isdir(mysi):
             raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb with structure indexing turned on.")
-
-        myai=AtomIndex(structure_index_directory=mysi)
-        manname=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        
         #get aidxs from ;int lines of defect manifests
         #match aidx to position in sorted NEB manifests
         #get those sites
@@ -514,12 +513,40 @@ class ChopIngredient(BaseIngredient):
         #    if site.specie == Element("Mg"):
         #        mg_sites.append(site_i)
 
+        myai=AtomIndex(structure_index_directory=mysi)
+        nebman=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        nebsplit=nebman.split("_")
+        defectman=("%s_%s_%s_" % (nebsplit[0], nebsplit[1], nebsplit[2]))
+        intlist=list()
+        defectmanlist=myai.read_manifest_file(defectman)
+        for defectidx in defectmanlist:
+            if "int" in defectidx:
+                intlist.append(defectidx.split(';')[0])
+        
+        nebmanlist=myai.read_manifest_file(nebman)
+
+        intsites=list()
+        for intitem in intlist:
+            intidx = nebmanlist.index(intitem)
+            intsites.append(intidx)
+
         # Interpolate
         #use a param for perf_stat or othe ing label for chgcar
         #print("Using CHGCAR potential mode.")
         #chg = Chgcar.from_file(args.chg)
         #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
 
+        if not os.path.isfile("%s/CHGCAR") % chgcarfolder:
+            raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
+        from pymatgen.io.vaspio import Chgcar
+        chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
+        
+        numim = self.keywords['program_keys']['mast_neb_settings']['images']
+        
+        from MAST.under_development.daniil_pathfinder import *
+        pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
+
+        image_structures=pf.images
 
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
