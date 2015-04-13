@@ -480,6 +480,11 @@ class ChopIngredient(BaseIngredient):
         """Get the parent structures, sort and match atoms, and interpolate
             using Daniil Kitchaev's NEB Pathfinder
             Write images to the appropriate folders.
+            Args:
+                chgcarfolder <str>: CHGCAR folder, e.g. a perfect static
+                addlsites <int>: number of additional sites at the end of
+                            the NEB manifest to pick up for needing
+                            path finding, e.g. vacancy positions
         """
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
