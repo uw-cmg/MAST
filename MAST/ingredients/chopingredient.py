@@ -535,7 +535,7 @@ class ChopIngredient(BaseIngredient):
         addlsites=int(addlsites)
         if addlsites > 0:
             self.logger.info("additional sites: %s" % addlsites)
-            intlist.extend(pmg_nebmanlist[-1*addlsites:])
+            intlist.extend(nebmanlist[-1*addlsites:])
 
         intsites=list()
         for intitem in intlist:
