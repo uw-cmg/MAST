@@ -476,7 +476,7 @@ class ChopIngredient(BaseIngredient):
         return
 
 
-    def write_pathfinder_neb(self, chgcarfolder):
+    def write_pathfinder_neb(self, chgcarfolder, addlsites=0):
         """Get the parent structures, sort and match atoms, and interpolate
             using Daniil Kitchaev's NEB Pathfinder
             Write images to the appropriate folders.
@@ -512,11 +512,18 @@ class ChopIngredient(BaseIngredient):
         #for site_i, site in enumerate(s1.sites):
         #    if site.specie == Element("Mg"):
         #        mg_sites.append(site_i)
-
+        sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
+        pmg_image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+        
         myai=AtomIndex(structure_index_directory=mysi)
+        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[0],os.path.join(self.keywords['name'],'pmg_scrambledep1'))
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[-1],os.path.join(self.keywords['name'],'pmg_scrambledep2'))
+        
         nebman=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
-        nebsplit=nebman.split("_")
-        defectman=("%s_%s_%s_" % (nebsplit[0], nebsplit[1], nebsplit[2]))
+        nebsplit=nebman.rsplit("_", 1)
+        defectman="%s_" % nebsplit[0]
         intlist=list()
         defectmanlist=myai.read_manifest_file(defectman)
         for defectidx in defectmanlist:
@@ -524,19 +531,26 @@ class ChopIngredient(BaseIngredient):
                 intlist.append(defectidx.split(';')[0])
         
         nebmanlist=myai.read_manifest_file(nebman)
+        pmg_nebmanlist=myai.read_manifest_file(os.path.join(self.keywords['name'],'pmg_scrambledep1'))
+        addlsites=int(addlsites)
+        if addlsites > 0:
+            self.logger.info("additional sites: %s" % addlsites)
+            intlist.extend(pmg_nebmanlist[-1*addlsites:])
 
         intsites=list()
         for intitem in intlist:
-            intidx = nebmanlist.index(intitem)
+            intidx = pmg_nebmanlist.index(intitem)
             intsites.append(intidx)
 
+        print "ADDLSITES: %s, INTSITES: %s" % (addlsites, intsites)
+        self.logger.info("intsites: %s" % intsites)
         # Interpolate
         #use a param for perf_stat or othe ing label for chgcar
         #print("Using CHGCAR potential mode.")
         #chg = Chgcar.from_file(args.chg)
         #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
 
-        if not os.path.isfile("%s/CHGCAR") % chgcarfolder:
+        if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
             raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
         from pymatgen.io.vaspio import Chgcar
         chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
@@ -547,6 +561,21 @@ class ChopIngredient(BaseIngredient):
         pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
 
         image_structures=pf.images
+        
+        image_structures_raw = list(image_structures)
+        image_structures = list()
+        self.logger.info("Attempt to unsort.")
+        myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
+        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[0],os.path.join(self.keywords['name'],'scrambledep1'))
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[-1],os.path.join(self.keywords['name'],'scrambledep2'))
+        for sidx in range(0,len(image_structures_raw)-1):
+            onestruc = image_structures_raw[sidx]
+            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"scrambledep1"))
+            image_structures.append(newstruc)
+        newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"scrambledep2"))
+        image_structures.append(newstruc)
 
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
