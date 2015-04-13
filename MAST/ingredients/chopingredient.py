@@ -568,13 +568,11 @@ class ChopIngredient(BaseIngredient):
         myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
         manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
         manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
-        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[0],os.path.join(self.keywords['name'],'scrambledep1'))
-        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[-1],os.path.join(self.keywords['name'],'scrambledep2'))
         for sidx in range(0,len(image_structures_raw)-1):
             onestruc = image_structures_raw[sidx]
-            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"scrambledep1"))
+            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"pmg_scrambledep1"))
             image_structures.append(newstruc)
-        newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"scrambledep2"))
+        newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"pmg_scrambledep2"))
         image_structures.append(newstruc)
 
         if image_structures == None:
