@@ -1,0 +1,25 @@
+#!/bin/bash
+###TTM 2014-08-27 post-mast steps
+export MAST_CONTROL=//home/mayeshiba/MAST_2/CONTROL
+export MAST_SCRATCH=//home/mayeshiba/MAST_2/SCRATCH
+export MAST_ARCHIVE=//home/mayeshiba/MAST_2/ARCHIVE
+rm $MAST_SQUID/MAST_workdirs_2.tar.gz
+cd $MAST_CHTC
+mv back_2.tar.gz $HOME/back_2.tar.gz
+cd $HOME
+tar -xzvf back_2.tar.gz
+rm back_2.tar.gz
+sleep 10
+$MAST_CHTC/stripsubmitlist_2.py
+sleep 2
+while read sdir
+do 
+    echo $sdir
+    if [[ $sdir == *"/neb"* ]]
+    then 
+        echo "NEB detected; switching submission script"
+        cp $MAST_CHTC/submit_neb.sh $sdir/submit.sh
+    else echo "not neb"
+    fi
+done < $MAST_CONTROL/submitlist
+mast -m submitonly
