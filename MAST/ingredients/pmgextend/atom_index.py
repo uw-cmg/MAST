@@ -564,7 +564,7 @@ class AtomIndex(MASTObj):
         
         scrambledlist=list()
         for site in mystr.sites:
-            fidx=self.find_any_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.001)
+            fidx=self.find_any_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.002)
             scrambledlist.append(fidx)
 
         self.write_manifest_file(scrambledlist, scrambledman)
