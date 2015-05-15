@@ -50,7 +50,7 @@ class StructoptChecker(BaseChecker):
         """Get the StructOpt keywords and make a dictionary."""
         input_dict=dict()
         allowedpath = os.path.join(dirutil.get_mast_install_path(),
-                        'ingredients',
+                        'ingredients', 
                         'programkeys','structopt_allowed_keywords.py')
         allowed_list = self._structopt_get_allowed_keywords(allowedpath)
         for key, value in self.keywords['program_keys'].iteritems():
@@ -644,7 +644,7 @@ class StructoptChecker(BaseChecker):
                     passflag = False
                 if passflag:
                     if MyOpti.structure=='Defect':
-                        from structopt.tools import find_defects
+                        from MAST.structopt.tools import find_defects
                         outt=find_defects(myatoms.copy(), MyOpti.solidbulk, MyOpti.sf,
                             atomlistcheck=MyOpti.atomlist,trackvacs=MyOpti.trackvacs,
                             trackswaps=MyOpti.trackswaps,debug=False)
@@ -747,16 +747,66 @@ class StructoptChecker(BaseChecker):
                 if 'atom_symbols' in diritem:
                     os.remove(os.path.join(pathtooutput, diritem))
         #Write structures to POSCAR files or DATA files for evaluation in MAST
-        for i in range(len(invalid_ind)):
+        MyOpti.output.write('length of individauls = {0}'.format(len(invalid_ind)))
+        for inv_idx in range(len(invalid_ind)):
+            MyOpti.output.write('This one = {0}'.format(inv_idx))
             if 'VASP' in self.structopt_parameters['calc_method']:
-                indname = "%s/POSCAR_%02d" % (MyOpti.filename+'-rank0', i)
+                indname = os.path.join(pathtooutput,'POSCAR_%02d' % inv_idx)
+                #"%s/POSCAR_%02d" % (MyOpti.filename+'-rank0', i)
                 import ase
                 if MyOpti.structure == 'Defect':
-                    indatoms = invalid_ind[i][0]
-                    indatoms.extend(invalid_ind[i].bulki)
+                    indatoms = invalid_ind[inv_idx][0].copy()
+                    indatoms.extend(invalid_ind[inv_idx].bulki)
+                    #Run small optimizer to ensure atoms are not too close
+                    #from ase.calculators.lj import LennardJones
+                    #from ase.optimize import BFGS
+                    #indatoms.set_calculator(LennardJones())
+                    #dyn = BFGS(indatoms)
+                    #dyn.run(fmax=0.01, steps=500)
+                    from MAST.structopt.tools.eval_energy import check_min_dist
+                    min_len = 1.8 #Minimum distance between 2 atoms in angstroms
+                    from ase.calculators.neighborlist import NeighborList
+                    from ase import Atom, Atoms
+                    import numpy
+                    cutoffs=[2.0 for one in indatoms]
+                    nl=NeighborList(cutoffs,bothways=True,self_interaction=False)
+                    count = 0
+                    dflag = True
+                    while dflag:
+                        count +=1
+                        dflag = False
+                        for one in indatoms:
+                            nl.update(indatoms)
+                            nbatoms=Atoms()
+                            nbatoms.append(one)
+                            indices, offsets=nl.get_neighbors(one.index)
+                            for index, d in zip(indices,offsets):
+                                index = int(index)
+                                sym=indatoms[index].symbol
+                                pos=indatoms[index].position + numpy.dot(d,indatoms.get_cell())
+                                at=Atom(symbol=sym,position=pos)
+                                nbatoms.append(at)
+                            for i in range(1,len(nbatoms)):
+                                d = nbatoms.get_distance(0,i)
+                                if d < min_len:
+                                    nbatoms.set_distance(0,i,min_len+.01,fix=0.5)
+                                    dflag = True
+                            idx = 0
+                            for index, d in zip(indices,offsets):
+                                index = int(index)
+                                pos = nbatoms[idx+1].position - numpy.dot(d,indatoms.get_cell())
+                                indatoms[index].position = pos
+                                idx+=1
+                            indatoms[one.index].position=nbatoms[0].position
+                        if count > 1000:
+                            self.logger.info("unable to satisfy min_len condition")
+                            break
+                    #indatoms, STR = check_min_dist(indatoms, MyOpti.structure, len(indatoms), min_len, '')
                     ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
+		    self.logger.info("HKK:: Writing individual {0}", indname) 
                 else:
                     ase.io.write(indname,invalid_ind[i][0],"vasp", direct=True, sort=True, vasp5=True)
+		    self.logger.info("HKK:: Writing invalid individual {0}", indname)
             elif 'LAMMPS' in self.structopt_parameters['calc_method']:
                 #indname = "%s/DATA_%02d" % (MyOpti.filename+'-rank0', i)
                 indname = os.path.join(pathtooutput,'DATA_%02d' % i)
@@ -778,7 +828,7 @@ class StructoptChecker(BaseChecker):
             MyOpti.output.write(indname+'\n')
             #Append individuals in invalid_ind to population for writing out
             if MyOpti.generation > 0:
-                MyOpti.population.append(invalid_ind[i])
+                MyOpti.population.append(invalid_ind[inv_idx])
         #Submit list of files to Tam's script to make subfolders
         self.make_subfolders_from_structures(pathtooutput)
         self.set_up_run_folders(pathtooutput)  #Start running.
@@ -821,6 +871,13 @@ class StructoptChecker(BaseChecker):
                 os.mkdir(subpath)
             if 'VASP' in self.structopt_parameters['calc_method']:
                 shutil.copy(str_path, "%s/POSCAR" % subpath)
+                #Write Metadata
+                from MAST.utility import Metadata
+                metafile = Metadata(metafile='%s/metadata.txt' % subpath)
+                metafile.write_data('directory created', time.asctime())
+                metafile.write_data('name', subname)
+                metafile.write_data('program', 'vasp')
+                metafile.write_data('ingredient type', "BaseIngredient")
             elif 'LAMMPS' in self.structopt_parameters['calc_method']:
                 shutil.copy(str_path, "%s/DATA" % subpath)
                 shutil.copy(os.path.join(finddir,'atom_symbols_{0}'.format(subname)),
@@ -859,6 +916,7 @@ class StructoptChecker(BaseChecker):
         subfolders.sort()
         return subfolders
 
+
     def subfolders_complete(self, childname=""):
         """Check if the Optimizer ingredient subfolders are complete
         """
@@ -870,6 +928,7 @@ class StructoptChecker(BaseChecker):
             count = 1
         for check in range(count):
             allcomplete=0
+            #HKK
             for subfolder in self.get_subfolder_list():
                 if 'VASP' in self.structopt_parameters['calc_method']:
                     keywords = self.keywords
@@ -881,9 +940,33 @@ class StructoptChecker(BaseChecker):
                     mychecker = LammpsChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
                 if mychecker.is_complete():
                     allcomplete = allcomplete + 1
+                    #print 'HKK :: Checking Subfolders,',subfolder, 'Complete'
+                
                 else:
-                    mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
-                    mychoping.run_singlerun()
+          # HKK :: 04-20-15  :: CONTCAR was not updated when VASP run is incomplete. Fixed.
+                    #print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
+                    #mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
+                    #mychoping.copy_file(copyfrom="CONTCAR", copyto="POSCAR") 
+                    #mychoping.run_singlerun()
+          # HKK :: 04-22-15  Stopping E evaluation if it iterated more than 3 times. Not going to converge. 
+                    subdirlist = os.listdir(mychecker.keywords['name'])
+                    count_opt_num=0
+                    for file in subdirlist:
+                        if any(i.isdigit() for i in file) is True:
+                           count_opt_num = count_opt_num+1
+                    path_oszicar = os.path.abspath('/home/hko8/bin/pylib/VASP_replace/OSZICAR')
+                    path_outcar = os.path.abspath('/home/hko8/bin/pylib/VASP_replace/OUTCAR')
+                    if count_opt_num >= 2:
+                        print 'HKK :: Evaluated following structure more than 3 times. Copying low fitness files'
+                        print 'HKK :: Checking Subfolders,',subfolder, 'Forced to complete'
+                        shutil.copy(path_oszicar, subfolder)
+                        shutil.copy(path_outcar, subfolder)
+                        allcomplete = allcomplete + 1
+                    else:
+                        mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
+                        mychoping.copy_file(copyfrom="CONTCAR", copyto="POSCAR")
+                        print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
+                        mychoping.run_singlerun()
             if allcomplete == len(subfolders) and (allcomplete > 0):
                 return True
             if 'LAMMPS' in self.structopt_parameters['calc_method']:
@@ -988,6 +1071,7 @@ class StructoptChecker(BaseChecker):
             print "No submission list at %s" % submitlist
             return
         submitfile=MASTFile(submitlist)
+        #print 'HKK:: submitfile',submitfile
         subentries=list(submitfile.data)
         subentries.sort()
         submitted=dict()

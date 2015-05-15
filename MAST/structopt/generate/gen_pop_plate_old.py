@@ -2,7 +2,7 @@ import random
 import numpy
 from ase import Atom, Atoms
 
-def gen_pop_box(atomlist,size,crystal=False):
+def gen_pop_plate(atomlist,size,crystal=False):
     """Function to generate a random structure of atoms.
     Inputs:
         atomlist = List of tuples with structure of atoms and quantity

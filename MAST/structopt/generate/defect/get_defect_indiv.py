@@ -1,16 +1,10 @@
 import random
 import numpy
 import os
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt get_defect_indiv.py, ASE must be installed."
+from ase import Atom, Atoms
 from MAST.structopt.generate.defect import gen_solid
-from MAST.structopt.generate import gen_pop_box, gen_pop_sphere, generate_dumbbells
-try:
-    from MAST.structopt.generate.Individual import Individual
-except NameError:
-    print "NOTE: ASE is not installed. ASE must be installed for Structopt Individual.py to work correctly."
+from MAST.structopt.generate import gen_pop_box, gen_pop_sphere, generate_dumbbells, gen_pop_plate
+from MAST.structopt.generate.Individual import Individual
 try:
     from mpi4py import MPI
 except ImportError:
@@ -67,7 +61,7 @@ def get_defect_indiv(Optimizer):
     else:
         nbulk = bulk.copy()
         nr2 = Atoms(pbc=True, cell=bulk.get_cell())
-    # Generate random individual
+    	# Generate random individual
     if 'sphere' in Optimizer.generate_flag:
         ind = gen_pop_sphere(Optimizer.atomlist,Optimizer.size)
     elif 'dumbbell' in Optimizer.generate_flag:
@@ -76,7 +70,15 @@ def get_defect_indiv(Optimizer):
             if c > 0:
                 dums = generate_dumbbells(c, dumbbellsym=sym, nindiv=1, solid = Optimizer.solidbulk, size=Optimizer.size)[0]
                 ind.extend(dums)
+	## HKK: adding plate
+    elif 'plate' in Optimizer.generate_flag:
+        #print 'HKK:: " plate" as Generate_flag'
+        #print type(gen_pop_plate)
+        #print gen_pop_plate.__file__
+        ind = gen_pop_plate(Optimizer.atomlist,Optimizer.size)
+	## HKK: adding plate		
     else:
+        #print 'HKK:: "box" as Generte flag'
         ind = gen_pop_box(Optimizer.atomlist,Optimizer.size)
     if 'random' in Optimizer.generate_flag:
         #Update atom list with atoms in region 2

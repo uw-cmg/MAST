@@ -1,8 +1,5 @@
 import copy
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt Individual.py, ASE must be installed."
+from ase import Atom, Atoms
 from MAST.structopt.inp_out.write_individual import write_individual
 
 class Individual(object):
