@@ -19,6 +19,7 @@ from MAST.utility import MASTError
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import dirutil
+#from MAST.utility.defect_formation_energy import DefectFormationEnergy as DFE
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 from MAST.ingredients.checker import VaspNEBChecker
@@ -33,7 +34,7 @@ class ChopIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object'),
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        
+
     def _fullpath_childname(self, childname):
         """Get full path of the child directory.
             Args: 
@@ -51,8 +52,8 @@ class ChopIngredient(BaseIngredient):
 
     def copy_file_with_prepend(self, copyfrom="", copyto="", childdir="", softlink=0):
         """Duplicate an ingredient file into the child
-            directory, with the ingredient
-            name prepended
+           directory, with the ingredient 
+           name prepended
             e.g. "OSZICAR" becomes "defect_vac1_q=p2_stat_OSZICAR"
             Args:
                 copyfrom <str>: File name to copy, e.g. OSZICAR
@@ -264,7 +265,7 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (copyfromfullpath, topath))
         return
 
-    def write_ingred_input_file(self, fname="", allowed_file="all", upperkey=1, delimiter=" "):
+    def write_ingred_input_file(self, fname="", allowed_file="all", not_allowed_file="none", upperkey=1, delimiter=" "):
         """Write an input file.
             Args: 
                 fname <str>: File name for the ingredient input 
@@ -289,9 +290,22 @@ class ChopIngredient(BaseIngredient):
             okay_keys = self._get_allowed_non_mast_keywords("", upperkey)
         else:
             okay_keys = self._get_allowed_non_mast_keywords(allowed_file, upperkey)
+        if not_allowed_file.lower() == "none": bad_keys = list()
+        else:
+            path = os.path.join(dirutil.get_mast_install_path(),'ingredients','programkeys',not_allowed_file)
+            bad_keys = list()
+            fp = open(path)
+            lines = fp.readlines()
+            for i in range(1,len(lines)-1):
+                if int(upperkey)==1:
+                    bad_keys.append(lines[i].strip().upper())
+                else:
+                    bad_keys.append(lines[i].strip().lower())
+                
         my_input = MASTFile()
         for key, value in okay_keys.iteritems():
-            my_input.data.append(str(key) + delimiter + str(value) + "\n")
+            if not key in bad_keys:
+                my_input.data.append(str(key) + delimiter + str(value) + "\n")
         inputpath = os.path.join(self.keywords['name'],fname)
         if os.path.isfile(inputpath):
             self.logger.error("File already exists at %s. Skipping input file writing." % inputpath)
@@ -1053,3 +1067,44 @@ class ChopIngredient(BaseIngredient):
         self.checker.forward_final_structure_file(childname)
         self.checker.softlink_wavefunction_file(childname)
 
+    def give_energy_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)
+        shutil.copy(self.keywords['name']+'/OSZICAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OSZICAR')
+        shutil.copy(self.keywords['name']+'/CONTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_CONTCAR')
+        shutil.copy(self.keywords['name']+'/OUTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OUTCAR')
+        #fp = open(childpath+"/dfe.in", "a")
+        #fp.write(self.keywords['name'].split('/')[-1]+":"+open(self.keywords['name']+'/OSZICAR').readlines()[-1].split('E0=')[1].split()[0]+'\n')
+        #dfe = DFE(os.path.dirname(childpath))
+        #scalingsize = self.metafile.read_data('scaling_size')
+        #Ef = dfe._calculate_defect_formation_energies(scalingsize)
+
+    def give_doscar_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)
+        shutil.copy(self.keywords['name']+'/DOSCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_DOSCAR')
+
+    def give_outcar_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)            
+        shutil.copy(self.keywords['name']+'/OUTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OUTCAR')
+
+
+
+    
+    def give_structure_w_random_displacements(self, childname, disp=0.01):
+        import pymatgen as mg
+        import random
+        disp = float(disp)
+        childpath = self._fullpath_childname(childname)
+        print childpath,self.keywords['name']
+        struct=mg.read_structure(self.keywords['name']+'/CONTCAR')
+        for i in range(len(struct)):
+            coords = struct[i].coords
+            x1 = random.uniform(-1,1)
+            x2 = random.uniform(-1,1)
+            while (x1**2+x2**2>=1):
+                x1=random.uniform(-1,1)
+                x2=random.uniform(-1,1)
+            coords[0]+=(2*x1*np.sqrt(1-x1**2-x2**2)*disp)
+            coords[1]+=(2*x2*np.sqrt(1-x1**2-x2**2)*disp)
+            coords[2]+=((1-2*(x1**2+x2**2))*disp)
+            struct.replace(i, struct[i].specie, coords, True)
+        mg.write_structure(struct,childpath+'/POSCAR')
