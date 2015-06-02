@@ -280,12 +280,10 @@ class VaspChecker(BaseChecker):
         if not (self.metafile.read_data('kpoints')==None):
             kpoints = self.metafile.read_data('kpoints').split()
             kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
-            if len(kpoints) == 4:
-                desig = "M"
-                kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
-            else:
-                desig = kpoints[1].upper()
-                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
+            try: desig = kpoints[1].upper()
+            except IndexError: desig = 'M'
+            try: kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
+            except IndexError: kshift = (0.0,0.0,0.0)
         else:
             if 'mast_kpoints' in self.keywords['program_keys'].keys():
                 kpoints = self.keywords['program_keys']['mast_kpoints']
@@ -293,19 +291,27 @@ class VaspChecker(BaseChecker):
                 raise MASTError(self.__class__.__name__,"k-point instructions need to be set either in ingredients keyword mast_kpoints or scaling section in structure ingredient: No k-point settings for the ingredient %s"% name)
             if len(kpoints) == 3:
                 desig = "M"
+            elif 'line' in str(kpoints[1]):
+                desig = 'L'
             else:
                 desig = kpoints[3].upper()
-            kmesh = (int(kpoints[0]),int(kpoints[1]),int(kpoints[2]))
-            kshift = (0,0,0)
+            if not desig == 'L':
+                kmesh = (int(kpoints[0]),int(kpoints[1]),int(kpoints[2]))
+                kshift = (0,0,0)
         if desig == "M":
             my_kpoints = Kpoints.monkhorst_automatic(kpts=kmesh,shift=kshift)
         elif desig == "G":
             my_kpoints = Kpoints.gamma_automatic(kpts=kmesh,shift=kshift)
+        elif desig == 'L':
+            my_kpoints='Line Mode\n'+'\n'.join(' '.join(kpoints).split(','))+'\n'
+            fp=open(name+'/KPOINTS','w')
+            fp.write(my_kpoints)
         else:
             raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
 
         dirutil.lock_directory(name)
-        my_kpoints.write_file(name + "/KPOINTS")
+        if not desig=='L':
+            my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
         return my_kpoints
 
@@ -407,6 +413,8 @@ class VaspChecker(BaseChecker):
             #newelectrons = myelectrons + adjustment
             newelectrons = myelectrons - adjustment
             myd['NELECT']=str(newelectrons)
+        if self.metafile.read_data('nbands'):
+            myd['NBANDS']=self.metafile.read_data('nbands')
         my_incar = Incar(myd)
         dirutil.lock_directory(name)
         my_incar.write_file(name + "/INCAR")
