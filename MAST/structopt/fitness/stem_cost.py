@@ -3,6 +3,7 @@ from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 import math
 import os
+from mpi4py import MPI
 
 def stem_cost(indiv, Optimizer):
     '''Function to calculate STEM_Cost fitness of individual.
@@ -28,19 +29,20 @@ def stem_cost(indiv, Optimizer):
         os.chdir(cwd)
         f=open('problem-structures.xyz','a')
         totalsol = indiv[0].copy()
-        totalsol.extend(indiv.bulki)
+        #totalsol.extend(indiv.bulki)
         write_xyz(f,totalsol,data='Starting structure hindex={0}'.format(indiv.history_index))
         indiv.energy = 10000
         f.close()
         print '    Writing structure to problemstructures.xyz file. Structure (hindex) : '+indiv.history_index
         print '    Setting individual energy to 50000.'
-        outs = [10000, starting.bulki, starting, stro]
+        #outs = [10000, starting.bulki, starting, stro]
+        outs = [10000, starting, starting, stro]
     indiv.energy = outs[0]
     stro=outs[3]
     if Optimizer.structure == 'Defect' or Optimizer.structure=='Surface':
         indiv.bulki = outs[1]
     fit = indiv.energy
-    if abs(fit) > Optimizer.energy_cutoff_factor*(len(indiv[0])+len(indiv.bulki)):
+    if abs(fit) > Optimizer.energy_cutoff_factor*len(indiv[0]):
         message = 'Warning: Found oddly large energy from Lammps in structure HI={0}'.format(indiv.history_index)
         logger.warn(message)
         print message
@@ -48,7 +50,8 @@ def stem_cost(indiv, Optimizer):
     if math.isnan(fit):
         logger.warn('Found NAN energy structure HI={0}'.format(indiv.history_index))
         indiv.energy = 10000
-    
+    rank = MPI.COMM_WORLD.Get_rank()
+    logger.info('M:finish run_energy_eval, start stemcalc @ rank ={0}'.format(rank)) 
     #Calculate the chisq
     chisq = Optimizer.stemcalc.run(indiv[0])
     #Calculate the coefficient to ensure same order of magnitude
@@ -70,7 +73,8 @@ def stem_cost(indiv, Optimizer):
     else:
         aflag=False
     #Calculate the fitness of the individual
-    indiv.fitness=indiv.energy+Optimizer.stem_coeff*chisq
+    #indiv.fitness=indiv.energy+Optimizer.stem_coeff*chisq
+    indiv.fitness=indiv.energy/indiv[0].get_number_of_atoms()+Optimizer.stem_coeff*chisq
     #Output values of fitness, energy, rms, and alpha for comparison
-    stro+='Individual '+repr(indiv.history_index)+': Fitness '+repr(indiv.fitness)+', Energy '+repr(indiv.energy)+', Chi^2 '+repr(chisq)+', Alpha '+repr(Optimizer.stem_coeff)+'\n'
+    stro+='Individual '+repr(indiv.history_index)+': Fitness '+repr(indiv.fitness)+', Energy/atom '+repr(indiv.energy/indiv[0].get_number_of_atoms())+', Chi^2 '+repr(chisq)+', Alpha '+repr(Optimizer.stem_coeff)+'\n'
     return indiv, stro

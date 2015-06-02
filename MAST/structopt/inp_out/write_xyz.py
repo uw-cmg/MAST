@@ -11,7 +11,9 @@ def write_xyz(fileobj,atms,data=0):
     symbols = atms.get_chemical_symbols()
     natoms = len(symbols)
     fileobj.write('%d\n' % natoms)
-    fileobj.write(repr(data)+'\n')
+    #fileobj.write(repr(data)+'\n')
+    cell = atms.get_cell()
+    fileobj.write('%s %10.5f %10.5f %10.5f \n' % (repr(data),cell[0][0],cell[1][1],cell[2][2]))
     for s, (x, y, z) in zip(symbols, atms.get_positions()):
         fileobj.write('%-2s %22.15f %22.15f %22.15f\n' % (s, x, y, z))
     return

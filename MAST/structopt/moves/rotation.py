@@ -1,6 +1,6 @@
 import random
 from MAST.structopt.tools.find_defects import find_defects
-
+import math
 def rotation(indiv, Optimizer):
     """Move function to perform rotation of a group of atoms
     Inputs:
@@ -38,9 +38,13 @@ def rotation(indiv, Optimizer):
         natrot=natrot2 - natrot1
         atmsr=atms[natrot1:natrot2]
         del atms[natrot1:natrot2]
-        ax=['x', '-x','y','-y','z','-z']
+        if Optimizer.forcing != 'FreeNatom':
+           ax=['x', '-x','y','-y','z','-z']
+        else:
+           ax=['z','-z']
         rax=ax[random.randint(0,len(ax)-1)]
-        rang=random.uniform(30,180)
+        #rang=random.uniform(30,180)
+        rang=random.random()*math.pi
         #rang=random.random()*90
         atmsr.rotate(rax,a=rang,center='COM',rotate_cell=False)
         atms.extend(atmsr)

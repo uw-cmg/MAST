@@ -18,6 +18,7 @@ def get_restart_population(Optimizer):
     Optimizer.output.write('Loading structures from old run\n')
     pop = []
     for i in range(Optimizer.nindiv):
+        logger.info('reading structure {0}'.format(Optimizer.files[i].name))
         successflag = False
         try:
             indiv = read_xyz(Optimizer.files[i].name)
@@ -41,7 +42,9 @@ def get_restart_population(Optimizer):
             elif Optimizer.structure == 'Surface':
                 individ = get_surface_restart_indiv(Optimizer, indiv)
             else:
-                indiv.set_cell([Optimizer.size,Optimizer.size,Optimizer.size])
+                cell = indiv.get_cell()
+                if cell[0][0] == 1.0:
+                   indiv.set_cell([Optimizer.size,Optimizer.size,Optimizer.size])
                 individ = Individual(indiv)
             individ.index = index1
             if Optimizer.genealogy: 

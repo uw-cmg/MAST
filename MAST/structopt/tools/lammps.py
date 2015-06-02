@@ -49,6 +49,7 @@ class LAMMPS:
 
     def __init__(self, label='lammps', tmp_dir=None, parameters={}, 
                  specorder=None, files=[], always_triclinic=False, 
+                 #specorder=['Zr','Cu','Al'], files=[], always_triclinic=False, 
                  keep_alive=True, keep_tmp_files=False,
                  no_data_file=False):
         """The LAMMPS calculators object
@@ -117,6 +118,8 @@ class LAMMPS:
         # re-populated by the read_log method.
         self.thermo_content = []
 
+        self.pea = []
+
         if tmp_dir is None:
             self.tmp_dir = mkdtemp(prefix='LAMMPS-')
         else:
@@ -138,6 +141,7 @@ class LAMMPS:
         self.update(atoms)
         return self.thermo_content[-1]['pe']
 
+   
     def get_forces(self, atoms):
         self.update(atoms)
         return self.forces.copy()
@@ -170,7 +174,9 @@ class LAMMPS:
             cell = self.atoms.get_cell()
         self.prism = prism(cell)
         self.run()
-        dict={'thermo':self.thermo_content,'atoms':self.atoms}
+        cell = self.atoms.get_cell()
+        #dict={'thermo':self.thermo_content,'atoms':self.atoms}
+        dict={'thermo':self.thermo_content,'atoms':self.atoms,'pea':self.pea}
         return dict
 
     def _lmp_alive(self):
@@ -397,31 +403,48 @@ class LAMMPS:
             f.write('pair_style lj/cut 2.5 \n' +
                     'pair_coeff * * 1 1 \n' +
                     'mass * 1.0 \n')
-#'fix 1 all box/relax iso 0.0 vmax 0.001\n'
-        
+
         if 'thermosteps' in parameters:
-            f.write('\n### run\n' + 
-                     'fix fix_nve all nve\n'+
-                    ('dump dump_all all custom '+repr(parameters['thermosteps'])+
-                    ' %s id type x y z vx vy vz fx fy fz\n' % lammps_trj) )
+           # f.write('\n### run\n' + 
+           #          'fix fix_nve all nve\n')
+                    #('dump dump_all all custom '+repr(parameters['thermosteps'])+
+                    #' %s id type x y z vx vy vz fx fy fz\n' % lammps_trj) )
             f.write(('thermo_style custom %s\n' +
                     'thermo_modify flush yes\n' +
                     'thermo '+repr(parameters['thermosteps'])+
                     '\n') % (' '.join(self._custom_thermo_args)))
         else:
-            f.write('\n### run\n' + 
-                     'fix fix_nve all nve\n'+
-                    ('dump dump_all all custom 1 %s id type x y z vx vy vz fx fy fz\n' % lammps_trj) )
+           # f.write('\n### run\n' + 
+           #          'fix fix_nve all nve\n')
+                  #  ('dump dump_all all custom 1 %s id type x y z vx vy vz fx fy fz\n' % lammps_trj) )
             f.write(('thermo_style custom %s\n' +
                     'thermo_modify flush yes\n' +
                     'thermo 1\n') % (' '.join(self._custom_thermo_args)))
 
-        if 'minimize' in parameters:
+#'fix 1 all box/relax iso 0.0 vmax 0.001\n'
+        f.write('\n### run\n')
+        if 'lammps_command' in parameters:
+            f.write('fix fix_nve all nve\n')
             f.write('minimize %s\n' % parameters['minimize'])
-        if 'run' in parameters:
-            f.write('run %s\n' % parameters['run'])
-        if not (('minimize' in parameters) or ('run' in parameters)):
-            f.write('run 0\n')
+            f.write('unfix fix_nve \n')
+            
+            f.write('%s \n' % parameters['lammps_command'])
+            f.write('minimize %s\n' % parameters['minimize'])
+        else:        
+            f.write('fix fix_nve all nve\n')
+
+            if 'minimize' in parameters:
+               f.write('minimize %s\n' % parameters['minimize'])
+            if 'run' in parameters:
+               f.write('run %s\n' % parameters['run'])
+            if not (('minimize' in parameters) or ('run' in parameters)):
+               f.write('run 0\n')
+
+        f.write('compute  pea all pe/atom \n')
+        #f.write('dump dump_all all custom 2 %s id type x y z vx vy vz fx fy fz\n' % lammps_trj) 
+        f.write('dump dump_all all custom 2 %s id type x y z c_pea \n' % lammps_trj) 
+        #f.write('dump dump_all all custom 2 %s id type x y z \n' % lammps_trj) 
+        f.write('run 1\n')
 
         f.write('print "%s"\n' % CALCULATION_END_MARK)
         f.write('log /dev/stdout\n') # Force LAMMPS to flush log
@@ -487,7 +510,7 @@ class LAMMPS:
                 n_atoms = 0
                 lo = [] ; hi = [] ; tilt = []
                 id = [] ; type = []
-                positions = [] ; velocities = [] ; forces = []
+                positions = [] ;  pea = [] #; velocities = [] ; forces = []
 
             if 'ITEM: NUMBER OF ATOMS' in line:
                 line = f.readline()
@@ -516,8 +539,9 @@ class LAMMPS:
                     id.append( int(fields[atom_attributes['id']]) )
                     type.append( int(fields[atom_attributes['type']]) )
                     positions.append( [ float(fields[atom_attributes[x]]) for x in ['x', 'y', 'z'] ] )
-                    velocities.append( [ float(fields[atom_attributes[x]]) for x in ['vx', 'vy', 'vz'] ] )
-                    forces.append( [ float(fields[atom_attributes[x]]) for x in ['fx', 'fy', 'fz'] ] )
+                    pea.append( [ float(fields[atom_attributes[x]]) for x in ['c_pea'] ] )
+                    #velocities.append( [ float(fields[atom_attributes[x]]) for x in ['vx', 'vy', 'vz'] ] )
+                    #forces.append( [ float(fields[atom_attributes[x]]) for x in ['fx', 'fy', 'fz'] ] )
         f.close()
         if nlines==0:
             raise RuntimeError('Failed to retreive any output from trajectory file: {0}\n'.format(lammps_trj))
@@ -571,8 +595,7 @@ class LAMMPS:
         type_atoms = np.array(type)
 
         if self.atoms:
-            cell_atoms = self.atoms.get_cell()
-
+            #cell_atoms = self.atoms.get_cell()
             # BEWARE: reconstructing the rotation from the LAMMPS output trajectory file
             #         fails in case of shrink wrapping for a non-periodic direction
             # -> hence rather obtain rotation from prism object used to generate the LAMMPS input
@@ -581,14 +604,13 @@ class LAMMPS:
 
             type_atoms = self.atoms.get_atomic_numbers()
             positions_atoms = np.array( [np.dot(np.array(r), rotation_lammps2ase) for r in positions] )
-            velocities_atoms = np.array( [np.dot(np.array(v), rotation_lammps2ase) for v in velocities] )
-            forces_atoms = np.array( [np.dot(np.array(f), rotation_lammps2ase) for f in forces] )
+            #velocities_atoms = np.array( [np.dot(np.array(v), rotation_lammps2ase) for v in velocities] )
+            #forces_atoms = np.array( [np.dot(np.array(f), rotation_lammps2ase) for f in forces] )
 
         if set_atoms:
             # assume periodic boundary conditions here (like also below in write_lammps)
             self.atoms = Atoms(type_atoms, positions=positions_atoms, cell=cell_atoms)
-
-        self.forces = forces_atoms
+            self.pea = pea
 
 class special_tee:
     """A special purpose, with limited applicability, tee-like thing.

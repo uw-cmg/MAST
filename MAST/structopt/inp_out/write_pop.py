@@ -24,8 +24,9 @@ def write_pop(Optimizer,pop):
         if Optimizer.indiv_defect_write:
             write_xyz(Optimizer.ifiles[ind.index],ind[0],ind.energy)
         update_structsumfile(ind, Optimizer.files[Optimizer.nindiv])
-        positions = update_structfile(ind, Optimizer.files[ind.index], Optimizer)
-        Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
+        if Optimizer.generation % 10 == 0:
+           positions = update_structfile(ind, Optimizer.files[ind.index], Optimizer)
+           Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
     if Optimizer.genealogy:
         Optimizer.Genealogyfile.write('\n')
     return
@@ -36,7 +37,7 @@ def update_outfile(ind, outfile):
     outfile.write('    Genealogy = {0}\n'.format(ind.history_index))
     outfile.write('    Energy = {0}\n'.format(ind.energy))
     outfile.write('    Fitness = {0}\n'.format(ind.fitness))
-    outfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
+    #outfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
 
 def update_structsumfile(ind, structsumfile):
     structsumfile.write(' Index = {0}\n'.format(ind.index))
@@ -45,7 +46,7 @@ def update_structsumfile(ind, structsumfile):
     structsumfile.write('    Cell = {0}\n'.format(ind[0].get_cell()))
     structsumfile.write('    Pressure = {0}\n'.format(ind.pressure))
     structsumfile.write('    Genealogy = {0}\n'.format(ind.history_index))
-    structsumfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
+    #structsumfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
     
 def update_structfile(ind, structfile, Optimizer):
     if Optimizer.structure == 'Defect' or Optimizer.structure == 'Surface':
@@ -60,7 +61,7 @@ def update_structfile(ind, structfile, Optimizer):
     if Optimizer.vacancy_output:
         for one in ind.vacancies:
             sols.append(Atom(symbol='X',position=one.position))
-    Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
+    #Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
     write_xyz(structfile, sols, ind.energy)
     return positions
 

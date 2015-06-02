@@ -1,6 +1,6 @@
 import random
 from MAST.structopt.tools.find_defects import find_defects
-
+import math
 def zp_rotation(indiv, Optimizer):
     """Move function to perform Zero point rotation of atoms
     Inputs:
@@ -13,10 +13,14 @@ def zp_rotation(indiv, Optimizer):
         debug = True
     else:
         debug = False
-    ax=['x', '-x','y','-y','z','-z']
+    if Optimizer.forcing != 'FreeNatom':
+       ax=['x', '-x','y','-y','z','-z']
+    else:
+       ax=['z','-z']
     #Identify random rotation about axis and rotate all atoms
     rax=ax[random.randint(0,len(ax)-1)]
-    rang=random.uniform(30,180)
+    #rang=random.uniform(30,180)
+    rang=random.random()*math.pi
     #rang=random.random()*90
     if Optimizer.structure=='Defect':
         if Optimizer.isolate_mutation:

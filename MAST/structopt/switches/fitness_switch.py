@@ -6,14 +6,15 @@ except ImportError:
     pass
 import pdb
 
-def fitness_switch(input):
+def fitness_switch(Optimizer,input):
     """Performs fitness evaluation on individual"""
-    if input[0]==None:
+    if input==None:
         indiv=0
         rank = MPI.COMM_WORLD.Get_rank()
         stro='Evaluated none individual on {0}\n'.format(rank)
     else:
-        Optimizer,indiv=input
+        #Optimizer,indiv=input
+        indiv = input
         #logger = initialize_logger(Optimizer.loggername)
         logger = logging.getLogger(Optimizer.loggername)
         stro='Evaluating individual {0}\n'.format(indiv.index)
