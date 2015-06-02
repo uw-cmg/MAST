@@ -1,31 +1,52 @@
 import random
 import numpy
+import math
 from ase import Atom, Atoms
+#from MAST.structopt.generate import __init__ 
+from MAST.structopt.generate.rot_vec import * 
 
-def gen_pop_plate(atomlist, size, dir=[1,0,0], crystal=False):
-    """Function to generate a random structure of atoms.
-    Inputs:
-        atomlist = List of tuples with structure of atoms and quantity
-            [('Sym1',int(concentration1), float(mass1),float(chempotential1)),
-            ('Sym2',int(concentration2), float(mass2),float(chempotential2)),...]
-        size = list of length of sides of plate within which to generate atoms
-            must have three components
-        dir = list or vector for direction of plate in space. Default is parallel to x-axis
-            must have three components
-        crystal = False/List of crystal cell shape options
-            list('cubic','orthorhombic','tetragonal','hexagonal','monoclinic','triclinic')
-            cell shape will be adjusted accordingly
-    Outputs:
-        Returns individual of class Atoms (see ase manual for info on Atoms class)
-        and if crystal list provided also outputs combined string with output information
-    """
+#def gen_pop_plate(atomlist, size, crystal=False):
+def gen_pop_plate(atomlist, sizeinput, dir_par=[1,-1,0], dir_per=[1,1,1], crystal=False):
+    '''
+     Last edited by Hyunseok Ko on 10-15-2014
+     Function to generate defects in a plate. The center of plate is equal to the center of mass of the bulk structure. 
+     -- Plate orientation can be specified by following parameters::
+     		dir_par and dir_per is a directional vector (do not necessarily be a unit vector) which sets the axis of the plate
+     -- Plate dimension can be chosen (Needs development. Manual setup for now) by setting 'size' in this module. 
+    '''
+# Setup axis vectors for plate 
+    size=[sizeinput, sizeinput, 3]
+    #print 'HKK :: plate vector', size
+    # Set unit vectors for plate
+    dir_crs=numpy.cross(dir_par, dir_per)
+    uvec_par=[x/((dir_par[0]**2+dir_par[1]**2+dir_par[2]**2)**0.5) for x in dir_par]
+    uvec_crs=[x/((dir_crs[0]**2+dir_crs[1]**2+dir_crs[2]**2)**0.5) for x in dir_crs]
+    uvec_per=[x/((dir_per[0]**2+dir_per[1]**2+dir_per[2]**2)**0.5) for x in dir_per]
+    #print 'Unit vectors of new xyz axis'
+    #print uvec_par, uvec_crs, uvec_per
+    
+    # Set vectors for plate
+    vec_par=[x*size[0] for x in uvec_par]
+    vec_crs=[x*size[1] for x in uvec_crs]
+    vec_per=[x*size[2] for x in uvec_per]
+    # Compute rotation angles from primary axis to axis for plate (If loop to avoid floating error)
+    temp=[-uvec_per[1]/((1-uvec_per[2]**2)**0.5), uvec_per[2],uvec_crs[2]/((1-uvec_per[2]**2)**0.5)]
+    if [temp[x] for x in range(3)]  >=1:
+        temp[x]=1
+    alpha=numpy.arccos(temp[0])
+    beta=numpy.arccos(temp[1])
+    gamma=numpy.arccos(temp[2])
+    
+# Get list of atom types for all atoms in cluster	
     indiv=Atoms()
     indiv.set_cell(size)
-    # Get list of atom types for all atoms in cluster
+
     for s,c,m,u in atomlist:
         if c > 0:
             for i in range(c):
-                pos = [random.uniform(0,size[j]) for j in range(3)]
+                temppos = [random.uniform(0,size[j]) for j in range(3)]
+                # Rotating the defect position to the plate 
+                pos = rot_vec(temppos,alpha,beta,gamma)
                 at=Atom(symbol=s,position=pos)
                 indiv.append(at)
     if crystal:

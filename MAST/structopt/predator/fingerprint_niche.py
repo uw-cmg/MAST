@@ -2,7 +2,7 @@ from MAST.structopt.fingerprinting import fingerprint_dist
 from MAST.structopt.tools import get_best
 from MAST.structopt.predator import mutation_dups
 import random
-
+import numpy
 def fingerprint_niche(pop, Optimizer):
     """Use a k-means clustering approach to identify individuals for new population"""
     STR = ''

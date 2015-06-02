@@ -14,6 +14,7 @@ from MAST.structopt.tools.check_cell_type import check_cell_type
 from MAST.structopt.fingerprinting import get_fingerprint
 from MAST.structopt.tools.lammps import LAMMPS
 import numpy
+import math
 try:
     from mpi4py import MPI
 except ImportError:
@@ -21,6 +22,9 @@ except ImportError:
 import logging
 import pdb
 import shutil
+import time
+import scipy
+import random
 
 def eval_energy(Optimizer, individ):
     """Function to evaluate energy of an individual
@@ -84,13 +88,17 @@ def eval_energy(Optimizer, individ):
             totalsol.set_cell([cell[0],cell[1],500])
             totalsol.set_pbc([True,True,False])
         elif Optimizer.structure=='Cluster':
+           # logger.info('M:')
             totalsol = indiv.copy()
             nat = len(totalsol)
             if debug:
                 logger.info('Extending cluster with {0} atoms to center of evaluation box of size {1}'.format(nat,Optimizer.large_box_size))
             origcell = indiv.get_cell()
-            totalsol.set_cell([Optimizer.large_box_size,Optimizer.large_box_size,Optimizer.large_box_size])
-            totalsol.translate([Optimizer.large_box_size/2.0,Optimizer.large_box_size/2.0,Optimizer.large_box_size/2.0])
+            #print 'rank, eval_energy.cell',rank,origcell
+            if Optimizer.forcing != 'RelaxBox':
+               totalsol.set_cell([Optimizer.large_box_size,Optimizer.large_box_size,Optimizer.large_box_size])
+               totalsol.translate([Optimizer.large_box_size/2.0,Optimizer.large_box_size/2.0,Optimizer.large_box_size/2.0])
+           # logger.info('M: set cell')
         elif Optimizer.structure=='Crystal':
             totalsol = indiv.copy()
             nat = len(totalsol)
@@ -111,7 +119,8 @@ def eval_energy(Optimizer, individ):
         if not Optimizer.fixed_region:
             if debug:
                 logger.info('Running check minimum distance')
-            totalsol, STR = check_min_dist(totalsol, Optimizer.structure, nat, min_len, STR)
+            # logger.info('M:check dist')
+            totalsol, STR = check_min_dist(Optimizer, totalsol, Optimizer.structure, nat, min_len, STR)
             if debug:
                 write_xyz(Optimizer.debugfile,totalsol,'After minlength check')
                 Optimizer.debugfile.flush()
@@ -119,6 +128,7 @@ def eval_energy(Optimizer, individ):
         
         # Set calculator to use to get forces/energies
         if Optimizer.parallel:
+           # logger.info('M:start calculator')
             calc = setup_calculator(Optimizer)
             if Optimizer.fixed_region:
                 if debug:
@@ -158,9 +168,11 @@ def eval_energy(Optimizer, individ):
                 if debug:
                     logger.info('Running local energy calculator')
                 if Optimizer.fixed_region:
-                    totalsol, energy, pressure, volume, STR = run_energy_eval(totalsol, Optimizer.calc_method, Optimizer.fixed_region, Optimizer.fitness_scheme, STR, Optimizer.static_calc)
+                    totalsol, pea, energy, pressure, volume, STR = run_energy_eval(totalsol, Optimizer.calc_method, Optimizer.fixed_region, Optimizer.fitness_scheme, STR, Optimizer.static_calc)
                 else:
-                    totalsol, energy, pressure, volume, STR = run_energy_eval(totalsol, Optimizer.calc_method, False, Optimizer.fitness_scheme, STR)
+                  #  logger.info('M:start run_energy_eval')
+                    totalsol, pea, energy, pressure, volume, STR = run_energy_eval(totalsol, Optimizer.calc_method, False, Optimizer.fitness_scheme, STR)
+                    logger.info('M:finish run_energy_eval, energy = {0} @ rank ={1}'.format(energy,rank))
         except Exception, e:
             logger.critical('Error in energy evaluation: {0}'.format(e), exc_info=True)
             path = os.path.join(cwd,'TroubledLammps')
@@ -218,8 +230,9 @@ def eval_energy(Optimizer, individ):
             bul = Atoms()
             if debug:
                 logger.info('Translating cluster back to smaller box size location')
-            totalsol.translate([-Optimizer.large_box_size/2.0,-Optimizer.large_box_size/2.0,-Optimizer.large_box_size/2.0])
-            totalsol.set_cell(origcell)
+            if Optimizer.forcing != 'RelaxBox':
+               totalsol.translate([-Optimizer.large_box_size/2.0,-Optimizer.large_box_size/2.0,-Optimizer.large_box_size/2.0])
+               totalsol.set_cell(origcell)
             individ[0] = totalsol.copy()
         
         # Add concentration energy dependence
@@ -248,7 +261,12 @@ def eval_energy(Optimizer, individ):
         individ.buli=bul
         individ.pressure=pressure
         individ.volume=volume
-    
+
+        #Add pealist to include atom index based on sorted PE. 
+        logger.info('before sort{0}'.format(individ.energy))
+        sort_pealist(Optimizer,individ,pea)
+        energy = individ.energy
+        logger.info('after sort {0}'.format(individ.energy))
         if Optimizer.fingerprinting:
             if debug:
                 logger.info('Identifying fingerprint of new structure')
@@ -261,6 +279,40 @@ def eval_energy(Optimizer, individ):
             signal=STR
 
     return energy, bul, individ, signal
+
+def sort_pealist(Optimizer,individ,pea):
+    logger = logging.getLogger(Optimizer.loggername)
+
+    #Add pealist to include atom index based on sorted PE. 
+    syms = [sym for sym,c,m,u in Optimizer.atomlist] 
+    numatom = [c for sym,c,m,u in Optimizer.atomlist]
+    peatom = [u for sym,c,m,u in Optimizer.atomlist]
+
+    hpealist = [] 
+    lpealist = []         
+    for j in range(len(syms)) :
+        sym = syms[j]
+        pelist = []
+        peindexlist = []
+        for i in range(len(pea)) :
+          if individ[0][i].symbol == sym:
+            if pea[i][0] < peatom[j] - 5.0 or pea[i][0] > peatom[j] + 5.0 :
+               individ.energy = 10000
+               message = 'Warning: Found oddly large energy from Lammps in structure HI={0}'.format(individ.history_index)
+               logger.warn(message)
+            pelist.append(pea[i][0])
+            peindexlist.append(i)     
+        pearray = numpy.asarray(pelist) 
+        pearray_sorted = pearray.argsort()     
+        for i in range(1,11):
+           hpealist.append(peindexlist[pearray_sorted[-i]])
+        for i in range(0,10):
+           lpealist.append(peindexlist[pearray_sorted[i]])
+            
+        individ.hpealist = hpealist
+        individ.lpealist = lpealist
+    return 
+
 
 def constrain_positions(indiv, bulk, sf):
     STR=''
@@ -292,7 +344,7 @@ def constrain_positions(indiv, bulk, sf):
             ts[id].position += trans
     return ts, STR
 
-def check_min_dist(totalsol, type='Defect', nat=None, min_len=0.7, STR=''):
+def check_min_dist(Optimizer, totalsol, type='Defect', nat=None, min_len=0.7, STR=''):
     if type=='Defect' or type=='Crystal' or type=='Surface':
         if nat==None:
             nat=len(totalsol)
@@ -324,13 +376,110 @@ def check_min_dist(totalsol, type='Defect', nat=None, min_len=0.7, STR=''):
             totalsol[one.index].position=nbatoms[0].position
             nl.update(totalsol)
     elif type=='Cluster':
-        for i in range(len(totalsol)):
-            for j in range(len(totalsol)):
-                if i != j:
-                    d=totalsol.get_distance(i,j)
-                    if d < min_len:
-                        totalsol.set_distance(i,j,min_len,fix=0.5)
-                        STR+='--- WARNING: Atoms too close (<0.7A) - Implement Move ---\n'
+        rank = MPI.COMM_WORLD.Get_rank()
+        logger = logging.getLogger(Optimizer.loggername)
+        R = totalsol.arrays['positions']
+        tol = 0.01
+        epsilon = 0.05
+        fix = 0.5
+        if Optimizer.forcing == 'EllipoidShape' or Optimizer.forcing == 'FreeNatom': 
+          com = totalsol.get_center_of_mass()       
+          cmax = numpy.maximum.reduce(R)
+          cmin = numpy.minimum.reduce(R)
+          rmax= (cmax-cmin)/2.0 
+          if Optimizer.forcing == 'FreeNatom':
+             rcutoff = 44.0
+             cutoff = [44.0,44.0,20.0]        
+          else:
+             rcutoff = 11.0
+             cutoff = [12.0,12.0,12.0]        
+          rcutoff = 44.0
+          cutoff = [44.0,44.0,20.0]        
+          #check if atoms are isolated outside of cluster
+          cutoffs=[3.0 for one in totalsol]
+          nl=NeighborList(cutoffs,bothways=True,self_interaction=False)
+          nl.update(totalsol)
+          for i in range(len(totalsol)):
+             indices, offsets=nl.get_neighbors(i)
+             D = R[i]-com
+             radius = (numpy.dot(D,D))**0.5 #numpy.linalg.norm(D)
+             if len(indices) < 12 or radius > rcutoff :
+                # logger.info('M:move atoms back when indice {0} or radius {1}'.format(len(indices),radius))
+                # R[i] = [com[j] + D[j]/radius*rcutoff for j in range(3)]
+                theta=math.radians(random.uniform(0,360))
+                phi=math.radians(random.uniform(0,180))
+                R[i][0] = com[0] + (rmax[0]+2.5)*math.sin(theta)*math.cos(phi) #allow atoms expend by 2.5 ang
+                R[i][1] = com[1] + (rmax[1]+2.5)*math.sin(theta)*math.sin(phi)
+                R[i][2] = com[2] + rmax[2]*math.cos(theta)
+                # logger.info('M:move atoms back new pos {0} {1} {2}'.format(rmax[0]*math.sin(theta)*math.cos(phi),rmax[1]*math.sin(theta)*math.sin(phi),rmax[2]*math.cos(theta)))
+               
+          # check if atoms are within cluster region 
+          for i in range(0,len(totalsol)):
+            # D = R[i]-com
+            for j in range(3):                 
+               if D[j] > cutoff[j] or D[j] < -cutoff[j]:
+         #         logger.info('M:before move R {0} & com {1}'.format(R[i][j],com[j]))
+                  #if rank==0:
+                  #   print "before:",j,R[i][j],com[j] 
+                  R[i][j] = com[j]+numpy.sign(D[j])*cutoff[j]*random.random()
+         #         logger.info('M:after move R {0} '.format(R[i][j]))
+                  #if rank==0:
+                  #   print "after:",R[i][j]
+              #    STR+='--- WARNING: Atoms too far along x-y (>44A) - Implement Move ---\n'          
+                  D = R[i]-com
+        #    radius = (numpy.dot(D,D))**0.5 #numpy.linalg.norm(D)
+             #  STR+='--- WARNING: Atoms too far (>56A) - Implement Move ---\n'          
+              
+
+        closelist = numpy.arange(len(totalsol))
+        iter = 0
+        while len(closelist) > 0 and iter<2:
+          iter+=1 
+         # checklist = numpy.copy(closelist)
+          closelist = []  
+          dist=scipy.spatial.distance.cdist(R,R)       
+          numpy.fill_diagonal(dist,1.0)
+          smalldist = numpy.where(dist < min_len-tol)
+         # for i in checklist:
+            # for j in range(i+1,len(totalsol)):
+         #    if len(checklist) == len(totalsol):
+         #       jstart = i+1
+         #    else:
+         #       jstart = 0
+         #    for j in range(jstart,len(totalsol)):
+         #       if i != j and dist[i][j] < min_len:
+             #       d=totalsol.get_distance(i,j)
+             #       if d < min_len:
+             #           totalsol.set_distance(i,j,min_len,fix=0.5)
+                    # d = (D[0]*D[0]+D[1]*D[1]+D[2]*D[2])**0.5
+          for ind in range(len(smalldist[0])):
+                   i = smalldist[0][ind]
+                   j = smalldist[1][ind]
+                   if i < j and dist[i][j] < min_len-tol:   
+                        closelist.append(i)
+                        closelist.append(j)
+                        if dist[i][j] > epsilon:
+                      	  x = 1.0 - min_len / dist[i][j]
+                          D = R[j]-R[i]
+                         # print "node:",rank,"x",x,R[i],R[j],D, dist[i][j]
+                       	  R[i] += (x * fix) * D
+                          R[j] -= (x * (1.0 - fix)) * D
+                        else:
+                          R[i] += [0.2, 0.0, 0.0]
+                          R[j] -= [0.2, 0.0, 0.0] 
+                        R2P = [R[i],R[j]]
+                        dist2P=scipy.spatial.distance.cdist(R2P,R)       
+                        dist[i] = dist2P[0]
+                        dist[j] = dist2P[1]
+                        for k in range(len(R)):
+                            dist[k][i] = dist[i][k]
+                            dist[k][j] = dist[j][k]
+                      #  STR+='--- WARNING: Atoms too close (<0.7A) - Implement Move ---\n'
+          closelist=list(set(closelist))
+          closelist.sort()
+          if len(closelist) != 0: 
+             logger.info('M:iter {0}, closelist size {1}'.format(iter,len(closelist)))
+         #    print "rank", rank, closelist
     else:
         print 'WARNING: In Check_Min_Dist in EvalEnergy: Structure Type not recognized'
     return totalsol, STR
@@ -376,6 +525,11 @@ def run_energy_eval(totalsol, calc_method='LAMMPS', fx_region=False, fit_scheme=
         totcop = totalsol.copy()
         OUT = totalsol.calc.calculate(totalsol)
         totalsol = OUT['atoms']
+        pea = OUT['pea']
+       # M: test
+       # if MPI.COMM_WORLD.Get_rank() == 0:
+       #   for i in range(len(totalsol)) :
+       #      print i,totalsol[i].symbol,totalsol[i].position, pea[i]
         totalsol.set_pbc(True)
         if fx_region:
             STR+='Energy of fixed region calc = {0}\n'.format(OUT['thermo'][-1]['pe'])
@@ -393,4 +547,4 @@ def run_energy_eval(totalsol, calc_method='LAMMPS', fx_region=False, fit_scheme=
     volume = totalsol.get_volume()
     energy=en
     STR+='Energy per atom = {0}\n'.format(energy/len(totalsol))
-    return totalsol, energy, pressure, volume, STR
+    return totalsol, pea, energy, pressure, volume, STR

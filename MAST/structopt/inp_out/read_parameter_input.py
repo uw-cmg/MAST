@@ -548,6 +548,12 @@ def read_parameter_input(input, logger):
                     logger.info('Setting lammps_min_style = {0}'.format('lammps_min_style')+'. Using LAMMPS conjugate gradient local minimizer')
         else:
             parameters['lammps_min_style'] = None
+    if 'lammps_command' in parameters:
+        parameters['lammps_command'] = str(parameters['lammps_command'])
+        if rank ==0:
+          logger.info('lammps_command = {0}'.format(parameters['lammps_command']))
+    else: 
+        parameters['lammps_command'] = None
     if 'large_box_size' not in parameters:
         parameters['large_box_size']=500.0
         if rank == 0:

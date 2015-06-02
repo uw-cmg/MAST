@@ -84,7 +84,8 @@ def BestInds(pop, bests, Optimizer, writefile=False, fname=None):
         if len(bests) > Optimizer.number_of_bests:
             logger.info('Removing extra {0} structures from best list'.format(len(bests)-Optimizer.number_of_bests))
             bests = bests[0:Optimizer.number_of_bests]
-    if writefile==True:
+    if Optimizer.generation % 10 == 0:
+      if writefile==True:
         if fname==None:
             try:
                 rank = MPI.COMM_WORLD.Get_rank()

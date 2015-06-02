@@ -1,5 +1,6 @@
 import random
 import numpy
+import math
 from ase import Atom, Atoms
 from MAST.structopt.inp_out import write_xyz
 
@@ -18,6 +19,12 @@ def rotct_rand(ind1, ind2, Optimizer):
     
     #Perserve starting conditions of individual
     indi1 = ind1[0].copy()
+    if Optimizer.forcing != 'FreeNatom':
+       rax = random.choice(['x', '-x','y','-y','z','-z'])
+    else:
+       rax = 'z'
+    rang=random.random()*math.pi
+    indi1.rotate(rax,a=rang,center='COM',rotate_cell=False)
     indi2 =ind2[0].copy()
     #Translate individuals so COM is at (0,0,0)
     com1 = indi1.get_center_of_mass()
@@ -29,10 +36,18 @@ def rotct_rand(ind1, ind2, Optimizer):
     cmin = [min(numpy.minimum.reduce(indi1.get_positions())[i],numpy.minimum.reduce(indi2.get_positions())[i]) for i in range(3)]
     n=0
     while n<10:
-        rax = random.choice(['x', '-x','y','-y','z','-z'])
-        rang = random.random()*90
-        rpos = [random.uniform(cmin[i]*0.8,cmax[i]*0.8) for i in range(3)]
-        indi1.rotate(rax,a=rang,center=rpos,rotate_cell=False)
+        if Optimizer.forcing != 'FreeNatom':
+           rax = random.choice(['x', '-x','y','-y','z','-z'])
+           rang = random.random()* math.pi/2.0
+           rpos = [random.uniform(cmin[i]*0.8,cmax[i]*0.8) for i in range(3)]
+           indi1.rotate(rax,a=rang,center=rpos,rotate_cell=False)
+        else: 
+           rax = random.choice(['x','-x','y','-y'])
+           rangz = random.uniform(0,90)/180.0*math.pi
+           rang = math.pi/2.0
+           rpos = [random.uniform(cmin[i]*0.7,cmax[i]*0.7) for i in range(3)]
+           indi1.rotate('z',a=rangz,center=rpos,rotate_cell=False)
+           indi1.rotate(rax,a=rang,center=rpos,rotate_cell=False)
         #Search for atoms in individual 1 that are above the xy plane
         group1 = Atoms(cell=ind1[0].get_cell(),pbc=ind1[0].get_pbc())
         indices1=[]
@@ -44,8 +59,16 @@ def rotct_rand(ind1, ind2, Optimizer):
             break
         else:
             n+=1
-            indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
-    indi2.rotate(rax,a=rang,center=rpos,rotate_cell=False)
+            if Optimizer.forcing != 'FreeNatom':
+               indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+            else:
+               indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+               indi1.rotate('z',a=-1*rangz,center=rpos,rotate_cell=False)
+    if Optimizer.forcing != 'FreeNatom':
+       indi2.rotate(rax,a=rang,center=rpos,rotate_cell=False)
+    else:
+       indi2.rotate('z',a=rangz,center=rpos,rotate_cell=False)
+       indi2.rotate(rax,a=rang,center=rpos,rotate_cell=False)
     if debug: 
         print 'Group1 size = ', len(group1)
         print 'Position = ', rpos
@@ -84,7 +107,7 @@ def rotct_rand(ind1, ind2, Optimizer):
                     del indices1[one]
             indices2=indices2n
             group2=group2n.copy()
-        else:
+        elif Optimizer.forcing != 'FreeNatom':
             dellist = []
             while len(group2) < len(group1)-len(dellist):
                 #Too many atoms in group 1
@@ -146,8 +169,14 @@ def rotct_rand(ind1, ind2, Optimizer):
                     if len(atms2)==0:
                         indi2.append(atms1[random.randint(0,len(atms1)-1)])
                         indi2.pop(random.randint(0,len(indi2)-2))	
-        indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
-        indi2.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+        if Optimizer.forcing != 'FreeNatom':
+           indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+           indi2.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+        else:
+           indi1.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+           indi1.rotate('z',a=-1*rangz,center=rpos,rotate_cell=False)
+           indi2.rotate(rax,a=-1*rang,center=rpos, rotate_cell=False)
+           indi2.rotate('z',a=-1*rangz,center=rpos,rotate_cell=False)
         indi1.translate(com1)
         indi2.translate(com2)
     
