@@ -71,6 +71,7 @@ class InputParser(MASTObj):
         self.section_parsers = {\
                 'mast'     : self.parse_mast_section,
                 'structure' : self.parse_structure_section,
+                'scaling' : self.parse_scaling_section,
                 'ingredients' : self.parse_ingredients_section,
                 'defects'  : self.parse_defects_section,
                 'recipe'   : self.parse_recipe_section,
@@ -160,6 +161,26 @@ class InputParser(MASTObj):
         for key, value in mast_dict.items():
             options.set_item(section_name, key, value)
         
+    def parse_scaling_section(self, section_name, section_content, options):
+        """Parses the scaling section and populate the options."""
+        scaling_dict = dict()
+        for line in section_content:
+            if (line.startswith('begin')):
+                size_name = ' '.join(line.split()[1:])
+                size_dict = dict()
+            elif ('end' not in line):
+                opt = line.split()
+                if (opt[0] == 'mast_size'):
+                    matrix = line.split('[')[1].split(']')[0]
+                    size_dict['mast_size'] = matrix
+                elif (opt[0] == 'mast_kpoints'):
+                    size_dict['mast_kpoints'] = ' '.join(opt[1:])
+            elif ('end' in line):
+                scaling_dict[size_name] = size_dict
+        for key,value in scaling_dict.items():
+            options.set_item(section_name, key, value)
+
+
     def parse_structure_section(self, section_name, section_content, options):
         """Parses the structure section and populate the options.
             Does not create the structure.
@@ -191,12 +212,7 @@ class InputParser(MASTObj):
         structure_dict = STRUCTURE_KEYWORDS.copy() 
 
         subsection_dict = dict()
-        matrix = []
         for myline in section_content:
-            if '[' and ']' in myline:
-                matrix.append(myline.split('[')[1].split(']')[0])
-                myline = myline.split(']')[1].strip()
-                line = myline.split()
             line = myline.split()
 
             if (line[0] in structure_dict):
@@ -250,7 +266,6 @@ class InputParser(MASTObj):
         # TM
         element_map = dict()
         atom_list = list()
-        scaling = dict()
         for key, value in subsection_dict.items():
             if (key == 'coordinates'):
                 value = np.array(value)
@@ -271,37 +286,6 @@ class InputParser(MASTObj):
                     elname = elline[1].strip().title() #Title case
                     element_map[elkey]=elname
                 structure_dict['element_map'] = element_map
-            if (key == 'scaling'):
-                index = 0
-                scsize = []
-                for scline in value:
-                    try:
-                        sckmesh = scline[0].strip()
-                    except: raise MASTError(self.__class__.__name__, "No kpoint mesh given!")
-                    sckshift = "0.0 0.0 0.0"
-                    scktype = 'M'
-                    try: 
-                        if scline[1].strip().upper()=='M' or scline[1].strip().upper()=='G':
-                            scktype = scline[1].strip()
-                    except IndexError: pass
-                    if 'label=' in scline[-1]:
-                        scsize.append(scline[-1].strip().split('label=')[1])
-                        try:                                     
-                            sckshift = "%s %s %s"%(float(scline[-4]), float(scline[-3]), float(scline[-2]))
-                        except: pass                            
-                    else:
-                        label = 1
-                        while 'size%s'%label in scsize:
-                            label += 1
-                        scsize.append('size%s'%label)
-                        try: 
-                            sckshift = "%s %s %s"%(float(scline[-3]), float(scline[-2]), float(scline[-1]))
-                        except: pass
-                    if scsize[index] in scaling.keys():
-                        raise MASTError(self.__class__.__name__, "Label %s conflicted with the default label. Please rename this label!"%scsize[index])
-                    scaling[scsize[index]]=[matrix[index],sckmesh,scktype,sckshift]
-                    index += 1
-                structure_dict['scaling'] = scaling
         if len(element_map) > 0 and len(atom_list) > 0:
             new_atom_list = list()
             for atomval in atom_list:
@@ -493,12 +477,15 @@ class InputParser(MASTObj):
                 opt = line.split()
                 # print opt
                 if (opt[0] == 'mast_kpoints'):
-                    kpts = map(int, opt[1].split('x'))
+                    try: 
+                        kpts = map(int, opt[1].split('x'))
+                        if len(opt) > 2:
+                            kpts.append(opt[2])
+                    except ValueError: 
+                        kpts = opt[1:]
                     # Second option after mast_kpoints tells where to 
                     # center the k-point mesh.
                     # If it's there, we append it onto the k-point grid list.
-                    if len(opt) > 2:
-                        kpts.append(opt[2])
                     ingredient_dict[opt[0]] = kpts
                 elif (opt[0] == 'mast_pp_setup'):
                     psp_dict = dict()
