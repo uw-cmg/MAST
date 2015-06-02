@@ -147,6 +147,7 @@ class RecipePlan:
                         else:
                             raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
                         self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
+                        my_ing.close_logger()
                         return mresult
         raise MASTError(self.__class__.__name__,"Could not find method %s in class %s" % (methodname, myclass))
         return None

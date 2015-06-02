@@ -220,32 +220,36 @@ class InputParser(MASTObj):
         # may match and use that.  If there are multiple matches, we'll throw
         # an error.
         if (structure_dict['posfile'] is not None): # Do we have a geometry file?
-            # First build a list of likely files
-            origindir = os.path.dirname(self.keywords['inputfile'])
-            if origindir == "":
-                origindir = os.getcwd()
-            metatry = os.path.join(os.getcwd(), 'metadata.txt')
-            if os.path.isfile(metatry):
-                myrecipemeta = Metadata(metafile=metatry)
-                origindir = myrecipemeta.search_data('origin_dir')[1]
-            myfiles = dirutil.walkfiles(origindir)
-            file_list=list()
-            for myfile in myfiles:
-                if structure_dict['posfile'] in myfile:
-                    file_list.append(myfile)
-            if (len(file_list) > 1):
-                # If we have multiple files with the same name, but different capitalization, throw an error here
-                self.logger.warning('Found multiple files with the name %s' % structure_dict['posfile'])
-                self.logger.warning('Found the files:')
-                for file in file_list:
-                    self.logger.warning(file)
-                error='Found ambiguous file names'
-                raise MASTError(self.__class__.__name__, error)
-            elif len(file_list) == 0:
-                raise MASTError(self.__class__.__name__, "No structure file %s found in %s" % (structure_dict['posfile'], origindir))
+            # TTM for issue #423
+            posfiletry = os.path.join(os.getcwd(), structure_dict['posfile'])
+            if os.path.isfile(posfiletry):
+                self.logger.info("Using posfile %s in directory %s" % (structure_dict['posfile'], os.getcwd()))
             else:
-                structure_dict['posfile'] = file_list[0]
-
+                # First build a list of likely files
+                origindir = os.path.dirname(self.keywords['inputfile'])
+                if origindir == "":
+                    origindir = os.getcwd()
+                metatry = os.path.join(os.getcwd(), 'metadata.txt')
+                if os.path.isfile(metatry):
+                    myrecipemeta = Metadata(metafile=metatry)
+                    origindir = myrecipemeta.search_data('origin_dir')[1]
+                myfiles = dirutil.walkfiles(origindir)
+                file_list=list()
+                for myfile in myfiles:
+                    if structure_dict['posfile'] in myfile:
+                        file_list.append(myfile)
+                if (len(file_list) > 1):
+                    # If we have multiple files with the same name, but different capitalization, throw an error here
+                    self.logger.warning('Found multiple files with the name %s' % structure_dict['posfile'])
+                    self.logger.warning('Found the files:')
+                    for file in file_list:
+                        self.logger.warning(file)
+                    error='Found ambiguous file names'
+                    raise MASTError(self.__class__.__name__, error)
+                elif len(file_list) == 0:
+                    raise MASTError(self.__class__.__name__, "No structure file %s found in %s" % (structure_dict['posfile'], origindir))
+                else:
+                    structure_dict['posfile'] = file_list[0]
         # print 'in InputParser.parse_structure_section:', subsection_dict
         # TM
         element_map = dict()

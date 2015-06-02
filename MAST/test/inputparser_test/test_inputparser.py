@@ -112,7 +112,8 @@ class TestInputparser(unittest.TestCase):
         #print myoptions
         mdict=dict()
         mdict['structure'] = dict()
-        mdict['structure']['posfile'] = os.path.join(testdir, "POSCAR_startpos")
+        mdict['structure']['posfile']="POSCAR_startpos"
+        #mdict['structure']['posfile'] = os.path.join(testdir, "POSCAR_startpos")
         self.assertItemsEqual(myoptions.options.keys(), ['structure'])
         self.assertEqual(myoptions.options['structure']['posfile'],mdict['structure']['posfile']) 
         myip = InputParser(inputfile="neb_with_phonons.inp")

@@ -98,6 +98,7 @@ def find_defects(solid, bulko, rcutoff, atomlistcheck=False, trackvacs=False, tr
                 if one < ntot:
                     nbatmsd.append((0,one))
                     repinds.append(one)
+        for one in oslist:
             indices, offsets = nl.get_neighbors(one)
             for index,d in zip(indices,offsets):
                 index = int(index)
@@ -119,51 +120,59 @@ def find_defects(solid, bulko, rcutoff, atomlistcheck=False, trackvacs=False, tr
                     repinds.append(one)
     nbatmsd=sorted(nbatmsd, key=lambda one:one[0], reverse=True)
     indices=[]
-    i=0
+    natomsbox = 0
     # Select only atoms closest to defects that satisfy concentrations specified by atomlist given in atomlistcheck
     if atomlistcheck:
-        natomsbox=sum([c for sym,c,m,u in atomlistcheck])
-        if len(nbatmsd) > natomsbox:
-            while i<natomsbox:
-                a=nbatmsd.pop()
-                box.append(solid[a[1]])
-                indices.append(a[1])
-                i+=1
-        elif len(nbatmsd) <= natomsbox:
-            for a in nbatmsd:
-                box.append(solid[a[1]])
-                indices.append(a[1])
-                i+=1
-            if len(box) < natomsbox:
-                try:
-                    while True:
-                        for n in range(len(nbatmsd)-1,-1,-1):
-                            inds, offsets=nl.get_neighbors(nbatmsd[n][1])
-                            for one,d in zip(inds,offsets):
-                                if len(box) < natomsbox:
-                                    if one not in indices and one < ntot:
-                                        opos = copy.copy(solid[one].position)
-                                        solid[one].position = solid[one].position + numpy.dot(d,solid.get_cell())
-                                        dist = solid.get_distance(nbatmsd[n][1],one)
-                                        solid[one].position = opos
-                                        if dist <= rcutoff*5.0:
+        for sym,c,m,u in atomlistcheck:
+            i=0
+            nbsym = [one for one in nbatmsd if solid[one[1]].symbol==sym]
+            if len(nbsym) > c:
+                while i < c:
+                    a = nbsym.pop()
+                    box.append(solid[a[1]])
+                    indices.append(a[1])
+                    i+=1
+            else:
+                for a in nbsym:
+                    box.append(solid[a[1]])
+                    indices.append(a[1])
+                    i+=1
+                if len(box)-natomsbox < c:
+                    try:
+                        while True:
+                            for n in range(len(nbatmsd)-1,-1,-1):
+                                inds, offsets=nl.get_neighbors(nbatmsd[n][1])
+                                for one,d in zip(inds,offsets):
+                                    if len(box)-natomsbox < c:
+                                        if one not in indices and one < ntot and solid[one].symbol==sym:
+                                            opos = copy.copy(solid[one].position)
+                                            solid[one].position = solid[one].position + numpy.dot(d,solid.get_cell())
+                                            dist = solid.get_distance(nbatmsd[n][1],one)
+                                            solid[one].position = opos
+                                            if dist <= rcutoff*5.0:
+                                                box.append(solid[one])
+                                                indices.append(one)
+                                    else:
+                                        raise StopIteration()
+                                for one,d in zip(inds,offsets):
+                                    if len(box)-natomsbox < c:
+                                        if one not in indices and one < ntot and solid[one].symbol==sym:
+                                            opos = copy.copy(solid[one].position)
+                                            solid[one].position = solid[one].position + numpy.dot(d,solid.get_cell())
+                                            dist = solid.get_distance(nbatmsd[n][1],one)
+                                            solid[one].position = opos
                                             box.append(solid[one])
                                             indices.append(one)
-                                else:
-                                    raise StopIteration()
-                            for one,d in zip(inds,offsets):
-                                if len(box) < natomsbox:
-                                    if one not in indices and one < ntot:
-                                        opos = copy.copy(solid[one].position)
-                                        solid[one].position = solid[one].position + numpy.dot(d,solid.get_cell())
-                                        dist = solid.get_distance(nbatmsd[n][1],one)
-                                        solid[one].position = opos
-                                        box.append(solid[one])
-                                        indices.append(one)
-                                else:
-                                    raise StopIteration()
-                except StopIteration:
-                    pass
+                                    else:
+                                        raise StopIteration()
+                    except StopIteration:
+                        pass
+            natomsbox = len(box)
+        #Double check for sanity
+        for sym,c,m,u in atomlistcheck:
+            symsbox = [one for one in box if one.symbol==sym]
+            if len(symsbox) != c:
+                stro+='WARNING!!!! : FAILURE IN FIND_DEFECTS TO MATCH PROVIDED ATOMLIST. DEBUG!!!!\n'
     # If atomlistcheck is False then use all the atoms in the given cutoff distance
     else:
         for a in nbatmsd:
@@ -182,6 +191,8 @@ def find_defects(solid, bulko, rcutoff, atomlistcheck=False, trackvacs=False, tr
     indiv.set_cell(bulko.get_cell())
     bulki.set_pbc(True)
     indiv.set_pbc(True)
+    stro+='Atomlist check = {0}\n'.format(atomlistcheck)
+    stro+='Bulko = {0}\n'.format(bulko)
     stro+='New individual ({0} atoms) : {1}\n'.format(len(indiv), indiv)
     stro+='New bulki ({0} atoms) : {1}\n'.format(len(bulki), bulki)
     #Debug: write new indiv to file
@@ -193,5 +204,5 @@ def find_defects(solid, bulko, rcutoff, atomlistcheck=False, trackvacs=False, tr
         write_xyz(debug,b,'Find Ints: New Bulki')
         debug.flush()
         print len(bulko)
-    
+
     return indiv,bulki,vacant,swaps,stro

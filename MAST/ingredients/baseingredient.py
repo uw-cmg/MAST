@@ -101,9 +101,20 @@ class BaseIngredient(MASTObj):
             #    self.metafile.write_data('charge', self.keywords['program_keys']['mast_charge'])
             for key, value in self.meta_dict.items():
                 self.metafile.write_data(key, value)
+
         except OSError:
             self.logger.info("Directory for %s already exists." % self.keywords['name'])
-            return
+        return
+    
+    def close_logger(self):
+        """Close logger handlers 
+            (prevents IOError from too many handlers being open)
+        """
+        handlerlist = list(self.logger.handlers) #TTM 428; also deleted return after OSError
+        for myhandler in handlerlist:
+            self.logger.removeHandler(myhandler)
+            myhandler.flush()
+            myhandler.close()
         return
 
     def is_complete(self):

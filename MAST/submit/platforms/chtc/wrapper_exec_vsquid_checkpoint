@@ -30,7 +30,47 @@ programexec="/home/mayeshiba/vasp.5.3.3_20140904_cNEB_for_CHTC/std/vasp"
 
 ###Step 3. Run the program using mpiexec.
 ###Step 3a. SPECIFIC: check to see if job had previously been checkpointed
-if [ -f CONTCAR ]
+isneb=`find ./ -type d -name 00 | wc -l`
+
+if [ $isneb -gt 0 ]
+then
+    mydirs=`find ./ -type d`
+    numfol=`find ./ -type d | wc -l`
+    numct=0
+    for myd in $mydirs
+    do  
+        numct=`expr $numct + 1`
+        if [ $numct -lt $numfol ]
+        then
+            if [ $numct -gt 1 ]
+            then
+                if [ -f $myd/CONTCAR ]
+                then
+                    clines=`wc -l $myd/CONTCAR | awk '{print $1}'`
+                    if [ $clines -gt 0 ]
+                    then
+                        date
+                        echo "Non-empty $myd/CONTCAR was found. Archive and copy CONTCAR to POSCAR."
+                        mydate=`date +%Y%m%d%H%M%S` 
+                        cp $myd/POSCAR $myd/POSCAR_$mydate
+                        cp $myd/CONTCAR $myd/CONTCAR_$mydate
+                        cp $myd/OUTCAR $myd/OUTCAR_$mydate
+                        cp $myd/OSZICAR $myd/OSZICAR_$mydate
+                        cp $myd/CONTCAR $myd/POSCAR
+                    else
+                        date
+                        echo "$myd/CONTCAR was empty! Fail out."
+                        exit 1
+                    fi
+                else
+                    date
+                    echo "No $myd/CONTCAR yet. Continue."
+                fi
+            fi
+        fi
+    done
+else
+    if [ -f CONTCAR ]
     then
         clines=`wc -l CONTCAR | awk '{print $1}'`
         if [ $clines -gt 0 ]
@@ -43,19 +83,54 @@ if [ -f CONTCAR ]
                 cp OUTCAR OUTCAR_$mydate
                 cp OSZICAR OSZICAR_$mydate
                 cp CONTCAR POSCAR
-            else
+        elif [[ `grep IBRION INCAR` == *"5"* ]]
+            then
                 date
-                echo "CONTCAR was empty! Fail out."
-                exit 1
-            fi
+                echo "IBRION equals 5 and some CONTCAR was found. Take no action."
+        else
+            date
+            echo "CONTCAR was empty! Fail out."
+            exit 1
+        fi
     else
         date
         echo "No CONTCAR yet. Continue."
+    fi
 fi
 
 $mpiexec -np $1 $cdeexecprogram $programexec > vasp.out
 
 ###Step 4. Clean up ONLY IF finished.
+if [ $isneb -gt 0 ]
+then
+    if [ -f 01/OUTCAR ]
+    then
+        uct=`grep -c User 01/OUTCAR`
+        if [ $uct -gt 0 ]
+        then
+            date
+            echo "01/OUTCAR has user time. Exit normally."
+            rm cde-package_mpiexec_vsquid.tar.gz
+            rm $pname
+            for myd in $mydirs
+            do
+                if [ -f $myd/WAVECAR ]
+                then
+                    rm $myd/WAVECAR
+                fi
+            done
+            exit 0
+        else
+            date
+            echo "No User time found in 01/OUTCAR. Needs to keep running."
+        fi
+    else
+        date
+        echo "No 01/OUTCAR found. Fail out!"
+        exit 1
+    fi
+fi
+
 if [ -f OUTCAR ]
     then
         uct=`grep -c User OUTCAR`
@@ -65,6 +140,7 @@ if [ -f OUTCAR ]
                 echo "OUTCAR has user time. Exit normally."
                 rm cde-package_mpiexec_vsquid.tar.gz
                 rm $pname
+                rm WAVECAR
                 exit 0
             else
                 date

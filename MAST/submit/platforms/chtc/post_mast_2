@@ -1,13 +1,16 @@
 #!/bin/bash
 ###TTM 2014-08-27 post-mast steps
-rm $MAST_SQUID/MAST_workdirs.tar.gz
+export MAST_CONTROL=//home/mayeshiba/MAST_2/CONTROL
+export MAST_SCRATCH=//home/mayeshiba/MAST_2/SCRATCH
+export MAST_ARCHIVE=//home/mayeshiba/MAST_2/ARCHIVE
+rm $MAST_SQUID/MAST_workdirs_2.tar.gz
 cd $MAST_CHTC
-mv back.tar.gz $HOME/back.tar.gz
+mv back_2.tar.gz $HOME/back_2.tar.gz
 cd $HOME
-tar -xzvf back.tar.gz
-rm back.tar.gz
+tar -xzvf back_2.tar.gz
+rm back_2.tar.gz
 sleep 10
-$MAST_CHTC/stripsubmitlist.py
+$MAST_CHTC/stripsubmitlist_2.py
 sleep 2
 while read sdir
 do 

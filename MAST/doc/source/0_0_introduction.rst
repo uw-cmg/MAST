@@ -2,11 +2,13 @@ Introduction
 ============
 Welcome to the MAterials Simulation Toolkit (MAST)!
 
-MAST is an automated workflow manager and post-processing tool.
+MAST is an automated workflow manager and post-processing tool. 
 
 MAST focuses on diffusion and defect workflows that use density functional theory. It interfaces primarily with the Vienna Ab-initio Simulation Package (VASP). 
 
 However, MAST can be generalized to other workflows and codes.
+
+`MAST is available from the Python Package Index. <https://pypi.python.org/pypi/MAST>`_
 
 ==================
 The MAST Kitchen
