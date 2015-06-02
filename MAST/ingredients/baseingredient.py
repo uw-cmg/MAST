@@ -26,6 +26,7 @@ from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
 from MAST.ingredients.errorhandler import VaspNEBError
 from MAST.ingredients.errorhandler import GenericError
+from MAST.ingredients.pmgextend.atom_index import AtomIndex
 from MAST.utility import loggerutils
 
 class BaseIngredient(MASTObj):
@@ -40,6 +41,7 @@ class BaseIngredient(MASTObj):
                     program-dependent checker object
             self.errhandler <VaspError, PhonError, etc.>:
                     program-dependent handler object
+            self.atomindex <AtomIndex>: atom index object
     """
     def __init__(self, allowed_keys, **kwargs):
         allowed_keys_base = dict()
@@ -62,6 +64,12 @@ class BaseIngredient(MASTObj):
         self.logger = logging.getLogger(self.keywords['name'])
         self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
         
+        sdir=os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
+        if os.path.exists(sdir):
+            self.atomindex = AtomIndex(structure_index_directory=sdir)
+        else:
+            self.atomindex = None
+
         if self.program == 'vasp':
             self.checker = VaspChecker(name=self.keywords['name'],
             program_keys = self.keywords['program_keys'],

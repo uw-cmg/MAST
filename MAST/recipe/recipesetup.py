@@ -219,15 +219,19 @@ class RecipeSetup(MASTObj):
         """
         datalist=list()
         datalist.append("ingredient type: %s " % myingred)
-        scaling = self.input_options.get_item('structure','scaling')
+        scaling = self.input_options.get_item('scaling')
         scalingsize = None
         if scaling: 
             for sckeys in scaling.keys():
                 if sckeys in myingred:
                     scalingsize = sckeys
             if scalingsize:
-                datalist.append("scaling_size: [%s]" % scaling[scalingsize][0])
-                datalist.append("kpoints: %s %s %s" % (scaling[scalingsize][-3],scaling[scalingsize][-2],scaling[scalingsize][-1]))
+                datalist.append("scaling_label: %s" % scalingsize) #TTM add scaling label for atom index
+                datalist.append("scaling_size: [%s]" % scaling[scalingsize]['mast_size'])        
+                kpoints = scaling[scalingsize]['mast_kpoints']
+                datalist.append("kpoints: %s" % kpoints)
+                #if 'nbands' in scaling[scalingsize].keys():
+                #    datalist.append("nbands: %s" % scaling[scalingsize]['nbands'][0])
         if 'defect_' in myingred:
             if scaling:
                 defectlabel = myingred.split('defect_')[1].split('_')[1]

@@ -111,6 +111,7 @@ class MASTInput(MASTObj):
         self.create_recipe_plan()
         self.create_archive_files()
         self.copy_posfile()
+        self.copy_structure_index_files()
 
     def create_recipe_plan(self):
         """Create the recipe plan object, and print its status.
@@ -278,4 +279,17 @@ class MASTInput(MASTObj):
         useposfile=self.input_options.get_item('structure','posfile')
         if not (useposfile == None):
             shutil.copy(useposfile, self.working_directory)
+        return True
+
+    def copy_structure_index_files(self):
+        """Copy any structure index files into the recipe directory.
+            Also remove them from the origin directory, as there are likely to
+            be repeat scaling label names if looping is used.
+        """
+        usestridx=self.input_options.get_item('structure','use_structure_index')
+        if usestridx in ["True","true","T","t"]:
+            shutil.move("structure_index_files", self.working_directory)
+            #import glob
+            #for stridxfile in glob.glob('*structure_index*'):
+            #    shutil.move(stridxfile, self.working_directory)
         return True

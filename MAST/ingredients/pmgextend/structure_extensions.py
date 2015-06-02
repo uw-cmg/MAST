@@ -11,6 +11,7 @@ from MAST.utility.dirutil import *
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import MASTObj
+from MAST.utility import InputOptions
 from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
@@ -29,8 +30,9 @@ class StructureExtensions(MASTObj):
             'name': (str, get_mast_control_path(), 'Name of ingredient')
             }
         MASTObj.__init__(self, allowed_keys, **kwargs)
-        self.logger = logging.getLogger(self.keywords['name'])
-        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        rname=os.path.dirname(self.keywords['name'])
+        self.logger = logging.getLogger(rname)
+        self.logger = loggerutils.add_handler_for_recipe(rname, self.logger)
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def induce_defect(self, defect, coord_type, threshold):
@@ -418,3 +420,36 @@ class StructureExtensions(MASTObj):
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)
         return returnstr
+
+    def get_scaled_coordinates(self, mycoords):
+        """Get scaled coordinates for a defect.
+            Args:
+                mycoords <numpy array of float>: unscaled coordinates
+            Returns:
+                newcoords <numpy array of float>: new coordinates
+        """
+        scale = self.keywords['scaling_size']
+        scale = scale.strip()
+        if len(scale.split(',')) == 3:
+            try: 
+                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+                coorda = mycoords[0]/scaleinput[0]
+                coordb = mycoords[1]/scaleinput[1]
+                coordc = mycoords[2]/scaleinput[2]
+            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
+        else:
+            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+            raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
+            return None
+        newcoords = np.array([coorda, coordb, coordc],'float')
+        return newcoords
+
+
+
+
+
+        
+
+

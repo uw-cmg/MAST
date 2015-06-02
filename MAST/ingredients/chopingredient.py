@@ -11,7 +11,6 @@ import shutil
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
-from pymatgen.core.structure_modifier import StructureEditor
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
 from MAST.utility import MASTObj
@@ -19,10 +18,12 @@ from MAST.utility import MASTError
 from MAST.utility import Metadata
 from MAST.utility import MASTFile
 from MAST.utility import dirutil
+#from MAST.utility.defect_formation_energy import DefectFormationEnergy as DFE
 from MAST.ingredients.baseingredient import BaseIngredient
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
 from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import VaspChecker
+from MAST.ingredients.pmgextend.atom_index import AtomIndex
 
 class ChopIngredient(BaseIngredient):
     def __init__(self, **kwargs):
@@ -33,7 +34,7 @@ class ChopIngredient(BaseIngredient):
             'structure': (Structure, None, 'Pymatgen Structure object'),
             }
         BaseIngredient.__init__(self, allowed_keys, **kwargs)
-        
+
     def _fullpath_childname(self, childname):
         """Get full path of the child directory.
             Args: 
@@ -51,8 +52,8 @@ class ChopIngredient(BaseIngredient):
 
     def copy_file_with_prepend(self, copyfrom="", copyto="", childdir="", softlink=0):
         """Duplicate an ingredient file into the child
-            directory, with the ingredient
-            name prepended
+           directory, with the ingredient 
+           name prepended
             e.g. "OSZICAR" becomes "defect_vac1_q=p2_stat_OSZICAR"
             Args:
                 copyfrom <str>: File name to copy, e.g. OSZICAR
@@ -264,7 +265,7 @@ class ChopIngredient(BaseIngredient):
                         self.logger.info("Copied file from %s to %s" % (copyfromfullpath, topath))
         return
 
-    def write_ingred_input_file(self, fname="", allowed_file="all", upperkey=1, delimiter=" "):
+    def write_ingred_input_file(self, fname="", allowed_file="all", not_allowed_file="none", upperkey=1, delimiter=" "):
         """Write an input file.
             Args: 
                 fname <str>: File name for the ingredient input 
@@ -289,9 +290,22 @@ class ChopIngredient(BaseIngredient):
             okay_keys = self._get_allowed_non_mast_keywords("", upperkey)
         else:
             okay_keys = self._get_allowed_non_mast_keywords(allowed_file, upperkey)
+        if not_allowed_file.lower() == "none": bad_keys = list()
+        else:
+            path = os.path.join(dirutil.get_mast_install_path(),'ingredients','programkeys',not_allowed_file)
+            bad_keys = list()
+            fp = open(path)
+            lines = fp.readlines()
+            for i in range(1,len(lines)-1):
+                if int(upperkey)==1:
+                    bad_keys.append(lines[i].strip().upper())
+                else:
+                    bad_keys.append(lines[i].strip().lower())
+                
         my_input = MASTFile()
         for key, value in okay_keys.iteritems():
-            my_input.data.append(str(key) + delimiter + str(value) + "\n")
+            if not key in bad_keys:
+                my_input.data.append(str(key) + delimiter + str(value) + "\n")
         inputpath = os.path.join(self.keywords['name'],fname)
         if os.path.isfile(inputpath):
             self.logger.error("File already exists at %s. Skipping input file writing." % inputpath)
@@ -446,6 +460,23 @@ class ChopIngredient(BaseIngredient):
         if len(parentimagestructures) == 0:
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
             image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+            if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
+                image_structures_raw = list(image_structures)
+                image_structures = list()
+                self.logger.info("Attempt to unsort.")
+                myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
+                manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+                manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
+                myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[0],os.path.join(self.keywords['name'],'scrambledep1'))
+                myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[-1],os.path.join(self.keywords['name'],'scrambledep2'))
+                for sidx in range(0,len(image_structures_raw)-1):
+                    onestruc = image_structures_raw[sidx]
+                    newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"scrambledep1"))
+                    image_structures.append(newstruc)
+                newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"scrambledep2"))
+                image_structures.append(newstruc)
+
+
         else:
             image_structures.append(parentstructures[0])
             image_structures.extend(parentimagestructures)
@@ -459,6 +490,117 @@ class ChopIngredient(BaseIngredient):
         return
 
 
+    def write_pathfinder_neb(self, chgcarfolder, addlsites=0):
+        """Get the parent structures, sort and match atoms, and interpolate
+            using Daniil Kitchaev's NEB Pathfinder
+            Write images to the appropriate folders.
+            Args:
+                chgcarfolder <str>: CHGCAR folder, e.g. a perfect static
+                addlsites <int>: number of additional sites at the end of
+                            the NEB manifest to pick up for needing
+                            path finding, e.g. vacancy positions
+        """
+        parentstructures = self.get_parent_structures()
+        parentimagestructures = self.get_parent_image_structures()
+        image_structures = list()
+        if len(parentimagestructures) > 0:
+            raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb without mast_coordinates, or on initial NEB setup.")
+        
+
+
+        #sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
+        #image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+
+        s1 = parentstructures[0]
+        s2 = parentstructures[1]
+        #s1 = Poscar.from_file(args.s1).structure
+        #s2 = Poscar.from_file(args.s2).structure
+        
+        #Must be an interstitial
+        mysi = os.path.join(os.path.dirname(self.keywords['name']),
+                "structure_index_files")
+        if not os.path.isdir(mysi):
+            raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb with structure indexing turned on.")
+        
+        #get aidxs from ;int lines of defect manifests
+        #match aidx to position in sorted NEB manifests
+        #get those sites
+
+        # Find diffusing species site indices
+        #mg_sites = []
+        #for site_i, site in enumerate(s1.sites):
+        #    if site.specie == Element("Mg"):
+        #        mg_sites.append(site_i)
+        sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
+        pmg_image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+        
+        myai=AtomIndex(structure_index_directory=mysi)
+        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[0],os.path.join(self.keywords['name'],'pmg_scrambledep1'))
+        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[-1],os.path.join(self.keywords['name'],'pmg_scrambledep2'))
+        
+        nebman=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        nebsplit=nebman.rsplit("_", 1)
+        defectman="%s_" % nebsplit[0]
+        intlist=list()
+        defectmanlist=myai.read_manifest_file(defectman)
+        for defectidx in defectmanlist:
+            if "int" in defectidx:
+                intlist.append(defectidx.split(';')[0])
+        
+        nebmanlist=myai.read_manifest_file(nebman)
+        pmg_nebmanlist=myai.read_manifest_file(os.path.join(self.keywords['name'],'pmg_scrambledep1'))
+        addlsites=int(addlsites)
+        if addlsites > 0:
+            self.logger.info("additional sites: %s" % addlsites)
+            intlist.extend(nebmanlist[-1*addlsites:])
+
+        intsites=list()
+        for intitem in intlist:
+            intidx = pmg_nebmanlist.index(intitem)
+            intsites.append(intidx)
+
+        print "ADDLSITES: %s, INTSITES: %s" % (addlsites, intsites)
+        self.logger.info("intsites: %s" % intsites)
+        # Interpolate
+        #use a param for perf_stat or othe ing label for chgcar
+        #print("Using CHGCAR potential mode.")
+        #chg = Chgcar.from_file(args.chg)
+        #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
+
+        if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
+            raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
+        from pymatgen.io.vaspio import Chgcar
+        chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
+        
+        numim = self.keywords['program_keys']['mast_neb_settings']['images']
+        
+        from MAST.under_development.daniil_pathfinder import *
+        pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
+
+        image_structures=pf.images
+        
+        image_structures_raw = list(image_structures)
+        image_structures = list()
+        self.logger.info("Attempt to unsort.")
+        myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
+        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
+        for sidx in range(0,len(image_structures_raw)-1):
+            onestruc = image_structures_raw[sidx]
+            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"pmg_scrambledep1"))
+            image_structures.append(newstruc)
+        newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"pmg_scrambledep2"))
+        image_structures.append(newstruc)
+
+        if image_structures == None:
+            raise MASTError(self.__class__.__name__,"Bad number of images")
+        self.checker.keywords['program_keys']['mast_neb_settings']['image_structures']=image_structures
+        self.checker.set_up_program_input()
+        self.place_parent_energy_files()
+        self.write_submit_script()
+        return
 
 
 
@@ -469,6 +611,7 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 [struct_init, struct_fin]: pymatgen Structure objects
+            #TTM add atom index
         """
         header = os.path.join(self.keywords['name'], "parent_structure_")
         mylabel = BaseIngredient.get_my_label(self, "neb_label").split("-")
@@ -497,6 +640,7 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 list of <Structure>: list of pymatgen Structure objects
+            #TTM add atom index
         """
         header = "parent_structure_"
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
@@ -575,13 +719,17 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
+            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
         mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr,thresh] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr, thresh)
+        if self.atomindex:
+            sdarrlist=self.atomindex.get_sd_array(self.keywords['name'], True)
+        else:
+            [pcs,pcr,thresh] = self.get_my_phonon_params()
+            sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
+            sdarrlist = sxtend.get_multiple_sd_array(pcs, pcr, thresh)
         if sdarrlist == None:
             raise MASTError(self.__class__.__name__, "No phonons to run!")
         sct=1
@@ -608,15 +756,19 @@ class ChopIngredient(BaseIngredient):
 
     def write_phonon_single(self):
         """Write the phonon files to a directory.
+            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
-        mystructure = self.checker.get_initial_structure_from_directory()
-        [pcs,pcr,thresh] = self.get_my_phonon_params()
-        sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
-        sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
-        if sdarr == None:
-            return
+        if self.atomindex:
+            sdarr=self.atomindex.get_sd_array(self.keywords['name'])
+        else:
+            mystructure = self.checker.get_initial_structure_from_directory()
+            [pcs,pcr,thresh] = self.get_my_phonon_params()
+            sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
+            sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
+            if sdarr == None:
+                return
         self.checker.add_selective_dynamics_to_structure_file(sdarr)
 
     def get_my_phonon_params(self):
@@ -731,18 +883,32 @@ class ChopIngredient(BaseIngredient):
         return
 
     def run_scale(self):
+        """
+        """
         try:
             base_structure = self.checker.get_initial_structure_from_directory()
         except: #no initial structure
             base_structure = self.keywords['structure'].copy()
             self.logger.warning("No parent structure detected for induce defect ingredient %s. Using initial structure of the recipe." % self.keywords['name'])
         scalingsize = self.metafile.read_data('scaling_size')
+        workdir=os.path.dirname(self.keywords['name'])
         if scalingsize == None: scalingsize = '1 1 1'
         elif '[' and ']' in scalingsize:
             scalingsize = scalingsize.split('[')[1].split(']')[0]
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s" % self.keywords['name'])
         scalextend = StructureExtensions(struc_work1=base_structure, scaling_size=scalingsize, name=self.keywords['name'])
         scaled = scalextend.scale_structure()
+        if self.atomindex:
+            mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
+            scaling_label=mymeta.read_data("scaling_label")
+            if scaling_label == None:
+                scaling_label = ""
+            defect_label=mymeta.read_data("defect_label")
+            if defect_label == None:
+                defect_label = ""
+            manname="manifest_%s_%s_" % (scaling_label, defect_label)
+            scaled=self.atomindex.graft_new_coordinates_from_manifest(scaled, manname, "")
+            self.logger.info("Getting coordinates from manifest.")
         self.checker.write_final_structure_file(scaled)
         return
 
@@ -759,6 +925,22 @@ class ChopIngredient(BaseIngredient):
         else: raise MASTError(self.__class__.__name__, "Error in scaling size for the ingredient %s"%self.keywords['name'])        
         defect = self.keywords['program_keys']['mast_defect_settings']
         scaled = base_structure.copy()
+        if self.atomindex:
+            mymeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
+            scaling_label=mymeta.read_data("scaling_label")
+            if scaling_label == None:
+                scaling_label = ""
+            defect_label=mymeta.read_data("defect_label")
+            if defect_label == None:
+                raise MASTError(self.__class__.__name__,"Ingredient %s has no defect_label in metadata. Cannot get manifest." % self.keywords['name'])
+            parent=mymeta.read_data("parent") 
+            manname="manifest_%s_%s_" % (scaling_label, defect_label)
+            sxtend = StructureExtensions(struc_work1=scaled, scaling_size=scalingsize, name=self.keywords['name'])
+            scaled = sxtend.scale_structure()
+            scaled=self.atomindex.graft_new_coordinates_from_manifest(scaled, manname, parent)
+            self.logger.info("Getting coordinates from manifest.")
+            self.checker.write_final_structure_file(scaled)
+            return
         for key in defect:
             if 'subdefect' in key:
                 subdefect = defect[key]
@@ -847,9 +1029,17 @@ class ChopIngredient(BaseIngredient):
     def complete_structure(self):
         if self.directory_is_locked():
             return False
-        return self.checker.has_ending_structure_file()
+        iscomplete = self.checker.has_ending_structure_file()
+        if iscomplete:
+            if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                self.checker.update_atom_index_for_complete()
+        return iscomplete
     def complete_singlerun(self):
-        return BaseIngredient.is_complete(self)
+        iscomplete = BaseIngredient.is_complete(self)
+        if iscomplete:
+            if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                self.checker.update_atom_index_for_complete()
+        return iscomplete
     def complete_neb_subfolders(self):
         """Make sure all subfolders are complete."""
         myname=self.keywords['name']
@@ -935,7 +1125,8 @@ class ChopIngredient(BaseIngredient):
             self.checker.keywords['name'] = impath
             self.checker.forward_final_structure_file(childname,"parent_structure_" + BaseIngredient.get_my_label(self, "neb_label") + '_' + imno)
             myct = myct + 1
-    
+        return
+
     def give_supercell_subfolder_file(self, oldfname, newfname, childname):
         """Give each CONTCAR to a corresponding scale1 through scale5
             child folder.
@@ -1053,3 +1244,44 @@ class ChopIngredient(BaseIngredient):
         self.checker.forward_final_structure_file(childname)
         self.checker.softlink_wavefunction_file(childname)
 
+    def give_energy_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)
+        shutil.copy(self.keywords['name']+'/OSZICAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OSZICAR')
+        shutil.copy(self.keywords['name']+'/CONTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_CONTCAR')
+        shutil.copy(self.keywords['name']+'/OUTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OUTCAR')
+        #fp = open(childpath+"/dfe.in", "a")
+        #fp.write(self.keywords['name'].split('/')[-1]+":"+open(self.keywords['name']+'/OSZICAR').readlines()[-1].split('E0=')[1].split()[0]+'\n')
+        #dfe = DFE(os.path.dirname(childpath))
+        #scalingsize = self.metafile.read_data('scaling_size')
+        #Ef = dfe._calculate_defect_formation_energies(scalingsize)
+
+    def give_doscar_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)
+        shutil.copy(self.keywords['name']+'/DOSCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_DOSCAR')
+
+    def give_outcar_to_dfe(self, childname):
+        childpath = self._fullpath_childname(childname)            
+        shutil.copy(self.keywords['name']+'/OUTCAR', childpath+'/'+self.keywords['name'].split('/')[-1]+'_OUTCAR')
+
+
+
+    
+    def give_structure_w_random_displacements(self, childname, disp=0.01):
+        import pymatgen as mg
+        import random
+        disp = float(disp)
+        childpath = self._fullpath_childname(childname)
+        print childpath,self.keywords['name']
+        struct=mg.read_structure(self.keywords['name']+'/CONTCAR')
+        for i in range(len(struct)):
+            coords = struct[i].coords
+            x1 = random.uniform(-1,1)
+            x2 = random.uniform(-1,1)
+            while (x1**2+x2**2>=1):
+                x1=random.uniform(-1,1)
+                x2=random.uniform(-1,1)
+            coords[0]+=(2*x1*np.sqrt(1-x1**2-x2**2)*disp)
+            coords[1]+=(2*x2*np.sqrt(1-x1**2-x2**2)*disp)
+            coords[2]+=((1-2*(x1**2+x2**2))*disp)
+            struct.replace(i, struct[i].specie, coords, True)
+        mg.write_structure(struct,childpath+'/POSCAR')

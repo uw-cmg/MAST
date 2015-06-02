@@ -112,91 +112,34 @@ if __name__ == "__main__":
     print '%    from MAST (MAterials Simulation Toolbox)    %'
     print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n'
  
-    string = os.getcwd()
-    for i in range(1,len(string)+1):
-        if string[-i]=='/':
-            tags=string[-i+1:]
-            break
     dfe = DFE('..')
     fp = open('DFE_vs_VM.log', 'w')
     v_m = dict()
-    Eform_orig = dict()
-    Eform_raw = dict()
+    Eform = dict()
     scalingsize = dfe.input_options.get_item('structure','scaling')
-    ingredients = dfe.recipe_plan.ingredients.keys()
+#    ingredients = dfe.recipe_plan.ingredients.keys()
     for size_label in scalingsize.keys():
         dfe = DFE('..')
-        dfe._calculate_defect_formation_energies("[%s]"%scalingsize[size_label][0],tags)
-        Ef = dfe.get_defect_formation_energies("[%s]"%scalingsize[size_label][0],tags)
-        Eform_orig[size_label] = Ef
+        dfe._calculate_defect_formation_energies("[%s]"%scalingsize[size_label][0])
+        Ef = dfe.get_defect_formation_energies("[%s]"%scalingsize[size_label][0])
+        Eform[size_label] = Ef
         for folder in ingredients:
             if (size_label in folder) and ('perfect' in folder):
-                if ((not('hse' in tags)) and (not ('hse' in folder))) or (('hse' in tags) and ('hse' in folder)):
-                    struct = mg.io.vaspio.Poscar.from_file('../%s/POSCAR'%folder).structure
-                    v_m[size_label] = CalcV_M(struct)
-                    break
-    sizes = Eform_orig.keys()
+                struct = mg.io.vaspio.Poscar.from_file('../%s/POSCAR'%folder).structure
+                v_m[size_label] = CalcV_M(struct)
+                break
+    sizes = Eform.keys()
     sizes.sort()
     chempot = dfe.input_options.get_item('chemical_potentials')
     conditions = chempot.keys()
-    defects = Eform_orig[sizes[0]][conditions[0]].keys()
+    defects = Eform[sizes[0]][conditions[0]].keys()
     defects.sort()
-    elements = chempot[conditions[0]]
-    string=''
-    eform_raw = dict()
-    eform = dict()
-    for ele in elements.keys():
-        string+='{0:^8}'.format('mu_%s'%ele)
-    for DEF in defects:
-        fp.write( "Table for defect %s:\n"%DEF )
-        fp.write( "{0:^12}{1:^8}{2:^8}{3:^8}{4:^8}{5:^8}\n".format(' ',"size","V_M","E_orig","FS_corr","E_corr"))
-        fp.write(''.join([i*52 for i in '='])+"\n")       
-        slpintcpt = dict()
-        eform_raw[DEF] = dict()
-        eform[DEF] = dict()
-        for CON in conditions:
-            V_M = []
-            for SIZE in sizes:
-                try: eform[DEF][CON].append(Eform_orig[SIZE][CON][DEF][1])
-                except KeyError: eform[DEF][CON]=[Eform_orig[SIZE][CON][DEF][1]]
-                try: eform_raw[DEF][CON].append(Eform_orig[SIZE][CON][DEF][0])
-                except KeyError: eform_raw[DEF][CON]=[Eform_orig[SIZE][CON][DEF][0]]
-                V_M.append(v_m[SIZE])
-            #Eform.append(eform)               
-            slpintcpt[CON]=linearFit(V_M,eform[DEF][CON]) 
-            FS_corr=-np.array(V_M)*slpintcpt[CON][0]
-            Eform_corr=np.array(eform[DEF][CON])+FS_corr
-            cases = 'Defect:%s with Conditions:%s'%(DEF,CON)
-        #   plotFit(V_M,eform[DEF][CON],'Madelung Potential V_M (eV)','Formation Energy (eV)',slpintcpt[CON],cases,"[%s]"%sizes)    
-        #   plt.savefig("%s_%s.png"%(DEF,CON))
-            for i in range(len(V_M)):
-                if i==0: blank = CON
-                else: blank = " "
-                fp.write("{0:^12}{1:^8}{2:^8}{3:^8}{4:^8}{5:^8}\n".format(blank,sizes[i],"%.2f"%V_M[i],"%.2f"%eform[DEF][CON][i],"%.2f"%FS_corr[i],"%.2f"%Eform_corr[i]) )
-                if i==len(V_M)-1: fp.write(''.join([i*52 for i in '-'])+"\n") 
-        fp.write( "{0:^12}{1:^8}{2:^8}{3:^8}{4:^8}{5:^8}\n".format(' ',string,'DFE','slope','R','stdev'))
-        fp.write(''.join([i*8*(5+len(elements)) for i in '='])+"\n") 
-        for con in conditions:
-            mu = ""
-            for ele in elements.keys():
-                mu+="{0:^8}".format('%.2f'%chempot[con][ele])
-            fp.write("{0:^8}{1:^8}{2:^8}{3:^8}{4:^8}{5:^8}\n".format(con,mu,"%.2f"%slpintcpt[con][1],"%.2f"%slpintcpt[con][0],"%.3f"%slpintcpt[con][2],"%.3f"%slpintcpt[con][3]))
-            fp.write(''.join([i*8*(5+len(elements)) for i in '-'])+"\n")
-        fp.write("\n")
-    fp.close()
-    print (open('DFE_vs_VM.log','r').read())
-
-
-    # for CON in conditions:
-    #    print CON
-    #    for DEF in defects:
-    #        print "%s: %s"%(DEF,linearFit(V_M,eform[DEF][CON])[1])
-
-
+    
+    print Eform
     charge_defects = dict()
     for DEF in defects:
-        try: charge_defects[DEF.split('_q=')[0]].append(DEF.split('_q=')[1])
-        except KeyError: charge_defects[DEF.split('_q=')[0]] = [DEF.split('_q=')[1]]
+        try: charge_defects[DEF.split('_q=')[0]].append(DEF.split('_q='))
+        except KeyError: charge_defects[DEF.split('_q=')[0]] = [DEF.split('_q=')]
     efermi=np.linspace(0.0,6.0,num=100)
     for CON in conditions:
         plt.figure()
@@ -205,8 +148,7 @@ if __name__ == "__main__":
             for i in range(100):
                 intercept = []
                 for CHG in charge_defects[DEF]:
-                    #if '4' in CHG: continue
-                    intercept.append(linearFit(V_M,eform['%s_q=%s'%(DEF,CHG)][CON])[1]+(efermi[i]*float(CHG)))
+                    intercept.append(linearFit(V_M,eform['%s_q=%s'%(DEF,CHG)][CON])+(efermi[i]*float(CHG)))
                 eforms[i] = min(intercept)
             plt.plot(efermi,eforms,'-',label='%s'%DEF)
             plt.hold(True)

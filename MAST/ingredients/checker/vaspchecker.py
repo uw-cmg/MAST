@@ -18,6 +18,7 @@ from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility.metadata import Metadata
 from MAST.ingredients.pmgextend.structure_extensions import StructureExtensions
+from MAST.ingredients.pmgextend.atom_index import AtomIndex
 import os
 import shutil
 import logging
@@ -74,7 +75,96 @@ class VaspChecker(BaseChecker):
                 childpath <str>: Path of child ingredient
                 newname <str>: new name (default 'POSCAR')
         """
-        return self.copy_a_file(childpath, "CONTCAR", newname)
+        proceed=False
+        workdir=os.path.dirname(self.keywords['name'])
+        sdir=os.path.join(workdir,"structure_index_files")
+        if os.path.exists(sdir):
+            proceed=True
+        if not proceed:
+            return self.copy_a_file(childpath, "CONTCAR", newname)
+        childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
+        child_scaling_label=childmeta.read_data("scaling_label")
+        child_defect_label=childmeta.read_data("defect_label")
+        child_neb_label=childmeta.read_data("neb_label")
+        child_phonon_label=childmeta.read_data("phonon_label")
+        if child_scaling_label == None:
+            child_scaling_label = ""
+        if child_defect_label == None:
+            child_defect_label = ""
+        if child_neb_label == None:
+            child_neb_label = ""
+        if child_phonon_label == None:
+            child_phonon_label = ""
+        parentmeta=Metadata(metafile="%s/metadata.txt" % self.keywords['name'])
+        parent_defect_label=parentmeta.read_data("defect_label")
+        parent_neb_label=parentmeta.read_data("neb_label")
+        if parent_defect_label == None:
+            parent_defect_label = ""
+        if parent_neb_label == None:
+            parent_neb_label = ""
+        if (not (child_neb_label == "")) and (not (parent_defect_label == "")):
+            child_defect_label = parent_defect_label
+        if (not (child_phonon_label == "")):
+            if (not (parent_defect_label == "")):
+                child_defect_label = parent_defect_label
+            if (not (parent_neb_label == "")):
+                child_neb_label = parent_neb_label
+                child_defect_label = parent_neb_label.split('-')[0].strip() # always define phonons from first endpoint
+        #get child manifest
+        childmanifest="manifest_%s_%s_%s" % (child_scaling_label, child_defect_label, child_neb_label)
+        #build structure from atom indices using parent name_frac_coords
+        ing_label=os.path.basename(self.keywords['name'])
+        childmeta.write_data("parent",ing_label)
+        mystr=Poscar.from_file("%s/CONTCAR" % self.keywords['name']).structure
+        myatomindex=AtomIndex(structure_index_directory=sdir)
+        if "inducescaling" in childpath: #initial scaled coords have no parent
+            ing_label="original"
+        newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
+        newposcar=Poscar(newstr)
+        newposcar.write_file(os.path.join(childpath,newname))
+        return
+
+    def update_atom_index_for_complete(self):
+        """Update atom index files with positions for the 
+            completed ingredient.
+        """
+        proceed=False
+        mydir = self.keywords['name']
+        workdir=os.path.dirname(mydir)
+        sdir=os.path.join(workdir,"structure_index_files")
+        if os.path.exists(sdir):
+            proceed=True
+        if not proceed:
+            self.logger.warning("Called update atom index for ingredient %s, but no atom indices exist." % self.keywords['name'])
+            return
+        mymeta=Metadata(metafile="%s/metadata.txt" % mydir)
+        scaling_label=mymeta.read_data("scaling_label")
+        defect_label=mymeta.read_data("defect_label")
+        neb_label=mymeta.read_data("neb_label")
+        if scaling_label == None:
+            scaling_label = ""
+        if defect_label == None:
+            defect_label = ""
+        if neb_label == None:
+            neb_label = ""
+        if neb_label == "":
+            mystr=Poscar.from_file("%s/CONTCAR" % self.keywords["name"]).structure
+            ing_label=os.path.basename(mydir)
+            manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+            myatomindex=AtomIndex(structure_index_directory=sdir)
+            myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
+        else:
+            nebdirs = dirutil.immediate_subdirs(self.keywords["name"])
+            for mysubdir in nebdirs:
+                if os.path.isfile("%s/%s/CONTCAR" % (self.keywords["name"],mysubdir)):
+                    mystr=Poscar.from_file("%s/%s/CONTCAR" % (self.keywords["name"], mysubdir)).structure
+                    ing_label=os.path.join(os.path.basename(mydir), mysubdir)
+                    for defect_label in neb_label.split("-"):
+                        manname="manifest_%s_%s_%s" % (scaling_label, defect_label, neb_label)
+                        myatomindex=AtomIndex(structure_index_directory=sdir)
+                        myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
+                
+        return
 
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
         """Forward the initial structure.
@@ -254,6 +344,16 @@ class VaspChecker(BaseChecker):
             #parent should have given a structure
         else: #this is an originating run; mast should give it a structure
             my_poscar = Poscar(self.keywords['structure'])
+            workdir=os.path.dirname(name)
+            sdir=os.path.join(workdir,"structure_index_files")
+            if os.path.exists(sdir):
+                mystr=my_poscar.structure
+                manname="manifest___"
+                myatomindex=AtomIndex(structure_index_directory=sdir)
+                newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, manname, "")
+                self.logger.info("Getting original coordinates from manifest.")
+                new_pos=Poscar(newstr)
+                my_poscar=new_pos
             self.logger.info("No POSCAR found from a parent; base structure used for %s" % self.keywords['name'])
         if 'mast_coordinates' in self.keywords['program_keys'].keys():
             sxtend = StructureExtensions(struc_work1=my_poscar.structure, name=self.keywords['name'])
@@ -280,12 +380,10 @@ class VaspChecker(BaseChecker):
         if not (self.metafile.read_data('kpoints')==None):
             kpoints = self.metafile.read_data('kpoints').split()
             kmesh = (int(kpoints[0].split('x')[0]),int(kpoints[0].split('x')[1]),int(kpoints[0].split('x')[2]))
-            if len(kpoints) == 4:
-                desig = "M"
-                kshift = (float(kpoints[1]),float(kpoints[2]),float(kpoints[3]))
-            else:
-                desig = kpoints[1].upper()
-                kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
+            try: desig = kpoints[1].upper()
+            except IndexError: desig = 'M'
+            try: kshift = (float(kpoints[2]),float(kpoints[3]),float(kpoints[4]))
+            except IndexError: kshift = (0.0,0.0,0.0)
         else:
             if 'mast_kpoints' in self.keywords['program_keys'].keys():
                 kpoints = self.keywords['program_keys']['mast_kpoints']
@@ -293,19 +391,27 @@ class VaspChecker(BaseChecker):
                 raise MASTError(self.__class__.__name__,"k-point instructions need to be set either in ingredients keyword mast_kpoints or scaling section in structure ingredient: No k-point settings for the ingredient %s"% name)
             if len(kpoints) == 3:
                 desig = "M"
+            elif 'line' in str(kpoints[1]):
+                desig = 'L'
             else:
                 desig = kpoints[3].upper()
-            kmesh = (int(kpoints[0]),int(kpoints[1]),int(kpoints[2]))
-            kshift = (0,0,0)
+            if not desig == 'L':
+                kmesh = (int(kpoints[0]),int(kpoints[1]),int(kpoints[2]))
+                kshift = (0,0,0)
         if desig == "M":
             my_kpoints = Kpoints.monkhorst_automatic(kpts=kmesh,shift=kshift)
         elif desig == "G":
             my_kpoints = Kpoints.gamma_automatic(kpts=kmesh,shift=kshift)
+        elif desig == 'L':
+            my_kpoints='Line Mode\n'+'\n'.join(' '.join(kpoints).split(','))+'\n'
+            fp=open(name+'/KPOINTS','w')
+            fp.write(my_kpoints)
         else:
             raise MASTError(self.__class__.__name__,"kpoint designation " + desig + " not recognized.")
 
         dirutil.lock_directory(name)
-        my_kpoints.write_file(name + "/KPOINTS")
+        if not desig=='L':
+            my_kpoints.write_file(name + "/KPOINTS")
         dirutil.unlock_directory(name)
         return my_kpoints
 
@@ -407,6 +513,8 @@ class VaspChecker(BaseChecker):
             #newelectrons = myelectrons + adjustment
             newelectrons = myelectrons - adjustment
             myd['NELECT']=str(newelectrons)
+        if self.metafile.read_data('nbands'):
+            myd['NBANDS']=self.metafile.read_data('nbands')
         my_incar = Incar(myd)
         dirutil.lock_directory(name)
         my_incar.write_file(name + "/INCAR")

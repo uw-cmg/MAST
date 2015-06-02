@@ -10,7 +10,6 @@ perfect_opt (no_run)
             inducedefect_<S>_<N>_<Q> (inducedefect)
                 defect_<S>_<N>_<Q>_opt (relax)
                     madelung_utility (madelung)
-                    phonon_<S>_<N>_<Q>_<P> (phonon)
     {end}
 $end
 
@@ -46,7 +45,7 @@ begin no_run
 mast_write_method write_singlerun
 mast_ready_method file_exists POSCAR
 mast_run_method copy_file POSCAR CONTCAR
-mast_complete_method complete_structure
+mast_complete_method file_exists CONTCAR
 end
 
 begin inducescaling
@@ -120,12 +119,12 @@ end
 $end
 
 $structure
-use_structure_index True
 coord_type fractional
 
 begin elementmap
 X1 Al
 X2 Mg
+X3 Nb
 end
 
 begin scaling
@@ -147,7 +146,7 @@ begin coordinates
 X1 0 0 0
 X1 0.5 0.5 0
 X1 0.5 0 0.5
-X1 0 0.5 0.5
+X2 0 0.5 0.5
 end
 $end
 
@@ -155,13 +154,15 @@ $defects
 threshold 1e-4
 coord_type fractional
 begin vac
-vacancy 0.0000000000000000  0.0000000000000000  0 X1
-phonon onephon 0.5 0.0 0.5 0.0001
+vacancy 0.5000000000000000  0.5000000000000000  0 X1
 charge=-3,-3
 end
 begin sub
-substitution 0.0000000000000000  0.0000000000000000  0.0 X2
+substitution 0.5000000000000000  0.0000000000000000  0.5 X2
 charge=-3,-2
+end
+begin int
+interstitial 0.3 0.3 0.3 X3
 end
 $end
 
