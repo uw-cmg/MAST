@@ -155,6 +155,13 @@ def get_mast_recipe_path():
     if getpath == None:
         raise MASTError("utility dirutil","No path set in environment variable MAST_RECIPE_PATH")
     return getpath
+
+def get_mast_platform():
+    getplatform = os.getenv('MAST_PLATFORM')
+    if getplatform == None:
+        raise MASTError("utility dirutil","No platform set in environment variable MAST_PLATFORM")
+    return getplatform.strip().lower()
+
 def directory_is_locked(dirname):
     if os.path.isfile(dirname + "/mast.write_files.lock"):
         return True
