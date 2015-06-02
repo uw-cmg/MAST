@@ -145,7 +145,7 @@ class RecipeTemplateParser(MASTObj):
                 needsnebs=1
             if "<S>" in line:
                 needsscaling=1
-        d_scaling       = self.input_options.get_item("structure","scaling")
+        d_scaling       = self.input_options.get_item("scaling")
         d_defects       = self.input_options.get_item("defects","defects")
         d_nebs          = self.input_options.get_item("neb","nebs")
         
