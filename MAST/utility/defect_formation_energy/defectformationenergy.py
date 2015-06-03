@@ -52,7 +52,7 @@ class DefectFormationEnergy:
             if scsize == perf_meta.read_data('scaling_size'): perf_dir = perf_dirs[i]
         
         perfpath = os.path.join(self.directory, perf_dir)
-        if os.path.isfile(os.path.join(perfpath,"vasprun.xml"):
+        if os.path.isfile(os.path.join(perfpath,"vasprun.xml")):
             e_perf = pmg.io.vaspio.vasp_output.Vasprun(os.path.join(perfpath, "vasprun.xml")).final_energy
         else:
             e_perf = float(open(os.path.join(perfpath, "OSZICAR")).readlines()[-1].split('E0=')[1].split()[0])
