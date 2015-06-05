@@ -12,6 +12,10 @@ Sections of the Input File
 
 .. toctree::
 
+   3_1_9_scaling
+
+.. toctree::
+
    3_1_2_ingredients
 
 .. toctree::
