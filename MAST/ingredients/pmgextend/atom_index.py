@@ -33,7 +33,8 @@ class AtomIndex(MASTObj):
         self.input_options = self.keywords['input_options']
         if self.input_options == None:
             return
-        self.scaling = self.input_options.get_item('structure','scaling')
+        self.scaling = self.input_options.get_item('scaling')
+        print self.scaling
         if self.scaling == None:
             self.scaling = dict()
         self.startstr = self.input_options.get_item('structure','structure')
@@ -62,7 +63,7 @@ class AtomIndex(MASTObj):
                 mySE=SE(struc_work1=self.startstr.copy())
                 mystruc=mySE.keywords['struc_work1']
             else:
-                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label]["mast_size"])
                 mystruc=mySE.scale_structure()
             alist=list()
             manname=os.path.join(self.sdir,"manifest_%s__" % scaling_label)
@@ -123,7 +124,7 @@ class AtomIndex(MASTObj):
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
-                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label]["mast_size"])
             for dlabel in dlabels:
                 dlist = list(alist)
                 manname=os.path.join(self.sdir,"manifest_%s_%s_" % (scaling_label, dlabel))
@@ -339,7 +340,7 @@ class AtomIndex(MASTObj):
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
-                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label]["mast_size"])
             for dlabel in dlabels:
                 pdict=dict(defect_dict[dlabel]["phonon"])
                 for phonon_label in pdict.keys():
@@ -370,7 +371,7 @@ class AtomIndex(MASTObj):
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
-                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label]["mast_size"])
             for nlabel in nlabels:
                 def1 = nlabel.split("-")[0].strip()
                 def2 = nlabel.split("-")[1].strip()
@@ -433,7 +434,7 @@ class AtomIndex(MASTObj):
             if scaling_label == "":
                 mySE=SE(struc_work1=self.startstr.copy())
             else:
-                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label][0])
+                mySE=SE(struc_work1=self.startstr.copy(), scaling_size=self.scaling[scaling_label]["mast_size"])
             for nlabel in nlabels:
                 pdict = dict(neb_dict[nlabel]["phonon"])
                 for phonon_label in pdict.keys():
