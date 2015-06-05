@@ -47,12 +47,13 @@ class VaspError(BaseError):
         handler_input_d=dict()
         handler_input_d['VaspErrorHandler']=["OUTCAR"]
         handler_input_d['DentetErrorHandler']=["OUTCAR"]
-        handler_input_d['UnconvergedErrorHandler']=["vasprun.xml"]
+        handler_input_d['UnconvergedErrorHandler']=["mast_skip"]
+        #handler_input_d['UnconvergedErrorHandler']=["vasprun.xml"]
         handler_input_d['PoscarErrorHandler']=["OUTCAR"]
         handler_input_d['TripleProductErrorHandler']=["OUTCAR"]
-        #handler_input_d['FrozenJobErrorHandler']="mast_skip"
-        #handler_input_d['NonConvergingErrorHandler']="mast_skip"
-        #handler_input_d['MeshSymmetryErrorHandler']="mast_skip"
+        #handler_input_d['FrozenJobErrorHandler']=["mast_skip"]
+        #handler_input_d['NonConvergingErrorHandler']=["mast_skip"]
+        #handler_input_d['MeshSymmetryErrorHandler']=["mast_skip"]
         handler_input_d['MASTWalltimeErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR","XDATCAR"],["CONTCAR"],["POSCAR"]]
         handler_input_d['MASTMemoryErrorHandler']=[self.keywords['name'],self.keywords,["OUTCAR","OSZICAR","CONTCAR","XDATCAR"]]
         handler_input_d['VaspReachedNSWErrorHandler']=[self.keywords['name'],["OUTCAR","OSZICAR","CONTCAR","POSCAR","XDATCAR"],["CONTCAR"],["POSCAR"]]
