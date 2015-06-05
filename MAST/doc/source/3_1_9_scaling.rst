@@ -32,7 +32,7 @@ Within the subsection, include keywords:
     * Kpoint mesh type, M for Monkhorst-Pack and G for Gamma-point centered
 
     * (Optional) Kpoint mesh shift, in floats, e.g. ``0.1 0.2 0.3`` **DOES THIS STILL WORK?**
-
+    * **WILL OTHER KEYWORDS NOW WORK AS WELL, FOR OVERRIDING?**
 Example::
  
     $scaling
