@@ -83,6 +83,9 @@ class VaspChecker(BaseChecker):
         if not proceed:
             return self.copy_a_file(childpath, "CONTCAR", newname)
         childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
+        child_program=childmeta.read_data("program")
+        if not "vasp" in child_program: #madelung utility or another folder
+            return self.copy_a_file(childpath, "CONTCAR", newname)
         child_scaling_label=childmeta.read_data("scaling_label")
         child_defect_label=childmeta.read_data("defect_label")
         child_neb_label=childmeta.read_data("neb_label")
