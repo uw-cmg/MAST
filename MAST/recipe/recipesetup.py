@@ -45,9 +45,9 @@ class RecipeSetup(MASTObj):
         self.structure      = self.keywords['structure']
         self.work_dir    = self.keywords['workingDirectory']
         self.logger = logging.getLogger('mastmon')
-        self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.logger.add_mast_monitor_handler()
         self.recipe_logger = logging.getLogger(self.work_dir)
-        self.recipe_logger = loggerutils.add_handler_for_recipe(self.work_dir, self.recipe_logger)
+        self.recipe_logger.add_mast_monitor_handler()
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
         self.recipe_logger.info('Setting up the recipe based on the personal recipe contents passed in self.recipe_file')
@@ -284,7 +284,6 @@ class RecipeSetup(MASTObj):
                         structure=my_ingred_input_options['structure'],
                         program_keys=my_ingred_input_options['program_keys'])
         myingred.write_directory()
-        myingred.close_logger()
         return
 
 

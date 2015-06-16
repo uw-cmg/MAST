@@ -9,6 +9,30 @@ import os
 import time
 from MAST.utility import dirutil
 
+class MASTLogger(logging.getLoggerClass()):
+    """MAST logger
+    """
+    def __init__(self, name=""):
+        logging.Logger.__init__(self, name)
+        return
+
+    def add_mast_monitor_handler(self):
+        """Add a handler for mast_monitor
+        """
+        self.setLevel(logging.INFO)
+        formatstr ='%(levelname)8s: %(name)s: %(asctime)s: %(message)s'
+        formatter = logging.Formatter(formatstr)
+        monitorhandler = logging.FileHandler(filename="%s/mast_monitor.log" % dirutil.get_mast_control_path())
+        monitorhandler.setFormatter(formatter)
+        #controlfilter = ControlFilter()
+        #controlhandler.addFilter(controlfilter)
+        if not getattr(self, 'has_monitor_handler', None):
+            self.addHandler(monitorhandler)
+            self.has_monitor_handler = True
+        return
+
+
+
 def validate_recipe_name(rname):
     """Validate the recipe name.
         Use $MAST_CONTROL if recipe name is not found in $MAST_SCRATCH.

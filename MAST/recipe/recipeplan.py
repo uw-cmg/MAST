@@ -65,9 +65,11 @@ class RecipePlan:
         self.status="I"
         self.working_directory = working_directory
         self.logger = logging.getLogger('mastmon')
-        self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.logger.add_mast_monitor_handler()
+        #self.logger = loggerutils.add_handler_for_control(self.logger)
         self.recipe_logger = logging.getLogger(self.working_directory)
-        self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
+        self.recipe_logger.add_mast_monitor_handler()
+        #self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
 
     def do_ingredient_methods(self, iname, methodtype, childname=""):
         """Do the ingredient methods.
@@ -147,7 +149,6 @@ class RecipePlan:
                         else:
                             raise MASTError(self.__class__.__name__, "Function %s for ChopIngredient requires too many inputs (> 4)." % methodname)
                         self.recipe_logger.info("Results for method name %s: %s" % (methodname, mresult))
-                        my_ing.close_logger()
                         return mresult
         raise MASTError(self.__class__.__name__,"Could not find method %s in class %s" % (methodname, myclass))
         return None

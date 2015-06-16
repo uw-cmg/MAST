@@ -60,7 +60,7 @@ class MASTInput(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        self.logger = loggerutils.initialize_short_logger(os.path.join(get_mast_control_path(),"mast.log"))
+        self.logger = loggerutils.initialize_short_logger(os.path.join(get_mast_control_path(),"mast_input.log"))
 
 
     def check_independent_loops(self):

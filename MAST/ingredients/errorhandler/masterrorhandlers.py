@@ -44,7 +44,8 @@ class MASTWalltimeErrorHandler(ErrorHandler):
         self.copyfromlist = list(copyfromlist)
         self.copytolist = list(copytolist)
         self.logger = logging.getLogger(self.ingpath)
-        self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
+        self.logger.add_mast_monitor_handler()
+        #self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
     
     def check(self):
         errfilepath = queue_commands.get_job_error_file(self.ingpath)
@@ -102,7 +103,8 @@ class MASTMemoryErrorHandler(ErrorHandler):
         self.ingpath = ingpath
         self.archivelist = archivelist
         self.logger = logging.getLogger(self.ingpath)
-        self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
+        self.logger.add_mast_monitor_handler()
+        #self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
         self.keywords = keywords
 
     def check(self):

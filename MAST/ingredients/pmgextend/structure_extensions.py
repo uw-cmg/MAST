@@ -32,7 +32,8 @@ class StructureExtensions(MASTObj):
         MASTObj.__init__(self, allowed_keys, **kwargs)
         rname=os.path.dirname(self.keywords['name'])
         self.logger = logging.getLogger(rname)
-        self.logger = loggerutils.add_handler_for_recipe(rname, self.logger)
+        self.logger.add_mast_monitor_handler()
+        #self.logger = loggerutils.add_handler_for_recipe(rname, self.logger)
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
 
     def induce_defect(self, defect, coord_type, threshold):

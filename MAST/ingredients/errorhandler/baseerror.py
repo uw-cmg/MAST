@@ -31,7 +31,8 @@ class BaseError(MASTObj):
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)
         self.logger = logging.getLogger(self.keywords['name'])
-        self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        self.logger.add_mast_monitor_handler()
+        #self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
   
 
     def get_error_handlers(self):
