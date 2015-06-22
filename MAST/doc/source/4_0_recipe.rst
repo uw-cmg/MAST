@@ -16,7 +16,9 @@ The recipe directory will contain:
 
 * A ``status.txt`` file listing the status of each ingredient
 
-* A ``mast_recipe.log`` file logging actions taken by MAST on the recipe and its ingredients
+* If an error is detected, a ``MAST_ERROR`` file will be created using the error text.
+
+For other logging information, see the ``$MAST_CONTROL/mast.log`` file. 
 
 A recipe object (created by MAST from the input file, and accessible to MAST while MAST is running) will have:
 
