@@ -66,8 +66,8 @@ class NEBPathfinder:
         """
         images = self.__s1.interpolate(self.__s2, nimages=self.__n_images, interpolate_lattices=True)
         for site_i in self.__relax_sites:
-            start_f = self.__s1.sites[site_i].frac_coords
-            end_f = self.__s2.sites[site_i].frac_coords
+            start_f = images[0].sites[site_i].frac_coords
+            end_f = images[-1].sites[site_i].frac_coords
 
             path = NEBPathfinder.string_relax(NEBPathfinder.__f2d(start_f, self.__v),
                                               NEBPathfinder.__f2d(end_f, self.__v),
@@ -212,7 +212,7 @@ class NEBPathfinder:
         """
         Converts fractional coordinates to discrete coordinates with respect to the grid size of v
         """
-        frac_coords = frac_coords % 1
+        # frac_coords = frac_coords % 1 #Remove line
         return np.array([int(frac_coords[0]*v.shape[0]),
                          int(frac_coords[1]*v.shape[1]),
                          int(frac_coords[2]*v.shape[2])])
