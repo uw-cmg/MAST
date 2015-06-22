@@ -86,7 +86,7 @@ class RecipePlan:
         else:
             raise MASTError(self.__class__.__name__,"Bad call to do_ingredient_methods with method type %s" % methodtype)
         allresults = list()
-        self.logger.info("Do methods for %s" % methodtype)
+        self.logger.debug("Do methods for %s" % methodtype)
         for methoditem in mlist:
             minputs = list(methoditem[1:])
             if methodtype == 'mast_update_children_method':
@@ -108,7 +108,7 @@ class RecipePlan:
             Returns:
                 Results of the method, whatever it returns.
         """
-        self.logger.info("Attempt to run method %s with inputs %s" % (methodstring, minputs))
+        self.logger.debug("Attempt to run method %s with inputs %s" % (methodstring, minputs))
         len_inputs = len(minputs)
         #Is it a ChopIngredient method?
         myclass = ""
@@ -173,7 +173,7 @@ class RecipePlan:
         iscomplete = False
         if sum(iscompletelist) == len(cresults):
             iscomplete = True
-        self.logger.info("Completeness evaluation: %s (from %s)" % (iscomplete, cresults))
+        self.logger.debug("Completeness evaluation: %s (from %s)" % (iscomplete, cresults))
         return iscomplete
 
     def ready_ingredient(self, iname):
@@ -193,7 +193,7 @@ class RecipePlan:
         isready = False
         if sum(isreadylist) == len(rresults):
             isready = True
-        self.logger.info("Readiness evaluation: %s (from %s)" % (isready, rresults))
+        self.logger.debug("Readiness evaluation: %s (from %s)" % (isready, rresults))
         return isready
 
 

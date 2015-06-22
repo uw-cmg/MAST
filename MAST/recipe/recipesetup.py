@@ -46,7 +46,7 @@ class RecipeSetup(MASTObj):
         self.logger = loggerutils.get_mast_logger("recipe setup %s" % self.work_dir)
 
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.work_dir)
-        self.logger.info('Setting up the recipe based on the personal recipe contents passed in self.recipe_file')
+        self.logger.debug('Setting up the recipe based on the personal recipe contents passed in self.recipe_file')
 
     def get_my_ingredient_options(self, name, ingredient_type):
         """Creates the ingredient based on the ingredient type.
@@ -59,15 +59,15 @@ class RecipeSetup(MASTObj):
                            this makes more sense).
             TTM 8/19/13: Unspecified ingredient is "default"
         """
-        self.logger.info('Initializing ingredient %s of type %s' % (name, ingredient_type))
+        self.logger.debug('Initializing ingredient %s of type %s' % (name, ingredient_type))
         global_defaults = self.input_options.get_item('ingredients', 'global')
 
         if (ingredient_type not in self.input_options.get_section_keys('ingredients')):
-            self.logger.info('Ingredient type %s has not be specified in the input file.' % ingredient_type)
-            self.logger.info('Using defaults from ingredients_global.')
+            self.logger.debug('Ingredient type %s has not been specified in the input file.' % ingredient_type)
+            self.logger.debug('Using defaults from ingredients_global.')
             self.input_options.set_item('ingredients', ingredient_type, global_defaults)
         else:
-            self.logger.info('Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type)
+            self.logger.debug('Copying over defaults from ingredients_global for ingredient %s.' % ingredient_type)
             ing_opt = self.input_options.get_item('ingredients', ingredient_type)
             for glob_key, glob_value in global_defaults.items():
                 if glob_key not in ing_opt:
@@ -157,7 +157,7 @@ class RecipeSetup(MASTObj):
         #allopt['program'] = self.program
         allopt['structure'] = self.structure
         allopt['program_keys'] = pkey_d
-        self.logger.info(pkey_d)
+        self.logger.debug(pkey_d) # change to debug level for logging
         return allopt
     def get_method_from_ingredient_type(self, ingredtype, methodtype=""):
         """Get write, ready, run, complete, and update methods from

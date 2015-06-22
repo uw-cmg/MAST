@@ -125,11 +125,11 @@ class InputParser(MASTObj):
                     return
 
                 section_content = list()
-                self.logger.info('Found section %s.  Reading in options.' % section_name)
+                self.logger.debug('Found section %s.  Reading in options.' % section_name)
             elif (self.section_end in line) and (section_name):
                 self.section_parsers[section_name](section_name, 
                         section_content, options)
-                self.logger.info('Finished parsing the %s section.' % section_name)
+                self.logger.debug('Finished parsing the %s section.' % section_name)
             else:
                 if (section_name != 'recipe') and (section_name != 'personal_recipe'): 
                         line = line.strip()
@@ -139,7 +139,7 @@ class InputParser(MASTObj):
 
         self.perform_element_mapping(options)
         self.set_structure_from_inputs(options)
-        self.logger.info(options)
+        self.logger.debug(options) # change to debug level
         self.validate_execs(options)
         return options
 

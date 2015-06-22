@@ -72,7 +72,7 @@ class MASTMon(object):
         input_options_keys = myinputoptions.get_sections()
         key = 'personal_recipe'
         if key in input_options_keys:
-            self.logger.info("Key - personal recipe was found")
+            self.logger.debug("Key - personal recipe was found")
         personal_recipe_contents = myinputoptions.get_item('personal_recipe', 'personal_recipe_list')
         rsetup = RecipeSetup(recipeFile=personal_recipe_contents,
                 inputOptions=myinputoptions,
