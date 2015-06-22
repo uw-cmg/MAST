@@ -167,8 +167,8 @@ class NEBPathfinder:
             d = V.shape
             s0 = s
             edV = np.array([[dV[0][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[0],
-                             dV[1][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[0],
-                             dV[2][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[0]] for pt in s])
+                             dV[1][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[1],
+                             dV[2][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[2]] for pt in s])
             #if(step % 100 == 0):
             #    print(edV)
 
