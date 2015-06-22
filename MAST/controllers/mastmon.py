@@ -15,7 +15,6 @@ from MAST.utility import InputOptions
 from MAST.parsers.inputparser import InputParser
 from MAST.recipe.recipesetup import RecipeSetup
 from MAST.utility import MASTFile
-from MAST.utility.loggerutils import MASTLogger
 
 class MASTMon(object):
     """The MAST monitor runs on a submission node and checks
@@ -30,10 +29,7 @@ class MASTMon(object):
         self.scratch = dirutil.get_mast_scratch_path()
         self._ARCHIVE = dirutil.get_mast_archive_path()
         self.make_directories() 
-        logging.setLoggerClass(MASTLogger)
-        self.logger = logging.getLogger('mast_monitor')
-        self.logger.add_mast_monitor_handler()
-        #self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.logger = loggerutils.get_mast_logger('mast_monitor')
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")

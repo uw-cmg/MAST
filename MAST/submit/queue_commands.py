@@ -225,9 +225,7 @@ def get_job_error_file(ingpath):
             Args:
                 ingpath <str>: ingredient path
     """
-    logger = logging.getLogger('mast')
-    logger.add_mast_monitor_handler()
-    #logger = loggerutils.add_handler_for_control(logger)
+    logger = loggerutils.get_mast_logger("mast queue commands")
     jobid = get_last_jobid(ingpath)
     tryfile = my_queue_commands.get_approx_job_error_file(jobid)
     #logger.info("Try this search string: %s" % tryfile)

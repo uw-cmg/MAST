@@ -9,28 +9,35 @@ import os
 import time
 from MAST.utility import dirutil
 
-class MASTLogger(logging.getLoggerClass()):
-    """MAST logger
+def get_mast_logger(loggername=""):
+    """Get the MAST logger. Add a handler if none exists.
+        Args:
+            loggername <str>: Logger name
     """
-    def __init__(self, name=""):
-        logging.Logger.__init__(self, name)
-        return
+    if loggername == "":
+        logger = logging.getLogger()
+    else:
+        logger = logging.getLogger(loggername)
+    logger = add_mast_handler(logger)
+    return logger
 
-    def add_mast_monitor_handler(self):
-        """Add a handler for mast_monitor
-        """
-        self.setLevel(logging.INFO)
-        formatstr ='%(levelname)8s: %(name)s: %(asctime)s: %(message)s'
-        formatter = logging.Formatter(formatstr)
-        monitorhandler = logging.FileHandler(filename="%s/mast_monitor.log" % dirutil.get_mast_control_path())
-        monitorhandler.setFormatter(formatter)
-        #controlfilter = ControlFilter()
-        #controlhandler.addFilter(controlfilter)
-        if not getattr(self, 'has_monitor_handler', None):
-            self.addHandler(monitorhandler)
-            self.has_monitor_handler = True
-        return
-
+def add_mast_handler(logger, hname="mast.log"):
+    """Add a handler and format string
+        Args:
+            logger <logging.Logger>: Logger for which to add the handler
+            hname <str>: handler name (file name)
+    """
+    logger.setLevel(logging.INFO)
+    formatstr ='%(levelname)8s: %(name)s: %(asctime)s: %(message)s'
+    formatter = logging.Formatter(formatstr)
+    monitorhandler = logging.FileHandler(filename=os.path.join(dirutil.get_mast_control_path(), hname))
+    monitorhandler.setFormatter(formatter)
+    #controlfilter = ControlFilter()
+    #controlhandler.addFilter(controlfilter)
+    if not getattr(logger, 'has_monitor_handler', None):
+        logger.addHandler(monitorhandler)
+        logger.has_monitor_handler = True
+    return logger
 
 
 def validate_recipe_name(rname):

@@ -48,9 +48,7 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         self.archivelist = list(archivelist)
         self.copyfromlist = list(copyfromlist)
         self.copytolist = list(copytolist)
-        self.logger = logging.getLogger(self.ingpath)
-        self.logger.add_mast_monitor_handler()
-        #self.logger = loggerutils.add_handler_for_recipe(self.ingpath, self.logger)
+        self.logger = loggerutils.get_mast_logger(self.ingpath)
     
     def check(self):
         ifile = "%s/INCAR" % self.ingpath

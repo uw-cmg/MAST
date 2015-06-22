@@ -61,9 +61,7 @@ class BaseIngredient(MASTObj):
 
         self.program = self.keywords['program_keys']['mast_program'].lower()
         
-        self.logger = logging.getLogger(self.keywords['name'])
-        self.logger.add_mast_monitor_handler()
-        #self.logger = loggerutils.add_handler_for_recipe(self.keywords['name'], self.logger)
+        self.logger = loggerutils.get_mast_logger(self.keywords['name'])
         
         sdir=os.path.join(os.path.dirname(self.keywords['name']),"structure_index_files")
         if os.path.exists(sdir):

@@ -39,8 +39,7 @@ class AtomIndex(MASTObj):
             self.scaling = dict()
         self.startstr = self.input_options.get_item('structure','structure')
         self.atomcount=1
-        self.logger = logging.getLogger("atom_indexing")
-        self.logger.add_mast_monitor_handler()
+        self.logger = loggerutils.get_mast_logger("atom_indexing")
         return
     
     def make_structure_index_directory(self):

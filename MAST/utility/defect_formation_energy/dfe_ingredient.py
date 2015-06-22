@@ -60,8 +60,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
                     bandgap_hse_or_expt=<float>
                 plot_threshold <float>: Plotting threshold value
         """
-        self.logger = logging.getLogger('mastmon')
-        self.logger = loggerutils.add_handler_for_control(self.logger)
+        self.logger = loggerutils.get_mast_logger("DFE ingredient")
         self.ingdir = os.getcwd() #Should be run in current directory
         self.recdir = os.path.dirname(self.ingdir)
         self.plot_threshold = plot_threshold

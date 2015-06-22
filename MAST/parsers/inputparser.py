@@ -84,14 +84,11 @@ class InputParser(MASTObj):
         scratchpath = dirutil.get_mast_scratch_path()
         inputlocation = os.path.dirname(self.keywords['inputfile'])
         if (inputlocation == ""):
-            self.logger = logging.getLogger('mast')
-            self.logger = loggerutils.add_handler_for_control(self.logger)
+            self.logger = loggerutils.get_mast_logger("mast input parser")
         elif scratchpath not in inputlocation:
-            self.logger = logging.getLogger('mast')
-            self.logger = loggerutils.add_handler_for_control(self.logger)
+            self.logger = loggerutils.get_mast_logger("mast input parser")
         else:
-            self.logger = logging.getLogger(inputlocation)
-            self.logger = loggerutils.add_handler_for_recipe(inputlocation, self.logger)
+            self.logger = loggerutils.get_mast_logger("mast input parser %s" % inputlocation)
 
 
 

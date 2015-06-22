@@ -24,9 +24,7 @@ def read_recipe(rawrlist, verbose=0):
                 [childname]['method']=[method group]
             rname <str>: Recipe name
     """
-    logger=logging.getLogger()
-    logger.add_mast_monitor_handler()
-    #logger=loggerutils.add_handler_for_control(logger)
+    logger=loggerutils.get_mast_logger("read_recipe")
 
     rfile = list(rawrlist) #MASTFile(filename)
     rdata = list()

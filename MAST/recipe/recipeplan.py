@@ -64,12 +64,8 @@ class RecipePlan:
         self.summary_options = ""
         self.status="I"
         self.working_directory = working_directory
-        self.logger = logging.getLogger('mastmon')
-        self.logger.add_mast_monitor_handler()
-        #self.logger = loggerutils.add_handler_for_control(self.logger)
-        self.recipe_logger = logging.getLogger(self.working_directory)
-        self.recipe_logger.add_mast_monitor_handler()
-        #self.recipe_logger = loggerutils.add_handler_for_recipe(self.working_directory, self.recipe_logger)
+        self.logger = loggerutils.get_mast_logger('recipe plan')
+        self.recipe_logger = loggerutils.get_mast_logger(self.working_directory)
 
     def do_ingredient_methods(self, iname, methodtype, childname=""):
         """Do the ingredient methods.
