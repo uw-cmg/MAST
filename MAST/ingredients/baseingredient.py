@@ -44,6 +44,7 @@ class BaseIngredient(MASTObj):
             self.atomindex <AtomIndex>: atom index object
     """
     def __init__(self, allowed_keys, **kwargs):
+        raise MASTError("Hello!", "Raising an error for testing.")
         allowed_keys_base = dict()
         allowed_keys_base.update(allowed_keys) 
         MASTObj.__init__(self, allowed_keys_base, **kwargs)

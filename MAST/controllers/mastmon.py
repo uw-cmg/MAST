@@ -84,10 +84,15 @@ class MASTMon(object):
             recipe_plan_obj.check_recipe_status(verbose)
         except Exception:
             import sys,traceback
-            ex_type, ex, trbck = sys.exc_info()
-            errortext = traceback.print_tb(trbck)
-            del trbck
-            raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s %s %s" % (shortdir, ex_type, ex, errortext))
+            #ex_type, ex, trbck = sys.exc_info()
+            errortext = traceback.format_exc()
+            #del trbck
+            errorfile = open(os.path.join(fulldir, "MAST_ERROR"), "ab")
+            errorfile.write("ERROR LOGGED %s\n" % time.asctime())
+            errorfile.write("%s\n" % errortext)
+            errorfile.close()
+            self.logger.warning("ERROR in recipe %s. Check MAST_ERROR file in the %s directory." % (shortdir, fulldir))
+            #raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s %s %s" % (shortdir, ex_type, ex, errortext))
         os.chdir(self.scratch)
         if recipe_plan_obj.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
