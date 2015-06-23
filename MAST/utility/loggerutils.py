@@ -28,7 +28,10 @@ def add_mast_handler(logger, hname="mast.log"):
             hname <str>: handler name (file name)
     """
     logger.setLevel(logging.INFO)
-    #logger.setLevel(logging.DEBUG) #Uncomment this line to read DEBUG messages
+    if os.getenv("MAST_DEBUG") == None:
+        pass
+    else:
+        logger.setLevel(logging.DEBUG) 
     formatstr ='%(levelname)8s: %(name)s: %(asctime)s: %(message)s'
     formatter = logging.Formatter(formatstr)
     monitorhandler = logging.FileHandler(filename=os.path.join(dirutil.get_mast_control_path(), hname))

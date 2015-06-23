@@ -18,4 +18,4 @@ What's new in version 1.3.0
 
 **Changes for programmers:**
 
-* In order to see some logged messages that are now logged to the DEBUG level, uncoment the marked line in MAST.utility.loggerutils.add_mast_handler()
+* In order to see some logged messages that are now logged to the DEBUG level, set environment variable MAST_DEBUG to any value.
