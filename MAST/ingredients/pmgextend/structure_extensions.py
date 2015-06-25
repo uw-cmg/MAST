@@ -33,6 +33,43 @@ class StructureExtensions(MASTObj):
         rname=os.path.dirname(self.keywords['name'])
         self.logger = loggerutils.get_mast_logger(rname)
         self.metafile = Metadata(metafile='%s/metadata.txt' % self.keywords['name'])
+        self.scaleinput=""
+        self.transform_scaling_size()
+        return
+
+    def transform_scaling_size(self):
+        """Transform scaling_size keyword into a numpy array.
+            TTM 2015-06-25 the mapping done previously is elegant but
+            is somehow becoming an itertools.imap object.
+            This function is not elegant but is clear.
+        """
+        if self.keywords['scaling_size'] == None:
+            return
+        if len(self.keywords['scaling_size']) == 0:
+            return
+        scaleline = self.keywords['scaling_size']
+        scaleline = scaleline.strip()
+        scalesplit = scaleline.split(",")
+        rows_str=list()
+        for sidx in [0,1,2]:
+            rows_str.append(scalesplit[sidx].strip().split())
+        rows_int=list()
+        if len(rows_str[0]) == 1:
+            rows_int.append([int(rows_str[0][0]),0,0])
+        else:
+            rows_int.append([int(rows_str[0][0]),int(rows_str[0][1]),int(rows_str[0][2])])
+        if len(rows_str[1]) == 1:
+            rows_int.append([0,int(rows_str[1][0]),0])
+        else:
+            rows_int.append([int(rows_str[1][0]),int(rows_str[1][1]),int(rows_str[1][2])])
+        if len(rows_str[2]) == 1:
+            rows_int.append([0,0,int(rows_str[2][0])])
+        else:
+            rows_int.append([int(rows_str[2][0]),int(rows_str[2][1]),int(rows_str[2][2])])
+        
+        newarr = np.array([rows_int[0],rows_int[1],rows_int[2]])
+        self.scaleinput = newarr
+        return
 
     def induce_defect(self, defect, coord_type, threshold):
         """Creates a defect, and returns the modified structure
@@ -371,17 +408,19 @@ class StructureExtensions(MASTObj):
 
     def scale_structure(self):
         scaledstr = self.keywords['struc_work1'].copy()
-        scale = self.keywords['scaling_size']
-        scale = scale.strip()
-        if len(scale.split(',')) == 3:
-            try: scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
-            except ValueError:  # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
-                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
-        else:
-            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
-            raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scale)
-            return None
-        scaledstr.make_supercell(scaleinput)
+        #scale = self.keywords['scaling_size']
+        #scale = scale.strip()
+        #if len(scale.split(',')) == 3:
+        #    try: scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+        #    except ValueError:  # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+        #        scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+        #else:
+        #    self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+        #    raise MASTError(self.__class__.__name__,"Wrong number of inputs for scaling: %s " % scale)
+        #    return None
+        #print "SCALE INPUT: ", scaleinput
+        #scaledstr.make_supercell(scaleinput)
+        scaledstr.make_supercell(self.scaleinput)
         return scaledstr
 
     def scale_defect(self, defect, coord_type, threshold):
@@ -400,21 +439,22 @@ class StructureExtensions(MASTObj):
                 defected structure <Structure>
         """
         mycoords = np.array(defect['coordinates'])
-        scale = self.keywords['scaling_size']
-        scale = scale.strip()
-        if len(scale.split(',')) == 3:
-            try: 
-                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
-                coorda = mycoords[0]/scaleinput[0]
-                coordb = mycoords[1]/scaleinput[1]
-                coordc = mycoords[2]/scaleinput[2]
-            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
-                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
-                [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
-        else:
-            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
-            raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
-            return None
+        [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(self.scaleinput))
+        #scale = self.keywords['scaling_size']
+        #scale = scale.strip()
+        #if len(scale.split(',')) == 3:
+        #    try: 
+        #        scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+        #        coorda = mycoords[0]/scaleinput[0]
+        #        coordb = mycoords[1]/scaleinput[1]
+        #        coordc = mycoords[2]/scaleinput[2]
+        #    except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+        #        scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+        #        [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
+        #else:
+        #    self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+        #    raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
+        #    return None
         newdict = dict(defect)
         newdict['coordinates'] = np.array([coorda, coordb, coordc],'float')
         returnstr = self.induce_defect(newdict, coord_type, threshold)
