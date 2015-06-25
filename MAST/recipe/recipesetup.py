@@ -257,6 +257,7 @@ class RecipeSetup(MASTObj):
             except ValueError: pass
             if scaling: labels.remove(scalingsize)
             phononlabel = '_'.join(labels)
+            datalist.append("defect_label: %s" % labels[0]) #Assume phonon_<S>_<N>_<Q>_<P>
             datalist.append("phonon_label: %s" % phononlabel)
         data=';'.join(datalist)
         self.metafile.write_data(myingred, data, 1)

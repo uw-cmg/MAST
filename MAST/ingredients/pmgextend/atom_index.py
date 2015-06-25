@@ -29,17 +29,17 @@ class AtomIndex(MASTObj):
             'structure_index_directory': (str, "structure_index_files", "Structure index directory")
         }
         MASTObj.__init__(self, allowed_keys, **kwargs)            
+        self.logger = loggerutils.get_mast_logger("atom_indexing")
         self.sdir = self.keywords['structure_index_directory']
         self.input_options = self.keywords['input_options']
         if self.input_options == None:
             return
         self.scaling = self.input_options.get_item('scaling')
-        print self.scaling
+        self.logger.info("Scaling: %s" % self.scaling)
         if self.scaling == None:
             self.scaling = dict()
         self.startstr = self.input_options.get_item('structure','structure')
         self.atomcount=1
-        self.logger = loggerutils.get_mast_logger("atom_indexing")
         return
     
     def make_structure_index_directory(self):
@@ -472,7 +472,12 @@ class AtomIndex(MASTObj):
                 ing_label <str>: Ingredient name
                 manname <str>: Manifest name
         """
+        self.logger.debug("Update atom indices from structure %s" % mystr)
+        self.logger.debug("Manifest name %s" % manname)
+        self.logger.debug("Current ingredient %s" % ing_label)
+        self.logger.debug("Structure index directory %s" % self.sdir)
         mlist = list(self.read_manifest_file("%s/%s" % (self.sdir, manname)))
+        self.logger.debug("MLIST %s" % mlist)
         for midx in range(0, len(mlist)):
             msplit=mlist[midx].split(";")
             ameta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, msplit[0]))
