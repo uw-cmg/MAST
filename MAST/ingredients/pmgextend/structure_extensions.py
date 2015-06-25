@@ -174,13 +174,14 @@ class StructureExtensions(MASTObj):
                 mycoord = strlist[mystridx].frac_coords[lastidx]
             scalingsize = self.metafile.read_data('scaling_size')
             if not (scalingsize == None):
-                scale = scalingsize.split('[')[1].split(']')[0]
-                try:
-                    scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
-                    mycoord = mycoord / np.array(scaleinput)
-                except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
-                    scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
-                    mycoord = np.dot(mycoord, np.linalg.inv(scaleinput))
+                mycoord = np.dot(mycoord, np.linalg.inv(self.scaleinput))
+                #scale = scalingsize.split('[')[1].split(']')[0]
+                #try:
+                #    scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+                #    mycoord = mycoord / np.array(scaleinput)
+                #except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+                #    scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+                #    mycoord = np.dot(mycoord, np.linalg.inv(scaleinput))
             indexraw = find_in_coord_list_pbc(sortedstruc.frac_coords, mycoord, atol)
             index=list()
             for indexentry in indexraw:
@@ -292,14 +293,14 @@ class StructureExtensions(MASTObj):
         pcscoord = np.array(phonon_center_site.strip().split(), float)
         scalingsize = self.metafile.read_data('scaling_size')
         if not (scalingsize == None):
-            scale = scalingsize.split('[')[1].split(']')[0]
-            try:
-                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
-                pcscoord = pcscoord / np.array(scaleinput)
-            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
-                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
-                pcscoord = np.dot(pcscoord, np.linalg.inv(scaleinput))
-
+            pcscoord = np.dot(pcscoord, np.linalg.inv(self.scaleinput)
+            #scale = scalingsize.split('[')[1].split(']')[0]
+            #try:
+            #    scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+            #    pcscoord = pcscoord / np.array(scaleinput)
+            #except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+            #    scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+            #    pcscoord = np.dot(pcscoord, np.linalg.inv(scaleinput))
         tol = float(tol)
         pcsarr = find_in_coord_list_pbc(mystruc.frac_coords, pcscoord,tol)
         uniqsites = np.unique(pcsarr)
@@ -467,21 +468,22 @@ class StructureExtensions(MASTObj):
             Returns:
                 newcoords <numpy array of float>: new coordinates
         """
-        scale = self.keywords['scaling_size']
-        scale = scale.strip()
-        if len(scale.split(',')) == 3:
-            try: 
-                scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
-                coorda = mycoords[0]/scaleinput[0]
-                coordb = mycoords[1]/scaleinput[1]
-                coordc = mycoords[2]/scaleinput[2]
-            except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
-                scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
-                [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
-        else:
-            self.logger.error("Wrong number of inputs for scaling: %s " % scale)
-            raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
-            return None
+        [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(self.scaleinput))
+        #scale = self.keywords['scaling_size']
+        #scale = scale.strip()
+        #if len(scale.split(',')) == 3:
+        #    try: 
+        #        scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
+        #        coorda = mycoords[0]/scaleinput[0]
+        #        coordb = mycoords[1]/scaleinput[1]
+        #        coordc = mycoords[2]/scaleinput[2]
+        #    except ValueError: # input scaling matrix like [1 1 0,1 -1 0,0 0 1]
+        #        scaleinput = np.array([map(int, scale.split(',')[0].split()),map(int, scale.split(',')[1].split()),map(int, scale.split(',')[2].split())])
+        #        [coorda,coordb,coordc] = np.dot(mycoords, np.linalg.inv(scaleinput))                 
+        #else:
+        #    self.logger.error("Wrong number of inputs for scaling: %s " % scale)
+        #    raise MASTError(self.__class__.__name__, "Wrong number of inputs for scaling: %s " % scale)
+        #    return None
         newcoords = np.array([coorda, coordb, coordc],'float')
         return newcoords
 
