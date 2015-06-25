@@ -233,6 +233,12 @@ If pymatgen cannot be installed because gcc cannot be found in order to compile 
 
 .. _add-local-bin:
 
+If you will be using the mast_DFE_tool, then you will also need::
+
+    pip install numpy --upgrade
+    pip install pandas
+    
+
 ------------------------------------------------
 Add the .local/bin directory, if necessary
 ------------------------------------------------
