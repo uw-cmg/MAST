@@ -293,7 +293,7 @@ class StructureExtensions(MASTObj):
         pcscoord = np.array(phonon_center_site.strip().split(), float)
         scalingsize = self.metafile.read_data('scaling_size')
         if not (scalingsize == None):
-            pcscoord = np.dot(pcscoord, np.linalg.inv(self.scaleinput)
+            pcscoord = np.dot(pcscoord, np.linalg.inv(self.scaleinput))
             #scale = scalingsize.split('[')[1].split(']')[0]
             #try:
             #    scaleinput = [int(scale.split(',')[0]),int(scale.split(',')[1]),int(scale.split(',')[2])] # input scaling size like [2,1,2]
