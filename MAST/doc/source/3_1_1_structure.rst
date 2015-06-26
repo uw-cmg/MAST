@@ -71,4 +71,54 @@ Example::
     
     $end
 
+===================================
+Structure indexing (beta)
+===================================
+
+Some atomic positions in structures may change significantly after structural relaxation.
+
+Without structure indexing, current operation of MAST is as follows: just before a defect, NEB, or phonon is about to be run, MAST decides which atoms to remove, single out for phonons, etc., based on a coordinate which is guessed at ahead of time, for example, 0.5 0.5 0.5, and sometimes a tolerance.
+
+However, the relaxed atom may be quite far from that coordinate, so the search may fail.
+
+When set to True, the **use_structure_index** keyword in the ``$structure`` section turns on atomic position indexing in the structure.::
+
+    $structure
+    use_structure_index True
+    ...
+    $end
+
+The coordinates in the ``$defect``, ``$neb``, etc. sections should exactly match the coordinates in the initial structure given to MAST. Scaling sizes will be handled automatically.
+
+MAST will create a separate structure index file, a "manifest" file, for the initial structure and each scaling size and defect configuration. Each NEB endpoint will have a separate manifest file, and each phonon calculation will have a separate manifest for detailing selective dynamics information. 
+
+These files are stored in the ``structure_index_files`` directory within the recipe directory.
+
+The manifest file consists of atomic index numbers, which correspond to ``atom_index_<index number>`` files. Each atomic index file is updated with the appropriate coordinates from a completed calculation. 
+
+When a calculation is complete, its relaxed atomic coordinates will be saved back to the appropriate atom_index file.
+
+----------------------------------
+NEB notes for structure indexing
+----------------------------------
+Special care should be taken when defining NEB calculations in the ``$neb`` section of the input file.
+
+Again, vacancy and substitutional defects should have coordinates that exactly match those in the initial structure.
+
+Coordinates in the ``$neb`` section should exactly match coordinates in the ``$defects`` section.
+
+Defect manifests have their defects sorted to the bottom, except for vacancies.
+NEB manifests are created from defect manifests.
+
+Atoms indicated in the ``$neb`` section are pulled out of their order in the manifest and put in order at the bottom.
+
+As long as vacancies are accounted for in the ``$neb`` section, and grouped defects are entered in the same order in the defect endpoints in the ``$defects`` section, this process ensures lineup.
+
+Grouped defects that are intended to persist but not move should be placed in the same order, that is, if defect1 and defect2 are going to be in an NEB and both have unmoving Sr antisite defects, then the Sr antisite defects should be in the same order in the begin defect1 and begin defect2 sections.
+
+Pymatgen's interpolate function resorts atoms, so a temporary manifest is made for pymatgen, and the interpolation is resorted back to match the NEB endpoint manifests.
+
+Also, all image atoms are ordered following the endpoint1 manifest. The final endpoint atoms are ordered following the endpoint2 manifest.
+
+Therefore, after completion, coordinates for image atoms are recorded in the atom index files indicated by the endpoint 1 manifest.
 
