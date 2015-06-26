@@ -125,6 +125,21 @@ For each Staged ingredient:
 
 When all ingredients in a recipe are complete, the entire recipe folder is moved from ``$MAST_SCRATCH`` to ``$MAST_ARCHIVE``
 
+-----------------------------------
+Errors in a recipe directory
+-----------------------------------
+
+Errors in a recipe which cause the recipe to fail out completely are logged to a ``MAST_ERROR`` file.
+
+These errors will need to be addressed manually. Until then, MAST will skip over the recipe directory and log a warning to the mast.log file.
+
+Once the error has been addressed, delete the ``MAST_ERROR`` file, and the recipe should be picked up on the next ``mast`` command.
+
+To get more information about why the error may have been generated, set the ``MAST_DEBUG`` environment variable, e.g. ``export MAST_DEBUG=1``, delete the ``MAST_ERROR`` file, and rerun MAST.
+
+The error should be re-logged, and the ``$MAST_CONTROL/mast.log`` file will now also contain DEBUG-level information. 
+
+
 =====================
 The CONTROL folder
 =====================
@@ -170,20 +185,6 @@ If you would like to skip certain ingredients of a single recipe, edit the recip
 
 *  No recipe can be considered complete by MAST if it includes skipped ingredients. However, if you consider the recipe complete, you can move the entire recipe directory out of ``$MAST_SCRATCH`` and into ``$MAST_ARCHIVE`` or another directory.
 
------------------------
-Errors in a recipe
------------------------
-
-Errors in a recipe which cause the recipe to fail out completely are logged to a ``MAST_ERROR`` file.
-
-These errors will need to be addressed manually. Until then, MAST will skip over the recipe directory and log a warning to the mast.log file.
-
-Once the error has been addressed, delete the ``MAST_ERROR`` file, and the recipe should be picked up on the next ``mast`` command.
-
-To get more information about why the error may have been generated, set the ``MAST_DEBUG`` environment variable, e.g. ``export MAST_DEBUG=1``, delete the ``MAST_ERROR`` file, and rerun MAST.
-
-The error should be re-logged, and the mast.log file will now also contain DEBUG-level information. 
-
 ===========================
 The ARCHIVE folder
 ===========================
@@ -218,4 +219,27 @@ This crontab line will run mast every 15 minutes and is ONLY suitable for short 
 
     */15 * * * * . $HOME/.bashrc; nice -n 19 mast
 
+********************************
+Modifying recipes
+********************************
+In your recipe directory in $MAST_SCRATCH,odify the input file as you would want it. 
+However, if ingredient names in the $recipe section are changed, some data may need to be moved around.
+If the $recipe section uses the <N> <S> <Q> etc. tags, then for example the $defects section could add an additional begin defectname end subsection without much fuss.
+Strip out the $personal_recipe section of the input file. ($personal_recipe line, all lines in between, and the $end line).
+From within the recipe directory, run the command “mast -m modifyrecipe”
+These steps may be accomplished over multiple recipes using a shell script, but be careful.
+h oh: my charged supercell isn’t charged! What happened?
+My input file had charge=2,2 in the $defects section, but it did not have the charge tag <Q> in the $recipe section
+The metadata.txt file wasn’t getting written correctly, and the checker wasn’t looking for a charge label, either.
+Remove the $personal_recipe section. Redo the $recipe section to have the <Q> tags.
+Run mast –m modifyrecipe
+The uncharged supercell calculations were fine; move their data to folders with a <Q> tag for q=p0 (no charge).
+Run mast (esp. mast –m monitoronly) until the status.txt file catches up
+Now mast will rerun a new arm of charged supercell calculations.
+
+An already-complete ingredient is not necessarily rerun, depending on how its completion is evaluated. It may not get any new parent information from a newly added ingredient.
+
+Status.txt file is reset all to Initialized.
+Each ingredient, whether previously completed or not, gets its state re-evaluated.
+This procedure may require several mast calls until the recipe is “caught up” again.
 
