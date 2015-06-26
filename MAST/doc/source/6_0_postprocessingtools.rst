@@ -65,10 +65,13 @@ A directory named ``dfe_results`` should be created within the ingredient direct
 Diffusion coefficient
 *************************
 
-The ``mast_diffusion_coefficient`` diffusion coefficient calculation tool supports the 5(fcc) and 8(hcp) frequency models as follows:
+The ``mast_diffusion_coefficient`` diffusion coefficient calculation tool supports the following models:
 
-*  Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
-*  Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
+*  FCC five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
+
+*  FCC concentrated fourteen-frequency model equation from Bocquet J.-L. and Le Claire A. D.
+
+*  HCP eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
 
 The tool is designed to be used as a separate ingredient within the recipe directory. See ``$HOME/MAST/examples/neb_with_phonons.inp`` for an example input fileof a full workflow.
 
