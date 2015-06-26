@@ -135,7 +135,8 @@ The ``$MAST_CONTROL`` folder houses several files:
 *  mastoutput: Contains all queue output from running the MAST monitor on the queue, including a printout of the ingredient statuses for all recipes in the $MAST_SCRATCH directory
 *  submitlist: The list of all ingredient folders to be submitted to the queue
 *  submitted: A list of all ingredients submitted to the queue the last time the MAST monitor ran
-*  mast.log and archive.<timestamp>.log: contains MAST runtime information
+
+*  mast.log and archive.<timestamp>.log: contains MAST runtime information. The default setting is INFO level. To also see DEBUG level information, set environment variable MAST_DEBUG, for example, ``export MAST_DEBUG=1``.
 
 Every file except ``submitlist`` can be periodically deleted to save space.
 
@@ -168,6 +169,20 @@ If you would like to skip certain ingredients of a single recipe, edit the recip
     *  **If deleting a file that was obtained from a parent, like a POSCAR file, also set the parent ingredient back to P when you un-skip the child ingredient.**
 
 *  No recipe can be considered complete by MAST if it includes skipped ingredients. However, if you consider the recipe complete, you can move the entire recipe directory out of ``$MAST_SCRATCH`` and into ``$MAST_ARCHIVE`` or another directory.
+
+-----------------------
+Errors in a recipe
+-----------------------
+
+Errors in a recipe which cause the recipe to fail out completely are logged to a ``MAST_ERROR`` file.
+
+These errors will need to be addressed manually. Until then, MAST will skip over the recipe directory and log a warning to the mast.log file.
+
+Once the error has been addressed, delete the ``MAST_ERROR`` file, and the recipe should be picked up on the next ``mast`` command.
+
+To get more information about why the error may have been generated, set the ``MAST_DEBUG`` environment variable, e.g. ``export MAST_DEBUG=1``, delete the ``MAST_ERROR`` file, and rerun MAST.
+
+The error should be re-logged, and the mast.log file will now also contain DEBUG-level information. 
 
 ===========================
 The ARCHIVE folder

@@ -7,7 +7,8 @@ What's new in version 1.3.0
 * STEM image processing additions to structopt. See **NO TAG YET**
 * Charge-density-based pathfinding for NEB. See **NO TAG YET**
 * Optional structure indexing (atomic indexing) for structures which change. Se :doc:`3_1_1_structure`.
-* 14-frequency concentrated diffusion model in the Diffusion Coefficient post-processing tool. See ** ???**
+* 14-frequency concentrated diffusion model in the Diffusion Coefficient post-processing tool. See **NO TAG YET**
+* MAST "modify recipe" function. See **NO TAG YET**.
 
 **Fixes:**
 
