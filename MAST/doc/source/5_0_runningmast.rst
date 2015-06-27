@@ -268,6 +268,7 @@ Caveats
 * An already-complete ingredient is not necessarily rerun, depending on how its completion is evaluated. It may not get any new parent information from a newly added ingredient.
 
 * The recipe's status.txt file is reset so that all ingredients are at status Initialized.
-** Each ingredient, whether previously completed or not, gets its state re-evaluated when MAST is called (using the normal ``mast`` command). 
-** This procedure may require several ``mast`` calls until the recipe is caught up again.
-** This procedure is necessary in order to update all parent-child relationships and to establish the correct data transfer among the existing and new ingredients.
+    
+    * Each ingredient, whether previously completed or not, gets its state re-evaluated when MAST is called (using the normal ``mast`` command). 
+    * This procedure may require several ``mast`` calls until the recipe is caught up again.
+    * This procedure is necessary in order to update all parent-child relationships and to establish the correct data transfer among the existing and new ingredients.

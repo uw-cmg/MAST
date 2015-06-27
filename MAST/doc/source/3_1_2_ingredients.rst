@@ -255,8 +255,18 @@ mast_write_method keyword values
 
 **write_neb**
 
-*  Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories.
+*  Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories and uses linear interpolation between images.
 *  Programs supported: vasp
+
+**write_pathfinder_neb**
+*  Write an NEB ingredient using a charge-density-based pathfinding method.
+*  Programs supported: vasp
+*  This method takes the argument of an ingredient name
+    * The ingredient must be fully specified, e.g. no <S>, <N>, etc. tags. 
+    * The ingredient must have a CHGCAR file written.
+    * The ingredient should have both endpoints removed. For example, for vacancy migration, the ingredient should have neither a vacancy at the initial position, nor a vacancy at the final position. However, it should have all other non-migrating defects that are common to both the initial and final state.
+
+*  This method only works with ``use_structure_index True`` in the ``$structure`` section of the inut ifle.
 
 **write_neb_subfolders**
 

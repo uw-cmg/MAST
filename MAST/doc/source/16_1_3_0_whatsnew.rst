@@ -4,11 +4,11 @@ What's new in version 1.3.0
 
 **Additions:**
 
-* STEM image processing additions to structopt. See **NO TAG YET**
-* Charge-density-based pathfinding for NEB. See **NO TAG YET**
-* Optional structure indexing (atomic indexing) for structures which change. Se :doc:`3_1_1_structure`.
-* 14-frequency concentrated diffusion model in the Diffusion Coefficient post-processing tool. See :doc:`6_0_postprocessingtools`.
-* MAST "modify recipe" function. See **NO TAG YET**.
+* A STEM image processing addition has been added to structopt. See **NO TAG YET**
+* A charge-density-based pathfinding method has been added as an alternative to linear interpolation for NEBs. See **NO TAG YET**
+* An optional atom indexing feature has been implemented for structures which are expected to undergo significant atomic relaxation when relaxed and/or defected. See :doc:`3_1_1_structure`.
+* A 14-frequency concentrated diffusion model has been added to the Diffusion Coefficient post-processing tool. See :doc:`6_0_postprocessingtools`.
+* The new MAST "modify recipe" function allows existing recipes to be modified. See :doc:`5_0_runningmast`.
 
 **Fixes:**
 
