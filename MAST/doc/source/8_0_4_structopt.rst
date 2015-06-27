@@ -18,4 +18,10 @@ Research and development: Min Yu, Hyunseok Ko
 
     *  If the user guide is not present, please download and unzip the full tar.gz file from http://dx.doi.org/10.5281/zenodo.11917 and look under ``MAST/structopt``
 
+========================
+STEM supplement to code
+========================
+Author: Min Yu
+
+Structopt has been extended to be able to read in a structure and simulate a STEM image using a convolution method.
 

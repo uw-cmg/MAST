@@ -4,7 +4,7 @@ What's new in version 1.3.0
 
 **Additions:**
 
-* A STEM image processing addition has been added to structopt. See **NO TAG YET**
+* STEM image simulation functionality has been added to structopt. See :doc:`8_0_4_structopt`.
 * A charge-density-based pathfinding method has been added as an alternative to linear interpolation for NEBs. See :doc:`3_1_2_ingredients`.
 * An optional atom indexing feature has been implemented for structures which are expected to undergo significant atomic relaxation when relaxed and/or defected. See :doc:`3_1_1_structure`.
 * A 14-frequency concentrated diffusion model has been added to the Diffusion Coefficient post-processing tool. See :doc:`6_0_postprocessingtools`.
