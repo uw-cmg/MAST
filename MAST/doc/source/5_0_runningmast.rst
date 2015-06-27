@@ -222,24 +222,52 @@ This crontab line will run mast every 15 minutes and is ONLY suitable for short 
 ********************************
 Modifying recipes
 ********************************
-In your recipe directory in $MAST_SCRATCH,odify the input file as you would want it. 
-However, if ingredient names in the $recipe section are changed, some data may need to be moved around.
-If the $recipe section uses the <N> <S> <Q> etc. tags, then for example the $defects section could add an additional begin defectname end subsection without much fuss.
-Strip out the $personal_recipe section of the input file. ($personal_recipe line, all lines in between, and the $end line).
-From within the recipe directory, run the command “mast -m modifyrecipe”
-These steps may be accomplished over multiple recipes using a shell script, but be careful.
-h oh: my charged supercell isn’t charged! What happened?
+
+Occasionally it is convenient to add additional ingredients onto an existent, completed or nearly-completed recipe.
+
+For example, it may be helpful to add an additional charge state, or calculate phonons, make additional defects on a relaxed structure, or calculate additional NEBs.
+
+The MAST "modify recipe" functionality allows new ingredient branches to be added onto an existing recipe in an existing recipe directory.
+
+Instructions are as follows:
+
+* In the recipe directory in $MAST_SCRATCH, modify the input file as you would want it. (If the recipe directory is not in $MAST_SCRATCH, move it there.)
+** For example, if the ``$recipe`` section uses the <N> <S> <Q> etc. tags, then the ``$defects`` section could add an additional ``begin defectname ... end`` subsection, or a charge designation within a defect subsection could be expanded.
+
+* Remove the ``$personal_recipe`` section of the input file. (That is, remove the ``$personal_recipe`` line, all lines in between, and the ``$end`` line).
+
+* From within the recipe directory, run the command ``mast -m modifyrecipe``
+
+These steps may be accomplished over multiple recipes using a shell script, but with caution.
+
+=========================
+Example
+=========================
+
+My charged supercell isn't charged! What happened?
+
 My input file had charge=2,2 in the $defects section, but it did not have the charge tag <Q> in the $recipe section
-The metadata.txt file wasn’t getting written correctly, and the checker wasn’t looking for a charge label, either.
+
+The metadata.txt file wasn't getting written correctly, and the checker wasn't looking for a charge label, either.
+
 Remove the $personal_recipe section. Redo the $recipe section to have the <Q> tags.
-Run mast –m modifyrecipe
+
+Run mast -m modifyrecipe
+
 The uncharged supercell calculations were fine; move their data to folders with a <Q> tag for q=p0 (no charge).
-Run mast (esp. mast –m monitoronly) until the status.txt file catches up
+
+Run mast (especially. mast -m monitoronly) until the status.txt file catches up
 Now mast will rerun a new arm of charged supercell calculations.
 
-An already-complete ingredient is not necessarily rerun, depending on how its completion is evaluated. It may not get any new parent information from a newly added ingredient.
+===============
+Caveats
+===============
 
-Status.txt file is reset all to Initialized.
-Each ingredient, whether previously completed or not, gets its state re-evaluated.
-This procedure may require several mast calls until the recipe is “caught up” again.
+* If ingredient names in the $recipe section are changed, some data may need to be moved around (see the example above).
 
+* An already-complete ingredient is not necessarily rerun, depending on how its completion is evaluated. It may not get any new parent information from a newly added ingredient.
+
+* The recipe's status.txt file is reset so that all ingredients are at status Initialized.
+** Each ingredient, whether previously completed or not, gets its state re-evaluated when MAST is called (using the normal ``mast`` command). 
+** This procedure may require several ``mast`` calls until the recipe is caught up again.
+** This procedure is necessary in order to update all parent-child relationships and to establish the correct data transfer among the existing and new ingredients.
