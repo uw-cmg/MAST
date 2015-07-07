@@ -56,8 +56,13 @@ class ParseInput:
                 self.defect = lines[l].split()[1]
             elif 'HSE' in keywords.upper():
                 if 'gap' in keywords.lower():
-                    doscar = '%s_DOSCAR'%lines[l].split()[1]
-                    self.HSE['gap'] = self.read_gap_from_eigenval(doscar)
+                    if 'dos' in lines[l].split()[1].lower():
+                        doscar = '%s_DOSCAR'%lines[l].split()[1]
+                        GAP = self.read_gap_from_doscar(doscar)
+                    elif 'band' in lines[l].split()[1].lower():
+                        outcar = '%s_OUTCAR'%lines[l].split()[1]
+                        GAP = self.read_gap_from_eigenval(outcar)
+                    self.HSE['gap'] = GAP
                     self.HSE['gap']['mygap'] = np.append(self.HSE['gap']['mygap'], np.array(lines[l].split()[2:],dtype=float))
                 elif 'size' in keywords.lower():
                     self.HSE['size'] = lines[l].split()[1:]
@@ -69,8 +74,13 @@ class ParseInput:
                         self.HSE['chem_pot'][C][chem_pot[2*ele]] = float(chem_pot[2*ele+1])
             else:
                 if 'gap' in keywords.lower():
-                    doscar = '%s_DOSCAR'%lines[l].split()[1]
-                    self.GGA['gap'] = self.read_gap(doscar)
+                    if 'dos' in lines[l].split()[1].lower():
+                        doscar = '%s_DOSCAR'%lines[l].split()[1]
+                        GAP = self.read_gap_from_doscar(doscar)
+                    elif 'band' in lines[l].split()[1].lower():
+                        outcar = '%s_OUTCAR'%lines[l].split()[1]
+                        GAP = self.read_gap_from_eigenval(outcar)
+                    self.GGA['gap'] = GAP
                     self.GGA['gap']['mygap'] = np.append(self.GGA['gap']['mygap'], np.array(lines[l].split()[2:],dtype=float))
                 elif 'size' in keywords.lower():
                     self.GGA['size'] = lines[l].split()[1:]
