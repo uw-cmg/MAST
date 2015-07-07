@@ -134,7 +134,8 @@ setup(
                 "MAST/bin/mast_diffusion_coefficient",
                 "MAST/bin/mast_finite_size_scaling_sizes",
                 "MAST/bin/mast_madelung_utility",
-                "MAST/bin/mast_defect_formation_energy"],
+                "MAST/bin/mast_defect_formation_energy",
+                "MAST/utility/finite_size_scaling/mast_DFE_tool"],
         data_files=[
             ("%s/MAST/examples" % myhome,
                 ["MAST/examples/README",
