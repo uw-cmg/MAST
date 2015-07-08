@@ -11,7 +11,7 @@ Calculates the effective diffusivity in a grain boundary network with two types 
 `Look for a new version in late 2014 <https://materialshub.org/resources/gbdiff>`_
     
 
-* Source code is in MAST/utility/gbdiff
+* You must download and unzip the MAST tar.gz file from https://github.com/uw-cmg/MAST/releases in order to access the source code, which is in MAST/utility/gbdiff, and will likely need to be recompiled for your machine. 
 
 This tool calculates the effective diffusivity in a grain boundary network represented by a three-dimensional Voronoi diagram. 
 Two types of grain boundaries with different diffusivities are randomly distributed in the domain. 
