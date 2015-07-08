@@ -58,6 +58,8 @@ Trying out MAST
 Unit testing
 ----------------------
 
+Unit tests are available through the MAST tar.gz file. See :doc:`12_0_programming`. (Unit tests are not installed by default using pip.)
+
 To check the validity of the MAST source code, navigate to ``<MAST installation directory>/MAST/test`` and run the unit tests with::
 
     nosetests --exe

@@ -12,9 +12,9 @@ To report any issues, please create an issue in this repository.
 
 To program with MAST:
 
-#. Clone from the dev branch. (See github's instructions for cloning.)
+#. Clone from the dev branch (see github's instructions for cloning) OR get the latest stable release from `https://github.com/uw-cmg/MAST/releases` and unzip it.
 
-#. Prepend the clone directory to your ``$PYTHONPATH`` environment variable.
+#. Prepend the clone directory to your ``$PYTHONPATH`` environment variable, and the clone directory's ``MAST/bin`` directory to your ``$PATH`` environment variable.
 
     *  The command ``mast`` should reveal the clone directory instead of any other MAST installation directories.
 
