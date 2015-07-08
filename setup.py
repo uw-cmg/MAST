@@ -47,9 +47,6 @@ def get_total_package_data():
     """Get total package data:
         * All files in MAST.submit.platforms.<platform name>
         * All files in MAST.summary.citation_files
-        * All files in MAST.test.<test_name>
-        * All files in MAST.utility.gbdiff (standalone, non-python)
-        * All files in MAST.utility.diffanalyzer (standalone, non-python)
         Returns:
             Dictionary with '<package name>':['<file name>','<file name>',...]
     """
@@ -72,52 +69,57 @@ def get_total_package_data():
     citationstem = os.path.join(mysetuppath,"MAST","summary","citation_files")
     citationlist = os.listdir(citationstem)
     mydict["MAST.summary.citation_files"] = list(citationlist)
+    #get additional structopt files
+    structoptstem = os.path.join(mysetuppath,"MAST","structopt")
+    structoptlist=list()
+    structoptlist.append("StructOpt_User_Guide_v1.docx")
+    mydict["MAST.structopt"] = list(structoptlist)
     #get standalone files
-    mystandalones=['gbdiff','diffanalyzer']
-    for standalone in mystandalones:
-        standstem = os.path.join(mysetuppath, "MAST","utility",standalone)
-        standlist = os.listdir(standstem)
-        mylist = list()
-        for standitem in standlist:
-            if os.path.isdir(os.path.join(standstem,standitem)):
-                standfiles = os.listdir(os.path.join(standstem, standitem))
-                for standitem2 in standfiles:
-                    mylist.append(os.path.join(standitem,standitem2))
-            else:
-                mylist.append(standitem)
-        mydict[os.path.join("MAST","utility",standalone).replace("/",".")] = list(mylist)
+    #mystandalones=['gbdiff','diffanalyzer']
+    #for standalone in mystandalones:
+    #    standstem = os.path.join(mysetuppath, "MAST","utility",standalone)
+    #    standlist = os.listdir(standstem)
+    #    mylist = list()
+    #    for standitem in standlist:
+    #        if os.path.isdir(os.path.join(standstem,standitem)):
+    #            standfiles = os.listdir(os.path.join(standstem, standitem))
+    #            for standitem2 in standfiles:
+    #                mylist.append(os.path.join(standitem,standitem2))
+    #        else:
+    #            mylist.append(standitem)
+    #    mydict[os.path.join("MAST","utility",standalone).replace("/",".")] = list(mylist)
     #get test files
-    teststem = os.path.join(mysetuppath, "MAST","test")
-    testlist = os.listdir(teststem)
-    for testname in testlist:
-        mytestdir = os.path.join(teststem, testname)
-        if os.path.isdir(mytestdir):
-            mylist = list()
-            myfiles = os.listdir(mytestdir)
-            myfiles.sort()
-            for myfile in myfiles:
-                if os.path.isdir(os.path.join(mytestdir, myfile)):
-                    myfiles2 = os.listdir(os.path.join(mytestdir, myfile))
-                    myfiles2.sort()
-                    for myfile2 in myfiles2:
-                        if os.path.isdir(os.path.join(mytestdir, myfile, myfile2)):
-                            myfiles3 = os.listdir(os.path.join(mytestdir, myfile, myfile2))
-                            myfiles3.sort()
-                            for myfile3 in myfiles3:
-                                if os.path.isdir(os.path.join(mytestdir, myfile, myfile2, myfile3)):
-                                    myfiles4 = os.listdir(os.path.join(mytestdir, myfile, myfile2, myfile3))
-                                    myfiles4.sort()
-                                    for myfile4 in myfiles4:
-                                        mylist.append(os.path.join(myfile, myfile2, myfile3, myfile4))
-                                else:
-                                    mylist.append(os.path.join(myfile, myfile2, myfile3))
-                        else:
-                            mylist.append(os.path.join(myfile, myfile2))
-                else:
-                    mylist.append(myfile)
-            mydict[os.path.join("MAST","test",testname).replace("/",".")]=mylist
-        else:
-            pass
+    #teststem = os.path.join(mysetuppath, "MAST","test")
+    #testlist = os.listdir(teststem)
+    #for testname in testlist:
+    #    mytestdir = os.path.join(teststem, testname)
+    #    if os.path.isdir(mytestdir):
+    #        mylist = list()
+    #        myfiles = os.listdir(mytestdir)
+    #        myfiles.sort()
+    #        for myfile in myfiles:
+    #            if os.path.isdir(os.path.join(mytestdir, myfile)):
+    #                myfiles2 = os.listdir(os.path.join(mytestdir, myfile))
+    #                myfiles2.sort()
+    #                for myfile2 in myfiles2:
+    #                    if os.path.isdir(os.path.join(mytestdir, myfile, myfile2)):
+    #                        myfiles3 = os.listdir(os.path.join(mytestdir, myfile, myfile2))
+    #                        myfiles3.sort()
+    #                        for myfile3 in myfiles3:
+    #                            if os.path.isdir(os.path.join(mytestdir, myfile, myfile2, myfile3)):
+    #                                myfiles4 = os.listdir(os.path.join(mytestdir, myfile, myfile2, myfile3))
+    #                                myfiles4.sort()
+    #                                for myfile4 in myfiles4:
+    #                                    mylist.append(os.path.join(myfile, myfile2, myfile3, myfile4))
+    #                            else:
+    #                                mylist.append(os.path.join(myfile, myfile2, myfile3))
+    #                    else:
+    #                        mylist.append(os.path.join(myfile, myfile2))
+    #            else:
+    #                mylist.append(myfile)
+    #        mydict[os.path.join("MAST","test",testname).replace("/",".")]=mylist
+    #    else:
+    #        pass
 
 
     mykeys = mydict.keys()

@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>8.3. The Ingredients section &mdash; MAST 1.2.9.4 documentation</title>
+    <title>9.4. The Ingredients section &mdash; MAST 1.3.0.5 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.9.4',
+        VERSION:     '1.3.0.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false
@@ -23,39 +23,39 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.2.9.4 documentation" href="index.html" />
-    <link rel="up" title="8. Sections of the Input File" href="3_1_inputsections.html" />
-    <link rel="next" title="8.4. The Recipe section" href="3_1_3_recipe.html" />
-    <link rel="prev" title="8.2. The Structure section" href="3_1_1_structure.html" /> 
+    <link rel="top" title="MAST 1.3.0.5 documentation" href="index.html" />
+    <link rel="up" title="9. Sections of the Input File" href="3_1_inputsections.html" />
+    <link rel="next" title="9.5. The Recipe section" href="3_1_3_recipe.html" />
+    <link rel="prev" title="9.3. The Scaling section" href="3_1_9_scaling.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_1_3_recipe.html" title="8.4. The Recipe section"
+          <a href="3_1_3_recipe.html" title="9.5. The Recipe section"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_1_structure.html" title="8.2. The Structure section"
+          <a href="3_1_9_scaling.html" title="9.3. The Scaling section"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li>
-          <li><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="the-ingredients-section">
-<h1>8.3. The Ingredients section<a class="headerlink" href="#the-ingredients-section" title="Permalink to this headline">¶</a></h1>
-<p>The <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section contains a section for global ingredient keywords and then a section for each <strong>ingredient type</strong>.</p>
-<p>Each ingredient type in the recipe should have a subsection denoted by <tt class="docutils literal"><span class="pre">begin</span> <span class="pre">&lt;ingredient</span> <span class="pre">type&gt;</span></tt>.</p>
-<p>Example <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section:</p>
+<h1>9.4. The Ingredients section<a class="headerlink" href="#the-ingredients-section" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal"><span class="pre">$ingredients</span></code> section contains a section for global ingredient keywords and then a section for each <strong>ingredient type</strong>.</p>
+<p>Each ingredient type in the recipe should have a subsection denoted by <code class="docutils literal"><span class="pre">begin</span> <span class="pre">&lt;ingredient</span> <span class="pre">type&gt;</span></code>.</p>
+<p>Example <code class="docutils literal"><span class="pre">$ingredients</span></code> section:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ingredients
 
 begin ingredients_global
@@ -74,7 +74,7 @@ end
 $end
 </pre></div>
 </div>
-<p>Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with <tt class="docutils literal"><span class="pre">mast_</span></tt>.</p>
+<p>Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with <code class="docutils literal"><span class="pre">mast_</span></code>.</p>
 <p>If there are no changes from the ingredients_global section, just add an empty subsection for that ingredient type:</p>
 <div class="highlight-python"><div class="highlight"><pre>begin ingredient_type
 end
@@ -82,14 +82,14 @@ end
 </div>
 <p>For a specific ingredient type, if a keyword is not specified in that ingredient type&#8217;s subsection but is specified in the <strong>ingredients_global</strong> subsection, then, the value for that keyword will be taken from ingredients_global.</p>
 <ul class="simple">
-<li>In the example above, <tt class="docutils literal"><span class="pre">ingredient_type2</span></tt> would inherit <tt class="docutils literal"><span class="pre">keyword1</span> <span class="pre">k1value1</span></tt> from ingredients_global.</li>
+<li>In the example above, <code class="docutils literal"><span class="pre">ingredient_type2</span></code> would inherit <code class="docutils literal"><span class="pre">keyword1</span> <span class="pre">k1value1</span></code> from ingredients_global.</li>
 </ul>
 <div class="section" id="program-specific-keywords">
-<h2>8.3.1. Program-specific keywords<a class="headerlink" href="#program-specific-keywords" title="Permalink to this headline">¶</a></h2>
-<p>VASP keywords such as <tt class="docutils literal"><span class="pre">IBRION</span></tt>, <tt class="docutils literal"><span class="pre">ISIF</span></tt>, <tt class="docutils literal"><span class="pre">LCHARG</span></tt>, <tt class="docutils literal"><span class="pre">LWAVE</span></tt>, and so on, can be specified under each ingredient type in the <tt class="docutils literal"><span class="pre">$ingredients</span></tt> section of the input file.</p>
-<p>Such program-specific keywords are only allowed if they are listed in the program-specific file located in the <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys/</span></tt> folder, for example, <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys/vasp_allowed_keywords.py</span></tt>.</p>
-<p>These program-specific keywords will be turned into uppercase keywords. The values will not change case, and should be given in the case required by the program. For example, <tt class="docutils literal"><span class="pre">lwave</span> <span class="pre">False</span></tt> will be translated into <tt class="docutils literal"><span class="pre">LWAVE</span> <span class="pre">False</span></tt> in the VASP INCAR file.</p>
-<p>One exception for VASP keywords is the <tt class="docutils literal"><span class="pre">IMAGES</span></tt> keyword, which signals a nudged elastic band run, and should instead be set in the <tt class="docutils literal"><span class="pre">$neb</span></tt> section of the input file.</p>
+<h2>9.4.1. Program-specific keywords<a class="headerlink" href="#program-specific-keywords" title="Permalink to this headline">¶</a></h2>
+<p>VASP keywords such as <code class="docutils literal"><span class="pre">IBRION</span></code>, <code class="docutils literal"><span class="pre">ISIF</span></code>, <code class="docutils literal"><span class="pre">LCHARG</span></code>, <code class="docutils literal"><span class="pre">LWAVE</span></code>, and so on, can be specified under each ingredient type in the <code class="docutils literal"><span class="pre">$ingredients</span></code> section of the input file.</p>
+<p>Such program-specific keywords are only allowed if they are listed in the program-specific file located in the <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys/</span></code> folder, for example, <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys/vasp_allowed_keywords.py</span></code>.</p>
+<p>These program-specific keywords will be turned into uppercase keywords. The values will not change case, and should be given in the case required by the program. For example, <code class="docutils literal"><span class="pre">lwave</span> <span class="pre">False</span></code> will be translated into <code class="docutils literal"><span class="pre">LWAVE</span> <span class="pre">False</span></code> in the VASP INCAR file.</p>
+<p>One exception for VASP keywords is the <code class="docutils literal"><span class="pre">IMAGES</span></code> keyword, which signals a nudged elastic band run, and should instead be set in the <code class="docutils literal"><span class="pre">$neb</span></code> section of the input file.</p>
 <p>For VASP ingredients, please include</p>
 <div class="highlight-python"><div class="highlight"><pre>lcharg False
 lwave False
@@ -98,12 +98,12 @@ lwave False
 <p>in your ingredient global keywords in order to avoid writing the large VASP files CHGCAR and WAVECAR, unless you really need these files.</p>
 </div>
 <div class="section" id="special-mast-keywords">
-<h2>8.3.2. Special MAST keywords<a class="headerlink" href="#special-mast-keywords" title="Permalink to this headline">¶</a></h2>
-<p>Any keyword that starts with <tt class="docutils literal"><span class="pre">mast_</span></tt> is considered a special keyword utilized by MAST and will not be written into the VASP INCAR file or any custom input file.</p>
+<h2>9.4.2. Special MAST keywords<a class="headerlink" href="#special-mast-keywords" title="Permalink to this headline">¶</a></h2>
+<p>Any keyword that starts with <code class="docutils literal"><span class="pre">mast_</span></code> is considered a special keyword utilized by MAST and will not be written into the VASP INCAR file or any custom input file.</p>
 <div class="section" id="submission-script-keywords">
-<h3>8.3.2.1. Submission script keywords<a class="headerlink" href="#submission-script-keywords" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.1. Submission script keywords<a class="headerlink" href="#submission-script-keywords" title="Permalink to this headline">¶</a></h3>
 <p>The following queue submission keywords are platform-dependent and are used along to create the submission script (see <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>).</p>
-<p><strong>mast_exec</strong>: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in <tt class="docutils literal"><span class="pre">mast_program</span></tt>, and it should include any MPI commands.</p>
+<p><strong>mast_exec</strong>: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in <code class="docutils literal"><span class="pre">mast_program</span></code>, and it should include any MPI commands.</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
 </pre></div>
 </div>
@@ -114,8 +114,8 @@ lwave False
 <p><strong>mast_memory</strong>: The memory per processor requested.</p>
 </div>
 <div class="section" id="mast-control-flow-keywords">
-<h3>8.3.2.2. MAST control flow keywords<a class="headerlink" href="#mast-control-flow-keywords" title="Permalink to this headline">¶</a></h3>
-<p><strong>mast_program</strong>: Specify which program to run (<tt class="docutils literal"><span class="pre">vasp</span></tt>, <tt class="docutils literal"><span class="pre">vasp_neb</span></tt>, or <tt class="docutils literal"><span class="pre">None</span></tt> for a generic program, are currently supported)</p>
+<h3>9.4.2.2. MAST control flow keywords<a class="headerlink" href="#mast-control-flow-keywords" title="Permalink to this headline">¶</a></h3>
+<p><strong>mast_program</strong>: Specify which program to run (<code class="docutils literal"><span class="pre">vasp</span></code>, <code class="docutils literal"><span class="pre">vasp_neb</span></code>, or <code class="docutils literal"><span class="pre">None</span></code> for a generic program, are currently supported)</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_program vasp
 </pre></div>
 </div>
@@ -126,22 +126,22 @@ lwave False
 <p><strong>mast_auto_correct</strong>: Specify whether mast should automatically correct errors.</p>
 <ul class="simple">
 <li>The default is True, so if this keyword is set to True, or if this keyword is not specified at all, then MAST will attempt to find errors, automatically correct the errors, and resubmit the ingredient.</li>
-<li>If set to False, MAST will attempt to find errors, then write them into a <tt class="docutils literal"><span class="pre">MAST_ERROR</span></tt> file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the <tt class="docutils literal"><span class="pre">MAST_ERROR</span></tt> file is manually deleted by the user.</li>
+<li>If set to False, MAST will attempt to find errors, then write them into a <code class="docutils literal"><span class="pre">MAST_ERROR</span></code> file in the recipe folder, logging both the error-containing ingredient and the nature of the error, but not taking any corrective actions. The recipe will be skipped in all subsequent MAST runs until the <code class="docutils literal"><span class="pre">MAST_ERROR</span></code> file is manually deleted by the user.</li>
 </ul>
 </div>
 <div class="section" id="vasp-specific-keywords">
-<h3>8.3.2.3. VASP-specific keywords<a class="headerlink" href="#vasp-specific-keywords" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.3. VASP-specific keywords<a class="headerlink" href="#vasp-specific-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_kpoints</strong>: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered.</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_kpoints = 3x3x3 G
 </pre></div>
 </div>
 <ul class="simple">
-<li>Either this keyword or <tt class="docutils literal"><span class="pre">mast_kpoint_density</span></tt> is required for VASP calculations.</li>
+<li>Either this keyword or <code class="docutils literal"><span class="pre">mast_kpoint_density</span></code> is required for VASP calculations.</li>
 </ul>
 <p><strong>mast_kpoint_density</strong>: A number for the desired kpoint mesh density.</p>
 <ul class="simple">
-<li>Only works with <tt class="docutils literal"><span class="pre">mast_write_method</span></tt> of <tt class="docutils literal"><span class="pre">write_singlerun_automesh</span></tt></li>
-<li>Either this keyword or <tt class="docutils literal"><span class="pre">mast_kpoints</span></tt> is required for VASP calculations.</li>
+<li>Only works with <code class="docutils literal"><span class="pre">mast_write_method</span></code> of <code class="docutils literal"><span class="pre">write_singlerun_automesh</span></code></li>
+<li>Either this keyword or <code class="docutils literal"><span class="pre">mast_kpoints</span></code> is required for VASP calculations.</li>
 </ul>
 <p><strong>mast_pp_setup</strong>: Specify which pseudopotential goes to which element:</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_pp_setup La=La Mn=Mn_pv O=O_s
@@ -154,9 +154,9 @@ lwave False
 <p><strong>mast_multiplyencut</strong>: Specify a number with which to multiply the maximum ENCUT value of the pseudopotentials. Volume relaxations in VASP often take 1.5; otherwise 1.25 is sufficient.</p>
 <ul class="simple">
 <li>Default is 1.5</li>
-<li>If <tt class="docutils literal"><span class="pre">encut</span></tt> is given as a program keyword, then that value will be used and <tt class="docutils literal"><span class="pre">mast_multiplyencut</span></tt> should have no effect</li>
+<li>If <code class="docutils literal"><span class="pre">encut</span></code> is given as a program keyword, then that value will be used and <code class="docutils literal"><span class="pre">mast_multiplyencut</span></code> should have no effect</li>
 </ul>
-<p><strong>mast_setmagmom</strong>: Specify a string to use for setting the initial magnetic moment. A short string will result in multipliers. For example, <tt class="docutils literal"><span class="pre">mast_setmagmom</span> <span class="pre">1</span> <span class="pre">5</span> <span class="pre">1</span></tt> will produce <tt class="docutils literal"><span class="pre">2*1</span> <span class="pre">2*5</span> <span class="pre">8*1</span></tt> for a 12-atom unit cell with 2A, 2B, and 8C atoms. A string of the number of atoms in the <tt class="docutils literal"><span class="pre">POSCAR</span></tt> file will be printed as entered, for example, <tt class="docutils literal"><span class="pre">mast_setmagmom</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span></tt>.</p>
+<p><strong>mast_setmagmom</strong>: Specify a string to use for setting the initial magnetic moment. A short string will result in multipliers. For example, <code class="docutils literal"><span class="pre">mast_setmagmom</span> <span class="pre">1</span> <span class="pre">5</span> <span class="pre">1</span></code> will produce <code class="docutils literal"><span class="pre">2*1</span> <span class="pre">2*5</span> <span class="pre">8*1</span></code> for a 12-atom unit cell with 2A, 2B, and 8C atoms. A string of the number of atoms in the <code class="docutils literal"><span class="pre">POSCAR</span></code> file will be printed as entered, for example, <code class="docutils literal"><span class="pre">mast_setmagmom</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span> <span class="pre">1</span> <span class="pre">-1</span></code>.</p>
 <p><strong>mast_charge</strong>: Specify the charge on the system (total system)</p>
 <ul class="simple">
 <li>-1 charge means the ADDITION of one electron. For example, O2- has two more electrons than O neutral.</li>
@@ -172,22 +172,22 @@ lwave False
 </pre></div>
 </div>
 </li>
-<li><p class="first">The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run <tt class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></tt>); once the <tt class="docutils literal"><span class="pre">input.inp</span></tt> file is created in the recipe directory, it will store a full path back to these poscar-type files.</p>
+<li><p class="first">The structure files must be found in the directory from which the input file is being submitted when initially inputting the input file (e.g. the directory you are in when you run <code class="docutils literal"><span class="pre">mast</span> <span class="pre">-i</span> <span class="pre">test.inp</span></code>); once the <code class="docutils literal"><span class="pre">input.inp</span></code> file is created in the recipe directory, it will store a full path back to these poscar-type files.</p>
 </li>
 <li><p class="first">This keyword cannot be used with programs other than VASP, cartesian coordinates, and special ingredients like inducedefect-type ingredients, whose write or run methods are different.</p>
 </li>
 </ul>
 </div>
 <div class="section" id="structure-manipulation-keywords">
-<h3>8.3.2.4. Structure manipulation keywords<a class="headerlink" href="#structure-manipulation-keywords" title="Permalink to this headline">¶</a></h3>
-<p><strong>mast_strain</strong>: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with <tt class="docutils literal"><span class="pre">mast_run_method</span></tt> of <tt class="docutils literal"><span class="pre">run_strain</span></tt></p>
+<h3>9.4.2.4. Structure manipulation keywords<a class="headerlink" href="#structure-manipulation-keywords" title="Permalink to this headline">¶</a></h3>
+<p><strong>mast_strain</strong>: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with <code class="docutils literal"><span class="pre">mast_run_method</span></code> of <code class="docutils literal"><span class="pre">run_strain</span></code></p>
 <div class="highlight-python"><div class="highlight"><pre>mast_strain 1.01 1.03 0.98
 </pre></div>
 </div>
 <p>This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%</p>
 </div>
 <div class="section" id="mast-xxx-method-keywords">
-<h3>8.3.2.5. mast_xxx_method keywords<a class="headerlink" href="#mast-xxx-method-keywords" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.5. mast_xxx_method keywords<a class="headerlink" href="#mast-xxx-method-keywords" title="Permalink to this headline">¶</a></h3>
 <p>The following keywords have individual sections:</p>
 <p><strong>mast_write_method</strong>: Specifies what the ingredient should write out before running (e.g., create the INCAR)</p>
 <p><strong>mast_ready_method</strong>: Specifies how MAST can tell if the ingredient is ready to run (often, in addition to writing its own files, an ingredient must also wait for data from its parent ingredient(s)).</p>
@@ -198,12 +198,12 @@ lwave False
 <div class="highlight-python"><div class="highlight"><pre>mast_write_method write_singlerun
 </pre></div>
 </div>
-<p>They depend on having an appropriate program set in <tt class="docutils literal"><span class="pre">mast_program</span></tt>.</p>
+<p>They depend on having an appropriate program set in <code class="docutils literal"><span class="pre">mast_program</span></code>.</p>
 <p>However, you may choose to specify arguments where available, e.g.:</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;
 </pre></div>
 </div>
-<p>You may also choose to specify multiple methods. These methods will be performed in the order listed. For <tt class="docutils literal"><span class="pre">mast_ready_method</span></tt> or <tt class="docutils literal"><span class="pre">mast_complete_method</span></tt>, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
+<p>You may also choose to specify multiple methods. These methods will be performed in the order listed. For <code class="docutils literal"><span class="pre">mast_ready_method</span></code> or <code class="docutils literal"><span class="pre">mast_complete_method</span></code>, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
 Use a semicolon to separate out the methods:</p>
 <div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;; file_exists Parsed_Structures
 </pre></div>
@@ -227,7 +227,7 @@ Use a semicolon to separate out the methods:</p>
 </li>
 <li><p class="first"><strong>copy_fullpath_file &lt;full path file name&gt; &lt;copy_to_filename&gt;</strong>: This method is for copying some system file like //home/user/some_template, not an ingredient-specific file</p>
 </li>
-<li><p class="first"><strong>write_ingred_input_file &lt;filename&gt; &lt;allowed file&gt; &lt;uppercase keywords&gt; &lt;delimiter&gt;</strong>: The allowed file specifies an allowed keywords file name in <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys</span></tt>.</p>
+<li><p class="first"><strong>write_ingred_input_file &lt;filename&gt; &lt;allowed file&gt; &lt;uppercase keywords&gt; &lt;delimiter&gt;</strong>: The allowed file specifies an allowed keywords file name in <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys</span></code>.</p>
 <blockquote>
 <div><ul>
 <li><p class="first">Use &#8220;all&#8221; to put any non-mast keywords into the input file.</p>
@@ -263,13 +263,13 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 </li>
 <li><p class="first">In the example above, the numbers 25 and 0.01 will actually be passed into sys.argv as a string.</p>
 </li>
-<li><p class="first">This method is intended to allow you to run short custom scripts of your own creation, particularly for <tt class="docutils literal"><span class="pre">mast_write_method</span></tt> when setting up your ingredient.</p>
+<li><p class="first">This method is intended to allow you to run short custom scripts of your own creation, particularly for <code class="docutils literal"><span class="pre">mast_write_method</span></code> when setting up your ingredient.</p>
 </li>
 <li><dl class="first docutils">
 <dt>For long or complex execution steps where you want the output tracked separately, do not use this method. Instead, do the following in order to get your script submitted to the queue:</dt>
-<dd><p class="first last">#  Use <tt class="docutils literal"><span class="pre">write_submit_script</span></tt> in your <tt class="docutils literal"><span class="pre">mast_write_method</span></tt>, along with any other write methods
-#  Use <tt class="docutils literal"><span class="pre">mast_run_method</span> <span class="pre">run_singlerun</span></tt>
-#  Put your script in the <tt class="docutils literal"><span class="pre">mast_exec</span></tt> keyword</p>
+<dd><p class="first last">#  Use <code class="docutils literal"><span class="pre">write_submit_script</span></code> in your <code class="docutils literal"><span class="pre">mast_write_method</span></code>, along with any other write methods
+#  Use <code class="docutils literal"><span class="pre">mast_run_method</span> <span class="pre">run_singlerun</span></code>
+#  Put your script in the <code class="docutils literal"><span class="pre">mast_exec</span></code> keyword</p>
 </dd>
 </dl>
 </li>
@@ -279,7 +279,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 </ul>
 </div>
 <div class="section" id="mast-write-method-keyword-values">
-<h3>8.3.2.6. mast_write_method keyword values<a class="headerlink" href="#mast-write-method-keyword-values" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.6. mast_write_method keyword values<a class="headerlink" href="#mast-write-method-keyword-values" title="Permalink to this headline">¶</a></h3>
 <p><strong>write_singlerun</strong></p>
 <ul class="simple">
 <li>Write files for a single generic run.</li>
@@ -289,12 +289,30 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <ul class="simple">
 <li>Write files for a single generic run.</li>
 <li>Programs supported: vasp</li>
-<li>Requires the <tt class="docutils literal"><span class="pre">mast_kpoint_density</span></tt> ingredient keyword</li>
+<li>Requires the <code class="docutils literal"><span class="pre">mast_kpoint_density</span></code> ingredient keyword</li>
 </ul>
 <p><strong>write_neb</strong></p>
 <ul class="simple">
-<li>Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories.</li>
+<li>Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories and uses linear interpolation between images.</li>
 <li>Programs supported: vasp</li>
+</ul>
+<p><strong>write_pathfinder_neb</strong></p>
+<ul>
+<li><p class="first">Write an NEB ingredient using a charge-density-based pathfinding method.</p>
+</li>
+<li><p class="first">Programs supported: vasp</p>
+</li>
+<li><p class="first">This method takes the argument of an ingredient name for the ingredient from which to take the charge density.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The ingredient name must be fully specified, e.g. no &lt;S&gt;, &lt;N&gt;, etc. tags.</li>
+<li>The ingredient must have a CHGCAR file written. A gamma-point calculation is sufficient for this purpose.</li>
+<li>The ingredient should have both endpoints removed. For example, for vacancy migration, the ingredient should have neither a vacancy at the initial position, nor a vacancy at the final position. However, it should have all other non-migrating defects that are common to both the initial and final state.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">This method only works with <code class="docutils literal"><span class="pre">use_structure_index</span> <span class="pre">True</span></code> in the <code class="docutils literal"><span class="pre">$structure</span></code> section of the input file.</p>
+</li>
 </ul>
 <p><strong>write_neb_subfolders</strong></p>
 <ul class="simple">
@@ -313,7 +331,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 </ul>
 </div>
 <div class="section" id="mast-ready-method-keyword-values">
-<h3>8.3.2.7. mast_ready_method keyword values<a class="headerlink" href="#mast-ready-method-keyword-values" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.7. mast_ready_method keyword values<a class="headerlink" href="#mast-ready-method-keyword-values" title="Permalink to this headline">¶</a></h3>
 <p><strong>ready_singlerun</strong></p>
 <ul class="simple">
 <li>Checks that a single run is ready to run</li>
@@ -332,15 +350,15 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <p><strong>ready_subfolders</strong>
 *  Checks that each subfolder is ready to run, following the ready_singlerun criteria.
 *  Generic
-*  This method is used for calculations whose write method includes subfolders, and where each subfolder is a calculation, as in <tt class="docutils literal"><span class="pre">write_phonon_multiple</span></tt>.</p>
+*  This method is used for calculations whose write method includes subfolders, and where each subfolder is a calculation, as in <code class="docutils literal"><span class="pre">write_phonon_multiple</span></code>.</p>
 </div>
 <div class="section" id="mast-run-method-keyword-values">
-<h3>8.3.2.8. mast_run_method keyword values<a class="headerlink" href="#mast-run-method-keyword-values" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.8. mast_run_method keyword values<a class="headerlink" href="#mast-run-method-keyword-values" title="Permalink to this headline">¶</a></h3>
 <p><strong>run_defect</strong></p>
 <ul class="simple">
 <li>Create a defect in the structure; not submitted to queue</li>
 <li>Generic</li>
-<li>Requires the <tt class="docutils literal"><span class="pre">$defects</span></tt> section in the input file (see <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>).</li>
+<li>Requires the <code class="docutils literal"><span class="pre">$defects</span></code> section in the input file (see <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>).</li>
 </ul>
 <p><strong>run_singlerun</strong></p>
 <ul class="simple">
@@ -361,24 +379,24 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <ul class="simple">
 <li>Strain the structure; not submitted to queue</li>
 <li>Generic</li>
-<li>Requires the <tt class="docutils literal"><span class="pre">mast_strain</span></tt> ingredient keyword</li>
+<li>Requires the <code class="docutils literal"><span class="pre">mast_strain</span></code> ingredient keyword</li>
 </ul>
 <p><strong>run_scale</strong></p>
 <ul class="simple">
 <li>Scale the structure (e.g. a 2-atom unit cell scaled by 2 becomes a 16-atom supercell)</li>
-<li>Requires the <tt class="docutils literal"><span class="pre">$scaling</span></tt> subsection in the input file (see <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>).</li>
+<li>Requires the <code class="docutils literal"><span class="pre">$scaling</span></code> subsection in the input file (see <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>).</li>
 <li>Must not be run on the starting ingredient.</li>
 </ul>
 </div>
 <div class="section" id="mast-complete-method-keyword-values">
-<h3>8.3.2.9. mast_complete_method keyword values<a class="headerlink" href="#mast-complete-method-keyword-values" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.9. mast_complete_method keyword values<a class="headerlink" href="#mast-complete-method-keyword-values" title="Permalink to this headline">¶</a></h3>
 <p><strong>complete_singlerun</strong></p>
 <ul>
 <li><p class="first">Check if run is complete</p>
 </li>
 <li><p class="first">Programs supported: vasp</p>
 </li>
-<li><p class="first">Note that for VASP, the phrase <tt class="docutils literal"><span class="pre">reached</span> <span class="pre">required</span> <span class="pre">accuracy</span></tt> is checked for, as well as a <tt class="docutils literal"><span class="pre">User</span> <span class="pre">time</span></tt> in seconds. The exceptions are:</p>
+<li><p class="first">Note that for VASP, the phrase <code class="docutils literal"><span class="pre">reached</span> <span class="pre">required</span> <span class="pre">accuracy</span></code> is checked for, as well as a <code class="docutils literal"><span class="pre">User</span> <span class="pre">time</span></code> in seconds. The exceptions are:</p>
 <blockquote>
 <div><ul class="simple">
 <li>NSW of 0, NSW of -1, or NSW not specified in the ingredients section keywords is taken as a static calculation, and .EDIFF is reached. is checked instead of .reached required accuracy.</li>
@@ -392,8 +410,8 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <p><strong>complete_neb_subfolders</strong></p>
 <ul class="simple">
 <li>Check if all NEB subfolders 01/.../0(N-1) are complete, according to complete_singlerun criteria.</li>
-<li>This method is not for checking the completion of NEBs! An NEB ingredient should have <tt class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp_neb</span></tt> and <tt class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_singlerun</span></tt>.</li>
-<li>An NEB static calculation, or a static calculation for each image, would use this keyword as <tt class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_neb_subfolders</span></tt> but have <tt class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp</span></tt> instead of vasp_neb.</li>
+<li>This method is not for checking the completion of NEBs! An NEB ingredient should have <code class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp_neb</span></code> and <code class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_singlerun</span></code>.</li>
+<li>An NEB static calculation, or a static calculation for each image, would use this keyword as <code class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_neb_subfolders</span></code> but have <code class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp</span></code> instead of vasp_neb.</li>
 </ul>
 <p><strong>complete_subfolders</strong></p>
 <ul class="simple">
@@ -407,7 +425,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 </ul>
 </div>
 <div class="section" id="mast-update-children-method-keyword-values">
-<h3>8.3.2.10. mast_update_children_method keyword values<a class="headerlink" href="#mast-update-children-method-keyword-values" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.10. mast_update_children_method keyword values<a class="headerlink" href="#mast-update-children-method-keyword-values" title="Permalink to this headline">¶</a></h3>
 <p><strong>give_structure</strong></p>
 <ul class="simple">
 <li>Forward the relaxed structure</li>
@@ -430,7 +448,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 </ul>
 </div>
 <div class="section" id="example-ingredients-section">
-<h3>8.3.2.11. Example Ingredients section<a class="headerlink" href="#example-ingredients-section" title="Permalink to this headline">¶</a></h3>
+<h3>9.4.2.11. Example Ingredients section<a class="headerlink" href="#example-ingredients-section" title="Permalink to this headline">¶</a></h3>
 <p>Here is an example ingredients section:</p>
 <div class="highlight-python"><div class="highlight"><pre>$ingredients
 begin ingredients_global
@@ -565,27 +583,27 @@ $end
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">8.3. The Ingredients section</a><ul>
-<li><a class="reference internal" href="#program-specific-keywords">8.3.1. Program-specific keywords</a></li>
-<li><a class="reference internal" href="#special-mast-keywords">8.3.2. Special MAST keywords</a><ul>
-<li><a class="reference internal" href="#submission-script-keywords">8.3.2.1. Submission script keywords</a></li>
-<li><a class="reference internal" href="#mast-control-flow-keywords">8.3.2.2. MAST control flow keywords</a></li>
-<li><a class="reference internal" href="#vasp-specific-keywords">8.3.2.3. VASP-specific keywords</a></li>
-<li><a class="reference internal" href="#structure-manipulation-keywords">8.3.2.4. Structure manipulation keywords</a></li>
-<li><a class="reference internal" href="#mast-xxx-method-keywords">8.3.2.5. mast_xxx_method keywords</a></li>
-<li><a class="reference internal" href="#mast-write-method-keyword-values">8.3.2.6. mast_write_method keyword values</a></li>
-<li><a class="reference internal" href="#mast-ready-method-keyword-values">8.3.2.7. mast_ready_method keyword values</a></li>
-<li><a class="reference internal" href="#mast-run-method-keyword-values">8.3.2.8. mast_run_method keyword values</a></li>
-<li><a class="reference internal" href="#mast-complete-method-keyword-values">8.3.2.9. mast_complete_method keyword values</a></li>
-<li><a class="reference internal" href="#mast-update-children-method-keyword-values">8.3.2.10. mast_update_children_method keyword values</a></li>
-<li><a class="reference internal" href="#example-ingredients-section">8.3.2.11. Example Ingredients section</a></li>
+<li><a class="reference internal" href="#">9.4. The Ingredients section</a><ul>
+<li><a class="reference internal" href="#program-specific-keywords">9.4.1. Program-specific keywords</a></li>
+<li><a class="reference internal" href="#special-mast-keywords">9.4.2. Special MAST keywords</a><ul>
+<li><a class="reference internal" href="#submission-script-keywords">9.4.2.1. Submission script keywords</a></li>
+<li><a class="reference internal" href="#mast-control-flow-keywords">9.4.2.2. MAST control flow keywords</a></li>
+<li><a class="reference internal" href="#vasp-specific-keywords">9.4.2.3. VASP-specific keywords</a></li>
+<li><a class="reference internal" href="#structure-manipulation-keywords">9.4.2.4. Structure manipulation keywords</a></li>
+<li><a class="reference internal" href="#mast-xxx-method-keywords">9.4.2.5. mast_xxx_method keywords</a></li>
+<li><a class="reference internal" href="#mast-write-method-keyword-values">9.4.2.6. mast_write_method keyword values</a></li>
+<li><a class="reference internal" href="#mast-ready-method-keyword-values">9.4.2.7. mast_ready_method keyword values</a></li>
+<li><a class="reference internal" href="#mast-run-method-keyword-values">9.4.2.8. mast_run_method keyword values</a></li>
+<li><a class="reference internal" href="#mast-complete-method-keyword-values">9.4.2.9. mast_complete_method keyword values</a></li>
+<li><a class="reference internal" href="#mast-update-children-method-keyword-values">9.4.2.10. mast_update_children_method keyword values</a></li>
+<li><a class="reference internal" href="#example-ingredients-section">9.4.2.11. Example Ingredients section</a></li>
 </ul>
 </li>
 </ul>
@@ -593,12 +611,12 @@ $end
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="3_1_1_structure.html"
-                        title="previous chapter">8.2. The Structure section</a></p>
+  <p class="topless"><a href="3_1_9_scaling.html"
+                        title="previous chapter">9.3. The Scaling section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_1_3_recipe.html"
-                        title="next chapter">8.4. The Recipe section</a></p>
-<div id="searchbox" style="display: none">
+                        title="next chapter">9.5. The Recipe section</a></p>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -615,25 +633,25 @@ $end
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_1_3_recipe.html" title="8.4. The Recipe section"
+          <a href="3_1_3_recipe.html" title="9.5. The Recipe section"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_1_structure.html" title="8.2. The Structure section"
+          <a href="3_1_9_scaling.html" title="9.3. The Scaling section"
              >previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li>
-          <li><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

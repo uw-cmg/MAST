@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>2. Introduction &mdash; MAST 1.2.9.4 documentation</title>
+    <title>3. Introduction &mdash; MAST 1.3.0.5 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.9.4',
+        VERSION:     '1.3.0.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false
@@ -23,41 +23,42 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.2.9.4 documentation" href="index.html" />
-    <link rel="next" title="3. Ingredients" href="2_0_ingredients.html" />
-    <link rel="prev" title="1. What’s new in version 1.2.X" href="16_0_whatsnew.html" /> 
+    <link rel="top" title="MAST 1.3.0.5 documentation" href="index.html" />
+    <link rel="next" title="4. Ingredients" href="2_0_ingredients.html" />
+    <link rel="prev" title="2. What’s new in version 1.2.X" href="16_1_2_0_whatsnew.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="2_0_ingredients.html" title="3. Ingredients"
+          <a href="2_0_ingredients.html" title="4. Ingredients"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="16_0_whatsnew.html" title="1. What’s new in version 1.2.X"
+          <a href="16_1_2_0_whatsnew.html" title="2. What’s new in version 1.2.X"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="introduction">
-<h1>2. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<h1>3. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p>Welcome to the MAterials Simulation Toolkit (MAST)!</p>
 <p>MAST is an automated workflow manager and post-processing tool.</p>
 <p>MAST focuses on diffusion and defect workflows that use density functional theory. It interfaces primarily with the Vienna Ab-initio Simulation Package (VASP).</p>
 <p>However, MAST can be generalized to other workflows and codes.</p>
 <p><a class="reference external" href="https://pypi.python.org/pypi/MAST">MAST is available from the Python Package Index.</a></p>
+<p>Additional tools and unit tests are available through the latest <a class="reference external" href="https://github.com/uw-cmg/MAST/releases">MAST tar.gz file.</a></p>
 <div class="section" id="the-mast-kitchen">
-<h2>2.1. The MAST Kitchen<a class="headerlink" href="#the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
+<h2>3.1. The MAST Kitchen<a class="headerlink" href="#the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
 <p>MAST uses kitchen terminology to organize the materials simulation workflow.</p>
 <ul>
 <li><p class="first">An <a class="reference internal" href="2_0_ingredients.html"><em>Ingredient</em></a> is a single calculation, like a single VASP calculation resulting in a relaxed structure and energy.</p>
@@ -71,15 +72,15 @@
 </div></blockquote>
 </li>
 </ul>
-<p>When MAST reads an input file, it creates a recipe in the <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> directory.</p>
+<p>When MAST reads an input file, it creates a recipe in the <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> directory.</p>
 <ul class="simple">
-<li>Many recipes can reside in <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt>.</li>
+<li>Many recipes can reside in <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code>.</li>
 <li>MAST will check and update the recipes in alphanumeric order.</li>
 </ul>
-<p>When MAST finds that a recipe is complete, it will move the recipe from <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> to <tt class="docutils literal"><span class="pre">$MAST_ARCHIVE</span></tt>.</p>
+<p>When MAST finds that a recipe is complete, it will move the recipe from <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> to <code class="docutils literal"><span class="pre">$MAST_ARCHIVE</span></code>.</p>
 </div>
 <div class="section" id="computing-in-the-mast-kitchen">
-<h2>2.2. Computing in the MAST Kitchen<a class="headerlink" href="#computing-in-the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
+<h2>3.2. Computing in the MAST Kitchen<a class="headerlink" href="#computing-in-the-mast-kitchen" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Install MAST (see <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>).</p>
 </li>
@@ -114,27 +115,27 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">2. Introduction</a><ul>
-<li><a class="reference internal" href="#the-mast-kitchen">2.1. The MAST Kitchen</a></li>
-<li><a class="reference internal" href="#computing-in-the-mast-kitchen">2.2. Computing in the MAST Kitchen</a></li>
+<li><a class="reference internal" href="#">3. Introduction</a><ul>
+<li><a class="reference internal" href="#the-mast-kitchen">3.1. The MAST Kitchen</a></li>
+<li><a class="reference internal" href="#computing-in-the-mast-kitchen">3.2. Computing in the MAST Kitchen</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="16_0_whatsnew.html"
-                        title="previous chapter">1. What&#8217;s new in version 1.2.X</a></p>
+  <p class="topless"><a href="16_1_2_0_whatsnew.html"
+                        title="previous chapter">2. What&#8217;s new in version 1.2.X</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="2_0_ingredients.html"
-                        title="next chapter">3. Ingredients</a></p>
-<div id="searchbox" style="display: none">
+                        title="next chapter">4. Ingredients</a></p>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -151,24 +152,24 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="2_0_ingredients.html" title="3. Ingredients"
+          <a href="2_0_ingredients.html" title="4. Ingredients"
              >next</a> |</li>
         <li class="right" >
-          <a href="16_0_whatsnew.html" title="1. What’s new in version 1.2.X"
+          <a href="16_1_2_0_whatsnew.html" title="2. What’s new in version 1.2.X"
              >previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

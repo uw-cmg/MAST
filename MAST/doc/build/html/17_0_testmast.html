@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>6. Trying out MAST &mdash; MAST 1.2.9.4 documentation</title>
+    <title>7. Trying out MAST &mdash; MAST 1.3.0.5 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.9.4',
+        VERSION:     '1.3.0.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false
@@ -23,56 +23,56 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.2.9.4 documentation" href="index.html" />
-    <link rel="next" title="7. Input File" href="3_0_inputfile.html" />
-    <link rel="prev" title="5. Installation" href="1_0_installation.html" /> 
+    <link rel="top" title="MAST 1.3.0.5 documentation" href="index.html" />
+    <link rel="next" title="8. Input File" href="3_0_inputfile.html" />
+    <link rel="prev" title="6. Installation" href="1_0_installation.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_0_inputfile.html" title="7. Input File"
+          <a href="3_0_inputfile.html" title="8. Input File"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="1_0_installation.html" title="5. Installation"
+          <a href="1_0_installation.html" title="6. Installation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="trying-out-mast">
-<h1>6. Trying out MAST<a class="headerlink" href="#trying-out-mast" title="Permalink to this headline">¶</a></h1>
+<h1>7. Trying out MAST<a class="headerlink" href="#trying-out-mast" title="Permalink to this headline">¶</a></h1>
 <ol class="arabic">
-<li><p class="first">Go to <tt class="docutils literal"><span class="pre">$HOME/MAST/examples</span></tt> (or <tt class="docutils literal"><span class="pre">$WORK/MAST/examples</span></tt> or a similar folder, if you moved the <tt class="docutils literal"><span class="pre">$HOME/MAST</span></tt> folder from its default location.)</p>
+<li><p class="first">Go to <code class="docutils literal"><span class="pre">$HOME/MAST/examples</span></code> (or <code class="docutils literal"><span class="pre">$WORK/MAST/examples</span></code> or a similar folder, if you moved the <code class="docutils literal"><span class="pre">$HOME/MAST</span></code> folder from its default location.)</p>
 </li>
-<li><p class="first">Select one of the examples. The fastest one is <tt class="docutils literal"><span class="pre">simple_optimization.inp</span></tt></p>
+<li><p class="first">Select one of the examples. The fastest one is <code class="docutils literal"><span class="pre">simple_optimization.inp</span></code></p>
 </li>
 <li><p class="first">Copy that file:</p>
 <div class="highlight-python"><div class="highlight"><pre>cp simple_optimization.inp test.inp
 </pre></div>
 </div>
 </li>
-<li><p class="first">Modify the test.inp file with the correct <tt class="docutils literal"><span class="pre">mast_exec</span></tt>, <tt class="docutils literal"><span class="pre">mast_ppn</span></tt>, <tt class="docutils literal"><span class="pre">mast_queue</span></tt>, <tt class="docutils literal"><span class="pre">mast_walltime</span></tt>, and other settings described in <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a></p>
+<li><p class="first">Modify the test.inp file with the correct <code class="docutils literal"><span class="pre">mast_exec</span></code>, <code class="docutils literal"><span class="pre">mast_ppn</span></code>, <code class="docutils literal"><span class="pre">mast_queue</span></code>, <code class="docutils literal"><span class="pre">mast_walltime</span></code>, and other settings described in <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a></p>
 </li>
 <li><p class="first">Try to parse the input file, entering the following command as one line:</p>
 <div class="highlight-python"><div class="highlight"><pre>nice -n 19 mast -i test.inp
 </pre></div>
 </div>
 <ul class="simple">
-<li>The <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span></tt> keeps this command low priority, since it is being run on the headnode (but it is not too intensive).</li>
-<li>The <tt class="docutils literal"><span class="pre">-i</span></tt> signals to MAST that it is processing an input file.</li>
+<li>The <code class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span></code> keeps this command low priority, since it is being run on the headnode (but it is not too intensive).</li>
+<li>The <code class="docutils literal"><span class="pre">-i</span></code> signals to MAST that it is processing an input file.</li>
 </ul>
 </li>
-<li><p class="first">Your <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> directory should now have a recipe directory in it.</p>
+<li><p class="first">Your <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> directory should now have a recipe directory in it.</p>
 <blockquote>
 <div><ul class="simple">
 <li>The recipe directory will have a name corresponding to the elements and the input file, and ending with a timestamp of YYYYMMDD&#8221;T&#8221;hhmmss.</li>
@@ -86,14 +86,14 @@
 <li><p class="first">To see the input options:</p>
 <blockquote>
 <div><ul>
-<li><p class="first"><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">input.inp</span></tt> (should be identical to test.inp since no looping was used)</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">cat</span> <span class="pre">input.inp</span></code> (should be identical to test.inp since no looping was used)</p>
 <blockquote>
 <div><ul class="simple">
-<li>Note that you can use other viewing commands, not just <tt class="docutils literal"><span class="pre">cat</span></tt>, but be careful not to edit any of these files.</li>
+<li>Note that you can use other viewing commands, not just <code class="docutils literal"><span class="pre">cat</span></code>, but be careful not to edit any of these files.</li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_input_options.txt</span></tt> (should show Al instead of element X1)</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_input_options.txt</span></code> (should show Al instead of element X1)</p>
 </li>
 </ul>
 </div></blockquote>
@@ -101,41 +101,42 @@
 <li><p class="first">To see information about the ingredient relationships MAST detected from the recipe template:</p>
 <blockquote>
 <div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_recipe_plan.txt</span></tt></li>
-<li>Look at the <tt class="docutils literal"><span class="pre">$personal_recipe</span></tt> section in the <tt class="docutils literal"><span class="pre">input.inp</span></tt> file</li>
+<li><code class="docutils literal"><span class="pre">cat</span> <span class="pre">archive_recipe_plan.txt</span></code></li>
+<li>Look at the <code class="docutils literal"><span class="pre">$personal_recipe</span></code> section in the <code class="docutils literal"><span class="pre">input.inp</span></code> file</li>
 </ul>
 </div></blockquote>
 </li>
 <li><p class="first">To see ingredient statuses at a glance:</p>
 <blockquote>
 <div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">cat</span> <span class="pre">status.txt</span></tt></li>
+<li><code class="docutils literal"><span class="pre">cat</span> <span class="pre">status.txt</span></code></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Run mast once: <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></tt></p>
+<li><p class="first">Run mast once: <code class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></code></p>
 </li>
-<li><p class="first">You should see a &#8220;mastmon&#8221; job appear on the queue specified in <tt class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></tt></p>
+<li><p class="first">You should see a &#8220;mastmon&#8221; job appear on the queue specified in <code class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></code></p>
 </li>
-<li><p class="first">MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: <tt class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></tt></p>
+<li><p class="first">MAST should have detected that the first ingredient was ready to run, so when that process disappears, run mast again: <code class="docutils literal"><span class="pre">nice</span> <span class="pre">-n</span> <span class="pre">19</span> <span class="pre">mast</span></code></p>
 </li>
-<li><p class="first">Now you should see <tt class="docutils literal"><span class="pre">perfect_opt1</span></tt> appear on the queue.</p>
+<li><p class="first">Now you should see <code class="docutils literal"><span class="pre">perfect_opt1</span></code> appear on the queue.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">status.txt</span></tt> in the recipe directory in <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> should show that <tt class="docutils literal"><span class="pre">perfect_opt1</span></tt> has a status of &#8220;Proceed to Queue&#8221;, or &#8220;P&#8221;.</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">status.txt</span></code> in the recipe directory in <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> should show that <code class="docutils literal"><span class="pre">perfect_opt1</span></code> has a status of &#8220;Proceed to Queue&#8221;, or &#8220;P&#8221;.</p>
 </li>
-<li><p class="first">When the queued <tt class="docutils literal"><span class="pre">perfect_opt1</span></tt> job starts running, you should be able to see output files inside <tt class="docutils literal"><span class="pre">$MAST_SCRATCH/&lt;recipe</span> <span class="pre">directory&gt;/perfect_opt1</span></tt></p>
+<li><p class="first">When the queued <code class="docutils literal"><span class="pre">perfect_opt1</span></code> job starts running, you should be able to see output files inside <code class="docutils literal"><span class="pre">$MAST_SCRATCH/&lt;recipe</span> <span class="pre">directory&gt;/perfect_opt1</span></code></p>
 </li>
-<li><p class="first">If you forgot some step above, or you encounter some errors, remove the recipe folder from <tt class="docutils literal"><span class="pre">$MAST_SCRATCH</span></tt> and start again from the beginning of this section.</p>
+<li><p class="first">If you forgot some step above, or you encounter some errors, remove the recipe folder from <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> and start again from the beginning of this section.</p>
 </li>
-<li><p class="first">The <tt class="docutils literal"><span class="pre">$MAST_CONTROL</span></tt> folder gives you error messages and other information. See <a class="reference internal" href="5_0_runningmast.html"><em>Running MAST</em></a> for tips.</p>
+<li><p class="first">The <code class="docutils literal"><span class="pre">$MAST_CONTROL</span></code> folder gives you error messages and other information. See <a class="reference internal" href="5_0_runningmast.html"><em>Running MAST</em></a> for tips.</p>
 </li>
 </ol>
 <div class="section" id="unit-testing">
-<h2>6.1. Unit testing<a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a></h2>
-<p>To check the validity of the MAST source code, navigate to <tt class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/test</span></tt> and run the unit tests with:</p>
+<h2>7.1. Unit testing<a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests are available through the MAST tar.gz file. See <a class="reference internal" href="12_0_programming.html"><em>Programming for MAST</em></a>. (Unit tests are not installed by default using pip.)</p>
+<p>To check the validity of the MAST source code, navigate to <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/test</span></code> and run the unit tests with:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">--</span><span class="n">exe</span>
 </pre></div>
 </div>
@@ -148,26 +149,26 @@ Errors should be reported to the MAST development team as an issue on the github
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/MAST_logo_200px.png" alt="Logo"/>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">6. Trying out MAST</a><ul>
-<li><a class="reference internal" href="#unit-testing">6.1. Unit testing</a></li>
+<li><a class="reference internal" href="#">7. Trying out MAST</a><ul>
+<li><a class="reference internal" href="#unit-testing">7.1. Unit testing</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="1_0_installation.html"
-                        title="previous chapter">5. Installation</a></p>
+                        title="previous chapter">6. Installation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_0_inputfile.html"
-                        title="next chapter">7. Input File</a></p>
-<div id="searchbox" style="display: none">
+                        title="next chapter">8. Input File</a></p>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -184,24 +185,24 @@ Errors should be reported to the MAST development team as an issue on the github
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_0_inputfile.html" title="7. Input File"
+          <a href="3_0_inputfile.html" title="8. Input File"
              >next</a> |</li>
         <li class="right" >
-          <a href="1_0_installation.html" title="5. Installation"
+          <a href="1_0_installation.html" title="6. Installation"
              >previous</a> |</li>
-        <li><a href="index.html">MAST 1.2.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.0.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

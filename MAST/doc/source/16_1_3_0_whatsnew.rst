@@ -19,7 +19,7 @@ What's new in version 1.3.0
 * Instead of a mast_recipe.log file in each recipe directory, there is now one large mast.log file in $MAST_CONTROL.
 * Instead of recipe-level trapped errors causing MAST to fail, MAST will create a MAST_ERROR document in the recipe directory and log a warning to ``$MAST_CONTROL/mast.log``
 
-* Standalone grain-boundary diffusion and diffusion analyzer tools must be unzipped from the MAST .tar.gz file downloaded from github (see :doc:`12_0_programminig`). They will not be installed through pip.
+* Standalone grain-boundary diffusion and diffusion analyzer tools must be unzipped from the MAST tar.gz file downloaded from github (see :doc:`12_0_programming`). They will not be installed through pip.
 
 **Changes for programmers:**
 

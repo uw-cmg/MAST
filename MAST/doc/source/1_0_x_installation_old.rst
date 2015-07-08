@@ -1,6 +1,6 @@
-#############
-Installation
-#############
+###############################
+Old Installation Instructions
+###############################
  
 =================================
 Do pre-installation steps
@@ -49,69 +49,209 @@ For this installation, please follow the correct procedures in order to avoid ex
 
 Please check with your cluster administrator if you are unsure of the correct procedures to user.
 
-================================================
-Install local python version and dependencies
-================================================
+================================
+Verify your Python version
+================================
 
-MAST requires the following dependencies, some of which have additional dependencies:
+Check your version of python: ``python --version``
 
-*  numpy
-*  scipy
-*  matplotlib
-*  pymatgen
-*  custodian
-*  pandas
-*  ase
+*  If your version of python is a 2.7 version (e.g. 2.7.3), skip to :ref:`verify-numpy-scipy`.
 
-Currently, the Anaconda python package is preferred because it:
+*  Otherwise, go to :ref:`locate-other-python`.
 
-*  automatically installs to a user directory and does not need root privileges
-*  does not have the environment complications that the previously-recommended Enthought Canopy python has
-*  can easily install numpy, scipy, and matplotlib.
+.. _locate-other-python:
 
-Older installation instructions are at :doc:`1_0_x_intallation_old`.
+-------------------------------------------------------------------
+Locate and use an available but non-default 2.7 version of python
+-------------------------------------------------------------------
 
--------------------------------
-Install Anaconda python
--------------------------------
+For clusters using the "module" system, like Stampede or DLX, check which modules are available using ``module avail python`` or ``module avail``
 
-Download the free installer from `Anaconda <https://store.continuum.io/cshop/anaconda/>`_. Use a Python 2.X version.
+For clusters not using the module system, you may need to look in ``//share/apps`` or in a similar shared directory, or ask your system administrator.
 
-*  Run the setup script. (e.g. ``bash ./Anaconda-<version>.sh``)
+*  If you cannot find an existing version of python 2.7, skip to :ref:`install-local-python`.
+
+*  If you did find an existing version of python 2.7, make sure that it is defaulted to be used first.
+
+    #.  Add the appropriate line to your user profile. 
+
+        *  If the version found was a module, then:
+        
+            *  Add a line like the following::
+
+                module load python
+
+            *  The actual wording may depend on the module name. Here, we are assuming that "python" is the module name.
+
+        *  If the version found was located in an explicit directory and not found through the module system:
+        
+            *  Add a line like the following::
+
+                export PATH=<path_to_python2.7>:$PATH
+
+            *  For example::
+
+                export PATH=//share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin:$PATH
+
+    #.  Then, log out and log back in. 
+
+    #.  Type ``which python`` or ``python --version`` to make sure your default version is now the correct version.
+
+If you already use python for something else and shifting python versions will interfere with other programs, for example, you routinely use Python 2.4.3 instead and your other programs break if called from python 2.7.3, please contact your system administrator or the MAST development team.
+
+Otherwise, go on to :ref:`verify-numpy-scipy`.
+
+.. _verify-numpy-scipy:
+
+-----------------------------------------
+Verify that python has numpy and scipy
+-----------------------------------------
+
+Check to see if your python version has numpy and scipy::
+
+    python
+
+And then, from the python prompt::
+
+    import numpy
+    import scipy
+
+If you receive an ImportError, then you must install a local version of python which has numpy and scipy. Go to :ref:`install-local-python`.
+
+.. _install-local-python:
+
+------------------------------------------------------------
+Install a local version of python with numpy and scipy
+------------------------------------------------------------
+
+The EPD/Canopy version is preferred because it includes numpy and scipy already. Download this version from `EPD Free Canopy <https://www.enthought.com/downloads/>`_
+
+*  Run the setup script. (e.g. ``bash ./canopy-1.0.3-rh5-64.sh``)
 
 *  Follow the prompts and specify a local installation (use spacebar to scroll through the license file).
 
-When prompted, agree for the installer to add a line to your user profile to make this python installation your default python, for example::
+Add a line to your user profile to make this python installation your default python, for example::
 
-    export PATH=//home/<username>/anaconda/bin:$PATH
+    export PATH=//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/bin:$PATH
 
-*  Log out and log back in. Verify that your python version is now the anaconda python version.::
+*  Do not just use the ``Canopy/bin`` directory, as python modules will not load properly
 
-    which python
+*  Log out and log back in.
 
-Use the conda command to install the following packages::
+Check your version of python: ``python --version``
 
-    conda install numpy scipy matplotlib
+The version given must be the correct version.
 
---------------------------------------------
-Install the MAST package
---------------------------------------------
+Check that numpy and scipy are installed, which they should be::
 
-Install the MAST package from the python package index::
+    python
 
-    pip install MAST
+And then at the python prompt::
 
-This command should install MAST, pymatgen, custodian, and pandas.
+    import numpy
+    import scipy
+
+==============================================
+Install dependencies
+==============================================
+MAST requires pymatgen and custodian, each of which has several dependencies, which also have their own dependencies.
+
+---------------------------------
+pip note for the python-savvy
+---------------------------------
+If you have ``pip``, it is possible but sometimes unusually complicated to use pip to install MAST and its dependencies. 
+
+*  If the ``pip`` command does not exist (``which pip`` does not return anything), go on to :ref:`manual-installation`.
+
+If you have the ``pip`` command, it may be worth trying the following::
+
+    pip install pymatgen==2.8.7 --user
+    pip install custodian==0.7.5 --user
+    pip install MAST --user
+
+*  If this series of commands actually worked without errors, then do a quick installation of ASE following the instructions on the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_ and then skip to :ref:`add-local-bin`. 
+
+*  If you have never used pip before, and using pip created a ``$HOME/.local`` folder for you for the first time, and you encounter errors, delete the ``$HOME/.local`` folder and go on to :ref:`manual-installation`.
+
+*  If you encountered errors and your ``$HOME/.local`` folder already existed, carefully remove the most recent package folders under ``$HOME/.local/lib/python2.7/site-packages`` and go on to :ref:`manual-installation`.
+
+.. _manual-installation:
+
+----------------------------------------
+Install dependencies manually
+----------------------------------------
+
+Download ``tar.gz`` files for the following dependencies from the `Python Package Index <https://pypi.python.org>`_
+
+*  The versions listed are known to be compatible with MAST and with each other.
+
+*  Using other version numbers may require adjustments to the entire list.
+
+    *  In this case, look at ``install_requires`` inside the ``setup.py`` file to see which version numbers may be required.
+
+Dependency list::
+
+    PyCifRW-3.6.2.tar.gz
+    pybtex-0.18.tar.gz
+    pyhull-1.4.5.tar.gz
+    monty-0.3.4.tar.gz
+    PyYAML-3.11.tar.gz
+    requests-2.3.0.tar.gz
+    pymatgen-2.8.7.tar.gz
+    custodian-0.7.5.tar.gz
+
+Also get::
+
+    python-ase-3.8.1.3440.tar.gz
+    
+from the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_
+
+Upload each of these .tar.gz files onto your cluster.
+Uncompress and untar each of these files (``tar -xzvf <tar.gz filename>``, for example, ``tar -xzvf PyCifRW-3.6.2.tar.gz``).
+
+Following the order listed above, go to the untarred directory for each package and run the setup script as follows::
+
+    tar -xzvf PyCifRW-3.6.2.tar.gz
+    cd PyCifRW-3.6.2
+    python setup.py install (--user, depending on the notes below)
+
+And so on for all the packages.
+
+If you are using a system-wide python, like from the module system or in a shared directory, then you need the ``--user`` tag, and will use the command::
+    
+    python setup.py install --user
+    
+In this case, the modules will end up in a folder like ``//home/<username>/.local/lib/python2.7/site-packages``.
+
+If you are using your own locally-installed python, you can just use::
+
+    python setup.py install
+    
+In this case, the modules will end up in your python installation directory, for example, ``//home/<username>/Canopy/appdata/canopy-1.0.3.1262.rh5-x86_64/lib/python2.7/site-packages``.
 
 If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.
 
-If you need additional standalone tools (see :doc:`8_0_standalonetools`) or unit tests, then also get and unzip the MAST tar.gz file (see :doc:`12_0_programming`).
+.. _add-local-bin:
 
---------------------------------------------
-Install additional dependencies
---------------------------------------------
+If you will be using the mast_DFE_tool, then you will also need::
 
-*  Do a quick installation of ASE following the instructions on the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_ 
+    pip install numpy --upgrade
+    pip install pandas
+    
+
+------------------------------------------------
+Add the .local/bin directory, if necessary
+------------------------------------------------
+
+If you have a ``$HOME/.local/bin`` directory from a ``--user`` installation from any of the previous steps, add this directory to your ``$PATH`` environment variable by adding a line to your user profile, for example::
+    
+    export PATH=$HOME/.local/bin:$PATH
+
+(This line can go either before or after any other ``export PATH`` lines you might have in your user profile.)
+
+Then log out and log back in.
+
+If you were using your own locally-installed python, then you would have already added the correct bin directory to your user profile in the :ref:`install-local-python` step. 
 
 
 .. _vasp-psp-dir:
@@ -187,14 +327,28 @@ Test the change::
 *  Make sure you are getting to the right directory, which has the ``POT_GGA_PAW_PBE`` etc. folders inside it.
 
 
+.. _install-mast:
+
+===============================
+Install MAST
+===============================
+(If you successfully used ``pip`` to install MAST, go to :ref:`mast-setup`.)
+
+* Get the `latest MAST package from the Python Package Index <https://pypi.python.org/pypi/MAST>`_
+
+* Extract the package using ``tar -xzvf MAST-<version number>.tar.gz``
+
+* Change into the package directory and run ``python setup.py install`` or ``python setup.py install --user`` as you did with the other packages in :ref:`manual-installation`.
+
+You should be prompted to set the MAST environment variables, which is covered in :ref:`mast-setup`.
 
 .. _mast-setup:
 
-======================================
+-----------------------------------------------------
 Set the MAST environment variables
-======================================
+-----------------------------------------------------
 
-The pip installation of MAST should have set up a ``MAST`` directory in your home directory, that is, ``//home/<username>/MAST``.
+The MAST setup.py script should have set up a ``MAST`` directory in your home directory, that is, ``//home/<username>/MAST``.
 
 *  This directory is primarily for storing calculations, and should not be confused with the python module directory, which is where the actual MAST python code resides.
 

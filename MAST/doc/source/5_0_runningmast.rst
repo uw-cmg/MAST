@@ -232,7 +232,8 @@ The MAST "modify recipe" functionality allows new ingredient branches to be adde
 Instructions are as follows:
 
 * In the recipe directory in $MAST_SCRATCH, modify the input file as you would want it. (If the recipe directory is not in $MAST_SCRATCH, move it there.)
-** For example, if the ``$recipe`` section uses the <N> <S> <Q> etc. tags, then the ``$defects`` section could add an additional ``begin defectname ... end`` subsection, or a charge designation within a defect subsection could be expanded.
+
+    * For example, if the ``$recipe`` section uses the <N> <S> <Q> etc. tags, then the ``$defects`` section could add an additional ``begin defectname ... end`` subsection, or a charge designation within a defect subsection could be expanded.
 
 * Remove the ``$personal_recipe`` section of the input file. (That is, remove the ``$personal_recipe`` line, all lines in between, and the ``$end`` line).
 
