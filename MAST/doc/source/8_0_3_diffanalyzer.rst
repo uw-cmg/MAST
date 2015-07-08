@@ -8,7 +8,7 @@ Computes mean squared displacements and tracer diffusion coefficients from parti
 
 `Version 1.13 - published on 28 Mar 2014 <https://materialshub.org/resources/diffanalyzer>`_
 
-* You must download and unzip the MAST tar.gz file from https://github.com/uw-cmg/MAST/releases in order to access the source code, which is in MAST/utility/diffanalyzer, and will likely need to be recompiled for your machine. 
+* You must download and unzip the MAST tar.gz file from https://github.com/uw-cmg/MAST/releases in order to access the source code, which is in MAST/standalone/diffanalyzer, and will likely need to be recompiled for your machine. 
 
 This tool takes as input particle position data from methods such as molecular dynamics or kinetic Monte Carlo and computes the mean squared displacement for all particles as a function of time. 
 For a system with multiple types of particles, the mean squared displacement is computed for each particle type. 
