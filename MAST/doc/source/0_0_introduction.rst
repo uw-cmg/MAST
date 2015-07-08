@@ -10,6 +10,8 @@ However, MAST can be generalized to other workflows and codes.
 
 `MAST is available from the Python Package Index. <https://pypi.python.org/pypi/MAST>`_
 
+Additional tools and unit tests are available through the latest `MAST tar.gz file. <https://github.com/uw-cmg/MAST/releases>`_
+
 ==================
 The MAST Kitchen
 ==================
