@@ -576,7 +576,7 @@ class ChopIngredient(BaseIngredient):
         
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
         
-        from MAST.under_development.daniil_pathfinder import *
+        from MAST.utility.daniil_pathfinder import *
         pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
 
         image_structures=pf.images
