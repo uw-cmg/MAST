@@ -25,11 +25,15 @@ MAST chooses from the following citations when writing the ``CITATIONS.bib`` fil
 MAST
 ==================
 
-* MAST development team. MAterials Simulation Toolkit (MAST). (2014). at <http://pypi.python.org/pypi/MAST>
+* MAST development team. MAterials Simulation Toolkit (MAST). (2015). at <http://pypi.python.org/pypi/MAST>
 
 * Angsten, T., Mayeshiba, T., Wu, H. & Morgan, D. Elemental vacancy diffusion database from high-throughput first-principles calculations for fcc and hcp structures. New J. Phys. 16, 015018 (2014).
 
-* Kaczmarowski, A. Structopt package for implementing genetic algorithms on clusters. (2014). at <https://pypi.python.org/pypi/MAST>
+* Kaczmarowski, A., Yang, S., Szlufarska, I. & Morgan, D. Genetic algorithm optimization of defect clusters in crystalline materials. Computational Materials Science 98, 234-244, doi:10.1016/j.commatsci.2014.10.062 (2015).
+
+* Yu, Min, STEM additions to structopt package, https://git@github.com/uw-cmg/MAST/structopt (2015).
+
+* Kitchaev, Daniil, Charge-based pathfinder for nudged elastic band calculations, https://git@github.com/uw-cmg/MAST/utility/daniil_pathfinder.py, 2015
 
 ===================
 pymatgen

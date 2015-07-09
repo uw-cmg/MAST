@@ -19,7 +19,6 @@ The following team members are arranged by start date and then alphabetically by
 *  Dr. Henry Wu + (summer 2013 - present)
 *  Amy Kaczmarowski (fall 2013 - present)
 *  Zhewen Song + (fall 2013 - present)
-*  Wei Xie (fall 2013 - present)
 *  Ben Afflerbach (fall 2014 - present)
 
 ----------------------
@@ -33,6 +32,7 @@ Alumni
 *  Parker Sear (spring 2013 - summer 2013, spring 2014)
 *  Nada Alameddine (summer 2013)
 *  Jihad Naja (summer 2013)
+*  Dr. Wei Xie (fall 2013 - spring 2015)
 *  Jesus Chavez (summer 2014)
 *  Saswati De (summer 2014)
 *  Chandana Hosamane Kabbali (summer 2014)
