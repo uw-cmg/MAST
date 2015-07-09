@@ -14,7 +14,7 @@ Your user profile will set up environment variables like ``$PATH`` when you log 
 
 This installation will ask you to modify your user profile several times.
 
-If you are comfortable modifying your user profile, please skip to :ref:`use-cluster-correctly`.
+If you are comfortable modifying your user profile, please skip to :ref:`old-use-cluster-correctly`.
 
 For others: 
 
@@ -36,7 +36,7 @@ For others:
 
 If you cannot locate your user profile, please contact your system administrator.
 
-.. _use-cluster-correctly:
+.. _old-use-cluster-correctly:
 
 ------------------------------
 Use your cluster correctly
@@ -231,13 +231,13 @@ In this case, the modules will end up in your python installation directory, for
 
 If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.
 
-.. _add-local-bin:
 
 If you will be using the mast_DFE_tool, then you will also need::
 
     pip install numpy --upgrade
     pip install pandas
     
+.. _add-local-bin:
 
 ------------------------------------------------
 Add the .local/bin directory, if necessary
@@ -254,7 +254,7 @@ Then log out and log back in.
 If you were using your own locally-installed python, then you would have already added the correct bin directory to your user profile in the :ref:`install-local-python` step. 
 
 
-.. _vasp-psp-dir:
+.. _old-vasp-psp-dir:
 
 ======================================
 Set up the pymatgen VASP_PSP_DIR
@@ -332,7 +332,7 @@ Test the change::
 ===============================
 Install MAST
 ===============================
-(If you successfully used ``pip`` to install MAST, go to :ref:`mast-setup`.)
+(If you successfully used ``pip`` to install MAST, go to :ref:`old-mast-setup`.)
 
 * Get the `latest MAST package from the Python Package Index <https://pypi.python.org/pypi/MAST>`_
 
@@ -340,9 +340,9 @@ Install MAST
 
 * Change into the package directory and run ``python setup.py install`` or ``python setup.py install --user`` as you did with the other packages in :ref:`manual-installation`.
 
-You should be prompted to set the MAST environment variables, which is covered in :ref:`mast-setup`.
+You should be prompted to set the MAST environment variables, which is covered in :ref:`old-mast-setup`.
 
-.. _mast-setup:
+.. _old-mast-setup:
 
 -----------------------------------------------------
 Set the MAST environment variables
@@ -408,7 +408,7 @@ For example::
     
     *  Log out and log back in.
 
-    *  Go to :ref:`additional-setup`.
+    *  Go to :ref:`old-additional-setup`.
 
 *  If your platform is not matched exactly, or you would choose one of the generic choices:
 
@@ -416,9 +416,9 @@ For example::
     
     *  Log out and log back in.
     
-    *  Go to :ref:`make-custom-platform`.
+    *  Go to :ref:`old-make-custom-platform`.
 
-.. _make-custom-platform:
+.. _old-make-custom-platform:
 
 ---------------------------------------
 Make a custom platform, if necessary
@@ -577,7 +577,7 @@ Modify the following python functions as necessary:
 
     *  The name of this file will depend on what is specified in ``submit_template.sh`` and is usually something like ``slurm.<jobnumber>`` or ``<jobname>.e<jobnumber>``
 
-.. _additional-setup:
+.. _old-additional-setup:
 
 ================================
 Additional setup

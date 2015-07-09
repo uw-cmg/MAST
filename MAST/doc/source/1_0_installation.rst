@@ -93,6 +93,10 @@ Use the conda command to install the following packages::
 
     conda install numpy scipy matplotlib
 
+If you are developing for MAST, install the following packages::
+
+    conda install numpy scipy matplotlib nose sphinx
+
 --------------------------------------------
 Install the MAST package
 --------------------------------------------
