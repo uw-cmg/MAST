@@ -47,7 +47,7 @@ For this installation, please follow the correct procedures in order to avoid ex
 
 *  Or, your cluster may have a dedicated compile node, or it may support interactive queue submission.
 
-Please check with your cluster administrator if you are unsure of the correct procedures to user.
+Please check with your cluster administrator if you are unsure of the correct procedures.
 
 ================================================
 Install local python version and dependencies
@@ -69,7 +69,6 @@ Currently, the Anaconda python package is preferred because it:
 *  does not have the environment complications that the previously-recommended Enthought Canopy python has
 *  can easily install numpy, scipy, and matplotlib.
 
-Older installation instructions are at :doc:`1_0_x_intallation_old`.
 
 -------------------------------
 Install Anaconda python

@@ -93,7 +93,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -250,7 +250,7 @@ texinfo_documents = [
 epub_title = u'MAterials Simulation Toolkit (MAST)'
 epub_author = u'MAST Development Team'
 epub_publisher = u'University of Wisconsin Compuational Materials Group'
-epub_copyright = u'2014, UW-CMG'
+epub_copyright = u'2015, UW-CMG'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
