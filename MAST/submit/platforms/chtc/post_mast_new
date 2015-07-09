@@ -1,0 +1,23 @@
+#!/bin/bash
+###TTM 2014-08-27 post-mast steps
+mygluster="/mnt/gluster/mayeshiba"
+rm $mygluster/MAST_workdirs.tar.gz
+cd $MAST_CHTC
+mv back.tar.gz $HOME/back.tar.gz
+cd $HOME
+tar -xzvf back.tar.gz
+rm back.tar.gz
+sleep 10
+$MAST_CHTC/stripsubmitlist.py
+sleep 2
+while read sdir
+do 
+    echo $sdir
+    if [[ $sdir == *"/neb"* ]]
+    then 
+        echo "NEB detected; switching submission script"
+        cp $MAST_CHTC/submit_neb.sh $sdir/submit.sh
+    else echo "not neb"
+    fi
+done < $MAST_CONTROL/submitlist
+mast -m submitonly
