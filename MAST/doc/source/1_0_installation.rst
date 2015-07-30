@@ -106,6 +106,10 @@ Install the MAST package from the python package index::
 
 This command should install MAST, pymatgen, custodian, and pandas.
 
+If pip cannot find anything (SSL certificate fail), try::
+
+    pip install MAST --cert <path to conda>/ssl/cacert.pem
+
 If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.
 
 If you need additional standalone tools (see :doc:`8_0_standalonetools`) or unit tests, then also get and unzip the MAST tar.gz file (see :doc:`12_0_programming`).
