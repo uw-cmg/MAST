@@ -1,0 +1,8 @@
+#!/bin/bash
+###TTM 2014-08-27 pre-mast steps
+mygluster="/mnt/gluster/mayeshiba"
+scripthome="//home/mayeshiba/chtc_new_bin"
+cd $HOME
+nice -n 19 tar -czvf $mygluster/MAST_workdirs.tar.gz MAST
+cd $scripthome
+condor_submit submit_mast_gluster.sh
