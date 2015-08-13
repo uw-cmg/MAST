@@ -126,6 +126,22 @@ def get_new_change_status_files():
                     rdict[srecdir][singreddir]="send"
     return rdict
 
+def get_new_mast_error_files():
+    """Get new MAST_ERROR files.
+    """
+    rdict=dict()
+    mastcontrol=dirutil.get_mast_control_path()
+    mastscratch=dirutil.get_mast_scratch_path()
+    olddirs=list()
+    srecdirs = dirutil.immediate_subdirs(mastscratch)
+    for srecdir in srecdirs:
+        merrfile = os.path.join(mastscratch, srecdir, "MAST_ERROR")
+        if os.path.isfile(merrfile):
+            if not srecdir in rdict.keys():
+                rdict[srecdir] = dict()
+            rdict[srecdir]["MAIN"]="changed"
+    return rdict
+
 
 def compare_old_and_new_status_files():
     """Compare old and new status files from $MAST_CONTROL
@@ -175,6 +191,7 @@ def merge_dictionaries_and_write_recipechangefile():
     rdict_status = compare_old_and_new_status_files() 
     rdict_change_status = compare_old_and_new_change_status_files()
     rdict_new_change_status = get_new_change_status_files()
+    rdict_error_files = get_new_mast_error_files()
     rchangefile = MASTFile()
     rdict=dict()
     for recdir in rdict_status.keys():
@@ -201,6 +218,11 @@ def merge_dictionaries_and_write_recipechangefile():
             else:
                 if rdict_new_change_status[recdir][ingreddir] == "send":
                     rdict[recdir][ingreddir] = "send" #update to send
+    for recdir in rdict_error_files.keys():
+        if not recdir in rdict.keys():
+            rdict[recdir]=dict()
+        for ingreddir in rdict_error_files[recdir].keys():
+            rdict[recdir][ingreddir] = rdict_error_files[recdir][ingreddir]
     for rdir in rdict.keys():
         for key, value in rdict[rdir].iteritems():
             rchangefile.data.append("%s:%s:%s\n" % (rdir,key,value))
@@ -225,6 +247,9 @@ def zip_only_changed():
         elif ":archived" in ritem:
             recipe=ritem.split(":")[0]
             totarfile.data.append(os.path.join("MAST/ARCHIVE",recipe)+"\n") 
+        elif ":changed" in ritem:
+            recipe=ritem.split(":")[0]
+            totarfile.data.append(os.path.join("MAST/SCRATCH",recipe,"MAST_ERROR") + "\n")
     totarfile.data.append("MAST/CONTROL\n")
     totarfile.to_file(os.getcwd() + "/tarthis")
     return
