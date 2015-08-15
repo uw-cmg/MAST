@@ -22,6 +22,7 @@ export MAST_PLATFORM=chtc_write_only
 export VASP_PSP_DIR=$mygluster/vasp_pps 
 export PYTHONPATH=$PYTHONPATH://mnt/gluster/mayeshiba/ase
 
+ulimit -n 4000
 rm $PWD/MAST/SCRATCH/mast.write_files.lock
 ./comparescratch.py -m save
 mast -m monitoronly > mastoutput
