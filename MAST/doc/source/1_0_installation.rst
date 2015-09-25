@@ -203,7 +203,9 @@ Set the MAST environment variables
 
 The pip installation of MAST should have set up a ``MAST`` directory in your home directory, that is, ``//home/<username>/MAST``.
 
-**With conda installation** it appears that this folder is buried under your anaconda directory, like ``./anaconda/lib/python2.7/site-packages/home/<username>/MAST``. Go ahead and move that MAST folder into your home directory.
+**With conda installation** it appears that this folder is buried under your anaconda directory, like ``./anaconda/lib/python2.7/site-packages/home/<username>/MAST``. Go ahead and move that MAST folder into your home directory::
+
+    mv ~/anaconda/lib/python2.7/site-packages/home/<username>/MAST ~/.
 
 *  This directory is primarily for storing calculations, and should not be confused with the python module directory, which is where the actual MAST python code resides.
 
