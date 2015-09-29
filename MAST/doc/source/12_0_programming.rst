@@ -14,9 +14,13 @@ To program with MAST:
 
 #. Clone from the dev branch (see github's instructions for cloning) OR get the latest stable release from `https://github.com/uw-cmg/MAST/releases` and unzip it.
 
-#. Prepend the clone directory to your ``$PYTHONPATH`` environment variable, and the clone directory's ``MAST/bin`` directory to your ``$PATH`` environment variable.
+#. Prepend the clone directory (the directory which contains the directory named MAST) to your ``$PYTHONPATH`` environment variable, and the clone directory's ``MAST/bin`` directory to your ``$PATH`` environment variable.
 
     *  The command ``mast`` should reveal the clone directory instead of any other MAST installation directories.
+
+#. If you previously did a ``pip`` install in order to get the MAST dependencies, go to your python installation's ``lib/python2.7/site-packages/`` directory and rename the MAST package directory there to something else. 
+   
+    *  Open python and ``import MAST`` at the prompt. ``help(MAST)`` should then reveal MAST in the correct cloned directory, rather than the pip-installed MAST.
 
 To run unit tests and verify that the MAST code is sound, go to the test directory in ``<clone directory>/MAST/test`` and run the command:: 
 
