@@ -337,7 +337,7 @@ class RecipePlan:
                         self.ingredients[iname] = "P"
                         self.logger.info("Status of %s changed to %s" % (iname, "P"))
 
-    def check_recipe_status(self, verbose=1):
+    def check_recipe_status(self, verbose=1, single_ingred_mode=0):
         """Check ingredient statuses, and get recipe status
             I = Initialized
             W = Waiting on parents
@@ -345,6 +345,8 @@ class RecipePlan:
             P = ready to Proceed
             C = Complete
         """
+        if single_ingred_mode != 0:
+            self.ingred_to_check = single_ingred_mode #string of ingred name
         #self.fast_forward_check_complete()
         self.check_if_have_parents()
         self.check_if_ready_to_proceed_are_complete()
