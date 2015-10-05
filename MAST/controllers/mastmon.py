@@ -110,10 +110,10 @@ class MASTMon(object):
         self.logger.info("-----------------------------")
 
 
-    def run(self, verbose=0, single_ingred_mode=0):
+    def run(self, verbose=0, single_recipe=0, single_ingred=0):
         """Run the MAST monitor.
         """
-        if (single_ingred_mode == 0) and ("dagman" in dirutil.get_mast_platform()):
+        if (single_ingred == 0) and ("dagman" in dirutil.get_mast_platform()):
             return None #Do not auto-run from __init__ method for CHTC/DAGMan
         curdir = os.getcwd()
         try:
@@ -126,8 +126,12 @@ class MASTMon(object):
         #dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
         #Directory is now locked by mast initially, but gets
         #unlocked at the end of the mastmon run.
-        
-        recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
+        if single_ingred_mode == 0: 
+            recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
+        else:
+            recipe_dirs = list()
+            recipe_dirs.append(single_recipe)
+
         if verbose == 1:
             self.logger.info("================================")
             self.logger.info("Recipe directories:")
@@ -136,7 +140,7 @@ class MASTMon(object):
             self.logger.info("================================")
 
         for recipe_dir in recipe_dirs:
-            self.check_recipe_dir(recipe_dir, verbose, single_ingred_mode)
+            self.check_recipe_dir(recipe_dir, verbose, single_ingred)
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
