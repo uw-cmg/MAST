@@ -2,7 +2,7 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Tam Mayeshiba
-# Last updated: 2014-04-25
+# Last updated: 2015-10-05
 ##############################################################
 import os
 import time
@@ -49,6 +49,8 @@ class RecipePlan:
             self.working_directory <str>: Recipe working directory
             self.logger <logging logger>: Recipe-level logger
             self.summary_options <InputOptions>: summary input options
+            self.ingred_to_check="": Single ingredient name to check, IF USING
+                            the DAGMan
     """
     def __init__(self, working_directory):
         #self.name            = name
@@ -64,7 +66,7 @@ class RecipePlan:
         self.status="I"
         self.working_directory = working_directory
         self.logger = loggerutils.get_mast_logger(self.working_directory)
-
+        self.ingred_to_check = ""
     def do_ingredient_methods(self, iname, methodtype, childname=""):
         """Do the ingredient methods.
             Args:
@@ -226,7 +228,12 @@ class RecipePlan:
             and switch them to "Wait" if so; otherwise,
             switch them to "Stage"
         """
-        for iname in self.ingredients.keys():
+        checklist=list()
+        if self.ingred_to_check == "":
+            checklist = self.ingredients.keys()
+        else:
+            checklist.append(self.ingred_to_check)
+        for iname in checklist:
             if self.ingredients[iname] == "I":
                 ptc = list(self.parents_to_check[iname])
                 plen = len(ptc)
@@ -241,7 +248,12 @@ class RecipePlan:
     def check_if_ready_to_proceed_are_complete(self):
         """Check if ready-to-proceed ingredients are complete
         """
-        for iname in self.ingredients.keys():
+        checklist=list()
+        if self.ingred_to_check == "":
+            checklist = self.ingredients.keys()
+        else:
+            checklist.append(self.ingred_to_check)
+        for iname in checklist:
             if self.ingredients[iname] == "P":
                 if self.status_change_recommended(iname):
                     pass
@@ -285,7 +297,12 @@ class RecipePlan:
         """Check if parents of waiting ingredients are
             complete.
         """
-        for iname in self.ingredients.keys():
+        checklist=list()
+        if self.ingred_to_check == "":
+            checklist = self.ingredients.keys()
+        else:
+            checklist.append(self.ingred_to_check)
+        for iname in checklist:
             if self.ingredients[iname] == "W":
                 okay=0
                 ptc = list(self.parents_to_check[iname])
@@ -301,7 +318,12 @@ class RecipePlan:
     def run_staged_ingredients(self):
         """Run staged ingredients.
         """
-        for iname in self.ingredients.keys():
+        checklist=list()
+        if self.ingred_to_check == "":
+            checklist = self.ingredients.keys()
+        else:
+            checklist.append(self.ingred_to_check)
+        for iname in checklist:
             if self.ingredients[iname] == "S":
                 if self.complete_ingredient(iname):
                     self.ingredients[iname] = "C"
