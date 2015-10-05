@@ -33,7 +33,7 @@ class MASTMon(object):
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         self.logger.info("\nMAST monitor started at %s.\n" % time.asctime())
         self.logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        self.run(1)
+        self.run(1) 
 
     def make_directories(self):
         """Attempt to make scratch and archive directories
@@ -48,11 +48,13 @@ class MASTMon(object):
             raise MASTError(self.__class__.__name__,
                     "Error making directory for MASTmon and completed recipes")
 
-    def check_recipe_dir(self, fulldir, verbose):
+    def check_recipe_dir(self, fulldir, verbose, single_ingred_mode):
         """Check a recipe directory.
             Args:
                 fulldir <str>: full path of recipe directory
                 verbose <int>: verbosity
+                single_ingred_mode <str>: 0 for checking all ingredients
+                           ingredient name for checking a single ingredient               
         """
         shortdir = os.path.basename(fulldir) #only the recipe directory name
         if not os.path.exists(fulldir):
@@ -81,7 +83,7 @@ class MASTMon(object):
         recipe_plan_obj = rsetup.start()
         recipe_plan_obj.get_statuses_from_file()
         try:
-            recipe_plan_obj.check_recipe_status(verbose)
+            recipe_plan_obj.check_recipe_status(verbose, single_ingred_mode)
         except Exception:
             import sys,traceback
             #ex_type, ex, trbck = sys.exc_info()
@@ -108,9 +110,11 @@ class MASTMon(object):
         self.logger.info("-----------------------------")
 
 
-    def run(self, verbose=0):
+    def run(self, verbose=0, single_ingred_mode=0):
         """Run the MAST monitor.
         """
+        if (single_ingred_mode == 0) and ("dagman" in dirutil.get_mast_platform()):
+            return None #Do not auto-run from __init__ method for CHTC/DAGMan
         curdir = os.getcwd()
         try:
             os.chdir(self.scratch)    
@@ -132,7 +136,7 @@ class MASTMon(object):
             self.logger.info("================================")
 
         for recipe_dir in recipe_dirs:
-            self.check_recipe_dir(recipe_dir, verbose)
+            self.check_recipe_dir(recipe_dir, verbose, single_ingred_mode)
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
