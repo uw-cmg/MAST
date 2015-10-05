@@ -47,6 +47,33 @@ class MASTMon(object):
         except:
             raise MASTError(self.__class__.__name__,
                     "Error making directory for MASTmon and completed recipes")
+    
+    def set_up_recipe_plan(self, fulldir, verbose=0):
+        """Set up a recipe plan from the recipe directory.
+            Args:
+                fulldir <str>: full path of recipe directory
+                verbose <int>: verbosity
+        """
+        self.logger.info("--------------------------------")
+        self.logger.info("Setting up recipe plan for %s" % fulldir)
+        self.logger.info("--------------------------------")
+        os.chdir(fulldir) #need to change directories in order to submit jobs?
+        myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
+        myinputoptions = myipparser.parse()
+        input_options_keys = myinputoptions.get_sections()
+        key = 'personal_recipe'
+        if key in input_options_keys:
+            self.logger.debug("Key - personal recipe was found")
+        personal_recipe_contents = myinputoptions.get_item('personal_recipe', 'personal_recipe_list')
+        rsetup = RecipeSetup(recipeFile=personal_recipe_contents,
+                inputOptions=myinputoptions,
+                structure=myinputoptions.get_item('structure','structure'),
+                workingDirectory=fulldir)
+        recipe_plan_obj = rsetup.start()
+        recipe_plan_obj.get_statuses_from_file()
+        self.logger.debug("Returning recipe plan object to calling method.")
+        return recipe_plan_obj
+
 
     def check_recipe_dir(self, fulldir, verbose, single_ingred_mode):
         """Check a recipe directory.
@@ -68,22 +95,10 @@ class MASTMon(object):
         self.logger.info("--------------------------------")
         self.logger.info("Processing recipe %s" % shortdir)
         self.logger.info("--------------------------------")
+        my_recipe_plan_object = self.set_up_recipe_plan(fulldir, verbose)
         os.chdir(fulldir) #need to change directories in order to submit jobs?
-        myipparser = InputParser(inputfile=os.path.join(fulldir, 'input.inp'))
-        myinputoptions = myipparser.parse()
-        input_options_keys = myinputoptions.get_sections()
-        key = 'personal_recipe'
-        if key in input_options_keys:
-            self.logger.debug("Key - personal recipe was found")
-        personal_recipe_contents = myinputoptions.get_item('personal_recipe', 'personal_recipe_list')
-        rsetup = RecipeSetup(recipeFile=personal_recipe_contents,
-                inputOptions=myinputoptions,
-                structure=myinputoptions.get_item('structure','structure'),
-                workingDirectory=fulldir)
-        recipe_plan_obj = rsetup.start()
-        recipe_plan_obj.get_statuses_from_file()
         try:
-            recipe_plan_obj.check_recipe_status(verbose, single_ingred_mode)
+            my_recipe_plan_object.check_recipe_status(verbose, single_ingred_mode)
         except Exception:
             import sys,traceback
             #ex_type, ex, trbck = sys.exc_info()
@@ -96,7 +111,7 @@ class MASTMon(object):
             self.logger.warning("ERROR in recipe %s. Check MAST_ERROR file in the %s directory." % (shortdir, fulldir))
             #raise MASTError(self.__class__.__name__,"Error in recipe %s as follows: %s %s %s" % (shortdir, ex_type, ex, errortext))
         os.chdir(self.scratch)
-        if recipe_plan_obj.status == "C":
+        if my_recipe_plan_object.status == "C":
             shutil.move(fulldir, self._ARCHIVE)
             summarypath = "%s/%s/SUMMARY.txt" % (self._ARCHIVE, shortdir)
             if os.path.isfile(summarypath):
