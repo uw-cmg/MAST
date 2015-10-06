@@ -1,6 +1,8 @@
 ################################
 universe = vanilla
-executable = //home/mayeshiba/bin/wrapper_exec_?mast_exec?_checkpoint
+###executable = //home/mayeshiba/bin/wrapper_exec_?mast_exec?_checkpoint
+Requirements = (Target.HasGluster == true)
+executable = //mnt/gluster/mayeshiba/MAST/MAST/submit/platforms/chtc_dagman/run_cde_vasp
 arguments = ?mast_ppn?
 transfer_input_files = ./
 should_transfer_files = yes
