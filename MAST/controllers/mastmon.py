@@ -141,7 +141,7 @@ class MASTMon(object):
         #dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
         #Directory is now locked by mast initially, but gets
         #unlocked at the end of the mastmon run.
-        if single_ingred_mode == 0: 
+        if single_ingred == 0: 
             recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
         else:
             recipe_dirs = list()
