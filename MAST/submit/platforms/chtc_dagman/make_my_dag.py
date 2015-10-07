@@ -26,7 +26,6 @@ def parse_arguments():
     recipe_name_raw = sys.argv[1]
     script_head_dir = sys.argv[2]
     recipe_name = recipe_name_raw
-    ing_name = ing_name_raw
     sys.stdout.write("Parse arguments.\n")
     print "RECIPE: %s" % recipe_name
     #print_to_file(recipe_name, ing_name, "PARSED ARGUMENTS: %s" % (recipe_name, ing_name))
