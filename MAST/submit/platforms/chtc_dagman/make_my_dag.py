@@ -33,10 +33,10 @@ def parse_arguments():
 
 def main():
     recipe_name, script_head_dir = parse_arguments()   
-    mymon = MASTMon()
-    my_recipe_plan = mymon.set_up_recipe_plan(recipe_name, 1)
-    my_dag_contents=list()
     mast_scratch = dirutil.get_mast_scratch_path()
+    mymon = MASTMon()
+    my_recipe_plan = mymon.set_up_recipe_plan(os.path.join(mast_scratch, recipe_name), 1)
+    my_dag_contents=list()
     for iname in my_recipe_plan.ingredients: #all JOB lines need to be at top
         my_dag_contents.append("JOB %s submit.sh DIR %s\n" % (iname, iname))
     for iname in my_recipe_plan.ingredients:
