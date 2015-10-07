@@ -333,9 +333,7 @@ class RecipePlan:
                     if not (self.ready_ingredient(iname)):
                         self.write_ingredient(iname)
                     if self.ready_ingredient(iname):
-                        from MAST.utility import dirutil
-                        if not ("dagman" in dirutil.get_mast_platform()): #only run if not in dagman mode
-                            self.run_ingredient(iname)
+                        self.run_ingredient(iname)
                         self.ingredients[iname] = "P"
                         self.logger.info("Status of %s changed to %s" % (iname, "P"))
 

@@ -185,6 +185,8 @@ class BaseIngredient(MASTObj):
         return
     
     def run(self, mode='serial', curdir=os.getcwd()):
+        if "dagman" in dirutil.get_mast_platform():
+            return
         from MAST.submit import queue_commands 
         if mode.lower() == 'noqsub':
             curdir = os.getcwd()
