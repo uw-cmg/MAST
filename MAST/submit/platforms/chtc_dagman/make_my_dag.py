@@ -37,9 +37,10 @@ def main():
     my_recipe_plan = mymon.set_up_recipe_plan(recipe_name, 1)
     my_dag_contents=list()
     mast_scratch = dirutil.get_mast_scratch_path()
-    for iname in my_recipe_plan.ingredients:
+    for iname in my_recipe_plan.ingredients: #all JOB lines need to be at top
         my_dag_contents.append("JOB %s submit.sh DIR %s\n" % (iname, iname))
-        my_dag_contents.append("SCRIPT PRE %s %s/mast_do_setup.sh %s %s\n" % (iname, script_head_dir, recipe_name, iname)) 
+    for iname in my_recipe_plan.ingredients:
+    my_dag_contents.append("SCRIPT PRE %s %s/mast_do_setup.sh %s %s\n" % (iname, script_head_dir, recipe_name, iname)) 
         my_dag_contents.append("SCRIPT POST %s %s/mast_check_is_complete.sh %s %s\n" % (iname, script_head_dir, recipe_name, iname)) 
         my_dag_contents.append("RETRY %s 5\n" % iname)
         ptc = list(my_recipe_plan.parents_to_check[iname])
