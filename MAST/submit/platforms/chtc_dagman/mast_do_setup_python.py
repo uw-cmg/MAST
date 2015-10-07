@@ -20,13 +20,6 @@ from MAST.utility import MASTError
 from MAST.utility import loggerutils
 from MAST.controllers.mastmon import MASTMon
 
-def print_to_file(recipe_name, ing_name, message):
-    mypath = os.path.join(dirutil.get_mast_scratch_path(), recipe_name, ing_name, "DAG_post_script_output")
-    with open(mypath, 'ab') as myfile:
-        myfile.write(message)
-        myfile.write("\n")
-    return
-
 def parse_arguments():
     if len(sys.argv) < 3:
         raise MASTError("DAG for MAST", "Not enough arguments.")
@@ -37,7 +30,6 @@ def parse_arguments():
     sys.stdout.write("Parse arguments.\n")
     print "RECIPE: %s" % recipe_name
     print "ING: %s" % ing_name
-    #print_to_file(recipe_name, ing_name, "PARSED ARGUMENTS: %s" % (recipe_name, ing_name))
     return recipe_name, ing_name
 
 def main():
