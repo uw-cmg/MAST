@@ -8,4 +8,4 @@ export MAST_SCRATCH=$mast_head_dir"/SCRATCH"
 export MAST_ARCHIVE=$mast_head_dir"/ARCHIVE"
 export MAST_CONTROL=$mast_head_dir"/CONTROL"
 export MAST_PLATFORM="chtc_dagman"
-python $script_head_dir"/make_my_dag.py" $MAST_SCRATCH"/"$1 $script_head_dir 1>> $output_file 2>> $output_file
+python $script_head_dir"/make_my_dag.py" $1 $script_head_dir 1>> $output_file 2>> $output_file
