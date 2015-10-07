@@ -40,6 +40,7 @@ def main():
     is_complete = my_recipe_plan.complete_ingredient(ing_name)
     print "COMPLETE: %s" % is_complete
     if is_complete:
+        my_recipe_plan.check_recipe_status()
         return 0
     return -1
 
