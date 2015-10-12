@@ -1,6 +1,8 @@
 ################################
 universe = vanilla
-executable = //home/mayeshiba/bin/wrapper_exec_vsquid_checkpoint
+###executable = //home/mayeshiba/bin/wrapper_exec_?mast_exec?_checkpoint
+Requirements = (Target.HasGluster == true)
+executable = //mnt/gluster/mayeshiba/MAST/MAST/submit/platforms/chtc_dagman/run_cde_vasp
 arguments = 16
 transfer_input_files = ./
 transfer_output_files = vasprun.xml,00,01,02
