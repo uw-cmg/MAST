@@ -1104,10 +1104,13 @@ class Optimizer():
         return self
         
     def write(self,filename=None, restart=True):
- #       if filename:
- #           inp_out.write_optimizer(self, filename, restart)
- #       else:
- #           inp_out.write_optimizer(self, self.optimizerfile, restart)
+        if 'stem' in self.fitness_scheme:
+            pass
+        else:
+            if filename:
+                inp_out.write_optimizer(self, filename, restart)
+            else:
+                inp_out.write_optimizer(self, self.optimizerfile, restart)
         return
     
 if __name__ == "__main__":
