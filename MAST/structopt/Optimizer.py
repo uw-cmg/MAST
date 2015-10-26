@@ -49,6 +49,13 @@ class Optimizer():
             else: 
                 self.stemcalc.psf = None           
             self.stemcalc.psf = MPI.COMM_WORLD.bcast(self.stemcalc.psf,root=0)
+        if 'MAST_VASP' in parameters['calc_method']: #TTM 2015-10-26
+            if 'optimizerfile' in parameters.keys():
+                temp_ofilename=parameters['optimizerfile']
+                if not (temp_ofilename == None):
+                    bulkfile = os.path.join(os.path.dirname(temp_ofilename),"Bulkfile.xyz")
+                    parameters['solidfile'] = bulkfile #Assume that MAST_VASP is using a POSCAR file. The bulk file was made into an XYZ file.
+                    self.__dict__.update(parameters)
         if self.loggername:
             global logger
             logger = logging.getLogger(self.loggername)
