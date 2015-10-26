@@ -59,7 +59,11 @@ def read_individual(indivfile, n=-1):
             individ.energy = float(line[1])
         elif 'pressure' in all_lines[linen]:
             line = all_lines[linen].split('=')
-            individ.pressure = float(line[1])
+            # HKK 05-21-2015:: Occassionally found 'Null' pressure during VASP-GA. Need investigation, but setting to 0 pressure for now.
+            if line[1] and line[1].strip():
+               individ.pressure = float(line[1])
+            else:
+               individ.pressure = 0.0        
         elif 'volume' in all_lines[linen]:
             line = all_lines[linen].split('=')
             individ.volume = float(line[1])
