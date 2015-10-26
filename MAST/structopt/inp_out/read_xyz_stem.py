@@ -19,12 +19,6 @@ def read_xyz(fileobj,n=-1,data=False):
         datalist(Optional) = String of data read from xyz file or list 
             of data strings read from xyz file
     """
-    if (type(fileobj) == str) and (not "xyz" in fileobj):
-        from pymatgen.io.vaspio import Poscar
-        mystructure = Poscar.from_file(fileobj).structure
-        from pymatgen.io.aseio import AseAtomsAdaptor
-        myatoms = AseAtomsAdaptor.get_atoms(mystructure)
-        return myatoms
     if isinstance(fileobj, str):
         fileobj = open(fileobj,'r')
     lines = fileobj.readlines()
