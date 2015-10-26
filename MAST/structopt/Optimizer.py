@@ -32,23 +32,23 @@ class Optimizer():
         else:
             parameters = inp_out.read_parameter_input({'atomlist':[('Xx',1,0,0)],'structure':'Cluster'}, uselogger)
         self.__dict__.update(parameters)
-        try:
-            rank = MPI.COMM_WORLD.Get_rank()
-        except:
-            rank = 0
         if 'stem' in parameters['fitness_scheme']:
-          if rank == 0 :
-            nk = self.stemcalc.parameters['Pixels']
-            self.stemcalc.psf = np.empty([nk,nk],dtype=float)
-            fileobj = open('PSF.txt', 'r')
-            lines = fileobj.readlines()
-            for x in range(0,nk):
-               self.stemcalc.psf[x] = lines[x].split()
-            fileobj.close()
-           #self.stemcalc.psf = tools.StemCalc.get_probe_function(self.stemcalc.parameters)
-          else: 
-            self.stemcalc.psf = None           
-          self.stemcalc.psf = MPI.COMM_WORLD.bcast(self.stemcalc.psf,root=0)
+            try:
+                rank = MPI.COMM_WORLD.Get_rank()
+            except:
+                rank = 0
+            if rank == 0 :
+                nk = self.stemcalc.parameters['Pixels']
+                self.stemcalc.psf = np.empty([nk,nk],dtype=float)
+                fileobj = open('PSF.txt', 'r')
+                lines = fileobj.readlines()
+                for x in range(0,nk):
+                    self.stemcalc.psf[x] = lines[x].split()
+                fileobj.close()
+                #self.stemcalc.psf = tools.StemCalc.get_probe_function(self.stemcalc.parameters)
+            else: 
+                self.stemcalc.psf = None           
+            self.stemcalc.psf = MPI.COMM_WORLD.bcast(self.stemcalc.psf,root=0)
         if self.loggername:
             global logger
             logger = logging.getLogger(self.loggername)
