@@ -38,6 +38,6 @@ def eval_energy(Optimizer, individ):
         signal = string of information about evaluation
     """
     if 'stem' in Optimizer.fitness_scheme:
-        return structopt.tools.eval_energy_stem(Optimizer, individ)
+        return MAST.structopt.tools.eval_energy_stem.eval_energy(Optimizer, individ)
     else:
-        return structopt.tools.eval_energy_non_stem(Optimizer, individ)
+        return MAST.structopt.tools.eval_energy_non_stem.eval_energy(Optimizer, individ)
