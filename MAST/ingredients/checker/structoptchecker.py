@@ -601,6 +601,7 @@ class StructoptChecker(BaseChecker):
         #Now append offspring to population, which includes
         #parents and fitnesses already.
         population.extend(offspring)
+        self.logger.info("TTM Population: %s" % population)
         self.logger.info("Opti files: %s" % MyOpti.files)
         pwd = os.getcwd()
         ingpath = self.keywords['name']
