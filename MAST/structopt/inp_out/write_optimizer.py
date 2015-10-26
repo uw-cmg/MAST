@@ -206,29 +206,64 @@ def write_optimizer(Optimizer, optfile, restart=True):
         rank = MPI.COMM_WORLD.Get_rank()
     except:
         rank = 0
-    if (len(Optimizer.population) > 0) and (len(Optimizer.BESTS) > 0):
-        if isinstance(Optimizer.population[0], str):
-            optfile.write("'population':{0},\n".format(Optimizer.population))
-            optfile.write("'BESTS':{0}".format(Optimizer.BESTS))
+    if not ('stem' in Optimizer.fitness_scheme):
+        if (len(Optimizer.population) > 0):
+            if isinstance(Optimizer.population[0], str):
+                optfile.write("'population':{0},\n".format(Optimizer.population))
+            else:
+                fpath = os.path.join(os.getcwd(), '{0}-rank{1}'.format(Optimizer.filename,rank))
+                path = os.path.join(fpath,'Restart-files')
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                popfiles = []
+                for index in range(len(Optimizer.population)):
+                    fname = os.path.join(path,'Reload-indiv{0:02d}.txt'.format(index))
+                    write_individual(Optimizer.population[index],fname)
+                    popfiles.append(fname)
+                optfile.write("'population':{0},\n".format(popfiles))  
         else:
-            fpath = os.path.join(os.getcwd(), '{0}-rank{1}'.format(Optimizer.filename,rank))
-            path = os.path.join(fpath,'Restart-files')
-            if not os.path.exists(path):
-                os.mkdir(path)
-            popfiles = []
-            for index in range(len(Optimizer.population)):
-                fname = os.path.join(path,'Reload-indiv{0:02d}.txt'.format(index))
-                write_individual(Optimizer.population[index],fname)
-                popfiles.append(fname)
-            optfile.write("'population':{0},\n".format(popfiles))
-            bestfiles = []
-            for index in range(len(Optimizer.BESTS)):
-                fname = os.path.join(path,'Reload-bests{0:02d}.txt'.format(index))
-                write_individual(Optimizer.BESTS[index],fname)
-                bestfiles.append(fname)
-            optfile.write("'BESTS':{0}".format(bestfiles))
+            optfile.write("'population':{0},\n".format([]))
+        if (len(Optimizer.BESTS) > 0):
+            if isinstance(Optimizer.population[0], str):
+                optfile.write("'BESTS':{0}".format(Optimizer.BESTS))
+            else:
+                fpath = os.path.join(os.getcwd(), '{0}-rank{1}'.format(Optimizer.filename,rank))
+                path = os.path.join(fpath,'Restart-files')
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                bestfiles = []
+                for index in range(len(Optimizer.BESTS)):
+                    fname = os.path.join(path,'Reload-bests{0:02d}.txt'.format(index))
+                    write_individual(Optimizer.BESTS[index],fname)
+                    bestfiles.append(fname)
+                optfile.write("'BESTS':{0}".format(bestfiles))
+        else:
+            optfile.write("'BESTS':{0}".format([])) 
+        optfile.close()
     else:
-        optfile.write("'population':{0},\n".format([]))
-        optfile.write("'BESTS':{0}".format([]))
-    optfile.close()
+        if (len(Optimizer.population) > 0) and (len(Optimizer.BESTS) > 0):
+            if isinstance(Optimizer.population[0], str):
+                optfile.write("'population':{0},\n".format(Optimizer.population))
+                optfile.write("'BESTS':{0}".format(Optimizer.BESTS))
+            else:
+                fpath = os.path.join(os.getcwd(), '{0}-rank{1}'.format(Optimizer.filename,rank))
+                path = os.path.join(fpath,'Restart-files')
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                popfiles = []
+                for index in range(len(Optimizer.population)):
+                    fname = os.path.join(path,'Reload-indiv{0:02d}.txt'.format(index))
+                    write_individual(Optimizer.population[index],fname)
+                    popfiles.append(fname)
+                optfile.write("'population':{0},\n".format(popfiles))
+                bestfiles = []
+                for index in range(len(Optimizer.BESTS)):
+                    fname = os.path.join(path,'Reload-bests{0:02d}.txt'.format(index))
+                    write_individual(Optimizer.BESTS[index],fname)
+                    bestfiles.append(fname)
+                optfile.write("'BESTS':{0}".format(bestfiles))
+        else:
+            optfile.write("'population':{0},\n".format([]))
+            optfile.write("'BESTS':{0}".format([]))
+        optfile.close()
     return
