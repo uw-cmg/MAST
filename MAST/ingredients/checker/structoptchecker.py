@@ -641,8 +641,10 @@ class StructoptChecker(BaseChecker):
                 try:
                     (myatoms, myenergy, mypressure) = Totaloutputs[idx-count]
                     passflag = True
+                    self.logger.info('TTM atoms, energy, pressure: %s %s %s' % (myatoms, myenergy, mypressure))
                 except:
                     passflag = False
+                self.logger.info("TTM passflag: %s" % passflag)
                 if passflag:
                     if MyOpti.structure=='Defect':
                         from MAST.structopt.tools import find_defects
