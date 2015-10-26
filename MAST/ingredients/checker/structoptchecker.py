@@ -764,7 +764,7 @@ class StructoptChecker(BaseChecker):
                     #indatoms.set_calculator(LennardJones())
                     #dyn = BFGS(indatoms)
                     #dyn.run(fmax=0.01, steps=500)
-                    from MAST.structopt.tools.eval_energy import check_min_dist
+                    #from MAST.structopt.tools.eval_energy import check_min_dist
                     min_len = 1.8 #Minimum distance between 2 atoms in angstroms
                     from ase.calculators.neighborlist import NeighborList
                     from ase import Atom, Atoms

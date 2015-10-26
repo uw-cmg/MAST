@@ -29,7 +29,8 @@ def write_individual(individ, indivfile):
     indivfile.write('purebulkenpa = {0}\n'.format(individ.purebulkenpa))
     indivfile.write('natomsbulk = {0}\n'.format(individ.natomsbulk))
     indivfile.write('fingerprint = {0}\n'.format(individ.fingerprint))
-    indivfile.write('swaplist = {0}\n'.format(individ.swaplist))
+    if hasattr(individ, 'swaplist'):
+        indivfile.write('swaplist = {0}\n'.format(individ.swaplist))
     #Write additional structure information
     indivfile.write('bulki\n')
     write_xyz(indivfile, individ.bulki)

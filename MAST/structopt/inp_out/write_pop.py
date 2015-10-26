@@ -42,9 +42,7 @@ def update_outfile(ind, outfile):
     outfile.write('    Genealogy = {0}\n'.format(ind.history_index))
     outfile.write('    Energy = {0}\n'.format(ind.energy))
     outfile.write('    Fitness = {0}\n'.format(ind.fitness))
-    if 'stem' in Optimizer.fitness_scheme:
-        pass
-    else:
+    if hasattr(ind, 'swaplist'):
         outfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
 
 def update_structsumfile(ind, structsumfile):
@@ -54,9 +52,7 @@ def update_structsumfile(ind, structsumfile):
     structsumfile.write('    Cell = {0}\n'.format(ind[0].get_cell()))
     structsumfile.write('    Pressure = {0}\n'.format(ind.pressure))
     structsumfile.write('    Genealogy = {0}\n'.format(ind.history_index))
-    if 'stem' in Optimizer.fitness_scheme:
-        pass
-    else:
+    if hasattr(ind, 'swaplist'):
         structsumfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
     
 def update_structfile(ind, structfile, Optimizer):
