@@ -954,8 +954,8 @@ class StructoptChecker(BaseChecker):
                     for file in subdirlist:
                         if any(i.isdigit() for i in file) is True:
                            count_opt_num = count_opt_num+1
-                    path_oszicar = os.path.abspath('/home/hko8/bin/pylib/VASP_replace/OSZICAR')
-                    path_outcar = os.path.abspath('/home/hko8/bin/pylib/VASP_replace/OUTCAR')
+                    path_oszicar = os.path.abspath('%s/VASP_replace/OSZICAR' % os.getenv("HOME"))
+                    path_outcar = os.path.abspath('%s/VASP_replace/OUTCAR' % os.getenv("HOME"))
                     if count_opt_num >= 2:
                         print 'HKK :: Evaluated following structure more than 3 times. Copying low fitness files'
                         print 'HKK :: Checking Subfolders,',subfolder, 'Forced to complete'
@@ -964,7 +964,7 @@ class StructoptChecker(BaseChecker):
                         allcomplete = allcomplete + 1
                     else:
                         mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
-                        mychoping.copy_file(copyfrom="CONTCAR", copyto="POSCAR")
+                        mychoping.copy_file_no_name_validation(copyfrom="CONTCAR", copyto="POSCAR")
                         print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
                         mychoping.run_singlerun()
             if allcomplete == len(subfolders) and (allcomplete > 0):
