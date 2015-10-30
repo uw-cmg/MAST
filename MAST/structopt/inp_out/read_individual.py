@@ -1,12 +1,7 @@
 from MAST.structopt.inp_out.read_xyz import read_xyz
-try:
-    from MAST.structopt.generate.Individual import Individual
-except NameError:
-    print "NOTE: ASE is not installed. ASE must be installed for Structopt Individual.py to work correctly."
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is note installed. To use Structopt read_individual.py, ASE must be installed."
+from MAST.structopt.generate.Individual import Individual
+from ase import Atom, Atoms
+
 def read_individual(indivfile, n=-1):
     """Function to write the data of an individual class object to a flat file
     Input:
@@ -59,7 +54,11 @@ def read_individual(indivfile, n=-1):
             individ.energy = float(line[1])
         elif 'pressure' in all_lines[linen]:
             line = all_lines[linen].split('=')
-            individ.pressure = float(line[1])
+            # HKK 05-21-2015:: Occassionally found 'Null' pressure during VASP-GA. Need investigation, but setting to 0 pressure for now.
+            if line[1] and line[1].strip():
+               individ.pressure = float(line[1])
+            else:
+               individ.pressure = 0.0        
         elif 'volume' in all_lines[linen]:
             line = all_lines[linen].split('=')
             individ.volume = float(line[1])

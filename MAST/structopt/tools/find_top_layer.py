@@ -1,7 +1,5 @@
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt find_top_layer.py, ASE must be installed."
+from ase import Atom, Atoms
+
 def find_top_layer(surf,topthick):
     """Development function for identifying viable surface atoms.
     *** needs development ***

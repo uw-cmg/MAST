@@ -26,11 +26,10 @@ def lattice_alteration_rdrd(indiv, Optimizer):
         positions=indiv[0].get_positions()
     if len(positions) != 0:
         try:
-          #  natomsmove=random.randint(1,len(positions)/5)
-            natomsmove=random.randint(1,len(positions)/50)
+            natomsmove=random.randint(1,len(positions)/5)
         except ValueError:
             natomsmove=1
-        r=random.uniform(0.3,d_max)
+        r=random.uniform(0.5,d_max)
         theta=math.radians(random.uniform(0,360))
         phi=math.radians(random.uniform(0,180))
         direction=[r*math.sin(theta)*math.cos(phi),r*math.sin(theta)*math.sin(phi),r*math.cos(theta)]
@@ -55,7 +54,7 @@ def lattice_alteration_rdrd(indiv, Optimizer):
     Optimizer.output.write('Index = '+repr(indiv.index)+'\n')
     Optimizer.output.write('Number of atoms moved = '+repr(natomsmove)+'\n')
     Optimizer.output.write(repr(ratmlocnew)+'\n')
-    #Optimizer.output.write(repr(indiv[0])+'\n')
+    Optimizer.output.write(repr(indiv[0])+'\n')
     muttype='LARD'+repr(natomsmove)	
     if indiv.energy==0:
         indiv.history_index=indiv.history_index+'m'+muttype

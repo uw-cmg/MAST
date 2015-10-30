@@ -1,9 +1,6 @@
 from MAST.structopt.tools.lammps import LAMMPS
-try:
-    from ase.calculators.vasp import Vasp
-    from ase.calculators.lj import LennardJones
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt setup_calculator.py, ASE must be installed."
+from ase.calculators.vasp import Vasp
+from ase.calculators.lj import LennardJones
 import os
 try:
     from mpi4py import MPI
@@ -26,7 +23,7 @@ def setup_calculator(Optimizer):
     else:
         debug=False
     atomlist=Optimizer.atomlist
-    #atomlist=sorted(atomlist,key=lambda symbol: symbol[0])
+    atomlist=sorted(atomlist,key=lambda symbol: symbol[0])
     if Optimizer.calc_method=='VASP':
         if debug:
             logger.info('Setting up vasp calculator = {0}'.format(Optimizer.vaspcalc))
@@ -60,9 +57,9 @@ def setup_calculator(Optimizer):
             pair_coeff = [ '* * {0}'.format(Optimizer.pot_file)]
             parameters = { 'pair_style' : Optimizer.pair_style, 'pair_coeff' : pair_coeff }
             filesL = [ Optimizer.pot_file ]
-        elif Optimizer.pair_style=='eam/fs' or Optimizer.pair_style=='eam/alloy':
+        elif Optimizer.pair_style=='eam/fs':
             if debug:
-                logger.info('Setting up LAMMPS calculator with EAM/FS , EAM/ALLOY potential')
+                logger.info('Setting up LAMMPS calculator with EAM/FS potential')
             parcoff = '* * {0}'.format(Optimizer.pot_file)
             for one in atomlist:
                 parcoff+=' {0}'.format(one[0])
@@ -133,7 +130,6 @@ def setup_calculator(Optimizer):
                 for i in range(len(atomlist)-1):
                     mass.append('{0} {1}'.format(i+2,atomlist[i+1][2]))
             if Optimizer.ps_other!=None:
-                logger.info('Setting up LAMMPS calculator with EAM/FS , EAM/ALLOY potential')
                 if 'newton' in Optimizer.ps_other:
                     parameters = {'pair_style' : Optimizer.ps_name, \
                     'pair_coeff': [Optimizer.pair_coeff], 'mass': mass,'newton':'on'}
@@ -148,7 +144,7 @@ def setup_calculator(Optimizer):
                 parameters = {'pair_style' : Optimizer.ps_name, \
                 'pair_coeff': Optimizer.pair_coeff, 'mass': mass}
             if Optimizer.pot_file !=None:
-                filesL= [ Optimizer.pot_file ]
+                filesL = [ Optimizer.pot_file ]
             else:
                 filesL=None
         else:
@@ -166,8 +162,6 @@ def setup_calculator(Optimizer):
                 parameters['pair_coeff'][0] += '\nmin_style {0}'.format(Optimizer.lammps_min_style)
             parameters['minimize'] = Optimizer.lammps_min
         parameters['thermosteps'] = Optimizer.lammps_thermo_steps
-        if Optimizer.lammps_command != None:
-           parameters['lammps_command'] = Optimizer.lammps_command
         if Optimizer.lammps_keep_files:
             if debug:
                 logger.info('Setting up directory for keeping LAMMPS files')
