@@ -601,6 +601,7 @@ class StructoptChecker(BaseChecker):
         #Now append offspring to population, which includes
         #parents and fitnesses already.
         population.extend(offspring)
+        self.logger.info("TTM Population: %s" % population)
         self.logger.info("Opti files: %s" % MyOpti.files)
         pwd = os.getcwd()
         ingpath = self.keywords['name']
@@ -640,8 +641,10 @@ class StructoptChecker(BaseChecker):
                 try:
                     (myatoms, myenergy, mypressure) = Totaloutputs[idx-count]
                     passflag = True
+                    self.logger.info('TTM atoms, energy, pressure: %s %s %s' % (myatoms, myenergy, mypressure))
                 except:
                     passflag = False
+                self.logger.info("TTM passflag: %s" % passflag)
                 if passflag:
                     if MyOpti.structure=='Defect':
                         from MAST.structopt.tools import find_defects
@@ -763,7 +766,7 @@ class StructoptChecker(BaseChecker):
                     #indatoms.set_calculator(LennardJones())
                     #dyn = BFGS(indatoms)
                     #dyn.run(fmax=0.01, steps=500)
-                    from MAST.structopt.tools.eval_energy import check_min_dist
+                    #from MAST.structopt.tools.eval_energy import check_min_dist
                     min_len = 1.8 #Minimum distance between 2 atoms in angstroms
                     from ase.calculators.neighborlist import NeighborList
                     from ase import Atom, Atoms
@@ -803,11 +806,10 @@ class StructoptChecker(BaseChecker):
                             break
                     #indatoms, STR = check_min_dist(indatoms, MyOpti.structure, len(indatoms), min_len, '')
                     ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
-            #HKK : Indiv info.        
-		    #self.logger.info("HKK:: Writing individual {0}", indname) 
+		    self.logger.info("HKK:: Writing individual {0}", indname) 
                 else:
                     ase.io.write(indname,invalid_ind[i][0],"vasp", direct=True, sort=True, vasp5=True)
-		    #self.logger.info("HKK:: Writing invalid individual {0}", indname)
+		    self.logger.info("HKK:: Writing invalid individual {0}", indname)
             elif 'LAMMPS' in self.structopt_parameters['calc_method']:
                 #indname = "%s/DATA_%02d" % (MyOpti.filename+'-rank0', i)
                 indname = os.path.join(pathtooutput,'DATA_%02d' % i)
@@ -929,7 +931,7 @@ class StructoptChecker(BaseChecker):
             count = 1
         for check in range(count):
             allcomplete=0
-            #HKK :: 04-20-15 :: Output info on indiv. convergence
+            #HKK
             for subfolder in self.get_subfolder_list():
                 if 'VASP' in self.structopt_parameters['calc_method']:
                     keywords = self.keywords
@@ -941,12 +943,11 @@ class StructoptChecker(BaseChecker):
                     mychecker = LammpsChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
                 if mychecker.is_complete():
                     allcomplete = allcomplete + 1
-                    print 'HKK :: Checking Subfolders,',subfolder, 'Complete'
+                    #print 'HKK :: Checking Subfolders,',subfolder, 'Complete'
                 
                 else:
           # HKK :: 04-20-15  :: CONTCAR was not updated when VASP run is incomplete. Fixed.
-                    print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
-                
+                    #print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
                     #mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
                     #mychoping.copy_file(copyfrom="CONTCAR", copyto="POSCAR") 
                     #mychoping.run_singlerun()
@@ -956,8 +957,8 @@ class StructoptChecker(BaseChecker):
                     for file in subdirlist:
                         if any(i.isdigit() for i in file) is True:
                            count_opt_num = count_opt_num+1
-                    path_oszicar = os.path.abspath(os.path.join(os.getenv("HOME"),"VASP_replace","OSZICAR"))
-                    path_outcar = os.path.abspath(os.path.join(os.getenv("HOME"),"VASP_replace","OUTCAR"))
+                    path_oszicar = os.path.abspath('%s/VASP_replace/OSZICAR' % os.getenv("HOME"))
+                    path_outcar = os.path.abspath('%s/VASP_replace/OUTCAR' % os.getenv("HOME"))
                     if count_opt_num >= 2:
                         print 'HKK :: Evaluated following structure more than 3 times. Copying low fitness files'
                         print 'HKK :: Checking Subfolders,',subfolder, 'Forced to complete'
@@ -966,7 +967,7 @@ class StructoptChecker(BaseChecker):
                         allcomplete = allcomplete + 1
                     else:
                         mychoping = ChopIngredient(name=subfolder, program=keywords['program'], program_keys = self.keywords['program_keys'],structure=self.keywords['structure'])
-                        mychoping.copy_file(copyfrom="CONTCAR", copyto="POSCAR")
+                        mychoping.copy_file_no_name_validation(copyfrom="CONTCAR", copyto="POSCAR")
                         print 'HKK :: Checking Subfolders,',subfolder, 'Incomplete'
                         mychoping.run_singlerun()
             if allcomplete == len(subfolders) and (allcomplete > 0):

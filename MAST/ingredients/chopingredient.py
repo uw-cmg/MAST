@@ -66,7 +66,10 @@ class ChopIngredient(BaseIngredient):
         toname = "%s_%s" % (ingname, copyto)
         self.copy_file(copyfrom, toname, childdir, softlink)
 
-    def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0):
+    def copy_file_no_name_validation(self, copyfrom="", copyto="", childdir="", softlink=0):
+        return self.copy_file(copyfrom, copyto, childdir, softlink, 0)
+
+    def copy_file(self, copyfrom="", copyto="", childdir="", softlink=0, validate=1):
         """Copy a file.
             Args:
                 copyfrom <str>: name to copy from, e.g. CONTCAR
@@ -86,7 +89,8 @@ class ChopIngredient(BaseIngredient):
             copyto = copyfrom
         if childdir == "":
             childdir = mydir
-        childdir = self._fullpath_childname(childdir)
+        if validate == 1:
+            childdir = self._fullpath_childname(childdir)
         if not os.path.isdir(childdir):
             raise MASTError(self.__class__.__name__, "No directory for copying into, at %s" % childdir)
         if childdir == mydir and copyfrom == copyto:
