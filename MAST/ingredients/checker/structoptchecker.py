@@ -956,10 +956,8 @@ class StructoptChecker(BaseChecker):
                     for file in subdirlist:
                         if any(i.isdigit() for i in file) is True:
                            count_opt_num = count_opt_num+1
-                    path_oszicar = os.path.abspath('/home/usitguest/VASP_replace/OSZICAR')
-                    #path_oszicar = os.path.abspath('/home/hko/tmp/VASP_replace/OSZICAR')
-                    path_outcar = os.path.abspath('/home/usitguest/VASP_replace/OUTCAR')
-                    #path_outcar = os.path.abspath('/home/hko/tmp/VASP_replace/OUTCAR')
+                    path_oszicar = os.path.abspath(os.path.join(os.getenv("HOME"),"VASP_replace","OSZICAR"))
+                    path_outcar = os.path.abspath(os.path.join(os.getenv("HOME"),"VASP_replace","OUTCAR"))
                     if count_opt_num >= 2:
                         print 'HKK :: Evaluated following structure more than 3 times. Copying low fitness files'
                         print 'HKK :: Checking Subfolders,',subfolder, 'Forced to complete'
