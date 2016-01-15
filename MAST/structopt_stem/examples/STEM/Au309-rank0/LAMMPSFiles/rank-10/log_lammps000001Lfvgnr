@@ -1,0 +1,89 @@
+LAMMPS (1 Feb 2014)
+# (written by ASE)
+clear
+variable dump_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-10/trj_lammps000001aqMhux"
+variable data_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-10/data_lammps0000011HtUIw"
+units metal
+boundary p p p
+atom_modify sort 0 0.0
+
+read_data /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-10/data_lammps0000011HtUIw
+  orthogonal box = (0 0 0) to (500 500 500)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  309 atoms
+
+### interactions
+pair_style lj/cut 10.0
+pair_coeff * * 0.4 2.5 10.0
+mass 1 196.9665
+min_style cg
+min_modify line quadratic
+thermo_style custom step temp press cpu pxx pyy pzz pxy pxz pyz ke pe etotal vol lx ly lz atoms
+thermo_modify flush yes
+thermo 1000
+
+### run
+fix fix_nve all nve
+minimize 1e-8 1e-8 5000 10000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:173)
+Memory usage per processor = 3.18652 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+       0            0  0.039073982            0   0.05039148   0.03564194  0.031188525  -0.01061368 -0.0021010692 -0.00032684728            0   -730.06476   -730.06476     1.25e+08          500          500          500      309 
+     320            0 -1.5692851e-06   0.92353702 -0.0031594026 0.0039071088 -0.00075241403 0.00076349936 0.00075739549 -0.0024332764            0   -736.43384   -736.43384     1.25e+08          500          500          500      309 
+Loop time of 0.923953 on 1 procs for 320 steps with 309 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -730.064762625     -736.433836107     -736.433836107
+  Force two-norm initial, final = 1.56848 0.0973299
+  Force max component initial, final = 0.602473 0.0173301
+  Final line search alpha, max atom move = 9.53674e-07 1.65273e-08
+  Iterations, force evaluations = 320 650
+
+Pair  time (%) = 0.877633 (94.9867)
+Neigh time (%) = 0.0252638 (2.73431)
+Comm  time (%) = 0.000440598 (0.0476861)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.0206161 (2.23129)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    28434 ave 28434 max 28434 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 28434
+Ave neighs/atom = 92.0194
+Neighbor list builds = 9
+Dangerous builds = 0
+compute  pea all pe/atom
+dump dump_all all custom 2 /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-10/trj_lammps000001aqMhux id type x y z c_pea
+run 1
+Memory usage per processor = 4.18887 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+     320            0 -1.5692851e-06            0 -0.0031594026 0.0039071088 -0.00075241403 0.00076349936 0.00075739549 -0.0024332764            0   -736.43384   -736.43384     1.25e+08          500          500          500      309 
+     321 5.8223356e-06 -1.556667e-06 0.0013477802 -0.0031594672 0.0039068769 -0.00075207967 0.00076346741 0.00075743245 -0.0024332261 2.3179955e-07   -736.43384   -736.43384     1.25e+08          500          500          500      309 
+Loop time of 0.00158 on 1 procs for 1 steps with 309 atoms
+
+Pair  time (%) = 0.00131297 (83.0994)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 9.53674e-07 (0.0603591)
+Outpt time (%) = 0.000247002 (15.633)
+Other time (%) = 1.90735e-05 (1.20718)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    28443 ave 28443 max 28443 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 28443
+Ave neighs/atom = 92.0485
+Neighbor list builds = 0
+Dangerous builds = 0
+print "__end_of_ase_invoked_calculation__"
+__end_of_ase_invoked_calculation__

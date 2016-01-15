@@ -1,0 +1,89 @@
+LAMMPS (1 Feb 2014)
+# (written by ASE)
+clear
+variable dump_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-25/trj_lammps0000013wPaac"
+variable data_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-25/data_lammps000001zOJdBS"
+units metal
+boundary p p p
+atom_modify sort 0 0.0
+
+read_data /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-25/data_lammps000001zOJdBS
+  orthogonal box = (0 0 0) to (500 500 500)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  309 atoms
+
+### interactions
+pair_style lj/cut 10.0
+pair_coeff * * 0.4 2.5 10.0
+mass 1 196.9665
+min_style cg
+min_modify line quadratic
+thermo_style custom step temp press cpu pxx pyy pzz pxy pxz pyz ke pe etotal vol lx ly lz atoms
+thermo_modify flush yes
+thermo 1000
+
+### run
+fix fix_nve all nve
+minimize 1e-8 1e-8 5000 10000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:173)
+Memory usage per processor = 3.18652 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+       0            0    1079892.4            0    1394801.1    535330.23    1309545.8    779101.88   -506513.05    3416.1464            0     21056098     21056098     1.25e+08          500          500          500      309 
+     349            0 0.0015932345   0.96488714 -0.00038318546 0.0053924768 -0.00022958798 0.0041469676 -0.0017189182 -0.00023859655            0    -748.2751    -748.2751     1.25e+08          500          500          500      309 
+Loop time of 0.965298 on 1 procs for 349 steps with 309 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+          21056098.362     -748.275096853     -748.275096853
+  Force two-norm initial, final = 2.89287e+08 0.0904496
+  Force max component initial, final = 9.58711e+07 0.0273983
+  Final line search alpha, max atom move = 9.53674e-07 2.61291e-08
+  Iterations, force evaluations = 349 662
+
+Pair  time (%) = 0.898009 (93.0291)
+Neigh time (%) = 0.04632 (4.79851)
+Comm  time (%) = 0.000513792 (0.0532263)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.0204558 (2.11912)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    29181 ave 29181 max 29181 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 29181
+Ave neighs/atom = 94.4369
+Neighbor list builds = 16
+Dangerous builds = 0
+compute  pea all pe/atom
+dump dump_all all custom 2 /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-25/trj_lammps0000013wPaac id type x y z c_pea
+run 1
+Memory usage per processor = 3.16766 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+     349            0 0.0015932345            0 -0.00038318546 0.0053924768 -0.00022958798 0.0041469676 -0.0017189182 -0.00023859655            0    -748.2751    -748.2751     1.25e+08          500          500          500      309 
+     350 5.028728e-06  0.001593082  0.002794981 -0.00038328168 0.0053921804 -0.00022965259 0.0041472005 -0.0017189152 -0.00023859438 2.0020434e-07    -748.2751    -748.2751     1.25e+08          500          500          500      309 
+Loop time of 0.00281286 on 1 procs for 1 steps with 309 atoms
+
+Pair  time (%) = 0.00148511 (52.7971)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 9.53674e-07 (0.0339041)
+Outpt time (%) = 0.00131392 (46.7113)
+Other time (%) = 1.28746e-05 (0.457705)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    29153 ave 29153 max 29153 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 29153
+Ave neighs/atom = 94.3463
+Neighbor list builds = 0
+Dangerous builds = 0
+print "__end_of_ase_invoked_calculation__"
+__end_of_ase_invoked_calculation__

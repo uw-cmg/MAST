@@ -1,0 +1,89 @@
+LAMMPS (1 Feb 2014)
+# (written by ASE)
+clear
+variable dump_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-16/trj_lammps000001wTYcRS"
+variable data_file string "/home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-16/data_lammps000001PQmCqu"
+units metal
+boundary p p p
+atom_modify sort 0 0.0
+
+read_data /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-16/data_lammps000001PQmCqu
+  orthogonal box = (0 0 0) to (500 500 500)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  309 atoms
+
+### interactions
+pair_style lj/cut 10.0
+pair_coeff * * 0.4 2.5 10.0
+mass 1 196.9665
+min_style cg
+min_modify line quadratic
+thermo_style custom step temp press cpu pxx pyy pzz pxy pxz pyz ke pe etotal vol lx ly lz atoms
+thermo_modify flush yes
+thermo 1000
+
+### run
+fix fix_nve all nve
+minimize 1e-8 1e-8 5000 10000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:173)
+Memory usage per processor = 3.18652 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+       0            0    66.000593            0    45.213996    110.66011     42.12767   -12.372066    9.0528767    60.122576            0    536.83804    536.83804     1.25e+08          500          500          500      309 
+     232            0 0.0053042709   0.66174817   0.01687524 0.0034899474 -0.0044523749  0.006440725 0.0038920327 0.0021179371            0   -739.05539   -739.05539     1.25e+08          500          500          500      309 
+Loop time of 0.661784 on 1 procs for 232 steps with 309 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+         536.838040402     -739.055389194     -739.055389194
+  Force two-norm initial, final = 11362.1 0.156725
+  Force max component initial, final = 6733.78 0.0402763
+  Final line search alpha, max atom move = 4.76837e-07 1.92052e-08
+  Iterations, force evaluations = 232 457
+
+Pair  time (%) = 0.61866 (93.4837)
+Neigh time (%) = 0.0290444 (4.3888)
+Comm  time (%) = 0.000326157 (0.0492844)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.0137534 (2.07823)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    28778 ave 28778 max 28778 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 28778
+Ave neighs/atom = 93.1327
+Neighbor list builds = 11
+Dangerous builds = 0
+compute  pea all pe/atom
+dump dump_all all custom 2 /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/examples/STEM/Au309-rank0/LAMMPSFiles/rank-16/trj_lammps000001wTYcRS id type x y z c_pea
+run 1
+Memory usage per processor = 4.18887 Mbytes
+Step Temp Press CPU Pxx Pyy Pzz Pxy Pxz Pyz KinEng PotEng TotEng Volume Lx Ly Lz Atoms 
+     232            0 0.0053042709            0   0.01687524 0.0034899474 -0.0044523749  0.006440725 0.0038920327 0.0021179371            0   -739.05539   -739.05539     1.25e+08          500          500          500      309 
+     233 1.5098749e-05 0.0053038412 0.0013489723  0.016874683 0.0034894048 -0.0044525646 0.0064406325 0.0038914694 0.0021181861 6.0111326e-07   -739.05539   -739.05539     1.25e+08          500          500          500      309 
+Loop time of 0.00136685 on 1 procs for 1 steps with 309 atoms
+
+Pair  time (%) = 0.00132203 (96.7207)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.14577e-06 (0.156986)
+Outpt time (%) = 2.7895e-05 (2.04082)
+Other time (%) = 1.4782e-05 (1.08146)
+
+Nlocal:    309 ave 309 max 309 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    0 ave 0 max 0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    28766 ave 28766 max 28766 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 28766
+Ave neighs/atom = 93.0939
+Neighbor list builds = 0
+Dangerous builds = 0
+print "__end_of_ase_invoked_calculation__"
+__end_of_ase_invoked_calculation__
