@@ -122,7 +122,9 @@ def write_optimizer(Optimizer, optfile, restart=True):
         'adaptmultiplier',
         'demin',
         'mark',
-        'restart_optimizer']
+        'restart_optimizer',
+        'psf',
+        'stem_ref']
     attributelist = ['genrep',
         'minfit',
         'generation',
