@@ -1113,8 +1113,8 @@ class VaspChecker(BaseChecker):
         """
         newkmesh = Kpoints.automatic_density(newstr, density)
         klist = list()
-        klist = newkmesh.to_dict['kpoints'][0]
-        klist.append(newkmesh.to_dict['generation_style'][0])
+        klist = newkmesh.as_dict()['kpoints'][0]
+        klist.append(newkmesh.as_dict()['generation_style'][0])
         self.keywords['program_keys']['mast_kpoints'] = klist
         return newkmesh
 
