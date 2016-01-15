@@ -207,6 +207,8 @@ class StructoptChecker(BaseChecker):
         if "MAST" in self.structopt_parameters['calc_method']:
             if "LOOPED" in self.structopt_parameters['calc_method']:
                 return self.is_complete_looped()
+            elif "STEM" in self.structopt_parameters['calc_method']:
+                return self.is_complete_stem()
             else:
                 return self.is_complete_one_gen()
         else:
@@ -232,7 +234,28 @@ class StructoptChecker(BaseChecker):
         else:
             self.logger.info("StructOpt output file at %s shows calculation has finished." % opath)
             return True
-    
+
+    def is_complete_stem(self):
+        """Check if StructOpt calculation is complete.
+        """
+        if 'filename' in self.structopt_parameters:
+            fname = '{0}-rank0.txt'.format(self.structopt_parameters['filename'])
+            opath = os.path.join(self.keywords['name'],fname)
+        else:
+            opath = os.path.join(self.keywords['name'],'Output-rank0.txt')
+        if not os.path.isfile(opath):
+            self.logger.info("No StructOpt output at %s; not complete." % opath)
+            return False
+        reachgrep=subprocess.Popen('grep "End of Execution" %s' % opath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        reachrpt=reachgrep.communicate()[0]
+        reachgrep.wait()
+        if reachrpt=='':
+            self.logger.info("StructOpt output file at %s shows calculation is incomplete." % opath)
+            return False
+        else:
+            self.logger.info("StructOpt output file at %s shows calculation has finished." % opath)
+            return True
+
     def is_complete_one_gen(self):
         """Check if StructOpt single generation is complete.
         """
@@ -468,6 +491,9 @@ class StructoptChecker(BaseChecker):
         if "MAST" in self.structopt_parameters['calc_method']:
             if 'LOOPED' in self.structopt_parameters['calc_method']:
                 return self.set_up_program_input_looped()
+            ## ZS: Adding STEM
+            elif 'STEM' in self.structopt_parameters['calc_method']:
+                return self.set_up_program_input_whole_stem()
             else:
                 return self.set_up_program_input_one_gen()
         else:
@@ -508,6 +534,29 @@ class StructoptChecker(BaseChecker):
         new_exec_line += ' {0} {1}'.format(structoptpath,inputfile)
         self.keywords['program_keys']['mast_exec'] = new_exec_line
         return
+
+    def set_up_program_input_whole_stem(self):
+        """Set up the StructOpt input file."""
+        self.logger.info('Parameters for structopt: {0}'.format(self.structopt_parameters))
+        if ('restart_optimizer' in self.structopt_parameters and self.structopt_parameters['restart_optimizer']):
+            population_list = self.structopt_parameters['population']
+            bests_list = self.structopt_parameters['BESTS']
+        Optinit = Optimizer(self.structopt_parameters)
+        ingpath = self.keywords['name']
+        inputfile = os.path.join(ingpath,"structoptinput.txt")
+        if 'potential_file' in self.structopt_parameters:
+            newlocation = os.path.join(ingpath,os.path.basename(self.structopt_parameters['potential_file']))
+            shutil.copyfile(self.structopt_parameters['potential_file'],newlocation)
+            if not Optinit.pot_file:
+                Optinit.pot_file = os.path.basename(self.structopt_parameters['potential_file'])
+        if Optinit.restart_optimizer:
+            Optinit.population = population_list
+            Optinit.BESTS = bests_list
+            Optinit.write(inputfile)
+        else:
+            Optinit.write(inputfile,restart=False)
+        self.keywords['program_keys']['mast_exec'] = '/share/apps/mvapich2/tam_mvapich2-1.9a2/usr/local/bin/mpirun /share/apps/EPD_64bit/epd_free-7.3-2-rh5-x86_64/bin/python /home/usitguest/MAST-structopt_VASP/MAST/structopt_stem/STEM_run.py > output.txt' 
+        return
     
     def set_up_program_input_one_gen(self):
         """Set up the StructOpt input file."""
@@ -520,7 +569,8 @@ class StructoptChecker(BaseChecker):
             if not Optinit.pot_file:
                 Optinit.pot_file = os.path.basename(self.structopt_parameters['potential_file'])
         Optinit.write(inputfile,restart=False)
-        self.keywords['program_keys']['mast_exec'] = "mast"
+
+        self.keywords['program_keys']['mast_exec'] = 'mast' 
         return
     
     def set_up_program_input_looped(self):
@@ -680,7 +730,12 @@ class StructoptChecker(BaseChecker):
             elif 'LAMMPS' in self.structopt_parameters['calc_method']:
                 mychecker = LammpsChecker(name=subfolder, program_keys=self.keywords['program_keys'], structure=self.keywords['structure'])
                 mystrfile = os.path.join(subfolder,"TRAJECTORY")
-            mystructure = mychecker.get_structure_from_file(mystrfile)
+            ## ZS
+            ## If CONTCAR is empty, which means VASP crashed at the very beginning due to the bad initial structure and no CONTCAR is produced, then we forward directly the POSCAR to the next generation
+            try: 
+                mystructure = mychecker.get_structure_from_file(mystrfile)
+            except ValueError:
+                mystructure = mychecker.get_structure_from_file(mystrfile.split('CONTCAR')[0]+'POSCAR')
             myatoms = AseAtomsAdaptor.get_atoms(mystructure)
             myenergy = mychecker.get_energy_from_energy_file()
             mypressure = mychecker.get_final_pressure()
@@ -806,26 +861,32 @@ class StructoptChecker(BaseChecker):
                             break
                     #indatoms, STR = check_min_dist(indatoms, MyOpti.structure, len(indatoms), min_len, '')
                     ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
-		    self.logger.info("HKK:: Writing individual {0}", indname) 
+		            #self.logger.info("HKK:: Writing individual {0}", indname) 
+                elif MyOpti.structure == 'Cluster':
+                    indatoms = invalid_ind[inv_idx][0].copy()
+                    indatoms.set_cell([MyOpti.large_box_size,MyOpti.large_box_size,MyOpti.large_box_size])
+                    indatoms.translate([MyOpti.large_box_size/2.0,MyOpti.large_box_size/2.0,MyOpti.large_box_size/2.0])
+                    ase.io.write(indname, indatoms, "vasp", direct=True, sort=True, vasp5=True)
+                    #self.logger.info("HKK:: Writing individual {0}", indname)
                 else:
-                    ase.io.write(indname,invalid_ind[i][0],"vasp", direct=True, sort=True, vasp5=True)
-		    self.logger.info("HKK:: Writing invalid individual {0}", indname)
+                    ase.io.write(indname,invalid_ind[inv_idx][0],"vasp", direct=True, sort=True, vasp5=True)
+		            #self.logger.info("HKK:: Writing invalid individual {0}", indname)
             elif 'LAMMPS' in self.structopt_parameters['calc_method']:
                 #indname = "%s/DATA_%02d" % (MyOpti.filename+'-rank0', i)
-                indname = os.path.join(pathtooutput,'DATA_%02d' % i)
+                indname = os.path.join(pathtooutput,'DATA_%02d' % inv_idx)
                 if MyOpti.structure == 'Defect':
-                    indatoms = invalid_ind[i][0]
-                    indatoms.extend(invalid_ind[i].bulki)
+                    indatoms = invalid_ind[inv_idx][0]
+                    indatoms.extend(invalid_ind[inv_idx].bulki)
                     inp_out.write_lammps_data(indname, indatoms)
                 elif MyOpti.structure == 'Cluster':
-                    indatoms = invalid_ind[i][0]
+                    indatoms = invalid_ind[inv_idx][0]
                     indatoms.set_cell([MyOpti.large_box_size,MyOpti.large_box_size,MyOpti.large_box_size])
                     indatoms.translate([MyOpti.large_box_size/2.0,MyOpti.large_box_size/2.0,MyOpti.large_box_size/2.0])
                     inp_out.write_lammps_data(indname, indatoms)
                 else:
-                    inp_out.write_lammps_data(indname, invalid_ind[i][0])
+                    inp_out.write_lammps_data(indname, invalid_ind[inv_idx][0])
                 shutil.copy(os.path.join(pathtooutput,'atom_symbols'), 
-                    os.path.join(pathtooutput,'atom_symbols_{0:02d}'.format(i)))
+                    os.path.join(pathtooutput,'atom_symbols_{0:02d}'.format(inv_idx)))
 #                 shutil.copy("{0}-rank0/atom_symbols".format(MyOpti.filename), 
 #                     "{0}-rank0/atom_symbols_{1:02d}".format(MyOpti.filename,i))
             MyOpti.output.write(indname+'\n')
