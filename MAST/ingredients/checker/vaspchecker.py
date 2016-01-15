@@ -597,8 +597,9 @@ class VaspChecker(BaseChecker):
         """
         name = self.keywords['name']
         pname = os.path.join(name,"POSCAR")
-        phposcar = Poscar.from_file(pname)
-        phposcar.selective_dynamics = sdarray
+        oldposcar = Poscar.from_file(pname)
+        phposcar = Poscar(oldposcar.structure, selective_dynamics=sdarray.tolist())
+        #phposcar.selective_dynamics = sdarray
         dirutil.lock_directory(name)
         os.rename(pname, pname + "_no_sd")
         phposcar.write_file(pname)
