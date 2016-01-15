@@ -420,7 +420,7 @@ class TestWriteIngredient(unittest.TestCase):
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=mypos.structure)
         mywi.write_singlerun_automesh()
         mykpts = pymatgen.io.vaspio.Kpoints.from_file("writedir/single_label1/KPOINTS")
-        self.assertEqual(mykpts.as_dict()['kpoints'][0],[8,8,8])
+        self.assertEqual(mykpts.as_dict()['kpoints'][0],[6,6,6])
         #print mykpts
         self.assertTrue(mywi.checker.is_ready_to_run())
         #self.testclass.write_singlerun()
