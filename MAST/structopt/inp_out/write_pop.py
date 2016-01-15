@@ -1,7 +1,4 @@
-try:
-    from ase import Atoms, Atom
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt write_pop.py, ASE must be installed."
+from ase import Atoms, Atom
 from MAST.structopt.inp_out.write_xyz import write_xyz
 
 def write_pop(Optimizer,pop):
@@ -24,14 +21,8 @@ def write_pop(Optimizer,pop):
         if Optimizer.indiv_defect_write:
             write_xyz(Optimizer.ifiles[ind.index],ind[0],ind.energy)
         update_structsumfile(ind, Optimizer.files[Optimizer.nindiv])
-        if 'stem' in Optimizer.fitness_scheme:
-            if Optimizer.generation % 10 == 0:
-                positions = update_structfile(ind, Optimizer.files[ind.index], Optimizer)
-                Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
-        else:
-            positions = update_structfile(ind, Optimizer.files[ind.index], Optimizer)
-            Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
-
+        positions = update_structfile(ind, Optimizer.files[ind.index], Optimizer)
+        Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
     if Optimizer.genealogy:
         Optimizer.Genealogyfile.write('\n')
     return
@@ -42,8 +33,7 @@ def update_outfile(ind, outfile):
     outfile.write('    Genealogy = {0}\n'.format(ind.history_index))
     outfile.write('    Energy = {0}\n'.format(ind.energy))
     outfile.write('    Fitness = {0}\n'.format(ind.fitness))
-    if hasattr(ind, 'swaplist'):
-        outfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
+    outfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
 
 def update_structsumfile(ind, structsumfile):
     structsumfile.write(' Index = {0}\n'.format(ind.index))
@@ -52,8 +42,7 @@ def update_structsumfile(ind, structsumfile):
     structsumfile.write('    Cell = {0}\n'.format(ind[0].get_cell()))
     structsumfile.write('    Pressure = {0}\n'.format(ind.pressure))
     structsumfile.write('    Genealogy = {0}\n'.format(ind.history_index))
-    if hasattr(ind, 'swaplist'):
-        structsumfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
+    structsumfile.write('    Swaplist = {0}\n'.format(ind.swaplist))
     
 def update_structfile(ind, structfile, Optimizer):
     if Optimizer.structure == 'Defect' or Optimizer.structure == 'Surface':
@@ -68,10 +57,7 @@ def update_structfile(ind, structfile, Optimizer):
     if Optimizer.vacancy_output:
         for one in ind.vacancies:
             sols.append(Atom(symbol='X',position=one.position))
-    if 'stem' in Optimizer.fitness_scheme:
-        pass
-    else:
-        Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
+    Optimizer.output.write('Number of positions = {0}\n'.format(len(positions)))
     write_xyz(structfile, sols, ind.energy)
     return positions
 

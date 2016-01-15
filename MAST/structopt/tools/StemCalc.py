@@ -19,8 +19,6 @@ import scipy.misc
 import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
 from scipy import optimize
-import time
-from mpi4py import MPI
 
 class ConvStem():
     def __init__(self, parameters={}, mode='Simple', tmp_dir=None, keep_files=True, 
@@ -35,35 +33,33 @@ class ConvStem():
         self.mode=mode
         self.debug=debug
         #Initialize directory for storing data
-        #if tmp_dir is None:
-        #    self.tmp_dir = mkdtemp(prefix='ConvStem-')
-        #else:
-        #    self.tmp_dir=os.path.realpath(tmp_dir)
-        #    if not os.path.isdir(self.tmp_dir):
-        #        os.mkdir(self.tmp_dir, 0755)
+        if tmp_dir is None:
+            self.tmp_dir = mkdtemp(prefix='ConvStem-')
+        else:
+            self.tmp_dir=os.path.realpath(tmp_dir)
+            if not os.path.isdir(self.tmp_dir):
+                os.mkdir(self.tmp_dir, 0755)
         #Get the probe function based on input parameters
-        #self.psf = get_probe_function(self.parameters)
+        self.psf = get_probe_function(self.parameters)
         if calc_exp:
             if self.mode=='Simple':
-#                self.expfun=self.calculate_simp_function(self.parameters['Exp_Image'])
-                 self.expfun=self.parameters['Exp_Image'] 
+                self.expfun=self.calculate_simp_function(self.parameters['Exp_Image'])
             elif self.mode=='Complex':
                 self.expfun=self.calculate_comp_function(self.parameters['Exp_Image'])
             else:
                 raise RuntimeError('Error: must specify either Simple or Complex mode')
-         #   if self.keep_files:
-         #       fig = plt.figure()
-         #       ax = fig.add_subplot(111)
-         #       ax.imshow(self.expfun,cmap=cm.hot)
-         #       ax.set_frame_on(False)
-         #       ax.set_xticks([])
-         #       ax.set_yticks([])
-         #       plt.axis('off')
-         #       ax.set_aspect('equal')
-         #       figname = 'Experimental_Image.png'
-         #       fig.savefig(self.tmp_dir+'/'+figname, transparent=True, bbox_inches='tight',pad_inches=0)
-        rank = MPI.COMM_WORLD.Get_rank()
-
+            if self.keep_files:
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.imshow(self.expfun,cmap=cm.hot)
+                ax.set_frame_on(False)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                plt.axis('off')
+                ax.set_aspect('equal')
+                figname = 'Experimental_Image.png'
+                fig.savefig(self.tmp_dir+'/'+figname, transparent=True, bbox_inches='tight',pad_inches=0)
+            
     def calculate_simp_function(self,image):
         #Load image file and convert image to grayscale
         #ima=Image.open(image).convert('LA')
@@ -151,104 +147,60 @@ class ConvStem():
     
     def compare_functions(self, expfun, simfun):
         """Function compares two matrices and calculates chisq.  Matrices must be same size"""
-        try:
-          Grid_sim2exp = self.parameters['Grid_sim2exp']
-        except:
-          Grid_sim2exp = 1
-        #if self.parameters['Pixelshift'] == True:
-        chisq = 0.0
+        chi=[]
         for i in range(len(expfun)):
-              for j in range(len(expfun[0])):
-                 if expfun[i][j] > -1000:
-                    chisq +=(simfun[i][j]-expfun[i][j])**2
-        #else:
-        #   chisq = abs(sum(sum((simfun-expfun)**2)))
-        chisq = chisq/len(simfun)/len(simfun[0])
+            for j in range(len(expfun[0])):
+                c=(simfun[i][j]-expfun[i][j])**2/expfun[i][j]
+                chi.append(c)
+        chisq=sum(chi)
         return chisq
     
     def run(self,atms):
-        rank = MPI.COMM_WORLD.Get_rank()
         #Get the image from ConvStem
-        try:
-           Grid_sim2exp = self.parameters['Grid_sim2exp']
-        except:
-           Grid_sim2exp = 1
-        if self.parameters['Pixelshift'] == True: 
-          points = [-0.5993457/2,0,0.5993457/2]
-          chisq = []
-          for x in points:
-             for y in points:
-                pixelshift = [x,y,0]
-                simfun=self.get_image(self.psf,atms,self.parameters['Slice size'],self.parameters['Pixels'],pixelshift)
-                simfun_resize = simfun
-                chisq.append(self.compare_functions(self.expfun,simfun_resize))
-          return min(chisq)       
-
-        else:
-          simfun=self.get_image(self.psf,atms,self.parameters['Slice size'],self.parameters['Pixels'])
-          if Grid_sim2exp > 1: 
-             simfun_resize = numpy.zeros([150,150],dtype=float)       
-             for x in range(len(simfun)):
-               for y in range(len(simfun[0])):
-                  simfun_resize[x/Grid_sim2exp][y/Grid_sim2exp]+=simfun[x][y]
-             simfun_resize /= 0.5993457**2
-             simfun_resize *= 0.12**2
-          else:
-             simfun_resize = simfun
+        simfun=self.get_image(self.psf,atms,self.parameters['Slice size'],self.parameters['Pixels'])
         #Calculate the function for the image
         #if self.mode=='Simple':
         #    simfun=self.calculate_simp_function(image)
         #elif self.mode=='Complex':
         #    simfun=self.calculate_comp_function(image)
-          chisq=self.compare_functions(self.expfun,simfun_resize)  
-        #print "chisq",chisq
-        #plt.imshow(simfun_resize)
-        #plt.show()
-        #if self.keep_files:
-        #    fig = plt.figure()
-        #    ax = fig.add_subplot(111)
-        #    #Uncomment the following lines to save image as borderless png
-        #    ax.imshow(simfun,cmap=cm.hot)
-        #    ax.set_frame_on(False)
-        #    ax.set_xticks([])
-        #    ax.set_yticks([])
-        #    plt.axis('off')
-        #    ax.set_aspect('equal')
-        #    fignamep = 'SimImage-'
-        #    #Label image with next available number
-        #    x=0
-        #    while True:
-        #        figname = fignamep+repr(x)+'.png'
-        #        if not os.path.exists(self.tmp_dir+'/'+figname):
-        #            break
-        #        else:
-        #            x+=1
-        #    fig.savefig(self.tmp_dir+'/'+figname, transparent=True, bbox_inches='tight',pad_inches=0)
+        chisq=self.compare_functions(self.expfun,simfun)
+        if self.keep_files:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            #Uncomment the following lines to save image as borderless png
+            ax.imshow(simfun,cmap=cm.hot)
+            ax.set_frame_on(False)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            plt.axis('off')
+            ax.set_aspect('equal')
+            fignamep = 'SimImage-'
+            #Label image with next available number
+            x=0
+            while True:
+                figname = fignamep+repr(x)+'.png'
+                if not os.path.exists(self.tmp_dir+'/'+figname):
+                    break
+                else:
+                    x+=1
+            fig.savefig(self.tmp_dir+'/'+figname, transparent=True, bbox_inches='tight',pad_inches=0)
         return chisq
     
-    def get_image(self, psf, atms, rmax, nx, pixelshift=[0,0,0], scalefactor=1.0):
+    def get_image(self, psf, atms, rmax, nx, scalefactor=1.0):
         """Function to get image based point spread function and atoms
         rmax=Size of slice in Angstoms
         nx=number of pixels in slice"""
         #dr =  rmax / nx
         #ry = numpy.arange(0.0,rmax,dr)
-        rank = MPI.COMM_WORLD.Get_rank()
-        #print "M: psffft @rank start", rank,len(psf),len(psf[0]),psf[0][0],psf[0][nx-1]
-        psf2d = numpy.fft.fft2(psf)
-        #print "M: psffft @rank finish", rank
-        pot = stempot(rmax,rmax,len(psf),len(psf[0]),atms,pixelshift,scalefactor)
-        #print "M: pot @rank", rank
+        pot = stempot(rmax,rmax,len(psf),len(psf[0]),atms,scalefactor)
         #pot = stempot(xyz, rmax, rmax, nk, nk)
         potft = numpy.fft.fft2(pot)
-        #print "M: potfft @rank", rank
+        psf2d = numpy.fft.fft2(psf)
         potm = potft*psf2d
-        #print "M: potm @rank", rank,len(potm),len(potm[0])
-        zcon_im = numpy.fft.ifft2(potm,axes=(0,1)).real
-        #print "M: ifft @rank", rank
-        #zcon_im = numpy.real(zcon_im)
-        #print "M: real @rank", rank
+        zcon_im = numpy.fft.ifft2(potm)
+        zcon_r = numpy.real(zcon_im)
         #zcon_s = numpy.fft.fftshift(zcon_r)
-        #zcon_s = zcon_r
+        zcon_s = zcon_r
         #grid = zcon_s.reshape((len(ry), len(ry)))
         #SetScale/P x DimOffSet(zcon_im, 0), DimDelta(zcon_im, 0), "", zcon_s
         #SetScale/P y DimOffSet(zcon_im, 1), DimDelta(zcon_im, 1), "", zcon_s
@@ -271,7 +223,7 @@ class ConvStem():
     #         else:
     #             x+=1
     #     fig.savefig(self.tmp_dir+'/'+figname, transparent=True, bbox_inches='tight',pad_inches=0)
-        return zcon_im
+        return zcon_s
     
     def get_atom_pos(self, data):
 		"""Function to identify the location of the atom columns
@@ -352,49 +304,44 @@ def get_probe_function(parameters):
     #df=parameters['Defocus']
     ds=parameters['Source size']
     rmax=parameters['Slice size']
-    nx=parameters['Pixels']
-   
+    #nx=parameters['Pixels']
     try:
         aber=parameters['aber']
     except:
         aber=[[0,0] for i in range(12)]
-     
+    
     nk = math.floor(40*(0.001*ap / wavlen(keV))*rmax)
     if math.fmod(nk, 2):
         nk += 1
-    if nx > nk:
-      nk = nx
+    
     #Get probe function
     if Cc == 0.0 and dE == 0.0:
-        psf2D = STEMPSF2DCoh(aber, keV, ap, nk, rmax)
+        psf2D = STEMPSF2DCoh(aber, keV, ap, nk)
         #Redimension/D/C probe2DCoh #Converts wave to double precision complex wave
         #wave/c psf2D = $"probe2DCoh"
     else:
-        psf2D = STEMPSF2DIncoh(aber, keV, Cc, dE, ds, ap, nk, rmax)
+        psf2D = STEMPSF2DIncoh(aber, keV, Cc, dE, ds, ap, nk)
         #Redimension/D/C probe2DIncoh #Converts wave to double precision complex wave
         #wave/c psf2D = $"probe2DIncoh"
     #Shift minimum to zero
-    #mn = numpy.minimum.reduce(numpy.minimum.reduce(psf2D))
-    #for i in range(len(psf2D)):
-    #    for j in range(len(psf2D[0])):
-    #        psf2D[i][j] += abs(mn)
+    mn = numpy.minimum.reduce(numpy.minimum.reduce(psf2D))
+    for i in range(len(psf2D)):
+        for j in range(len(psf2D[0])):
+            psf2D[i][j] += abs(mn)
     
     return psf2D
 
-def STEMPSF2DCoh(aber, keV, ap, nk,rmax):
+def STEMPSF2DCoh(aber, keV, ap, nk):
     kmax = 0.001*ap / wavlen(keV)
     phase = ChiPhase2D(aber, keV, ap, nk/10)
     xp=numpy.linspace(-kmax*2.0,(kmax*2.0),nk/10)
     yp=numpy.linspace(-kmax*2.0,(kmax*2.0),nk/10)
     phasef = scipy.interpolate.RectBivariateSpline(xp,yp,phase)
-    #print "M:kmax",kmax
-    #print phasef
     
-    kbound = nk/4.0/(rmax/2.0)
     # need to pad the phase with zeros here.
     probe2DCoh = numpy.zeros((nk,nk),dtype=complex)
-    x=numpy.linspace(-kbound,kbound,nk)
-    y=numpy.linspace(-kbound,kbound,nk)
+    x=numpy.linspace(-20*kmax,40*kmax,nk)
+    y=numpy.linspace(-20*kmax,40*kmax,nk)
     
     #SetScale/I x -20*kmax, 40*kmax, "", probe2DCoh
     #SetScale/I y -20*kmax, 40*kmax, "", probe2DCoh
@@ -411,83 +358,62 @@ def STEMPSF2DCoh(aber, keV, ap, nk,rmax):
         for j in range(len(y)):
             probe2DCoh[i][j] = complex((abs(p2dcf[i][j]))**2, 0)
     probe2DCoh = numpy.real(probe2DCoh)    
-    #print "M:probe2DCoh" 
-    #print probe2DCoh[0]
-    #print "M:sum:probe2DCoh",sum(sum(probe2DCoh)) 
     probe2DCoh /= sum(sum(probe2DCoh))
+    
     return probe2DCoh
 
-def STEMPSF2DIncoh(aber, keV, Cc, dE, ds, ap, nk, rmax):
+def STEMPSF2DIncoh(aber, keV, Cc, dE, ds, ap, nk):
     kmax = 0.001*ap / wavlen(keV)
     defocus_distribution = ChromaticDefocusDistribution(Cc, dE, keV, ap)
     start_df = aber[0][0]
-    df_range = 2.5*(Cc*1e7*dE /(1e3*keV)*( (1+keV/511.0)/(1+keV/1022.0) ))
+    df_range = 2.5*(Cc*dE /(1e3*keV)*( (1+keV/511)/(1+keV/1022) ))
     x = numpy.linspace(-df_range,df_range, num=len(defocus_distribution))
     for i in range(len(defocus_distribution)):
-        #aber_step = numpy.copy(aber)
         aber[0][0] = start_df + x[i]
-        #print aber_step
-        probe2DCoh = STEMPSF2DCoh(aber, keV, ap, nk, rmax)
+        probe2DCoh = STEMPSF2DCoh(aber, keV, ap, nk)
         if i==0:
-           # probe2DIncoh = copy.deepcopy(probe2DCoh)
-            probe2DIncoh = numpy.copy(probe2DCoh)
+            probe2DIncoh = copy.deepcopy(probe2DCoh)
             probe2DIncoh *= defocus_distribution[0]
         else:
             for j in range(len(probe2DIncoh)):
                 for k in range(len(probe2DIncoh[0])):
                     probe2DIncoh[j][k] += defocus_distribution[i]*probe2DCoh[j][k]
-        #print i
-        #print probe2DIncoh
-
-    probe2DIncoh /= sum(defocus_distribution)
-    #print "probe2DIncoh",probe2DIncoh[0],probe2DIncoh[100]
-    #print "ave",sum(defocus_distribution),probe2DIncoh
-    aber[0][0] = start_df
     
+    probe2DIncoh /= sum(defocus_distribution)
+
+    aber[0][0] = start_df
+
     if ds != 0:
         fds = ds / (2*(2*math.log(2))**0.5)    # real-space standard deviation for Gaussian with FWHM ds
-        #fds = 1/(2*math.pi*fds)    # FT standard deviation
+        fds = 1/(2*math.pi*fds)    # FT standard deviation
         #Redimension/C probe2DIncoh
         #wave/C probe2DSS = $"probe2DIncoh"
         probe2DSS = numpy.fft.fft2(probe2DIncoh)
-        #g = Gauss(0.0, 0.0, fds, fds)#, len(probe2DSS), len(probe2DSS[0]))
-        #xs = numpy.linspace(-2.19234, 2.19234, num=len(probe2DSS))  #256 pts
-        #xs = numpy.linspace(-4.76855, 4.76855, num=len(probe2DSS))   #560 pts
-        xs = numpy.linspace(-rmax/2, rmax/2, num=len(probe2DSS))   #560 pts
-        #xs = numpy.linspace(-31.9809, 31.9809, endpoint=False, num=len(probe2DSS))   #3750 pts
-        #leftend = -60*kmax/(len(probe2DSS)-1)*((len(probe2DSS)-1)/2+1)  # nk =258 left 257->129 points
-        #rightend = 60*kmax/(len(probe2DSS)-1)*((len(probe2DSS)-1)/2)    # nk =258 right 257->128 points
-        #xs = numpy.linspace(leftend, rightend, num=len(probe2DSS))
-        #print 'len',len(probe2DSS),xs[0],xs[1],xs[len(probe2DSS)-1]
-        #print 'Gauss',xs[124],Gauss2D(xs[124],0.0,fds,xs[124],0.0,fds)
-        Gaussfunction = numpy.zeros((nk,nk),dtype=complex)
+        g = Gauss(0.0, 0.0, fds, fds)#, len(probe2DSS), len(probe2DSS[0]))
+        xs = numpy.linspace(-1.0, 1.0, num=len(probe2DSS))
         for j in range(len(probe2DSS)):
                 for k in range(len(probe2DSS[0])):
-                    Gaussfunction[j][k]=complex(Gauss2D(xs[j],0.0,fds,xs[k],0.0,fds),0.0)
-                   # if Gaussfunction[j][k] > 0.1:
-                  #     print j,k, Gaussfunction[j][k]
+                    probe2DSS[j][k]*=complex(g(xs[j],xs[k]),0.0)
         #probe2DSS *= complex(Gauss(x, 0.0, fds, y, 0.0, fds), 0.0)
-        Gaussft = numpy.fft.fft2(Gaussfunction)
-        probe2DSS *= Gaussft
-        probe2Dreal = numpy.fft.ifft2(probe2DSS)
-        probe2DSS = numpy.real(probe2Dreal)
-        #print "probe2DSS",probe2DSS[0],probe2DSS[100]
+        probe2DSS = numpy.fft.ifft2(probe2DSS)
+        probe2DSS = numpy.real(probe2DSS)
         probe2DSS = numpy.fft.fftshift(probe2DSS)
         #probe2DSS = cmplx(sqrt(magsqr(probe2DSS)), 0)
         probe2DSS /= sum(sum(probe2DSS))
-        probe2DIncoh = numpy.copy(probe2DSS)
+        probe2DIncoh = copy.deepcopy(probe2DSS)
         #SetScale/p x dimoffset(probe2dcoh, 0), dimdelta(probe2dcoh, 0), "", probe2dIncoh
         #SetScale/P y dimoffset(probe2dcoh, 1), dimdelta(probe2dcoh, 1), "", probe2dIncoh
-         
+    
     return probe2DIncoh
 
-def ChiPhase2D(aber_in, keV, ap, nk):
-    aber = SwitchToAngstroms(aber_in)
+def ChiPhase2D(aber, keV, ap, nk):
+    aber = SwitchToAngstroms(aber)
     wl = wavlen(keV)
     kmax = (0.001*ap / wl)  # maximum k through aperture
     x=numpy.linspace(-kmax*2.0,(kmax*2.0),nk)
     y=numpy.linspace(-kmax*2.0,(kmax*2.0),nk)
     astack = [numpy.zeros((len(x),len(y))) for one in range(12)]
+    
     # Evaluate the phase shifts from the various aberrations
     for i in range(len(x)):
         for j in range(len(y)):
@@ -524,24 +450,22 @@ def ChiPhase2D(aber_in, keV, ap, nk):
 #                 if astack[k][i][j] < 0.0:
 #                     astack[k][i][j]=0.0
     #Shift minimum to zero
-#    for k in range(len(astack)):
-#        mn = numpy.minimum.reduce(numpy.minimum.reduce(astack[k]))
-#        for i in range(len(x)):
-#            for j in range(len(y)):
-#                astack[k][i][j]+= abs(mn)
-#    print 'mn',mn
+    for k in range(len(astack)):
+        mn = numpy.minimum.reduce(numpy.minimum.reduce(astack[k]))
+        for i in range(len(x)):
+            for j in range(len(y)):
+                astack[k][i][j]+= abs(mn)
+    
     # rotate the phase shifts of the non-centrosymmetric aberrations
     for i in range(12):
         if aber[i][1] != 0.0:
-            astack[i] = scipy.ndimage.rotate(astack[i],aber[i][1],reshape=False)
+            astack[i] = scipy.ndimage.rotate(astack[i],-aber[i][1])
             #ImageTransform/P=(i) getplane astack
             #wave aphase = $"M_ImagePlane"
             #ImageRotate/E=0/O/A=(aber[i][1]) aphase
             #SetScale/P x -DimSize(aphase, 0)*DimDelta(astack, 0) / 2, DimDelta(astack, 0), "", aphase
             #SetScale/P y -DimSize(aphase, 1)*DimDelta(astack, 1) / 2, DimDelta(astack, 0), "", aphase
             #astack[][][i] = aphase(x)(y)
-       # print "M:astack",i,aber[i][0],aber[i][1]
-       # print astack[i][0]
 
     # sum all the aberration contributions
     fsum = numpy.zeros((len(x),len(y)))
@@ -556,10 +480,10 @@ def ChiPhase2D(aber_in, keV, ap, nk):
 
 def ChromaticDefocusDistribution(Cc, dE, keV, ap):
     Cc *= 1e7  # mm to Angstroms
-    df_phase_max = 2*math.pi / 50.0  # maximum phase step at the aperture edge due to chromatic aberration
+    df_phase_max = 2*math.pi / 50  # maximum phase step at the aperture edge due to chromatic aberration
     kmax = 0.001*ap/wavlen(keV)
     # defocus range and form from Reimer
-    H = (Cc*dE /(1e3*keV)*( (1+keV/511.0)/(1+keV/1022.0) ))
+    H = (Cc*dE /(1e3*keV)*( (1+keV/511)/(1+keV/1022) ))
     N = (2*(math.log(2)**0.5) / ((math.pi**0.5)*H))
     df_range = 2.5*H
     ndf = math.ceil(df_range * wavlen(keV) * kmax**2 / df_phase_max)
@@ -576,9 +500,10 @@ def ChromaticDefocusDistribution(Cc, dE, keV, ap):
     #SetScale/I x -df_range, df_range, "", defocus_distribution
     for x in range(len(defocus_distribution)):
         defocus_distribution[x] = N*math.exp( -math.log(2) * (2*defocus_distribution[x] / H)**2 )
+    
     return defocus_distribution
 
-def stempot(xmax,ymax,nx,ny,atms,pixelshift,scalefactor):
+def stempot(xmax,ymax,nx,ny,atms,scalefactor):
     """function V = stempot(xmax,ymax,nx,ny,potfile)
     %  STEMPOT Generate a Projected Potential
     %  inputs xmax, ymax are the size of the slice in angstroms
@@ -596,13 +521,6 @@ def stempot(xmax,ymax,nx,ny,atms,pixelshift,scalefactor):
     Zatom = atms.get_atomic_numbers()
     #translate atoms such that the center of mass is in the center of the computational cell
     com = atms.get_center_of_mass()
-    #com = [ 44.40963074 , 44.65497562 , 44.90406073] #for AuNP
-    com = numpy.array(com)
-    #print 'com',com -0.149836425, 0.29967285, 0
-    #com += [0.41205016875, 0.6742639125, 0] #for rotated line profile 
-    #com += [-0.149836425, 0.29967285, 0]  #for AuNP
-    #com += pixelshift
-    #print 'com+pixelshift',com
     cop = xmax/2.0
     trans = [cop-i for i in com]
     atms.translate(trans)
@@ -631,19 +549,18 @@ def stempot(xmax,ymax,nx,ny,atms,pixelshift,scalefactor):
     #A fraction of the atom must be assigned to the closest gridpoints
     #to avoid sum and difference frequencies appearing in the image
     #grid point to the left of the atom
-    ix = numpy.array([math.floor(axi/dx) for axi in ax])
-    #apply periodic boundary conditions
-    iax = numpy.array([math.fmod(iaxi,nx) for iaxi in ix])
-    ibx = numpy.array([math.fmod(iaxi+1,nx) for iaxi in ix])
+    iax = numpy.array([math.floor(axi/dx)+1 for axi in ax])
+    #create periodic boundary conditions
+    ibx=numpy.array([math.fmod(iaxi,nx)+1 for iaxi in iax])
     #fraction of atom at iax
-    fax = numpy.array([1-math.fmod((axi/dx),1 ) for axi in ax])
+    fax = numpy.array([1-math.fmod((axi/dx),1 ) for axi in ax]) 
     #grid point above the atom
-    iy = numpy.array([math.floor(ayi/dy) for ayi in ay])
-    #apply periodic boundary conditions
-    iay = numpy.array([math.fmod(iayi,ny) for iayi in iy])
-    iby = numpy.array([math.fmod(iayi+1,ny) for iayi in iy])
+    iay = numpy.array([math.floor(ayi/dy)+1 for ayi in ay])
+    #create periodic boundary conditions
+    iby = numpy.array([math.fmod(iayi,ny)+1 for iayi in iay])
     #fraction of atom at iay 
     fay = numpy.array([1-math.fmod((ayi/dy),1 ) for ayi in ay])
+    
     #Add each atom to the potential grid
     V1 = numpy.array([fax[i] * fay[i] * (Zatom[i]**zed) for i in range(len(fax))])
     V2 = numpy.array([(1-fax[i]) * fay[i] * (Zatom[i]**zed) for i in range(len(fax))])
@@ -659,8 +576,7 @@ def stempot(xmax,ymax,nx,ny,atms,pixelshift,scalefactor):
        V[ibx[j],iay[j]] += V2[j]
        V[iax[j],iby[j]] += V3[j]
        V[ibx[j],iby[j]] += V4[j]
-    rev_trans = [-1.0*i for i in trans]
-    atms.translate(rev_trans)
+    
     return V
 
 def wavlen(keV):
@@ -670,7 +586,7 @@ def wavlen(keV):
 
 def SwitchToAngstroms(aber):
     '''Function to switch aberrations wave into Angstroms instead of natural units'''
-    naber = numpy.copy(aber)
+    naber = [[0.0,0.0] for i in range(12)]
     #C1, A1, A3, B2, all start in nm
     for i in range(0,4):
         naber[i][0] = 10*aber[i][0]
@@ -680,14 +596,8 @@ def SwitchToAngstroms(aber):
     #C5, A5 in mm
     for i in range(10,12):
         naber[i][0] = 1e7*aber[i][0]
+    
     return naber
-
-def Gauss2D(x, center_x, width_x, y, center_y, width_y, height=1.0):
-    """Returns a 2D gaussian """
-    g = math.exp(-0.5*((center_x-x)/width_x)**2)/(width_x*(2.0*math.pi)**0.5)
-    g *= math.exp(-0.5*((center_y-y)/width_y)**2)/(width_y*(2.0*math.pi)**0.5)
-    g *= height
-    return g
 
 def Gauss(center_x, center_y, width_x, width_y, height=1.0):
     """Returns a gaussian function with the given parameters"""
@@ -736,5 +646,5 @@ def find_stem_coeff(Optimizer, indiv):
             alpha*=10
         else:
             break
-    indiv.fitness=indiv.energy/indiv[0].get_number_of_atoms()+alpha*chisq
+    indiv.fitness=indiv.energy+alpha*chisq
     return alpha, indiv

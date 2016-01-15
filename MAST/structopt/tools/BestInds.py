@@ -1,15 +1,12 @@
 import os
 from operator import attrgetter
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt BestInds.py, ASE must be installed."
+from ase import Atom, Atoms
 from MAST.structopt.inp_out.write_xyz import write_xyz
 import logging
 try:
     from mpi4py import MPI
 except:
-    print "NOTE: mpi4py is not installed. To use certain features in Structopt BestInds.py, mpi4py must be installed."
+    pass
 
 def BestInds(pop, bests, Optimizer, writefile=False, fname=None):
     """Function to keep track of the best individuals throughout an optimization
@@ -84,7 +81,7 @@ def BestInds(pop, bests, Optimizer, writefile=False, fname=None):
         if len(bests) > Optimizer.number_of_bests:
             logger.info('Removing extra {0} structures from best list'.format(len(bests)-Optimizer.number_of_bests))
             bests = bests[0:Optimizer.number_of_bests]
-    if (('stem' in Optimizer.fitness_scheme) and (Optimizer.generation % 10 == 0) and (writefile == True)) or (('stem' not in Optimizer.fitness_scheme) and (writefile == True)):
+    if writefile==True:
         if fname==None:
             try:
                 rank = MPI.COMM_WORLD.Get_rank()

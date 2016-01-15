@@ -29,8 +29,7 @@ def write_individual(individ, indivfile):
     indivfile.write('purebulkenpa = {0}\n'.format(individ.purebulkenpa))
     indivfile.write('natomsbulk = {0}\n'.format(individ.natomsbulk))
     indivfile.write('fingerprint = {0}\n'.format(individ.fingerprint))
-    if hasattr(individ, 'swaplist'):
-        indivfile.write('swaplist = {0}\n'.format(individ.swaplist))
+    indivfile.write('swaplist = {0}\n'.format(individ.swaplist))
     #Write additional structure information
     indivfile.write('bulki\n')
     write_xyz(indivfile, individ.bulki)
@@ -38,18 +37,15 @@ def write_individual(individ, indivfile):
     indivfile.write('bulko\n')
     write_xyz(indivfile, individ.bulko)
     indivfile.write('bulko cell = {0}\n'.format(get_atom_cell(individ.bulko)))
-    if hasattr(individ, 'box'):
-        indivfile.write('box\n')
-        write_xyz(indivfile, individ.box)
-        indivfile.write('box cell = {0}\n'.format(get_atom_cell(individ.box)))
-    if hasattr(individ, 'vacancies'):
-        indivfile.write('vacancies\n')
-        write_xyz(indivfile, individ.vacancies)
-        indivfile.write('vacancies cell = {0}\n'.format(get_atom_cell(individ.vacancies)))
-    if hasattr(individ, 'swaps'):
-        indivfile.write('swaps\n')
-        write_xyz(indivfile, individ.swaps)
-        indivfile.write('swaps cell = {0}\n'.format(get_atom_cell(individ.swaps)))
+    indivfile.write('box\n')
+    write_xyz(indivfile, individ.box)
+    indivfile.write('box cell = {0}\n'.format(get_atom_cell(individ.box)))
+    indivfile.write('vacancies\n')
+    write_xyz(indivfile, individ.vacancies)
+    indivfile.write('vacancies cell = {0}\n'.format(get_atom_cell(individ.vacancies)))
+    indivfile.write('swaps\n')
+    write_xyz(indivfile, individ.swaps)
+    indivfile.write('swaps cell = {0}\n'.format(get_atom_cell(individ.swaps)))
     indivfile.write('Finish')
     indivfile.close()
     return

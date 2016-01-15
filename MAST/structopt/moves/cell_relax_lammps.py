@@ -1,10 +1,6 @@
 import os
 import copy
 from MAST.structopt.tools.lammps import LAMMPS
-try:
-    from mpi4py import MPI
-except ImportError:
-    pass
 
 def cell_relax_lammps(indiv, Optimizer):
     """Move function to perform Lammps box/relax for cell. Intended for use in Crystal Optimization
@@ -34,15 +30,7 @@ def cell_relax_lammps(indiv, Optimizer):
     if passflag:
         filesL = [ Optimizer.pot_file ]
         if Optimizer.lammps_keep_files:
-            rank = 0
-            path = os.path.join(os.getcwd(),'{0}-rank{1}'.format(Optimizer.filename,rank))
-            if not os.path.exists(os.path.join(path,'LAMMPSFiles')):
-                            os.mkdir(os.path.join(path,'LAMMPSFiles'))
-
-            real_rank = MPI.COMM_WORLD.Get_rank()
-            tmpdir = os.path.join(os.path.join(path, 'LAMMPSFiles'),'rank-{0}'.format(real_rank))
-           # calc2 = LAMMPS(parameters=parameters, files=filesL,keep_tmp_files=True, tmp_dir=os.getcwd()+'/'+Optimizer.filename+'/Lammpsrun2/')
-            calc2 = LAMMPS(parameters=parameters, files=filesL,keep_tmp_files=True, tmp_dir=tmpdir)
+            calc2 = LAMMPS(parameters=parameters, files=filesL,keep_tmp_files=True, tmp_dir=os.getcwd()+'/'+Optimizer.filename+'/Lammpsrun2/')
         else:
             calc2 = LAMMPS(parameters=parameters, files=filesL)
         atmsdup=indiv[0].copy()

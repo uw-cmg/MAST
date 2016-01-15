@@ -29,7 +29,7 @@ def read_output(folder,genealogytree=False,natoms=None, loggername=None):
         logger = logging.getLogger(Optimizer.loggername)
     files=os.listdir(folder)
     for filename in files:
-        if 'All_Energies' in filename:
+        if ('All_Energies' in filename) and not ('png' in filename): #TTM 20151030 do not process a plot file if it was created first.
             if loggername:
                 logger.info('Reading from All_Energies file.  Plotting all energies vs. generation')
             f=open(os.path.join(folder,filename),'r')
@@ -91,11 +91,13 @@ def read_output(folder,genealogytree=False,natoms=None, loggername=None):
                 plt.title('Energy Evolution')
                 plt.xlim([0,len(generation)])
                 plt.savefig('Plot-Peratom-{0}.png'.format(filename))
-        if 'Summary' in filename:
+        if ('Summary' in filename) and not ('png' in filename): #TTM 20151030 do not parse plot graphics if they happened to have been created first
+            #print 'HKK :: filename' : filename
             if 'StructureSummary' not in filename:
                 if loggername:
                     logger.info('Plotting Fitness min, max and medium vs. generation')
                 f=open(os.path.join(folder,filename),'r')
+                #print 'HKK :: file', os.path.join(folder,filename) 
                 line0=f.readline()
                 line1=f.readline().split(':')
                 bulkepa=float(line1[1])
@@ -106,6 +108,7 @@ def read_output(folder,genealogytree=False,natoms=None, loggername=None):
                 for line in f.readlines():
                     i=0
                     for value in line.split(' ',6):
+                        #print 'HKK ::' , value
                         if i <6:
                             data[labels[i]].append(float(value))
                         else:
@@ -219,7 +222,7 @@ def read_output(folder,genealogytree=False,natoms=None, loggername=None):
                 plt.ylabel('Energy Difference, eV')
                 plt.title('Fingerprint Distance vs. Energy, Generation={0}'.format(i))
                 plt.savefig('Plot-FpDist-{0}-gen{1}.png'.format(filename,i))
-        if 'Genealogy' in filename:
+        if ('Genealogy' in filename) and (not 'png' in filename): #TTM do not try to process any Genealogy*.png plots
             if loggername:
                 logger.info('Plotting bar plot of mutation success')
             f = open(os.path.join(folder,filename),'r')

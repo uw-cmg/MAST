@@ -1,0 +1,115 @@
+$mast
+system_name Fe_Au1
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 Fe
+X2 Au
+end
+
+#HK : begin lattice and coordinates irrelavent for defect type calc, where initial coordinates (POSCAR) are required to provided.
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$ingredients
+begin GAvasp
+mast_nodes 1
+mast_multiplyencut 1.5
+mast_walltime 4
+#mast_ppn 1
+mast_queue morgan1
+mast_ppn 8
+#mast_queue default
+#mast_ppn 1
+#mast_ppn 16
+#mast_queue pre
+mast_exec python /home/usitguest/MAST-tam/MAST/structopt/Optimizer.py
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+mast_program   structopt
+## HK : INCAR parameters. Feel free to change to low accuracy calc (Already low) for testing.
+istart 0
+ibrion 2
+nsw 3
+#nsw 39		# HK : In the current setting, if one structure did not converged for 3 runs, A low fitness(high energy) is arbitrary assigned so that this structure is excluded. 
+isif 2
+ismear 0
+sigma 0.2
+encut 300
+#encut 750
+npar 1
+lcharg False
+lwave False
+ediff 1E-3
+prec Accurate
+mast_kpoints 1x1x1 M
+mast_xc PBE
+exec_mast //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB > vasp.out
+## HK : GA parameters
+structure  Defect
+optimizer_type GA
+atomlist [('Fe', 0, 55.845, -4.000), ('Au', 1, 196.966, -7.000)]
+#atomlist [('Si', 0, 28.0855, -4.647),('C', 1, 12.011, -7.371)] # HK: (Atom type, # of interstitial, mass, chem.pot)
+#atomlist [('Si', 0, 28.0855, -4.647),('C', 4, 12.011, -7.371)] # HK: (Atom type, # of interstitial, mass, chem.pot)
+solidcell [5.75, 5.75, 5.75]
+#solidcell [9.147, 9.147, 9.147]			#HK: Change 'solidcell' and 'solidfile' to use smaller cell for test run. Currently using 64 atom SiC POSCAR.
+solidfile //home/usitguest/USIT/dropbox_app/POSCAR_bcc
+evalsolid false
+filename 'FeAu'
+natoms 1
+#natoms 4
+####sf 10 # size factor; might be a radius or might be a volume which defines the region which must be relaxed; for LAMMPS this parameter should be set to the defect region; for VASP, relax the whole cell.
+maxgen 3 								# HK: Convergence Criteria. Make 'maxgen' and reqrep small for test run.
+reqrep 2
+tolerance 0.15 							# HK: Convergence Criteria. maximum difference between the fitness of two structures for them to be considered equivalent. Can be large for test run.
+nindiv 5
+#nindiv 15								# HK: Number of individual
+r_ab 1.6								# HK:'size' is the radius of sphere for initial defect region. Defects(interstitials) are placed within this volume, keeping distance 'r_ab' from host atoms. Tune this parameters for fast convergence in which defect structure is pre-known.
+size 2.6		
+algorithm_type 'lambda+mu'
+calc_method MAST_VASP
+cxpb 0.55
+mutpb 0.40
+cx_scheme cxTPA
+fitness_scheme totalenfit
+natural_selection_scheme best
+selection_scheme fuss
+fusslimit 5 
+convergence_scheme gen_rep_min
+predator mutation_dups
+demin 0.1
+mutation_options ['lattice_alteration','lattice_alteration_rdrd','rotation_geo','rotation','random_replacement']
+genealogy True
+genealogytree True
+allenergyfile True
+number_of_bests 40
+best_inds_list True
+postprocessing True
+finddefects True
+parallel True 
+alloy False
+end
+
+$end
+
+$recipe
+perfect_opt1 (GAvasp)
+$end

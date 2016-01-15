@@ -27,29 +27,20 @@ def totalenfit(indiv, Optimizer):
         os.chdir(cwd)
         f=open('problem-structures.xyz','a')
         totalsol = indiv[0].copy()
-        if not ('stem' in Optimizer.fitness_scheme):
-            totalsol.extend(indiv.bulki)
+        totalsol.extend(indiv.bulki)
         write_xyz(f,totalsol,data='Starting structure hindex={0}'.format(indiv.history_index))
         indiv.energy = 10000
         f.close()
         print '    Writing structure to problemstructures.xyz file. Structure (hindex) : '+indiv.history_index
         print '    Setting individual energy to 50000.'
-        if not ('stem' in Optimizer.fitness_scheme):
-            outs = [10000, starting.bulki, starting, stro]
-        else:
-            outs = [10000, starting, starting, stro]
+        outs = [10000, starting.bulki, starting, stro]
     indiv = outs[2]
     indiv.energy = outs[0]
     stro=outs[3]
     if Optimizer.structure == 'Defect' or Optimizer.structure=='Surface':
         indiv.bulki = outs[1]
-    if not ('stem' in Optimizer.fitness_scheme):
-        indiv.fitness = indiv.energy
-        cutoff = Optimizer.energy_cutoff_factor*(len(indiv[0])+len(indiv.bulki))
-    else:
-        indiv.fitness = indiv.energy/indiv[0].get_number_of_atoms()
-        cutoff = Optimizer.energy_cutoff_factor*(len(indiv[0]))
-    if abs(indiv.fitness) > cutoff:
+    indiv.fitness = indiv.energy
+    if abs(indiv.fitness) > Optimizer.energy_cutoff_factor*(len(indiv[0])+len(indiv.bulki)):
         indiv.fitness=10000
         message = 'Warning: Found oddly large energy from Lammps in structure HI={0}'.format(indiv.history_index)
         logger.warn(message)

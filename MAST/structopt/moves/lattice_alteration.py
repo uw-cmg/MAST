@@ -26,10 +26,7 @@ def lattice_alteration(indiv, Optimizer):
         positions=indiv[0].get_positions()
     if len(positions) != 0:
         try:
-            if 'stem' in Optimizer.fitness_scheme:
-                natomsmove=random.randint(1,len(positions)/50)
-            else:
-                natomsmove=random.randint(1,len(positions)/5)
+            natomsmove=random.randint(1,len(positions)/5)
         except ValueError:
             natomsmove=1
         ratmlocnew=[0]*natomsmove

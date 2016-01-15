@@ -5,7 +5,6 @@ import random
 import math
 import pdb
 import logging
-import numpy as np
 from MAST.structopt import inp_out
 from MAST.structopt import tools
 from MAST.structopt import generate
@@ -13,10 +12,7 @@ from MAST.structopt import switches
 from MAST.structopt.switches.predator_switch import predator_switch
 from MAST.structopt import fingerprinting
 from MAST.structopt import post_processing as pp
-try:
-    from ase import Atom, Atoms
-except ImportError:
-    print "NOTE: ASE is not installed. To use Structopt Optimizer.py, ASE must be installed."
+from ase import Atom, Atoms
 try:
     from mpi4py import MPI
 except ImportError:
@@ -32,23 +28,6 @@ class Optimizer():
         else:
             parameters = inp_out.read_parameter_input({'atomlist':[('Xx',1,0,0)],'structure':'Cluster'}, uselogger)
         self.__dict__.update(parameters)
-        if 'stem' in parameters['fitness_scheme']:
-            try:
-                rank = MPI.COMM_WORLD.Get_rank()
-            except:
-                rank = 0
-            if rank == 0 :
-                nk = self.stemcalc.parameters['Pixels']
-                self.stemcalc.psf = np.empty([nk,nk],dtype=float)
-                fileobj = open('PSF.txt', 'r')
-                lines = fileobj.readlines()
-                for x in range(0,nk):
-                    self.stemcalc.psf[x] = lines[x].split()
-                fileobj.close()
-                #self.stemcalc.psf = tools.StemCalc.get_probe_function(self.stemcalc.parameters)
-            else: 
-                self.stemcalc.psf = None           
-            self.stemcalc.psf = MPI.COMM_WORLD.bcast(self.stemcalc.psf,root=0)
         if self.loggername:
             global logger
             logger = logging.getLogger(self.loggername)
@@ -289,7 +268,7 @@ class Optimizer():
             end_signal = None
         end_signal = comm.bcast(end_signal, root=0)
         return end_signal    
-
+    
     def algorithm_parallel(self):
         """Subprogram for running parallel version of GA
         Requires MPI4PY"""
@@ -319,11 +298,10 @@ class Optimizer():
                 maplist=[[] for n in range(ntimes)]
                 strt=0
                 for i in range(len(maplist)):
-                    maplist[i]=[indi for indi in invalid_ind[strt:comm.Get_size()+strt]]
-          #          maplist[i]=[[self,indi] for indi in invalid_ind[strt:comm.Get_size()+strt]]
+                    maplist[i]=[[self,indi] for indi in invalid_ind[strt:comm.Get_size()+strt]]
                     strt+=comm.Get_size()
                 for i in range(nadd):
-                    maplist[len(maplist)-1].append(None)
+                    maplist[len(maplist)-1].append([None,None])
             else:
                 ntimes=None
             ntimes = comm.bcast(ntimes,root=0)
@@ -333,14 +311,11 @@ class Optimizer():
                     one=maplist[i]
                 else:
                     one=None
-                one = comm.scatter(one,root=0)
-                logger.info('M:geometry scattering')
-                out = switches.fitness_switch(self,one)
-                logger.info('M:fitness evaluation done')
-                out = comm.gather(out,root=0)
-                logger.info('M:gethering done')
+                ind =comm.scatter(one,root=0)
+                out = switches.fitness_switch(ind)
+                outt = comm.gather(out,root=0)
                 if rank==0:
-                    outs.extend(out)
+                    outs.extend(outt)
             if rank==0:
                 for i in range(len(invalid_ind)):
                     invalid_ind[i] = outs[i][0]
@@ -350,8 +325,9 @@ class Optimizer():
                 pop = self.generation_eval(pop)
                 self.write()
             convergence =comm.bcast(self.convergence, root=0)
+        
         if rank==0:
-            logger.info('Run algorithm stats, generation:{0}'.format(self.generation))
+            logger.info('Run algorithm stats')
             end_signal = self.algorithm_stats(self.population)
         else:
             end_signal = None
@@ -648,13 +624,6 @@ class Optimizer():
             Gen=str(self.generation),Fitmin=repr(mine),Fitavg=repr(mean),Fitmed=repr(medium),Fitmax=repr(maxe),
             Std=repr(std),time=repr(time.asctime( time.localtime(time.time()) ))))
     
-        outputlist = []
-        for ind in pop:
-            outputlist.append([ind.fitness,ind.energy/ind[0].get_number_of_atoms()])
-        fitness_min = min([fitness for fitness, eatom in outputlist])
-        eatom_min = [one[1] for one in outputlist if one[0]==fitness_min][0]
-        print 'Gen,fitness,eatom,chi2', self.generation,fitness_min,eatom_min,fitness_min-eatom_min
-
         # Set new index values and write population
         index1 = 0
         for ind in pop:
@@ -1104,13 +1073,10 @@ class Optimizer():
         return self
         
     def write(self,filename=None, restart=True):
-        if 'stem' in self.fitness_scheme:
-            pass
+        if filename:
+            inp_out.write_optimizer(self, filename, restart)
         else:
-            if filename:
-                inp_out.write_optimizer(self, filename, restart)
-            else:
-                inp_out.write_optimizer(self, self.optimizerfile, restart)
+            inp_out.write_optimizer(self, self.optimizerfile, restart)
         return
     
 if __name__ == "__main__":
