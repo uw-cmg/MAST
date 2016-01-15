@@ -222,7 +222,6 @@ class VaspChecker(BaseChecker):
         if not os.path.isfile(opath):
             self.logger.info("No OUTCAR at %s; not complete." % opath)
             return False
-
         myoutcar = Outcar(opath)
         
         #hw 04/19/13
