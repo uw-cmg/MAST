@@ -14,31 +14,31 @@ def get_defect_indiv(Optimizer):
     """
     Function to generate a structopt Individual class structure with a defect structure.
     Inputs:
-    	Optimizer = structopt Optimizer class object
+        Optimizer = structopt Optimizer class object
     Outputs:
-    	individ = structopt Individual class object containing defect structure data
+        individ = structopt Individual class object containing defect structure data
     """
     if not Optimizer.solidbulk:
-		#Initialize Bulk - Generate or load positions of bulk solid
-		try:
-		    rank = MPI.COMM_WORLD.Get_rank()
-		except:
-		    rank = 0
-		outfilename = os.path.join(os.path.join(os.getcwd(),Optimizer.filename+'-rank'+repr(rank)),'Bulkfile.xyz')
-		if Optimizer.evalsolid:
-			if Optimizer.parallel:
-			    from MAST.structopt.tools.setup_calculator import setup_calculator
-			    Optimizer.calc = setup_calculator(Optimizer)
-			bulk1, PureBulkEnpa, stro = gen_solid(Optimizer.solidfile,
-				Optimizer.solidcell,outfilename,Optimizer.calc,Optimizer.calc_method)
-			Optimizer.output.write(stro)
-		else:
-			bulk1 = gen_solid(Optimizer.solidfile,Optimizer.solidcell,outfilename)
-			PureBulkEnpa = 0
-		natomsbulk = len(bulk1)
-		Optimizer.solidbulk = bulk1.copy()
-		Optimizer.purebulkenpa = PureBulkEnpa
-		Optimizer.natomsbulk = natomsbulk
+                #Initialize Bulk - Generate or load positions of bulk solid
+                try:
+                    rank = MPI.COMM_WORLD.Get_rank()
+                except:
+                    rank = 0
+                outfilename = os.path.join(os.path.join(os.getcwd(),Optimizer.filename+'-rank'+repr(rank)),'Bulkfile.xyz')
+                if Optimizer.evalsolid:
+                        if Optimizer.parallel:
+                            from MAST.structopt.tools.setup_calculator import setup_calculator
+                            Optimizer.calc = setup_calculator(Optimizer)
+                        bulk1, PureBulkEnpa, stro = gen_solid(Optimizer.solidfile,
+                                Optimizer.solidcell,outfilename,Optimizer.calc,Optimizer.calc_method)
+                        Optimizer.output.write(stro)
+                else:
+                        bulk1 = gen_solid(Optimizer.solidfile,Optimizer.solidcell,outfilename)
+                        PureBulkEnpa = 0
+                natomsbulk = len(bulk1)
+                Optimizer.solidbulk = bulk1.copy()
+                Optimizer.purebulkenpa = PureBulkEnpa
+                Optimizer.natomsbulk = natomsbulk
     # Identify nearby atoms for region 2 inclusion
     bulk = Optimizer.solidbulk.copy()
     if not Optimizer.random_loc_start:
@@ -61,7 +61,7 @@ def get_defect_indiv(Optimizer):
     else:
         nbulk = bulk.copy()
         nr2 = Atoms(pbc=True, cell=bulk.get_cell())
-    	# Generate random individual
+        # Generate random individual
     if 'sphere' in Optimizer.generate_flag:
         ind = gen_pop_sphere(Optimizer.atomlist,Optimizer.size)
     elif 'dumbbell' in Optimizer.generate_flag:
@@ -70,13 +70,13 @@ def get_defect_indiv(Optimizer):
             if c > 0:
                 dums = generate_dumbbells(c, dumbbellsym=sym, nindiv=1, solid = Optimizer.solidbulk, size=Optimizer.size)[0]
                 ind.extend(dums)
-	## HKK: adding plate
+        ## HKK: adding plate
     elif 'plate' in Optimizer.generate_flag:
         #print 'HKK:: " plate" as Generate_flag'
         #print type(gen_pop_plate)
         #print gen_pop_plate.__file__
         ind = gen_pop_plate(Optimizer.atomlist,Optimizer.size)
-	## HKK: adding plate		
+        ## HKK: adding plate            
     else:
         #print 'HKK:: "box" as Generte flag'
         ind = gen_pop_box(Optimizer.atomlist,Optimizer.size)
@@ -97,8 +97,11 @@ def get_defect_indiv(Optimizer):
     individ.natomsbulk = Optimizer.natomsbulk
     
     # Combine individual with R2
-    icom = ind.get_center_of_mass()
-    ind.translate(-icom)
+    if Optimizer.natoms > 1: ## ZS: We will not recenter the atoms if natoms=1
+        icom = ind.get_center_of_mass()
+        ind.translate(-icom)
+    else:
+        pass
     ind.extend(nr2)
     ind.set_pbc(True)
     ind.set_cell(bulk.get_cell())
@@ -127,7 +130,7 @@ def get_defect_indiv(Optimizer):
                 bul.append(Atom(position=pos))
                 alist = [one for one in bul if one.symbol==sym]
                 alistd = [(bul.get_distance(len(bul)-1,one.index),one.index)
-                			for one in alist]
+                                        for one in alist]
                 alistd.sort(reverse=True)
                 bul.pop()
                 while count > 0:
@@ -146,6 +149,6 @@ def get_defect_indiv(Optimizer):
         for atm in nalist:
             newind.append(atm)
         newind.set_cell(individ[0].get_cell())
-        newind.set_pbc(True)									
+        newind.set_pbc(True)                                                                    
         individ[0] = newind
     return individ
