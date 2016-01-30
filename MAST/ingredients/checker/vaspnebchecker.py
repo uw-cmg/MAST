@@ -4,7 +4,7 @@
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-04-25
 ##############################################################
-from pymatgen.io.vaspio import Poscar
+from pymatgen.io.vasp import Poscar
 from pymatgen.io.vaspio import Outcar
 from pymatgen.io.vaspio import Potcar
 from pymatgen.io.vaspio import Incar
@@ -74,7 +74,10 @@ class VaspNEBChecker(VaspChecker):
                 newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
                 sidx = sidx + 1
         while imct < len(image_structures):
+            import numpy as np
+            myvels = np.zeros((image_structures[0].num_sites,3),'float')
             imposcar = Poscar(image_structures[imct])
+            imposcar.velocities=myvels
             num_str = str(imct).zfill(2)
             impath = os.path.join(myname, num_str)
             impospath = os.path.join(myname, "POSCAR_" + num_str)
