@@ -23,6 +23,7 @@ import os
 import shutil
 import logging
 import subprocess
+import numpy as np
 from MAST.ingredients.checker import BaseChecker
 class VaspChecker(BaseChecker):
     """VASP checker functions
@@ -124,7 +125,7 @@ class VaspChecker(BaseChecker):
             ing_label="original"
         newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
         newposcar=Poscar(newstr)
-        newposcar.write_file(os.path.join(childpath,newname))
+        self.write_poscar_with_zero_velocities(newposcar, os.path.join(childpath, newname))
         return
 
     def update_atom_index_for_complete(self):
@@ -168,7 +169,17 @@ class VaspChecker(BaseChecker):
                         myatomindex.update_atom_indices_from_structure(mystr, ing_label, manname)
                 
         return
-
+    def write_poscar_with_zero_velocities(self, pmg_Poscar, fpath):
+        """Write a POSCAR-type file but set zero velocities
+            Args:
+                pmg_Poscar: pymatgen Poscar objecdt
+                fpath: filename
+        """
+        mystruc = pmg_Poscar.structure
+        myvels = np.zeros((mystruc.num_sites,3),'float')
+        pmg_Poscar.velocities=myvels
+        pmg_Poscar.write_file(fpath)
+        return
     def forward_initial_structure_file(self, childpath, newname="POSCAR"):
         """Forward the initial structure.
             For VASP, this is the POSCAR. This function is
@@ -364,7 +375,7 @@ class VaspChecker(BaseChecker):
             newstruc = sxtend.graft_coordinates_onto_structure(coordstrucs[0])
             my_poscar.structure=newstruc.copy()
         dirutil.lock_directory(name)
-        my_poscar.write_file(pospath)
+        self.write_poscar_with_zero_velocities(my_poscar, pospath)
         dirutil.unlock_directory(name)
         return my_poscar
 
@@ -602,7 +613,7 @@ class VaspChecker(BaseChecker):
         #phposcar.selective_dynamics = sdarray
         dirutil.lock_directory(name)
         os.rename(pname, pname + "_no_sd")
-        phposcar.write_file(pname)
+        self.write_poscar_with_zero_velocities(phposcar, pname)
         dirutil.unlock_directory(name)
         return
 
@@ -1091,7 +1102,9 @@ class VaspChecker(BaseChecker):
             For VASP, this is CONTCAR.
         """
         mycontcar = Poscar(mystruc)
-        mycontcar.write_file(os.path.join(self.keywords['name'],'CONTCAR'))
+        cname = os.path.join(self.keywords['name'],'CONTCAR')
+        self.write_poscar_with_zero_velocities(mycontcar, cname)
+        return
     def has_starting_structure_file(self):
         """Evaluate whether the ingredient has a starting
             structure file. For VASP, this is a POSCAR.

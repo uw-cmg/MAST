@@ -74,10 +74,7 @@ class VaspNEBChecker(VaspChecker):
                 newstrucs.append(sxtend.graft_coordinates_onto_structure(coordstrucs[sidx]))
                 sidx = sidx + 1
         while imct < len(image_structures):
-            import numpy as np
-            myvels = np.zeros((image_structures[0].num_sites,3),'float')
             imposcar = Poscar(image_structures[imct])
-            imposcar.velocities=myvels
             num_str = str(imct).zfill(2)
             impath = os.path.join(myname, num_str)
             impospath = os.path.join(myname, "POSCAR_" + num_str)
@@ -89,7 +86,7 @@ class VaspNEBChecker(VaspChecker):
                 else:
                     imposcar.structure=newstrucs[imct-1].copy()
             dirutil.lock_directory(myname)
-            imposcar.write_file(impospath)
+            self.write_poscar_with_zero_velocities(imposcar, impospath)
             dirutil.unlock_directory(myname)
             try:
                 os.makedirs(impath)
@@ -97,7 +94,7 @@ class VaspNEBChecker(VaspChecker):
                 self.logger.warning("Directory at %s already exists." % impath)
                 return None
             dirutil.lock_directory(impath)
-            imposcar.write_file(os.path.join(impath, "POSCAR"))
+            self.write_poscar_with_zero_velocities(imposcar, os.path.join(impath, "POSCAR"))
             dirutil.unlock_directory(impath)
             imct = imct + 1
         return
