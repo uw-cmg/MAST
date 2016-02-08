@@ -289,10 +289,9 @@ class DiffCoeff(ParsingInputFiles):
                 except ValueError: Edir_saddle[i] = Edir[i][1]
                 try: Edir_min[i] = float(Edir[i][0])
                 except ValueError: Edir_min[i] = Edir[i][0]
-       
         values['enebarr'] = self.get_barrier(Edir,Edir_saddle,Edir_min)
         values['v'] = self.get_v(vdir,vdir_num,vdir_denom)
-    values['HVf'] = self.get_HB_and_HVf(Hdir,numatom,'HVf')
+        values['HVf'] = self.get_HB_and_HVf(Hdir,numatom,'HVf')
         if model==8:
             values['HB'] = self.get_HB_and_HVf(Hdir,numatom,'HB')
         return values
@@ -313,7 +312,7 @@ class DiffCoeff(ParsingInputFiles):
         if model==8: 
             c = values['c'] 
             HB = values['HB'] 
-    # print all system information
+        # print all system information
         if model==5:
             print "FCC Five-Frequency Dilute Diffusion Model"
             print "FCC lattice constant [Angstrom]: {0:.4f}".format(a*10**8)
@@ -340,7 +339,6 @@ class DiffCoeff(ParsingInputFiles):
             print "Attempt Frequencies [THz]:  v23: {v23:.4f}  v24: {v24:.4f}  v33: {v33:.4f}  v34: {v34:.4f}  v44: {v44:.4f}".format(**v)
             print "Vacancy Formation Energy [eV]: {0:.4f}\n".format(HVf)
             print ""
-        
         try:
             temp = self.get_item_name('temp')['temp']
             tempstart = temp[0]
@@ -391,8 +389,6 @@ class DiffCoeff(ParsingInputFiles):
                 plt.ylabel('log$_{10}$$D$ (cm$^2$/s)')
                 plt.savefig('Diffusivity.png')
                 plt.show()
-    
-
         if model==14:
             fp = open('Diffusivity.txt','w+')
             fp.write('D_host(c) = D_host(0) * [ 1 + b1*c + b2*c^2 + ...]\n')
@@ -449,8 +445,6 @@ class DiffCoeff(ParsingInputFiles):
                 plt.ylabel('log$_{10}$$D$ (cm$^2$/s)')
                 plt.savefig('Diffusivity.png')
                 plt.show()
-
-    
         elif model==8:
             fp = open('Diffusivity.txt','w+')
             fp.write('1000/T[K^(-1)]    D_basal[cm^2/s]    D_c-axis[cm^2/s]\n')
