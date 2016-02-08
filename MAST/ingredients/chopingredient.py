@@ -771,7 +771,8 @@ class ChopIngredient(BaseIngredient):
             [pcs,pcr,thresh] = self.get_my_phonon_params()
             sxtend = StructureExtensions(struc_work1 = mystructure, name=self.keywords['name'])
             sdarr = sxtend.get_sd_array(pcs, pcr,thresh)
-            if sdarr == None:
+            if sum(sum(sdarr)) == 0:
+                raise MASTError(self.__class__.__name__,"Selective dynamics array was all false; no selective dynamics added for %s" % self.keywords['name'])
                 return
         self.checker.add_selective_dynamics_to_structure_file(sdarr)
 
