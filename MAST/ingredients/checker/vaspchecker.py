@@ -142,6 +142,10 @@ class VaspChecker(BaseChecker):
             self.logger.warning("Called update atom index for ingredient %s, but no atom indices exist." % self.keywords['name'])
             return
         mymeta=Metadata(metafile="%s/metadata.txt" % mydir)
+        phonon_label = mymeta.read_data("phonon_label")
+        if not (phonon_label == None): #Don't update atom indices for phonons
+            self.logger.debug("Skipping atom index update for phonon calculation %s" % self.keywords['name'])
+            return 
         scaling_label=mymeta.read_data("scaling_label")
         defect_label=mymeta.read_data("defect_label")
         neb_label=mymeta.read_data("neb_label")
