@@ -251,7 +251,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('CONTCAR' in os.listdir(abspath)):
-            return pmg.core.structure.from_file('%s/CONTCAR' % abspath)
+            return pmg.core.structure.IStructure.from_file('%s/CONTCAR' % abspath)
         elif ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
 
