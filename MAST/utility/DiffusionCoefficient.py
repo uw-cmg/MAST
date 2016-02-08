@@ -195,37 +195,37 @@ class ParsingInputFiles(object):
                 if os.path.isfile(vdir_num[freq]+'_FREQ') and os.path.isfile(vdir_num[freq]+'_FREQ'): # Reading data from FREQ files
                     fn=open(vdir_num[freq]+'_FREQ','r')
                     nthzlist=self.getinfo(fn.readline())
-            i=0
-            num_num=0
+                    i=0
+                    num_num=0
                     v_num[freq]=1.0
                     while i<len(nthzlist):
                         if abs(float(nthzlist[i]))>0.1: 
-                v_num[freq]=v_num[freq]*float(nthzlist[i])
-                num_num+=1
+                            v_num[freq]=v_num[freq]*float(nthzlist[i])
+                            num_num+=1
                         i+=1
-            fd=open(vdir_denom[freq]+'_FREQ','r')
+                    fd=open(vdir_denom[freq]+'_FREQ','r')
                     dthzlist=self.getinfo(fd.readline())
-            j=0
-            denom_num=0
+                    j=0
+                    denom_num=0
                     v_denom[freq]=1.0
                     while j<len(dthzlist):           
                         if abs(float(dthzlist[j]))>0.1: 
-                v_denom[freq]=v_denom[freq]*float(dthzlist[j])
-                denom_num+=1
+                            v_denom[freq]=v_denom[freq]*float(dthzlist[j])
+                            denom_num+=1
                         j+=1
-            if not num_num==denom_num+1: 
+                    if not num_num==denom_num+1: 
                         print 'WARNING: Numbers of non-zero frequencies at local minimum and at saddle point do not match! Please double-check the FREQ files of %s and %s'%(vdir_num[freq],vdir_denom[freq])
 
                 else: # Reading data from OUTCAR files
-                nthzlist = fileutil.grepme(vdir_num[freq]+'_OUTCAR', "2PiTHz")
+                    nthzlist = fileutil.grepme(vdir_num[freq]+'_OUTCAR', "2PiTHz")
                     num_num=len(nthzlist)
-            dthzlist = fileutil.grepme(vdir_denom[freq]+'_OUTCAR', "2PiTHz")
-                denom_num=len(dthzlist)
-                im_num=0
-                im_denom=0
-                if denom_num==num_num:
+                    dthzlist = fileutil.grepme(vdir_denom[freq]+'_OUTCAR', "2PiTHz")
+                    denom_num=len(dthzlist)
+                    im_num=0
+                    im_denom=0
+                    if denom_num==num_num:
                         for i in range(num_num):
-                        if 'f/i' in dthzlist[i]: im_denom+=1
+                            if 'f/i' in dthzlist[i]: im_denom+=1
                             if 'f/i' in nthzlist[i]: im_num+=1
                         if not im_num==0: 
                             print 'WARNING: Imaginary frequency found in the local minimum! Please check the OUTCAR of %s!'%vdir_num[freq]
@@ -242,7 +242,7 @@ class ParsingInputFiles(object):
                     for i in range(denom_num):    
                         if not 'f/i' in dthzlist[i]:
                             v_denom[freq]*=float(self.getinfo(dthzlist[i])[3])
-        v[freq]=v_num[freq]/v_denom[freq]
+                v[freq]=v_num[freq]/v_denom[freq]
         return v
 
 
