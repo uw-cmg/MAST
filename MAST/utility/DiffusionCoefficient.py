@@ -138,7 +138,7 @@ class ParsingInputFiles(object):
                 try: 
                     ene[key]=float(Hdir[keyword][key])
                 except ValueError: 
-            ene[key] = Hdir[keyword][key]
+                    ene[key] = Hdir[keyword][key]
             line = open(ene[key]+'_OSZICAR','r').readlines()      
                     pt = -1   
                     while not 'E0' in line[pt]: pt = pt - 1
