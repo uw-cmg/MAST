@@ -139,14 +139,14 @@ class ParsingInputFiles(object):
                     ene[key]=float(Hdir[keyword][key])
                 except ValueError: 
                     ene[key] = Hdir[keyword][key]
-            line = open(ene[key]+'_OSZICAR','r').readlines()      
+                    line = open(ene[key]+'_OSZICAR','r').readlines()      
                     pt = -1   
                     while not 'E0' in line[pt]: pt = pt - 1
                     ene[key] = float(self.getinfo(line[pt])[4])
             if keyword=='HVf':
-        return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
+                return ene['vac'] - (numatom - 1)*ene['perfect']/numatom
             elif keyword=='HB': 
-        return ene['perfect'] + ene['vac-sub'] - ene['sub'] - ene['vac']
+                return ene['perfect'] + ene['vac-sub'] - ene['sub'] - ene['vac']
     
     def get_barrier(self,Edir,Edir_saddle,Edir_min):
         """Obtaining the energy barriers.
@@ -166,7 +166,7 @@ class ParsingInputFiles(object):
                     pt = -1
                     while not 'E0' in line[pt]: pt = pt - 1
                     enesaddle[freq] = float(self.getinfo(line[pt])[4])
-    for freq in Edir.keys():
+        for freq in Edir.keys():
             if not len(Edir[freq])==1: 
                 try: eneend[freq]=float(Edir_min[freq])
                 except ValueError:
@@ -174,10 +174,10 @@ class ParsingInputFiles(object):
                     pt = -1
                     while not 'E0' in line[pt]: pt = pt - 1
                     eneend[freq] = float(self.getinfo(line[pt])[4])
-    for freq in Edir.keys():
+        for freq in Edir.keys():
             if len(Edir[freq])==1: enebarr[freq] = Edir[freq][0]
             else: enebarr[freq] = enesaddle[freq] - eneend[freq] 
-    return enebarr
+        return enebarr
     
     def get_v(self,vdir,vdir_num,vdir_denom):
         """Obtaining the attempt frequencies.
