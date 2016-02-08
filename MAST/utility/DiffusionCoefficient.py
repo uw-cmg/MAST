@@ -113,7 +113,7 @@ class ParsingInputFiles(object):
 
         struct = Poscar.from_file('POSCAR').structure
         os.system('rm POSCAR')
-        reduced = mg.symmetry.finder.SymmetryFinder(struct,0.001).get_primitive_standard_structure()   
+        reduced = mg.symmetry.analyzer.SpacegroupAnalyzer(struct,0.001).get_primitive_standard_structure()   
         data['No.'] = len(struct)
         if model==5:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
