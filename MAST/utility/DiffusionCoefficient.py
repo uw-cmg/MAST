@@ -19,6 +19,7 @@
 import sys, getopt, os
 import numpy as np
 import pymatgen as mg
+from pymatgen.io.vasp import Poscar
 from MAST.utility import fileutil
   
 class ParsingInputFiles(object):
@@ -109,7 +110,8 @@ class ParsingInputFiles(object):
         """
         data={'a':0,'c':0,'No.':0}
         os.system('cp '+latt+'_POSCAR POSCAR')
-        struct = mg.read_structure('POSCAR')
+
+        struct = Poscar.from_file('POSCAR').structure
         os.system('rm POSCAR')
         reduced = mg.symmetry.finder.SymmetryFinder(struct,0.001).get_primitive_standard_structure()   
         data['No.'] = len(struct)
