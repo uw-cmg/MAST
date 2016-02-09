@@ -17,7 +17,7 @@
 activate_command="$HOME/anaconda/bin/activate"
 testing_environment="mast_install_20160115"
 examples_located="$HOME/mast_2016_tam/MAST/examples"
-testdir="$HOME/mast_2016_tam/MAST/test/workflow_tests"
+testdir="$HOME/mast_2016_tam/MAST/test/workflow_test"
 #######
 
 
