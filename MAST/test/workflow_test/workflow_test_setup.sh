@@ -30,8 +30,8 @@ do
     cp -r $testdir/mini_mast_tree $mast_test_dir/.
     #submit workflow test to queue
     shortname=`echo $which_example | awk -F. '{print $1}'`
-    output="output_"shortname
-    submitscript="submit_"shortname".sh"
+    output="output_"$shortname
+    submitscript="submit_"$shortname".sh"
     bashcommand="bash $testdir/generic_mast_workflow.sh $mast_test_dir $examples_located $which_example $activate_command $testing_environment >> $output"
     cp $testdir/submit_stub.sh $testdir/$submitscript
     echo $bashcommand >> $testdir/$submitscript
