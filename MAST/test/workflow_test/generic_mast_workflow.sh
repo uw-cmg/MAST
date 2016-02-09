@@ -39,7 +39,7 @@ export MAST_CONTROL=$mast_test_dir/CONTROL
 which mast
 
 mast -i $examples_located"/"$which_example
-mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type ;d`
+mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type d`
 
 cd $mydir
 

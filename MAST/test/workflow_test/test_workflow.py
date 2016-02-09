@@ -27,18 +27,22 @@ class TestWorkflows(unittest.TestCase):
     """Test Workflows
     """
     def setUp(self):
-        os.chdir(testdir)
-        if not os.path.exists("childdir"):
-            os.mkdir("childdir")
-        shutil.copy("files/metadata.txt","childdir")
-
+        pass
+        return
     def tearDown(self):
-        for fname in ["POSCAR","XDATCAR","DYNMAT","OSZICAR","DYNMAT_combined","KPOINTS","POTCAR","INCAR","WAVECAR","CHGCAR","POSCAR_no_sd","XDATCAR_combined","CONTCAR","metadata.txt"]:
+        testlist=list()
+        testlist.append("simple_optimization.inp")
+        for testname in testlist:
+            shortname = testname.split(".")[0]
             try:
-                os.remove("childdir/%s" % fname)
+                pass
+                #os.remove("output_%s" % shortname)
             except OSError:
                 pass
-        os.rmdir("childdir")
-
+        myfiles = os.listdir(testdir)
+        for myfile in myfiles:
+            if "output_workflow_testing" in myfile:
+                os.remove(myfile)
+        return
     def test_none(self):
         self.assertTrue(True)
