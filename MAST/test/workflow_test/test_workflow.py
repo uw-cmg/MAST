@@ -13,21 +13,14 @@ from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 testname ="workflow_test"
-#oldcontrol = os.getenv("MAST_CONTROL")
-#oldrecipe = os.getenv("MAST_RECIPE_PATH")
-#oldscratch = os.getenv("MAST_SCRATCH")
-#print "Old directories:"
-#print oldcontrol
-#print oldrecipe
-#print oldscratch
 testdir = dirutil.get_test_dir(testname)
-
+import subprocess
+from MAST.test.workflow_test import workflow_setup
 
 class TestWorkflows(unittest.TestCase):
     """Test Workflows
     """
     def setUp(self):
-        pass
         return
     def tearDown(self):
         testlist=list()
@@ -44,5 +37,16 @@ class TestWorkflows(unittest.TestCase):
             if "output_workflow_testing" in myfile:
                 os.remove(myfile)
         return
-    def test_none(self):
-        self.assertTrue(True)
+
+    def test_simple_optimization(self):
+        mystatus=workflow_setup.generic_submit("simple_optimization.inp")
+        if mystatus == "Unfinished":
+            self.assertTrue(False)
+            return
+        elif mystatus == "Completed":
+            #do more checks here
+            self.assertTrue(True)
+            return
+        else:
+            self.assertTrue(False)
+            return
