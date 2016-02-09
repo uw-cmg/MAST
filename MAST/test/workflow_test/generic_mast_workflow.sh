@@ -53,6 +53,8 @@ do
     if [ -f "SUMMARY.txt" ]
     then
         echo "SUMMARY file found. Workflow completed."
+        echo "Workflow at:"
+        echo $mydir
         break
     fi
     sleep $sleep_interval
