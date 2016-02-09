@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N workflow_test
+#PBS -N output_workflow_testing
 #PBS -l nodes=1:ppn=1,pvmem=1000mb
 #PBS -l walltime=4:00:00
 ##export all environment variables. 

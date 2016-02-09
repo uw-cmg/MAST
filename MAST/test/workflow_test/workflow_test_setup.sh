@@ -27,7 +27,7 @@ do
     timestamp=`date +%Y%m%d"T"%H%M%S`
     mast_test_dir=$HOME"/MAST/workflow_test_"$timestamp
     mkdir $mast_test_dir
-    cp -r $testdir/mini_mast_tree $mast_test_dir/.
+    cp -r $testdir/mini_mast_tree/* $mast_test_dir/.
     #submit workflow test to queue
     shortname=`echo $which_example | awk -F. '{print $1}'`
     output="output_"$shortname
