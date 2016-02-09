@@ -44,6 +44,12 @@ class TestRunIngredient(unittest.TestCase):
         tearlist.append("writedir")
         tearlist.append(self.test_control)
         for tearfolder in tearlist:
+            for subitem in os.listdir(tearfolder):
+                subpath=os.path.join(tearfolder, subitem)
+                if os.path.isdir(subpath):
+                    shutil.rmtree(subpath)
+                else:
+                    os.remove(subpath)
             shutil.rmtree(tearfolder)
         os.environ['MAST_CONTROL'] = old_control
         os.environ['MAST_RECIPE_PATH'] = old_recipe
