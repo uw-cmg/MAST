@@ -49,7 +49,7 @@ def create_workflow_test_script(inputfile):
     # set up testing directory tree
     timestamp=time.strftime("%Y%m%dT%H%M%S")
     wtdir=myvars['workflow_test_directory']
-    mast_test_dir = os.path.join(wtdir,"workflow_test_%s" % timestamp)
+    mast_test_dir = os.path.join(wtdir,"output_test_%s" % timestamp)
     shutil.copytree("%s/mini_mast_tree" % wtdir, mast_test_dir)
     # set up output file and submission script
     shortname = inputfile.split(".")[0]
@@ -76,7 +76,9 @@ def generic_submit(inputfile):
     myqsub = MAST.submit.queue_commands.queue_submission_command(submitscript)
     qproc = subprocess.Popen(myqsub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     qproc.wait()
-    
+    if not (os.path.isfile(outputname)):
+        print "Sleep 5"
+        time.sleep(5)
     if not (os.path.isfile(outputname)):
         raise OSError("Test did not create output %s" % outputname)
     waitct=0

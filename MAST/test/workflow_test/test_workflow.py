@@ -28,14 +28,16 @@ class TestWorkflows(unittest.TestCase):
         for testname in testlist:
             shortname = testname.split(".")[0]
             try:
-                os.remove("output_%s" % shortname)
-                os.remove("submit_%s.sh" % shortname)
+                pass
+                #os.remove("output_%s" % shortname)
+                #os.remove("submit_%s.sh" % shortname)
             except OSError:
                 pass
         myfiles = os.listdir(testdir)
         for myfile in myfiles:
             if "output_workflow_testing" in myfile:
-                os.remove(myfile)
+                pass
+                #os.remove(myfile)
         return
 
     def test_simple_optimization(self):
@@ -61,6 +63,24 @@ class TestWorkflows(unittest.TestCase):
                     self.assertEquals(myenergy, "-20.145")
                     okays=okays+1
             self.assertEquals(okays, 3)
+            return
+        else:
+            self.assertTrue(False)
+            return
+    def test_neb_with_phonons(self):
+        [mystatus, my_test_dir]=workflow_setup.generic_submit("neb_with_phonons.inp")
+        if mystatus == "Unfinished":
+            self.assertTrue(False)
+            return
+        elif mystatus == "Completed":
+            recipedir = workflow_setup.get_finished_recipe_dir(my_test_dir)
+            myfile=MASTFile(os.path.join(recipedir,"diffcoeff_utility","Diffusivity.txt"))
+            okays=0
+            for myline in myfile.data:
+                if myline[0:3] == "1.0":
+                    self.assertEquals(myline.split()[1].strip(), "6.198170E-07")
+                    okays=okays+1
+            self.assertEquals(okays, 1)
             return
         else:
             self.assertTrue(False)
