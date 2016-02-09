@@ -28,8 +28,8 @@ class TestWorkflows(unittest.TestCase):
         for testname in testlist:
             shortname = testname.split(".")[0]
             try:
-                pass
-                #os.remove("output_%s" % shortname)
+                os.remove("output_%s" % shortname)
+                os.remove("submit_%s.sh" % shortname)
             except OSError:
                 pass
         myfiles = os.listdir(testdir)
@@ -39,13 +39,28 @@ class TestWorkflows(unittest.TestCase):
         return
 
     def test_simple_optimization(self):
-        mystatus=workflow_setup.generic_submit("simple_optimization.inp")
+        [mystatus, my_test_dir]=workflow_setup.generic_submit("simple_optimization.inp")
         if mystatus == "Unfinished":
             self.assertTrue(False)
             return
         elif mystatus == "Completed":
-            #do more checks here
-            self.assertTrue(True)
+            recipedir = workflow_setup.get_finished_recipe_dir(my_test_dir)
+            myfile=MASTFile(os.path.join(recipedir,"SUMMARY.txt"))
+            okays=0
+            for myline in myfile.data:
+                if "defect_int1_stat" in myline:
+                    myenergy=myline.split()[-1]
+                    self.assertEquals(myenergy, "-13.953")
+                    okays=okays+1
+                if "defect_vac1_stat" in myline:
+                    myenergy=myline.split()[-1]
+                    self.assertEquals(myenergy, "-10.623")
+                    okays=okays+1
+                if "defect_sub1_stat" in myline:
+                    myenergy=myline.split()[-1]
+                    self.assertEquals(myenergy, "-20.145")
+                    okays=okays+1
+            self.assertEquals(okays, 3)
             return
         else:
             self.assertTrue(False)

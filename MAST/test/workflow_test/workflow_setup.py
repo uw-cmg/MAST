@@ -16,6 +16,7 @@ import numpy as np
 from MAST.utility import MASTError
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
+import MAST
 import subprocess
 testname ="workflow_test"
 testdir = dirutil.get_test_dir(testname)
@@ -59,39 +60,44 @@ def create_workflow_test_script(inputfile):
             mast_test_dir,
             myvars["workflow_examples_located"],
             inputfile,
-            myvars["activate_command"],
-            myvars["testing_environment"],
+            myvars["workflow_activate_command"],
+            myvars["workflow_testing_environment"],
             output)
     scriptfile = MASTFile(os.path.join(wtdir, "submit_stub.sh"))
     scriptfile.data.append("\n")
     scriptfile.data.append(bashcommand + "\n")
     scriptfile.to_file(submitscript)
     
-    return [mast_test_dir, submitscript]
+    return [mast_test_dir, submitscript, output]
 
 def generic_submit(inputfile):
-    [mast_test_dir, submitscript] = create_workflow_test_script(inputfile)
+    [mast_test_dir, submitscript, outputname] = create_workflow_test_script(inputfile)
     
     myqsub = MAST.submit.queue_commands.queue_submission_command(submitscript)
     qproc = subprocess.Popen(myqsub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     qproc.wait()
     
-    wtdir=myvars['workflow_test_directory']
-    shortname = inputfile.split(".")[0]
-    output="%s/output_%s" % (wtdir, shortname)
     if not (os.path.isfile(outputname)):
-        raise OSError("Test did not create output for %s" % shortname)
+        raise OSError("Test did not create output %s" % outputname)
     waitct=0
     tailcmd = "tail -n 3 %s" % outputname
-    while waitct < 1000:
+    maxwait=502
+    while waitct < maxwait:
         tail3proc=subprocess.Popen(tailcmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         tail3=tail3proc.communicate()[0]
         tail3proc.wait()
         for tailline in tail3.split("\n"):
             if "Workflow completed" in tailline:
-                return "Completed"
+                return ["Completed", mast_test_dir]
         time.sleep(30)
         waitct = waitct + 1
-    return "Unfinished"
+        print "Output not complete. Attempt %i/%i" % (waitct, maxwait)
+    return ["Unfinished", mast_test_dir]
 
-
+def get_finished_recipe_dir(mast_test_dir):
+    trydirs=os.listdir(os.path.join(mast_test_dir,"ARCHIVE"))
+    for trydir in trydirs:
+        trypath=os.path.join(mast_test_dir,"ARCHIVE",trydir)
+        if (os.path.isdir(trypath)):
+            return trypath
+    return ""
