@@ -43,6 +43,7 @@ class TestRunIngredient(unittest.TestCase):
         tearlist.append("writedir")
         tearlist.append("test_control")
         for tearfolder in tearlist:
+            time.sleep(1) #Necessary for some faster systems?
             shutil.rmtree(tearfolder)
         os.environ['MAST_CONTROL'] = old_control
         os.environ['MAST_RECIPE_PATH'] = old_recipe
