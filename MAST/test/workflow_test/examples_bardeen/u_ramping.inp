@@ -1,0 +1,112 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# Example input file for DFT U-ramping workflow
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
+$mast
+system_name bccU
+$end
+
+$structure
+use_structure_index True
+coord_type fractional
+
+begin elementmap
+X1 U
+X2 Zr
+end
+
+begin lattice
+-1.713051407  1.713051407  1.713051407
+ 1.713051407 -1.713051407  1.713051407
+ 1.713051407  1.713051407 -1.713051407
+end
+
+begin coordinates
+X1 0 0 0
+X2 0.5 0.5 0.5
+end
+
+$end
+
+$ingredients
+begin global
+mast_nodes 1
+mast_ppn 1
+mast_exec //share/apps/vasp5.2_cNEB
+#mast_queue morgan1
+#mast_ppn 8
+#mast_exec /opt/mpiexec/bin/mpiexec /share/apps/bin/vasp5.2_CNEB
+mast_pp_setup U=U
+mast_pp_setup Zr=Zr_sv
+mast_xc PBE
+ismear 2
+sigma 0.1
+NSW 191
+ICHARG 1
+IBRION 2
+ISIF 3
+NPAR 2
+ISPIN 2
+ISPIND 2
+MAGMOM 2 2
+LDAU .TRUE.
+LMAXMIX 6
+# for d/f orbital
+LASPH .TRUE.
+ISYM 0
+NGX 24
+NGY 24
+NGZ 24
+LWAVE .FALSE.
+LDAUTYPE 3
+#if also starting from the WAVECAR, then add ISTART = 1 as well
+mast_program vasp
+mast_write_method write_singlerun
+# MAST/ingredients/chopingredient.py
+mast_ready_method ready_singlerun
+mast_run_method run_singlerun
+mast_complete_method complete_singlerun
+mast_update_children_method give_structure_and_charge_density_full_copy
+mast_kpoints           2x2x2 M
+end
+
+begin dft_without_u_type
+LDAUL 3 -1
+LDAUU 0 0
+LDAUJ 0 0
+end
+
+begin dft_with_u1_type
+LDAUL 3 -1
+LDAUU 1 0
+LDAUJ 0 0
+end
+
+begin dft_with_u2_type
+LDAUL 3 -1
+LDAUU 2 0
+LDAUJ 0 0
+end
+
+begin dft_with_u3_type
+LDAUL 3 -1
+LDAUU 3 0
+LDAUJ 0 0
+end
+
+$end
+
+$summary
+without_u energy cutoff
+with_u energy uvalue
+$end
+
+$recipe
+#whether to start with U or not depends on experience and system
+dft_without_u (dft_without_u_type)
+    dft_with_u1 (dft_with_u1_type)
+        dft_with_u2 (dft_with_u2_type)
+            dft_with_u3 (dft_with_u3_type)
+$end
