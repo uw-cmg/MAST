@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N simple_optimization_workflow_test_submit
+#PBS -N workflow_test
 #PBS -l nodes=1:ppn=1,pvmem=1000mb
 #PBS -l walltime=4:00:00
 ##export all environment variables. 
@@ -10,4 +10,4 @@ echo "script running on host `hostname`"
 cd $PBS_O_WORKDIR
 echo "PBS_NODEFILE"
 cat $PBS_NODEFILE
-bash ./simple_optimization_workflow_test.sh
+
