@@ -7,19 +7,21 @@
 ##############################################################
 ##############################################################
 # Arguments:
-# [$1] Full path to example files
-# [$2] Name of input file
-# [$3] Activation command (optional)
-# [$4] Activation environment (optional)
+# [$1] MAST testing tree to use
+# [$2] Full path to example files
+# [$3] Name of input file
+# [$4] Activation command (optional)
+# [$5] Activation environment (optional)
 ##############################################################
-examples_located=$1
-which_example=$2
+mast_test_dir=$1
+examples_located=$2
+which_example=$3
 
-if [ $# -gt 2 ]
+if [ $# -gt 3 ]
 then
     echo "Sourcing."
-    activate_command=$3
-    testing_environment=$4
+    activate_command=$4
+    testing_environment=$5
     source $activate_command $testing_environment
     echo "Source done."
 fi
@@ -30,15 +32,10 @@ sleep_interval=60
 
 export MAST_PLATFORM="no_queue_system"
 mast_test=$HOME"/MAST/workflow_test_"$timestamp
-mkdir $mast_test
-mkdir $mast_test/SCRATCH
-mkdir $mast_test/CONTROL
-mkdir $mast_test/ARCHIVE
-export MAST_SCRATCH=$mast_test/SCRATCH
-export MAST_ARCHIVE=$mast_test/ARCHIVE
-export MAST_CONTROL=$mast_test/CONTROL
-echo "" >> $MAST_CONTROL/submitlist
-echo "" >> $MAST_CONTROL/just_submitted
+export MAST_SCRATCH=$mast_test_dir/SCRATCH
+export MAST_ARCHIVE=$mast_test_dir/ARCHIVE
+export MAST_CONTROL=$mast_test_dir/CONTROL
+
 which mast
 
 mast -i $examples_located"/"$which_example
