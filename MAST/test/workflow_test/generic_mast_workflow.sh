@@ -28,7 +28,7 @@ fi
 
 timestamp=`date +%Y%m%d"T"%H%M%S`
 total_mast_calls=500
-sleep_interval=60
+sleep_interval=30
 
 export MAST_PLATFORM="no_queue_system"
 mast_test=$HOME"/MAST/workflow_test_"$timestamp
