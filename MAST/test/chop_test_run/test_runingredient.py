@@ -21,15 +21,16 @@ old_scratch = os.getenv("MAST_SCRATCH")
 class TestRunIngredient(unittest.TestCase):
 
     def setUp(self):
-        os.environ['MAST_CONTROL'] = testdir + "/test_control"
-        os.environ['MAST_RECIPE_PATH'] = testdir
+        self.test_control = testdir + "/control_%s" % self._testMethodName
+        os.mkdir(self.test_control)
+        os.environ["MAST_CONTROL"] = self.test_control
         os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
 
         if not os.path.isdir("writedir"):
             os.mkdir("writedir")
-        if not os.path.isdir("test_control"):
-            os.mkdir("test_control")
+        if not os.path.isdir(self.test_control):
+            os.mkdir(self.test_control)
         if not os.path.isdir("writedir/next_ingred"):
             os.mkdir("writedir/next_ingred")
         if not os.path.isdir("writedir/single_label1"):
@@ -41,9 +42,8 @@ class TestRunIngredient(unittest.TestCase):
     def tearDown(self):
         tearlist = list()
         tearlist.append("writedir")
-        tearlist.append("test_control")
+        tearlist.append(self.test_control)
         for tearfolder in tearlist:
-            time.sleep(1) #Necessary for some faster systems?
             shutil.rmtree(tearfolder)
         os.environ['MAST_CONTROL'] = old_control
         os.environ['MAST_RECIPE_PATH'] = old_recipe
@@ -73,7 +73,7 @@ class TestRunIngredient(unittest.TestCase):
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myri.run_singlerun()
         self.assertTrue(myri.checker.is_ready_to_run())
-        mysubmit = MASTFile("test_control/submitlist")
+        mysubmit = MASTFile("%s/submitlist" % self.test_control)
         self.assertEquals(mysubmit.data[0], "%s\n" % ingdir)
         #self.testclass.run_singlerun(mode='serial')
 
@@ -117,7 +117,7 @@ class TestRunIngredient(unittest.TestCase):
         mywr.write_neb_subfolders()
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myri.run_neb_subfolders()
-        mysubmit = MASTFile("test_control/submitlist")
+        mysubmit = MASTFile("%s/submitlist" % self.test_control)
         myri.checker.keywords['name'] = "%s/00" % ingdir
         self.assertFalse(myri.checker.is_ready_to_run()) #do not run endpoints again
         myri.checker.keywords['name'] = "%s/01" % ingdir
@@ -160,7 +160,7 @@ class TestRunIngredient(unittest.TestCase):
             subname = "%s/%s" % (ingdir, subfolder)
             myri.checker.keywords['name'] = subname
             self.assertTrue(myri.checker.is_ready_to_run())
-        mysubmit = MASTFile("test_control/submitlist")
+        mysubmit = MASTFile("%s/submitlist" % self.test_control)
         self.assertEquals(mysubmit.data[0], "%s/sub1\n" % ingdir)
         self.assertEquals(mysubmit.data[1], "%s/sub2\n" % ingdir)
         self.assertEquals(mysubmit.data[2], "%s/sub3\n" % ingdir)
@@ -242,7 +242,7 @@ class TestRunIngredient(unittest.TestCase):
         my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
         defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_multi").structure.get_sorted_structure()
         self.assertEquals(my_defected, defected_compare)
-        self.assertFalse(os.path.isfile("test_control/submitlist"))
+        self.assertFalse(os.path.isfile("%s/submitlist" % self.test_control))
         #self.testclass.run_defect()
 
     def test_run_strain(self):
@@ -265,7 +265,7 @@ class TestRunIngredient(unittest.TestCase):
         my_strained = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure
         strained_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_strained").structure
         self.assertEquals(my_strained, strained_compare)
-        self.assertFalse(os.path.isfile("test_control/submitlist"))
+        self.assertFalse(os.path.isfile("%s/submitlist" % self.test_control))
         #self.testclass.run_strain()
 
     def test_run_scale_defect(self):
