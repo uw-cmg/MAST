@@ -43,7 +43,7 @@ def get_variables():
             myvars[mykey] = myval
     return myvars
 
-def create_workflow_test_script(self, inputfile):
+def create_workflow_test_script(inputfile):
     myvars = get_variables()
     # set up testing directory tree
     timestamp=time.strftime("%Y%m%dT%H%M%S")
@@ -69,7 +69,7 @@ def create_workflow_test_script(self, inputfile):
     
     return [mast_test_dir, submitscript]
 
-def generic_submit(self, inputfile):
+def generic_submit(inputfile):
     [mast_test_dir, submitscript] = create_workflow_test_script(inputfile)
     
     myqsub = MAST.submit.queue_commands.queue_submission_command(submitscript)
