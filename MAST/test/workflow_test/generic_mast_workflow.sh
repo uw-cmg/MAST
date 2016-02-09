@@ -37,6 +37,8 @@ mkdir $mast_test/ARCHIVE
 export MAST_SCRATCH=$mast_test/SCRATCH
 export MAST_ARCHIVE=$mast_test/ARCHIVE
 export MAST_CONTROL=$mast_test/CONTROL
+echo "" >> $MAST_CONTROL/submitlist
+echo "" >> $MAST_CONTROL/just_submitted
 which mast
 
 mast -i $examples_located"/"$which_example
