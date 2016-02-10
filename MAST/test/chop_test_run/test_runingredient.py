@@ -23,7 +23,6 @@ class TestRunIngredient(unittest.TestCase):
 
     def setUp(self):
         self.test_control = testdir + "/control_%s" % self._testMethodName
-        os.mkdir(self.test_control)
         os.environ["MAST_CONTROL"] = self.test_control
         os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
