@@ -30,7 +30,6 @@ timestamp=`date +%Y%m%d"T"%H%M%S`
 total_mast_calls=500
 sleep_interval=30
 
-export MAST_PLATFORM="no_queue_system"
 mast_test=$HOME"/MAST/workflow_test_"$timestamp
 export MAST_SCRATCH=$mast_test_dir/SCRATCH
 export MAST_ARCHIVE=$mast_test_dir/ARCHIVE
