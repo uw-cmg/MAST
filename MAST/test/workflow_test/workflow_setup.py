@@ -36,12 +36,17 @@ def verify_checks():
 def get_variables():
     verify_checks()
     myvars=dict()
+    myvars["mast_keywords"] = dict()
     checkfile=MASTFile(checkname)
     for myline in checkfile.data:
         if myline[0:9] == "workflow_":
             mykey = myline.split("=")[0].strip()
             myval = myline.split("=")[1].strip()
             myvars[mykey] = myval
+        elif myline[0:6] == "mast_":
+            mykey = myline.split("=")[0].strip()
+            myval = myline.split("=")[1].strip()
+            myvars["mast_keywords"][mykey] = myval
     return myvars
 
 def create_workflow_test_script(inputfile):
@@ -66,10 +71,10 @@ def create_workflow_test_script(inputfile):
             myvars["workflow_activate_command"],
             myvars["workflow_testing_environment"],
             output)
-    scriptfile = MASTFile(os.path.join(wtdir, "submit_stub.sh"))
-    scriptfile.data.append("\n")
-    scriptfile.data.append(bashcommand + "\n")
-    scriptfile.to_file(submitscript)
+    mykeywords=dict(myvars["mast_keywords"])
+    mykeywords["mast_exec"] = bashcommand
+
+    MAST.submit.script_commands.write_script_file(submitscript)
     
     return [mast_test_dir, submitscript, output]
 
