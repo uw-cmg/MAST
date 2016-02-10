@@ -12,6 +12,7 @@ from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
 import numpy as np
+from pymatgen.io.vasp import Poscar
 testname="chop_test_run"
 testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
@@ -44,11 +45,13 @@ class TestRunIngredient(unittest.TestCase):
         tearlist.append("writedir")
         tearlist.append(self.test_control)
         for tearfolder in tearlist:
-            try:
-                shutil.rmtree(tearfolder)
-            except OSError:
-                time.sleep(5)
-                shutil.rmtree(tearfolder)
+            subdirs = os.listdir(tearfolder)
+            for subdir in subdirs:
+                subpath = os.path.join(tearfolder, subdir)
+                if os.path.isdir(subpath):
+                    shutil.rmtree(subpath)
+                else:
+                    os.remove(subpath)
         os.environ['MAST_CONTROL'] = old_control
         os.environ['MAST_RECIPE_PATH'] = old_recipe
         os.environ['MAST_SCRATCH'] = old_scratch
@@ -71,7 +74,7 @@ class TestRunIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_singlerun()
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
@@ -116,7 +119,7 @@ class TestRunIngredient(unittest.TestCase):
         en_00.to_file("%s/parent_energy_labelinit" % ingdir) 
         en_04 = MASTFile("files/OSZICAR_04")
         en_04.to_file("%s/parent_energy_labelfin" % ingdir) 
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_neb_subfolders()
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
@@ -150,7 +153,7 @@ class TestRunIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         for subfolder in ['sub1','sub2','sub3','sub4']:
             subname = "%s/%s" % (ingdir, subfolder)
             os.mkdir(subname)
@@ -223,7 +226,7 @@ class TestRunIngredient(unittest.TestCase):
         ddict['mast_defect_settings']=dict()
         ddict['mast_defect_settings'].update(kdict['label1']) #single defect grouping
         ddict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        my_structure = Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
         myri = ChopIngredient(name=ingdir,program_keys=ddict, structure=my_structure)
@@ -243,8 +246,8 @@ class TestRunIngredient(unittest.TestCase):
         #return
         #
         #
-        my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
-        defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_multi").structure.get_sorted_structure()
+        my_defected = Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
+        defected_compare = Poscar.from_file("files/POSCAR_multi").structure.get_sorted_structure()
         self.assertEquals(my_defected, defected_compare)
         self.assertFalse(os.path.isfile("%s/submitlist" % self.test_control))
         #self.testclass.run_defect()
@@ -261,13 +264,13 @@ class TestRunIngredient(unittest.TestCase):
         kdict=dict()
         kdict['mast_program'] = 'vasp'
         kdict['mast_strain']=" 0.98 0.92 1.03 \n"
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        my_structure = Poscar.from_file("files/POSCAR_perfect").structure
         myunstrained = MASTFile("files/POSCAR_unstrained")
         myunstrained.to_file("%s/POSCAR" % ingdir)
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myri.run_strain()
-        my_strained = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure
-        strained_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_strained").structure
+        my_strained = Poscar.from_file("%s/CONTCAR" % ingdir).structure
+        strained_compare = Poscar.from_file("files/POSCAR_strained").structure
         self.assertEquals(my_strained, strained_compare)
         self.assertFalse(os.path.isfile("%s/submitlist" % self.test_control))
         #self.testclass.run_strain()
@@ -324,7 +327,7 @@ class TestRunIngredient(unittest.TestCase):
         mdict['mast_program'] = 'vasp'
         mdict['mast_defect_settings']=dict()
         mdict['mast_defect_settings'].update(kdict['label1'])
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        my_structure = Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
         myri = ChopIngredient(name=ingdir,program_keys=mdict, structure=my_structure)
@@ -332,8 +335,8 @@ class TestRunIngredient(unittest.TestCase):
         #copy contcar to poscar
         os.rename("%s/CONTCAR" % ingdir, "%s/POSCAR" % ingdir)
         myri.run_defect()
-        my_defected = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
-        defected_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled_defected").structure.get_sorted_structure()
+        my_defected = Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
+        defected_compare = Poscar.from_file("files/POSCAR_scaled_defected").structure.get_sorted_structure()
         self.assertEquals(my_defected, defected_compare)
     def test_run_scale(self):
         #raise SkipTest
@@ -348,11 +351,11 @@ class TestRunIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_perfect").structure
+        my_structure = Poscar.from_file("files/POSCAR_perfect").structure
         myperf = MASTFile("files/POSCAR_perfect")
         myperf.to_file("%s/POSCAR" % ingdir)
         myri = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
         myri.run_scale()
-        my_scaled = pymatgen.io.vaspio.Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
-        scaled_compare = pymatgen.io.vaspio.Poscar.from_file("files/POSCAR_scaled").structure.get_sorted_structure()
+        my_scaled = Poscar.from_file("%s/CONTCAR" % ingdir).structure.get_sorted_structure()
+        scaled_compare = Poscar.from_file("files/POSCAR_scaled").structure.get_sorted_structure()
         self.assertEquals(my_scaled, scaled_compare)
