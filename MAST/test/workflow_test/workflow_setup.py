@@ -47,10 +47,13 @@ def get_variables():
 def create_workflow_test_script(inputfile):
     myvars = get_variables()
     # set up testing directory tree
-    timestamp=time.strftime("%Y%m%dT%H%M%S")
     wtdir=myvars['workflow_test_directory']
-    mast_test_dir = os.path.join(wtdir,"output_test_%s" % timestamp)
-    shutil.copytree("%s/mini_mast_tree" % wtdir, mast_test_dir)
+    mast_test_dir=os.path.join(wtdir,"no_directory_yet")
+    while not (os.path.isdir(mast_test_dir)):
+        timestamp=time.strftime("%Y%m%dT%H%M%S")
+        mast_test_dir = os.path.join(wtdir,"output_test_%s" % timestamp)
+        if not (os.path.isdir(mast_test_dir)):
+            shutil.copytree("%s/mini_mast_tree" % wtdir, mast_test_dir)
     # set up output file and submission script
     shortname = inputfile.split(".")[0]
     output="%s/output_%s" % (wtdir, shortname)
