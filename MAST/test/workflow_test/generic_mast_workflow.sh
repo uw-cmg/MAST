@@ -37,7 +37,7 @@ export MAST_CONTROL=$mast_test_dir/CONTROL
 
 which mast
 
-mast -i $examples_located"/"$which_example
+nice -n 19 mast -i $examples_located"/"$which_example
 mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type d`
 
 cd $mydir
@@ -48,7 +48,7 @@ while [ $mct -lt $total_mast_calls ]
 do
     date
     echo "MAST call $mct"
-    mast
+    nice -n 19 mast
     if [ -f "SUMMARY.txt" ]
     then
         echo "SUMMARY file found. Workflow completed."
