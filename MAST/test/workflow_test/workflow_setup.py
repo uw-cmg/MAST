@@ -89,12 +89,9 @@ def generic_submit(inputfile):
     tailcmd = "tail -n 3 %s" % outputname
     maxwait=502
     while waitct < maxwait:
-        tail3proc=subprocess.Popen(tailcmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        tail3=tail3proc.communicate()[0]
-        tail3proc.wait()
-        for tailline in tail3.split("\n"):
-            if "Workflow completed" in tailline:
-                return ["Completed", mast_test_dir]
+        archivelist=os.listdir(os.path.join(mast_test_dir,"ARCHIVE"))
+        if len(archivelist) > 1: #test folder now in ARCHIVE
+            return ["Completed", mast_test_dir]
         time.sleep(30)
         waitct = waitct + 1
         print "Output not complete. Attempt %i/%i" % (waitct, maxwait)
