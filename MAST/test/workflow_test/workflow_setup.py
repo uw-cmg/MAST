@@ -36,17 +36,12 @@ def verify_checks():
 def get_variables():
     verify_checks()
     myvars=dict()
-    myvars["mast_keywords"] = dict()
     checkfile=MASTFile(checkname)
     for myline in checkfile.data:
         if myline[0:9] == "workflow_":
             mykey = myline.split("=")[0].strip()
             myval = myline.split("=")[1].strip()
             myvars[mykey] = myval
-        elif myline[0:6] == "mast_":
-            mykey = myline.split("=")[0].strip()
-            myval = myline.split("=")[1].strip()
-            myvars["mast_keywords"][mykey] = myval
     return myvars
 
 def create_workflow_test_script(inputfile):
@@ -71,24 +66,25 @@ def create_workflow_test_script(inputfile):
             myvars["workflow_activate_command"],
             myvars["workflow_testing_environment"],
             output)
-    mykeywords=dict(myvars["mast_keywords"])
-    mykeywords["mast_exec"] = bashcommand
 
-    MAST.submit.script_commands.write_script_file(submitscript)
+    submitfile=MASTFile()
+    submitfile.data.append(bashcommand + "\n")
+    submitfile.to_file(submitscript)
     
     return [mast_test_dir, submitscript, output]
 
 def generic_submit(inputfile):
     [mast_test_dir, submitscript, outputname] = create_workflow_test_script(inputfile)
     
-    myqsub = MAST.submit.queue_commands.queue_submission_command(submitscript)
-    qproc = subprocess.Popen(myqsub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    qproc.wait()
+    mygsub = "bash %s" % submitscript
+    gproc = subprocess.Popen(mygsub, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    gproc.wait()
     if not (os.path.isfile(outputname)):
         print "Sleep 5"
         time.sleep(5)
     if not (os.path.isfile(outputname)):
         raise OSError("Test did not create output %s" % outputname)
+    print "Output %s created" % outputname
     waitct=0
     tailcmd = "tail -n 3 %s" % outputname
     maxwait=502
