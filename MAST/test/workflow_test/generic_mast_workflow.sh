@@ -40,7 +40,7 @@ which mast
 nice -n 19 mast -i $examples_located"/"$which_example
 mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type d`
 
-cd $mydir
+cd $MAST_CONTROL
 
 mct="0"
 
@@ -48,8 +48,16 @@ while [ $mct -lt $total_mast_calls ]
 do
     date
     echo "MAST call $mct"
-    nice -n 19 mast
-    if [ -f "SUMMARY.txt" ]
+    # Have to run monitor separately because it needs the testing environment
+    # sourced, which is not in submit/platforms/<platform>/mastmon_submit.sh.
+    # Cannot change MAST_PLATFORM to no_queue_system because then the
+    # submission scripts for the ingredients will not write correctly.
+    # Therefore, cannot just call "mast" main command.
+    nice -n 19 python runmast.py >> output_workflow_testing 2>> output_workflow_errors
+    # Now also have to therefore submit separately.
+    # In this case, can call the mast command with submit only.
+    nice -n 19 mast -m submitonly >> output_workflow_testing 2>> output_workflow_errors
+    if [ -f "$mydir/SUMMARY.txt" ]
     then
         echo "SUMMARY file found. Workflow completed."
         echo "Workflow at:"
