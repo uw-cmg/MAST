@@ -44,7 +44,7 @@ def main():
     mystructure=""
 
     try:
-        mystructure = pymatgen.io.vaspio.Poscar.from_file(myopt.input).structure
+        mystructure = pymatgen.io.vasp.Poscar.from_file(myopt.input).structure
     except ValueError:
         print "Structure could not be obtained from %s." % myopt.input
         print "Please check the file contents and try again."
@@ -54,7 +54,7 @@ def main():
         print "Please check the file contents and try again."
         return
 
-    mysf = pymatgen.symmetry.finder.SymmetryFinder(mystructure, float(myopt.tolerance))
+    mysf = pymatgen.symmetry.analyzer.SpacegroupAnalyzer(mystructure, float(myopt.tolerance))
 
     print "Tolerance used: ", myopt.tolerance
     print "Spacegroup:     ", mysf.get_spacegroup_symbol()
