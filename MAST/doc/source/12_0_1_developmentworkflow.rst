@@ -8,17 +8,17 @@ Last modified TTM 2016-02-11
 I am a developer
 ***********************************
 
-I am a developer developing on my own branch, prior to a development merge.
-
 =======================
 Create a new branch
 =======================
 
 Go to the repository at `<http://git@github.com/uw-cmg/MAST>`_
+
 Create a new branch from dev.
 
 .. _create-test-env:
-=========================================================
+
+=========================================================   
 Create new anaconda test environment with dependencies
 =========================================================
 In the instructions below, the test environment is called ``mast_myname_test``.::
@@ -38,10 +38,13 @@ Install MAST dependencies by pip-installing MAST::
     (mast_myname_test)[user@cluster ~]$ pip install --cert=~/anaconda/ssl/cacert.pem MAST
 
 The cert tag may be important for finding newer versions etc.
+
 If unsure, use pip -v -v -v (v for verbose)
+
 You may also have to manually install ase and add it to PYTHONPATH
 
-Now, you would actually want to develop on a git clone version of MAST rather than the package-installed MAST.
+Now, you would actually want to develop on a git clone version of MAST rather than on the package-installed MAST.
+
 So, unlink the package-installed MAST::
 
     cd ~/anaconda/envs/mast_myname_test/lib/python2.7/site-packages/
@@ -107,10 +110,12 @@ You can also run unit tests singly, running only those tests directly affected b
 After development, run all unit tests.
 
 Investigate failed tests. Repair code and/or tests as necessary.
+
 When all tests have passed, commit and push to own branch.
 
 .. _reconcile-with-dev:
-===================================================
+
+===================================================   
 Reconcile your branch with the development branch
 ===================================================
 
@@ -119,7 +124,9 @@ Pull from dev to your local clone::
     git pull ssh://git@github.com/uw-cmg/MAST dev
 
 Address any merge errors.
+
 Run unit tests.
+
 Investigate failed tests. Repair code and/or tests as necessary, consulting with other developers as necessary.
 
 Commit and push to your branch on github.
@@ -129,6 +136,7 @@ When all tests have passed, commit and push to dev.::
     git push ssh://git@github.com/uw-cmg/MAST myname:dev
 
 .. _release-manager:
+
 *********************************
 I am the release manager
 *********************************
@@ -151,6 +159,9 @@ Check documentation and upload to pypi
 =========================================
 
 Change the version number in ``//home/<user>/mast_dev/MAST/_version.py``
+
+Edit the sphinx-build path in ``//home/<user>/mast_dev/MAST/doc/Makefile`` to correspond to ``//home/<user>/anaconda/envs/mast_dev_test/bin/sphinx-build``.
+
 Build the documentation::
 
     source ~/anaconda/bin/activate mast_dev_test
@@ -184,7 +195,7 @@ Create a ``~/.pypirc`` file that looks something like::
         pypi
         test
 
-    [test]
+    [pypitest]
     repository = https://testpypi.python.org/pypi
     username = <username>
     password =  <pwd>
@@ -234,9 +245,10 @@ But in practice not all files get copied over, so use the test files from dev (w
     cd //home/<user>/mast_dev/mast_20160211_dev/MAST/test
     python -m nose
 
-If any unit tests fail:
-Go back to the developers.
+If any unit tests fail, go back to the developers.
+
 Each developer starts over from the :ref:`reconcile-with-dev` step.
+
 When all unit tests have passed, the release manager starts over from :ref:`release-manager`.
 
 If all tests pass, package to real repository.
@@ -245,6 +257,7 @@ If all tests pass, package to real repository.
 Package to the real pypi repository
 ========================================
 Change ``~/mast_dev/MAST/_version.py`` to the correct version.
+
 Package to the real pypi repository::
 
     cd //home/<user>/mast_dev
@@ -260,31 +273,36 @@ Make a new environment as above and source it::
 Run unit tests out of ``~/mast_dev``.
 
 Go back to developers if any unit tests fail. Nothing should fail from here, but it might.
+
 If all tests pass, then only archiving, cleanup, and notifications are left.
 
 ============
 Archiving
 ============
+
 Sign in to github.com
-Draft a new release
-Use the same version number as in the pypi real repository as a tag (conventionally, v#.#.#)
-Use MAST-v#.#.# as the title
-Write a small description
-Publish release
-Save the .tar.gz file for this release
+
+* Draft a new release
+* Use the same version number as in the pypi real repository as a tag (conventionally, v#.#.#)
+* Use MAST-v#.#.# as the title
+* Write a small description
+* Publish release
+* Save the .tar.gz file for this release
+
 Sign in to zenodo.org
-Create a new Software upload with the .tar.gz file
+
+* Create a new Software upload with the .tar.gz file
 
 =====================
-Cleanup (optional)
+Cleanup
 =====================
-Remove all created environments
-conda env remove -n <environment name>
-Remove all cloned MAST directories (except any that you use for personal coding)
-Remove any unneeded github branches that may have been created during the testing phase (e.g. if two developers create a mutual branch in order to test some code conflict)
+
+* Remove all created environments using ``conda env remove -n <environment name>``
+* Remove all cloned MAST directories (except any that you use for personal coding)
+* Remove any unneeded github branches that may have been created during the testing phase (e.g. if two developers create a mutual branch in order to test some code conflict)
 
 =================
 Notification
 =================
-Send out an email to MAST development team and any core users. Done!
+Send out an email to the MAST development team and any core users. Done!
 

@@ -2,6 +2,10 @@
 Programming for MAST
 #####################
 
+.. toctree::
+
+   12_0_1_developmentworkflow
+
 ===============================
 Detailed development workflow
 ===============================
