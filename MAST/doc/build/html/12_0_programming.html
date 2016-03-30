@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
-    <link rel="next" title="14. Acknowledgments" href="10_0_acknowledgments.html" />
+    <link rel="next" title="13.1. MAST development workflow" href="12_0_1_developmentworkflow.html" />
     <link rel="prev" title="12.5.1. StructOpt" href="8_0_4_structopt.html" /> 
   </head>
   <body role="document">
@@ -35,7 +35,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="10_0_acknowledgments.html" title="14. Acknowledgments"
+          <a href="12_0_1_developmentworkflow.html" title="13.1. MAST development workflow"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="8_0_4_structopt.html" title="12.5.1. StructOpt"
@@ -51,8 +51,36 @@
             
   <div class="section" id="programming-for-mast">
 <h1>13. Programming for MAST<a class="headerlink" href="#programming-for-mast" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="12_0_1_developmentworkflow.html">13.1. MAST development workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="12_0_1_developmentworkflow.html#i-am-a-developer">13.1.1. I am a developer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#create-a-new-branch">13.1.1.1. Create a new branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#create-new-anaconda-test-environment-with-dependencies">13.1.1.2. Create new anaconda test environment with dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#code-on-your-branch">13.1.1.3. Code on your branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#reconcile-your-branch-with-the-development-branch">13.1.1.4. Reconcile your branch with the development branch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="12_0_1_developmentworkflow.html#i-am-the-release-manager">13.1.2. I am the release manager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#create-a-dev-test-environment">13.1.2.1. Create a dev-test environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#check-documentation-and-upload-to-pypi">13.1.2.2. Check documentation and upload to pypi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#package-to-the-pypi-test-repository-and-test-the-package">13.1.2.3. Package to the pypi test repository and test the package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#package-to-the-real-pypi-repository">13.1.2.4. Package to the real pypi repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#archiving">13.1.2.5. Archiving</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#cleanup">13.1.2.6. Cleanup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="12_0_1_developmentworkflow.html#notification">13.1.2.7. Notification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="detailed-development-workflow">
+<h2>13.2. Detailed development workflow<a class="headerlink" href="#detailed-development-workflow" title="Permalink to this headline">¶</a></h2>
+<p>If you are a MAST programmer in the UW-Madison Computational Materials Group, please see <a class="reference internal" href="12_0_1_developmentworkflow.html"><em>MAST development workflow</em></a>.</p>
+</div>
 <div class="section" id="source-code">
-<h2>13.1. Source code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
+<h2>13.3. Source code<a class="headerlink" href="#source-code" title="Permalink to this headline">¶</a></h2>
 <p>The MAST github repository is located at <a class="reference external" href="https://github.com/uw-cmg/MAST">https://github.com/uw-cmg/MAST</a>.</p>
 <p>To report any issues, please create an issue in this repository.</p>
 <p>To program with MAST:</p>
@@ -75,7 +103,7 @@
 </li>
 </ol>
 <p>To run unit tests and verify that the MAST code is sound, go to the test directory in <code class="docutils literal"><span class="pre">&lt;clone</span> <span class="pre">directory&gt;/MAST/test</span></code> and run the command:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">nosetests</span> <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">nocapture</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">nocapture</span></code> option allows print statements.
@@ -83,7 +111,7 @@ The <code class="docutils literal"><span class="pre">verbose</span></code> optio
 <p>The development team may have designated some tests to be skipped. However, any errors should be reported to the development team as a github issue.</p>
 </div>
 <div class="section" id="object-hierarchy">
-<h2>13.2. Object hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline">¶</a></h2>
+<h2>13.4. Object hierarchy<a class="headerlink" href="#object-hierarchy" title="Permalink to this headline">¶</a></h2>
 <p>Several objects are created in MAST. The classes for these objects are in similarly named files, for example, class MyClass in file myclass.py.</p>
 <ul>
 <li><p class="first">When the user types <code class="docutils literal"><span class="pre">mast</span></code> or when crontab executes <code class="docutils literal"><span class="pre">mast</span></code>, a <strong>MAST monitor</strong> object is created (class MASTmon in MAST). This monitor is responsible for looking through the <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> directory for recipe folders.</p>
@@ -107,7 +135,7 @@ The <code class="docutils literal"><span class="pre">verbose</span></code> optio
 </ul>
 </div>
 <div class="section" id="code-hooks-in-the-input-file">
-<h2>13.3. Code hooks in the input file<a class="headerlink" href="#code-hooks-in-the-input-file" title="Permalink to this headline">¶</a></h2>
+<h2>13.5. Code hooks in the input file<a class="headerlink" href="#code-hooks-in-the-input-file" title="Permalink to this headline">¶</a></h2>
 <p>The most common modifications to MAST are expected to be:</p>
 <ul>
 <li><p class="first">Adding support for new programs, e.g. besides VASP</p>
@@ -133,7 +161,7 @@ The <code class="docutils literal"><span class="pre">verbose</span></code> optio
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)</p>
 </div>
 <div class="section" id="debugging">
-<h2>13.4. Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<h2>13.6. Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
 <p>For classes which have a self.logger attribute, or functions in which a logger is defined, messages may be logged to the DEBUG level. (self.logger.debug(&#8220;message&#8221;))</p>
 <p>Set the MAST_DEBUG environment variable to any value so that the mast.log file will print debug messages.</p>
 </div>
@@ -151,10 +179,11 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">13. Programming for MAST</a><ul>
-<li><a class="reference internal" href="#source-code">13.1. Source code</a></li>
-<li><a class="reference internal" href="#object-hierarchy">13.2. Object hierarchy</a></li>
-<li><a class="reference internal" href="#code-hooks-in-the-input-file">13.3. Code hooks in the input file</a></li>
-<li><a class="reference internal" href="#debugging">13.4. Debugging</a></li>
+<li><a class="reference internal" href="#detailed-development-workflow">13.2. Detailed development workflow</a></li>
+<li><a class="reference internal" href="#source-code">13.3. Source code</a></li>
+<li><a class="reference internal" href="#object-hierarchy">13.4. Object hierarchy</a></li>
+<li><a class="reference internal" href="#code-hooks-in-the-input-file">13.5. Code hooks in the input file</a></li>
+<li><a class="reference internal" href="#debugging">13.6. Debugging</a></li>
 </ul>
 </li>
 </ul>
@@ -163,8 +192,8 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
   <p class="topless"><a href="8_0_4_structopt.html"
                         title="previous chapter">12.5.1. StructOpt</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="10_0_acknowledgments.html"
-                        title="next chapter">14. Acknowledgments</a></p>
+  <p class="topless"><a href="12_0_1_developmentworkflow.html"
+                        title="next chapter">13.1. MAST development workflow</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -189,7 +218,7 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="10_0_acknowledgments.html" title="14. Acknowledgments"
+          <a href="12_0_1_developmentworkflow.html" title="13.1. MAST development workflow"
              >next</a> |</li>
         <li class="right" >
           <a href="8_0_4_structopt.html" title="12.5.1. StructOpt"
@@ -199,7 +228,7 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

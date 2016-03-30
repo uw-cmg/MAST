@@ -56,7 +56,7 @@
 <p>The <code class="docutils literal"><span class="pre">$ingredients</span></code> section contains a section for global ingredient keywords and then a section for each <strong>ingredient type</strong>.</p>
 <p>Each ingredient type in the recipe should have a subsection denoted by <code class="docutils literal"><span class="pre">begin</span> <span class="pre">&lt;ingredient</span> <span class="pre">type&gt;</span></code>.</p>
 <p>Example <code class="docutils literal"><span class="pre">$ingredients</span></code> section:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ingredients
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ingredients
 
 begin ingredients_global
 keyword1 k1value1
@@ -76,7 +76,7 @@ $end
 </div>
 <p>Program-specific keywords such as VASP INCAR keywords are included in these sections. All other keywords are prefaced with <code class="docutils literal"><span class="pre">mast_</span></code>.</p>
 <p>If there are no changes from the ingredients_global section, just add an empty subsection for that ingredient type:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin ingredient_type
+<div class="highlight-python"><div class="highlight"><pre><span></span>begin ingredient_type
 end
 </pre></div>
 </div>
@@ -91,7 +91,7 @@ end
 <p>These program-specific keywords will be turned into uppercase keywords. The values will not change case, and should be given in the case required by the program. For example, <code class="docutils literal"><span class="pre">lwave</span> <span class="pre">False</span></code> will be translated into <code class="docutils literal"><span class="pre">LWAVE</span> <span class="pre">False</span></code> in the VASP INCAR file.</p>
 <p>One exception for VASP keywords is the <code class="docutils literal"><span class="pre">IMAGES</span></code> keyword, which signals a nudged elastic band run, and should instead be set in the <code class="docutils literal"><span class="pre">$neb</span></code> section of the input file.</p>
 <p>For VASP ingredients, please include</p>
-<div class="highlight-python"><div class="highlight"><pre>lcharg False
+<div class="highlight-python"><div class="highlight"><pre><span></span>lcharg False
 lwave False
 </pre></div>
 </div>
@@ -104,7 +104,7 @@ lwave False
 <h3>9.4.2.1. Submission script keywords<a class="headerlink" href="#submission-script-keywords" title="Permalink to this headline">¶</a></h3>
 <p>The following queue submission keywords are platform-dependent and are used along to create the submission script (see <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>).</p>
 <p><strong>mast_exec</strong>: The command used in the submission script to execute the program. Note that this is a specific command rather than the class of program, given in <code class="docutils literal"><span class="pre">mast_program</span></code>, and it should include any MPI commands.</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_exec //opt/mpiexec/bin/mpiexec ~/bin/vasp_5.2
 </pre></div>
 </div>
 <p><strong>mast_nodes</strong>: The number of nodes requested.</p>
@@ -116,7 +116,7 @@ lwave False
 <div class="section" id="mast-control-flow-keywords">
 <h3>9.4.2.2. MAST control flow keywords<a class="headerlink" href="#mast-control-flow-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_program</strong>: Specify which program to run (<code class="docutils literal"><span class="pre">vasp</span></code>, <code class="docutils literal"><span class="pre">vasp_neb</span></code>, or <code class="docutils literal"><span class="pre">None</span></code> for a generic program, are currently supported)</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_program vasp
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_program vasp
 </pre></div>
 </div>
 <ul class="simple">
@@ -132,7 +132,7 @@ lwave False
 <div class="section" id="vasp-specific-keywords">
 <h3>9.4.2.3. VASP-specific keywords<a class="headerlink" href="#vasp-specific-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_kpoints</strong>: Specify k-point instructions in the form of kpoints along lattice vectors a, b, and c, and then a designation M for Monkhorst-Pack or G for Gamma-centered.</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_kpoints = 3x3x3 G
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_kpoints = 3x3x3 G
 </pre></div>
 </div>
 <ul class="simple">
@@ -144,7 +144,7 @@ lwave False
 <li>Either this keyword or <code class="docutils literal"><span class="pre">mast_kpoints</span></code> is required for VASP calculations.</li>
 </ul>
 <p><strong>mast_pp_setup</strong>: Specify which pseudopotential goes to which element:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_pp_setup La=La Mn=Mn_pv O=O_s
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_pp_setup La=La Mn=Mn_pv O=O_s
 </pre></div>
 </div>
 <p><strong>mast_xc</strong>: Specify an exchange correlation functional; for VASP, follow the conventions of pymatgen (e.g. pw91, pbe)</p>
@@ -163,12 +163,12 @@ lwave False
 <li>A positive charge is the REMOVAL of electrons. For example, Na+ with a +1 charge has one FEWER electron than Na neutral.</li>
 </ul>
 <p><strong>mast_coordinates</strong>: For a non-NEB calculation, allows you to specify a single POSCAR-type of CIF structure file which corresponds to the relaxed fractional coordinates at which you would like to start this ingredient. ONLY the coordinates are used. The lattice parameters and elements are given by the $structure section of the input file. The coordinates must be fractional coordinates.</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_coordinates POSCAR_initialize
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_coordinates POSCAR_initialize
 </pre></div>
 </div>
 <ul>
 <li><p class="first">For an NEB calculation, use a comma-delimited list of poscar files corresponding to the correct number of images. Put no spaces between the file names. Example for an NEB with 3 intermediate images:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_coordinates POSCAR_im1,POSCAR_im2,POSCAR_im3
 </pre></div>
 </div>
 </li>
@@ -181,7 +181,7 @@ lwave False
 <div class="section" id="structure-manipulation-keywords">
 <h3>9.4.2.4. Structure manipulation keywords<a class="headerlink" href="#structure-manipulation-keywords" title="Permalink to this headline">¶</a></h3>
 <p><strong>mast_strain</strong>: Specify three numbers for multiplying the lattice parameters a, b, and c. Only works with <code class="docutils literal"><span class="pre">mast_run_method</span></code> of <code class="docutils literal"><span class="pre">run_strain</span></code></p>
-<div class="highlight-python"><div class="highlight"><pre>mast_strain 1.01 1.03 0.98
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_strain 1.01 1.03 0.98
 </pre></div>
 </div>
 <p>This example will stretch the lattice along lattice vector a by 1%, stretch the lattice along lattice vector b by 3%, and compress the lattice along lattice vector c by 2%</p>
@@ -195,22 +195,22 @@ lwave False
 <p><strong>mast_complete_method</strong>: Specifies how MAST can tell if the ingredient is considered complete</p>
 <p><strong>mast_update_children_method</strong>: Specifies what information an ingredient passes on to its children, and how it does so.</p>
 <p>Specific available values for each keyword are given in the accompanying sections, and require no arguments, e.g.:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_write_method write_singlerun
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_write_method write_singlerun
 </pre></div>
 </div>
 <p>They depend on having an appropriate program set in <code class="docutils literal"><span class="pre">mast_program</span></code>.</p>
 <p>However, you may choose to specify arguments where available, e.g.:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;
 </pre></div>
 </div>
 <p>You may also choose to specify multiple methods. These methods will be performed in the order listed. For <code class="docutils literal"><span class="pre">mast_ready_method</span></code> or <code class="docutils literal"><span class="pre">mast_complete_method</span></code>, all methods listed must return True in order for the ingredient to be considered ready or complete, respectively.
 Use a semicolon to separate out the methods:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;; file_exists Parsed_Structures
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_complete_method file_has_string myoutput &quot;End of Execution&quot;; file_exists Parsed_Structures
 </pre></div>
 </div>
 <p>In the example above, the file &#8220;myoutput&#8221; must exist and contain the phrase &#8220;End of Execution&#8221;, and the file &#8220;Parsed_Structures&#8221; must exist, in order for the ingredient to be considered complete.</p>
 <p>Update-children methods will always get the child name appended as the end of the argument string. For example,</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_update_children_method copy_file EndStructure BeginStructure
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_update_children_method copy_file EndStructure BeginStructure
 </pre></div>
 </div>
 <p>will copy the file EndStructure of the parent ingredient folder to a new file BeginStructure in the child ingredient folder. There is no separate argument denoting the child ingredient.</p>
@@ -237,7 +237,7 @@ Use a semicolon to separate out the methods:</p>
 <li><p class="first">Leave off the delimiter argument in order to use a single space.</p>
 </li>
 <li><p class="first">Examples:</p>
-<div class="highlight-python"><div class="highlight"><pre>write_ingred_input_file input.txt all 0 =
+<div class="highlight-python"><div class="highlight"><pre><span></span>write_ingred_input_file input.txt all 0 =
 write_ingred_input_file input.txt phon_allowed_keys.py 1
 </pre></div>
 </div>
@@ -257,7 +257,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <li><p class="first">Please stick to common text characters.</p>
 </li>
 <li><p class="first">Example:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_run_method run_command &quot;//home/user/myscripts/my_custom_parsing.py 25 0.01&quot;
+<div class="highlight-python"><div class="highlight"><pre><span></span>mast_run_method run_command &quot;//home/user/myscripts/my_custom_parsing.py 25 0.01&quot;
 </pre></div>
 </div>
 </li>
@@ -450,7 +450,7 @@ write_ingred_input_file input.txt phon_allowed_keys.py 1
 <div class="section" id="example-ingredients-section">
 <h3>9.4.2.11. Example Ingredients section<a class="headerlink" href="#example-ingredients-section" title="Permalink to this headline">¶</a></h3>
 <p>Here is an example ingredients section:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ingredients
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ingredients
 begin ingredients_global
 mast_program    vasp
 mast_nodes      1
@@ -651,7 +651,7 @@ $end
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

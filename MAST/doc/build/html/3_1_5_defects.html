@@ -85,7 +85,7 @@
 <p>The <code class="docutils literal"><span class="pre">coord_type</span></code> keyword specifies fractional or cartesian coordinates for the defects.</p>
 <p>The <code class="docutils literal"><span class="pre">threshold</span></code> keyword specifies the absolute threshold for finding the defect coordinate, since relaxation of the perfect structure may result in changed coordinates.</p>
 <p>Example <code class="docutils literal"><span class="pre">$defects</span></code> section:</p>
-<div class="highlight-python"><div class="highlight"><pre>$defects
+<div class="highlight-python"><div class="highlight"><pre><span></span>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -100,7 +100,7 @@ $end
 </div>
 <p>The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>, four separate ingredients, each containing one of the defects above, will be created.</p>
 <p>Multiple point defects can be also grouped together as a combined defect within a <code class="docutils literal"><span class="pre">&lt;defect</span> <span class="pre">label&gt;</span></code> subsection such as:</p>
-<div class="highlight-python"><div class="highlight"><pre>$defects
+<div class="highlight-python"><div class="highlight"><pre><span></span>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -121,11 +121,11 @@ $end
 <h2>9.7.1. Charges for defects<a class="headerlink" href="#charges-for-defects" title="Permalink to this headline">¶</a></h2>
 <p>Charges can be specified as <code class="docutils literal"><span class="pre">charge=0,10</span></code>, where a comma denotes the lower and upper ranges for the charges.</p>
 <p>Let&#8217;s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg charge=0,3
+<div class="highlight-python"><div class="highlight"><pre><span></span>vacancy 0 0 0 Mg charge=0,3
 </pre></div>
 </div>
 <p>Let&#8217;s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a><a class="reference external" href="mailto:-Vac&#37;&#52;&#48;Mg">-Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin Vac@Mg-Vac@Mg
+<div class="highlight-python"><div class="highlight"><pre><span></span>begin Vac@Mg-Vac@Mg
 vacancy 0.0 0.0 0.0 Mg
 vacancy 0.5 0.5 0.5 Mg
 charge=0,3
@@ -134,11 +134,11 @@ end
 </div>
 <p>For a single defect, charges and labels can be given at the same time:</p>
 <p>Let&#8217;s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
+<div class="highlight-python"><div class="highlight"><pre><span></span>vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
 </pre></div>
 </div>
 <p>The charge and label keywords are interchangeable, i.e. we could also have typed:</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg label=Vac@Mg charge=0,3
+<div class="highlight-python"><div class="highlight"><pre><span></span>vacancy 0 0 0 Mg label=Vac@Mg charge=0,3
 </pre></div>
 </div>
 <p>If you use charges in the defects section like this, then you must use a tagged <code class="docutils literal"><span class="pre">defect_&lt;N&gt;_&lt;Q&gt;</span></code> type recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
@@ -156,7 +156,7 @@ end
 <li>An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used).</li>
 </ul>
 <p>Multiple separate phonon calculations may be obtained for each defect, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin int1
+<div class="highlight-python"><div class="highlight"><pre><span></span>begin int1
 interstitial 0.25 0.25 0.25 X2
 phonon host3 0.3 0.3 0.4 2.5 0.01
 phonon solute 0.1 0.1 0.2 0.5
@@ -167,7 +167,7 @@ end
 <p>In the example above, <em>solute</em> is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.</p>
 <p>The recipe template file for phonons may include either the explicit phonon labels and other labels, or &lt;S&gt;, &lt;N&gt;, &lt;Q&gt;, &lt;P&gt;. See <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
 <p>Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre>{begin}
+<div class="highlight-python"><div class="highlight"><pre><span></span>{begin}
 defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
     phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt; (phonon)
         phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt;_parse (phononparse)
@@ -236,7 +236,7 @@ defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

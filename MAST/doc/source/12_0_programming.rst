@@ -2,6 +2,16 @@
 Programming for MAST
 #####################
 
+.. toctree::
+
+   12_0_1_developmentworkflow
+
+===============================
+Detailed development workflow
+===============================
+
+If you are a MAST programmer in the UW-Madison Computational Materials Group, please see :doc:`12_0_1_developmentworkflow`.
+
 =============================
 Source code
 =============================
