@@ -164,13 +164,33 @@ class MASTMon(object):
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
 
-    def mpi_check_dirs(verbose, recipe_dirs, single_ingred=0):
+    def mpi_check_dirs(self, verbose, recipe_dirs, single_ingred=0):
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
         size = comm.size
         rank = comm.rank
-        small_recipe_list = comm.scatter(recipe_dirs, root=0)
-        for recipe_dir in small_recipe_list:
+        print "Size %i detected" % size
+        if rank == 0:
+            chunked_recipe_dirs=list()
+            for srank in range(0, size):
+                chunked_recipe_dirs.append(list())
+            rlen = len(recipe_dirs)
+            print "Total of %i recipe directories" % rlen
+            ridx = 0
+            sct = 0
+            while (ridx < rlen):
+                if (sct == size):
+                    sct = 0
+                chunked_recipe_dirs[sct].append(recipe_dirs[ridx])
+                sct = sct + 1
+                ridx = ridx + 1
+            #print "recipe dirs: %s " % recipe_dirs
+            #print "chunked_recipe_dirs: %s" % chunked_recipe_dirs
+        else:
+            chunked_recipe_dirs=None
+            small_dir_list=None
+        small_dir_list = comm.scatter(chunked_recipe_dirs, root=0)
+        for recipe_dir in small_dir_list:
             self.check_recipe_dir(recipe_dir, verbose, single_ingred)
-        print "Rank %s finished with a list of size %i" % (len(small_recipe_list))
+        print "Rank %i finished with a list of size %i" % (rank, len(small_dir_list))
         return None
