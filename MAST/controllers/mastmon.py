@@ -154,8 +154,23 @@ class MASTMon(object):
                 self.logger.info(recipe_dir)
             self.logger.info("================================")
 
+        if ("parallel_monitor" in dirutil.get_mast_platform()) and (single_ingred == 0) and (len(recipe_dirs) > 1):
+            self.mpi_check_dirs(verbose, recipe_dirs, single_ingred)
+            return None
+
         for recipe_dir in recipe_dirs:
             self.check_recipe_dir(recipe_dir, verbose, single_ingred)
                 
         dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
+
+    def mpi_check_dirs(verbose, recipe_dirs, single_ingred=0):
+        from mpi4py import MPI
+        comm = MPI.COMM_WORLD
+        size = comm.size
+        rank = comm.rank
+        small_recipe_list = comm.scatter(recipe_dirs, root=0)
+        for recipe_dir in small_recipe_list:
+            self.check_recipe_dir(recipe_dir, verbose, single_ingred)
+        print "Rank %s finished with a list of size %i" % (len(small_recipe_list))
+        return None
