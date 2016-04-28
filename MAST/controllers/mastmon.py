@@ -156,6 +156,9 @@ class MASTMon(object):
 
         if ("parallel_monitor" in dirutil.get_mast_platform()) and (single_ingred == 0) and (len(recipe_dirs) > 1):
             self.mpi_check_dirs(verbose, recipe_dirs, single_ingred)
+            if dirutil.directory_is_locked(self.scratch):
+                dirutil.unlock_directory(self.scratch)
+            os.chdir(curdir)
             return None
 
         for recipe_dir in recipe_dirs:
