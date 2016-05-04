@@ -156,8 +156,6 @@ class MASTMon(object):
 
         if ("parallel_monitor" in dirutil.get_mast_platform()) and (single_ingred == 0) and (len(recipe_dirs) > 1):
             self.mpi_check_dirs(verbose, recipe_dirs, single_ingred)
-            if dirutil.directory_is_locked(self.scratch):
-                dirutil.unlock_directory(self.scratch)
             os.chdir(curdir)
             return None
 
@@ -172,8 +170,8 @@ class MASTMon(object):
         comm = MPI.COMM_WORLD
         size = comm.size
         rank = comm.rank
-        print "Size %i detected" % size
         if rank == 0:
+            print "Size %i detected" % size
             chunked_recipe_dirs=list()
             for srank in range(0, size):
                 chunked_recipe_dirs.append(list())
@@ -196,4 +194,14 @@ class MASTMon(object):
         for recipe_dir in small_dir_list:
             self.check_recipe_dir(recipe_dir, verbose, single_ingred)
         print "Rank %i finished with a list of size %i" % (rank, len(small_dir_list))
+        local_okay = 1
+        local_okay = comm.gather(local_okay, root=0)
+        if rank == 0:
+            global_okay = sum(local_okay)
+            if (global_okay == size):
+                print "All %s nodes reported back. Unlock directory." % size
+                if dirutil.directory_is_locked(self.scratch):
+                    dirutil.unlock_directory(self.scratch)
+            else:
+                raise MASTError(self.__class__.__name__, "Not all nodes for parallel monitor reported back. Sum is %i out of %i." % (global_okay, size))
         return None
