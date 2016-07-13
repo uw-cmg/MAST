@@ -58,7 +58,7 @@ MAST requires the following dependencies, some of which have additional dependen
 *  numpy
 *  scipy
 *  matplotlib
-*  pymatgen
+*  pymatgen (tested to version 3.3.4)
 *  custodian
 *  pandas
 *  ase
@@ -113,6 +113,12 @@ If pip cannot find anything (SSL certificate fail), try::
 If pymatgen cannot be installed because gcc cannot be found in order to compile spglib, then please see your system administrator.
 
 If you need additional standalone tools (see :doc:`8_0_standalonetools`) or unit tests, then also get and unzip the MAST tar.gz file (see :doc:`12_0_programming`).
+
+Note 2016-07-13: also run::
+
+    pip install pymatgen=="3.3.4"
+
+in order to get a compatible version of pymatgen. MAST is currently not compatible with pymatgen 4.x.
 
 --------------------------------------------
 Install additional dependencies
