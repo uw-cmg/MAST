@@ -10,6 +10,7 @@ import shutil
 import pymatgen
 import numpy as np
 from MAST.utility import dirutil
+from pymatgen.io.vasp import Poscar
 testname ="structure_extensions_test"
 testdir = dirutil.get_test_dir(testname)
 #oldcontrol = os.getenv("MAST_CONTROL")
@@ -30,10 +31,10 @@ class TestSE(unittest.TestCase):
     def tearDown(self):
         pass
     def test_induce_defect_frac(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
-        compare_vac1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_vac1").structure
-        compare_int1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_int1").structure
-        compare_sub1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sub1").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
+        compare_vac1 = Poscar.from_file("POSCAR_vac1").structure
+        compare_int1 = Poscar.from_file("POSCAR_int1").structure
+        compare_sub1 = Poscar.from_file("POSCAR_sub1").structure
         coord_type='fractional'
         threshold=1.e-4
         vac1={'symbol':'O', 'type': 'vacancy', 'coordinates':  np.array([0.25, 0.75, 0.25])}
@@ -54,10 +55,10 @@ class TestSE(unittest.TestCase):
         self.assertEqual(struc_sub1.sites,compare_sub1.sites)
     
     def test_sort_structure_and_neb_lines(self):
-        perfect1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup1").structure
-        compare_sorted1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted1").structure
-        perfect2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup2").structure
-        compare_sorted2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted2").structure
+        perfect1 = Poscar.from_file("POSCAR_defectgroup1").structure
+        compare_sorted1 = Poscar.from_file("POSCAR_sorted1").structure
+        perfect2 = Poscar.from_file("POSCAR_defectgroup2").structure
+        compare_sorted2 = Poscar.from_file("POSCAR_sorted2").structure
         neblines = list()
         neblines.append(["Cr","0.3 0 0","0 0 0"])
         neblines.append(["Ni","0.6 0 0","0.3 0 0"])
@@ -89,9 +90,9 @@ class TestSE(unittest.TestCase):
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3").structure
+        perfect3 = Poscar.from_file("POSCAR_defectgroup3").structure
         #print perfect3.get_sorted_structure()
-        perfect4 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup4").structure
+        perfect4 = Poscar.from_file("POSCAR_defectgroup4").structure
         #print perfect4.get_sorted_structure()
         sxtend3 = StructureExtensions(struc_work1=perfect3, name=testdir)
         sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
@@ -99,9 +100,9 @@ class TestSE(unittest.TestCase):
         sxtend4 = StructureExtensions(struc_work1=perfect4, name=testdir)
         sorted4 = sxtend4.sort_structure_and_neb_lines(neblines,"04",3)
         #print sorted4
-        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
+        compare_sorted3 = Poscar.from_file("POSCAR_sorted3").structure
         #print compare_sorted3
-        compare_sorted4 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted4").structure
+        compare_sorted4 = Poscar.from_file("POSCAR_sorted4").structure
         #print compare_sorted4
         self.assertEqual(sorted3, compare_sorted3)
         self.assertEqual(sorted4, compare_sorted4)
@@ -117,32 +118,32 @@ class TestSE(unittest.TestCase):
         neblines.append(["Cr","0.4 0.2 0.1","0.3 0.3 0.2"])
         neblines.append(["Cr","0.29 0.05 0.05","0.01 0.01 0.98"])
         neblines.append(["Ni","0.61 0.99 0.98","0.25 0.01 0.97"])
-        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3_scrambled").structure
+        perfect3 = Poscar.from_file("POSCAR_defectgroup3_scrambled").structure
         #print perfect3.get_sorted_structure()
         #print perfect4.get_sorted_structure()
         sxtend3 = StructureExtensions(struc_work1=perfect3)
         sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
-        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
+        compare_sorted3 = Poscar.from_file("POSCAR_sorted3").structure
         self.assertEqual(sorted3, compare_sorted3)
         self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
         self.assertEqual(sorted3.sites, compare_sorted3.sites)
-        perfect3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_defectgroup3_really_scrambled").structure
+        perfect3 = Poscar.from_file("POSCAR_defectgroup3_really_scrambled").structure
         #print perfect3.get_sorted_structure()
         #print perfect4.get_sorted_structure()
         sxtend3 = StructureExtensions(struc_work1=perfect3)
         sorted3 = sxtend3.sort_structure_and_neb_lines(neblines,"00",3)
-        compare_sorted3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_sorted3").structure
+        compare_sorted3 = Poscar.from_file("POSCAR_sorted3").structure
         self.assertEqual(sorted3, compare_sorted3)
         self.assertEqual(sorted3.lattice, compare_sorted3.lattice)
         self.assertEqual(sorted3.sites, compare_sorted3.sites)
 
 
     def test_interpolation(self):
-        ep1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_ep1").structure
-        ep2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_ep2").structure
-        compare_im1 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_im1").structure
-        compare_im2 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_im2").structure
-        compare_im3 = pymatgen.io.vaspio.Poscar.from_file("POSCAR_im3").structure
+        ep1 = Poscar.from_file("POSCAR_ep1").structure
+        ep2 = Poscar.from_file("POSCAR_ep2").structure
+        compare_im1 = Poscar.from_file("POSCAR_im1").structure
+        compare_im2 = Poscar.from_file("POSCAR_im2").structure
+        compare_im3 = Poscar.from_file("POSCAR_im3").structure
         sxtend = StructureExtensions(struc_work1 = ep1, struc_work2 = ep2)
         slist = sxtend.do_interpolation(3)
         self.assertEqual(slist[0],ep1)
@@ -151,7 +152,7 @@ class TestSE(unittest.TestCase):
         self.assertEqual(slist[3],compare_im3)
         self.assertEqual(slist[4],ep2)
     def test_get_sd_array(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
         sxtend = StructureExtensions(struc_work1=perfect, name=testdir)
         mysd = sxtend.get_sd_array("0.5 0.5 0.5", 3)
         #print mysd
@@ -162,7 +163,7 @@ class TestSE(unittest.TestCase):
             myarr[idx-1][2]=True
         self.assertEqual(sum(np.fabs(sum(mysd-myarr))),0)
     def test_get_sd_array_periodic_boundary(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
         sxtend = StructureExtensions(struc_work1=perfect, name=testdir)
         mysd = sxtend.get_sd_array("0.95 0.95 0.95", 1, 0.07)
         #print mysd
@@ -173,7 +174,7 @@ class TestSE(unittest.TestCase):
             myarr[idx-1][2]=True
         self.assertEqual(sum(np.fabs(sum(mysd-myarr))),0)
     def test_multiple_sd_array(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
         sxtend = StructureExtensions(struc_work1=perfect, name=testdir)
         mysdlist = sxtend.get_multiple_sd_array("0.5 0.5 0.5", 1)
         mylist=list()
@@ -187,9 +188,9 @@ class TestSE(unittest.TestCase):
         self.assertEqual(sum(np.fabs(sum(mysdlist[1]-mylist[1]))),0)
         self.assertEqual(sum(np.fabs(sum(mysdlist[2]-mylist[2]))),0)
     def test_graft_coordinates(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
-        coordsonly = pymatgen.io.vaspio.Poscar.from_file("POSCAR_coordinates").structure
-        compare_grafted = pymatgen.io.vaspio.Poscar.from_file("POSCAR_grafted").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
+        coordsonly = Poscar.from_file("POSCAR_coordinates").structure
+        compare_grafted = Poscar.from_file("POSCAR_grafted").structure
         sxtend = StructureExtensions(struc_work1=perfect)
         grafted = sxtend.graft_coordinates_onto_structure(coordsonly)
         self.assertEqual(grafted, compare_grafted)
@@ -197,29 +198,29 @@ class TestSE(unittest.TestCase):
         self.assertEqual(grafted.sites, compare_grafted.sites)
 
     def test_strain_lattice(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_unstrained").structure
+        perfect = Poscar.from_file("POSCAR_unstrained").structure
         sxtend = StructureExtensions(struc_work1=perfect)
         strained = sxtend.strain_lattice(" 0.98 0.92 1.03  \n")
-        strain_compare = pymatgen.io.vaspio.Poscar.from_file("POSCAR_strained").structure
+        strain_compare = Poscar.from_file("POSCAR_strained").structure
         self.assertEqual(strained, strain_compare)
         self.assertEqual(strained.lattice, strain_compare.lattice)
         self.assertEqual(strained.sites, strain_compare.sites)
     def test_scale_structure_three(self):
-        hcp = pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP").structure
+        hcp = Poscar.from_file("POSCAR_HCP").structure
         sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2,2,2", name=testdir)
         scaled = sxtend.scale_structure()
-        self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
-        self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
-        self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+        self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertEqual(scaled.lattice, Poscar.from_file("POSCAR_HCP_222").structure.lattice)
+        self.assertEqual(scaled.sites.sort(), Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
     def test_scale_structure_nine(self):
-        hcp = pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP").structure
+        hcp = Poscar.from_file("POSCAR_HCP").structure
         sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2 0 0,0 2 0,0 0 2", name=testdir)
         scaled = sxtend.scale_structure()
-        self.assertEqual(scaled, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure)
-        self.assertEqual(scaled.lattice, pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.lattice)
-        self.assertEqual(scaled.sites.sort(), pymatgen.io.vaspio.Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+        self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertEqual(scaled.lattice, Poscar.from_file("POSCAR_HCP_222").structure.lattice)
+        self.assertEqual(scaled.sites.sort(), Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
     def test_scale_defect(self):
-        perfect = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        perfect = Poscar.from_file("POSCAR_perfect").structure
         scalingsize = "2,2,2"
         sxtend = StructureExtensions(struc_work1=perfect, scaling_size=scalingsize, name=testdir)
         scaled = sxtend.scale_structure()
@@ -232,4 +233,4 @@ class TestSE(unittest.TestCase):
         sub1={'symbol':'Fe', 'type': 'substitution','coordinates':np.array([0.25, 0.25,0.75])}
         sxtend4 = StructureExtensions(struc_work1=defected2, struc_work2=perfect, scaling_size=scalingsize, name=testdir)
         defected3 = sxtend4.scale_defect(sub1,'fractional',0.0001)
-        self.assertEqual(pymatgen.io.vaspio.Poscar.from_file("POSCAR_scaled_defected").structure, defected3)
+        self.assertEqual(Poscar.from_file("POSCAR_scaled_defected").structure, defected3)
