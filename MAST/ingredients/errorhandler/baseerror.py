@@ -17,8 +17,6 @@ from MAST.utility import loggerutils
 from MAST.ingredients.errorhandler import masterrorhandlers 
 from MAST.ingredients.errorhandler import mastvasperrorhandlers 
 from pymatgen.core.structure import Structure
-from pymatgen.io.vaspio import Poscar
-from pymatgen.io.cifio import CifParser
 class BaseError(MASTObj):
     """Base error handling class. This class switches between
         program-specific error-handling functions.
