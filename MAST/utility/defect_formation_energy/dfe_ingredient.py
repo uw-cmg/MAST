@@ -6,9 +6,7 @@
 ##############################################################
 import sys, os
 
-import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar, Oszicar
-from pymatgen.io.smartio import read_structure
+from pymatgen.io.vasp import Vasprun, Outcar, Oszicar, Poscar
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility.defect_formation_energy.defectformationenergy import DefectFormationEnergy
@@ -251,7 +249,7 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         abspath = '%s/%s/' % (self.recdir, directory)
 
         if ('CONTCAR' in os.listdir(abspath)):
-            return pmg.core.structure.IStructure.from_file('%s/CONTCAR' % abspath)
+            return Poscar.from_file('%s/CONTCAR' % abspath).structure
         elif ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
 

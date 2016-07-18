@@ -132,7 +132,7 @@ class DefectFormationEnergy:
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
         elif ('CONTCAR' in os.listdir(abspath)):
-            return Poscar.from_file('%s/CONTCAR' % abspath)
+            return Poscar.from_file('%s/CONTCAR' % abspath).structure
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""

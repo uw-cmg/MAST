@@ -7,8 +7,7 @@
 
 import shutil, os
 from collections import defaultdict
-import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Outcar
+from pymatgen.io.vasp import Poscar
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment  
 import pandas
 from MAST.utility.finite_size_scaling.parse_input import ParseInput 
@@ -45,7 +44,7 @@ class DefectFormationEnergy:
                 PA['%s_%s_%s'%(keywords[2],keywords[3],size)] = self.pa.read_outcar(CARs[i])
             elif keywords[0]==perfect_tag and (keywords[-1]=='POSCAR' or keywords[-1]=='CONTCAR'):
                 shutil.copy(CARs[i],'POSCAR')
-                Ele = pmg.read_structure('POSCAR').species
+                Ele = Poscar.from_file('POSCAR').structure.species
                 ele = dict()
                 for k in range(len(Ele)): 
                     if not Ele[k] in ele.keys():
@@ -54,7 +53,7 @@ class DefectFormationEnergy:
                 perfect[size]['ele'] = ele
             elif keywords[0]==defect_tag and (keywords[-1]=='POSCAR' or keywords[-1]=='CONTCAR'):
                 shutil.copy(CARs[i],'POSCAR')
-                Ele = pmg.read_structure('POSCAR').species
+                Ele = Poscar.from_file('POSCAR').structure.species
                 ele = dict()
                 os.system('rm POSCAR')
                 for k in range(len(Ele)): 
