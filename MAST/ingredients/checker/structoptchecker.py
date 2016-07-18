@@ -14,7 +14,7 @@ from MAST.ingredients.checker import VaspChecker
 from MAST.ingredients.checker import LammpsChecker
 from MAST.submit import queue_commands
 from pymatgen.core.structure import Structure
-from pymatgen.io.aseio import AseAtomsAdaptor
+from pymatgen.io.ase import AseAtomsAdaptor
 from MAST.structopt.Optimizer import Optimizer
 from MAST.structopt import post_processing as pp
 from MAST.structopt import inp_out
