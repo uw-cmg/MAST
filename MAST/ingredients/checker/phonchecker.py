@@ -5,10 +5,6 @@
 # Last updated: 2014-04-25
 ##############################################################
 from pymatgen.io.vasp import Poscar
-from pymatgen.io.vasp import Outcar
-from pymatgen.io.vasp import Potcar
-from pymatgen.io.vasp import Incar
-from pymatgen.io.vasp import Kpoints
 from pymatgen.core.structure import Structure
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile

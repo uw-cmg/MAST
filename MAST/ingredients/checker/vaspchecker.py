@@ -10,7 +10,6 @@ from pymatgen.io.vasp import Potcar
 from pymatgen.io.vasp import Incar
 from pymatgen.io.vasp import Kpoints
 from pymatgen.io.vasp import Vasprun
-from pymatgen.io.cif import CifParser
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from MAST.utility import dirutil
