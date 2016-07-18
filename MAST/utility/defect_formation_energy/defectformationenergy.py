@@ -6,9 +6,7 @@
 ##############################################################
 import sys, os
 
-import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar
-from pymatgen.io.smartio import read_structure
+from pymatgen.io.vasp import Poscar, Vasprun, Outcar
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 #from MAST.utility import PickleManager
@@ -53,7 +51,7 @@ class DefectFormationEnergy:
         
         perfpath = os.path.join(self.directory, perf_dir)
         if os.path.isfile(os.path.join(perfpath,"vasprun.xml")):
-            e_perf = pmg.io.vaspio.vasp_output.Vasprun(os.path.join(perfpath, "vasprun.xml")).final_energy
+            e_perf = Vasprun(os.path.join(perfpath, "vasprun.xml")).final_energy
         else:
             e_perf = float(open(os.path.join(perfpath, "OSZICAR")).readlines()[-1].split('E0=')[1].split()[0])
         efermi = self.get_fermi_energy(perf_dir)
@@ -77,7 +75,7 @@ class DefectFormationEnergy:
                     label = def_meta.read_data('defect_label')+'_q='+def_meta.read_data('charge')
                     charge = int(def_meta.read_data('charge'))
                     if os.path.isfile(os.path.join(self.directory, ddir, "vasprun.xml")):
-                        energy = pmg.io.vaspio.vasp_output.Vasprun(self.directory+'/'+ddir+'/vasprun.xml').final_energy
+                        energy = Vasprun(self.directory+'/'+ddir+'/vasprun.xml').final_energy
                     else:
                         energy = float(open(self.directory+'/'+ddir+'/OSZICAR').readlines()[-1].split('E0=')[1].split()[0])
                     structure = self.get_structure(ddir)
@@ -134,7 +132,7 @@ class DefectFormationEnergy:
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
         elif ('CONTCAR' in os.listdir(abspath)):
-            return pmg.read_structure('%s/CONTCAR' % abspath)
+            return Poscar.from_file('%s/CONTCAR' % abspath)
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""

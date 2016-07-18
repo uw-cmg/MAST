@@ -7,6 +7,7 @@ from filecmp import dircmp
 import MAST
 import shutil
 import pymatgen
+from pymatgen.io.vasp import Poscar
 import numpy as np
 from MAST.utility.finite_size_scaling.EneVsVm import CalcV_M
 from MAST.utility import dirutil
@@ -30,6 +31,6 @@ class TestEneVsVm(unittest.TestCase):
     def tearDown(self):
         pass
     def test_genLMNs(self):
-        struct = pymatgen.io.vaspio.Poscar.from_file("POSCAR").structure
+        struct = Poscar.from_file("POSCAR").structure
         V_M = round(5.185227,5)
         self.assertEqual(V_M,round(CalcV_M(struct),5)) 

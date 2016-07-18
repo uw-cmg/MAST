@@ -8,6 +8,7 @@ import os
 import time
 import MAST
 import pymatgen
+from pymatgen.io.vasp import Poscar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
@@ -51,7 +52,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_singlerun()
         myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
@@ -72,7 +73,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_pos = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
+        my_pos = Poscar.from_file("files/perfect_structure")
         my_pos.write_file("writedir/single_label1/POSCAR")
         myrdi = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
         self.assertTrue(myrdi.ready_structure())
@@ -94,7 +95,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_xc'] = 'pw91'
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images'] = 3
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         for subdir in ['00','01','02','03','04']:
             subname = "%s/%s" % (ingdir, subdir)
@@ -123,7 +124,7 @@ class TestIsReadyToRunIngredient(unittest.TestCase):
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
         kdict['images'] = 3
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         for subdir in ['00','01','02','03','04']:
             subname = "%s/%s" % (ingdir, subdir)

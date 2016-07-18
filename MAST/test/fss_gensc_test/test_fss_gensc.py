@@ -7,6 +7,7 @@ from filecmp import dircmp
 import MAST
 import shutil
 import pymatgen
+from pymatgen.io.vasp import Poscar
 import numpy as np
 from MAST.utility.finite_size_scaling.GenSC import genLMNs
 from MAST.utility.finite_size_scaling.GenSC import gensc
@@ -31,7 +32,7 @@ class TestGenSC(unittest.TestCase):
     def tearDown(self):
         pass
     def test_genLMNs(self):
-        primordial_struct = pymatgen.io.vaspio.Poscar.from_file("POSCAR_perfect").structure
+        primordial_struct = Poscar.from_file("POSCAR_perfect").structure
         LMNlist = [[1, 1, 2], [2, 2, 2], [1, 2, 2], [1, 1, 1]]
         self.assertItemsEqual(LMNlist,genLMNs(primordial_struct,minDefDist=5,maxNumAtoms=600,numStructAsked=5))
         

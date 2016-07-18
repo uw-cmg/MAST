@@ -8,6 +8,7 @@ import os
 import time
 import MAST
 import pymatgen
+from pymatgen.io.vasp import Poscar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
@@ -59,7 +60,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myuci = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         fullpath = myuci._fullpath_childname("next_ingred")
         self.assertEqual(fullpath, "%s/writedir/next_ingred" % testdir)
@@ -75,7 +76,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         myuci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_structure)
@@ -96,7 +97,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp_neb'
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images'] = 3
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed=dict()
         for subdir in ['00','01','02','03','04']:
             os.mkdir("writedir/neb_labelinit-labelfin/%s" % subdir)
@@ -120,7 +121,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         kdict=dict()
         kdict['mast_program'] = 'vasp_neb'
         kdict['images'] = 3
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed=dict()
         myosz=dict()
         mywav=dict()
@@ -155,7 +156,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mypos.to_file("%s/POSCAR" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myxdat=dict()
         mydynmat=dict()
         for subdir in ['phon_01','phon_02','phon_03']:
@@ -189,7 +190,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         mypos.to_file("%s/POSCAR" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myxdat = MASTFile("files/XDATCAR_compare")
         myxdat.to_file("%s/XDATCAR" % ingdir)
         mydynmat = MASTFile("files/DYNMAT_compare")
@@ -218,7 +219,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         myenergy = MASTFile("files/OSZICAR_relaxed")
@@ -241,7 +242,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -266,7 +267,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -291,7 +292,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -316,7 +317,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -340,7 +341,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -363,7 +364,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
@@ -386,7 +387,7 @@ class TestUpdateChildrenIngredient(unittest.TestCase):
         metad.to_file("%s/metadata.txt" % ingdir)
         kdict=dict()
         kdict['mast_program'] = 'vasp'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         myrelaxed = MASTFile("files/relaxed_structure")
         myrelaxed.to_file("%s/CONTCAR" % ingdir)
         mychg = MASTFile("files/CHGCAR")
