@@ -15,7 +15,7 @@ from MAST.utility import Metadata
 from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
-from pymatgen.io.cifio import CifParser
+from pymatgen.io.cif import CifParser
 
 class BaseChecker(MASTObj):
     """Base checker class. This class switches between
