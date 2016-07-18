@@ -16,6 +16,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 from pymatgen.core.sites import PeriodicSite
+from pymatgen.core.lattice import Lattice
 
 class StructureExtensions(MASTObj):
     """Structure extensions
