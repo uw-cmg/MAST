@@ -4,7 +4,7 @@
 # Maintainer: Tam Mayeshiba
 # Last updated: 2015-02-12 by Tam Mayeshiba
 ##############################################################
-from pymatgen.io.vaspio import *
+from pymatgen.io.vasp import *
 import numpy as np
 import logging
 from MAST.utility.dirutil import *
