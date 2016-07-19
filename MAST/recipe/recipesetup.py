@@ -190,7 +190,9 @@ class RecipeSetup(MASTObj):
         recipe_obj = RecipePlan(self.work_dir)
         ingredlist = how_to_run.keys()
         for ingred in ingredlist:
-            self.update_top_meta_for_ingred(ingred)
+            [iline, idata] = self.metafile.search_data(ingred)
+            if (iline == None):
+                self.update_top_meta_for_ingred(ingred)
             ingredtype = how_to_run[ingred]
             recipe_obj.ingredients[ingred]="I" #set all to initialized
             recipe_obj.ingred_input_options[ingred] = self.get_my_ingredient_options(ingred, ingredtype)
