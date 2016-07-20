@@ -13,8 +13,9 @@ from MAST.utility import MASTObj
 from MAST.utility import MAST2Structure
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
+from MAST.utility import Metadata
 #from MAST.utility.picklemanager import PickleManager
-from MAST.utility.dirutil import *
+from MAST.utility import dirutil
 from MAST.utility import InputOptions
 from MAST.utility import loggerutils
 from MAST.parsers import InputParser
@@ -60,7 +61,7 @@ class MASTInput(MASTObj):
         self.working_directory=""
         self.sysname=""
         self.recipe_plan = None
-        self.logger = loggerutils.initialize_short_logger(os.path.join(get_mast_control_path(),"mast_input.log"))
+        self.logger = loggerutils.initialize_short_logger(os.path.join(dirutil.get_mast_control_path(),"mast_input.log"))
 
 
     def check_independent_loops(self):
@@ -231,7 +232,7 @@ class MASTInput(MASTObj):
         #recipename = os.path.basename(self.input_options.get_item('recipe','recipe_file')).split('.')[0]
         #dir_name = "%s_%s_%s" % (self.sysname, recipename, self.timestamp)
         dir_name = "%s_%s" % (self.sysname, self.timestamp)
-        dir_path = str(os.path.join(get_mast_scratch_path(), dir_name))
+        dir_path = str(os.path.join(dirutil.get_mast_scratch_path(), dir_name))
         self.working_directory = dir_path
         return
 
