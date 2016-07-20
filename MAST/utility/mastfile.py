@@ -9,7 +9,7 @@ import time
 from MAST.utility import dirutil
 from MAST.utility import MASTError
 
-class MASTFile:
+class MASTFile(object):
     """Controls MAST file IO and manipulation"""
     #data = [] #TTM 11/16/11 remove from here to avoid confusing reinit.
 
