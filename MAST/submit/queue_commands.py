@@ -167,7 +167,7 @@ def clear_submission_list(subdict=""):
         return
     submitfile=MASTFile(submitlist)
     if subdict == "":
-        raise DeprecationWarning("/bin/mast command should be updated by installing the latest MAST version. clear_submission_list must now take a dictionary argument.")
+        raise DeprecationWarning("mast command should be updated by pip-installing the latest MAST version. clear_submission_list must now take a dictionary argument.")
         return
     retain_these = list()
     submittedlist = subdict.keys()
