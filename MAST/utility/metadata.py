@@ -2,12 +2,15 @@
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # 
 # Maintainer: Glen Jenness
-# Last updated: 2013-07-01
+# Last updated:
+#       2016-07-20 Tam Mayeshiba
+#       2013-07-01
 ##############################################################
 import os
 
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
+from MAST.utility.mastfile import MASTFile
 
 ALLOWED_KEYS = {
                 'metafile' : (str, 'metadata.txt', 'Metadata file name')
@@ -17,9 +20,13 @@ ALLOWED_KEYS = {
 class Metadata(MASTObj):
     """Class to handle the metadata file
         Fields are composed of a keyword and a value, separated by a '='.
+        Attributes:
+            self.mdfile <MASTFile>: MAST file
     """
     def __init__(self, **kwargs):
         MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
+        self.mdfile = MASTFile(self.keywords['metafile'])
+        return
 
     def write_data(self, keyword, data, option=0):
         """Writes a keyword and its associated data to the metafile"""
@@ -47,13 +54,13 @@ class Metadata(MASTObj):
         """
         line_number = None
         data = None
+        
+        searchstr = keyword.lower() + " = "
+        line_number = self.mdfile.get_line_match(searchstr) #TTM use mastfile
 
-        with open(self.keywords['metafile'], 'r') as metafile:
-            for n, line in enumerate(metafile):
-                if (keyword.lower() + ' = ') in line.lower():
-                    line_number = n
-                    data = line.split(' = ')[1].strip()
-                    break
+        if not (line_number == None): #TTM match found
+            linetext = self.mdfile.data[line_number]
+            data = linetext.split(" = ")[1].strip()
 
         return line_number, data
 
