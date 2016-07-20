@@ -59,7 +59,7 @@ class MASTFile(object):
             raise MASTError(self.__class__.__name__,
                 "Empty file not copied to " + file_path)
         writef = open(file_path,'wb')
-        fcntl.flock(writef, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(writef, fcntl.LOCK_EX)
         for line in self.data:
             writef.write(line)
         fcntl.flock(writef, fcntl.LOCK_UN)
