@@ -118,6 +118,7 @@ class MASTFile:
             if string_to_match in myline:
                 return ct + 1 #return line numbers starting from 1
             ct = ct + 1
+        return None #No match
 
     #TTM+block 10/5/11 created
     def get_last_line_match(self, string_to_match):
