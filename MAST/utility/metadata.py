@@ -25,12 +25,22 @@ class Metadata(MASTFile):
         return
 
     def write_data(self, keyword, data, option=0):
-        """Writes a keyword and its associated data to the metafile"""
+        """Writes a keyword and its associated data to the metafile
+            Args:
+                keyword <str>
+                data <str>
+                option <int>: if the keyword is found,
+                    0 - append to previous entry
+                    1 - overwrite previous entry
+                    2 - make no modifications
+        """
         [existline, existdata] = self.search_data(keyword)
-        if existline == None:
+        if existline == None: 
             linetowrite = "%s = %s\n" % (keyword, data)
             self.data.append(linetowrite)
         else:
+            if (option == 2): # make no modifications
+                return
             if (option == 0): #append to previous entry
                 linetowrite = "%s = %s; %s\n" % (keyword, existdata, data)
             elif (option == 1): #overwrite previous entry
