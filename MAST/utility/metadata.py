@@ -12,37 +12,32 @@ from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility.mastfile import MASTFile
 
-ALLOWED_KEYS = {
-                'metafile' : (str, 'metadata.txt', 'Metadata file name')
-               }
-
-
-class Metadata(MASTObj):
+class Metadata(MASTFile):
     """Class to handle the metadata file
         Fields are composed of a keyword and a value, separated by a '='.
-        Attributes:
-            self.mdfile <MASTFile>: MAST file
     """
-    def __init__(self, **kwargs):
-        MASTObj.__init__(self, ALLOWED_KEYS, **kwargs)
-        self.mdfile = MASTFile(self.keywords['metafile'])
+    def __init__(self, metafile=""):
+        self.mdpath=metafile
+        if not (os.path.isfile(self.mdpath)):
+            MASTFile.__init__(self, "")
+        else:
+            MASTFile.__init__(self, self.mdpath)
         return
 
     def write_data(self, keyword, data, option=0):
         """Writes a keyword and its associated data to the metafile"""
-        with open(self.keywords['metafile'], 'a') as metafile:
-            # First check to see if the keyword already exists in the metadata file
-            if None in self.search_data(keyword):
-                metafile.write('%s = %s\n' % (keyword, data))
-            else:
-                if (option == 0):
-                    entry = self.read_data(keyword)
-                    entry += '; %s' % data
-                    self.clear_data(keyword)
-                    metafile.write('%s = %s\n' % (keyword, entry))
-                elif (option == 1):
-                    self.clear_data(keyword)
-                    metafile.write('%s = %s\n' % (keyword, data))
+        [existline, existdata] = self.search_data(keyword)
+        if existline == None:
+            linetowrite = "%s = %s\n" % (keyword, data)
+            self.data.append(linetowrite)
+        else:
+            if (option == 0): #append to previous entry
+                linetowrite = "%s = %s; %s\n" % (keyword, existdata, data)
+            elif (option == 1): #overwrite previous entry
+                linetowrite = "%s = %s\n" % (keyword, data)
+            self.modify_file_by_line_number(existline, "R", linetowrite)
+        self.to_file(self.mdpath)
+        return
 
     def search_data(self, keyword):
         """Searches the file for a keyword, and if found returns the line number
@@ -56,10 +51,10 @@ class Metadata(MASTObj):
         data = None
         
         searchstr = keyword.lower() + " = "
-        line_number = self.mdfile.get_line_match(searchstr) #TTM use mastfile
-
+        line_number = self.get_line_match_number(searchstr) #TTM use mastfile
         if not (line_number == None): #TTM match found
-            linetext = self.mdfile.data[line_number]
+            dataidx = line_number - 1 #TTM adjust line number to data index
+            linetext = self.data[dataidx]
             data = linetext.split(" = ")[1].strip()
 
         return line_number, data
@@ -73,30 +68,20 @@ class Metadata(MASTObj):
  
     def clear_data(self, keyword):
         """Removes the specified data and keyword from the file.
-            This is inefficient, as what we do is basically reading in the file
-            then iterating through the file, do if..else check, clear the file,
-            then re-write it.
-
-            But it works!
         """
         line_number, data = self.search_data(keyword)
-
-        data = list()
-        with open(self.keywords['metafile'], 'r') as metafile:
-            for n, line in enumerate(metafile):
-                if n == line_number:
-                    pass
-                else:
-                    data.append(line)
-
-        self.clear_file()
-        for line in data:
-            keyword, data = line.split(' = ')
-            self.write_data(keyword, data.strip())
+        if line_number == None: #TTM not found
+            return
+        self.modify_file_by_line_number(line_number, "D")
+        self.to_file(self.mdpath)
+        return
 
     def clear_file(self):
         """Empties the metafile"""
-        open(self.keywords['metafile'], 'w').close()
+        self.data = list()
+        self.to_file(self.mdpath)
+        return
 
     def __repr__(self):
-        return file(self.keywords['metafile']).read()
+        self.to_stdout()
+        return
