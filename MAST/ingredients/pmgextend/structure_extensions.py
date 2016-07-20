@@ -8,7 +8,7 @@ import numpy as np
 import logging
 from MAST.utility.dirutil import *
 from MAST.utility import MASTError
-from MAST.utility import MASTFile
+from MAST.utility import Metadata
 from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import loggerutils
