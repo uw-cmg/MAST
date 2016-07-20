@@ -6,7 +6,7 @@
 ##############################################################
 import os
 import time
-from MAST.utility import dirutil
+import fcntl
 from MAST.utility import MASTError
 
 class MASTFile(object):
@@ -58,12 +58,13 @@ class MASTFile(object):
         if self.data == []:
             raise MASTError(self.__class__.__name__,
                 "Empty file not copied to " + file_path)
-        dirutil.lock_directory(os.path.dirname(file_path))
         writef = open(file_path,'wb')
+        fcntl.flock(writef, fcntl.LOCK_EX | fcntl.LOCK_NB)
         for line in self.data:
             writef.write(line)
+        fcntl.flock(writef, fcntl.LOCK_UN)
         writef.close()
-        dirutil.unlock_directory(os.path.dirname(file_path))
+        return
 
     #TTM 11/10/11 created to solve archiving problems
     def to_unique_file(self, parent_path="", try_name="", suffix="", max=10):
