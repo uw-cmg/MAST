@@ -79,10 +79,8 @@ def submit_and_monitor(only=0):
     if only==2:
         pass
     else: 
-        print "Submitting from submission list."
+        print "Submitting from submission list and clearing submitted jobs."
         queue_commands.submit_from_submission_list()
-        print "Clearing submission list."
-        queue_commands.clear_submission_list()
         display_recent_submissions()
         print "Getting queue snapshot."
         clear_and_get_queue_snapshot()

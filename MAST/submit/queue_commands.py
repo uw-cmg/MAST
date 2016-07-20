@@ -16,6 +16,7 @@ import importlib
 import subprocess
 import shutil
 import logging
+import traceback
 from MAST.utility.mastfile import MASTFile
 from MAST.utility import MASTError
 from MAST.utility import dirutil
@@ -89,10 +90,18 @@ def submit_from_submission_list():
         subme=subprocess.Popen(subcommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         subme.wait()
         status=subme.communicate()[0]
-        write_to_jobids_file(subentry, status)
-        submitted[subentry]=status
+        submittedokay = write_to_jobids_file(subentry, status)
+        if submittedokay:
+            submitted[subentry]=status
+        else: #probably ran into queue limit or account limit
+            print "   "
+            print "No futher MAST submissions for this cycle of the mast command."
+            print "Check $MAST_CONTROL/submitlist for remaining jobs."
+            break 
     print_submitted_dict(submitted)
     os.chdir(mast_control)
+    clear_submission_list(submitted)
+    return
 
 def write_to_jobids_file(subentry, status):
     """Write the job id to a jobids file in the ingredient directory.
@@ -102,6 +111,8 @@ def write_to_jobids_file(subentry, status):
             status <str>: Job submission response from queueing system
     """
     jobid = extract_submitted_jobid(status)
+    if jobid == None:
+        return None
     jpath = "%s/jobids" % subentry
     if not os.path.isfile(jpath):
         jfile = MASTFile()
@@ -109,7 +120,7 @@ def write_to_jobids_file(subentry, status):
         jfile = MASTFile(jpath)
     jfile.data.insert(0,str(jobid) + '\n')
     jfile.to_file(jpath)
-    return
+    return True
 
 def get_job_status_from_queue_snapshot(ingpath, jobid):
     """Match a jobid to the queue_snapshot
@@ -144,18 +155,30 @@ def get_last_jobid(ingpath):
         return None
     return int(jfile.data[0].strip())
 
-def clear_submission_list():
-    """Clear all entries from the submission list at
+def clear_submission_list(subdict=""):
+    """Clear entries from the submission list at
         $MAST_CONTROL/submitlist
+        Args:
+            subdict <dict of str>: Dictionary of submitted job directories
     """
     submitlist=os.path.join(mast_control, "submitlist")
     if not os.path.isfile(submitlist):
         print "No submission list at %s" % submitlist
         return
     submitfile=MASTFile(submitlist)
-    submitfile.data=list()
-    submitfile.data.append("\n")
+    if subdict == "":
+        raise DeprecationWarning("/bin/mast command should be updated by installing the latest MAST version. clear_submission_list must now take a dictionary argument.")
+        return
+    retain_these = list()
+    submittedlist = subdict.keys()
+    for subline in submitfile.data:
+        if subline.strip() in submittedlist: #was submitted successfully
+            pass
+        else:
+            retain_these.append(subline)
+    submitfile.data=list(retain_these)
     submitfile.to_file(submitlist)
+    return
 
 def print_submitted_dict(submitted):
     """Print a dictionary of all runs submitted into
@@ -207,7 +230,13 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
-    return my_queue_commands.extract_submitted_jobid(string)
+    try:
+        myjobid = my_queue_commands.extract_submitted_jobid(string)
+    except (ValueError, TypeError):
+        print "Exception for submission:"
+        traceback.print_exc(file=sys.stdout)
+        return None
+    return myjobid
 
 def queue_snap_command():
     """
