@@ -178,6 +178,7 @@ def lock_directory(dirname, waitmax=10):
     lockfile = open(dirname + "/mast.write_files.lock", 'wb')
     lockfile.writelines(time.ctime())
     lockfile.close()
+    return()
 
 def unlock_directory(dirname, waitmax=10):
     """Unlock a directory by removing the lockfile.
@@ -200,6 +201,7 @@ def unlock_directory(dirname, waitmax=10):
         if not okay==1:
             raise MASTError("utility unlock_directory",
                 "Tried to unlock directory %s which was not locked." % dirname)
+    return
 
 def wait_to_write(dirname, waitmax=10):
     """Wait to write to directory.
@@ -216,6 +218,7 @@ def wait_to_write(dirname, waitmax=10):
     if directory_is_locked(dirname):
         raise MASTError("utility wait_to_write", 
             "Timed out waiting to obtain lock on directory %s" % dirname)
+    return
 
 def list_methods(myclass=None, printout=1):
     """List the methods in a class.
