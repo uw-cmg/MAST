@@ -65,7 +65,7 @@ def submit_and_monitor(only=0):
                               2 - monitor only
     """
     from MAST.submit import queue_commands
-    clear_and_get_queue_snapshot()
+    clear_and_get_queue_snapshot() #snapshot to check if mast is already running
     [mast_found,mast_search_str,username] = queue_commands.mast_is_on_queue_snapshot()
     if mast_found:
         print "MAST appears to be running:"
@@ -79,10 +79,6 @@ def submit_and_monitor(only=0):
         return
     display_displayme_lines()
     mastscratch = dirutil.get_mast_scratch_path()
-    if dirutil.directory_is_locked(mastscratch):
-        print "The $MAST_SCRATCH directory is locked by a MAST monitor. Please wait for that monitor to complete, or check the $MAST_CONTROL/errormast file."
-        return
-    dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1) 
     print "Moving log file."
     move_log()
     if only==2:
@@ -92,12 +88,10 @@ def submit_and_monitor(only=0):
         queue_commands.submit_from_submission_list()
         display_recent_submissions()
         print "Getting queue snapshot."
-        clear_and_get_queue_snapshot()
-    dirutil.unlock_directory(dirutil.get_mast_scratch_path())
+        clear_and_get_queue_snapshot() #snapshot updated with submitted jobs
     if only == 1:
         return
-    print "Locking directory and submitting MAST monitor."
-    dirutil.lock_directory(dirutil.get_mast_scratch_path(), 1)
+    print "Submitting MAST monitor."
     mycwd=os.getcwd()
     mast_control = os.getenv("MAST_CONTROL")
     os.chdir(mast_control)
@@ -157,8 +151,6 @@ def display_errors():
             break
     if has_traceback == False:
         shutil.move(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
-        if dirutil.directory_is_locked(mastscratch):
-            dirutil.unlock_directory(mastscratch)
         return 0
     if len(myerrormast.data) > 0:
         print "--------------------------"
@@ -177,8 +169,6 @@ def display_errors():
         print "3. Re-run MAST."
         print ""
         shutil.copy(errorpath, "%s/archive.errormast.%s" % (os.getenv("MAST_CONTROL"),time.strftime('%Y%m%dT%H%M%S')))
-        if dirutil.directory_is_locked(mastscratch):
-            dirutil.unlock_directory(mastscratch)
         return -1
 
 def display_recent_submissions():

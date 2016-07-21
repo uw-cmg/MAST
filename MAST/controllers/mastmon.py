@@ -138,9 +138,6 @@ class MASTMon(object):
             errorstr = "Could not change directories to MAST_SCRATCH at %s" % self.scratch
             raise MASTError(self.__class__.__name__, errorstr)
         
-        #dirutil.lock_directory(self.scratch, 1) # Wait 5 seconds
-        #Directory is now locked by mast initially, but gets
-        #unlocked at the end of the mastmon run.
         if single_ingred == 0: 
             recipe_dirs = dirutil.walkdirs(self.scratch,1,1)
         else:
@@ -162,7 +159,6 @@ class MASTMon(object):
         for recipe_dir in recipe_dirs:
             self.check_recipe_dir(recipe_dir, verbose, single_ingred)
                 
-        dirutil.unlock_directory(self.scratch) #unlock directory
         os.chdir(curdir)
 
     def mpi_check_dirs(self, verbose, recipe_dirs, single_ingred=0):
@@ -199,9 +195,7 @@ class MASTMon(object):
         if rank == 0:
             global_okay = sum(local_okay)
             if (global_okay == size):
-                print "All %s nodes reported back. Unlock directory." % size
-                if dirutil.directory_is_locked(self.scratch):
-                    dirutil.unlock_directory(self.scratch)
+                print "All %s nodes reported back." % size
             else:
                 raise MASTError(self.__class__.__name__, "Not all nodes for parallel monitor reported back. Sum is %i out of %i." % (global_okay, size))
         return None
