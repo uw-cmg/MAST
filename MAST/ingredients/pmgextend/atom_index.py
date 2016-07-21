@@ -6,12 +6,13 @@
 ##############################################################
 import numpy as np
 import logging
-from MAST.utility.dirutil import *
+import os
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility import MASTObj
 from MAST.utility import Metadata
 from MAST.utility import loggerutils
+from MAST.utility import dirutil
 from pymatgen.core.structure import Structure
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
@@ -281,7 +282,7 @@ class AtomIndex(MASTObj):
         elem_matches=list()
         scaling_matches=list()
         namelist=list()
-        allfolders=immediate_subdirs(os.path.dirname(self.sdir)) #ing dirs
+        allfolders=dirutil.immediate_subdirs(os.path.dirname(self.sdir)) #ing dirs
         for folder in allfolders:
             namelist.append("%s_frac_coords" % folder)
         for nametofind in namelist:
