@@ -91,13 +91,13 @@ def submit_from_submission_list():
         subme.wait()
         status=subme.communicate()[0]
         submittedokay = write_to_jobids_file(subentry, status)
-        if submittedokay:
-            submitted[subentry]=status
-        else: #probably ran into queue limit or account limit
+        if submittedokay == False: #probably ran into queue limit or account limit
             print "   "
             print "No futher MAST submissions for this cycle of the mast command."
             print "Check $MAST_CONTROL/submitlist for remaining jobs."
             break 
+        else:
+            submitted[subentry]=status
     print_submitted_dict(submitted)
     os.chdir(mast_control)
     clear_submission_list(submitted)
@@ -111,8 +111,8 @@ def write_to_jobids_file(subentry, status):
             status <str>: Job submission response from queueing system
     """
     jobid = extract_submitted_jobid(status)
-    if jobid == None:
-        return None
+    if ((jobid == None) or (jobid == False)):
+        return jobid #None is no queue system; False is error
     jpath = "%s/jobids" % subentry
     if not os.path.isfile(jpath):
         jfile = MASTFile()
@@ -230,12 +230,12 @@ def extract_submitted_jobid(string):
         OUTPUTS:
             <int> = job ID as integer
     """
-    try:
+    try: 
         myjobid = my_queue_commands.extract_submitted_jobid(string)
     except (ValueError, TypeError):
         print "Exception for submission:"
         traceback.print_exc(file=sys.stdout)
-        return None
+        return False
     return myjobid
 
 def queue_snap_command():
@@ -272,4 +272,16 @@ def get_job_error_file(ingpath):
         logger.warning("More than one job error file found for %s. Using first file %s" % (ingpath, tryitems[0]))
     return tryitems[0]
     
-
+def mast_is_on_queue_snapshot():
+    myqs = MASTFile("%s/queue_snapshot" % mast_control)
+    username = os.getenv("USER")
+    binct=0
+    for qsline in myqs.data:
+        if username in qsline:
+            if ("/bin/mast" in qsline): #no_queue_system matches on /bin/mast
+                binct = binct + 1 #one would be already-running mast
+                if binct > 1:
+                    return [True, "/bin/mast", "%s, twice" % username]
+            if (" mastmon " in qsline): #with a queue system
+                return [True, " mastmon ", username]
+    return [False,"",""]

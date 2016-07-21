@@ -35,39 +35,7 @@ def queue_status_from_text(jobid, queuetext):
             'R': Running
             'Q': Queued
     """
-    if (queuetext == None): 
-        return 'X'
-    if len(queuetext) == 0:
-        return 'X'
-    begin = queuetext.find(str(jobid))
-    if begin == -1:
-        return 'X'
-    queuetext = queuetext[begin:]
-    end = queuetext.find('\n')
-    if end > -1:
-        queuetext = queuetext[:end]
-    
-    qmat = queuetext.split()
-    if len(qmat) < 5:
-        return 'E'
-    return qmat[4] #TTM 1/17/12 qstat returns differently than qstat -a does
-
-    #if system == "ranger":####Ranger
-    #    ranger_out = queuetext.split()[4]
-    #    if (ranger_out == 'wq') or (ranger_out == 'qw'):
-    #        final_out = 'Q'
-    #    elif ranger_out == 'r':
-    #        final_out = 'R'
-    #    return final_out
-
-    #if system == "dlx":####UKy DLX
-    #    queuetext = queuetext.strip()
-    #    dlx_out = queuetext.split()[4] #indexing starts at 0
-    #    if (dlx_out == 'PD'):
-    #        final_out = 'Q'
-    #    elif dlx_out in ['CG','CD','R']:
-    #        final_out = 'R'
-    #    return final_out
+    return "X" #TTM no queue system does not track jobids
 
 def extract_submitted_jobid(string):
     """
@@ -87,7 +55,8 @@ def queue_snap_command():
         OUTPUTS:
             Command for producing a queue snapshot
     """
-    return ""
+    username=os.getenv("USER")
+    return "ps aux | grep %s" % username
 
 def get_approx_job_error_file(jobid):
     """

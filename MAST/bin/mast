@@ -65,6 +65,15 @@ def submit_and_monitor(only=0):
                               2 - monitor only
     """
     from MAST.submit import queue_commands
+    clear_and_get_queue_snapshot()
+    [mast_found,mast_search_str,username] = queue_commands.mast_is_on_queue_snapshot()
+    if mast_found:
+        print "MAST appears to be running:"
+        print "$MAST_CONTROL/queue_snapshot matched '%s'" % mast_search_str
+        print "for user %s." % username
+        print "Please wait until that job or process has finished."
+        return
+
     myerrors = display_errors()
     if myerrors == -1:
         return
@@ -109,6 +118,7 @@ def clear_and_get_queue_snapshot():
     mysub = subprocess.Popen(myqs, shell=True, stdout=qsopen, stderr=subprocess.PIPE)
     mysub.wait()
     qsopen.close()
+    return
 
 def process_input_file(myinputfile):
     myerrors = display_errors()
