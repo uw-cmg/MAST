@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N mastmon
-#PBS -l nodes=1:ppn=8,pvmem=2000mb
+#PBS -l nodes=1:ppn=4,pvmem=2000mb
 #PBS -q morganshort
 #PBS -l walltime=4:00:00
 ##export all environment variables. 
@@ -13,4 +13,4 @@ echo "script running on host `hostname`"
 cd $PBS_O_WORKDIR
 echo "PBS_NODEFILE"
 cat $PBS_NODEFILE
-//opt/mpiexec/bin/mpiexec -n 8 python runmast.py >> $MAST_CONTROL/mastoutput 2> $MAST_CONTROL/errormast
+//opt/mpiexec/bin/mpiexec -n 4 python runmast.py >> $MAST_CONTROL/mastoutput 2> $MAST_CONTROL/errormast
