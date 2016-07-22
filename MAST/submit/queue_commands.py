@@ -54,6 +54,16 @@ def write_to_submit_list(mydir):
     submitfile.to_file(submitlist, 1) #TTM append 
     return
 
+def unify_submission_list():
+    mast_control = dirutil.get_mast_control_path()
+    submitlist=os.path.join(mast_control, "submitlist")
+    if os.path.isfile(submitlist):
+        submitfile=MASTFile(submitlist)
+    else:
+        raise MASTError("submit.queue_commands","Asked to unify nonexistent submission list at %s" % submitlist)
+    submitfile.to_file(submitlist, 2) #TTM print only unique entries
+    return
+
 def submit_from_submission_list():
     """Submit all entries from the submission list at
         $MAST_CONTROL/submitlist

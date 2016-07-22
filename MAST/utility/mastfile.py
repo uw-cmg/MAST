@@ -51,12 +51,13 @@ class MASTFile(object):
             self.data.append(line)
         readf.close()    
     
-    def to_file(self,file_path, append=0):
+    def to_file(self,file_path, writestyle=0):
         """Writes data to a file
             Args:
                 file_path <str>: File path
-                append <int>: 0 - overwrite file (default)
-                              1 - append to file
+                writestyle <int>: 0 - overwrite file (default)
+                                  1 - append to file
+                                  2 - overwrite with unique lines from self.data
         """
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
@@ -70,6 +71,8 @@ class MASTFile(object):
         else:
             writef = open(file_path,'wb')
         fcntl.flock(writef, fcntl.LOCK_EX)
+        if (append == 2):
+            self.keep_only_unique_lines()
         for line in self.data:
             writef.write(line)
         fcntl.flock(writef, fcntl.LOCK_UN)
@@ -267,4 +270,14 @@ class MASTFile(object):
         other_file.data = list()
         for line in self.data:
             other_file.data.append(line)
+        return
+
+    def keep_only_unique_lines(self):
+        uniquelist=list()
+        for line in self.data:
+            if line in uniquelist:
+                pass
+            else:
+                uniquelist.append(line)
+        self.data=list(uniquelist)
         return

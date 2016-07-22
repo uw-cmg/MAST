@@ -196,6 +196,8 @@ class MASTMon(object):
             global_okay = sum(local_okay)
             if (global_okay == size):
                 print "All %s nodes reported back." % size
+                from MAST.submit import queue_commands
+                queue_commands.unify_submission_list()
             else:
                 raise MASTError(self.__class__.__name__, "Not all nodes for parallel monitor reported back. Sum is %i out of %i." % (global_okay, size))
         return None
