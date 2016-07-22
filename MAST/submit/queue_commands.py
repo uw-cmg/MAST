@@ -51,7 +51,7 @@ def write_to_submit_list(mydir):
     else:
         submitfile=MASTFile()
     submitfile.data.append(mydir + "\n")
-    submitfile.to_file(submitlist)
+    submitfile.to_file(submitlist, 1) #TTM append 
     return
 
 def submit_from_submission_list():

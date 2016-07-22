@@ -51,8 +51,13 @@ class MASTFile(object):
             self.data.append(line)
         readf.close()    
     
-    def to_file(self,file_path):
-        """Writes data to a file (overwrites existing file)."""
+    def to_file(self,file_path, append=0):
+        """Writes data to a file
+            Args:
+                file_path <str>: File path
+                append <int>: 0 - overwrite file (default)
+                              1 - append to file
+        """
         #TTM+2 10/7/11 add error checking in case of no path
         if (file_path == "") or (file_path == None):
             raise MASTError(self.__class__.__name__,
@@ -60,7 +65,10 @@ class MASTFile(object):
         if self.data == []:
             raise MASTError(self.__class__.__name__,
                 "Empty file not copied to " + file_path)
-        writef = open(file_path,'wb')
+        if (append == 1):
+            writef = open(file_path,'ab')
+        else:
+            writef = open(file_path,'wb')
         fcntl.flock(writef, fcntl.LOCK_EX)
         for line in self.data:
             writef.write(line)
