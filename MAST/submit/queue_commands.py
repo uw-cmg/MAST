@@ -46,12 +46,14 @@ def write_to_submit_list(mydir):
     """
     mast_control = dirutil.get_mast_control_path() #setting here instead of globally allows tests to run in isolated test_control folder
     submitlist=os.path.join(mast_control, "submitlist")
+    dirutil.lock_directory(mast_control)
     if os.path.isfile(submitlist):
         submitfile=MASTFile(submitlist)
     else:
         submitfile=MASTFile()
     submitfile.data.append(mydir + "\n")
     submitfile.to_file(submitlist)
+    dirutil.unlock_directory(mast_control)
     return
 
 def submit_from_submission_list():
