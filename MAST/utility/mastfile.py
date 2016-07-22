@@ -66,12 +66,12 @@ class MASTFile(object):
         if self.data == []:
             raise MASTError(self.__class__.__name__,
                 "Empty file not copied to " + file_path)
-        if (append == 1):
+        if (writestyle == 1):
             writef = open(file_path,'ab')
         else:
             writef = open(file_path,'wb')
         fcntl.flock(writef, fcntl.LOCK_EX)
-        if (append == 2):
+        if (writestyle == 2):
             self.keep_only_unique_lines()
         for line in self.data:
             writef.write(line)
