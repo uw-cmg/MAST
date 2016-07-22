@@ -78,7 +78,7 @@ def extract_submitted_jobid(string):
             <int> = job ID as integer
     """
     if string == "":
-        return None
+        raise ValueError("Job did not submit.")
     return int(string.split('.')[0])
     ####Bardeen and Curie:
     if system == "bardeen" or system == "curie":
