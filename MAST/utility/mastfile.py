@@ -33,6 +33,7 @@ class MASTFile(object):
             raise MASTError(self.__class__.__name__,
                 "No such file at " + file_path)
         readf = open(file_path,'rb')
+        fcntl.flock(readf, fcntl.LOCK_SH)
         lines = readf.readlines()
         for line in lines:
             self.data.append(line)
@@ -44,6 +45,7 @@ class MASTFile(object):
         if not os.path.isfile(file_path):
             return
         readf = open(file_path,'rb')
+        fcntl.flock(readf, fcntl.LOCK_SH)
         lines = readf.readlines()
         for line in lines:
             self.data.append(line)
