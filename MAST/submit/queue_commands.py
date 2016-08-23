@@ -46,11 +46,12 @@ def write_to_submit_list(mydir):
     """
     mast_control = dirutil.get_mast_control_path() #setting here instead of globally allows tests to run in isolated test_control folder
     submitlist=os.path.join(mast_control, "submitlist")
+    submitfile=MASTFile()
     if os.path.isfile(submitlist):
-        submitfile=MASTFile(submitlist)
-    else:
-        submitfile=MASTFile()
-    submitfile.data.append(mydir + "\n")
+        submitfile.from_file(submitlist, "exclusive") #TTM do not read until can get an exclusive lock
+    writestr = mydir + "\n"
+    if not (writestr in submitfile.data):
+        submitfile.data.append(writestr)
     submitfile.to_file(submitlist, 1) #TTM append 
     return
 

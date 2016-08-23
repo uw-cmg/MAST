@@ -25,7 +25,7 @@ class MASTFile(object):
         else:
             pass
 
-    def from_file(self, file_path):
+    def from_file(self, file_path, lock_type="shared"):
         """Reads data from a file and stores it in a list"""
         self.data = []
         #TTM+2 10/7/11 add error checking in case of no file
@@ -33,12 +33,17 @@ class MASTFile(object):
             raise MASTError(self.__class__.__name__,
                 "No such file at " + file_path)
         readf = open(file_path,'rb')
-        fcntl.flock(readf, fcntl.LOCK_SH)
+        if lock_type == "exclusive":
+            fcntl.flock(readf, fcntl.LOCK_EX)
+        else:
+            fcntl.flock(readf, fcntl.LOCK_SH)
         lines = readf.readlines()
+        fcntl.flock(readf, fcntl.LOCK_UN)
         for line in lines:
             self.data.append(line)
         readf.close()    
-    
+        return
+
     #TTM 12/6/11 create for multiple species potcars
     def from_file_append(self, file_path=str()):
         """Reads data from a file and appends it to the list"""
