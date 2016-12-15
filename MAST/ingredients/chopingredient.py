@@ -574,7 +574,9 @@ class ChopIngredient(BaseIngredient):
         #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
 
         if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
-            raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
+            chgcarfolder = self._fullpath_childname(chgcarfolder)
+            if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
+                raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
         from pymatgen.io.vaspio import Chgcar
         chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
         
