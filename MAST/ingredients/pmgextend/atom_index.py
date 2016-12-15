@@ -510,9 +510,12 @@ class AtomIndex(MASTObj):
                 if frac_coords == None:
                     raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             elif idxtorepl == "int": #interstitial
-                frac_coords = ameta.read_data("original_frac_coords")
+                frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
                 if frac_coords == None:
-                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
+                    self.logger.warning("No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s. Using original coordinates." % (ing_label, self.sdir, manname, aidx))
+                    frac_coords = ameta.read_data("original_frac_coords")
+                    if frac_coords == None:
+                        raise MASTError(self.__class__.__name__, "No original coordinates or coordinates from %s building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             else: #substitution
                 replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
                 frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
