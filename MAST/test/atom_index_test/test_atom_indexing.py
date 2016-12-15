@@ -182,7 +182,47 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_make_coordinate_and_element_list_from_manifest(self):
-        raise SkipTest
+        #raise SkipTest
+        wdir=os.path.join(testdir,'workdir')
+        myip = MASTInput(inputfile='multidefect.inp')
+        os.environ['MAST_SCRATCH']=wdir
+        os.environ['MAST_CONTROL']=wdir
+        myip.set_up_recipe()
+        rwdir = myip.working_directory
+        myio = myip.input_options
+        mysid = os.path.join(rwdir, "structure_index_files")
+        test_sid = os.path.join(testdir,"list_files","structure_index_files_orig_only")
+        myai = AtomIndex(input_options=myio, structure_index_directory=test_sid)
+        [coordlist, elemlist]=myai.make_coordinate_and_element_list_from_manifest("manifest__group1_")
+        mystr = myai.startstr
+        newstr = myai.graft_new_coordinates_from_manifest(mystr, "manifest__group1_","")
+        comparestr = Poscar.from_file(os.path.join(testdir,"list_files","POSCAR_test1")).structure
+        self.assertEqual(comparestr, newstr)
+        print "subtest1 ok"
+        test_sid = os.path.join(testdir,"list_files","structure_index_files_updated")
+        myai = AtomIndex(input_options=myio, structure_index_directory=test_sid)
+        [coordlist, elemlist]=myai.make_coordinate_and_element_list_from_manifest("manifest__group1_", "test2")
+        mystr = myai.startstr
+        newstr = myai.graft_new_coordinates_from_manifest(mystr, "manifest__group1_","test2")
+        comparestr = Poscar.from_file(os.path.join(testdir,"list_files","POSCAR_test2")).structure
+        self.assertEqual(comparestr, newstr)
+        print "subtest2 ok"
+        test_sid = os.path.join(testdir,"list_files","structure_index_files_updated")
+        myai = AtomIndex(input_options=myio, structure_index_directory=test_sid)
+        [coordlist, elemlist]=myai.make_coordinate_and_element_list_from_manifest("manifest__group1_", "test3")
+        mystr = myai.startstr
+        newstr = myai.graft_new_coordinates_from_manifest(mystr, "manifest__group1_","test3")
+        comparestr = Poscar.from_file(os.path.join(testdir,"list_files","POSCAR_test3")).structure
+        self.assertEqual(comparestr, newstr)
+        print "subtest3 ok"
+        test_sid = os.path.join(testdir,"list_files","structure_index_files_updated")
+        myai = AtomIndex(input_options=myio, structure_index_directory=test_sid)
+        [coordlist, elemlist]=myai.make_coordinate_and_element_list_from_manifest("manifest__group1_", "test4")
+        mystr = myai.startstr
+        newstr = myai.graft_new_coordinates_from_manifest(mystr, "manifest__group1_","test4")
+        comparestr = Poscar.from_file(os.path.join(testdir,"list_files","POSCAR_test4")).structure
+        self.assertEqual(comparestr, newstr)
+        print "subtest4 ok"
         return
 
     def test_guess_manifest_from_ingredient_metadata(self):
@@ -198,7 +238,10 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_graft_new_coordinates_from_manifest(self):
-        raise SkipTest
+        #raise SkipTest
+
+        
+        print "interstitial_test_ok"
         return
 
     def test_get_sd_array(self):
@@ -214,7 +257,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_defect_static(self):
-        #raise SkipTest
+        raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'saveoff_nebpathtest_pre_defect_stat')
         rwdir=os.path.join(wdir,"saveoff_nebpathtest_pre_defect_stat")
