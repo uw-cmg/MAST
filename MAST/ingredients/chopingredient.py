@@ -13,6 +13,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.io.vaspio import Poscar
+from pymatgen.io.vaspio import Chgcar
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
@@ -572,12 +573,13 @@ class ChopIngredient(BaseIngredient):
         #print("Using CHGCAR potential mode.")
         #chg = Chgcar.from_file(args.chg)
         #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
-
+        
         if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
             chgcarfolder = self._fullpath_childname(chgcarfolder)
             if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
                 raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
-        from pymatgen.io.vaspio import Chgcar
+        if not (os.stat("%s/CHGCAR" % chgcarfolder).st_size > 1):
+            raise MASTError(self.__class__.__name__, "CHGCAR in %s appears to be empty" % chgcarfolder)
         chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
         
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
