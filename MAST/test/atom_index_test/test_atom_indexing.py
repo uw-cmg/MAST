@@ -311,10 +311,10 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_defect_static(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
-        tdir=os.path.join(testdir,'saveoff_nebpathtest_pre_defect_stat')
-        rwdir=os.path.join(wdir,"saveoff_nebpathtest_pre_defect_stat")
+        tdir=os.path.join(testdir,'nebpathtest_condensed')
+        rwdir=os.path.join(wdir,"nebpathtest_condensed")
         shutil.copytree(tdir,rwdir)
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
@@ -399,11 +399,13 @@ class TestAtomIndexing(unittest.TestCase):
         #    newstr.append(elemlist[cct], 
         #        coordlist[cct],
         #        coords_are_cartesian=False,validate_proximity=True) 
-        if 1==1:
-            return
         newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
         newposcar=Poscar(newstr)
         checker.write_poscar_with_zero_velocities(newposcar, os.path.join(childpath, newname))
+        pos_test = MASTFile(os.path.join(childpath, "POSCAR"))
+        pos_comp = MASTFile(os.path.join(testdir, "nebpathtest_files",
+            "POSCAR_defect_int2_stat"))
+        self.assertEqual(pos_test.data, pos_comp.data)
         ########
         #from MAST monitor
         #myipparser=InputParser(inputfile=os.path.join(rwdir,"input.inp"))
@@ -421,7 +423,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test_nebpathtest(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'nebpathtest_condensed')
         rwdir=os.path.join(wdir,"nebpathtest_condensed")
@@ -453,99 +455,7 @@ class TestAtomIndexing(unittest.TestCase):
                 "POSCAR"),os.path.join(rwdir,"defect_int%i_q=p0_stat" % dnum,
                     "CONTCAR"))
         #check again; try to set up NEB
+        myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
+        os.chdir(rwdir)
         myrp.check_recipe_status()
-        if 1==1:
-            return
-        ingp = "defect_int2_q=p0_opt2"
-        ingc = "defect_int2_q=p0_stat"
-        iscomplete=myrp.complete_ingredient(ingp)
-        self.assertTrue(iscomplete)
-        myrp.ingredients[ingp]="C"
-        #myrp.update_children(ingp)
-        #myrp.do_ingredient_methods(ingp,"mast_update_children_method",ingc)
-        #print myrp.update_methods[ingp][ingc]
-        #mresult = myrp.run_a_method(ingp, "give_structure", [ingc])
-        my_ing = ChopIngredient(name = myrp.ingred_input_options[ingp]['name'], 
-            program_keys = myrp.ingred_input_options[ingp]['program_keys'], 
-            structure = myrp.ingred_input_options[ingp]['structure'])
-        #my_ing.give_structure(ingc)
-        childname = my_ing._fullpath_childname(ingc)
-        #my_ing.checker.forward_final_structure_file(childname)
-        checker = my_ing.checker
-        ###from vaspchecker
-        childpath=childname
-        newname="POSCAR"
-        workdir=os.path.dirname(checker.keywords['name'])
-        sdir = os.path.join(workdir, "structure_index_files")
-        childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
-        child_program=childmeta.read_data("program")
-        if not "vasp" in child_program: #madelung utility or another folder
-            return checker.copy_a_file(childpath, "CONTCAR", newname)
-        child_scaling_label=childmeta.read_data("scaling_label")
-        child_defect_label=childmeta.read_data("defect_label")
-        child_neb_label=childmeta.read_data("neb_label")
-        child_phonon_label=childmeta.read_data("phonon_label")
-        if child_scaling_label == None:
-            child_scaling_label = ""
-        if child_defect_label == None:
-            child_defect_label = ""
-        if child_neb_label == None:
-            child_neb_label = ""
-        if child_phonon_label == None:
-            child_phonon_label = ""
-        parentmeta=Metadata(metafile="%s/metadata.txt" % checker.keywords['name'])
-        parent_defect_label=parentmeta.read_data("defect_label")
-        parent_neb_label=parentmeta.read_data("neb_label")
-        if parent_defect_label == None:
-            parent_defect_label = ""
-        if parent_neb_label == None:
-            parent_neb_label = ""
-        if (not (child_neb_label == "")) and (not (parent_defect_label == "")):
-            child_defect_label = parent_defect_label
-        if (not (child_phonon_label == "")):
-            if (not (parent_defect_label == "")):
-                child_defect_label = parent_defect_label
-            if (not (parent_neb_label == "")):
-                child_neb_label = parent_neb_label
-                child_defect_label = parent_neb_label.split('-')[0].strip() # always define phonons from first endpoint
-        #get child manifest
-        childmanifest="manifest_%s_%s_%s" % (child_scaling_label, child_defect_label, child_neb_label)
-        #build structure from atom indices using parent name_frac_coords
-        ing_label=os.path.basename(checker.keywords['name'])
-        childmeta.write_data("parent",ing_label)
-        mystr=Poscar.from_file("%s/CONTCAR" % checker.keywords['name']).structure
-        myatomindex=AtomIndex(structure_index_directory=sdir)
-        if "inducescaling" in childpath: #initial scaled coords have no parent
-            ing_label="original"
-        self.assertEqual(childmanifest,"manifest__int2_")
-        self.assertEqual(ing_label,ingp)
-        [coordlist, elemlist]=myatomindex.make_coordinate_and_element_list_from_manifest(childmanifest, ing_label)
-        for cidx in range(0, len(coordlist)):
-            print "%s, %s" % (elemlist[cidx], coordlist[cidx])
-        #newstr = mystr.copy()
-        #lenoldsites = len(newstr.sites)
-        #newstr.remove_sites(range(0, lenoldsites))
-        #for cct in range(0, len(coordlist)):
-        #    newstr.append(elemlist[cct], 
-        #        coordlist[cct],
-        #        coords_are_cartesian=False,validate_proximity=True) 
-        if 1==1:
-            return
-        newstr=myatomindex.graft_new_coordinates_from_manifest(mystr, childmanifest,ing_label)
-        newposcar=Poscar(newstr)
-        checker.write_poscar_with_zero_velocities(newposcar, os.path.join(childpath, newname))
-        ########
-        #from MAST monitor
-        #myipparser=InputParser(inputfile=os.path.join(rwdir,"input.inp"))
-        #myinputoptions = myipparser.parse()
-        #personal_recipe_contents = myinputoptions.get_item('personal_recipe',
-        #        'personal_recipe_list')
-        #rsetup = RecipeSetup(recipeFile=personal_recipe_contents,
-        #        inputOptions=myinputoptions,
-        #        structure=myinputoptions.get_item('structure','structure'),
-        #        workingDirectory=rwdir)
-        #recipe_plan_obj = rsetup.start()
-        #recipe_plan_obj.get_statuses_from_file()
-        #os.chdir(rwdir)
-        #recipe_plan_obj.check_recipe_status(1,"defect_int2_q=p0_opt2")
         return
