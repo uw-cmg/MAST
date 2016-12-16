@@ -226,7 +226,8 @@ class AtomIndex(MASTObj):
             aidx=ameta.read_data("atom_index")
             atom_ofc=ameta.read_data("original_frac_coords")
             atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
-            if np.allclose(atom_ofc_arr,coord,rtol,tol):
+            #if np.allclose(atom_ofc_arr,coord,rtol,tol):
+            if len(find_in_coord_list_pbc([atom_ofc_arr],coord,tol)) > 0:
                 coord_matches.append(aidx)
         if element == "":
             elem_matches = list(coord_matches)
@@ -257,7 +258,7 @@ class AtomIndex(MASTObj):
                 return allmatches
         return None
     
-    def find_any_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001):
+    def find_any_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001, verbose=0):
         """Find the atomic index of any FRACTIONAL coordinate in the 
             structure dictionary.
             Args:
@@ -268,6 +269,7 @@ class AtomIndex(MASTObj):
                                     If blank, must match NO scaling (blank)
                 find_multiple <boolean>: allow multiple matches. Default False.
                 tol <float>: tolerance
+                verbose <int>: 0 - silent; 1 - verbose
             Returns:
                 atomic index <hex string>: atomic index of match, 
                     if find_multiple is false
@@ -286,7 +288,11 @@ class AtomIndex(MASTObj):
         for folder in allfolders:
             namelist.append("%s_frac_coords" % folder)
         for nametofind in namelist:
+            if verbose > 0:
+                print nametofind
             for aname in idxnames:
+                if verbose > 0:
+                    print aname
                 ameta=Metadata(metafile=aname)
                 aidx=ameta.read_data("atom_index")
                 atom_ofc=ameta.read_data(nametofind)
@@ -295,8 +301,14 @@ class AtomIndex(MASTObj):
                 if ";" in atom_ofc:
                     atom_ofc = atom_ofc.split(';')[-1].strip() # get most updated
                 atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
-                if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                if verbose > 0:
+                    print atom_ofc_arr
+                #if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                if len(find_in_coord_list_pbc([atom_ofc_arr],coord,tol)) > 0:
                     coord_matches.append(aidx)
+                else:
+                    if verbose > 0:
+                        print "rejected"
         if element == "":
             elem_matches = list(coord_matches)
         else:
