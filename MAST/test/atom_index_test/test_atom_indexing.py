@@ -33,13 +33,14 @@ class TestAtomIndexing(unittest.TestCase):
 
     def tearDown(self):
         pass
-        #if os.path.isdir(os.path.join(testdir,'workdir')):
-        #    shutil.rmtree('workdir')
-        #if os.path.isdir(os.path.join(testdir,'structure_index_files')):
-        #    shutil.rmtree('structure_index_files')
+        return
+        for dirname in ['workdir','structure_index_files']:
+            dfull = os.path.join(testdir, dirname)
+            if os.path.isdir(dfull):
+                shutil.rmtree(dfull)
 
     def test_interstitial_neb_setup(self):
-        raise SkipTest #SD
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'interstitial_neb_files')
         myip = MASTInput(inputfile='neb_pathfinder.inp')
@@ -62,7 +63,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test__init__(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         myip = MASTInput(inputfile='neb_pathfinder.inp')
         os.environ['MAST_SCRATCH']=wdir
@@ -75,7 +76,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test__init__2(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         myip = MASTInput(inputfile='multidefect.inp')
         os.environ['MAST_SCRATCH']=wdir
@@ -88,7 +89,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test_write_defected(self):
-        raise SkipTest
+        #raise SkipTest
         tdir=os.path.join(testdir,'multidefect_files')
         wdir=os.path.join(testdir,'workdir')
         myip = MASTInput(inputfile='multidefect.inp')
@@ -133,6 +134,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test_find_frac_coord_in_atom_indices(self):
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         os.environ['MAST_SCRATCH']=wdir
         myipparser=InputParser(inputfile=os.path.join(testdir,"neb_pathfinder.inp"))
@@ -180,7 +182,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_make_coordinate_and_element_list_from_manifest(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         myip = MASTInput(inputfile='multidefect.inp')
         os.environ['MAST_SCRATCH']=wdir
@@ -228,7 +230,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
 
     def test_make_temp_manifest_from_scrambled_structure(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
@@ -272,14 +274,20 @@ class TestAtomIndexing(unittest.TestCase):
         parentstructures = my_ing.get_parent_structures()
         sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=my_ing.keywords['name'])
         pmg_image_structures = sxtend.do_interpolation(my_ing.keywords['program_keys']['mast_neb_settings']['images'])
-        print "IMAGE STRUCTURE -1:"
-        print pmg_image_structures[-1]
+        #print "IMAGE STRUCTURE -1:"
+        #print pmg_image_structures[-1]
         my_ing.checker.write_poscar_with_zero_velocities(Poscar(pmg_image_structures[-1]),os.path.join(my_ing.keywords['name'],"POSCAR_final_image_structure"))
         myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[-1],os.path.join(my_ing.keywords['name'],'pmg_scrambledep2'))
-        #mystr = myai.startstr
-        #newstr = myai.graft_new_coordinates_from_manifest(mystr, "manifest__group1_","")
-        #comparestr = Poscar.from_file(os.path.join(testdir,"list_files","POSCAR_test1")).structure
-        #self.assertEqual(comparestr, newstr)
+        my_ing.checker.write_poscar_with_zero_velocities(Poscar(pmg_image_structures[0]),os.path.join(my_ing.keywords['name'],"POSCAR_initial_image_structure"))
+        myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[0],os.path.join(my_ing.keywords['name'],'pmg_scrambledep1'))
+        man1_test = MASTFile(os.path.join(my_ing.keywords['name'],'pmg_scrambledep1'))
+        man1_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","pmg_scrambledep1"))
+        self.assertEqual(man1_test.data, man1_comp.data)
+        print "subtest 2.1 ok"
+        man2_test = MASTFile(os.path.join(my_ing.keywords['name'],'pmg_scrambledep2'))
+        man2_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","pmg_scrambledep2"))
+        self.assertEqual(man2_test.data, man2_comp.data)
+        print "subtest 2.2 ok"
         return
 
     def test_unscramble_a_scrambled_structure(self):
