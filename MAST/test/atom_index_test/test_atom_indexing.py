@@ -423,10 +423,48 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test_nebpathtest(self):
-        raise SkipTest
+        #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'nebpathtest_condensed')
         rwdir=os.path.join(wdir,"nebpathtest_condensed")
+        shutil.copytree(tdir,rwdir)
+        os.environ['MAST_SCRATCH']=wdir
+        os.environ['MAST_ARCHIVE']=wdir
+        os.environ['MAST_CONTROL']=wdir
+        dirutil.lock_directory(wdir)
+        mymon = MASTMon()
+        #The MAST_SKIP file inside the folder should prevent any actions
+        #from the previous step
+        myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
+        os.chdir(rwdir)
+        myrp.check_recipe_status()
+        #check that statics set up correctly
+        str1_1 = Poscar.from_file(os.path.join(rwdir,"defect_int1_q=p0_stat","POSCAR")).structure
+        str1_comp = Poscar.from_file(os.path.join(testdir,"nebpathtest_files","POSCAR_defect_int1_stat")).structure
+        self.assertEqual(str1_1,str1_comp)
+        str2_1 = Poscar.from_file(os.path.join(rwdir,"defect_int2_q=p0_stat","POSCAR")).structure
+        str2_comp = Poscar.from_file(os.path.join(testdir,"nebpathtest_files","POSCAR_defect_int2_stat")).structure
+        self.assertEqual(str2_1,str2_comp)
+        #mimic completion of statics
+        for dnum in [1,2]:
+            shutil.copy(os.path.join(rwdir,"defect_int%i_q=p0_opt2" % dnum,
+                "OUTCAR"),os.path.join(rwdir,"defect_int%i_q=p0_stat" % dnum))
+            shutil.copy(os.path.join(rwdir,"defect_int%i_q=p0_opt2" % dnum,
+                "OSZICAR"),os.path.join(rwdir,"defect_int%i_q=p0_stat" % dnum))
+            shutil.copy(os.path.join(rwdir,"defect_int%i_q=p0_stat" % dnum,
+                "POSCAR"),os.path.join(rwdir,"defect_int%i_q=p0_stat" % dnum,
+                    "CONTCAR"))
+        #check again; try to set up NEB
+        myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
+        os.chdir(rwdir)
+        myrp.check_recipe_status()
+        return
+    
+    def test_nebtest(self):
+        #raise SkipTest
+        wdir=os.path.join(testdir,'workdir')
+        tdir=os.path.join(testdir,'nebtest_condensed')
+        rwdir=os.path.join(wdir,"nebtest_condensed")
         shutil.copytree(tdir,rwdir)
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
