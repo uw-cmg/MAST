@@ -32,8 +32,8 @@ class TestAtomIndexing(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
-        pass
-        return
+        #pass
+        #return
         for dirname in ['workdir','structure_index_files']:
             dfull = os.path.join(testdir, dirname)
             if os.path.isdir(dfull):
@@ -423,7 +423,7 @@ class TestAtomIndexing(unittest.TestCase):
         return
     
     def test_nebpathtest(self):
-        #raise SkipTest
+        raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'nebpathtest_condensed')
         rwdir=os.path.join(wdir,"nebpathtest_condensed")
