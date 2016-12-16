@@ -258,11 +258,16 @@ class AtomIndex(MASTObj):
                 return allmatches
         return None
     
-    def find_any_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001, verbose=0):
+    def find_frac_coord_in_atom_indices(self, coord, include_orig="no", element="", scaling_label="", find_multiple=False, tol=0.0001, verbose=0):
         """Find the atomic index of any FRACTIONAL coordinate in the 
             structure dictionary.
             Args:
                 coord <numpy array of float>: coordinate to find
+                include_orig <str>: include original fractional coordinates
+                    in search:
+                        yes - allow original as-entered coordinates
+                        no - only use coordinates from ingredients
+                        only - only allow original as-entered coordinates
                 element <str>: element symbol to match
                                 If blank, matches any element.
                 scaling_label <str>: scaling label
@@ -283,21 +288,35 @@ class AtomIndex(MASTObj):
         coord_matches=list()
         elem_matches=list()
         scaling_matches=list()
-        namelist=list()
-        allfolders=immediate_subdirs(os.path.dirname(self.sdir)) #ing dirs
-        for folder in allfolders:
-            namelist.append("%s_frac_coords" % folder)
-        for nametofind in namelist:
+        for aname in idxnames:
             if verbose > 0:
-                print nametofind
-            for aname in idxnames:
+                print aname
+            ameta=Metadata(metafile=aname)
+            aidx=ameta.read_data("atom_index")
+            amastfile = MASTFile(aname)
+            for aline in amastfile.data:
+                aline = aline.strip()
                 if verbose > 0:
-                    print aname
-                ameta=Metadata(metafile=aname)
-                aidx=ameta.read_data("atom_index")
-                atom_ofc=ameta.read_data(nametofind)
-                if atom_ofc == None:
+                    print aline
+                asplit = aline.split(" = ") # need spaces because of charge tags
+                if len(asplit) < 2: #no coordinates
                     continue
+                alinekey = asplit[0].strip()
+                atom_ofc = asplit[1].strip()
+                if not "frac_coords" in alinekey:
+                    if verbose > 0:
+                        print "skip line: not frac coords"
+                    continue
+                if alinekey == "original_frac_coords":
+                    if include_orig == "no":
+                        if verbose > 0:
+                            print "skip line: original frac coords"
+                        continue
+                else:
+                    if include_orig == "only":
+                        if verbose > 0:
+                            print "skip line: not original frac coords"
+                        continue
                 if ";" in atom_ofc:
                     atom_ofc = atom_ofc.split(';')[-1].strip() # get most updated
                 atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
@@ -308,7 +327,7 @@ class AtomIndex(MASTObj):
                     coord_matches.append(aidx)
                 else:
                     if verbose > 0:
-                        print "rejected"
+                        print "no match for tol %3.3f; rejected" % tol
         if element == "":
             elem_matches = list(coord_matches)
         else:
