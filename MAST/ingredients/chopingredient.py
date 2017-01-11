@@ -567,6 +567,10 @@ class ChopIngredient(BaseIngredient):
             intsites.append(intidx)
 
         print "ADDLSITES: %s, INTSITES: %s" % (addlsites, intsites)
+        print "S1:"
+        print s1
+        print "S2:"
+        print s2
         self.logger.info("intsites: %s" % intsites)
         # Interpolate
         #use a param for perf_stat or othe ing label for chgcar
