@@ -32,8 +32,8 @@ class TestAtomIndexing(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
-        #pass
-        #return
+        pass
+        return
         for dirname in ['workdir','structure_index_files']:
             dfull = os.path.join(testdir, dirname)
             if os.path.isdir(dfull):
@@ -314,7 +314,7 @@ class TestAtomIndexing(unittest.TestCase):
         #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'nebpathtest_condensed')
-        rwdir=os.path.join(wdir,"nebpathtest_condensed")
+        rwdir=os.path.join(wdir,"nebpathtest_condensed%s" % time.strftime("%H%M%S"))
         shutil.copytree(tdir,rwdir)
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
@@ -426,7 +426,7 @@ class TestAtomIndexing(unittest.TestCase):
         #raise SkipTest
         wdir=os.path.join(testdir,'workdir')
         tdir=os.path.join(testdir,'nebpathtest_condensed')
-        rwdir=os.path.join(wdir,"nebpathtest_condensed")
+        rwdir=os.path.join(wdir,"nebpathtest_condensed%s" % time.strftime("%H%M%S"))
         shutil.copytree(tdir,rwdir)
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
