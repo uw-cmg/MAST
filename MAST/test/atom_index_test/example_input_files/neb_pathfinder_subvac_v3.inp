@@ -1,0 +1,358 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# Example input file for NEB, PHONONS, DIFFUSION COEFFICIENT workflow 
+# Maintainer: Tam Mayeshiba
+# Last updated: 2017-01-11
+# #Need to take out diffcoeff utility
+# #Make perfect_opt2 write chgcar, or change to perfect_stat
+##############################################################
+$mast
+system_name nebpathtest_subvac
+$end
+
+$structure
+use_structure_index True
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+X3 Cu
+end
+
+begin lattice
+8.1 0.0 0.0
+0.0 8.1 0.0
+0.0 0.0 8.1
+end
+
+begin coordinates
+X1 0.00000000 0.00000000 0.0000000
+X1 0.25000000 0.00000000 0.2500000
+X1 0.25000000 0.25000000 0.0000000
+X1 0.00000000 0.25000000 0.2500000
+X1 0.50000000 0.00000000 0.0000000
+X1 0.75000000 0.00000000 0.2500000
+X1 0.75000000 0.25000000 0.0000000
+X1 0.50000000 0.25000000 0.2500000
+X1 0.00000000 0.50000000 0.0000000
+X1 0.25000000 0.50000000 0.2500000
+X1 0.25000000 0.75000000 0.0000000
+X1 0.00000000 0.75000000 0.2500000
+X1 0.50000000 0.50000000 0.0000000
+X1 0.75000000 0.50000000 0.2500000
+X1 0.75000000 0.75000000 0.0000000
+X1 0.50000000 0.75000000 0.2500000
+X1 0.00000000 0.00000000 0.5000000
+X1 0.25000000 0.00000000 0.7500000
+X1 0.25000000 0.25000000 0.5000000
+X1 0.00000000 0.25000000 0.7500000
+X1 0.50000000 0.00000000 0.5000000
+X1 0.75000000 0.00000000 0.7500000
+X1 0.75000000 0.25000000 0.5000000
+X1 0.50000000 0.25000000 0.7500000
+X1 0.00000000 0.50000000 0.5000000
+X1 0.25000000 0.50000000 0.7500000
+X1 0.25000000 0.75000000 0.5000000
+X1 0.00000000 0.75000000 0.7500000
+X1 0.50000000 0.50000000 0.5000000
+X1 0.75000000 0.50000000 0.7500000
+X1 0.75000000 0.75000000 0.5000000
+X1 0.50000000 0.75000000 0.7500000
+end
+
+$end
+
+$defects
+threshold 1e-4
+coord_type fractional
+
+begin vacsub1
+substitution 0.25 0.25 0.5 X3
+vacancy 0.5 0.25 0.25 X1
+end
+
+begin vacsub2
+substitution 0.5 0.25 0.25 X3
+vacancy 0.25 0.25 0.5 X1
+end
+
+$end
+
+$neb
+
+begin vacsub1-vacsub2
+X3, 0.25 0.25 0.5, 0.5 0.25 0.25
+images 3
+end
+
+
+$end
+
+$ingredients
+begin ingredients_global
+mast_auto_correct  True
+mast_frozen_seconds 1000
+encut              300
+#mast_multiplyencut 1.5
+##Bardeen testing
+mast_nodes         1
+mast_ppn           32
+mast_queue         morgan3
+mast_walltime      96
+mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
+##Hub noqueue testing
+#mast_exec          nice -n 19 ~/vasp_parallel
+##Korczak testing
+#mast_nodes         1
+#mast_ppn           1
+#mast_queue         default
+#mast_walltime      4
+#mast_exec          //share/apps/vasp5.2_cNEB
+mast_kpoints       2x2x2 M
+mast_xc            PBE
+ediffg             5e-2
+ialgo              48
+isif 2
+ibrion 2
+nsw                191
+#nsw                 0
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+end
+
+begin lowmesh_perfect
+isif 3
+mast_kpoints 1x1x1 G
+end
+
+begin relax_perfect
+isif 3
+end
+
+begin lowmesh_defect
+mast_kpoints 1x1x1 G
+end
+
+begin relax_defect
+end
+
+begin static
+ibrion -1
+nsw 0
+#mast_multiplyencut 1.25
+mast_update_children_method give_structure
+end
+
+begin static_to_neb
+ibrion -1
+nsw 0
+#mast_multiplyencut 1.25
+mast_update_children_method give_structure_and_energy_to_neb
+end
+
+begin phonon
+ibrion 5
+mast_write_method write_phonon_single
+mast_update_children_method copy_file_with_prepend OUTCAR OUTCAR
+nsw 191
+#nfree 2
+#potim 0.01
+end
+
+#begin phononparse
+#mast_program phon
+##lfree .True.
+##temperature 1173
+##The above two lines will get THERMO instead of FREQ
+##nd 3
+#nd 1
+#qa 11
+#qb 11
+#qc 11
+#lsuper .False.
+#mast_exec $MAST_INSTALL_PATH/bin/phon_henry_hub
+#mast_complete_method file_exists FREQ1
+##use FREQ1 if there are more than 16 atoms in the supercell; FREQ otherwise
+#mast_update_children_method no_update
+#end
+
+begin neb_to_neb
+ibrion 1
+potim 0.5
+lclimb True
+spring -5
+mast_kpoints 1x1x1 G
+mast_program   vasp_neb
+mast_write_method            write_pathfinder_neb perfect_opt2 1
+mast_update_children_method  give_neb_structures_to_neb
+end
+
+begin neb_to_nebstat
+ibrion 1
+potim 0.5
+lclimb True
+spring -5
+mast_program   vasp_neb
+mast_write_method            write_neb
+mast_update_children_method  give_neb_structures_to_neb
+end
+
+begin nebstat_to_phonon
+ibrion -1
+nsw 0
+#mast_multiplyencut 1.25
+mast_program   vasp
+mast_write_method            write_neb_subfolders
+mast_ready_method            ready_neb_subfolders
+mast_run_method              run_neb_subfolders
+mast_complete_method         complete_neb_subfolders
+mast_update_children_method  give_saddle_structure
+end
+
+begin perfect_stat_to_diffcoeff
+ibrion -1
+nsw 0
+lcharg True
+mast_update_children_method     copy_file_with_prepend OSZICAR OSZICAR; copy_file_with_prepend POSCAR POSCAR
+end
+
+begin nebstat_to_diffcoeff
+ibrion -1
+nsw 0
+#mast_multiplyencut 1.25
+mast_program   vasp
+mast_write_method            write_neb_subfolders
+mast_ready_method            ready_neb_subfolders
+mast_run_method              run_neb_subfolders
+mast_complete_method         complete_neb_subfolders
+mast_update_children_method  copy_saddle_file_with_prepend OSZICAR OSZICAR
+end
+
+begin static_to_diffcoeff
+ibrion -1
+nsw 0
+#mast_multiplyencut 1.25
+mast_update_children_method copy_file_with_prepend OSZICAR OSZICAR
+end
+
+begin diffcoeff
+mast_program None
+mast_write_method           write_ingred_input_file diffcoeff_input.txt diff_allowed_keywords.py none 0;write_submit_script
+mast_ready_method           file_exists diffcoeff_input.txt
+mast_run_method             run_singlerun
+mast_complete_method        file_exists Diffusivity.txt
+mast_update_children_method no_update
+mast_exec python mast_diffusion_coefficient -i diffcoeff_input.txt
+#inputs below
+type fcc_5freq
+
+#attempt frequencies in terahertz
+#v1 1nn_1nnb     1nn-1nnb_movingsolvent
+v1 1.0
+v2 phonon_1nn_q=p0_solute   phonon_1nn-solute_q=p0_movingsolute
+#v3 1nn_3nn      1nn-3nn_movingsolvent
+v3 1.0
+#v4 3nn_1nn      1nn-3nn_movingsolvent
+v4 1.0
+v0 phonon_pureinit_q=p0_solvent phonon_pureinit-purefin_q=p0_movingsolvent
+
+#migration barriers in eV
+#E1 1nn          1nn-1nnb
+E1 1.0
+E2 defect_1nn_q=p0_stat          neb_1nn-solute_q=p0_stat
+#E3 1nn          1nn-3nn
+E3 1.0
+#E4 3nn          1nn-3nn
+E4 1.0
+E0 defect_pureinit_q=p0_stat neb_pureinit-purefin_q=p0_stat
+
+lattice perfect_stat
+HVf  perfect_stat defect_pureinit_q=p0_stat
+#HB  perfect_stat  defect_1nn_q=p0_stat  defect_subnovac_q=p0_stat defect_pureinit_q=p0_stat
+#HB is not needed in five-frequency model
+end
+
+$end
+
+
+$recipe
+perfect_opt1 (lowmesh_perfect)
+    perfect_opt2 (relax_perfect)
+        perfect_stat (perfect_stat_to_diffcoeff)
+            diffcoeff_utility (diffcoeff)
+        {begin}
+        inducedefect_<N> (inducedefect)
+            defect_<N>_<Q>_opt1 (lowmesh_defect)
+                defect_<N>_<Q>_opt2 (relax_defect)
+                    defect_<N>_<Q>_stat (static)
+        {end}
+{begin}
+defect_<N>_<Q>_stat (static)
+    phonon_<N>_<Q>_<P> (phonon)
+        diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+defect_<N>_<Q>_stat (static_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+defect_<B>_<Q>_stat (static_to_neb), defect_<E>_<Q>_stat (static_to_neb)
+    neb_<B-E>_<Q>_opt1 (neb_to_neb)
+        neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+            neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+    neb_<B-E>_<Q>_opt2 (neb_to_nebstat)
+    neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+{end}
+{begin}
+neb_<B-E>_<Q>_stat (nebstat_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+neb_<B-E>_<Q>_stat (nebstat_to_phonon)
+    phonon_<B-E>_<Q>_<P> (phonon)
+        diffcoeff_utility (diffcoeff)
+{end}
+$end
+$personal_recipe
+perfect_opt1 (lowmesh_perfect)
+    perfect_opt2 (relax_perfect)
+        perfect_stat (perfect_stat_to_diffcoeff)
+            diffcoeff_utility (diffcoeff)
+        inducedefect_vacsub1 (inducedefect)
+            defect_vacsub1_q=p0_opt1 (lowmesh_defect)
+                defect_vacsub1_q=p0_opt2 (relax_defect)
+                    defect_vacsub1_q=p0_stat (static)
+        inducedefect_vacsub2 (inducedefect)
+            defect_vacsub2_q=p0_opt1 (lowmesh_defect)
+                defect_vacsub2_q=p0_opt2 (relax_defect)
+                    defect_vacsub2_q=p0_stat (static)
+defect_vacsub1_q=p0_stat (static_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+defect_vacsub2_q=p0_stat (static_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+defect_vacsub1_q=p0_stat (static_to_neb), defect_vacsub2_q=p0_stat (static_to_neb)
+    neb_vacsub1-vacsub2_q=p0_opt1 (neb_to_neb)
+        neb_vacsub1-vacsub2_q=p0_opt2 (neb_to_nebstat)
+            neb_vacsub1-vacsub2_q=p0_stat (nebstat_to_phonon)
+    neb_vacsub1-vacsub2_q=p0_opt2 (neb_to_nebstat)
+    neb_vacsub1-vacsub2_q=p0_stat (nebstat_to_phonon)
+neb_vacsub1-vacsub2_q=p0_stat (nebstat_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+$end
