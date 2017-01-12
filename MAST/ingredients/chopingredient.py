@@ -624,7 +624,6 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 [struct_init, struct_fin]: pymatgen Structure objects
-            #TTM add atom index
         """
         header = os.path.join(self.keywords['name'], "parent_structure_")
         mylabel = BaseIngredient.get_my_label(self, "neb_label").split("-")
@@ -643,7 +642,7 @@ class ChopIngredient(BaseIngredient):
             iname = self.keywords['name']
             nebpcs=[0,1]
             nebstructs=[struct_init, struct_fin]
-            scramblenames=['scrambledep_init','scrambledep2_fin']
+            scramblenames=['scrambledep_init','scrambledep_fin']
             for nidx in [0,1]:
                 sname = os.path.join(iname, scramblenames[nidx])
                 manifestep=myai.guess_manifest_from_ingredient_metadata(iname,
@@ -673,12 +672,15 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 list of <Structure>: list of pymatgen Structure objects
-            #TTM add atom index
         """
         header = "parent_structure_"
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
         imct = 1
         imstrs=list()
+        if self.uses_atom_indexing():
+            myai = self.create_atom_index_object()
+            iname = self.keywords['name']
+            manifestep=myai.guess_manifest_from_ingredient_metadata(iname,0) #images always use initial endpoint manifest
         while imct <= numim:
             pfpath=""
             for myfile in os.listdir(self.keywords['name']):
@@ -688,11 +690,20 @@ class ChopIngredient(BaseIngredient):
                 pass
             else:
                 struct_im = self.checker.get_structure_from_file(pfpath)
-                base_struct = self.keywords['structure']
-                neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-                sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct, name=self.keywords['name'])
-                sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
-                imstrs.append(sorted_im)
+                if self.uses_atom_indexing():
+                    sname = os.path.join(iname, "scrambledim_%s" % str(imct.zfill(2))) 
+                    myai.make_temp_manifest_from_scrambled_structure(iname, 
+                                        struct_im, sname)
+                    onestruc = struct_im
+                    newstruc = myai.unscramble_a_scrambled_structure(iname,
+                                    onestruc, manifestep, sname)
+                    imstrs.append(newstruc)
+                else:
+                    base_struct = self.keywords['structure']
+                    neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
+                    sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct, name=self.keywords['name'])
+                    sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
+                    imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
             raise MASTError(self.__class__.__name__, "Incomplete number of forwared images found!")
