@@ -432,7 +432,9 @@ class TestAtomIndexing(unittest.TestCase):
         os.environ['MAST_ARCHIVE']=wdir
         os.environ['MAST_CONTROL']=wdir
         dirutil.lock_directory(wdir)
+        print "Got lock."
         mymon = MASTMon()
+        print "Set initial mastmon."
         myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
         os.chdir(rwdir)
         myrp.check_recipe_status()

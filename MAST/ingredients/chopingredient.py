@@ -638,13 +638,33 @@ class ChopIngredient(BaseIngredient):
                 "Error: no parent file at" + pfpath_fin)
         struct_init = self.checker.get_structure_from_file(pfpath_init)
         struct_fin = self.checker.get_structure_from_file(pfpath_fin)
-        base_struct = self.keywords['structure']
-        myimages = self.keywords['program_keys']['mast_neb_settings']['images']
-        neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-        sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct, name=self.keywords['name'])
-        sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
-        sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct, name=self.keywords['name'])
-        sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
+        if self.uses_atom_indexing():
+            myai = self.create_atom_index_object()
+            iname = self.keywords['name']
+            nebpcs=[0,1]
+            nebstructs=[struct_init, struct_fin]
+            scramblenames=['scrambledep_init','scrambledep2_fin']
+            for nidx in [0,1]:
+                sname = os.path.join(iname, scramblenames[nidx])
+                manifestep=myai.guess_manifest_from_ingredient_metadata(iname,
+                                nebpcs[nidx])
+                myai.make_temp_manifest_from_scrambled_structure(iname, 
+                                nebstructs[nidx], sname)
+                onestruc = nebstructs[nidx]
+                newstruc = myai.unscramble_a_scrambled_structure(iname,
+                            onestruc, manifestep, sname)
+                if nidx == 0:
+                    sorted_init = newstruc
+                elif nidx == 1:
+                    sorted_fin = newstruc
+        else:
+            base_struct = self.keywords['structure']
+            myimages = self.keywords['program_keys']['mast_neb_settings']['images']
+            neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
+            sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct, name=self.keywords['name'])
+            sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
+            sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct, name=self.keywords['name'])
+            sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
