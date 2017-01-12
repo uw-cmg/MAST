@@ -433,8 +433,6 @@ class TestAtomIndexing(unittest.TestCase):
         os.environ['MAST_CONTROL']=wdir
         dirutil.lock_directory(wdir)
         mymon = MASTMon()
-        #The MAST_SKIP file inside the folder should prevent any actions
-        #from the previous step
         myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
         os.chdir(rwdir)
         myrp.check_recipe_status()
@@ -445,6 +443,7 @@ class TestAtomIndexing(unittest.TestCase):
         str2_1 = Poscar.from_file(os.path.join(rwdir,"defect_int2_q=p0_stat","POSCAR")).structure
         str2_comp = Poscar.from_file(os.path.join(testdir,"nebpathtest_files","POSCAR_defect_int2_stat")).structure
         self.assertEqual(str2_1,str2_comp)
+        print "Static setup subtest ok"
         #mimic completion of statics
         for dnum in [1,2]:
             shutil.copy(os.path.join(rwdir,"defect_int%i_q=p0_opt2" % dnum,
@@ -458,5 +457,8 @@ class TestAtomIndexing(unittest.TestCase):
         myrp = mymon.set_up_recipe_plan(rwdir, verbose=1)
         os.chdir(rwdir)
         myrp.check_recipe_status()
+        strn02_1 = Poscar.from_file(os.path.join(rwdir,"neb_int1-int2_q=p0_opt1","02","POSCAR")).structure
+        strn02_comp = Poscar.from_file(os.path.join(testdir,"nebpathtest_files","POSCAR_neb_opt1_02")).structure
+        self.assertEqual(strn02_1,strn02_comp)
         return
     
