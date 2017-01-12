@@ -262,9 +262,9 @@ class TestAtomIndexing(unittest.TestCase):
         mystr = Poscar.from_file(os.path.join(testdir,"nebpathtest_files",
                     "parent_structure_int2")).structure
         myai.make_temp_manifest_from_scrambled_structure(ingdir,
-            mystr, os.path.join(wdir, "manifest_int2_test1"))
-        man1=MASTFile(os.path.join(wdir,"manifest_int2_test1"))
-        mancomp=MASTFile(os.path.join(testdir,"nebpathtest_files","manifest_int2_test1"))
+            mystr, os.path.join(wdir, "manifest_int2_unscrambled"))
+        man1=MASTFile(os.path.join(wdir,"manifest_int2_unscrambled"))
+        mancomp=MASTFile(os.path.join(testdir,"nebpathtest_files","manifest_int2_unscrambled"))
         self.assertItemsEqual(man1.data, mancomp.data)
         print "subtest1 ok"
         ###chop
