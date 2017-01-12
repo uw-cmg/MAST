@@ -277,15 +277,15 @@ class TestAtomIndexing(unittest.TestCase):
         #print "IMAGE STRUCTURE -1:"
         #print pmg_image_structures[-1]
         my_ing.checker.write_poscar_with_zero_velocities(Poscar(pmg_image_structures[-1]),os.path.join(my_ing.keywords['name'],"POSCAR_final_image_structure"))
-        myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[-1],os.path.join(my_ing.keywords['name'],'pmg_scrambledep2'))
+        myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[-1],os.path.join(my_ing.keywords['name'],'scrambled_fin'))
         my_ing.checker.write_poscar_with_zero_velocities(Poscar(pmg_image_structures[0]),os.path.join(my_ing.keywords['name'],"POSCAR_initial_image_structure"))
-        myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[0],os.path.join(my_ing.keywords['name'],'pmg_scrambledep1'))
-        man1_test = MASTFile(os.path.join(my_ing.keywords['name'],'pmg_scrambledep1'))
-        man1_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","pmg_scrambledep1"))
+        myai.make_temp_manifest_from_scrambled_structure(my_ing.keywords['name'],pmg_image_structures[0],os.path.join(my_ing.keywords['name'],'scrambledep_init'))
+        man1_test = MASTFile(os.path.join(my_ing.keywords['name'],'scrambledep_init'))
+        man1_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","scrambledep_init"))
         self.assertEqual(man1_test.data, man1_comp.data)
         print "subtest 2.1 ok"
-        man2_test = MASTFile(os.path.join(my_ing.keywords['name'],'pmg_scrambledep2'))
-        man2_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","pmg_scrambledep2"))
+        man2_test = MASTFile(os.path.join(my_ing.keywords['name'],'scrambledep_fin'))
+        man2_comp = MASTFile(os.path.join(testdir,"nebpathtest_files","scrambledep_fin"))
         self.assertEqual(man2_test.data, man2_comp.data)
         print "subtest 2.2 ok"
         return
