@@ -489,7 +489,11 @@ class ChopIngredient(BaseIngredient):
         self.logger.info("Attempt to unsort.")
         myai = self.create_atom_index_object()
         manifestep_init=myai.guess_manifest_from_ingredient_metadata(iname,0)
-        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[0],m_init_name)
+        print "PRESORT init:"
+        print image_structures_raw[0]
+        print "PRESORT fin:"
+        print image_structures_raw[-1]
+        myai.make_temp_manifest_from_scrambled_structure(iname,image_structures_raw[0],m_init_name)
         manifestep_fin=myai.guess_manifest_from_ingredient_metadata(iname,1)
         myai.make_temp_manifest_from_scrambled_structure(iname,image_structures_raw[-1],m_fin_name)
         for sidx in range(0,len(image_structures_raw)-1):
