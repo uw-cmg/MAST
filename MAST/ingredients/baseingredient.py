@@ -267,3 +267,7 @@ class BaseIngredient(MASTObj):
         if os.path.isdir(mysi):
             return True
         return False
+
+    def create_atom_index_object(self):
+        myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
+        return myai
