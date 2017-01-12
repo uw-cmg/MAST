@@ -495,11 +495,11 @@ class ChopIngredient(BaseIngredient):
             presort_init = Poscar(image_structures_raw[0])
             presort_init.write_file(os.path.join(iname,"image_actual_raw_init"))
             presort_fin = Poscar(image_structures_raw[-1])
-            presort_fin.write_file(os.path.join(iname,"image_actual_raw_fin")
+            presort_fin.write_file(os.path.join(iname,"image_actual_raw_fin"))
             presort_init2 = Poscar(structures_for_sorting[0])
             presort_init2.write_file(os.path.join(iname,"image_useforsort_init"))
             presort_fin2 = Poscar(structures_for_sorting[-1])
-            presort_fin2.write_file(os.path.join(iname,"image_useforsort_fin")
+            presort_fin2.write_file(os.path.join(iname,"image_useforsort_fin"))
             init_to_sort = structures_for_sorting[0]
             fin_to_sort = structures_for_sorting[-1]
         else:
