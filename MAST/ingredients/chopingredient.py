@@ -613,7 +613,7 @@ class ChopIngredient(BaseIngredient):
         sxtend = StructureExtensions(struc_work1=s1, struc_work2=s2,name=iname)
         image_structures_raw_linear = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
 
-        image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw, image_structure_raw_linear)
+        image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw, image_structures_raw_linear)
 
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
