@@ -481,7 +481,8 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
         return
 
-    def atom_indexing_sort_interpolated_images(self, image_structures_raw):
+    def atom_indexing_sort_interpolated_images(self, image_structures_raw,
+            structures_for_sorting=list()):
         image_structures = list()
         iname = self.keywords['name']
         m_init_name = os.path.join(iname,"sort_images_scrambled_init")
@@ -489,13 +490,23 @@ class ChopIngredient(BaseIngredient):
         self.logger.info("Attempt to unsort.")
         myai = self.create_atom_index_object()
         manifestep_init=myai.guess_manifest_from_ingredient_metadata(iname,0)
-        presort_init = Poscar(image_structures_raw[0])
-        presort_init.write_file("image_presort_init")
-        presort_fin = Poscar(image_structures_raw[-1])
-        presort_fin.write_file("image_presort_fin")
-        myai.make_temp_manifest_from_scrambled_structure(iname,image_structures_raw[0],m_init_name)
         manifestep_fin=myai.guess_manifest_from_ingredient_metadata(iname,1)
-        myai.make_temp_manifest_from_scrambled_structure(iname,image_structures_raw[-1],m_fin_name)
+        if len(structures_for_sorting) > 0: #sort manifests based on these structures
+            presort_init = Poscar(image_structures_raw[0])
+            presort_init.write_file(os.path.join(iname,"image_actual_raw_init"))
+            presort_fin = Poscar(image_structures_raw[-1])
+            presort_fin.write_file(os.path.join(iname,"image_actual_raw_fin")
+            presort_init2 = Poscar(structures_for_sorting[0])
+            presort_init2.write_file(os.path.join(iname,"image_useforsort_init"))
+            presort_fin2 = Poscar(structures_for_sorting[-1])
+            presort_fin2.write_file(os.path.join(iname,"image_useforsort_fin")
+            init_to_sort = structures_for_sorting[0]
+            fin_to_sort = structures_for_sorting[-1]
+        else:
+            init_to_sort = image_structures_raw[0]
+            fin_to_sort = image_structures_raw[-1]
+        myai.make_temp_manifest_from_scrambled_structure(iname,init_to_sort,m_init_name)
+        myai.make_temp_manifest_from_scrambled_structure(iname,fin_to_sort,m_fin_name)
         for sidx in range(0,len(image_structures_raw)-1):
             onestruc = image_structures_raw[sidx]
             newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep_init, m_init_name)
@@ -594,8 +605,15 @@ class ChopIngredient(BaseIngredient):
         pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
 
         image_structures_raw=pf.images
+        
+        #also do a strict linear interpolation from pymatgen to 
+        #get the reordering order, as pathfinder interpolation
+        #alters the initial and final image coordinates of the pathfound sites,
+        #and therefore those coordinates will not match up with atom_index files
+        sxtend = StructureExtensions(struc_work1=s1, struc_work2=s2,name=iname)
+        image_structures_raw_linear = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
 
-        image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw)
+        image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw, image_structure_raw_linear)
 
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
