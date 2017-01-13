@@ -138,8 +138,8 @@ encut              300
 #mast_multiplyencut 1.5
 ##Bardeen testing
 mast_nodes         1
-mast_ppn           32
-mast_queue         morgan3
+mast_ppn           12
+mast_queue         morgan2
 mast_walltime      96
 mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
 ##Hub noqueue testing
@@ -209,6 +209,7 @@ mast_update_children_method give_structure_and_energy_to_neb
 end
 
 begin neb_to_neb
+mast_nodes 3
 ibrion 1
 potim 0.5
 lclimb True
@@ -221,6 +222,7 @@ end
 
 begin neb_to_neb_pf_interstitial
 #ingredient name cannot contain the word "path"
+mast_nodes 3
 ibrion 1
 potim 0.5
 lclimb True
@@ -234,6 +236,7 @@ mast_update_children_method  give_neb_structures_to_neb
 end
 
 begin neb_to_neb_pf_subvac
+mast_nodes 3
 ibrion 1
 potim 0.5
 lclimb True
@@ -248,6 +251,7 @@ mast_update_children_method  give_neb_structures_to_neb
 end
 
 begin neb_to_neb_pf_ring
+mast_nodes 3
 ibrion 1
 potim 0.5
 lclimb True
@@ -263,6 +267,7 @@ end
 
 
 begin neb_to_nebstat
+mast_nodes 3
 ibrion 1
 potim 0.5
 lclimb True
