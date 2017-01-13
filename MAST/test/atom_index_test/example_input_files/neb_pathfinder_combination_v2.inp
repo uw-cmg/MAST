@@ -7,7 +7,7 @@
 # #Make perfect_opt2 write chgcar, or change to perfect_stat
 ##############################################################
 $mast
-system_name nebpathtest_subvac
+system_name nebpathtest_combination
 $end
 
 $structure
@@ -18,6 +18,9 @@ begin elementmap
 X1 Al
 X2 Mg
 X3 Cu
+X4 Pt
+X5 Au
+X6 Ag
 end
 
 begin lattice
@@ -67,22 +70,34 @@ $defects
 threshold 1e-4
 coord_type fractional
 
-begin vacsub1
-substitution 0.25 0.25 0.5 X3
-vacancy 0.5 0.25 0.25 X1
+begin comb1
+interstitial 0.66 0.66 0.66 X2
+substitution 0.25 0.25 0.50 X3
+vacancy 0.50 0.25 0.25 X1
+substitution 0.25 0.00 0.75 X5
+substitution 0.50 0.00 0.00 X4
+substitution 0.25 0.75 0.00 X6
 end
 
-begin vacsub2
-substitution 0.5 0.25 0.25 X3
-vacancy 0.25 0.25 0.5 X1
+begin comb2
+interstitial 0.50 0.50 0.75 X2
+substitution 0.50 0.25 0.25 X3
+vacancy 0.25 0.25 0.50 X1
+substitution 0.25 0.00 0.75 X6
+substitution 0.50 0.00 0.00 X5
+substitution 0.25 0.75 0.00 X4
 end
 
 $end
 
 $neb
 
-begin vacsub1-vacsub2
-X3, 0.25 0.25 0.5, 0.5 0.25 0.25
+begin comb1-comb2
+X2, 0.66 0.66 0.66, 0.50 0.50 0.75
+X3, 0.25 0.25 0.50, 0.50 0.25 0.25
+X5, 0.25 0.00 0.75, 0.50 0.00 0.00
+X4, 0.50 0.00 0.00, 0.25 0.75 0.00
+X6, 0.25 0.75 0.00, 0.25 0.00 0.75
 images 3
 end
 
@@ -200,7 +215,7 @@ lclimb True
 spring -5
 mast_kpoints 1x1x1 G
 mast_program   vasp_neb
-mast_write_method            write_pathfinder_neb perfect_opt2 1
+mast_write_method            write_pathfinder_neb perfect_opt2 4
 mast_update_children_method  give_neb_structures_to_neb
 end
 
