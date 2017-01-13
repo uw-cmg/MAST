@@ -773,7 +773,6 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
-            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
@@ -810,7 +809,6 @@ class ChopIngredient(BaseIngredient):
 
     def write_phonon_single(self):
         """Write the phonon files to a directory.
-            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
