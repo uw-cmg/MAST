@@ -466,7 +466,7 @@ class ChopIngredient(BaseIngredient):
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
             image_structures_raw = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
             if self.uses_atom_indexing(): #resort according to indexing
-                images_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw)
+                image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw)
             else:
                 image_structures = list(image_structures_raw)
         else: #if not using indexing, interpolation ok even if rearranges atoms
