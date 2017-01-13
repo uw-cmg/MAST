@@ -268,6 +268,7 @@ mast_write_method keyword values
     * The ingredient must have a CHGCAR file written. A gamma-point calculation is sufficient for this purpose.
     * The ingredient should have both endpoints removed. For example, for vacancy migration, the ingredient should have neither a vacancy at the initial position, nor a vacancy at the final position. However, it should have all other non-migrating defects that are common to both the initial and final state.
 
+*  This method also takes a second argument as a number of additional sites from the bottom of the sorted POSCAR for which to find the path, if the moving atoms(s) are not interstitials; e.g. a vacancy-mediated moving atom must be sorted to the end, and the second argument would therefore be 1.
 *  This method only works with ``use_structure_index True`` in the ``$structure`` section of the input file.
 
 **write_neb_subfolders**

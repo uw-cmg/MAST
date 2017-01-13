@@ -537,7 +537,9 @@ class ChopIngredient(BaseIngredient):
         if not self.uses_atom_indexing():
             raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb with structure indexing turned on.")
 
-        #Must be an interstitial; otherwise, indices of ADDITIONAL SITES must be
+        #Must be an interstitial; otherwise, a number of
+        #ADDITIONAL SITE positions at the end of the POSCAR or manifest
+        #must be
         #specified as a parameter for the mast_write_method of
         #write_pathfinder_neb in the input file
        
