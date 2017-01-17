@@ -1,12 +1,12 @@
 ##############################################################
 # This code is part of the MAterials Simulation Toolkit (MAST)
 # Example input file for NEB, PHONONS, DIFFUSION COEFFICIENT workflow 
+# with the NEB pathfinder
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-04-25
-# #REPLACE THIS FILE
 ##############################################################
 $mast
-system_name nebpathtest
+system_name FiveFreq
 $end
 
 $structure
@@ -65,25 +65,81 @@ $defects
 threshold 1e-4
 coord_type fractional
 
-begin int1
-interstitial 0.66 0.66 0.66 X2
+begin pureinit
+vacancy 0.50 0.50 0.50 X1
+phonon solvent 0.25 0.50 0.25 0.05
+charge=0,0
 end
 
-begin int2
-#interstitial 0.66 0.66 0.33 X2
-interstitial 0.50 0.50 0.75 X2
+begin purefin
+vacancy 0.25 0.50 0.25 X1
+charge=0,0
 end
+
+#sub without vacancy only needed in HCP models
+##begin subnovac
+##antisite 0.25 0.50 0.25 X2
+##charge=0,0
+##end
+
+#labels are in terms of vacancy position to solute
+begin 1nn
+antisite 0.25 0.50 0.25 X2
+vacancy 0.50 0.50 0.50 X1
+#phonon 1nnb 0.25 0.75 0.50 0.05
+phonon solute 0.25 0.50 0.25 0.05
+#phonon 3nn 0.75 0.25 0.50 0.05
+charge=0,0
+end
+
+#begin 1nnb
+#antisite 0.25 0.50 0.25 X2
+#vacancy 0.25 0.75 0.50 X1
+#charge=0,0
+#end
+
+begin solute
+vacancy 0.25 0.50 0.25 X1
+antisite 0.50 0.50 0.50 X2
+charge=0,0
+end
+
+#begin 3nn
+#antisite 0.25 0.50 0.25 X2
+#vacancy 0.75 0.25 0.50 X1
+#phonon 1nn 0.50 0.50 0.50 0.05
+#charge=0,0
+#end
 
 $end
 
 $neb
 
-begin int1-int2
-#X2, 0.66 0.66 0.66, 0.66 0.66 0.33
-X2, 0.66 0.66 0.66, 0.50 0.50 0.75
+begin pureinit-purefin
+X1, 0.25 0.5 0.25, 0.5 0.5 0.5
+#note that when using structure indexing, use the actual moving
+#atom coordinates. Do not estimate a movement along the path.
+phonon movingsolvent 0.25 0.5 0.25 0.05
 images 1
 end
 
+#begin 1nn-1nnb
+#X1, 0.25 0.75 0.50, 0.5 0.5 0.5
+#phonon movingsolvent 0.25 0.75 0.50 0.05
+#images 1
+#end
+
+begin 1nn-solute
+X2, 0.25 0.50 0.25, 0.5 0.5 0.5
+phonon movingsolute 0.25 0.50 0.25 0.05
+images 1
+end
+
+#begin 1nn-3nn
+#X1, 0.75 0.25 0.50, 0.5 0.5 0.5
+#phonon movingsolvent 0.75 0.25 0.50 0.05
+#images 1
+#end
 
 $end
 
@@ -94,19 +150,19 @@ mast_frozen_seconds 1000
 encut              300
 #mast_multiplyencut 1.5
 ##Bardeen testing
-#mast_nodes         1
-#mast_ppn           8
-#mast_queue         morgan1
-#mast_walltime      72
-#mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
+mast_nodes         1
+mast_ppn           12
+mast_queue         morgan2
+mast_walltime      96
+mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
 ##Hub noqueue testing
 #mast_exec          nice -n 19 ~/vasp_parallel
 ##Korczak testing
-mast_nodes         1
-mast_ppn           1
-mast_queue         default
-mast_walltime      4
-mast_exec          //share/apps/vasp5.2_cNEB
+#mast_nodes         1
+#mast_ppn           1
+#mast_queue         default
+#mast_walltime      4
+#mast_exec          //share/apps/vasp5.2_cNEB
 mast_kpoints       2x2x2 M
 mast_xc            PBE
 ediffg             5e-2
@@ -141,7 +197,6 @@ mast_kpoints 1x1x1 G
 end
 
 begin relax_perfect
-lcharg True
 isif 3
 end
 
@@ -199,7 +254,9 @@ lclimb True
 spring -5
 mast_kpoints 1x1x1 G
 mast_program   vasp_neb
-mast_write_method            write_pathfinder_neb perfect_opt2
+mast_write_method            write_pathfinder_neb perfect_stat 1
+#The single vacancy line should be sorted to the bottom of the structure,
+#so the additional sites parameter is 1.
 mast_update_children_method  give_neb_structures_to_neb
 end
 
