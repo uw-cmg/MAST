@@ -1113,8 +1113,12 @@ class ChopIngredient(BaseIngredient):
             self.errhandler.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
-            elif not self.is_complete():
-                notready = notready + 1
+            else:
+                if self.is_complete():
+                    if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                        self.checker.update_atom_index_for_complete()
+                else:
+                    notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
         self.checker.keywords['name']=myname
