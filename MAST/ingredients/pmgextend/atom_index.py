@@ -348,7 +348,7 @@ class AtomIndex(MASTObj):
                             element="",
                             scaling_label=scaling_label,
                             find_multiple=True,
-                            tol=0.001+pcrad)
+                            tol=0.0001+pcrad)
                     manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (dlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return 
@@ -452,7 +452,7 @@ class AtomIndex(MASTObj):
                         element="",
                         scaling_label=scaling_label,
                         find_multiple=True,
-                        tol=0.001+pcrad)
+                        tol=0.0001+pcrad)
                     manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (nlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return
@@ -682,7 +682,9 @@ class AtomIndex(MASTObj):
                 for myct in range(0,3):
                     mysd = np.zeros([lensites,3],bool)
                     mysd[lidx]=np.zeros(3,bool)
-                    if structurelist[lidx] in phononlist:
+                    structureline = structurelist[lidx].strip()
+                    saidx = structureline.split(";")[0]
+                    if saidx in phononlist:
                         mysd[lidx][myct]=1
                         mysdlist.append(mysd)
             return mysdlist 

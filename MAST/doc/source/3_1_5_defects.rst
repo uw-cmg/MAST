@@ -94,7 +94,8 @@ If you use charges in the defects section like this, then you must use a tagged 
 Phonons for defects
 =====================
 
-Phonon calculations are described by a *phonon center site* coordinate and a *phonon center radius* in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.
+Phonon calculations are described by a *phonon center site* coordinate and a *phonon center radius* (uses pymatgen's find\_in\_coord\_list\_pbc method for radial tolerance). 
+Atoms within the sphere specified by these two values will be included in phonon calculations.
 
 For VASP, this inclusion takes the form of selective dynamics T T T for the atoms within the sphere, and F F F otherwise, in a phonon calculation (IBRION = 5, 6, 7, 8)
 
@@ -106,21 +107,23 @@ To use phonons in the defects section, use the subsection keyword ``phonon`` fol
 
 * The fractional coordinates for the phonon center site
 
-*  A float value for the phonon center radius
+* A float value for the phonon center radius
 
-*  An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used). 
+* An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used). Only used if atom indexing is not used.
+
+If atom indexing is used, only the phonon center site and phonon center radius are used, with an additional 0.0001 matching tolerance.
 
 Multiple separate phonon calculations may be obtained for each defect, for example::
 
     begin int1
     interstitial 0.25 0.25 0.25 X2
-    phonon host3 0.3 0.3 0.4 2.5 0.01
-    phonon solute 0.1 0.1 0.2 0.5
+    phonon host3 0.3 0.3 0.4 0.25 0.01
+    phonon solute 0.1 0.1 0.2 0.05
     end
 
-In the example above, *host3* is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site. 
+In the example above, *host3* is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 0.25 is the fractional radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site, if atom indexing is not used.
 
-In the example above, *solute* is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.
+In the example above, *solute* is the label for the phonon calculation bounded within a 0.05 fractional radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site, if atom indexing is not used.
 
 
 The recipe template file for phonons may include either the explicit phonon labels and other labels, or <S>, <N>, <Q>, <P>. See :doc:`3_1_3_recipe`.
