@@ -687,10 +687,10 @@ class ChopIngredient(BaseIngredient):
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
         imct = 1
         imstrs=list()
-        if self.uses_atom_indexing():
-            myai = self.create_atom_index_object()
-            iname = self.keywords['name']
-            manifestep=myai.guess_manifest_from_ingredient_metadata(iname,0) #images always use initial endpoint manifest
+        #if self.uses_atom_indexing():
+        #    myai = self.create_atom_index_object()
+        #    iname = self.keywords['name']
+        #    manifestep=myai.guess_manifest_from_ingredient_metadata(iname,0) #images always use initial endpoint manifest
         while imct <= numim:
             pfpath=""
             for myfile in os.listdir(self.keywords['name']):
@@ -701,12 +701,16 @@ class ChopIngredient(BaseIngredient):
             else:
                 struct_im = self.checker.get_structure_from_file(pfpath)
                 if self.uses_atom_indexing():
-                    sname = os.path.join(iname, "scrambledim_%s" % str(imct).zfill(2)) 
-                    myai.make_temp_manifest_from_scrambled_structure(iname, 
-                                        struct_im, sname)
-                    onestruc = struct_im
-                    newstruc = myai.unscramble_a_scrambled_structure(iname,
-                                    onestruc, manifestep, sname)
+                    #sname = os.path.join(iname, "scrambledim_%s" % str(imct).zfill(2)) 
+                    #myai.make_temp_manifest_from_scrambled_structure(iname, 
+                    #                    struct_im, sname)
+                    #onestruc = struct_im
+                    #newstruc = myai.unscramble_a_scrambled_structure(iname,
+                    #                onestruc, manifestep, sname)
+                    #imstrs.append(newstruc)
+                    ##Do not use sorting above.
+                    ##Assume parent image has already been properly sorted
+                    newstruc = struct_im.copy()
                     imstrs.append(newstruc)
                 else:
                     base_struct = self.keywords['structure']
