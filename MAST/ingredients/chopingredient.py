@@ -701,7 +701,7 @@ class ChopIngredient(BaseIngredient):
             else:
                 struct_im = self.checker.get_structure_from_file(pfpath)
                 if self.uses_atom_indexing():
-                    sname = os.path.join(iname, "scrambledim_%s" % str(imct.zfill(2))) 
+                    sname = os.path.join(iname, "scrambledim_%s" % str(imct).zfill(2)) 
                     myai.make_temp_manifest_from_scrambled_structure(iname, 
                                         struct_im, sname)
                     onestruc = struct_im
