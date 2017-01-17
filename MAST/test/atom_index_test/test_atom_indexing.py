@@ -162,23 +162,40 @@ class TestAtomIndexing(unittest.TestCase):
         print "subtest4 ok"
         return
     def test_write_defected_phonon_sd_manifests(self):
-        raise SkipTest
+        #raise SkipTest
+        tdir=os.path.join(testdir,'manifest_files')
+        wdir=os.path.join(testdir,'workdir')
+        myip = MASTInput(inputfile='../../examples/neb_with_phonons.inp')
+        os.environ['MAST_SCRATCH']=wdir
+        myip.set_up_recipe()
+        rwdir = myip.working_directory
+        myio = myip.input_options
+        mysid = os.path.join(rwdir, "structure_index_files")
+        fnames = os.listdir(os.path.join(rwdir, "structure_index_files"))
+        for fname in fnames:
+            f1=MASTFile(os.path.join(tdir,"structure_index_files",fname))
+            f2=MASTFile(os.path.join(rwdir,"structure_index_files",fname))
+            self.assertEqual(f1.data,f2.data)
         return
 
     def test_write_neb_endpoint_manifests(self):
         raise SkipTest
+        #covered as part of test_write_defected_phonon_sd_manifests
         return
 
     def test_write_neb_phonon_sd_manifests(self):
         raise SkipTest
+        #covered as part of test_write_defected_phonon_sd_manifests
         return
 
     def test_set_up_initial_index(self):
         raise SkipTest
+        #covered as part of test_write_defected_phonon_sd_manifests
         return
 
     def test_update_atom_indices_from_structure(self):
         raise SkipTest
+        #covered as part of test_defect_static
         return
 
     def test_make_coordinate_and_element_list_from_manifest(self):
@@ -227,6 +244,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_guess_manifest_from_ingredient_metadata(self):
         raise SkipTest
+        #covered as part of test_nebpathtest
         return
 
     def test_make_temp_manifest_from_scrambled_structure(self):
@@ -292,22 +310,49 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_unscramble_a_scrambled_structure(self):
         raise SkipTest
+        #covered as part of test_nebpathtest
         return
 
     def test_graft_new_coordinates_from_manifest(self):
-        raise SkipTest
+        #raise SkipTest
+        wdir=os.path.join(testdir,'workdir')
+        tdir = os.path.join(testdir,'graft_files')
+        myip = MASTInput(inputfile=os.path.join(tdir,'input.inp'))
+        os.environ['MAST_SCRATCH']=wdir
+        os.environ['MAST_CONTROL']=wdir
+        myip.set_up_recipe()
+        rwdir = myip.working_directory
+        myio = myip.input_options
+        mysid = os.path.join(rwdir, "structure_index_files")
+        test_sid = os.path.join(tdir, "structure_index_files")
+        myai = AtomIndex(input_options=myio, structure_index_directory=test_sid)
+        onestr = Poscar.from_file(os.path.join(tdir,"POSCAR_defect_int1_opt1")).structure
+        newstr = myai.graft_new_coordinates_from_manifest(onestr, 
+                "manifest__int1_", "defect_int1_q=p0_opt1") #get relaxed positions
+        #write to file and back out to get matching number of decimal points
+        postest = os.path.join(rwdir, "POSCAR_test")
+        writestr = Poscar(newstr).write_file(postest)
+        writtenstr = Poscar.from_file(postest).structure
+        teststr = Poscar.from_file(os.path.join(tdir,"POSCAR_defect_int1_opt2")).structure
+        for sidx in range(0, len(writtenstr.frac_coords)):
+            for zidx in range(0,3):
+                self.assertEqual(writtenstr.frac_coords[sidx][zidx], teststr.frac_coords[sidx][zidx])
         return
 
     def test_get_sd_array(self):
         raise SkipTest
+        #covered as part of test_write_defected_phonon_sd_manifests
+        #but could probably use more use cases.
         return
 
     def test_add_atom_specific_keywords_to_structure_dictionary(self):
         raise SkipTest
+        #This method does nothing? Copied over from structure_extensions.
         return
 
     def test_add_element_specific_keywords_to_structure_dictionary(self):
         raise SkipTest
+        #This method does nothing? Copied over from structure_extensions.
         return
 
     def test_defect_static(self):
