@@ -671,7 +671,9 @@ class AtomIndex(MASTObj):
         if not multiple:
             mysd=np.zeros([lensites,3],bool)
             for lidx in range(0, lensites):
-                if structurelist[lidx] in phononlist:
+                structureline = structurelist[lidx].strip()
+                saidx = structureline.split(";")[0]
+                if saidx in phononlist:
                     mysd[lidx]=np.ones(3,bool)
             return mysd
         elif multiple:
