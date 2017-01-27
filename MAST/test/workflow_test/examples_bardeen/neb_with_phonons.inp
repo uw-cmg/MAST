@@ -66,7 +66,7 @@ coord_type fractional
 
 begin pureinit
 vacancy 0.50 0.50 0.50 X1
-phonon solvent 0.25 0.50 0.25 0.5
+phonon solvent 0.25 0.50 0.25 0.05
 charge=0,0
 end
 
@@ -85,9 +85,9 @@ end
 begin 1nn
 antisite 0.25 0.50 0.25 X2
 vacancy 0.50 0.50 0.50 X1
-#phonon 1nnb 0.25 0.75 0.50 0.5
-phonon solute 0.25 0.50 0.25 0.5
-#phonon 3nn 0.75 0.25 0.50 0.5
+#phonon 1nnb 0.25 0.75 0.50 0.05
+phonon solute 0.25 0.50 0.25 0.05
+#phonon 3nn 0.75 0.25 0.50 0.05
 charge=0,0
 end
 
@@ -106,7 +106,7 @@ end
 #begin 3nn
 #antisite 0.25 0.50 0.25 X2
 #vacancy 0.75 0.25 0.50 X1
-#phonon 1nn 0.50 0.50 0.50 0.50
+#phonon 1nn 0.50 0.50 0.50 0.05
 #charge=0,0
 #end
 
@@ -116,25 +116,27 @@ $neb
 
 begin pureinit-purefin
 X1, 0.25 0.5 0.25, 0.5 0.5 0.5
-phonon movingsolvent 0.375 0.5 0.375 0.5
+#note that when using structure indexing, use the actual moving
+#atom coordinates. Do not estimate a movement along the path.
+phonon movingsolvent 0.25 0.5 0.25 0.05
 images 1
 end
 
 #begin 1nn-1nnb
 #X1, 0.25 0.75 0.50, 0.5 0.5 0.5
-#phonon movingsolvent 0.375 0.625 0.500 0.5
+#phonon movingsolvent 0.25 0.75 0.50 0.05
 #images 1
 #end
 
 begin 1nn-solute
 X2, 0.25 0.50 0.25, 0.5 0.5 0.5
-phonon movingsolute 0.375 0.500 0.375 0.5
+phonon movingsolute 0.25 0.50 0.25 0.05
 images 1
 end
 
 #begin 1nn-3nn
 #X1, 0.75 0.25 0.50, 0.5 0.5 0.5
-#phonon movingsolvent 0.625 0.375 0.500 0.5
+#phonon movingsolvent 0.75 0.25 0.50 0.05
 #images 1
 #end
 
@@ -146,11 +148,20 @@ mast_auto_correct  True
 mast_frozen_seconds 1000
 encut              300
 #mast_multiplyencut 1.5
+##Bardeen testing
 mast_nodes         1
-mast_ppn           8
-mast_queue         morgan1
-mast_walltime      72
+mast_ppn           12
+mast_queue         morgan2
+mast_walltime      96
 mast_exec          //opt/mpiexec/bin/mpiexec //share/apps/bin/vasp5.2_CNEB
+##Hub noqueue testing
+#mast_exec          nice -n 19 ~/vasp_parallel
+##Korczak testing
+#mast_nodes         1
+#mast_ppn           1
+#mast_queue         default
+#mast_walltime      4
+#mast_exec          //share/apps/vasp5.2_cNEB
 mast_kpoints       2x2x2 M
 mast_xc            PBE
 ediffg             5e-2
@@ -300,7 +311,7 @@ mast_ready_method           file_exists diffcoeff_input.txt
 mast_run_method             run_singlerun
 mast_complete_method        file_exists Diffusivity.txt
 mast_update_children_method no_update
-mast_exec python //home/tam/mast_2016_tam/MAST/bin/mast_diffusion_coefficient -i diffcoeff_input.txt
+mast_exec mast_diffusion_coefficient -i diffcoeff_input.txt
 #inputs below
 type fcc_5freq
 
