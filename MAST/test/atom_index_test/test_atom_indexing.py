@@ -32,8 +32,8 @@ class TestAtomIndexing(unittest.TestCase):
             os.mkdir('workdir')
 
     def tearDown(self):
-        pass
-        return
+        #pass
+        #return
         for dirname in ['workdir','structure_index_files']:
             dfull = os.path.join(testdir, dirname)
             if os.path.isdir(dfull):
