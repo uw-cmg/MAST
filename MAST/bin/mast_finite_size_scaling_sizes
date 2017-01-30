@@ -12,6 +12,7 @@ from MAST.utility.finite_size_scaling.GenSC import writer
 import sys
 import os
 import pymatgen as mg
+from mg.io.vasp import Poscar, Kpoints, Incar, Potcar
 from MAST.utility import MASTError
 
 if __name__ == "__main__":
@@ -62,14 +63,14 @@ if __name__ == "__main__":
     ###read CONTCAR from primordial_perfect directory########
     cwdir=os.getcwd()
     os.chdir(perfDir)
-    perfectContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    perfectContcar=Poscar.from_file("CONTCAR").structure
     os.chdir(cwdir)
     #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_defect directory##
     os.chdir(defDir)
-    defectedContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
-    defectedKpoints=mg.io.vaspio.Kpoints.from_file('KPOINTS')
-    defectedPotcar=mg.io.vaspio.Potcar.from_file('POTCAR')
-    defectedIncar=mg.io.vaspio.Incar.from_file('INCAR')
+    defectedContcar=Poscar.from_file("CONTCAR").structure
+    defectedKpoints=Kpoints.from_file('KPOINTS')
+    defectedPotcar=Potcar.from_file('POTCAR')
+    defectedIncar=Incar.from_file('INCAR')
     os.chdir(cwdir)
     ##calculate and select a list of LMN scaling factors to run
     LMN_list=genLMNs(perfectContcar,mindefdist,maxnumatoms,numstructasked)
