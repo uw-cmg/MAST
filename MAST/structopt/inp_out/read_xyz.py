@@ -20,9 +20,9 @@ def read_xyz(fileobj,n=-1,data=False):
             of data strings read from xyz file
     """
     try:
-        from pymatgen.io.vaspio import Poscar
+        from pymatgen.io.vasp import Poscar
         mystructure = Poscar.from_file(fileobj).structure
-        from pymatgen.io.aseio import AseAtomsAdaptor
+        from pymatgen.io.ase import AseAtomsAdaptor
         myatoms = AseAtomsAdaptor.get_atoms(mystructure)
         return myatoms
     except:

@@ -16,8 +16,6 @@ from MAST.utility import loggerutils
 from MAST.submit import queue_commands
 from MAST.submit import script_commands
 from pymatgen.core.structure import Structure
-from pymatgen.io.vaspio import Poscar
-from pymatgen.io.cifio import CifParser
 from custodian.custodian import ErrorHandler
 try:
    from custodian.custodian import backup

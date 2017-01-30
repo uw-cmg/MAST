@@ -17,9 +17,7 @@ from MAST.utility import MASTFile
 from MAST.utility import loggerutils
 from MAST.submit import queue_commands
 from MAST.submit import script_commands
-from pymatgen.core.structure import Structure
-from pymatgen.io.vaspio import Poscar
-from pymatgen.io.cifio import CifParser
+from pymatgen.io.vasp import Incar
 from custodian.custodian import ErrorHandler
 try:
    from custodian.custodian import backup
@@ -53,7 +51,7 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
     def check(self):
         ifile = "%s/INCAR" % self.ingpath
         if os.path.isfile(ifile):
-            myincar = pymatgen.io.vaspio.Incar.from_file(ifile)
+            myincar = Incar.from_file(ifile)
         else:
             self.logger.warning("No INCAR file found at %s" % ifile)
             return False
@@ -81,7 +79,7 @@ class VaspReachedNSWErrorHandler(ErrorHandler):
         return False
         #ofile = "%s/vasprun.xml" % self.ingpath
         #if os.path.isfile(ofile):
-        #    myvasprun = pymatgen.io.vaspio.Vasprun(ofile)
+        #    myvasprun = pymatgen.io.vasp.Vasprun(ofile)
         #    if myvasprun.nionic_steps >= nsw:
         #        self.logger.info("Ionic steps %s is at NSW %s" % (myvasprun.nionic_steps, nsw))
         #        return True

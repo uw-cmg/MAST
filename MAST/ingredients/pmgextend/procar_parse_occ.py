@@ -37,8 +37,6 @@ from pymatgen.electronic_structure.core import Spin, Orbital
 from pymatgen.electronic_structure.dos import CompleteDos, Dos
 from pymatgen.electronic_structure.bandstructure import BandStructure, \
     BandStructureSymmLine, get_reconstructed_band_structure
-from pymatgen.core.lattice import Lattice
-from pymatgen.io.vaspio.vasp_input import Incar, Kpoints, Poscar
 
 logger = logging.getLogger(__name__)
 
