@@ -106,12 +106,12 @@ class InputPythonCreator(MASTObj):
             pln.append("    coordinates=iopscoords, atom_list=iopsatoms,")
             pln.append("    coord_type=iopsctype)")
         elif ('poscar' in strposfile.lower()):
-            pln.append("from pymatgen.io.vaspio import Poscar")
+            pln.append("from pymatgen.io.vasp import Poscar")
             pln.append("structure = Poscar.from_file('" +strposfile+ "').structure")
         elif ('cif' in strposfile.lower()):
-            #from pymatgen.io.cifio import CifParser
+            #from pymatgen.io.cif import CifParser
             #structure = CifParser(strposfile).get_structures()[0]
-            pln.append("from pymatgen.io.cifio import CifParser")
+            pln.append("from pymatgen.io.cif import CifParser")
             pln.append("structure = CifParser('"+strposfile+"').get_structures()[0]")
         else:
             error = 'Cannot build structure from file %s' % strposfile

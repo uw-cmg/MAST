@@ -11,6 +11,8 @@ import logging
 
 import numpy as np
 import pymatgen as pmg
+from pymatgen.io.vasp import Poscar
+from pymatgen.io.cif import CifParser
 
 from MAST.utility import InputOptions
 from MAST.utility import MASTObj
@@ -783,10 +785,8 @@ class InputParser(MASTObj):
                 coordinates=iopscoords, atom_list=iopsatoms,
                 coord_type=iopsctype)
         elif ('poscar' in strposfile.lower()):
-            from pymatgen.io.vaspio import Poscar
             structure = Poscar.from_file(strposfile).structure
         elif ('cif' in strposfile.lower()):
-            from pymatgen.io.cifio import CifParser
             structure = CifParser(strposfile).get_structures()[0]
         else:
             error = 'Cannot build structure from file %s' % strposfile

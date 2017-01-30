@@ -33,9 +33,9 @@ from pymatgen.apps.borg.hive import AbstractDrone
 from pymatgen.analysis.structure_analyzer import VoronoiCoordFinder
 from pymatgen.core.structure import Structure
 from pymatgen.core.composition import Composition
-from pymatgen.io.vaspio import Vasprun, Incar, Kpoints, Potcar, Poscar, \
+from pymatgen.io.vasp import Vasprun, Incar, Kpoints, Potcar, Poscar, \
     Outcar, Oszicar
-from pymatgen.io.cifio import CifWriter
+from pymatgen.io.cif import CifWriter
 from pymatgen.symmetry.finder import SymmetryFinder
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.util.io_utils import zopen

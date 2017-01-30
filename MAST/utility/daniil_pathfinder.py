@@ -29,8 +29,8 @@ from pymatgen.core.structure import Structure
 from pymatgen.core.lattice import Lattice
 from pymatgen.core.sites import *
 from pymatgen.core.periodic_table import *
-from pymatgen.io.vaspio.vasp_input import Poscar
-from pymatgen.io.vaspio.vasp_output import VolumetricData, Chgcar
+from pymatgen.io.vasp import Poscar
+from pymatgen.io.vasp import VolumetricData, Chgcar
 
 class NEBPathfinder:
     def __init__(self, start_struct, end_struct, relax_sites, v, n_images=20, h=1.0):

@@ -3,7 +3,8 @@
 from pymatgen.matproj.rest import MPRester
 from pymatgen.phasediagram.pdmaker import PhaseDiagram
 from pymatgen.phasediagram.plotter import PDPlotter
-from pymatgen.io.vaspio import Poscar
+from pymatgen.io.vasp import Poscar
+from pymatgen.io.vasp import MITVaspInputSet, MPVaspInputSet
 import sys
 import os
 
@@ -40,7 +41,6 @@ def main(api="", queryid=""):
     entries.extend(myentry)
 
     workdir = os.getcwd()
-    from pymatgen.io.vaspio_set import MITVaspInputSet, MPVaspInputSet
     for entry in entries: 
         mpvis = MPVaspInputSet()
         myname = str(entry['pretty_formula'])
