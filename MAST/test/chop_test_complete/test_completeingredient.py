@@ -7,6 +7,7 @@ import os
 import time
 import MAST
 import pymatgen
+from pymatgen.io.vasp import Poscar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
@@ -50,7 +51,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_pos = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
+        my_pos = Poscar.from_file("files/perfect_structure")
         my_pos.write_file("%s/CONTCAR" % ingdir)
         myci = ChopIngredient(name=ingdir,program_keys=kdict, structure=my_pos.structure)
         self.assertTrue(myci.complete_structure())
@@ -71,7 +72,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         mywr.write_singlerun()
         myoutcar = MASTFile("files/OUTCAR_completed")
@@ -100,7 +101,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_xc'] = 'pw91'
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images'] = 3
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         myoutcar = MASTFile("files/OUTCAR_completed")
         myoszicar = MASTFile("files/OSZICAR_completed")
@@ -133,7 +134,7 @@ class TestIsCompleteIngredient(unittest.TestCase):
         kdict['mast_program'] = 'vasp'
         kdict['mast_kpoints'] = [2,2,2,"M"]
         kdict['mast_xc'] = 'pw91'
-        my_structure = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure = Poscar.from_file("files/perfect_structure").structure
         mywr = ChopIngredient(name=ingdir, program_keys = kdict, structure=my_structure)
         myoutcar = MASTFile("files/OUTCAR_completed")
         myoszicar = MASTFile("files/OSZICAR_completed")

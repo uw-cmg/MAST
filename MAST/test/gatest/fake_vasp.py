@@ -9,9 +9,10 @@ randenergy = np.random.random_sample()*-100.0 + -200.0
 randtime = np.random.random_sample()*100
 randpress = np.random.random_sample()*50
 
-#mystruc = pymatgen.io.vaspio.Poscar.from_file("POSCAR").structure
+#from pymatgen.io.vasp import Poscar
+#mystruc = Poscar.from_file("POSCAR").structure
 #mystruc.perturb(0.01)
-#fake_contcar = pymatgen.io.vaspio.Poscar(mystruc)
+#fake_contcar = Poscar(mystruc)
 #fake_contcar.write_file("CONTCAR",direct=False)
 #
 from ase.calculators.lj import LennardJones

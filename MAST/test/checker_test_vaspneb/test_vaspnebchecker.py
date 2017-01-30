@@ -7,6 +7,7 @@ import os
 import time
 import MAST
 import pymatgen
+from pymatgen.io.vasp import Poscar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
@@ -48,18 +49,18 @@ class TestVaspnebchecker(unittest.TestCase):
         mystrs=list()
         pos=dict()
         for posstr in ['00','01','02','03','04']:
-            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
+            pos[posstr] = Poscar.from_file("structures/POSCAR_%s" % posstr)
             mystrs.append(pos[posstr].structure)
         kdict=dict()
         kdict['images']=3
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_neb_folders(mystrs)
         for subdir in ['00','01','02','03','04']:
-            mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR_%s" % subdir)
+            mypos = Poscar.from_file("childdir/POSCAR_%s" % subdir)
             self.assertEqual(mypos.structure,pos[subdir].structure)
             self.assertEqual(mypos.structure.lattice,pos[subdir].structure.lattice)
             self.assertEqual(mypos.structure.sites,pos[subdir].structure.sites)
-            mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/%s/POSCAR" % subdir)
+            mypos = Poscar.from_file("childdir/%s/POSCAR" % subdir)
             self.assertEqual(mypos.structure,pos[subdir].structure)
             self.assertEqual(mypos.structure.lattice,pos[subdir].structure.lattice)
             self.assertEqual(mypos.structure.sites,pos[subdir].structure.sites)
@@ -73,17 +74,17 @@ class TestVaspnebchecker(unittest.TestCase):
         pos=dict()
         graftedpos=dict()
         for posstr in ['00','01','02','03','04']:
-            graftedpos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_grafted_%s" % posstr)
-            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
+            graftedpos[posstr] = Poscar.from_file("structures/POSCAR_grafted_%s" % posstr)
+            pos[posstr] = Poscar.from_file("structures/POSCAR_%s" % posstr)
             mystrs.append(pos[posstr].structure)
         myvcneb=VaspNEBChecker(name="childdir",program_keys=kdict)
         myvcneb.set_up_neb_folders(mystrs)
         for subdir in ['00','01','02','03','04']:
-            mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/POSCAR_%s" % subdir)
+            mypos = Poscar.from_file("childdir/POSCAR_%s" % subdir)
             self.assertEqual(mypos.structure,graftedpos[subdir].structure)
             self.assertEqual(mypos.structure.lattice,graftedpos[subdir].structure.lattice)
             self.assertEqual(mypos.structure.sites,graftedpos[subdir].structure.sites)
-            mypos = pymatgen.io.vaspio.Poscar.from_file("childdir/%s/POSCAR" % subdir)
+            mypos = Poscar.from_file("childdir/%s/POSCAR" % subdir)
             self.assertEqual(mypos.structure,graftedpos[subdir].structure)
             self.assertEqual(mypos.structure.lattice,graftedpos[subdir].structure.lattice)
             self.assertEqual(mypos.structure.sites,graftedpos[subdir].structure.sites)
@@ -129,7 +130,7 @@ class TestVaspnebchecker(unittest.TestCase):
         #self.testclass.is_ready_to_run()
 
     def test__vasp_incar_setup(self):
-        my_poscar = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_00")
+        my_poscar = Poscar.from_file("structures/POSCAR_00")
         my_structure = my_poscar.structure
         my_poscar.write_file("childdir/POSCAR")
         kdict=dict()
@@ -145,8 +146,8 @@ class TestVaspnebchecker(unittest.TestCase):
         mypot = myvc._vasp_potcar_setup(my_poscar)
         myvc._vasp_incar_setup(mypot, my_poscar)
         myvc._vasp_neb_incar_modify()
-        myincar = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
-        incar_compare = pymatgen.io.vaspio.Incar.from_file(os.path.join(testdir,"files","INCAR"))
+        myincar = Incar.from_file(os.path.join(testdir,"childdir","INCAR"))
+        incar_compare = Incar.from_file(os.path.join(testdir,"files","INCAR"))
         self.assertEqual(myincar, incar_compare)
         #self.testclass._vasp_incar_setup(my_potcar, my_poscar)
 
@@ -154,7 +155,7 @@ class TestVaspnebchecker(unittest.TestCase):
         mystrs=list()
         pos=dict()
         for posstr in ['00','01','02','03','04']:
-            pos[posstr] = pymatgen.io.vaspio.Poscar.from_file("structures/POSCAR_%s" % posstr)
+            pos[posstr] = Poscar.from_file("structures/POSCAR_%s" % posstr)
             mystrs.append(pos[posstr].structure)
         kdict=dict()
         kdict['mast_kpoints']=[3,3,3,"G"]

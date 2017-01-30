@@ -12,6 +12,7 @@ from MAST.utility import dirutil
 from MAST.utility import InputOptions
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
+from pymatgen.io.vasp import Poscar
 import numpy as np
 
 testname="inputparser_test"
@@ -368,7 +369,7 @@ class TestInputparser(unittest.TestCase):
     def test_set_structure_from_inputs(self):
         myip = InputParser(inputfile="neb_with_phonons.inp")
         myoptions = myip.parse()
-        compare_struct = pymatgen.io.vaspio.Poscar.from_file("nebphononsposcar").structure
+        compare_struct = Poscar.from_file("nebphononsposcar").structure
         self.assertEqual(myoptions.options['structure']['structure'],compare_struct)
         #self.testclass.set_structure_from_inputs(input_options)
 

@@ -8,6 +8,7 @@ import os
 import time
 import MAST
 import pymatgen
+from pymatgen.io.vasp import Poscar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil
@@ -67,7 +68,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images']=3
         kdict['mast_neb_settings']['lines']=neblines
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb()
         self.assertTrue(mywi.checker.is_ready_to_run())
@@ -118,7 +119,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images']=3
         kdict['mast_neb_settings']['lines']=neblines
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb()
         self.assertTrue(mywi.checker.is_ready_to_run())
@@ -159,11 +160,11 @@ class TestWriteIngredient(unittest.TestCase):
         unsorted_init.to_file("%s/parent_structure_labelinit" % ingdir)
         unsorted_fin = MASTFile("unsorted/parent_structure_labelfin")
         unsorted_fin.to_file("%s/parent_structure_labelfin" % ingdir)
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         [sinit, sfin] = mywi.get_parent_structures()
-        init_compare = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit").structure
-        fin_compare = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelfin").structure
+        init_compare = Poscar.from_file("files/parent_structure_labelinit").structure
+        fin_compare = Poscar.from_file("files/parent_structure_labelfin").structure
         #print sinit
         #print init_compare
         #print sfin
@@ -196,12 +197,12 @@ class TestWriteIngredient(unittest.TestCase):
         unsorted_02.to_file("%s/parent_structure_labelinit-labelfin_02" % ingdir)
         unsorted_03 = MASTFile("unsorted/parent_structure_labelinit-labelfin_03")
         unsorted_03.to_file("%s/parent_structure_labelinit-labelfin_03" % ingdir)
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         imstrs = mywi.get_parent_image_structures()
-        compare_01 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_01").structure
-        compare_02 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_02").structure
-        compare_03 = pymatgen.io.vaspio.Poscar.from_file("files/parent_structure_labelinit-labelfin_03").structure
+        compare_01 = Poscar.from_file("files/parent_structure_labelinit-labelfin_01").structure
+        compare_02 = Poscar.from_file("files/parent_structure_labelinit-labelfin_02").structure
+        compare_03 = Poscar.from_file("files/parent_structure_labelinit-labelfin_03").structure
         self.assertEqual(imstrs[0].sites, compare_01.sites)
         self.assertEqual(imstrs[0].lattice, compare_01.lattice)
         self.assertEqual(imstrs[1].sites, compare_02.sites)
@@ -227,7 +228,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_program']='vasp_neb'
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images']=3
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         os.mkdir(ingdir + '/00')
         os.mkdir(ingdir + '/04')
@@ -273,7 +274,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_neb_settings']=dict()
         kdict['mast_neb_settings']['images']=3
         kdict['mast_neb_settings']['lines']=neblines
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_neb_subfolders()
         self.assertFalse(os.path.isfile("%s/00/submit.sh" % ingdir))
@@ -310,7 +311,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_kpoints']=[3,3,3,"G"]
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_singlerun()
         self.assertTrue(mywi.checker.is_ready_to_run())
@@ -333,7 +334,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
         kdict['mast_phonon_settings']['threshold']="0.075"
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_multiple()
         self.assertTrue(os.path.isdir("%s/phon_01" % ingdir))
@@ -371,7 +372,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
         kdict['mast_phonon_settings']['threshold']="0.075"
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         mywi.write_phonon_single()
         self.assertTrue(mywi.checker.is_ready_to_run())
@@ -395,7 +396,7 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_phonon_settings']['phonon_center_site']="0.33 0.25 0.0"
         kdict['mast_phonon_settings']['phonon_center_radius']="1"
         kdict['mast_phonon_settings']['threshold']="0.075"
-        my_structure=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_structure=Poscar.from_file("files/perfect_structure").structure
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=my_structure)
         [mysite, myrad, mythresh] = mywi.get_my_phonon_params()
         self.assertEqual(mysite,"0.33 0.25 0.0")
@@ -415,11 +416,11 @@ class TestWriteIngredient(unittest.TestCase):
         kdict['mast_xc']='pbe'
         kdict['mast_program']='vasp'
         kdict['mast_kpoint_density']='1000'
-        mypos=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure")
+        mypos=Poscar.from_file("files/perfect_structure")
         mypos.write_file("writedir/single_label1/POSCAR")
         mywi = ChopIngredient(name=ingdir,program_keys=kdict,structure=mypos.structure)
         mywi.write_singlerun_automesh()
-        mykpts = pymatgen.io.vaspio.Kpoints.from_file("writedir/single_label1/KPOINTS")
+        mykpts = Kpoints.from_file("writedir/single_label1/KPOINTS")
         self.assertEqual(mykpts.as_dict()['kpoints'][0],[6,6,6])
         #print mykpts
         self.assertTrue(mywi.checker.is_ready_to_run())
