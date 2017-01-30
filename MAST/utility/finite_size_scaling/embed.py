@@ -16,7 +16,6 @@ from scipy import stats
 
 import pymatgen as mg
 from pymatgen.analysis import ewald
-from pymatgen.io import vaspio
 
 def CenterMassnReflectionCorr(relax,defect): 
     # Correct periodically reflected atoms according to the perfect cell.

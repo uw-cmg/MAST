@@ -8,7 +8,6 @@
 import shutil, os
 from collections import defaultdict
 import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Outcar
 from MAST.utility.defect_formation_energy.potential_alignment import PotentialAlignment  
 import pandas
 from MAST.utility.finite_size_scaling.parse_input import ParseInput 

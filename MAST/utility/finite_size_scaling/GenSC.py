@@ -16,7 +16,7 @@ from scipy import stats
 
 import pymatgen as mg
 from pymatgen.analysis import ewald
-from pymatgen.io import vaspio
+from pymatgen.io.vasp import Poscar, Potcar, Kpoints, Incar
 
 import EneVsVm 
 import uniformPick    
@@ -208,7 +208,7 @@ def gensc(LMN_list,perf_primordial_struct,
                 def_primordial_kpnt.kpts[0][1]*
                 def_primordial_kpnt.kpts[0][2])/
                 (1/def_primordial_struct.composition.num_atoms))        
-        dummykpnt=mg.io.vaspio.Kpoints.automatic_density(dummystruct,kppra)
+        dummykpnt=Kpoints.automatic_density(dummystruct,kppra)
         dummykpnt.style=def_primordial_kpnt.style
         print (str(LMN_list[j])+"   " \
                #    +"%4.2f"      %EneVsVm.CalcV_M(dummystruct)+"   "+
@@ -235,15 +235,15 @@ if __name__ == "__main__":
     ###read CONTCAR from primordial_perfect directory########
     cwdir=os.getcwd()
     os.chdir(perfDir)      
-    perfectContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
+    perfectContcar=Poscar.from_file("CONTCAR").structure
     os.chdir(cwdir)
 
     #read CONTCAR, KPOINTS, POTCAR and INCAR from primordial_defect directory##
     os.chdir(defDir)       
-    defectedContcar=mg.io.vaspio.Poscar.from_file("CONTCAR").structure
-    defectedKpoints=mg.io.vaspio.Kpoints.from_file('KPOINTS')
-    defectedPotcar=mg.io.vaspio.Potcar.from_file('POTCAR')
-    defectedIncar=mg.io.vaspio.Incar.from_file('INCAR')
+    defectedContcar=Poscar.from_file("CONTCAR").structure
+    defectedKpoints=Kpoints.from_file('KPOINTS')
+    defectedPotcar=Potcar.from_file('POTCAR')
+    defectedIncar=Incar.from_file('INCAR')
     os.chdir(cwdir)
 
     ##calculate and select a list of LMN scaling factors to run

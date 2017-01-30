@@ -13,7 +13,7 @@ from scipy import stats
 
 import pymatgen as mg
 from pymatgen.analysis import ewald
-from pymatgen.io import vaspio
+from pymatgen.io.vasp import Oszicar, Outcar, Poscar
 
 import GenSC
 '''
@@ -26,7 +26,7 @@ class writer :
                         w.write(text)
 '''                        
 def psTotEne(oszicar):
-    dummyOszcar = vaspio.vasp_output.Oszicar(oszicar).electronic_steps
+    dummyOszcar = Oszicar(oszicar).electronic_steps
     TotEne = dummyOszcar[len(dummyOszcar)-1][len(dummyOszcar[len(dummyOszcar)-1])-1]['E']
     return TotEne
     
@@ -104,7 +104,6 @@ if __name__ == "__main__":
     from MAST.recipe import recipeutility as ru
     from MAST.utility.defect_formation_energy import DefectFormationEnergy as DFE
     import shutil, os
-    from pymatgen.io.vaspio.vasp_output import Outcar
   
 
     print '\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
@@ -125,7 +124,7 @@ if __name__ == "__main__":
         Eform[size_label] = Ef
         for folder in ingredients:
             if (size_label in folder) and ('perfect' in folder):
-                struct = mg.io.vaspio.Poscar.from_file('../%s/POSCAR'%folder).structure
+                struct = Poscar.from_file('../%s/POSCAR'%folder).structure
                 v_m[size_label] = CalcV_M(struct)
                 break
     sizes = Eform.keys()

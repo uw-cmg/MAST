@@ -7,8 +7,7 @@
 import sys, os
 
 import pymatgen as pmg
-from pymatgen.io.vaspio.vasp_output import Vasprun, Outcar, Oszicar
-from pymatgen.io.smartio import read_structure
+from pymatgen.io.vasp import Vasprun
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 from MAST.utility.defect_formation_energy.defectformationenergy import DefectFormationEnergy
@@ -223,12 +222,6 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
         abspath = '%s/%s/' % (self.recdir, directory)
         mychecker = VaspChecker(name=abspath)
         return mychecker.get_energy_from_energy_file()
-        #if ('OSZICAR' in os.listdir(abspath)):
-        #    return Oszicar('%s/OSZICAR' % abspath).final_energy
-
-        #elif ('vasprun.xml' in os.listdir(abspath)):
-        ## Modified from the PyMatGen Vasprun.final_energy() function to return E_0
-        #    return Vasprun('%s/vasprun.xml' % abspath).ionic_steps[-1]["electronic_steps"][-1]["e_0_energy"]
 
     def get_fermi_energy(self, directory):
         """Returns the Fermi energy from a directory"""
@@ -240,8 +233,6 @@ class DefectFormationEnergyIngredient(DefectFormationEnergy):
             fermi = float(lastfermi.split()[2])
             print "TTM DEBUG LAST FERMI: ", fermi
             return fermi
-            #print "TTM DEBUG: OUTCAR efermi: ", Outcar('%s/OUTCAR' % abspath).efermi
-            #return Outcar('%s/OUTCAR' % abspath).efermi
         elif ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).efermi
 

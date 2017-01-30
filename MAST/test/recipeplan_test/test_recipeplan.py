@@ -12,6 +12,7 @@ import shutil
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 from MAST.utility import MASTError
+from pymatgen.io.vasp import Poscar
 testname="recipeplan_test"
 testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
@@ -82,7 +83,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing2b']=dict()
         rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
         rp.ingred_input_options['ing2b']['program_keys']=kdict
-        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing2b']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.write_methods['ing2b']=[['write_singlerun']]
         rp.write_ingredient('ing2b')
         self.assertTrue(os.path.isfile('recipedir/ing2b/INCAR'))
@@ -107,7 +108,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="%s/recipedir/ing1" % testdir
         rp.ingred_input_options['ing1']['program_keys']=kdict
-        rp.ingred_input_options['ing1']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.complete_methods['ing1']=[['complete_singlerun']]
         self.assertTrue(rp.complete_ingredient('ing1'))
         #self.testclass.complete_ingredient(iname)
@@ -127,7 +128,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing2b']=dict()
         rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
         rp.ingred_input_options['ing2b']['program_keys']=kdict
-        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing2b']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.write_methods['ing2b']=[['write_singlerun']]
         rp.write_ingredient('ing2b')
         rp.ready_methods['ing2b']=[['ready_singlerun']]
@@ -149,7 +150,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing2b']=dict()
         rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
         rp.ingred_input_options['ing2b']['program_keys']=kdict
-        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing2b']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.write_methods['ing2b']=[['write_singlerun']]
         rp.write_ingredient('ing2b')
         rp.run_methods['ing2b']=[['run_singlerun']]
@@ -173,7 +174,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="%s/ing1" % rp.working_directory
         rp.ingred_input_options['ing1']['program_keys']=kdict
-        rp.ingred_input_options['ing1']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing1']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.update_methods['ing1']=dict()
         rp.update_methods['ing1']['ing2a']=[['give_structure']]
         rp.update_methods['ing1']['ing2b']=[['give_structure_and_restart_files']]
@@ -208,7 +209,7 @@ class TestRecipeplan(unittest.TestCase):
         kdict['mast_program']='vasp'
         kdict['mast_xc']='pw91'
         kdict['mast_kpoints']=[1,2,3,"G"]
-        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_struc = Poscar.from_file("files/perfect_structure").structure
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="%s/recipedir/ing1" % testdir
         rp.ingred_input_options['ing1']['program_keys']=kdict
@@ -270,7 +271,7 @@ class TestRecipeplan(unittest.TestCase):
         kdict['mast_program']='vasp'
         kdict['mast_xc']='pw91'
         kdict['mast_kpoints']=[1,2,3,"G"]
-        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_struc = Poscar.from_file("files/perfect_structure").structure
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="%s/recipedir/ing1" % testdir
         rp.ingred_input_options['ing1']['program_keys']=kdict
@@ -323,7 +324,7 @@ class TestRecipeplan(unittest.TestCase):
         rp.ingred_input_options['ing2b']=dict()
         rp.ingred_input_options['ing2b']['name']="recipedir/ing2b"
         rp.ingred_input_options['ing2b']['program_keys']=kdict
-        rp.ingred_input_options['ing2b']['structure']=pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        rp.ingred_input_options['ing2b']['structure']=Poscar.from_file("files/perfect_structure").structure
         rp.write_methods['ing2b']=[['write_singlerun']]
         rp.write_ingredient('ing2b')
         rp.ready_methods['ing2b']=[['ready_singlerun']]
@@ -358,7 +359,7 @@ class TestRecipeplan(unittest.TestCase):
         kdict['mast_program']='vasp'
         kdict['mast_xc']='pw91'
         kdict['mast_kpoints']=[1,2,3,"G"]
-        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_struc = Poscar.from_file("files/perfect_structure").structure
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="%s/recipedir/ing1" % testdir
         rp.ingred_input_options['ing1']['program_keys']=kdict
@@ -435,7 +436,7 @@ class TestRecipeplan(unittest.TestCase):
         kdict['mast_program']='vasp'
         kdict['mast_xc']='pw91'
         kdict['mast_kpoints']=[1,2,3,"G"]
-        my_struc = pymatgen.io.vaspio.Poscar.from_file("files/perfect_structure").structure
+        my_struc = Poscar.from_file("files/perfect_structure").structure
         rp.ingred_input_options['ing1']=dict()
         rp.ingred_input_options['ing1']['name']="recipedir/ing1"
         rp.ingred_input_options['ing1']['program_keys']=kdict

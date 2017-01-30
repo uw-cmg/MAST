@@ -10,6 +10,7 @@ import logging
 import pymatgen
 from MAST.utility import loggerutils
 from MAST.utility import MASTFile
+from pymatgen.io.vasp import Poscar
 
 def main(mydir="", fname="", startat=0, childdir=""):
     """This method makes POSCAR-containing subfolders from a 
@@ -60,7 +61,7 @@ def main(mydir="", fname="", startat=0, childdir=""):
         subpath = os.path.join(childdir, subname)
         if not os.path.isdir(subpath):
             os.mkdir(subpath)
-        one_poscar = pymatgen.io.vaspio.Poscar(one_structure)
+        one_poscar = Poscar(one_structure)
         pospath = os.path.join(subpath, "POSCAR")
         if os.path.isfile(pospath):
             logger.error("POSCAR file already exists at %s" % subpath)
