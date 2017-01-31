@@ -23,6 +23,9 @@ from pymatgen.io.vasp import Poscar
 import shutil
 testname="atom_index_test"
 testdir = dirutil.get_test_dir(testname)
+old_control = os.getenv("MAST_CONTROL")
+old_archive = os.getenv("MAST_ARCHIVE")
+old_scratch = os.getenv("MAST_SCRATCH")
 
 class TestAtomIndexing(unittest.TestCase):
 
@@ -38,6 +41,9 @@ class TestAtomIndexing(unittest.TestCase):
             dfull = os.path.join(testdir, dirname)
             if os.path.isdir(dfull):
                 shutil.rmtree(dfull)
+        os.environ["MAST_CONTROL"] = old_control
+        os.environ["MAST_SCRATCH"] = old_scratch
+        os.environ["MAST_ARCHIVE"] = old_archive
 
     def test_interstitial_neb_setup(self):
         #raise SkipTest
