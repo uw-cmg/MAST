@@ -137,7 +137,12 @@ class AtomIndex(MASTObj):
                         if not (scaling_label == ""):
                             dcoords = mySE.get_scaled_coordinates(dcoords)
                         if dtype == "interstitial":
-                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
+                            didx=self.find_frac_coord_in_atom_indices(dcoords, 
+                                    include_orig="only",
+                                    element=delement, 
+                                    scaling_label=scaling_label, 
+                                    find_multiple=False, 
+                                    tol=0.001)
                             if didx == None:
                                 akey=self.get_new_key()
                                 aname="atom_index_%s" % akey
@@ -151,13 +156,23 @@ class AtomIndex(MASTObj):
                             else:
                                 dlist.append("%s;int" % didx)
                         elif dtype == "vacancy":
-                            didx=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001)
+                            didx=self.find_frac_coord_in_atom_indices(dcoords, 
+                                    include_orig="only",
+                                    element=delement, 
+                                    scaling_label=scaling_label, 
+                                    find_multiple=False, 
+                                    tol=0.001)
                             try:
                                 dlist.remove(didx)
                             except ValueError:
                                 raise MASTError(self.__class__.__name__, "For defect %s, cannot remove atom index %s from list: %s" % (dlabel, didx, dlist))
                         elif dtype in ["substitution","antisite"]:
-                            didxlist=self.find_orig_frac_coord_in_atom_indices(dcoords, "", scaling_label, True, 0.001) #leave element empty; just search coords
+                            didxlist=self.find_frac_coord_in_atom_indices(dcoords, 
+                                include_orig="only",
+                                element="", 
+                                scaling_label=scaling_label, 
+                                find_multiple=True, 
+                                tol=0.001) #leave element empty; just search coords
                             idxtorepl=list()
                             for didx in didxlist:
                                 dmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, didx))
@@ -168,7 +183,12 @@ class AtomIndex(MASTObj):
                                         idxtorepl.append(didx)
                             if len(idxtorepl) > 1:
                                 raise MASTError(self.__class__.__name__, "Interstitial %s is attempting to replace more than one atom: %s" % (dlabel, idxtorepl))
-                            didxsub=self.find_orig_frac_coord_in_atom_indices(dcoords, delement, scaling_label, False, 0.001) #leave element empty; just search coords
+                            didxsub=self.find_frac_coord_in_atom_indices(dcoords, 
+                                include_orig="only",
+                                element=delement, 
+                                scaling_label=scaling_label, 
+                                find_multiple=False, 
+                                tol=0.001) #leave element empty; just search coords
                             if didxsub == None:
                                 akey=self.get_new_key()
                                 aname="atom_index_%s" % akey
@@ -196,17 +216,24 @@ class AtomIndex(MASTObj):
             mlist.append(mline)
         return mlist
     
-    def find_orig_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001):
-        """Find the atomic index of an original FRACTIONAL coordinate in the 
+    
+    def find_frac_coord_in_atom_indices(self, coord, include_orig="no", element="", scaling_label="", find_multiple=False, tol=0.0001, verbose=0):
+        """Find the atomic index of any FRACTIONAL coordinate in the 
             structure dictionary.
             Args:
                 coord <numpy array of float>: coordinate to find
+                include_orig <str>: include original fractional coordinates
+                    in search:
+                        yes - allow original as-entered coordinates
+                        no - only use coordinates from ingredients
+                        only - only allow original as-entered coordinates
                 element <str>: element symbol to match
                                 If blank, matches any element.
                 scaling_label <str>: scaling label
                                     If blank, must match NO scaling (blank)
                 find_multiple <boolean>: allow multiple matches. Default False.
                 tol <float>: tolerance
+                verbose <int>: 0 - silent; 1 - verbose
             Returns:
                 atomic index <hex string>: atomic index of match, 
                     if find_multiple is false
@@ -221,81 +248,45 @@ class AtomIndex(MASTObj):
         elem_matches=list()
         scaling_matches=list()
         for aname in idxnames:
+            if verbose > 0:
+                print aname
             ameta=Metadata(metafile=aname)
             aidx=ameta.read_data("atom_index")
-            atom_ofc=ameta.read_data("original_frac_coords")
-            atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
-            if np.allclose(atom_ofc_arr,coord,rtol,tol):
-                coord_matches.append(aidx)
-        if element == "":
-            elem_matches = list(coord_matches)
-        else:
-            for aidx in coord_matches:
-                ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
-                atom_elem=ameta.read_data("element")
-                if (element == atom_elem):
-                    elem_matches.append(aidx)
-        for aidx in elem_matches:
-            ameta=Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
-            ascale=ameta.read_data("scaling_label")
-            if (scaling_label == ascale):
-                scaling_matches.append(aidx)
-        allmatches = list(scaling_matches)
-        if len(allmatches) == 0:
-            return None
-        if len(allmatches) > 1:
-            if not find_multiple:
-                raise MASTError(self.__class__.__name__,
-                    "Multiple matches found for coordinate %s: %s" % (coord, allmatches))
-            else:
-                return allmatches
-        if len(allmatches) == 1:
-            if not find_multiple:
-                return allmatches[0]
-            else:
-                return allmatches
-        return None
-    
-    def find_any_frac_coord_in_atom_indices(self, coord, element="", scaling_label="", find_multiple=False, tol=0.0001):
-        """Find the atomic index of any FRACTIONAL coordinate in the 
-            structure dictionary.
-            Args:
-                coord <numpy array of float>: coordinate to find
-                element <str>: element symbol to match
-                                If blank, matches any element.
-                scaling_label <str>: scaling label
-                                    If blank, must match NO scaling (blank)
-                find_multiple <boolean>: allow multiple matches. Default False.
-                tol <float>: tolerance
-            Returns:
-                atomic index <hex string>: atomic index of match, 
-                    if find_multiple is false
-                list of atomic indices of matches, if find_multiple is true
-                Returns None if no match is found
-        """
-        import glob
-        matchstring = "%s/atom_index_*" % self.sdir
-        idxnames = glob.glob(matchstring)
-        rtol=tol*100
-        coord_matches=list()
-        elem_matches=list()
-        scaling_matches=list()
-        namelist=list()
-        allfolders=immediate_subdirs(os.path.dirname(self.sdir)) #ing dirs
-        for folder in allfolders:
-            namelist.append("%s_frac_coords" % folder)
-        for nametofind in namelist:
-            for aname in idxnames:
-                ameta=Metadata(metafile=aname)
-                aidx=ameta.read_data("atom_index")
-                atom_ofc=ameta.read_data(nametofind)
-                if atom_ofc == None:
+            amastfile = MASTFile(aname)
+            for aline in amastfile.data:
+                aline = aline.strip()
+                if verbose > 0:
+                    print aline
+                asplit = aline.split(" = ") # need spaces because of charge tags
+                if len(asplit) < 2: #no coordinates
                     continue
+                alinekey = asplit[0].strip()
+                atom_ofc = asplit[1].strip()
+                if not "frac_coords" in alinekey:
+                    if verbose > 0:
+                        print "skip line: not frac coords"
+                    continue
+                if alinekey == "original_frac_coords":
+                    if include_orig == "no":
+                        if verbose > 0:
+                            print "skip line: original frac coords"
+                        continue
+                else:
+                    if include_orig == "only":
+                        if verbose > 0:
+                            print "skip line: not original frac coords"
+                        continue
                 if ";" in atom_ofc:
                     atom_ofc = atom_ofc.split(';')[-1].strip() # get most updated
                 atom_ofc_arr=np.array(atom_ofc[1:-1].split(),'float')
-                if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                if verbose > 0:
+                    print atom_ofc_arr
+                #if np.allclose(atom_ofc_arr,coord,rtol,tol):
+                if len(find_in_coord_list_pbc([atom_ofc_arr],coord,tol)) > 0:
                     coord_matches.append(aidx)
+                else:
+                    if verbose > 0:
+                        print "no match for tol %3.3f; rejected" % tol
         if element == "":
             elem_matches = list(coord_matches)
         else:
@@ -351,8 +342,12 @@ class AtomIndex(MASTObj):
                     if not (scaling_label == ""):
                         pcoords = mySE.get_scaled_coordinates(pcoords)
                      
-                    #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
-                    pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
+                    pindices = self.find_frac_coord_in_atom_indices(pcoords,
+                            include_orig="only",
+                            element="",
+                            scaling_label=scaling_label,
+                            find_multiple=True,
+                            tol=0.0001+pcrad)
                     manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (dlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return 
@@ -401,8 +396,14 @@ class AtomIndex(MASTObj):
                         ncoord1 = mySE.get_scaled_coordinates(ncoord1)
                         ncoord2 = mySE.get_scaled_coordinates(ncoord2)
                     nelem = nline[0]
-                    nidx1 = self.find_orig_frac_coord_in_atom_indices(ncoord1, nelem, scaling_label, False, 0.001)
-                    nidx2 = self.find_orig_frac_coord_in_atom_indices(ncoord2, nelem, scaling_label, False, 0.001)
+                    nidx1 = self.find_frac_coord_in_atom_indices(ncoord1, 
+                        include_orig="only",
+                        element=nelem, scaling_label=scaling_label, 
+                        find_multiple=False, tol=0.001)
+                    nidx2 = self.find_frac_coord_in_atom_indices(ncoord2, 
+                        include_orig="only",
+                        element=nelem, scaling_label=scaling_label, 
+                        find_multiple=False, tol=0.001)
                     try:
                         mlist1.remove(nidx1)
                     except ValueError:
@@ -445,8 +446,12 @@ class AtomIndex(MASTObj):
                     if not (scaling_label == ""):
                         pcoords = mySE.get_scaled_coordinates(pcoords)
                      
-                    #pindices = self.find_orig_frac_coord_in_structure_dictionary(sdict, pcoords, pthresh+pcrad, True)
-                    pindices = self.find_orig_frac_coord_in_atom_indices(pcoords,"",scaling_label,True,0.001+pcrad)
+                    pindices = self.find_frac_coord_in_atom_indices(pcoords,
+                        include_orig="only",
+                        element="",
+                        scaling_label=scaling_label,
+                        find_multiple=True,
+                        tol=0.0001+pcrad)
                     manname=os.path.join(self.sdir,"manifest_phonon_sd_%s_%s_%s" % (nlabel, phonon_label, scaling_label))
                     self.write_manifest_file(pindices, manname) 
         return
@@ -509,14 +514,24 @@ class AtomIndex(MASTObj):
                 if frac_coords == None:
                     raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             elif idxtorepl == "int": #interstitial
-                frac_coords = ameta.read_data("original_frac_coords")
+                frac_coords = ameta.read_data("%s_frac_coords" % ing_label)
                 if frac_coords == None:
-                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
+                    self.logger.warning("No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s. Using original coordinates." % (ing_label, self.sdir, manname, aidx))
+                    frac_coords = ameta.read_data("original_frac_coords")
+                    if frac_coords == None:
+                        raise MASTError(self.__class__.__name__, "No original coordinates or coordinates from %s building from manifest %s/%s using atom index %s" % (ing_label, self.sdir, manname, aidx))
             else: #substitution
-                replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
+                replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, aidx))
                 frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
                 if frac_coords == None:
-                    raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s for coordinates and atom index %s for element" % (ing_label, self.sdir, manname, idxtorepl,aidx))
+                    self.logger.warning("No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s for coordinates and atom index %s for element. Trying original atom index at %s." % (ing_label, self.sdir, manname, aidx,aidx, idxtorepl))
+                    replmeta = Metadata(metafile="%s/atom_index_%s" % (self.sdir, idxtorepl))
+                    frac_coords = replmeta.read_data("%s_frac_coords" % ing_label)
+                    if frac_coords == None:
+                        self.logger.warning("No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s for coordinates and atom index %s for element. Trying original coords." % (ing_label, self.sdir, manname, idxtorepl,aidx))
+                        frac_coords = replmeta.read_data("original_frac_coords")
+                        if frac_coords == None:
+                            raise MASTError(self.__class__.__name__, "No coordinates for %s_frac_coords building from manifest %s/%s using atom index %s for coordinates and atom index %s for element" % (ing_label, self.sdir, manname, idxtorepl,aidx))
             frac_coords=frac_coords.split("[")[1]
             frac_coords=frac_coords.split("]")[0]
             frac_array = np.array(frac_coords.split(), 'float')
@@ -570,7 +585,11 @@ class AtomIndex(MASTObj):
         
         scrambledlist=list()
         for site in mystr.sites:
-            fidx=self.find_any_frac_coord_in_atom_indices(site.frac_coords, site.species_string, scaling_label, False, 0.002)
+            fidx=self.find_frac_coord_in_atom_indices(site.frac_coords, 
+                    include_orig="no",
+                    element = site.species_string, 
+                    scaling_label = scaling_label, 
+                    find_multiple=False, tol=0.002)
             scrambledlist.append(fidx)
 
         self.write_manifest_file(scrambledlist, scrambledman)
@@ -651,7 +670,9 @@ class AtomIndex(MASTObj):
         if not multiple:
             mysd=np.zeros([lensites,3],bool)
             for lidx in range(0, lensites):
-                if structurelist[lidx] in phononlist:
+                structureline = structurelist[lidx].strip()
+                saidx = structureline.split(";")[0]
+                if saidx in phononlist:
                     mysd[lidx]=np.ones(3,bool)
             return mysd
         elif multiple:
@@ -660,7 +681,9 @@ class AtomIndex(MASTObj):
                 for myct in range(0,3):
                     mysd = np.zeros([lensites,3],bool)
                     mysd[lidx]=np.zeros(3,bool)
-                    if structurelist[lidx] in phononlist:
+                    structureline = structurelist[lidx].strip()
+                    saidx = structureline.split(";")[0]
+                    if saidx in phononlist:
                         mysd[lidx][myct]=1
                         mysdlist.append(mysd)
             return mysdlist 

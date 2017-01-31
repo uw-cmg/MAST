@@ -1,0 +1,23 @@
+#Statuses:
+#I = Initial state
+#W = Waiting on parents
+#S = Staged for run prep (parents complete)
+#P = ready to Proceed to queue; look for submission
+#C = Complete
+#E = Error
+#skip = Skip (from user)
+         defect_int1_q=p0_opt1 :    C
+         defect_int1_q=p0_opt2 :    C
+         defect_int1_q=p0_stat :    C
+         defect_int2_q=p0_opt1 :    C
+         defect_int2_q=p0_opt2 :    C
+         defect_int2_q=p0_stat :    C
+             diffcoeff_utility :    W
+             inducedefect_int1 :    C
+             inducedefect_int2 :    C
+       neb_int1-int2_q=p0_opt1 :    P
+       neb_int1-int2_q=p0_opt2 :    W
+       neb_int1-int2_q=p0_stat :    W
+                  perfect_opt1 :    C
+                  perfect_opt2 :    C
+                  perfect_stat :    C

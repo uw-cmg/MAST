@@ -12,8 +12,13 @@ from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
 from pymatgen.util.coord_utils import find_in_coord_list
+<<<<<<< HEAD
 from pymatgen.io.vasp import Poscar
 from pymatgen.io.vasp import Chgcar
+=======
+from pymatgen.io.vaspio import Poscar
+from pymatgen.io.vaspio import Chgcar
+>>>>>>> 4138b87e5a1038eb65023232f80907333d3196f2
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
@@ -462,27 +467,14 @@ class ChopIngredient(BaseIngredient):
         parentstructures = self.get_parent_structures()
         parentimagestructures = self.get_parent_image_structures()
         image_structures = list()
-        if len(parentimagestructures) == 0:
+        if len(parentimagestructures) == 0: #interpolate to get images
             sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
-            image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
-            if os.path.exists(os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files')):
-                image_structures_raw = list(image_structures)
-                image_structures = list()
-                self.logger.info("Attempt to unsort.")
-                myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
-                manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
-                manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
-                myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[0],os.path.join(self.keywords['name'],'scrambledep1'))
-                myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],image_structures_raw[-1],os.path.join(self.keywords['name'],'scrambledep2'))
-                for sidx in range(0,len(image_structures_raw)-1):
-                    onestruc = image_structures_raw[sidx]
-                    newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"scrambledep1"))
-                    image_structures.append(newstruc)
-                newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"scrambledep2"))
-                image_structures.append(newstruc)
-
-
-        else:
+            image_structures_raw = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+            if self.uses_atom_indexing(): #resort according to indexing
+                image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw)
+            else:
+                image_structures = list(image_structures_raw)
+        else: #if not using indexing, interpolation ok even if rearranges atoms
             image_structures.append(parentstructures[0])
             image_structures.extend(parentimagestructures)
             image_structures.append(parentstructures[1])
@@ -494,6 +486,39 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
         return
 
+    def atom_indexing_sort_interpolated_images(self, image_structures_raw,
+            structures_for_sorting=list()):
+        image_structures = list()
+        iname = self.keywords['name']
+        m_init_name = os.path.join(iname,"sort_images_scrambled_init")
+        m_fin_name = os.path.join(iname,"sort_images_scrambled_fin")
+        self.logger.info("Attempt to unsort.")
+        myai = self.create_atom_index_object()
+        manifestep_init=myai.guess_manifest_from_ingredient_metadata(iname,0)
+        manifestep_fin=myai.guess_manifest_from_ingredient_metadata(iname,1)
+        if len(structures_for_sorting) > 0: #sort manifests based on these structures
+            presort_init = Poscar(image_structures_raw[0])
+            presort_init.write_file(os.path.join(iname,"image_actual_raw_init"))
+            presort_fin = Poscar(image_structures_raw[-1])
+            presort_fin.write_file(os.path.join(iname,"image_actual_raw_fin"))
+            presort_init2 = Poscar(structures_for_sorting[0])
+            presort_init2.write_file(os.path.join(iname,"image_useforsort_init"))
+            presort_fin2 = Poscar(structures_for_sorting[-1])
+            presort_fin2.write_file(os.path.join(iname,"image_useforsort_fin"))
+            init_to_sort = structures_for_sorting[0]
+            fin_to_sort = structures_for_sorting[-1]
+        else:
+            init_to_sort = image_structures_raw[0]
+            fin_to_sort = image_structures_raw[-1]
+        myai.make_temp_manifest_from_scrambled_structure(iname,init_to_sort,m_init_name)
+        myai.make_temp_manifest_from_scrambled_structure(iname,fin_to_sort,m_fin_name)
+        for sidx in range(0,len(image_structures_raw)-1):
+            onestruc = image_structures_raw[sidx]
+            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep_init, m_init_name)
+            image_structures.append(newstruc)
+        newstruc = myai.unscramble_a_scrambled_structure(iname, image_structures_raw[-1], manifestep_fin, m_fin_name)
+        image_structures.append(newstruc)
+        return image_structures
 
     def write_pathfinder_neb(self, chgcarfolder, addlsites=0):
         """Get the parent structures, sort and match atoms, and interpolate
@@ -510,42 +535,31 @@ class ChopIngredient(BaseIngredient):
         image_structures = list()
         if len(parentimagestructures) > 0:
             raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb without mast_coordinates, or on initial NEB setup.")
-        
-
-
-        #sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
-        #image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
 
         s1 = parentstructures[0]
         s2 = parentstructures[1]
-        #s1 = Poscar.from_file(args.s1).structure
-        #s2 = Poscar.from_file(args.s2).structure
         
-        #Must be an interstitial
-        mysi = os.path.join(os.path.dirname(self.keywords['name']),
-                "structure_index_files")
-        if not os.path.isdir(mysi):
+        if not self.uses_atom_indexing():
             raise MASTError(self.__class__.__name__, "Can only use write_pathfinder_neb with structure indexing turned on.")
-        
-        #get aidxs from ;int lines of defect manifests
-        #match aidx to position in sorted NEB manifests
-        #get those sites
 
-        # Find diffusing species site indices
+        #Must be an interstitial; otherwise, a number of
+        #ADDITIONAL SITE positions at the end of the POSCAR or manifest
+        #must be
+        #specified as a parameter for the mast_write_method of
+        #write_pathfinder_neb in the input file
+       
+        #Find interstitial diffusing species site indices
         #mg_sites = []
         #for site_i, site in enumerate(s1.sites):
         #    if site.specie == Element("Mg"):
         #        mg_sites.append(site_i)
-        sxtend = StructureExtensions(struc_work1=parentstructures[0], struc_work2=parentstructures[1],name=self.keywords['name'])
-        pmg_image_structures = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
-        
-        myai=AtomIndex(structure_index_directory=mysi)
-        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
-        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
-        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[0],os.path.join(self.keywords['name'],'pmg_scrambledep1'))
-        myai.make_temp_manifest_from_scrambled_structure(self.keywords['name'],pmg_image_structures[-1],os.path.join(self.keywords['name'],'pmg_scrambledep2'))
-        
-        nebman=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
+
+        myai=self.create_atom_index_object()
+        iname = self.keywords['name']
+
+        #get defected manifest
+        #get aidxs from ;int lines of defect manifests
+        nebman=myai.guess_manifest_from_ingredient_metadata(iname,0)
         nebsplit=nebman.rsplit("_", 1)
         defectman="%s_" % nebsplit[0]
         intlist=list()
@@ -554,28 +568,41 @@ class ChopIngredient(BaseIngredient):
             if "int" in defectidx:
                 intlist.append(defectidx.split(';')[0])
         
+        #get_parent_structures should have already sorted parent structures
         nebmanlist=myai.read_manifest_file(nebman)
-        pmg_nebmanlist=myai.read_manifest_file(os.path.join(self.keywords['name'],'pmg_scrambledep1'))
+        #get additional site aidx's from parent initial endpoint manifest
         addlsites=int(addlsites)
         if addlsites > 0:
             self.logger.info("additional sites: %s" % addlsites)
             intlist.extend(nebmanlist[-1*addlsites:])
 
+        #match aidx to structure site position based on sorted NEB manifests
+        #record those structure site positions
+        pmg_nebmanlist=myai.read_manifest_file(os.path.join(iname,'scrambledep_init'))
         intsites=list()
         for intitem in intlist:
             intidx = pmg_nebmanlist.index(intitem)
             intsites.append(intidx)
 
         print "ADDLSITES: %s, INTSITES: %s" % (addlsites, intsites)
+
+        print "S1:"
+        print s1
+        print "S2:"
+        print s2
         self.logger.info("intsites: %s" % intsites)
         # Interpolate
         #use a param for perf_stat or othe ing label for chgcar
         #print("Using CHGCAR potential mode.")
         #chg = Chgcar.from_file(args.chg)
         #pf = NEBPathfinder(s1, s2, relax_sites=mg_sites, v=ChgcarPotential(chg).get_v(), n_images=10)
-
+        
         if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
-            raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
+            chgcarfolder = self._fullpath_childname(chgcarfolder)
+            if not os.path.isfile("%s/CHGCAR" % chgcarfolder):
+                raise MASTError(self.__class__.__name__, "No CHGCAR in %s " % chgcarfolder)
+        if not (os.stat("%s/CHGCAR" % chgcarfolder).st_size > 1):
+            raise MASTError(self.__class__.__name__, "CHGCAR in %s appears to be empty" % chgcarfolder)
         chg = Chgcar.from_file("%s/CHGCAR" % chgcarfolder)
         
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
@@ -584,20 +611,16 @@ class ChopIngredient(BaseIngredient):
         from MAST.utility.daniil_pathfinder import ChgcarPotential
         pf = NEBPathfinder(s1, s2, relax_sites=intsites, v=ChgcarPotential(chg).get_v(), n_images=numim+1)
 
-        image_structures=pf.images
+        image_structures_raw=pf.images
         
-        image_structures_raw = list(image_structures)
-        image_structures = list()
-        self.logger.info("Attempt to unsort.")
-        myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
-        manifestep1=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],0)
-        manifestep2=myai.guess_manifest_from_ingredient_metadata(self.keywords['name'],1)
-        for sidx in range(0,len(image_structures_raw)-1):
-            onestruc = image_structures_raw[sidx]
-            newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], onestruc, manifestep1, os.path.join(self.keywords['name'],"pmg_scrambledep1"))
-            image_structures.append(newstruc)
-        newstruc = myai.unscramble_a_scrambled_structure(self.keywords['name'], image_structures_raw[-1], manifestep2, os.path.join(self.keywords['name'],"pmg_scrambledep2"))
-        image_structures.append(newstruc)
+        #also do a strict linear interpolation from pymatgen to 
+        #get the reordering order, as pathfinder interpolation
+        #alters the initial and final image coordinates of the pathfound sites,
+        #and therefore those coordinates will not match up with atom_index files
+        sxtend = StructureExtensions(struc_work1=s1, struc_work2=s2,name=iname)
+        image_structures_raw_linear = sxtend.do_interpolation(self.keywords['program_keys']['mast_neb_settings']['images'])
+
+        image_structures = self.atom_indexing_sort_interpolated_images(image_structures_raw, image_structures_raw_linear)
 
         if image_structures == None:
             raise MASTError(self.__class__.__name__,"Bad number of images")
@@ -616,7 +639,6 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 [struct_init, struct_fin]: pymatgen Structure objects
-            #TTM add atom index
         """
         header = os.path.join(self.keywords['name'], "parent_structure_")
         mylabel = BaseIngredient.get_my_label(self, "neb_label").split("-")
@@ -630,13 +652,33 @@ class ChopIngredient(BaseIngredient):
                 "Error: no parent file at" + pfpath_fin)
         struct_init = self.checker.get_structure_from_file(pfpath_init)
         struct_fin = self.checker.get_structure_from_file(pfpath_fin)
-        base_struct = self.keywords['structure']
-        myimages = self.keywords['program_keys']['mast_neb_settings']['images']
-        neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-        sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct, name=self.keywords['name'])
-        sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
-        sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct, name=self.keywords['name'])
-        sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
+        if self.uses_atom_indexing():
+            myai = self.create_atom_index_object()
+            iname = self.keywords['name']
+            nebpcs=[0,1]
+            nebstructs=[struct_init, struct_fin]
+            scramblenames=['scrambledep_init','scrambledep_fin']
+            for nidx in [0,1]:
+                sname = os.path.join(iname, scramblenames[nidx])
+                manifestep=myai.guess_manifest_from_ingredient_metadata(iname,
+                                nebpcs[nidx])
+                myai.make_temp_manifest_from_scrambled_structure(iname, 
+                                nebstructs[nidx], sname)
+                onestruc = nebstructs[nidx]
+                newstruc = myai.unscramble_a_scrambled_structure(iname,
+                            onestruc, manifestep, sname)
+                if nidx == 0:
+                    sorted_init = newstruc
+                elif nidx == 1:
+                    sorted_fin = newstruc
+        else:
+            base_struct = self.keywords['structure']
+            myimages = self.keywords['program_keys']['mast_neb_settings']['images']
+            neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
+            sxtendi = StructureExtensions(struc_work1 = struct_init, struc_init = base_struct, name=self.keywords['name'])
+            sorted_init = sxtendi.sort_structure_and_neb_lines(neblines, '00', myimages) 
+            sxtendf = StructureExtensions(struc_work1 = struct_fin, struc_init = base_struct, name=self.keywords['name'])
+            sorted_fin = sxtendf.sort_structure_and_neb_lines(neblines, str(myimages + 1).zfill(2), myimages)
         return [sorted_init, sorted_fin]
 
     def get_parent_image_structures(self):
@@ -645,12 +687,15 @@ class ChopIngredient(BaseIngredient):
             For VASP these are CONTCAR-type files.
             Returns:
                 list of <Structure>: list of pymatgen Structure objects
-            #TTM add atom index
         """
         header = "parent_structure_"
         numim = self.keywords['program_keys']['mast_neb_settings']['images']
         imct = 1
         imstrs=list()
+        #if self.uses_atom_indexing():
+        #    myai = self.create_atom_index_object()
+        #    iname = self.keywords['name']
+        #    manifestep=myai.guess_manifest_from_ingredient_metadata(iname,0) #images always use initial endpoint manifest
         while imct <= numim:
             pfpath=""
             for myfile in os.listdir(self.keywords['name']):
@@ -660,11 +705,24 @@ class ChopIngredient(BaseIngredient):
                 pass
             else:
                 struct_im = self.checker.get_structure_from_file(pfpath)
-                base_struct = self.keywords['structure']
-                neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
-                sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct, name=self.keywords['name'])
-                sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
-                imstrs.append(sorted_im)
+                if self.uses_atom_indexing():
+                    #sname = os.path.join(iname, "scrambledim_%s" % str(imct).zfill(2)) 
+                    #myai.make_temp_manifest_from_scrambled_structure(iname, 
+                    #                    struct_im, sname)
+                    #onestruc = struct_im
+                    #newstruc = myai.unscramble_a_scrambled_structure(iname,
+                    #                onestruc, manifestep, sname)
+                    #imstrs.append(newstruc)
+                    ##Do not use sorting above.
+                    ##Assume parent image has already been properly sorted
+                    newstruc = struct_im.copy()
+                    imstrs.append(newstruc)
+                else:
+                    base_struct = self.keywords['structure']
+                    neblines = self.keywords['program_keys']['mast_neb_settings']['lines']
+                    sxtend = StructureExtensions(struc_work1 = struct_im, struc_init = base_struct, name=self.keywords['name'])
+                    sorted_im = sxtend.sort_structure_and_neb_lines(neblines, str(imct).zfill(2), self.keywords['program_keys']['mast_neb_settings']['images']) 
+                    imstrs.append(sorted_im)
             imct = imct + 1
         if len(imstrs) > 0 and not (len(imstrs) == numim):
             raise MASTError(self.__class__.__name__, "Incomplete number of forwared images found!")
@@ -724,7 +782,6 @@ class ChopIngredient(BaseIngredient):
         self.write_submit_script()
     def write_phonon_multiple(self):
         """Write the multiple phonon files, one for each atom and each direction.
-            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
@@ -761,7 +818,6 @@ class ChopIngredient(BaseIngredient):
 
     def write_phonon_single(self):
         """Write the phonon files to a directory.
-            #TTM add atom index
         """
         self.checker.set_up_program_input()
         self.write_submit_script()
@@ -1062,8 +1118,12 @@ class ChopIngredient(BaseIngredient):
             self.errhandler.keywords['name']=newname
             if imct == 0 or imct > numim:
                 pass
-            elif not self.is_complete():
-                notready = notready + 1
+            else:
+                if self.is_complete():
+                    if 'update_atom_index_for_complete' in dirutil.list_methods(self.checker,0):
+                        self.checker.update_atom_index_for_complete()
+                else:
+                    notready = notready + 1
             imct = imct + 1
         self.keywords['name']=myname
         self.checker.keywords['name']=myname

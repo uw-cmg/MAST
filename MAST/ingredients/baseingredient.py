@@ -260,3 +260,14 @@ class BaseIngredient(MASTObj):
         statusfile.data.append("%s:recommend:%s" % (newstatus, time.asctime()))
         statusfile.to_file(statuspath)
         self.logger.info("Recommending status change to %s" % newstatus)
+
+    def uses_atom_indexing(self):
+        mysi = os.path.join(os.path.dirname(self.keywords['name']),
+                "structure_index_files")
+        if os.path.isdir(mysi):
+            return True
+        return False
+
+    def create_atom_index_object(self):
+        myai = AtomIndex(structure_index_directory=os.path.join(os.path.dirname(self.keywords['name']),'structure_index_files'))
+        return myai
