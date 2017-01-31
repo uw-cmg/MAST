@@ -639,7 +639,7 @@ class AtomIndex(MASTObj):
             newstr.append(elemlist[cct], 
                             coordlist[cct],
                             coords_are_cartesian=False,
-                            validate_proximity=True)
+                            validate_proximity=False)
         return newstr
 
     def get_sd_array(self, ing_label, multiple=False):
