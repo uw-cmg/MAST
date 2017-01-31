@@ -12,13 +12,8 @@ from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from pymatgen.core.structure import Lattice
 from pymatgen.util.coord_utils import find_in_coord_list
-<<<<<<< HEAD
 from pymatgen.io.vasp import Poscar
 from pymatgen.io.vasp import Chgcar
-=======
-from pymatgen.io.vaspio import Poscar
-from pymatgen.io.vaspio import Chgcar
->>>>>>> 4138b87e5a1038eb65023232f80907333d3196f2
 from MAST.utility import MASTObj
 from MAST.utility import MASTError
 from MAST.utility import Metadata
