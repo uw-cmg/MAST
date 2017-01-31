@@ -8,7 +8,7 @@ import MAST
 from MAST.ingredients.checker.vaspchecker import VaspChecker
 import shutil
 import pymatgen
-from pymatgen.io.vasp import Poscar
+from pymatgen.io.vasp import Poscar, Outcar, Potcar, Incar, Kpoints
 import numpy as np
 from MAST.utility import MASTError
 from MAST.utility import dirutil

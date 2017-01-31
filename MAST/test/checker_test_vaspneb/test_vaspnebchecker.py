@@ -7,7 +7,7 @@ import os
 import time
 import MAST
 import pymatgen
-from pymatgen.io.vasp import Poscar
+from pymatgen.io.vasp import Poscar, Incar
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 import shutil

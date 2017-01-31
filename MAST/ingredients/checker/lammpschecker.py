@@ -22,7 +22,7 @@ try:
 except ImportError:
     print "NOTE: ASE is not installed. To use the LAMMPS checker, you must install ASE."
 import random
-from pymatgen.io.aseio import AseAtomsAdaptor
+from pymatgen.io.ase import AseAtomsAdaptor
 from re import compile as re_compile, IGNORECASE
 import decimal as dec
 import shutil

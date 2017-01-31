@@ -7,8 +7,7 @@
 import sys, os
 
 import pymatgen as pmg
-from pymatgen.io.vasp import Vasprun
-from pymatgen.io.smartio import read_structure
+from pymatgen.io.vasp import Vasprun, Poscar
 from MAST.utility import MASTError
 from MAST.utility import MASTFile
 #from MAST.utility import PickleManager
@@ -134,7 +133,7 @@ class DefectFormationEnergy:
         if ('vasprun.xml' in os.listdir(abspath)):
             return Vasprun('%s/vasprun.xml' % abspath).final_structure
         elif ('CONTCAR' in os.listdir(abspath)):
-            return pmg.read_structure('%s/CONTCAR' % abspath)
+            return Poscar.from_file('%s/CONTCAR' % abspath).structure
 
     def get_potential_alignment(self, perf_dir, def_dir):
         """Returns the potential alignment correction used in charge defects"""

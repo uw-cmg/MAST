@@ -13,6 +13,7 @@ from MAST.utility import MASTObj
 from MAST.utility import InputOptions
 from MAST.utility import loggerutils
 from pymatgen.core.structure import Structure
+from pymatgen.core.lattice import Lattice
 from pymatgen.util.coord_utils import find_in_coord_list
 from pymatgen.util.coord_utils import find_in_coord_list_pbc
 from pymatgen.core.sites import PeriodicSite
