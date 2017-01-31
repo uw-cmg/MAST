@@ -4,11 +4,7 @@
 # Maintainer: Tam Mayeshiba
 # Last updated: 2014-04-25
 ##############################################################
-from pymatgen.io.vaspio import Poscar
-from pymatgen.io.vaspio import Outcar
-from pymatgen.io.vaspio import Potcar
-from pymatgen.io.vaspio import Incar
-from pymatgen.io.vaspio import Kpoints
+from pymatgen.io.vasp import Poscar
 from pymatgen.core.structure import Structure
 from MAST.utility import dirutil
 from MAST.utility.mastfile import MASTFile

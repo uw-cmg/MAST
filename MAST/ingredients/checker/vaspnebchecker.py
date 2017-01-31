@@ -5,12 +5,6 @@
 # Last updated: 2014-04-25
 ##############################################################
 from pymatgen.io.vasp import Poscar
-from pymatgen.io.vaspio import Outcar
-from pymatgen.io.vaspio import Potcar
-from pymatgen.io.vaspio import Incar
-from pymatgen.io.vaspio import Kpoints
-from pymatgen.io.vaspio.vasp_output import Vasprun
-from pymatgen.io.cifio import CifParser
 from pymatgen.core.sites import PeriodicSite
 from pymatgen.core.structure import Structure
 from MAST.utility import dirutil
