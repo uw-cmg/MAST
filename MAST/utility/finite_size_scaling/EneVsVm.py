@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-import pymatgen as mg
+import pymatgen
 from pymatgen.analysis import ewald
 from pymatgen.io.vasp import Oszicar, Outcar, Poscar
-
+from pymatgen.core.structure import Structure
 import GenSC
 '''
 class writer :
@@ -31,8 +31,9 @@ def psTotEne(oszicar):
     return TotEne
     
 def CalcV_M(structure):
-    dummyPoscarLatStr = mg.core.structure.Structure(structure.lattice,["F-"],[[0,0,0]])
-    V_M = ewald.EwaldSummation(dummyPoscarLatStr).total_energy*(-2)
+    dummyPoscarLatStr = Structure(structure.lattice,["F-"],[[0,0,0]])
+    V_M_Ewald = ewald.EwaldSummation(dummyPoscarLatStr)
+    V_M = V_M_Ewald.compute_sub_structure(dummyPoscarLatStr)*(-2)
     return V_M
 
 def linearFit(listX,listY):
