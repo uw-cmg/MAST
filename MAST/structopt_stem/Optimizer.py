@@ -27,6 +27,7 @@ class Optimizer():
     logger = None
     
     def __init__(self, input, uselogger=True):
+        raise DeprecationWarning("StructOpt packaged with MAST is now deprecated. Please see https://github.com/uw-cmg/StructOpt_modular instead.")
         if input:
             parameters = inp_out.read_parameter_input(input, uselogger)
         else:
