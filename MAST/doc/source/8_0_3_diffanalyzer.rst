@@ -6,7 +6,7 @@ Acknowledgments to: Amy Bengtson, Saumitra Saha
 
 Computes mean squared displacements and tracer diffusion coefficients from particle position data as a function of time.
 
-`Version 1.13 - published on 28 Mar 2014 <https://materialshub.org/resources/diffanalyzer>`_
+`Version 1.1 - originally published on 28 Mar 2014 <https://nanohub.org/resources/22854>`_
 
 * You must download and unzip the MAST tar.gz file from https://github.com/uw-cmg/MAST/releases in order to access the source code, which is in MAST/standalone/diffanalyzer, and will likely need to be recompiled for your machine. 
 
@@ -51,13 +51,4 @@ Cite this work
 ===============
 Researchers should cite this work as follows::
 
-    Leland Barnard (2014), "Particle Trajectory Diffusion Analysis," https://materialshub.org/resources/diffanalyzer.
-
-    @misc { 31,
-        title = {Particle Trajectory Diffusion Analysis},
-        month = {Feb},
-        url = {https://materialshub.org/resources/31},
-        year = {2014},
-        author = {Barnard , Leland}
-    }
-
+    Leland Barnard, Amy Bengtson, Saumitra Saha, Weixi Ma, Navjeet Sandhu, Henry Wu, and Dane Morgan, "Particle Trajectory Diffusion Analysis Tool," https://nanohub.org/resources/diffanalyzer (2015).

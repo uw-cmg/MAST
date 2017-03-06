@@ -6,9 +6,7 @@ Standalone Tools
 Defect Finder
 **************************
 
-The defect finder takes a POSCAR file and finds vacancies and interstitials.
-The defect finder currently exists in a separate repository.
-You may test it online at materialshub.org > Resources > Tools > Defect Finder
+The defect finder will be available in a separate repository under https://github.com/uw-cmg
 
 *************************************************
 Effective Grain Boundary Diffusivity Calculator
