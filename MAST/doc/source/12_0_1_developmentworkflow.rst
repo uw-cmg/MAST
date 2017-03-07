@@ -270,7 +270,7 @@ Make a new environment as above and source it::
     source activate mast_pypi_test
     pip install --cert ~/anaconda/ssl/cacert.pem MAST
 
-Run unit tests out of ``~/mast_dev``.
+Run unit tests out of ``~/mast_pypi_test``.
 
 Go back to developers if any unit tests fail. Nothing should fail from here, but it might.
 
