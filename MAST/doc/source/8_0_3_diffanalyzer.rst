@@ -2,6 +2,7 @@
 Particle Trajectory Diffusion Analysis
 #########################################
 Author: Leland Barnard
+
 Acknowledgments to: Amy Bengtson, Saumitra Saha
 
 Computes mean squared displacements and tracer diffusion coefficients from particle position data as a function of time.
