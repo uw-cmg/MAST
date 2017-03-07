@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>9. Running MAST for real &#8212; MAST 1.3.2.0 documentation</title>
+    <title>10. Running MAST for real &mdash; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,17 +17,15 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  false
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="10. MAST post-processing utilities" href="6_0_postprocessingtools.html" />
-    <link rel="prev" title="8.10. The Summary section" href="3_1_8_summary.html" /> 
+    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
+    <link rel="next" title="11. MAST post-processing utilities" href="6_0_postprocessingtools.html" />
+    <link rel="prev" title="9.10. The Summary section" href="3_1_8_summary.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,12 +35,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="6_0_postprocessingtools.html" title="10. MAST post-processing utilities"
+          <a href="6_0_postprocessingtools.html" title="11. MAST post-processing utilities"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_8_summary.html" title="8.10. The Summary section"
+          <a href="3_1_8_summary.html" title="9.10. The Summary section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,24 +50,24 @@
           <div class="body" role="main">
             
   <div class="section" id="running-mast-for-real">
-<h1>9. Running MAST for real<a class="headerlink" href="#running-mast-for-real" title="Permalink to this headline">¶</a></h1>
+<h1>10. Running MAST for real<a class="headerlink" href="#running-mast-for-real" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="general-notes">
-<h2>9.1. General notes<a class="headerlink" href="#general-notes" title="Permalink to this headline">¶</a></h2>
+<h2>10.1. General notes<a class="headerlink" href="#general-notes" title="Permalink to this headline">¶</a></h2>
 <p>Depending on your cluster, you might find it necessary to <em>nice</em> your processes:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">nice</span> <span class="o">-</span><span class="n">n</span> <span class="mi">19</span> <span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="nb">input</span><span class="o">.</span><span class="n">inp</span>
-<span class="n">nice</span> <span class="o">-</span><span class="n">n</span> <span class="mi">19</span> <span class="n">mast</span>
+<div class="highlight-python"><div class="highlight"><pre>nice -n 19 mast -i input.inp
+nice -n 19 mast
 </pre></div>
 </div>
 <p>Nice-ing allows the headnode to put its regular functions before the MAST processes. MAST should start running within several seconds.</p>
 </div>
 <div class="section" id="inputting-an-input-file">
-<h2>9.2. Inputting an input file<a class="headerlink" href="#inputting-an-input-file" title="Permalink to this headline">¶</a></h2>
+<h2>10.2. Inputting an input file<a class="headerlink" href="#inputting-an-input-file" title="Permalink to this headline">¶</a></h2>
 <p>To parse an input file, use</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="nb">input</span><span class="o">.</span><span class="n">inp</span>
+<div class="highlight-python"><div class="highlight"><pre>mast -i input.inp
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="o">//</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="nb">input</span><span class="o">/</span><span class="n">file</span><span class="o">/</span><span class="n">myinput</span><span class="o">.</span><span class="n">inp</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="o">//</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="nb">input</span><span class="o">/</span><span class="nb">file</span><span class="o">/</span><span class="n">myinput</span><span class="o">.</span><span class="n">inp</span>
 </pre></div>
 </div>
 <p>If your input file specifies any POSCAR or CIF files:</p>
@@ -81,20 +79,20 @@
 <p>Look at the <code class="docutils literal"><span class="pre">input.inp</span></code>, <code class="docutils literal"><span class="pre">archive_input_options.txt</span></code>, and <code class="docutils literal"><span class="pre">archive_recipe_plan.txt</span></code> files in the recipe directory to see if the setup agrees with what you think it should be.</p>
 </div>
 <div class="section" id="running-mast">
-<h2>9.3. Running MAST<a class="headerlink" href="#running-mast" title="Permalink to this headline">¶</a></h2>
+<h2>10.3. Running MAST<a class="headerlink" href="#running-mast" title="Permalink to this headline">¶</a></h2>
 <p>Running MAST is separate from inputting input files. Use this command:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mast</span>
 </pre></div>
 </div>
 <p>This command will do two things:</p>
 <ol class="arabic simple">
 <li>Submit all ingredient runs listed in the <code class="docutils literal"><span class="pre">$MAST_CONTROL/submitlist</span></code> list to the queue.<ul>
-<li>The submission command (<code class="docutils literal"><span class="pre">sbatch</span></code>, <code class="docutils literal"><span class="pre">qsub</span></code>, etc.) is based on the platform chosen when you set <code class="docutils literal"><span class="pre">$MAST_PLATFORM</span></code>. See <a class="reference internal" href="1_0_installation.html"><span class="doc">Installation</span></a>.</li>
+<li>The submission command (<code class="docutils literal"><span class="pre">sbatch</span></code>, <code class="docutils literal"><span class="pre">qsub</span></code>, etc.) is based on the platform chosen when you set <code class="docutils literal"><span class="pre">$MAST_PLATFORM</span></code>. See <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>.</li>
 <li>The exact commands can be found in your MAST installation path under <code class="docutils literal"><span class="pre">submit/platforms/&lt;platform</span> <span class="pre">name&gt;/queue_commands.py</span></code>.</li>
 </ul>
 </li>
 </ol>
-<p>Individual ingredients&#8217; submission scripts are created automatically through a combination of <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a> in the input file, and your the template submission script for your platform</p>
+<p>Individual ingredients&#8217; submission scripts are created automatically through a combination of <a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a> in the input file, and your the template submission script for your platform</p>
 <blockquote>
 <div><ul class="simple">
 <li>The template submission script is found in your MAST installation path under <code class="docutils literal"><span class="pre">submit/platforms/&lt;platform</span> <span class="pre">name&gt;/submit_template.sh</span></code>).</li>
@@ -110,16 +108,16 @@
 </ul>
 <p>The mastmon process will generate additional entries on <code class="docutils literal"><span class="pre">$MAST_CONTROL/submitlist</span></code>, but these entries will not be submitted to the queue until MAST is called again.</p>
 <div class="section" id="the-mast-monitor">
-<h3>9.3.1. The MAST monitor<a class="headerlink" href="#the-mast-monitor" title="Permalink to this headline">¶</a></h3>
+<h3>10.3.1. The MAST monitor<a class="headerlink" href="#the-mast-monitor" title="Permalink to this headline">¶</a></h3>
 <p>The MAST monitor, or mastmon, process goes through the <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> directory.</p>
 <ul class="simple">
 <li>It looks at the recipe directories under <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code>.</li>
-<li>For each recipe directory, the MAST monitor builds a <a class="reference internal" href="4_0_recipe.html"><span class="doc">Recipes</span></a> plan object from information in the recipe directory, using a combination of the <code class="docutils literal"><span class="pre">input.inp</span></code> and <code class="docutils literal"><span class="pre">status.txt</span></code> files in the recipe directory.</li>
-<li>MAST then uses the recipe plan object to assess the next steps appropriate for the recipe, creating objects for the separate <a class="reference internal" href="2_0_ingredients.html"><span class="doc">Ingredients</span></a> and evaluating them.</li>
+<li>For each recipe directory, the MAST monitor builds a <a class="reference internal" href="4_0_recipe.html"><em>Recipes</em></a> plan object from information in the recipe directory, using a combination of the <code class="docutils literal"><span class="pre">input.inp</span></code> and <code class="docutils literal"><span class="pre">status.txt</span></code> files in the recipe directory.</li>
+<li>MAST then uses the recipe plan object to assess the next steps appropriate for the recipe, creating objects for the separate <a class="reference internal" href="2_0_ingredients.html"><em>Ingredients</em></a> and evaluating them.</li>
 </ul>
 </div>
 <div class="section" id="troubleshooting-in-a-recipe-directory">
-<h3>9.3.2. Troubleshooting in a recipe directory<a class="headerlink" href="#troubleshooting-in-a-recipe-directory" title="Permalink to this headline">¶</a></h3>
+<h3>10.3.2. Troubleshooting in a recipe directory<a class="headerlink" href="#troubleshooting-in-a-recipe-directory" title="Permalink to this headline">¶</a></h3>
 <p>For human troubleshooting of a recipe, the <code class="docutils literal"><span class="pre">archive_recipe_plan.txt</span></code> file gives information about which ingredients are parents/children of which other ingredients, and which method each parent should use to update each of its child ingredients.</p>
 <p>The <code class="docutils literal"><span class="pre">status.txt</span></code> files gives the status of each ingredient.</p>
 <p>Ingredient statuses are:</p>
@@ -156,7 +154,7 @@
 </ul>
 <p>When all ingredients in a recipe are complete, the entire recipe folder is moved from <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> to <code class="docutils literal"><span class="pre">$MAST_ARCHIVE</span></code></p>
 <div class="section" id="errors-in-a-recipe-directory">
-<h4>9.3.2.1. Errors in a recipe directory<a class="headerlink" href="#errors-in-a-recipe-directory" title="Permalink to this headline">¶</a></h4>
+<h4>10.3.2.1. Errors in a recipe directory<a class="headerlink" href="#errors-in-a-recipe-directory" title="Permalink to this headline">¶</a></h4>
 <p>Errors in a recipe which cause the recipe to fail out completely are logged to a <code class="docutils literal"><span class="pre">MAST_ERROR</span></code> file.</p>
 <p>These errors will need to be addressed manually. Until then, MAST will skip over the recipe directory and log a warning to the mast.log file.</p>
 <p>Once the error has been addressed, delete the <code class="docutils literal"><span class="pre">MAST_ERROR</span></code> file, and the recipe should be picked up on the next <code class="docutils literal"><span class="pre">mast</span></code> command.</p>
@@ -165,7 +163,7 @@
 </div>
 </div>
 <div class="section" id="the-control-folder">
-<h3>9.3.3. The CONTROL folder<a class="headerlink" href="#the-control-folder" title="Permalink to this headline">¶</a></h3>
+<h3>10.3.3. The CONTROL folder<a class="headerlink" href="#the-control-folder" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal"><span class="pre">$MAST_CONTROL</span></code> folder houses several files:</p>
 <ul class="simple">
 <li>errormast: Contains any queue errors from running the MAST monitor on the queue</li>
@@ -178,13 +176,13 @@
 <p>The <code class="docutils literal"><span class="pre">errormast</span></code> file is written when there is an error, and will need to be deleted for MAST to continue running.</p>
 </div>
 <div class="section" id="the-scratch-folder">
-<h3>9.3.4. The SCRATCH folder<a class="headerlink" href="#the-scratch-folder" title="Permalink to this headline">¶</a></h3>
+<h3>10.3.4. The SCRATCH folder<a class="headerlink" href="#the-scratch-folder" title="Permalink to this headline">¶</a></h3>
 <p>The <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> folder houses all recipe folders. It also houses a <code class="docutils literal"><span class="pre">mast.write_files.lock</span></code> file while the MAST monitor is running, in order to prevent several versions of MAST from running at once and simultaneously checking and writing ingredients.</p>
 <ul class="simple">
 <li>Occasionally, MAST may report that it is locked. If there is no <em>mastmon</em> process running or queued on the queue, you may delete the <code class="docutils literal"><span class="pre">mast.write_files.lock</span></code> file manually.</li>
 </ul>
 <div class="section" id="skipping-recipes-or-ingredients-in-the-scratch-folder">
-<h4>9.3.4.1. Skipping recipes or ingredients in the SCRATCH folder<a class="headerlink" href="#skipping-recipes-or-ingredients-in-the-scratch-folder" title="Permalink to this headline">¶</a></h4>
+<h4>10.3.4.1. Skipping recipes or ingredients in the SCRATCH folder<a class="headerlink" href="#skipping-recipes-or-ingredients-in-the-scratch-folder" title="Permalink to this headline">¶</a></h4>
 <p>If a certain recipe has some sort of flaw, or if you want to stop tracking it halfway through, you may have MAST skip over this recipe:</p>
 <ul class="simple">
 <li>Create an empty (or not, the contents do not matter) file named <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> in the recipe directory.</li>
@@ -207,12 +205,12 @@
 </div>
 </div>
 <div class="section" id="the-archive-folder">
-<h3>9.3.5. The ARCHIVE folder<a class="headerlink" href="#the-archive-folder" title="Permalink to this headline">¶</a></h3>
+<h3>10.3.5. The ARCHIVE folder<a class="headerlink" href="#the-archive-folder" title="Permalink to this headline">¶</a></h3>
 <p>When all ingredients in a recipe are complete, the entire recipe directory is moved from <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> to <code class="docutils literal"><span class="pre">$MAST_ARCHIVE</span></code>.</p>
 </div>
 </div>
 <div class="section" id="running-mast-repeatedly">
-<h2>9.4. Running MAST repeatedly<a class="headerlink" href="#running-mast-repeatedly" title="Permalink to this headline">¶</a></h2>
+<h2>10.4. Running MAST repeatedly<a class="headerlink" href="#running-mast-repeatedly" title="Permalink to this headline">¶</a></h2>
 <p>The command <code class="docutils literal"><span class="pre">mast</span></code> needs to be run repeatedly in order to move the status of the recipe forward. In order to run mast automatically, use a crontab.</p>
 <p>Important notes:</p>
 <ul class="simple">
@@ -227,16 +225,16 @@
 <li><code class="docutils literal"><span class="pre">crontab</span> <span class="pre">-r</span></code> to remove your crontab</li>
 </ul>
 <p>This crontab line will run mast every hour at minute 15, and is usually suitable for everyday use:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>15 * * * * . $HOME/.bashrc; nice -n 19 mast
+<div class="highlight-python"><div class="highlight"><pre>15 * * * * . $HOME/.bashrc; nice -n 19 mast
 </pre></div>
 </div>
 <p>This crontab line will run mast every 15 minutes and is ONLY suitable for short testing:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>*/15 * * * * . $HOME/.bashrc; nice -n 19 mast
+<div class="highlight-python"><div class="highlight"><pre>*/15 * * * * . $HOME/.bashrc; nice -n 19 mast
 </pre></div>
 </div>
 </div>
 <div class="section" id="modifying-recipes">
-<h2>9.5. Modifying recipes<a class="headerlink" href="#modifying-recipes" title="Permalink to this headline">¶</a></h2>
+<h2>10.5. Modifying recipes<a class="headerlink" href="#modifying-recipes" title="Permalink to this headline">¶</a></h2>
 <p>Occasionally it is convenient to add additional ingredients onto an existent, completed or nearly-completed recipe.</p>
 <p>For example, it may be helpful to add an additional charge state, or calculate phonons, make additional defects on a relaxed structure, or calculate additional NEBs.</p>
 <p>The MAST &#8220;modify recipe&#8221; functionality allows new ingredient branches to be added onto an existing recipe in an existing recipe directory.</p>
@@ -256,7 +254,7 @@
 </ul>
 <p>These steps may be accomplished over multiple recipes using a shell script, but with caution.</p>
 <div class="section" id="example">
-<h3>9.5.1. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<h3>10.5.1. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
 <p>My charged supercell isn&#8217;t charged! What happened?</p>
 <p>My input file had charge=2,2 in the $defects section, but it did not have the charge tag &lt;Q&gt; in the $recipe section</p>
 <p>The metadata.txt file wasn&#8217;t getting written correctly, and the checker wasn&#8217;t looking for a charge label, either.</p>
@@ -267,7 +265,7 @@
 Now mast will rerun a new arm of charged supercell calculations.</p>
 </div>
 <div class="section" id="caveats">
-<h3>9.5.2. Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h3>
+<h3>10.5.2. Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h3>
 <ul>
 <li><p class="first">If ingredient names in the $recipe section are changed, some data may need to be moved around (see the example above).</p>
 </li>
@@ -283,16 +281,7 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
 </div></blockquote>
 </li>
 </ul>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-54660326-1', 'auto');
-  ga('send', 'pageview');
-
-</script></div>
+</div>
 </div>
 </div>
 
@@ -307,27 +296,27 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">9. Running MAST for real</a><ul>
-<li><a class="reference internal" href="#general-notes">9.1. General notes</a></li>
-<li><a class="reference internal" href="#inputting-an-input-file">9.2. Inputting an input file</a></li>
-<li><a class="reference internal" href="#running-mast">9.3. Running MAST</a><ul>
-<li><a class="reference internal" href="#the-mast-monitor">9.3.1. The MAST monitor</a></li>
-<li><a class="reference internal" href="#troubleshooting-in-a-recipe-directory">9.3.2. Troubleshooting in a recipe directory</a><ul>
-<li><a class="reference internal" href="#errors-in-a-recipe-directory">9.3.2.1. Errors in a recipe directory</a></li>
+<li><a class="reference internal" href="#">10. Running MAST for real</a><ul>
+<li><a class="reference internal" href="#general-notes">10.1. General notes</a></li>
+<li><a class="reference internal" href="#inputting-an-input-file">10.2. Inputting an input file</a></li>
+<li><a class="reference internal" href="#running-mast">10.3. Running MAST</a><ul>
+<li><a class="reference internal" href="#the-mast-monitor">10.3.1. The MAST monitor</a></li>
+<li><a class="reference internal" href="#troubleshooting-in-a-recipe-directory">10.3.2. Troubleshooting in a recipe directory</a><ul>
+<li><a class="reference internal" href="#errors-in-a-recipe-directory">10.3.2.1. Errors in a recipe directory</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#the-control-folder">9.3.3. The CONTROL folder</a></li>
-<li><a class="reference internal" href="#the-scratch-folder">9.3.4. The SCRATCH folder</a><ul>
-<li><a class="reference internal" href="#skipping-recipes-or-ingredients-in-the-scratch-folder">9.3.4.1. Skipping recipes or ingredients in the SCRATCH folder</a></li>
+<li><a class="reference internal" href="#the-control-folder">10.3.3. The CONTROL folder</a></li>
+<li><a class="reference internal" href="#the-scratch-folder">10.3.4. The SCRATCH folder</a><ul>
+<li><a class="reference internal" href="#skipping-recipes-or-ingredients-in-the-scratch-folder">10.3.4.1. Skipping recipes or ingredients in the SCRATCH folder</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#the-archive-folder">9.3.5. The ARCHIVE folder</a></li>
+<li><a class="reference internal" href="#the-archive-folder">10.3.5. The ARCHIVE folder</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#running-mast-repeatedly">9.4. Running MAST repeatedly</a></li>
-<li><a class="reference internal" href="#modifying-recipes">9.5. Modifying recipes</a><ul>
-<li><a class="reference internal" href="#example">9.5.1. Example</a></li>
-<li><a class="reference internal" href="#caveats">9.5.2. Caveats</a></li>
+<li><a class="reference internal" href="#running-mast-repeatedly">10.4. Running MAST repeatedly</a></li>
+<li><a class="reference internal" href="#modifying-recipes">10.5. Modifying recipes</a><ul>
+<li><a class="reference internal" href="#example">10.5.1. Example</a></li>
+<li><a class="reference internal" href="#caveats">10.5.2. Caveats</a></li>
 </ul>
 </li>
 </ul>
@@ -336,18 +325,21 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="3_1_8_summary.html"
-                        title="previous chapter">8.10. The Summary section</a></p>
+                        title="previous chapter">9.10. The Summary section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="6_0_postprocessingtools.html"
-                        title="next chapter">10. MAST post-processing utilities</a></p>
+                        title="next chapter">11. MAST post-processing utilities</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -361,17 +353,17 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="6_0_postprocessingtools.html" title="10. MAST post-processing utilities"
+          <a href="6_0_postprocessingtools.html" title="11. MAST post-processing utilities"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_8_summary.html" title="8.10. The Summary section"
+          <a href="3_1_8_summary.html" title="9.10. The Summary section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

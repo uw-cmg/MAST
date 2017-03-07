@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>8.8. The NEB section &#8212; MAST 1.3.2.0 documentation</title>
+    <title>9.8. The NEB section &mdash; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,17 +17,16 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  false
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="8.9. The Chemical Potentials section" href="3_1_7_chemicalpotentials.html" />
-    <link rel="prev" title="8.7. The Defects section" href="3_1_5_defects.html" /> 
+    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
+    <link rel="up" title="9. Sections of the Input File" href="3_1_inputsections.html" />
+    <link rel="next" title="9.9. The Chemical Potentials section" href="3_1_7_chemicalpotentials.html" />
+    <link rel="prev" title="9.7. The Defects section" href="3_1_5_defects.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,13 +36,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_1_7_chemicalpotentials.html" title="8.9. The Chemical Potentials section"
+          <a href="3_1_7_chemicalpotentials.html" title="9.9. The Chemical Potentials section"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_5_defects.html" title="8.7. The Defects section"
+          <a href="3_1_5_defects.html" title="9.7. The Defects section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,20 +52,20 @@
           <div class="body" role="main">
             
   <div class="section" id="the-neb-section">
-<h1>8.8. The NEB section<a class="headerlink" href="#the-neb-section" title="Permalink to this headline">¶</a></h1>
+<h1>9.8. The NEB section<a class="headerlink" href="#the-neb-section" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal"><span class="pre">$neb</span></code> section includes a subsection for each nudged-elastic-band hops.</p>
 <ul>
 <li><p class="first">Each neb hop should be a subsection labeled with a name composed of a starting and ending defect group, connected with a dash, like <code class="docutils literal"><span class="pre">vac1-vac2</span></code>.</p>
 <blockquote>
 <div><ul class="simple">
-<li>These labels should correspond exactly to the labels given in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a>.</li>
+<li>These labels should correspond exactly to the labels given in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</li>
 </ul>
 </div></blockquote>
 </li>
 <li><p class="first">The subsection should also include the movement of each primary moving atom, including:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The atom&#8217;s element symbol: if an <code class="docutils literal"><span class="pre">elementmap</span></code> subsection is given in <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a>, then the mapped designations <code class="docutils literal"><span class="pre">X1</span></code>, <code class="docutils literal"><span class="pre">X2</span></code>, and so on can be given instead of an element symbol.</li>
+<li>The atom&#8217;s element symbol: if an <code class="docutils literal"><span class="pre">elementmap</span></code> subsection is given in <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>, then the mapped designations <code class="docutils literal"><span class="pre">X1</span></code>, <code class="docutils literal"><span class="pre">X2</span></code>, and so on can be given instead of an element symbol.</li>
 <li>The starting and ending .defect group. as specified in the <code class="docutils literal"><span class="pre">$defects</span></code> section, and then also indicate the movement of elements, and their closest starting and ending positions. These explicit positions disambiguate between possible interpolations.</li>
 <li>The <code class="docutils literal"><span class="pre">images</span></code> keyword, which specifies the number of intermediate images.</li>
 </ul>
@@ -75,21 +74,21 @@
 </ul>
 <p>Again, the <code class="docutils literal"><span class="pre">$neb</span></code> section is tied to specific defect labels. The NEB ingredients must be able to find defects or defect groups with those labels.</p>
 <div class="section" id="charges-for-nebs">
-<h2>8.8.1. Charges for NEBs<a class="headerlink" href="#charges-for-nebs" title="Permalink to this headline">¶</a></h2>
-<p>To enable charged-supercell NEBs, use &lt;Q&gt; tags for the defect and NEB ingredients in <a class="reference internal" href="3_1_3_recipe.html"><span class="doc">The Recipe section</span></a> and also specify charges for the defects in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a>.</p>
+<h2>9.8.1. Charges for NEBs<a class="headerlink" href="#charges-for-nebs" title="Permalink to this headline">¶</a></h2>
+<p>To enable charged-supercell NEBs, use &lt;Q&gt; tags for the defect and NEB ingredients in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a> and also specify charges for the defects in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</p>
 <p>The NEB ingredients will only be run for charges in the charge ranges of both parent endpoints.</p>
 <p>For example, if defect parent vac1 has a charge range of charge=-2,0 and defect parent vac2 has a charge range of charge=-1,3, then the NEB with the label vac1-vac2 will only run with supercell charges -1 and 0.</p>
 </div>
 <div class="section" id="phonons-for-nebs">
-<h2>8.8.2. Phonons for NEBs<a class="headerlink" href="#phonons-for-nebs" title="Permalink to this headline">¶</a></h2>
-<p>Phonons may be specified within each NEB grouping, as in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a>.</p>
+<h2>9.8.2. Phonons for NEBs<a class="headerlink" href="#phonons-for-nebs" title="Permalink to this headline">¶</a></h2>
+<p>Phonons may be specified within each NEB grouping, as in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</p>
 <p>The presumed saddle point in an NEB is usually taken.</p>
 <ul class="simple">
-<li>To give the saddle point structure to the phonon calculation, in <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a>, use <code class="docutils literal"><span class="pre">mast_update_children</span> <span class="pre">give_saddle_structure</span></code> for the NEB ingredient type of the NEB parent to the phonon calculation.</li>
+<li>To give the saddle point structure to the phonon calculation, in <a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a>, use <code class="docutils literal"><span class="pre">mast_update_children</span> <span class="pre">give_saddle_structure</span></code> for the NEB ingredient type of the NEB parent to the phonon calculation.</li>
 <li>If the frequencies of a moving atom are desired for the phonon calculations, and if that atom is anticipated to pass from fractional coordinate 0 0 0 to fractional coordinate 0.5 0 0, then the phonon_center_site should be 0.25 0 0 (assuming a straight path), and the phonon_center_radius is probably about 1 Angstrom.</li>
 </ul>
 <p>Example defect and NEB section together:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$defects
+<div class="highlight-python"><div class="highlight"><pre>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -117,16 +116,7 @@ end
 $end
 </pre></div>
 </div>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-54660326-1', 'auto');
-  ga('send', 'pageview');
-
-</script></div>
+</div>
 </div>
 
 
@@ -140,27 +130,30 @@ $end
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">8.8. The NEB section</a><ul>
-<li><a class="reference internal" href="#charges-for-nebs">8.8.1. Charges for NEBs</a></li>
-<li><a class="reference internal" href="#phonons-for-nebs">8.8.2. Phonons for NEBs</a></li>
+<li><a class="reference internal" href="#">9.8. The NEB section</a><ul>
+<li><a class="reference internal" href="#charges-for-nebs">9.8.1. Charges for NEBs</a></li>
+<li><a class="reference internal" href="#phonons-for-nebs">9.8.2. Phonons for NEBs</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="3_1_5_defects.html"
-                        title="previous chapter">8.7. The Defects section</a></p>
+                        title="previous chapter">9.7. The Defects section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_1_7_chemicalpotentials.html"
-                        title="next chapter">8.9. The Chemical Potentials section</a></p>
+                        title="next chapter">9.9. The Chemical Potentials section</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -174,18 +167,18 @@ $end
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_1_7_chemicalpotentials.html" title="8.9. The Chemical Potentials section"
+          <a href="3_1_7_chemicalpotentials.html" title="9.9. The Chemical Potentials section"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_5_defects.html" title="8.7. The Defects section"
+          <a href="3_1_5_defects.html" title="9.7. The Defects section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

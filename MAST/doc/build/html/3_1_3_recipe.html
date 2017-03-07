@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>8.5. The Recipe section &#8212; MAST 1.3.2.0 documentation</title>
+    <title>9.5. The Recipe section &mdash; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,17 +17,16 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  false
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="8.6. The Personal Recipe section" href="3_1_4_personalrecipe.html" />
-    <link rel="prev" title="8.4. The Ingredients section" href="3_1_2_ingredients.html" /> 
+    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
+    <link rel="up" title="9. Sections of the Input File" href="3_1_inputsections.html" />
+    <link rel="next" title="9.6. The Personal Recipe section" href="3_1_4_personalrecipe.html" />
+    <link rel="prev" title="9.4. The Ingredients section" href="3_1_2_ingredients.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,13 +36,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
+          <a href="3_1_4_personalrecipe.html" title="9.6. The Personal Recipe section"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_2_ingredients.html" title="8.4. The Ingredients section"
+          <a href="3_1_2_ingredients.html" title="9.4. The Ingredients section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,17 +52,17 @@
           <div class="body" role="main">
             
   <div class="section" id="the-recipe-section">
-<h1>8.5. The Recipe section<a class="headerlink" href="#the-recipe-section" title="Permalink to this headline">¶</a></h1>
+<h1>9.5. The Recipe section<a class="headerlink" href="#the-recipe-section" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal"><span class="pre">$recipe</span></code> section of the input file contains information about how the ingredients are related to each other.</p>
 <ul class="simple">
 <li>This information complements the <code class="docutils literal"><span class="pre">mast_update_children_method</span></code> keyword given for each ingredient.</li>
 </ul>
 <p>An ingredient in the recipe is referred to by:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>&lt;ingredient name&gt; (ingredient type in $ingredients section)
+<div class="highlight-python"><div class="highlight"><pre>&lt;ingredient name&gt; (ingredient type in $ingredients section)
 </pre></div>
 </div>
 <p>For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">lowmesh_relaxation</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">lowmesh_relaxation</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If no ingredient type is given, then only settings from the ingredients_global ingredient type of the input file will be used.</p>
@@ -75,12 +74,12 @@
 <li><p class="first">In most complex workflows, however, tags may be used as shortcuts to ingredient names. These tags will be filled in from information in the input file.</p>
 <blockquote>
 <div><ul class="simple">
-<li><strong>&lt;S&gt;</strong>: The <code class="docutils literal"><span class="pre">scaling</span></code> subsection of <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a></li>
-<li><strong>&lt;N&gt;</strong>: <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a></li>
-<li><strong>&lt;Q&gt;</strong>: The <code class="docutils literal"><span class="pre">charge</span></code> keyword in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a></li>
-<li><strong>&lt;P&gt;</strong>: The <code class="docutils literal"><span class="pre">phonon</span></code> keyword in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a> and <cite>3_1_6_neb</cite></li>
-<li><strong>&lt;B&gt;, &lt;E&gt;, &lt;B-E&gt;</strong>: <a class="reference internal" href="3_1_6_neb.html"><span class="doc">The NEB section</span></a></li>
-<li>The filled-in tags will be evident in <a class="reference internal" href="3_1_4_personalrecipe.html"><span class="doc">The Personal Recipe section</span></a> of the <code class="docutils literal"><span class="pre">input.inp</span></code> file in the recipe directory, once MAST has read the input file and set up the recipe directory.</li>
+<li><strong>&lt;S&gt;</strong>: The <code class="docutils literal"><span class="pre">scaling</span></code> subsection of <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a></li>
+<li><strong>&lt;N&gt;</strong>: <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a></li>
+<li><strong>&lt;Q&gt;</strong>: The <code class="docutils literal"><span class="pre">charge</span></code> keyword in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a></li>
+<li><strong>&lt;P&gt;</strong>: The <code class="docutils literal"><span class="pre">phonon</span></code> keyword in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a> and <cite>3_1_6_neb</cite></li>
+<li><strong>&lt;B&gt;, &lt;E&gt;, &lt;B-E&gt;</strong>: <a class="reference internal" href="3_1_6_neb.html"><em>The NEB section</em></a></li>
+<li>The filled-in tags will be evident in <a class="reference internal" href="3_1_4_personalrecipe.html"><em>The Personal Recipe section</em></a> of the <code class="docutils literal"><span class="pre">input.inp</span></code> file in the recipe directory, once MAST has read the input file and set up the recipe directory.</li>
 </ul>
 </div></blockquote>
 </li>
@@ -92,7 +91,7 @@
 <li><p class="first">Inducing defects must use an <code class="docutils literal"><span class="pre">inducedefect_&lt;N&gt;</span></code> or <code class="docutils literal"><span class="pre">inducedefect_&lt;S&gt;_&lt;N&gt;</span></code> ingredient.</p>
 </li>
 <li><p class="first">Defects must start with <code class="docutils literal"><span class="pre">defect</span></code>, and if tags are used, they must follow the order &lt;S&gt;, &lt;N, B, or E&gt;, &lt;Q&gt;, depending on which tags are used.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">defect_</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">_arbitrarysuffix</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">defect_</span><span class="o">&lt;</span><span class="n">S</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">_arbitrarysuffix</span>
 </pre></div>
 </div>
 </li>
@@ -108,26 +107,26 @@
 <p><strong>Important: when creating or editing recipes, do not use the Tab key. Instead, use 4 spaces to indent.</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li>See <a class="reference internal" href="1_0_installation.html"><span class="doc">Installation</span></a> for setting up text editors.</li>
+<li>See <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a> for setting up text editors.</li>
 <li>Also make sure that the recipe you are working with has not somehow been converted to tabs.</li>
 </ul>
 </div></blockquote>
 <div class="section" id="syntax">
-<h2>8.5.1. Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<h2>9.5.1. Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>Each indentation level marks a parent-child relationship.:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">volrelax_lowmesh</span><span class="p">)</span>
-    <span class="n">perfect_opt2</span>
-        <span class="n">perfect_opt3</span>
+<div class="highlight-python"><div class="highlight"><pre>perfect_opt1 (volrelax_lowmesh)
+    perfect_opt2
+        perfect_opt3
 </pre></div>
 </div>
 <p>The ingredient type of an ingredient is specified in parentheses after the ingredient.</p>
-<p>The ingredient type should correspond to ingredient subsections within <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a>. If no ingredient type is specified, the ingredient gets all default values from the ingredients_global subsection.</p>
+<p>The ingredient type should correspond to ingredient subsections within <a class="reference internal" href="3_1_2_ingredients.html"><em>The Ingredients section</em></a>. If no ingredient type is specified, the ingredient gets all default values from the ingredients_global subsection.</p>
 <p>In the recipe:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">volrelax_lowmesh</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">perfect_opt1</span> <span class="p">(</span><span class="n">volrelax_lowmesh</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In the input file:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ingredients
+<div class="highlight-python"><div class="highlight"><pre>$ingredients
 
 begin volrelax_lowmesh
 mast_run_method run_singlerun
@@ -138,10 +137,10 @@ $end
 </pre></div>
 </div>
 <p>If the parent needs to update several children in different ways, create new trees where the originating parent is the same parent name, but with a different ingredient type:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">perfect_stat</span> <span class="p">(</span><span class="n">stat_to_defect</span><span class="p">)</span>
-    <span class="n">defect_opt</span>
-<span class="n">perfect_stat</span> <span class="p">(</span><span class="n">stat_to_phonon</span><span class="p">)</span>
-    <span class="n">phonon_opt1</span>
+<div class="highlight-python"><div class="highlight"><pre>perfect_stat (stat_to_defect)
+    defect_opt
+perfect_stat (stat_to_phonon)
+    phonon_opt1
 </pre></div>
 </div>
 <ul class="simple">
@@ -149,11 +148,11 @@ $end
 <li>They should have all the same other keywords.</li>
 </ul>
 <p>If two children need to be the parent of one ingredient, also create a new tree:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">perfect_stat</span>
-    <span class="n">defect_1_opt</span>
-    <span class="n">defect_2_opt</span>
-<span class="n">defect_1_opt</span><span class="p">,</span> <span class="n">defect_2_opt</span>
-    <span class="n">neb_1</span><span class="o">-</span><span class="mi">2</span><span class="n">_opt</span>
+<div class="highlight-python"><div class="highlight"><pre>perfect_stat
+    defect_1_opt
+    defect_2_opt
+defect_1_opt, defect_2_opt
+    neb_1-2_opt
 </pre></div>
 </div>
 <p>Parent-child relationships are name-based, and the name must also include correct formats for size-scaling labels &lt;S&gt;, defect labels &lt;N, B, or E&gt;, neb labels &lt;B-E&gt;, charge labels &lt;Q&gt;, and phonon labels &lt;P&gt;.</p>
@@ -163,26 +162,26 @@ $end
 <li>Some post-processing utilities may also rely on folder names.</li>
 </ul>
 <p><strong>The &lt;S&gt; tag</strong>
-The &lt;S&gt; tag will correspond to labels in the <code class="docutils literal"><span class="pre">scaling</span></code> subsection of <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a>.</p>
+The &lt;S&gt; tag will correspond to labels in the <code class="docutils literal"><span class="pre">scaling</span></code> subsection of <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>.</p>
 <p><strong>The &lt;N&gt;, &lt;B&gt;, &lt;E&gt;, and &lt;B-E&gt; tags</strong>
-For defects, the &lt;N&gt; tag will correspond to labels in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a>.</p>
+For defects, the &lt;N&gt; tag will correspond to labels in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</p>
 <p>The same labels will be matched up and should be used as &lt;B&gt; and &lt;E&gt; labels (beginning and ending states) to correspond with NEBs, which are labeled &lt;B-E&gt;.</p>
-<p>The NEB labels will correspond to labels in <a class="reference internal" href="3_1_6_neb.html"><span class="doc">The NEB section</span></a></p>
+<p>The NEB labels will correspond to labels in <a class="reference internal" href="3_1_6_neb.html"><em>The NEB section</em></a></p>
 <p>NEB label names must match up exactly with defect label names. For example, defect_vac1 and defect_vac2 must match up with neb_vac1-vac2.</p>
 <p>Use &lt;N&gt; in a recipe unless specifying that a defect is a parent of an NEB, in which case use &lt;B&gt; or &lt;E&gt;:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">begin</span><span class="p">}</span>
-<span class="n">defect_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_opt1</span> <span class="p">(</span><span class="n">relax</span><span class="p">)</span>
-    <span class="n">defect_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static</span><span class="p">)</span>
-<span class="p">{</span><span class="n">end</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre>{begin}
+defect_&lt;N&gt;_opt1 (relax)
+    defect_&lt;N&gt;_stat (static)
+{end}
 
-<span class="p">{</span><span class="n">begin</span><span class="p">}</span>
-<span class="n">defect_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static_to_neb</span><span class="p">),</span> <span class="n">defect_</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static_to_neb</span><span class="p">)</span>
-    <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_opt1</span> <span class="p">(</span><span class="n">neb</span><span class="p">)</span>
-<span class="p">{</span><span class="n">end</span><span class="p">}</span>
+{begin}
+defect_&lt;B&gt;_stat (static_to_neb), defect_&lt;E&gt;_stat (static_to_neb)
+    neb_&lt;B-E&gt;_opt1 (neb)
+{end}
 </pre></div>
 </div>
 <p><strong>The &lt;Q&gt; tag</strong>
-The &lt;Q&gt; tag will correspond to charges given in <a class="reference internal" href="3_1_5_defects.html"><span class="doc">The Defects section</span></a>.</p>
+The &lt;Q&gt; tag will correspond to charges given in <a class="reference internal" href="3_1_5_defects.html"><em>The Defects section</em></a>.</p>
 <ul>
 <li><p class="first">Charges are given as</p>
 <blockquote>
@@ -202,20 +201,20 @@ The &lt;Q&gt; tag will correspond to charges given in <a class="reference intern
 <li><p class="first">Use a new {begin} and {end} when you have a new tree branch or unindentation in the recipe that switches between &lt;N&gt; and &lt;B&gt; or &lt;E&gt;</p>
 </li>
 <li><p class="first">Note that defect endpoints need to be the parents of all NEB optimizations and NEB static calculations. Therefore, the endpoint-neb parent-child block may look like the following:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">begin</span><span class="p">}</span>
-<span class="n">defect_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static_to_neb</span><span class="p">),</span> <span class="n">defect_</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static_to_neb</span><span class="p">)</span>
-    <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_opt1</span> <span class="p">(</span><span class="n">neb</span><span class="p">)</span>
-        <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_opt2</span> <span class="p">(</span><span class="n">neb</span><span class="p">)</span>
-            <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">neb_static</span><span class="p">)</span>
-    <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_opt2</span> <span class="p">(</span><span class="n">neb</span><span class="p">)</span>
-    <span class="n">neb_</span><span class="o">&lt;</span><span class="n">B</span><span class="o">-</span><span class="n">E</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">neb_static</span><span class="p">)</span>
-<span class="p">{</span><span class="n">end</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre>{begin}
+defect_&lt;B&gt;_stat (static_to_neb), defect_&lt;E&gt;_stat (static_to_neb)
+    neb_&lt;B-E&gt;_opt1 (neb)
+        neb_&lt;B-E&gt;_opt2 (neb)
+            neb_&lt;B-E&gt;_stat (neb_static)
+    neb_&lt;B-E&gt;_opt2 (neb)
+    neb_&lt;B-E&gt;_stat (neb_static)
+{end}
 </pre></div>
 </div>
 </li>
 </ul>
 <p>Full example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$recipe
+<div class="highlight-python"><div class="highlight"><pre>$recipe
 perfect_opt1 (lowmesh)
     perfect_opt2
         perfect_stat (static)
@@ -245,16 +244,7 @@ neb_&lt;S&gt;_&lt;B-E&gt;_&lt;Q&gt;_stat (nebstat_to_phonon)
 $end
 </pre></div>
 </div>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-54660326-1', 'auto');
-  ga('send', 'pageview');
-
-</script></div>
+</div>
 </div>
 
 
@@ -268,26 +258,29 @@ $end
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">8.5. The Recipe section</a><ul>
-<li><a class="reference internal" href="#syntax">8.5.1. Syntax</a></li>
+<li><a class="reference internal" href="#">9.5. The Recipe section</a><ul>
+<li><a class="reference internal" href="#syntax">9.5.1. Syntax</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="3_1_2_ingredients.html"
-                        title="previous chapter">8.4. The Ingredients section</a></p>
+                        title="previous chapter">9.4. The Ingredients section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_1_4_personalrecipe.html"
-                        title="next chapter">8.6. The Personal Recipe section</a></p>
+                        title="next chapter">9.6. The Personal Recipe section</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -301,18 +294,18 @@ $end
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
+          <a href="3_1_4_personalrecipe.html" title="9.6. The Personal Recipe section"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_2_ingredients.html" title="8.4. The Ingredients section"
+          <a href="3_1_2_ingredients.html" title="9.4. The Ingredients section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >9. Sections of the Input File</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
