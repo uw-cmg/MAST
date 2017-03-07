@@ -114,12 +114,6 @@ If pymatgen cannot be installed because gcc cannot be found in order to compile 
 
 If you need additional standalone tools (see :doc:`8_0_standalonetools`) or unit tests, then also get and unzip the MAST tar.gz file (see :doc:`12_0_programming`).
 
---------------------------------------------
-Install additional dependencies
---------------------------------------------
-
-*  Do a quick installation of ASE following the instructions on the `ASE website <https://wiki.fysik.dtu.dk/ase/download.html>`_ 
-
 
 .. _vasp-psp-dir:
 
