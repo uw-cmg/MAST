@@ -4,7 +4,7 @@
 StructOpt
 ***************************
 
-ATTENTION: StructOpt has been moved to its own repository. Please see http://github.com/uw-cmg/StructOpt_modular and contact its developers for more information.
+ATTENTION: StructOpt is being moved to its own repository for further improvement. Please see http://github.com/uw-cmg/StructOpt_modular and contact its developers for more information. (2017-03-07)
 
 Author: Amy Kaczmarowski
 
