@@ -15,6 +15,8 @@ None.
 
 * StructOpt packaged with MAST is now deprecated. Please see the code base maintained at `StructOpt_modular <https://github.com/uw-cmg/StructOpt_modular>`_ and/or contact its developers for assistance.
 
+Users with old workflows combining StructOpt and MAST should use version 1.3.4.
+
 **Changes for programmers:**
 
 None.
