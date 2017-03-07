@@ -66,3 +66,17 @@ To check the validity of the MAST source code, navigate to ``<MAST installation 
 
 Some tests may have been designated to be skipped.
 Errors should be reported to the MAST development team as an issue on the github site (see :doc:`Programming for MAST <12_0_programming>`).
+
+.. raw:: html
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-54660326-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+

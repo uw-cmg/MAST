@@ -273,3 +273,17 @@ Caveats
     * Each ingredient, whether previously completed or not, gets its state re-evaluated when MAST is called (using the normal ``mast`` command). 
     * This procedure may require several ``mast`` calls until the recipe is caught up again.
     * This procedure is necessary in order to update all parent-child relationships and to establish the correct data transfer among the existing and new ingredients.
+
+.. raw:: html
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-54660326-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+

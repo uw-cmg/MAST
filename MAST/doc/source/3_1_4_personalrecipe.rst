@@ -15,3 +15,17 @@ If errors are spotted in this section once the recipe directory has been created
 #.  Examine the original input file's ``$recipe`` section for errors and edit and save it
 
 #.  Re-run ``mast -i <inputfile>.inp`` to create a new recipe directory in ``$MAST_SCRATCH``
+
+.. raw:: html
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-54660326-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+

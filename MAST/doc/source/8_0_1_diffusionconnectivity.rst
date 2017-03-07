@@ -30,3 +30,17 @@ If the lattice user provides is too small and not all the neighbors (up to nth) 
 The NEBcheck.py code will generate the MAST-input style defect structure for the possible pairs found in the create_paths.py and write a new input file that calls MAST to generate NEB and phonon folders to check if these paths are appropriate. Currently the code ends at calling MAST and does not yet manage to handle the NEB and phonon results analysis.
 
 The usage is: python NEBcheck.py -i <input> -n <up-to-nth-neighbor> 
+
+.. raw:: html
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-54660326-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
