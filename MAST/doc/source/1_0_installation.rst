@@ -134,46 +134,15 @@ Set up the pseudopotential folders
 
 Locate the VASP pseudopotentials. If you cannot locate the VASP pseudopotentials, contact your system administrator or another person who uses VASP on the cluster.
 
-``which potcar_setup.py`` should return the pymatgen utility for setting up your pseudopotential directories in the way that pymatgen requires.
-If this command does not return a file location, then probably ``$HOME/.local/bin`` or ``<python installation directory>/bin`` is missing from your ``$PATH`` environment variable. See :ref:`add-local-bin`.
+Follow the POTCAR Setup instructions from Pymatgen's installation instructions at `http://pymatgen.org <http://pymatgen.org>`_
 
-Run ``potcar_setup.py``::
+Later on, ingredients with a value of ``pbe`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of the ``POT_GGA_PAW_PBE`` folder (see :doc:`3_0_inputfile`). 
 
-    potcar_setup.py
+Ingredients with a value of ``pw91`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of the ``POT_GGA_PAW_PW91`` folder, and so on. 
 
-*  The first directory address that you give to the utility is the directory that contains a few subdirectories, for example: potpaw_GGA, potpaw_LDA.52, potpaw_PBE.52, potUSPP_LDA, potpaw_LDA, potpaw_PBE, potUSPP_GGA. 
+Use pymatgen-recognized values for ``mast_xc`` keyword values.
 
-    *  These subdirectories themselves contain many sub-subdirectories with element names like Ac, Ac_s, Zr_sv, etc.
-
-*  The second directory address that you give should be a new directory that you create.
-
-Once the new pymatgen-structured folders have been created, rename the GGA PBE folder to ``POT_GGA_PAW_PBE``.
-
-Later on, ingredients with a value of ``pbe`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of this folder (see :doc:`3_0_inputfile`). 
-
-Rename the GGA PW91 folder to ``POT_GGA_PAW_PW91``. Ingredients with a value of ``pw91`` for the ingredient keyword ``mast_xc`` will draw pseudopotentials out of this folder.
-
-Example of running the python setup tool::
-        
-    Please enter full path where the POT_GGA_PAW_PBE, etc. 
-    subdirs are present. 
-    If you obtained the PSPs directly from VASP, this should 
-    typically be the directory that you untar the files to : 
-    
-    //share/apps/vasp_pseudopotentials/paw
-    
-    Please enter the fullpath of the where you want to create 
-    your pymatgen resources directory:
-
-    //home/<username>/.local/vasp_pps
-
-Rename the folders under ``//home/<username>/.local/vasp_pps``::
-
-    mv //home/<username>/.local/vasp_pps/<pbe_name> //home/<username>/.local/vasp_pps/POT_GGA_PAW_PBE
-
-    mv //home/<username>/.local/vasp_pps/<pw91_name> //home/<username>/.local/vasp_pps/POT_GGA_PAW_PW91
-
-For assistance with potcar_setup.py, please contact the
+For assistance with POTCAR setup, please contact the
 `Pymatgen support group <https://groups.google.com/forum/#!forum/pymatgen>`_
 
 ---------------------------------------------
