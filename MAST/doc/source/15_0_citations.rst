@@ -25,6 +25,8 @@ MAST chooses from the following citations when writing the ``CITATIONS.bib`` fil
 MAST
 ==================
 
+* T. Mayeshiba, H. Wu, T. Angsten, A. Kaczmarowski, Z. Song, G. Jenness, W. Xie, D. Morgan. The MAterials Simulation Toolkit (MAST) for Atomistic Modeling of Defects and Diffusion. Computational Materials Science 126 (2017)  90.
+
 * MAST development team. MAterials Simulation Toolkit (MAST). (2015). at <http://pypi.python.org/pypi/MAST>
 
 * Angsten, T., Mayeshiba, T., Wu, H. & Morgan, D. Elemental vacancy diffusion database from high-throughput first-principles calculations for fcc and hcp structures. New J. Phys. 16, 015018 (2014).
