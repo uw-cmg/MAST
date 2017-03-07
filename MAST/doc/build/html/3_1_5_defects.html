@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>9.7. The Defects section &mdash; MAST 1.3.2.0 documentation</title>
+    <title>8.7. The Defects section &#8212; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,16 +17,17 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false
+        HAS_SOURCE:  false,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
-    <link rel="up" title="9. Sections of the Input File" href="3_1_inputsections.html" />
-    <link rel="next" title="9.8. The NEB section" href="3_1_6_neb.html" />
-    <link rel="prev" title="9.6. The Personal Recipe section" href="3_1_4_personalrecipe.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="8.8. The NEB section" href="3_1_6_neb.html" />
+    <link rel="prev" title="8.6. The Personal Recipe section" href="3_1_4_personalrecipe.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,13 +37,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_1_6_neb.html" title="9.8. The NEB section"
+          <a href="3_1_6_neb.html" title="8.8. The NEB section"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_4_personalrecipe.html" title="9.6. The Personal Recipe section"
+          <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">9. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -52,12 +53,12 @@
           <div class="body" role="main">
             
   <div class="section" id="the-defects-section">
-<h1>9.7. The Defects section<a class="headerlink" href="#the-defects-section" title="Permalink to this headline">¶</a></h1>
+<h1>8.7. The Defects section<a class="headerlink" href="#the-defects-section" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal"><span class="pre">$defects</span></code> section specifies defects by:</p>
-<ul>
+<ul class="simple">
 <li><dl class="first docutils">
 <dt>defect type:</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li>vacancy</li>
 <li>interstitial</li>
 <li>substitution or antisite</li>
@@ -65,12 +66,11 @@
 </dd>
 </dl>
 </li>
-<li><p class="first">defect coordinates</p>
-</li>
+<li>defect coordinates</li>
 <li><dl class="first docutils">
 <dt>defect element symbol</dt>
-<dd><ul class="first last simple">
-<li>Note that if an <code class="docutils literal"><span class="pre">elementmap</span></code> subsection is given in <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>, then the mapped designations <code class="docutils literal"><span class="pre">X1</span></code>, <code class="docutils literal"><span class="pre">X2</span></code>, and so on can be given instead of an element symbol.</li>
+<dd><ul class="first last">
+<li>Note that if an <code class="docutils literal"><span class="pre">elementmap</span></code> subsection is given in <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a>, then the mapped designations <code class="docutils literal"><span class="pre">X1</span></code>, <code class="docutils literal"><span class="pre">X2</span></code>, and so on can be given instead of an element symbol.</li>
 </ul>
 </dd>
 </dl>
@@ -78,14 +78,14 @@
 </ul>
 <p><strong>ATTENTION:</strong></p>
 <ul class="simple">
-<li>Elements in the initial structure, given in <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a>, will appear in order as entered, by posfile keyword or through the coordinates and/or elementmap subsections.</li>
+<li>Elements in the initial structure, given in <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a>, will appear in order as entered, by posfile keyword or through the coordinates and/or elementmap subsections.</li>
 <li>However, once a defect is formed, structures are RESORTED by element ELECTRONEGATIVITY.  Therefore, if you are using substitutional defects or non-self-interstitials, you may find that later element-specific keywords (mast_setmagmom, LDAUU, LDAUJ) may be OUT OF ORDER FOR YOUR DEFECTED STRUCTURE.</li>
-<li>Please check your files carefully! You may want a separate input file for each chemical system (possibly created through looping (see <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>) in order to synchronize the elements and element-specific keywords.</li>
+<li>Please check your files carefully! You may want a separate input file for each chemical system (possibly created through looping (see <a class="reference internal" href="3_0_inputfile.html"><span class="doc">Input File</span></a>) in order to synchronize the elements and element-specific keywords.</li>
 </ul>
 <p>The <code class="docutils literal"><span class="pre">coord_type</span></code> keyword specifies fractional or cartesian coordinates for the defects.</p>
 <p>The <code class="docutils literal"><span class="pre">threshold</span></code> keyword specifies the absolute threshold for finding the defect coordinate, since relaxation of the perfect structure may result in changed coordinates.</p>
 <p>Example <code class="docutils literal"><span class="pre">$defects</span></code> section:</p>
-<div class="highlight-python"><div class="highlight"><pre>$defects
+<div class="highlight-default"><div class="highlight"><pre><span></span>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -98,9 +98,9 @@ interstitial 0.25 0.75 0 Mg
 $end
 </pre></div>
 </div>
-<p>The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>, four separate ingredients, each containing one of the defects above, will be created.</p>
+<p>The above section specifies 4 point defects (2 vacancies and 2 interstitials) to be applied separately and independently to the structure. When combined with the correct recipe in <a class="reference internal" href="3_1_3_recipe.html"><span class="doc">The Recipe section</span></a>, four separate ingredients, each containing one of the defects above, will be created.</p>
 <p>Multiple point defects can be also grouped together as a combined defect within a <code class="docutils literal"><span class="pre">&lt;defect</span> <span class="pre">label&gt;</span></code> subsection such as:</p>
-<div class="highlight-python"><div class="highlight"><pre>$defects
+<div class="highlight-default"><div class="highlight"><pre><span></span>$defects
 
 coord_type fractional
 threshold 1e-4
@@ -118,34 +118,35 @@ $end
 </div>
 <p>In this case, there will be three separate defect ingredients: one ingredient with two vacancies together (where the defect group is labeled <code class="docutils literal"><span class="pre">doublevac</span></code>), one interstitial, and another interstitial.</p>
 <div class="section" id="charges-for-defects">
-<h2>9.7.1. Charges for defects<a class="headerlink" href="#charges-for-defects" title="Permalink to this headline">¶</a></h2>
+<h2>8.7.1. Charges for defects<a class="headerlink" href="#charges-for-defects" title="Permalink to this headline">¶</a></h2>
 <p>Charges can be specified as <code class="docutils literal"><span class="pre">charge=0,10</span></code>, where a comma denotes the lower and upper ranges for the charges.</p>
 <p>Let&#8217;s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg charge=0,3
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vacancy</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="n">Mg</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>Let&#8217;s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a><a class="reference external" href="mailto:-Vac&#37;&#52;&#48;Mg">-Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin Vac@Mg-Vac@Mg
-vacancy 0.0 0.0 0.0 Mg
-vacancy 0.5 0.5 0.5 Mg
-charge=0,3
-end
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">begin</span> <span class="n">Vac</span><span class="nd">@Mg</span><span class="o">-</span><span class="n">Vac</span><span class="nd">@Mg</span>
+<span class="n">vacancy</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="n">Mg</span>
+<span class="n">vacancy</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="n">Mg</span>
+<span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span>
+<span class="n">end</span>
 </pre></div>
 </div>
 <p>For a single defect, charges and labels can be given at the same time:</p>
 <p>Let&#8217;s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0.0 0.0 0.0 Mg charge=0,3 label=Vac@Mg
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vacancy</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="n">Mg</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span> <span class="n">label</span><span class="o">=</span><span class="n">Vac</span><span class="nd">@Mg</span>
 </pre></div>
 </div>
 <p>The charge and label keywords are interchangeable, i.e. we could also have typed:</p>
-<div class="highlight-python"><div class="highlight"><pre>vacancy 0 0 0 Mg label=Vac@Mg charge=0,3
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vacancy</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="n">Mg</span> <span class="n">label</span><span class="o">=</span><span class="n">Vac</span><span class="nd">@Mg</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span>
 </pre></div>
 </div>
-<p>If you use charges in the defects section like this, then you must use a tagged <code class="docutils literal"><span class="pre">defect_&lt;N&gt;_&lt;Q&gt;</span></code> type recipe in <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
+<p>If you use charges in the defects section like this, then you must use a tagged <code class="docutils literal"><span class="pre">defect_&lt;N&gt;_&lt;Q&gt;</span></code> type recipe in <a class="reference internal" href="3_1_3_recipe.html"><span class="doc">The Recipe section</span></a>.</p>
 </div>
 <div class="section" id="phonons-for-defects">
-<h2>9.7.2. Phonons for defects<a class="headerlink" href="#phonons-for-defects" title="Permalink to this headline">¶</a></h2>
-<p>Phonon calculations are described by a <em>phonon center site</em> coordinate and a <em>phonon center radius</em> in Angstroms. Atoms within the sphere specified by these two values will be included in phonon calculations.</p>
+<h2>8.7.2. Phonons for defects<a class="headerlink" href="#phonons-for-defects" title="Permalink to this headline">¶</a></h2>
+<p>Phonon calculations are described by a <em>phonon center site</em> coordinate and a <em>phonon center radius</em> (uses pymatgen&#8217;s find_in_coord_list_pbc method for radial tolerance).
+Atoms within the sphere specified by these two values will be included in phonon calculations.</p>
 <p>For VASP, this inclusion takes the form of selective dynamics T T T for the atoms within the sphere, and F F F otherwise, in a phonon calculation (IBRION = 5, 6, 7, 8)</p>
 <p>If the phonon center radius is 0, only the atom found at the phonon center site point will be considered.</p>
 <p>To use phonons in the defects section, use the subsection keyword <code class="docutils literal"><span class="pre">phonon</span></code> followed by:</p>
@@ -153,28 +154,38 @@ end
 <li>A label for the phonon</li>
 <li>The fractional coordinates for the phonon center site</li>
 <li>A float value for the phonon center radius</li>
-<li>An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used).</li>
+<li>An optional float value for the tolerance-matching threshold for matching the phonon center site (if this last value is not specified, 0.1 is used). Only used if atom indexing is not used.</li>
 </ul>
+<p>If atom indexing is used, only the phonon center site and phonon center radius are used, with an additional 0.0001 matching tolerance.</p>
 <p>Multiple separate phonon calculations may be obtained for each defect, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin int1
-interstitial 0.25 0.25 0.25 X2
-phonon host3 0.3 0.3 0.4 2.5 0.01
-phonon solute 0.1 0.1 0.2 0.5
-end
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">begin</span> <span class="n">int1</span>
+<span class="n">interstitial</span> <span class="mf">0.25</span> <span class="mf">0.25</span> <span class="mf">0.25</span> <span class="n">X2</span>
+<span class="n">phonon</span> <span class="n">host3</span> <span class="mf">0.3</span> <span class="mf">0.3</span> <span class="mf">0.4</span> <span class="mf">0.25</span> <span class="mf">0.01</span>
+<span class="n">phonon</span> <span class="n">solute</span> <span class="mf">0.1</span> <span class="mf">0.1</span> <span class="mf">0.2</span> <span class="mf">0.05</span>
+<span class="n">end</span>
 </pre></div>
 </div>
-<p>In the example above, <em>host3</em> is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 2.5 Angstroms is the radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site.</p>
-<p>In the example above, <em>solute</em> is the label for the phonon calculation bounded within a 0.5 Angstrom radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site.</p>
-<p>The recipe template file for phonons may include either the explicit phonon labels and other labels, or &lt;S&gt;, &lt;N&gt;, &lt;Q&gt;, &lt;P&gt;. See <a class="reference internal" href="3_1_3_recipe.html"><em>The Recipe section</em></a>.</p>
+<p>In the example above, <em>host3</em> is the label for the phonon calculation where (0.3, 0.3, 0.4) is the coordinate for the phonon center site, and 0.25 is the fractional radius for the sphere inside which to consider atoms for the phonon calculation. Points within 0.01 of fractional coordinates will be considered for matching the phonon center site, if atom indexing is not used.</p>
+<p>In the example above, <em>solute</em> is the label for the phonon calculation bounded within a 0.05 fractional radius centered at (0.1, 0.1, 0.2) in fractional coordinates. As no threshold value was given, points within 0.1 (default) of fractional coordinates will be considered for matching the phonon center site, if atom indexing is not used.</p>
+<p>The recipe template file for phonons may include either the explicit phonon labels and other labels, or &lt;S&gt;, &lt;N&gt;, &lt;Q&gt;, &lt;P&gt;. See <a class="reference internal" href="3_1_3_recipe.html"><span class="doc">The Recipe section</span></a>.</p>
 <p>Because phonons are cycled with the defects, a new parent loop must be provided for the phonons, for example:</p>
-<div class="highlight-python"><div class="highlight"><pre>{begin}
-defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
-    phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt; (phonon)
-        phonon_&lt;N&gt;_&lt;Q&gt;_&lt;P&gt;_parse (phononparse)
-{end}
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">begin</span><span class="p">}</span>
+<span class="n">defect_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">_stat</span> <span class="p">(</span><span class="n">static</span><span class="p">)</span>
+    <span class="n">phonon_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">phonon</span><span class="p">)</span>
+        <span class="n">phonon_</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">_</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="n">_parse</span> <span class="p">(</span><span class="n">phononparse</span><span class="p">)</span>
+<span class="p">{</span><span class="n">end</span><span class="p">}</span>
 </pre></div>
 </div>
-</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54660326-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
 </div>
 
 
@@ -188,30 +199,27 @@ defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">9.7. The Defects section</a><ul>
-<li><a class="reference internal" href="#charges-for-defects">9.7.1. Charges for defects</a></li>
-<li><a class="reference internal" href="#phonons-for-defects">9.7.2. Phonons for defects</a></li>
+<li><a class="reference internal" href="#">8.7. The Defects section</a><ul>
+<li><a class="reference internal" href="#charges-for-defects">8.7.1. Charges for defects</a></li>
+<li><a class="reference internal" href="#phonons-for-defects">8.7.2. Phonons for defects</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="3_1_4_personalrecipe.html"
-                        title="previous chapter">9.6. The Personal Recipe section</a></p>
+                        title="previous chapter">8.6. The Personal Recipe section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_1_6_neb.html"
-                        title="next chapter">9.8. The NEB section</a></p>
+                        title="next chapter">8.8. The NEB section</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -225,18 +233,18 @@ defect_&lt;N&gt;_&lt;Q&gt;_stat (static)
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_1_6_neb.html" title="9.8. The NEB section"
+          <a href="3_1_6_neb.html" title="8.8. The NEB section"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_4_personalrecipe.html" title="9.6. The Personal Recipe section"
+          <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >9. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

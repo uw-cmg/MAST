@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>11. MAST post-processing utilities &mdash; MAST 1.3.2.0 documentation</title>
+    <title>10. MAST post-processing utilities &#8212; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,15 +17,17 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false
+        HAS_SOURCE:  false,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
-    <link rel="next" title="12. Standalone Tools" href="8_0_standalonetools.html" />
-    <link rel="prev" title="10. Running MAST for real" href="5_0_runningmast.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="11. Standalone Tools" href="8_0_standalonetools.html" />
+    <link rel="prev" title="9. Running MAST for real" href="5_0_runningmast.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -35,12 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="8_0_standalonetools.html" title="12. Standalone Tools"
+          <a href="8_0_standalonetools.html" title="11. Standalone Tools"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="5_0_runningmast.html" title="10. Running MAST for real"
+          <a href="5_0_runningmast.html" title="9. Running MAST for real"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -50,33 +52,33 @@
           <div class="body" role="main">
             
   <div class="section" id="mast-post-processing-utilities">
-<h1>11. MAST post-processing utilities<a class="headerlink" href="#mast-post-processing-utilities" title="Permalink to this headline">¶</a></h1>
+<h1>10. MAST post-processing utilities<a class="headerlink" href="#mast-post-processing-utilities" title="Permalink to this headline">¶</a></h1>
 <p>These utilities are meant to be used as part of a MAST workflow.
 See example files in <code class="docutils literal"><span class="pre">$HOME/MAST/examples</span></code> or wherever you may have moved the initally-created <code class="docutils literal"><span class="pre">$HOME/MAST/examples</span></code> folder for examples on how to use them.</p>
-<p>These utilities should have been copied into your bin or .local/bin directory (see <a class="reference internal" href="1_0_installation.html"><em>Installation</em></a>).</p>
+<p>These utilities should have been copied into your bin or .local/bin directory (see <a class="reference internal" href="1_0_installation.html"><span class="doc">Installation</span></a>).</p>
 <div class="section" id="defect-formation-energy-with-finite-size-scaling">
-<h2>11.1. Defect formation energy with finite-size scaling<a class="headerlink" href="#defect-formation-energy-with-finite-size-scaling" title="Permalink to this headline">¶</a></h2>
-<p>Initially determining the sizes for finite-size scaling is covered in <a class="reference internal" href="3_1_1_structure.html"><em>The Structure section</em></a> with the utility <code class="docutils literal"><span class="pre">mast_finite_size_scaling_sizes</span></code>.</p>
+<h2>10.1. Defect formation energy with finite-size scaling<a class="headerlink" href="#defect-formation-energy-with-finite-size-scaling" title="Permalink to this headline">¶</a></h2>
+<p>Initially determining the sizes for finite-size scaling is covered in <a class="reference internal" href="3_1_1_structure.html"><span class="doc">The Structure section</span></a> with the utility <code class="docutils literal"><span class="pre">mast_finite_size_scaling_sizes</span></code>.</p>
 <p>The <code class="docutils literal"><span class="pre">mast_madelung_utility</span></code> utility runs as the last ingredient in a finite-size scaling defect workflow (see <code class="docutils literal"><span class="pre">$HOME/MAST/examples/finite_size_scaling.inp</span></code>).</p>
 <p>Run the utility as <code class="docutils literal"><span class="pre">mast_madelung_utility</span></code>. All inputs are derived from the recipe-local <code class="docutils literal"><span class="pre">input.inp</span></code> file in the recipe directory.</p>
 <ul class="simple">
 <li>The utility should generate a series of tables and .png plots that display the finite-size-scaling-corrected and original defect formation energies for different chemical potentials.</li>
-<li><a class="reference internal" href="3_1_7_chemicalpotentials.html"><em>The Chemical Potentials section</em></a> of the input file should be set in order for the utility to work.</li>
+<li><a class="reference internal" href="3_1_7_chemicalpotentials.html"><span class="doc">The Chemical Potentials section</span></a> of the input file should be set in order for the utility to work.</li>
 </ul>
 </div>
 <div class="section" id="defect-formation-energy-versus-fermi-energy">
-<h2>11.2. Defect formation energy versus Fermi energy<a class="headerlink" href="#defect-formation-energy-versus-fermi-energy" title="Permalink to this headline">¶</a></h2>
+<h2>10.2. Defect formation energy versus Fermi energy<a class="headerlink" href="#defect-formation-energy-versus-fermi-energy" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">mast_defect_formation_energy</span></code> tool plots defect formation energy versus Fermi energy.</p>
 <p>The defect formation energy tool is intended to be run as another ingredient folder in the recipe directory.</p>
 <p>If you do not have such an ingredient in the recipe directory, you may manually create the ingredient folder and give it a <code class="docutils literal"><span class="pre">dfe_input.txt</span></code> file.</p>
 <p>The <code class="docutils literal"><span class="pre">dfe_input.txt</span></code> file for a manually-created or embedded workflow ingredient (see <code class="docutils literal"><span class="pre">//home/&lt;username&gt;/MAST/example/defect_formation_energy.inp</span></code>) should contain the following information:</p>
-<div class="highlight-python"><div class="highlight"><pre>dfe_label1=perfect_label defected_label
-dfe_label2=perfect_label defected_label
-dfe_label3=perfect_label defected_label
-(etc. for more defects)
-bandgap_lda_or_gga=&lt;float&gt;
-bandgap_hse_or_expt=&lt;float&gt;
-plot_threshold &lt;float&gt;: Plotting threshold value
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dfe_label1</span><span class="o">=</span><span class="n">perfect_label</span> <span class="n">defected_label</span>
+<span class="n">dfe_label2</span><span class="o">=</span><span class="n">perfect_label</span> <span class="n">defected_label</span>
+<span class="n">dfe_label3</span><span class="o">=</span><span class="n">perfect_label</span> <span class="n">defected_label</span>
+<span class="p">(</span><span class="n">etc</span><span class="o">.</span> <span class="k">for</span> <span class="n">more</span> <span class="n">defects</span><span class="p">)</span>
+<span class="n">bandgap_lda_or_gga</span><span class="o">=&lt;</span><span class="nb">float</span><span class="o">&gt;</span>
+<span class="n">bandgap_hse_or_expt</span><span class="o">=&lt;</span><span class="nb">float</span><span class="o">&gt;</span>
+<span class="n">plot_threshold</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">Plotting</span> <span class="n">threshold</span> <span class="n">value</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -84,10 +86,10 @@ plot_threshold &lt;float&gt;: Plotting threshold value
 <li>bandgap_lda_or_gga should be a float value indicating a DFT-calculated bandgap, usually expected to be underestimated.</li>
 <li>bandgap_hse_or_expt should be a float value indicating an experimental or more accurate bandgap, e.g. from a hybrid calculation.</li>
 <li>plot_threshold should be a float value indicating the threshold for transitions.</li>
-<li>In addition, <a class="reference internal" href="3_1_7_chemicalpotentials.html"><em>The Chemical Potentials section</em></a> should exist in the <code class="docutils literal"><span class="pre">input.inp</span></code> input file inside the recipe directory.</li>
+<li>In addition, <a class="reference internal" href="3_1_7_chemicalpotentials.html"><span class="doc">The Chemical Potentials section</span></a> should exist in the <code class="docutils literal"><span class="pre">input.inp</span></code> input file inside the recipe directory.</li>
 </ul>
 <p>Run the utility as:</p>
-<div class="highlight-python"><div class="highlight"><pre>mast_defect_formation_energy dfe_input.txt
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast_defect_formation_energy</span> <span class="n">dfe_input</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>A directory named <code class="docutils literal"><span class="pre">dfe_results</span></code> should be created within the ingredient directory. Inside that directory:</p>
@@ -97,7 +99,7 @@ plot_threshold &lt;float&gt;: Plotting threshold value
 </ul>
 </div>
 <div class="section" id="diffusion-coefficient">
-<h2>11.3. Diffusion coefficient<a class="headerlink" href="#diffusion-coefficient" title="Permalink to this headline">¶</a></h2>
+<h2>10.3. Diffusion coefficient<a class="headerlink" href="#diffusion-coefficient" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">mast_diffusion_coefficient</span></code> diffusion coefficient calculation tool supports the following models:</p>
 <ul class="simple">
 <li>FCC five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.</li>
@@ -197,7 +199,16 @@ plot_threshold &lt;float&gt;: Plotting threshold value
 </li>
 </ul>
 <p>Run as <code class="docutils literal"><span class="pre">mast_diffusion_coefficient</span> <span class="pre">-i</span> <span class="pre">&lt;input&gt;</span></code></p>
-</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54660326-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
 </div>
 
 
@@ -211,31 +222,28 @@ plot_threshold &lt;float&gt;: Plotting threshold value
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">11. MAST post-processing utilities</a><ul>
-<li><a class="reference internal" href="#defect-formation-energy-with-finite-size-scaling">11.1. Defect formation energy with finite-size scaling</a></li>
-<li><a class="reference internal" href="#defect-formation-energy-versus-fermi-energy">11.2. Defect formation energy versus Fermi energy</a></li>
-<li><a class="reference internal" href="#diffusion-coefficient">11.3. Diffusion coefficient</a></li>
+<li><a class="reference internal" href="#">10. MAST post-processing utilities</a><ul>
+<li><a class="reference internal" href="#defect-formation-energy-with-finite-size-scaling">10.1. Defect formation energy with finite-size scaling</a></li>
+<li><a class="reference internal" href="#defect-formation-energy-versus-fermi-energy">10.2. Defect formation energy versus Fermi energy</a></li>
+<li><a class="reference internal" href="#diffusion-coefficient">10.3. Diffusion coefficient</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="5_0_runningmast.html"
-                        title="previous chapter">10. Running MAST for real</a></p>
+                        title="previous chapter">9. Running MAST for real</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="8_0_standalonetools.html"
-                        title="next chapter">12. Standalone Tools</a></p>
+                        title="next chapter">11. Standalone Tools</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -249,17 +257,17 @@ plot_threshold &lt;float&gt;: Plotting threshold value
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="8_0_standalonetools.html" title="12. Standalone Tools"
+          <a href="8_0_standalonetools.html" title="11. Standalone Tools"
              >next</a> |</li>
         <li class="right" >
-          <a href="5_0_runningmast.html" title="10. Running MAST for real"
+          <a href="5_0_runningmast.html" title="9. Running MAST for real"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>

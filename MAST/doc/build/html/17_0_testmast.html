@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>7. Trying out MAST &mdash; MAST 1.3.2.0 documentation</title>
+    <title>6. Trying out MAST &#8212; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,15 +17,17 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false
+        HAS_SOURCE:  false,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
-    <link rel="next" title="8. Input File" href="3_0_inputfile.html" />
-    <link rel="prev" title="6. Installation" href="1_0_installation.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. Input File" href="3_0_inputfile.html" />
+    <link rel="prev" title="5. Installation" href="1_0_installation.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -35,12 +37,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_0_inputfile.html" title="8. Input File"
+          <a href="3_0_inputfile.html" title="7. Input File"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="1_0_installation.html" title="6. Installation"
+          <a href="1_0_installation.html" title="5. Installation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -50,21 +52,21 @@
           <div class="body" role="main">
             
   <div class="section" id="trying-out-mast">
-<h1>7. Trying out MAST<a class="headerlink" href="#trying-out-mast" title="Permalink to this headline">¶</a></h1>
+<h1>6. Trying out MAST<a class="headerlink" href="#trying-out-mast" title="Permalink to this headline">¶</a></h1>
 <ol class="arabic">
 <li><p class="first">Go to <code class="docutils literal"><span class="pre">$HOME/MAST/examples</span></code> (or <code class="docutils literal"><span class="pre">$WORK/MAST/examples</span></code> or a similar folder, if you moved the <code class="docutils literal"><span class="pre">$HOME/MAST</span></code> folder from its default location.)</p>
 </li>
 <li><p class="first">Select one of the examples. The fastest one is <code class="docutils literal"><span class="pre">simple_optimization.inp</span></code></p>
 </li>
 <li><p class="first">Copy that file:</p>
-<div class="highlight-python"><div class="highlight"><pre>cp simple_optimization.inp test.inp
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">simple_optimization</span><span class="o">.</span><span class="n">inp</span> <span class="n">test</span><span class="o">.</span><span class="n">inp</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Modify the test.inp file with the correct <code class="docutils literal"><span class="pre">mast_exec</span></code>, <code class="docutils literal"><span class="pre">mast_ppn</span></code>, <code class="docutils literal"><span class="pre">mast_queue</span></code>, <code class="docutils literal"><span class="pre">mast_walltime</span></code>, and other settings described in <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a></p>
+<li><p class="first">Modify the test.inp file with the correct <code class="docutils literal"><span class="pre">mast_exec</span></code>, <code class="docutils literal"><span class="pre">mast_ppn</span></code>, <code class="docutils literal"><span class="pre">mast_queue</span></code>, <code class="docutils literal"><span class="pre">mast_walltime</span></code>, and other settings described in <a class="reference internal" href="3_0_inputfile.html"><span class="doc">Input File</span></a></p>
 </li>
 <li><p class="first">Try to parse the input file, entering the following command as one line:</p>
-<div class="highlight-python"><div class="highlight"><pre>nice -n 19 mast -i test.inp
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">nice</span> <span class="o">-</span><span class="n">n</span> <span class="mi">19</span> <span class="n">mast</span> <span class="o">-</span><span class="n">i</span> <span class="n">test</span><span class="o">.</span><span class="n">inp</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -130,19 +132,28 @@
 </li>
 <li><p class="first">If you forgot some step above, or you encounter some errors, remove the recipe folder from <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> and start again from the beginning of this section.</p>
 </li>
-<li><p class="first">The <code class="docutils literal"><span class="pre">$MAST_CONTROL</span></code> folder gives you error messages and other information. See <a class="reference internal" href="5_0_runningmast.html"><em>Running MAST</em></a> for tips.</p>
+<li><p class="first">The <code class="docutils literal"><span class="pre">$MAST_CONTROL</span></code> folder gives you error messages and other information. See <a class="reference internal" href="5_0_runningmast.html"><span class="doc">Running MAST</span></a> for tips.</p>
 </li>
 </ol>
 <div class="section" id="unit-testing">
-<h2>7.1. Unit testing<a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a></h2>
-<p>Unit tests are available through the MAST tar.gz file. See <a class="reference internal" href="12_0_programming.html"><em>Programming for MAST</em></a>. (Unit tests are not installed by default using pip.)</p>
+<h2>6.1. Unit testing<a class="headerlink" href="#unit-testing" title="Permalink to this headline">¶</a></h2>
+<p>Unit tests are available through the MAST tar.gz file. See <a class="reference internal" href="12_0_programming.html"><span class="doc">Programming for MAST</span></a>. (Unit tests are not installed by default using pip.)</p>
 <p>To check the validity of the MAST source code, navigate to <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/test</span></code> and run the unit tests with:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">nosetests</span> <span class="o">--</span><span class="n">exe</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">nosetests</span> <span class="o">--</span><span class="n">exe</span>
 </pre></div>
 </div>
 <p>Some tests may have been designated to be skipped.
-Errors should be reported to the MAST development team as an issue on the github site (see <a class="reference internal" href="12_0_programming.html"><em>Programming for MAST</em></a>).</p>
-</div>
+Errors should be reported to the MAST development team as an issue on the github site (see <a class="reference internal" href="12_0_programming.html"><span class="doc">Programming for MAST</span></a>).</p>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54660326-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
 </div>
 
 
@@ -156,29 +167,26 @@ Errors should be reported to the MAST development team as an issue on the github
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">7. Trying out MAST</a><ul>
-<li><a class="reference internal" href="#unit-testing">7.1. Unit testing</a></li>
+<li><a class="reference internal" href="#">6. Trying out MAST</a><ul>
+<li><a class="reference internal" href="#unit-testing">6.1. Unit testing</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="1_0_installation.html"
-                        title="previous chapter">6. Installation</a></p>
+                        title="previous chapter">5. Installation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_0_inputfile.html"
-                        title="next chapter">8. Input File</a></p>
+                        title="next chapter">7. Input File</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -192,17 +200,17 @@ Errors should be reported to the MAST development team as an issue on the github
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_0_inputfile.html" title="8. Input File"
+          <a href="3_0_inputfile.html" title="7. Input File"
              >next</a> |</li>
         <li class="right" >
-          <a href="1_0_installation.html" title="6. Installation"
+          <a href="1_0_installation.html" title="5. Installation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>
