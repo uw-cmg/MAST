@@ -68,7 +68,7 @@ def extract_submitted_jobid(string):
             <int> = job ID as integer
     """
     if string == "":
-        return None
+        raise ValueError("Job did not submit.")
     return int(string.split()[-1].split('.')[0])
 
 def queue_snap_command():
