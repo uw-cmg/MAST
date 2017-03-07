@@ -4,13 +4,12 @@ What's new in version 2.0.0
 
 **Additions:**
 
-* A charge-density-based pathfinding method has been added as an alternative to linear interpolation for NEBs. See :doc:`3_1_2_ingredients`.
-* A 14-frequency concentrated diffusion model has been added to the Diffusion Coefficient post-processing tool. See :doc:`6_0_postprocessingtools`.
+None.
 
 **Fixes:**
 
-* Fixes to atom indexing.
 * MAST is now compatible with pymatgen 4.X.X
+* Major fixes have been made to atom indexing.
 
 **Changes for users:**
 
@@ -18,6 +17,7 @@ What's new in version 2.0.0
 
 **Changes for programmers:**
 
+None.
 
 .. raw:: html
 
