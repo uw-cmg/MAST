@@ -80,9 +80,9 @@ def submit_and_monitor(only=0):
         pass
     else: 
         print "Submitting from submission list."
-        queue_commands.submit_from_submission_list()
+        subdict=queue_commands.submit_from_submission_list()
         print "Clearing submission list."
-        queue_commands.clear_submission_list()
+        queue_commands.clear_submission_list(subdict)
         display_recent_submissions()
         print "Getting queue snapshot."
         clear_and_get_queue_snapshot()
