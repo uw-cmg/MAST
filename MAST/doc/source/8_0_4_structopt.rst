@@ -4,6 +4,8 @@
 StructOpt
 ***************************
 
+ATTENTION: StructOpt has been moved to its own repository. Please see http://github.com/uw-cmg/StructOpt_modular and contact its developers for more information.
+
 Author: Amy Kaczmarowski
 
 Research and development: Min Yu, Hyunseok Ko
