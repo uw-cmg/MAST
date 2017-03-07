@@ -35,7 +35,7 @@ MAST
 
 * Yu, Min, STEM additions to structopt package, https://git@github.com/uw-cmg/MAST/structopt (2015).
 
-* Kitchaev, Daniil, Charge-based pathfinder for nudged elastic band calculations, https://git@github.com/uw-cmg/MAST/utility/daniil_pathfinder.py, 2015
+* Z. Rong, D. Kitchaev, P. Canepa, W. Huang, G. Ceder. An efficient algorithm for finding the minimum energy path for cation migration in ionic materials. The Journal of Chemical Physics 145 (2016) (7) 074112.
 
 ===================
 pymatgen
