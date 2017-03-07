@@ -20,7 +20,6 @@ from MAST.ingredients.checker import VaspNEBChecker
 from MAST.ingredients.checker import PhonChecker
 from MAST.ingredients.checker import GenericChecker
 from MAST.ingredients.checker import LammpsChecker
-from MAST.ingredients.checker import StructoptChecker
 from MAST.ingredients.errorhandler import BaseError
 from MAST.ingredients.errorhandler import VaspError
 from MAST.ingredients.errorhandler import PhonError
