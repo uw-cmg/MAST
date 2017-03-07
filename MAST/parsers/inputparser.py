@@ -104,7 +104,7 @@ class InputParser(MASTObj):
         """
         options   = InputOptions()
         infile    = file(self.keywords['inputfile'])
-
+        section_name=""
         eof = False
         while (not eof):
             line = infile.readline() #.lower() #Remove the lowercasing
