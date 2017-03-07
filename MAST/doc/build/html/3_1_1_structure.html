@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>9.2. The Structure section &mdash; MAST 1.3.2.0 documentation</title>
+    <title>8.2. The Structure section &#8212; MAST 1.3.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,16 +17,17 @@
         VERSION:     '1.3.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  false
+        HAS_SOURCE:  false,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MAST 1.3.2.0 documentation" href="index.html" />
-    <link rel="up" title="9. Sections of the Input File" href="3_1_inputsections.html" />
-    <link rel="next" title="9.3. The Scaling section" href="3_1_9_scaling.html" />
-    <link rel="prev" title="9.1. The MAST section" href="3_1_0_mast.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="8.3. The Scaling section" href="3_1_9_scaling.html" />
+    <link rel="prev" title="8.1. The MAST section" href="3_1_0_mast.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,13 +37,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="3_1_9_scaling.html" title="9.3. The Scaling section"
+          <a href="3_1_9_scaling.html" title="8.3. The Scaling section"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="3_1_0_mast.html" title="9.1. The MAST section"
+          <a href="3_1_0_mast.html" title="8.1. The MAST section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">9. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -52,12 +53,12 @@
           <div class="body" role="main">
             
   <div class="section" id="the-structure-section">
-<h1>9.2. The Structure section<a class="headerlink" href="#the-structure-section" title="Permalink to this headline">¶</a></h1>
+<h1>8.2. The Structure section<a class="headerlink" href="#the-structure-section" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="docutils literal"><span class="pre">$structure</span></code> section contains the coordinate type, coordinates, and lattice, or, optionally, the name of a structure file (either CIF or VASP POSCAR-type).</p>
 <div class="section" id="structure-by-file">
-<h2>9.2.1. Structure by file<a class="headerlink" href="#structure-by-file" title="Permalink to this headline">¶</a></h2>
+<h2>8.2.1. Structure by file<a class="headerlink" href="#structure-by-file" title="Permalink to this headline">¶</a></h2>
 <p>Using the keyword <code class="docutils literal"><span class="pre">posfile</span></code>, a VASP POSCAR-type file or a CIF file can be inserted here in this section:</p>
-<div class="highlight-python"><div class="highlight"><pre>$structure
+<div class="highlight-default"><div class="highlight"><pre><span></span>$structure
 posfile POSCAR_fcc
 $end
 </pre></div>
@@ -67,17 +68,17 @@ $end
 <p>A POSCAR-type filename must start with <code class="docutils literal"><span class="pre">POSCAR_</span></code> or <code class="docutils literal"><span class="pre">CONTCAR_</span></code> in order for pymatgen to recognize it. The elements will be obtained from the POSCAR unless you also have a POTCAR in the directory, in which case, check your output carefully because the elements might be given by the POTCAR instead, no matter what elements are written in the POSCAR file.</p>
 </div>
 <div class="section" id="structure-by-specification">
-<h2>9.2.2. Structure by specification<a class="headerlink" href="#structure-by-specification" title="Permalink to this headline">¶</a></h2>
+<h2>8.2.2. Structure by specification<a class="headerlink" href="#structure-by-specification" title="Permalink to this headline">¶</a></h2>
 <p>To specify a structure, use the following subsections:</p>
 <p><strong>coord_type</strong>: This keyword specifies fractional or cartesian coordinates. Only fractional coordinates have been thoroughly tested with most MAST features.</p>
 <p><strong>lattice</strong>: The lattice subsection specifies lattice basis vectors on a cartesian coordinate system.</p>
-<p><strong>elementmap</strong>: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed in <a class="reference internal" href="3_0_inputfile.html"><em>Input File</em></a>).</p>
+<p><strong>elementmap</strong>: The elementmap subsection allows you to create a generic lattice and interchange other elements onto it. This is useful when looping over other elements (discussed in <a class="reference internal" href="3_0_inputfile.html"><span class="doc">Input File</span></a>).</p>
 <p>The elementmap subsection works in conjunction with the coordinates subsection.</p>
 <p><strong>coordinates</strong>: The coordinates subsection specifies the coordinates in order.</p>
 <p>Fractional coordinates are fractional along each lattice basis vector, e.g. .0.5 0 0. describes a position 0.5 (halfway) along the first lattice basis vector.</p>
 <p>Each fractional coordinate must be preceded by either an element symbol or an X# symbol corresponding to the symbols assigned in the elementmap section.</p>
 <p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre>begin $structure
+<div class="highlight-default"><div class="highlight"><pre><span></span>begin $structure
 
 coord_type fractional
 
@@ -108,12 +109,12 @@ $end
 </div>
 </div>
 <div class="section" id="structure-indexing-beta">
-<h2>9.2.3. Structure indexing (beta)<a class="headerlink" href="#structure-indexing-beta" title="Permalink to this headline">¶</a></h2>
+<h2>8.2.3. Structure indexing (beta)<a class="headerlink" href="#structure-indexing-beta" title="Permalink to this headline">¶</a></h2>
 <p>Some atomic positions in structures may change significantly after structural relaxation.</p>
 <p>Without structure indexing, current operation of MAST is as follows: just before a defect, NEB, or phonon is about to be run, MAST decides which atoms to remove, single out for phonons, etc., based on a coordinate which is guessed at ahead of time, for example, 0.5 0.5 0.5, and sometimes a tolerance.</p>
 <p>However, the relaxed atom may be quite far from that coordinate, so the search may fail.</p>
 <p>When set to True, the <strong>use_structure_index</strong> keyword in the <code class="docutils literal"><span class="pre">$structure</span></code> section turns on atomic position indexing in the structure.:</p>
-<div class="highlight-python"><div class="highlight"><pre>$structure
+<div class="highlight-default"><div class="highlight"><pre><span></span>$structure
 use_structure_index True
 ...
 $end
@@ -125,7 +126,7 @@ $end
 <p>The manifest file consists of atomic index numbers, which correspond to <code class="docutils literal"><span class="pre">atom_index_&lt;index</span> <span class="pre">number&gt;</span></code> files. Each atomic index file is updated with the appropriate coordinates from a completed calculation.</p>
 <p>When a calculation is complete, its relaxed atomic coordinates will be saved back to the appropriate atom_index file.</p>
 <div class="section" id="neb-notes-for-structure-indexing">
-<h3>9.2.3.1. NEB notes for structure indexing<a class="headerlink" href="#neb-notes-for-structure-indexing" title="Permalink to this headline">¶</a></h3>
+<h3>8.2.3.1. NEB notes for structure indexing<a class="headerlink" href="#neb-notes-for-structure-indexing" title="Permalink to this headline">¶</a></h3>
 <p>Special care should be taken when defining NEB calculations in the <code class="docutils literal"><span class="pre">$neb</span></code> section of the input file.</p>
 <p>Again, vacancy and substitutional defects should have coordinates that exactly match those in the initial structure.</p>
 <p>Coordinates in the <code class="docutils literal"><span class="pre">$neb</span></code> section should exactly match coordinates in the <code class="docutils literal"><span class="pre">$defects</span></code> section.</p>
@@ -137,7 +138,16 @@ NEB manifests are created from defect manifests.</p>
 <p>Pymatgen&#8217;s interpolate function resorts atoms, so a temporary manifest is made for pymatgen, and the interpolation is resorted back to match the NEB endpoint manifests.</p>
 <p>Also, all image atoms are ordered following the endpoint1 manifest. The final endpoint atoms are ordered following the endpoint2 manifest.</p>
 <p>Therefore, after completion, coordinates for image atoms are recorded in the atom index files indicated by the endpoint 1 manifest.</p>
-</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54660326-1', 'auto');
+  ga('send', 'pageview');
+
+</script></div>
 </div>
 </div>
 
@@ -152,11 +162,11 @@ NEB manifests are created from defect manifests.</p>
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">9.2. The Structure section</a><ul>
-<li><a class="reference internal" href="#structure-by-file">9.2.1. Structure by file</a></li>
-<li><a class="reference internal" href="#structure-by-specification">9.2.2. Structure by specification</a></li>
-<li><a class="reference internal" href="#structure-indexing-beta">9.2.3. Structure indexing (beta)</a><ul>
-<li><a class="reference internal" href="#neb-notes-for-structure-indexing">9.2.3.1. NEB notes for structure indexing</a></li>
+<li><a class="reference internal" href="#">8.2. The Structure section</a><ul>
+<li><a class="reference internal" href="#structure-by-file">8.2.1. Structure by file</a></li>
+<li><a class="reference internal" href="#structure-by-specification">8.2.2. Structure by specification</a></li>
+<li><a class="reference internal" href="#structure-indexing-beta">8.2.3. Structure indexing (beta)</a><ul>
+<li><a class="reference internal" href="#neb-notes-for-structure-indexing">8.2.3.1. NEB notes for structure indexing</a></li>
 </ul>
 </li>
 </ul>
@@ -165,21 +175,18 @@ NEB manifests are created from defect manifests.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="3_1_0_mast.html"
-                        title="previous chapter">9.1. The MAST section</a></p>
+                        title="previous chapter">8.1. The MAST section</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="3_1_9_scaling.html"
-                        title="next chapter">9.3. The Scaling section</a></p>
+                        title="next chapter">8.3. The Scaling section</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -193,18 +200,18 @@ NEB manifests are created from defect manifests.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="3_1_9_scaling.html" title="9.3. The Scaling section"
+          <a href="3_1_9_scaling.html" title="8.3. The Scaling section"
              >next</a> |</li>
         <li class="right" >
-          <a href="3_1_0_mast.html" title="9.1. The MAST section"
+          <a href="3_1_0_mast.html" title="8.1. The MAST section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >9. Sections of the Input File</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 1.3.2.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2014, University of Wisconsin-Madison Compuational Materials Group.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
     </div>
   </body>
 </html>
