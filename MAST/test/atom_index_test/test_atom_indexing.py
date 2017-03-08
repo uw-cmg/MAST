@@ -56,7 +56,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_interstitial_neb_setup(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         tdir=os.path.join(testdir,'interstitial_neb_files')
         myip = MASTInput(inputfile='neb_pathfinder.inp')
         os.environ['MAST_SCRATCH']=wdir
