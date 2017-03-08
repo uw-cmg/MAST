@@ -23,24 +23,33 @@ from pymatgen.io.vasp import Poscar
 import shutil
 testname="atom_index_test"
 testdir = dirutil.get_test_dir(testname)
+workdir = os.path.join(testdir,'workdir')
+if not os.path.isdir(workdir):
+    os.mkdir(workdir)
 old_control = os.getenv("MAST_CONTROL")
 old_archive = os.getenv("MAST_ARCHIVE")
 old_scratch = os.getenv("MAST_SCRATCH")
 
 class TestAtomIndexing(unittest.TestCase):
+    def __init__(self, methodName='runTest'):
+        unittest.TestCase.__init__(self, methodName)
+        self.tname = self.id().split(".")[-1]
+        self.wdir = os.path.join(workdir, self.tname)
+        return
 
     def setUp(self):
         os.chdir(testdir)
-        if not os.path.isdir(os.path.join(testdir,'workdir')):
-            os.mkdir('workdir')
+        if not os.path.isdir(self.wdir):
+            os.mkdir(self.wdir)
+        return
 
     def tearDown(self):
         #pass
         #return
-        for dirname in ['workdir','structure_index_files']:
-            dfull = os.path.join(testdir, dirname)
-            if os.path.isdir(dfull):
-                shutil.rmtree(dfull)
+        sdir = os.path.join(testdir, 'structure_index_files')
+        for removedir in [self.wdir, sdir]:
+            if os.path.isdir(removedir):
+                shutil.rmtree(removedir, ignore_errors=True)
         os.environ["MAST_CONTROL"] = old_control
         os.environ["MAST_SCRATCH"] = old_scratch
         os.environ["MAST_ARCHIVE"] = old_archive
@@ -70,7 +79,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test__init__(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         myip = MASTInput(inputfile='neb_pathfinder.inp')
         os.environ['MAST_SCRATCH']=wdir
         myip.set_up_recipe()
@@ -83,7 +92,7 @@ class TestAtomIndexing(unittest.TestCase):
     
     def test__init__2(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         myip = MASTInput(inputfile='multidefect.inp')
         os.environ['MAST_SCRATCH']=wdir
         myip.set_up_recipe()
@@ -97,7 +106,7 @@ class TestAtomIndexing(unittest.TestCase):
     def test_write_defected(self):
         #raise SkipTest
         tdir=os.path.join(testdir,'multidefect_files')
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         myip = MASTInput(inputfile='multidefect.inp')
         os.environ['MAST_SCRATCH']=wdir
         myip.set_up_recipe()
@@ -113,7 +122,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_find_orig_frac_coord_in_atom_indices(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         os.environ['MAST_SCRATCH']=wdir
         myipparser=InputParser(inputfile=os.path.join(testdir,"neb_pathfinder.inp"))
         myio = myipparser.parse()
@@ -141,7 +150,7 @@ class TestAtomIndexing(unittest.TestCase):
     
     def test_find_frac_coord_in_atom_indices(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         os.environ['MAST_SCRATCH']=wdir
         myipparser=InputParser(inputfile=os.path.join(testdir,"neb_pathfinder.inp"))
         myio = myipparser.parse()
@@ -170,7 +179,7 @@ class TestAtomIndexing(unittest.TestCase):
     def test_write_defected_phonon_sd_manifests(self):
         #raise SkipTest
         tdir=os.path.join(testdir,'manifest_files')
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         myip = MASTInput(inputfile='../../examples/neb_with_phonons.inp')
         os.environ['MAST_SCRATCH']=wdir
         myip.set_up_recipe()
@@ -206,7 +215,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_make_coordinate_and_element_list_from_manifest(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         myip = MASTInput(inputfile='multidefect.inp')
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_CONTROL']=wdir
@@ -255,7 +264,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_make_temp_manifest_from_scrambled_structure(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         os.environ['MAST_SCRATCH']=wdir
         os.environ['MAST_ARCHIVE']=wdir
         os.environ['MAST_CONTROL']=wdir
@@ -321,7 +330,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_graft_new_coordinates_from_manifest(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         tdir = os.path.join(testdir,'graft_files')
         myip = MASTInput(inputfile=os.path.join(tdir,'input.inp'))
         os.environ['MAST_SCRATCH']=wdir
@@ -363,7 +372,7 @@ class TestAtomIndexing(unittest.TestCase):
 
     def test_defect_static(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         tdir=os.path.join(testdir,'nebpathtest_condensed')
         rwdir=os.path.join(wdir,"nebpathtest_condensed%s" % time.strftime("%H%M%S"))
         shutil.copytree(tdir,rwdir)
@@ -396,8 +405,8 @@ class TestAtomIndexing(unittest.TestCase):
         ###from vaspchecker
         childpath=childname
         newname="POSCAR"
-        workdir=os.path.dirname(checker.keywords['name'])
-        sdir = os.path.join(workdir, "structure_index_files")
+        cworkdir=os.path.dirname(checker.keywords['name'])
+        sdir = os.path.join(cworkdir, "structure_index_files")
         childmeta=Metadata(metafile="%s/metadata.txt" % childpath)
         child_program=childmeta.read_data("program")
         if not "vasp" in child_program: #madelung utility or another folder
@@ -475,7 +484,7 @@ class TestAtomIndexing(unittest.TestCase):
     
     def test_nebpathtest(self):
         #raise SkipTest
-        wdir=os.path.join(testdir,'workdir')
+        wdir=self.wdir
         tdir=os.path.join(testdir,'nebpathtest_condensed')
         rwdir=os.path.join(wdir,"nebpathtest_condensed%s" % time.strftime("%H%M%S"))
         shutil.copytree(tdir,rwdir)
