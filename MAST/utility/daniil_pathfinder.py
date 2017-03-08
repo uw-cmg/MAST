@@ -156,6 +156,7 @@ class NEBPathfinder:
         ds0_plus[0] = (ds0_plus[0] - ds0_plus[0])
         ds0_minus[-1] = (ds0_minus[-1] - ds0_minus[-1])
 
+        dV = np.gradient(V) #TTM move line; issue #469, Daniil's instructions
         # Evolve string
         for step in range(0, max_iter):
             if step > min_iter:
@@ -163,7 +164,6 @@ class NEBPathfinder:
             else:
                 h = h0
             # Calculate forces acting on string
-            dV = np.gradient(V)
             d = V.shape
             s0 = s
             edV = np.array([[dV[0][int(pt[0])%d[0]][int(pt[1])%d[1]][int(pt[2])%d[2]] / dr[0],
