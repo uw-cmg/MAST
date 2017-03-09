@@ -176,7 +176,10 @@ def clear_submission_list(submitted=""):
             pass
         else:
             retain_these.append(subline)
-    submitfile.data=list(retain_these)
+    if len(retain_these) > 0:
+        submitfile.data=list(retain_these)
+    else:
+        submitfile.data=list("\n")
     submitfile.to_file(submitlist)
     return
 
