@@ -39,6 +39,8 @@ which mast
 
 nice -n 19 mast -i $examples_located"/"$which_example
 mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type d`
+testname=`basename $mydir`
+archdir=$MAST_ARCHIVE"/"$testname
 
 cd $MAST_CONTROL
 
@@ -57,11 +59,11 @@ do
     # Now also have to therefore submit separately.
     # In this case, can call the mast command with submit only.
     nice -n 19 mast -m submitonly >> output_workflow_testing 2>> output_workflow_errors
-    if [ -f "$mydir/SUMMARY.txt" ]
+    if [ -f "$archdir/SUMMARY.txt" ]
     then
         echo "SUMMARY file found. Workflow completed."
         echo "Workflow at:"
-        echo $mydir
+        echo $archdir
         break
     fi
     sleep $sleep_interval
