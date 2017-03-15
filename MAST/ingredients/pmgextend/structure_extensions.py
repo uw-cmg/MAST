@@ -118,7 +118,7 @@ class StructureExtensions(MASTObj):
                 raise MASTError(self.__class__.__name__, "Multiple indices %s found. Check structure and/or adjust threshold %s to finer tolerance for ingredient %s" % (index, threshold, self.keywords['name']))
             if len(index) == 0:
                 raise MASTError(self.__class__.__name__, "No indices found. Check structure and/or adjust threshold %s to lower tolerance for ingredient %s" % (threshold, self.keywords['name']))
-            struct_ed.replace(index, symbol)
+            struct_ed.replace(index[0], symbol)
             struct_ed = struct_ed.get_sorted_structure()
         else:
             raise RuntimeError('Defect type %s not supported' % defect['type'])
