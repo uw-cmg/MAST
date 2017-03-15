@@ -330,6 +330,7 @@ class StructureExtensions(MASTObj):
         nbsitelist = np.array(nbsitelist)
         alltotarr = np.concatenate([uniqsites, nbsitelist])
         allsites = np.unique(alltotarr)
+        allsites = np.array(allsites,'int') #indices are integers
         return allsites
 
     def get_multiple_sd_array(self, phonon_center_site, phonon_center_radius,threshold=1e-1):
