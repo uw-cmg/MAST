@@ -8,6 +8,12 @@ v1
 v2
 v3
 v4
+v5
+v6
+v3p
+v4p
+v3pp
+v4pp
 va
 vb
 vc
@@ -21,6 +27,12 @@ E1
 E2
 E3
 E4
+E5
+E6
+E3p
+E4p
+E3pp
+E4pp
 Ea
 Eb
 Ec
