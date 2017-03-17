@@ -19,7 +19,7 @@
 
 import sys, getopt, os
 import numpy as np
-import pymatgen as mg
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.vasp import Poscar
 from MAST.utility import fileutil
   
@@ -117,7 +117,7 @@ class ParsingInputFiles(object):
 
         struct = Poscar.from_file('POSCAR').structure
         os.system('rm POSCAR')
-        reduced = mg.symmetry.analyzer.SpacegroupAnalyzer(struct,0.001).get_primitive_standard_structure()   
+        reduced = SpacegroupAnalyzer(struct,0.001).get_primitive_standard_structure()   
         data['No.'] = len(struct)
         if model==5:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)

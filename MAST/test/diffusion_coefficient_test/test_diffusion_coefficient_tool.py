@@ -9,6 +9,7 @@ import os
 import time
 import MAST
 import pymatgen
+import subprocess
 from MAST.utility import dirutil
 from MAST.utility import MASTFile
 from MAST.utility import Metadata
@@ -68,15 +69,47 @@ class TestDiffusionCoefficientTool(unittest.TestCase):
         os.chdir(rwdir)
         DiffCoeff(dctool_input).calculatingD()
         os.chdir(curdir)
-        #check output. Plot may take some time to generate.
-        print "output in: %s, %s" % (outputname, plotname)
-        oct=1
-        while not os.path.isfile(plotname):
-            print "Waiting for output. Sleep 1."
-            time.sleep(1)
-            oct = oct + 1
-            if oct > 9:
-                raise ValueError("No output after %i seconds." % oct)
+        #check output.
+        print "output in: %s" % (outputname)
+        with open(outputname, 'r') as opfile:
+            olines = opfile.readlines()
+        comparename = os.path.join(testdir,'files','diffcoeff_utility',
+                                    'Diffusivity.txt')
+        with open(comparename, 'r') as cfile:
+            clines = cfile.readlines()
+        print clines
+        print olines
+        self.assertEqual(len(clines),len(olines))
+        for cidx in range(0, len(clines))[-5:]: #compare last few numeric lines
+            [ctemp, cval] = clines[cidx].strip().split()
+            [otemp, oval] = olines[cidx].strip().split()
+            self.assertEqual(ctemp, otemp)
+            self.assertEqual(cval, oval)
+        return
+    
+    def test_tool_with_wrapper(self):
+        """Test diffusion coefficient tool with the wrapper
+        """
+        #set up paths
+        rwdir = os.path.join(self.wdir, 'diffcoeff_utility')
+        shutil.copytree(os.path.join(testdir,'files','diffcoeff_utility'), 
+                        rwdir)
+        outputname = os.path.join(rwdir, 'Diffusivity.txt')
+        plotname = os.path.join(rwdir, 'Diffusivity.png')
+        os.remove(outputname) #remove test output
+        os.remove(plotname) #remove test output
+        print(os.listdir(rwdir))
+        #run the utility
+        curdir=os.getcwd()
+        os.chdir(rwdir)
+        mycommand="mast_diffusion_coefficient -i diffcoeff_input.txt"
+        dproc = subprocess.Popen(mycommand, shell=True,
+                        stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        dproc.wait()
+        print(dproc.communicate())
+        os.chdir(curdir)
+        #check output
+        print "output in: %s" % (outputname)
         with open(outputname, 'r') as opfile:
             olines = opfile.readlines()
         comparename = os.path.join(testdir,'files','diffcoeff_utility',
