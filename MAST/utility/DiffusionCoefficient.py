@@ -244,6 +244,27 @@ class ParsingInputFiles(object):
                             print 'WARNING: Imaginary frequency found in the local minimum! Please check the OUTCAR of %s!'%vdir_num[freq]
                         elif im_denom==0:
                             print 'WARNING: No imaginary frequency found in the saddle point! Please check the OUTCAR of %s!'%vdir_denom[freq]
+                            print 'ATTEMPTING TO CORRECT:'
+                            numlist=list()
+                            for cct in range(num_num):
+                                thzfloat = float(dthzlist[cct].split()[3])
+                                numlist.append(thzfloat)
+                            dthz_std = np.std(numlist)
+                            dthz_mean = np.mean(numlist)
+                            rangemax = dthz_mean + dthz_std
+                            rangemin = dthz_mean - dthz_std
+                            removeidx=list()
+                            for cct in range(num_num):
+                                print numlist[cct]
+                                if (numlist[cct] < rangemin):
+                                    removeidx.append(cct)
+                            if len(removeidx) == 1:
+                                print "Removing ", dthzlist[removeidx[0]]
+                                dthzlist.pop(removeidx[0])
+                                denom_num = denom_num - 1
+                                im_denom = im_denom + 1
+                            else:
+                                print "Could not determine a correction."
                         elif im_denom>1:
                             print 'WARNING: More than 1 imaginary frequencies found in the saddle point! Please check the OUTCAR of %s!'%vdir_denom[freq]
                     else:
