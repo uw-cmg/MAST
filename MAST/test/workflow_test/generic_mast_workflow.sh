@@ -36,6 +36,16 @@ export MAST_ARCHIVE=$mast_test_dir/ARCHIVE
 export MAST_CONTROL=$mast_test_dir/CONTROL
 
 mastver=`which mast`
+if [$mastver -eq ""]
+then 
+    echo "ATTENTION: NO mast COMMAND FOUND!"
+    echo "Check to make sure paths and environment are set up correctly."
+    echo "If using anaconda without a pip installation,"
+    echo "the environment's bin/activate may need"
+    echo "a path to MAST's bin directory."
+    echo "ERROR: command not found. EXITING."
+    exit
+fi 
 echo "MAST command found: "$mastver
 
 nice -n 19 mast -i $examples_located"/"$which_example
