@@ -1,0 +1,310 @@
+Recipe name: OptimizeWorkflow
+Ingredients: 
+    defect_1nn_q=p0_opt1
+        Parents: 
+            inducedefect_1nn
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_1nn_q=p0_opt2:[['give_structure']]
+    defect_1nn_q=p0_opt2
+        Parents: 
+            defect_1nn_q=p0_opt1
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_1nn_q=p0_stat:[['give_structure']]
+    defect_1nn_q=p0_stat
+        Parents: 
+            defect_1nn_q=p0_opt2
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            phonon_1nn_q=p0_solute:[['give_structure']]
+            diffcoeff_utility:[['copy_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+            neb_1nn-solute_q=p0_stat:[['give_structure_and_energy_to_neb']]
+            neb_1nn-solute_q=p0_opt2:[['give_structure_and_energy_to_neb']]
+            neb_1nn-solute_q=p0_opt1:[['give_structure_and_energy_to_neb']]
+    defect_purefin_q=p0_opt1
+        Parents: 
+            inducedefect_purefin
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_purefin_q=p0_opt2:[['give_structure']]
+    defect_purefin_q=p0_opt2
+        Parents: 
+            defect_purefin_q=p0_opt1
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_purefin_q=p0_stat:[['give_structure']]
+    defect_purefin_q=p0_stat
+        Parents: 
+            defect_purefin_q=p0_opt2
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_pureinit-purefin_q=p0_stat:[['give_structure_and_energy_to_neb']]
+            diffcoeff_utility:[['copy_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+            neb_pureinit-purefin_q=p0_opt2:[['give_structure_and_energy_to_neb']]
+            neb_pureinit-purefin_q=p0_opt1:[['give_structure_and_energy_to_neb']]
+    defect_pureinit_q=p0_opt1
+        Parents: 
+            inducedefect_pureinit
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_pureinit_q=p0_opt2:[['give_structure']]
+    defect_pureinit_q=p0_opt2
+        Parents: 
+            defect_pureinit_q=p0_opt1
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_pureinit_q=p0_stat:[['give_structure']]
+    defect_pureinit_q=p0_stat
+        Parents: 
+            defect_pureinit_q=p0_opt2
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_pureinit-purefin_q=p0_stat:[['give_structure_and_energy_to_neb']]
+            phonon_pureinit_q=p0_solvent:[['give_structure']]
+            diffcoeff_utility:[['copy_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+            neb_pureinit-purefin_q=p0_opt2:[['give_structure_and_energy_to_neb']]
+            neb_pureinit-purefin_q=p0_opt1:[['give_structure_and_energy_to_neb']]
+    defect_solute_q=p0_opt1
+        Parents: 
+            inducedefect_solute
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_solute_q=p0_opt2:[['give_structure']]
+    defect_solute_q=p0_opt2
+        Parents: 
+            defect_solute_q=p0_opt1
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            defect_solute_q=p0_stat:[['give_structure']]
+    defect_solute_q=p0_stat
+        Parents: 
+            defect_solute_q=p0_opt2
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+            neb_1nn-solute_q=p0_stat:[['give_structure_and_energy_to_neb']]
+            neb_1nn-solute_q=p0_opt2:[['give_structure_and_energy_to_neb']]
+            neb_1nn-solute_q=p0_opt1:[['give_structure_and_energy_to_neb']]
+    diffcoeff_utility
+        Parents: 
+            perfect_stat
+            phonon_1nn_q=p0_solute
+            phonon_pureinit_q=p0_solvent
+            defect_1nn_q=p0_stat
+            defect_purefin_q=p0_stat
+            defect_pureinit_q=p0_stat
+            defect_solute_q=p0_stat
+            neb_1nn-solute_q=p0_stat
+            neb_pureinit-purefin_q=p0_stat
+            phonon_1nn-solute_q=p0_movingsolute
+            phonon_pureinit-purefin_q=p0_movingsolvent
+        Write:    [['write_ingred_input_file', 'diffcoeff_input.txt', 'diff_allowed_keywords.py', '0'], ['write_submit_script']]
+        Ready:    [['file_exists', 'diffcoeff_input.txt']]
+        Run:      [['run_singlerun']]
+        Complete: [['file_exists', 'Diffusivity.txt']]
+        Children: 
+    inducedefect_1nn
+        Parents: 
+            perfect_opt2
+        Write:    [['no_setup']]
+        Ready:    [['ready_defect']]
+        Run:      [['run_defect']]
+        Complete: [['complete_structure']]
+        Children: 
+            defect_1nn_q=p0_opt1:[['give_structure']]
+    inducedefect_purefin
+        Parents: 
+            perfect_opt2
+        Write:    [['no_setup']]
+        Ready:    [['ready_defect']]
+        Run:      [['run_defect']]
+        Complete: [['complete_structure']]
+        Children: 
+            defect_purefin_q=p0_opt1:[['give_structure']]
+    inducedefect_pureinit
+        Parents: 
+            perfect_opt2
+        Write:    [['no_setup']]
+        Ready:    [['ready_defect']]
+        Run:      [['run_defect']]
+        Complete: [['complete_structure']]
+        Children: 
+            defect_pureinit_q=p0_opt1:[['give_structure']]
+    inducedefect_solute
+        Parents: 
+            perfect_opt2
+        Write:    [['no_setup']]
+        Ready:    [['ready_defect']]
+        Run:      [['run_defect']]
+        Complete: [['complete_structure']]
+        Children: 
+            defect_solute_q=p0_opt1:[['give_structure']]
+    neb_1nn-solute_q=p0_opt1
+        Parents: 
+            defect_solute_q=p0_stat
+            defect_1nn_q=p0_stat
+        Write:    [['write_neb']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_1nn-solute_q=p0_opt2:[['give_neb_structures_to_neb']]
+    neb_1nn-solute_q=p0_opt2
+        Parents: 
+            defect_solute_q=p0_stat
+            defect_1nn_q=p0_stat
+            neb_1nn-solute_q=p0_opt1
+        Write:    [['write_neb']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_1nn-solute_q=p0_stat:[['give_neb_structures_to_neb']]
+    neb_1nn-solute_q=p0_stat
+        Parents: 
+            defect_solute_q=p0_stat
+            defect_1nn_q=p0_stat
+            neb_1nn-solute_q=p0_opt2
+        Write:    [['write_neb_subfolders']]
+        Ready:    [['ready_neb_subfolders']]
+        Run:      [['run_neb_subfolders']]
+        Complete: [['complete_neb_subfolders']]
+        Children: 
+            phonon_1nn-solute_q=p0_movingsolute:[['give_saddle_structure']]
+            diffcoeff_utility:[['copy_saddle_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+    neb_pureinit-purefin_q=p0_opt1
+        Parents: 
+            defect_pureinit_q=p0_stat
+            defect_purefin_q=p0_stat
+        Write:    [['write_neb']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_pureinit-purefin_q=p0_opt2:[['give_neb_structures_to_neb']]
+    neb_pureinit-purefin_q=p0_opt2
+        Parents: 
+            defect_pureinit_q=p0_stat
+            defect_purefin_q=p0_stat
+            neb_pureinit-purefin_q=p0_opt1
+        Write:    [['write_neb']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            neb_pureinit-purefin_q=p0_stat:[['give_neb_structures_to_neb']]
+    neb_pureinit-purefin_q=p0_stat
+        Parents: 
+            defect_pureinit_q=p0_stat
+            defect_purefin_q=p0_stat
+            neb_pureinit-purefin_q=p0_opt2
+        Write:    [['write_neb_subfolders']]
+        Ready:    [['ready_neb_subfolders']]
+        Run:      [['run_neb_subfolders']]
+        Complete: [['complete_neb_subfolders']]
+        Children: 
+            diffcoeff_utility:[['copy_saddle_file_with_prepend', 'OSZICAR', 'OSZICAR']]
+            phonon_pureinit-purefin_q=p0_movingsolvent:[['give_saddle_structure']]
+    perfect_opt1
+        Parents: 
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            perfect_opt2:[['give_structure']]
+    perfect_opt2
+        Parents: 
+            perfect_opt1
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            perfect_stat:[['give_structure']]
+            inducedefect_pureinit:[['give_structure']]
+            inducedefect_1nn:[['give_structure']]
+            inducedefect_purefin:[['give_structure']]
+            inducedefect_solute:[['give_structure']]
+    perfect_stat
+        Parents: 
+            perfect_opt2
+        Write:    [['write_singlerun']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OSZICAR', 'OSZICAR'], ['copy_file_with_prepend', 'POSCAR', 'POSCAR']]
+    phonon_1nn-solute_q=p0_movingsolute
+        Parents: 
+            neb_1nn-solute_q=p0_stat
+        Write:    [['write_phonon_single']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OUTCAR', 'OUTCAR']]
+    phonon_1nn_q=p0_solute
+        Parents: 
+            defect_1nn_q=p0_stat
+        Write:    [['write_phonon_single']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OUTCAR', 'OUTCAR']]
+    phonon_pureinit-purefin_q=p0_movingsolvent
+        Parents: 
+            neb_pureinit-purefin_q=p0_stat
+        Write:    [['write_phonon_single']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OUTCAR', 'OUTCAR']]
+    phonon_pureinit_q=p0_solvent
+        Parents: 
+            defect_pureinit_q=p0_stat
+        Write:    [['write_phonon_single']]
+        Ready:    [['ready_singlerun']]
+        Run:      [['run_singlerun']]
+        Complete: [['complete_singlerun']]
+        Children: 
+            diffcoeff_utility:[['copy_file_with_prepend', 'OUTCAR', 'OUTCAR']]
