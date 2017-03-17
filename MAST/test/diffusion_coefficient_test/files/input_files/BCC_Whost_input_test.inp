@@ -1,0 +1,352 @@
+# NEB workflow
+$mast
+system_name BCC_solute
+$end
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 W
+X2 Ag
+end
+
+begin lattice
+9.5650187208282311 0.0000000000000000 0.0000000000000000
+0.0000000000000000 9.5650187208282311 0.0000000000000000
+0.0000000000000000 0.0000000000000000 9.5650187208282311
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.0000000000 0.0000000000 0.3333333333
+X1 0.0000000000 0.0000000000 0.6666666667
+X1 0.0000000000 0.3333333333 0.0000000000
+X1 0.0000000000 0.3333333333 0.3333333333
+X1 0.0000000000 0.3333333333 0.6666666667
+X1 0.0000000000 0.6666666667 0.0000000000
+X1 0.0000000000 0.6666666667 0.3333333333
+X1 0.0000000000 0.6666666667 0.6666666667
+X1 0.3333333333 0.0000000000 0.0000000000
+X1 0.3333333333 0.0000000000 0.3333333333
+X1 0.3333333333 0.0000000000 0.6666666667
+X1 0.3333333333 0.3333333333 0.0000000000
+X1 0.3333333333 0.3333333333 0.3333333333
+X1 0.3333333333 0.3333333333 0.6666666667
+X1 0.3333333333 0.6666666667 0.0000000000
+X1 0.3333333333 0.6666666667 0.3333333333
+X1 0.3333333333 0.6666666667 0.6666666667
+X1 0.6666666667 0.0000000000 0.0000000000
+X1 0.6666666667 0.0000000000 0.3333333333
+X1 0.6666666667 0.0000000000 0.6666666667
+X1 0.6666666667 0.3333333333 0.0000000000
+X1 0.6666666667 0.3333333333 0.3333333333
+X1 0.6666666667 0.3333333333 0.6666666667
+X1 0.6666666667 0.6666666667 0.0000000000
+X1 0.6666666667 0.6666666667 0.3333333333
+X1 0.6666666667 0.6666666667 0.6666666667
+X1 0.1666666667 0.1666666667 0.1666666667
+X1 0.1666666667 0.1666666667 0.5000000000
+X1 0.1666666667 0.1666666667 0.8333333333
+X1 0.1666666667 0.5000000000 0.1666666667
+X1 0.1666666667 0.5000000000 0.5000000000
+X1 0.1666666667 0.5000000000 0.8333333333
+X1 0.1666666667 0.8333333333 0.1666666667
+X1 0.1666666667 0.8333333333 0.5000000000
+X1 0.1666666667 0.8333333333 0.8333333333
+X1 0.5000000000 0.1666666667 0.1666666667
+X1 0.5000000000 0.1666666667 0.5000000000
+X1 0.5000000000 0.1666666667 0.8333333333
+X1 0.5000000000 0.5000000000 0.1666666667
+X1 0.5000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.5000000000 0.8333333333
+X1 0.5000000000 0.8333333333 0.1666666667
+X1 0.5000000000 0.8333333333 0.5000000000
+X1 0.5000000000 0.8333333333 0.8333333333
+X1 0.8333333333 0.1666666667 0.1666666667
+X1 0.8333333333 0.1666666667 0.5000000000
+X1 0.8333333333 0.1666666667 0.8333333333
+X1 0.8333333333 0.5000000000 0.1666666667
+X1 0.8333333333 0.5000000000 0.5000000000
+X1 0.8333333333 0.5000000000 0.8333333333
+X1 0.8333333333 0.8333333333 0.1666666667
+X1 0.8333333333 0.8333333333 0.5000000000
+X1 0.8333333333 0.8333333333 0.8333333333
+end
+
+$end
+
+$defects
+threshold 1e-4
+coord_type fractional
+
+# w_3, w_3p, w_3pp freq
+begin vac1a
+vacancy 0.3333333333 0.3333333333 0.3333333333 X1
+substitution 0.1666666667 0.1666666667 0.1666666667 X2
+phonon w3 0.5 0.1666666667 0.1666666667 0.5
+phonon w3p 0.1666666667 0.5 0.5 0.5
+phonon w3pp 0.5 0.5 0.5 0.5
+end
+
+# w_2 freq
+begin vac1b
+vacancy 0.1666666667 0.1666666667 0.1666666667 X1
+substitution 0.3333333333 0.3333333333 0.3333333333 X2
+phonon w2 0.3333333333 0.3333333333 0.3333333333 0.5
+end
+
+# w_4, w_6 freq
+begin vac2
+vacancy 0.5 0.1666666667 0.1666666667 X1
+substitution 0.1666666667 0.1666666667 0.1666666667 X2
+phonon w4 0.3333333333 0.3333333333 0.3333333333 0.5
+phonon w6 0.6666666667 0.0 0.0 0.5
+end
+
+# w_4p freq
+begin vac3
+vacancy 0.1666666667 0.5 0.5 X1
+substitution 0.1666666667 0.1666666667 0.1666666667 X2
+phonon w4p 0.3333333333 0.3333333333 0.3333333333 0.5
+end
+
+# w_4pp freq
+begin vac5
+vacancy 0.5 0.5 0.5 X1
+substitution 0.1666666667 0.1666666667 0.1666666667 X2
+phonon w4pp 0.3333333333 0.3333333333 0.3333333333 0.5
+end
+
+# w_5 freq
+begin vac4
+vacancy 0.6666666667 0.0 0.0 X1
+substitution 0.1666666667 0.1666666667 0.1666666667 X2
+phonon w5 0.5 0.1666666667 0.1666666667 0.5
+end
+
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_program       vasp
+mast_pp_setup      W=W_pv Sc=Sc_sv Ti=Ti_sv_new V=V_sv_new Cr=Cr_pv_new Mn=Mn_pv_new Fe=Fe_pv_new Co=Co_new Ni=Ni_new Cu=Cu_new Zn=Zn Y=Y_sv Zr=Zr_sv Nb=Nb_sv Mo=Mo_sv Tc=Tc_pv_new Ru=Ru_pv_new Rh=Rh_pv_new Ag=Ag_new Cd=Cd La=La Hf=Hf_sv Ta=Ta_pv Re=Re_pv Os=Os_pv Ir=Ir Pt=Pt_new Au=Au_new Hg=Hg Na=Na_pv Mg=Mg_new K=K_sv Ca=Ca_sv Rb=Rb_sv Sr=Sr_sv Cs=Cs_sv Ba=Ba_sv Al=Al Si=Si P=P Ga=Ga_d Ge=Ge_d As=As In=In_d Sn=Sn_d Sb=Sb Tl=Tl_d Pb=Pb_d Bi=Bi_d
+mast_nodes         2
+mast_processors    40
+mast_ppn           20
+mast_queue         univ2
+mast_exec          vsquid
+#mast_exec          mpiexec //home/hhwu/bin/vasp.5.3.3_vtst_static
+mast_kpoints       4x4x4 M
+mast_xc PBE
+encut 400
+ediff 0.00001
+ediffg -0.01
+isif 2
+ibrion 2
+ispin 2
+nsw 101
+ismear 1
+sigma 0.2
+lreal Auto
+lwave False
+lcharg False
+prec Accurate
+SYMPREC 1E-8
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_defect
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+end
+
+begin norun
+mast_write_method write_singlerun
+mast_ready_method file_exists POSCAR
+mast_run_method copy_file POSCAR CONTCAR
+mast_complete_method file_exists CONTCAR
+end
+
+begin norun_to_diffcoeff
+mast_write_method write_singlerun
+mast_ready_method file_exists POSCAR
+mast_run_method copy_file POSCAR CONTCAR
+mast_complete_method file_exists CONTCAR
+mast_update_children_method     copy_file_with_prepend OSZICAR OSZICAR; copy_file_with_prepend POSCAR POSCAR
+end
+
+begin defect_relax
+isif 2
+end
+
+begin defect_to_neb
+isif 2
+mast_update_children_method give_structure_and_energy_to_neb
+end
+
+begin defect_to_diffcoeff
+isif 2
+mast_update_children_method copy_file_with_prepend OSZICAR OSZICAR
+end
+
+begin phonon
+ibrion 5
+isif   2
+nfree  2
+potim  0.05
+mast_write_method write_phonon_single
+mast_update_children_method copy_file_with_prepend OUTCAR OUTCAR
+end
+
+begin neb_to_phonon
+mast_program   vasp_neb
+ibrion 1
+potim 0.5
+images 1
+lclimb True
+spring -5
+mast_write_method            write_neb
+mast_update_children_method   copy_file 01/CONTCAR POSCAR
+#mast_update_children_method  give_saddle_structure
+end
+
+begin neb_to_diffcoeff
+mast_program   vasp_neb
+ibrion 1
+potim 0.5
+images 1
+lclimb True
+spring -5
+mast_write_method            write_neb
+mast_update_children_method copy_saddle_file_with_prepend OSZICAR OSZICAR
+end
+
+begin diffcoeff
+mast_program None
+mast_write_method           write_ingred_input_file diffcoeff_input.txt diff_allowed_keywords.py none 0;write_submit_script
+mast_ready_method           file_exists diffcoeff_input.txt
+mast_run_method             run_singlerun
+mast_complete_method        file_exists Diffusivity.txt
+mast_update_children_method no_update
+mast_exec mast_diffusion_coefficient -i diffcoeff_input.txt
+#inputs below
+type bcc_9freq
+
+#attempt frequencies in terahertz
+#frequency label      starting position phonons     saddle position phonons
+#v0 is for host self-diffusion and may be calculated separately once
+v0   3.7501
+#v0 phonon_pureinit_q=p0_solvent phonon_pureinit-purefin_q=p0_movingsolvent
+v2   phonon_vac1b_w2   phonon_vac1a-vac1b_w2
+v3   phonon_vac1a_w3   phonon_vac1a-vac2_w3w4  
+v4   phonon_vac2_w4    phonon_vac1a-vac2_w3w4
+v3p  phonon_vac1a_w3p  phonon_vac1a-vac3_w3w4p 
+v4p  phonon_vac3_w4p   phonon_vac1a-vac3_w3w4p
+v3pp phonon_vac1a_w3pp phonon_vac1a-vac5_w3w4pp
+v4pp phonon_vac5_w4pp  phonon_vac1a-vac5_w3w4pp
+v5   phonon_vac4_w5    phonon_vac2-vac4_w5w6
+v6   phonon_vac2_w6    phonon_vac2-vac4_w5w6
+
+#migration barriers in eV
+#label   initial state      neb
+#E0 is for host self-diffusion and may be calculated separately once
+E0    1.6945
+E2    defect_vac1a_opt    neb_vac1a-vac1b_opt
+E3    defect_vac1a_opt    neb_vac1a-vac2_opt
+E4    defect_vac2_opt     neb_vac1a-vac2_opt
+E3p   defect_vac1a_opt    neb_vac1a-vac3_opt
+E4p   defect_vac3_opt     neb_vac1a-vac3_opt
+E3pp  defect_vac1a_opt    neb_vac1a-vac5_opt
+E4pp  defect_vac5_opt     neb_vac1a-vac5_opt
+E5    defect_vac2_opt     neb_vac2-vac4_opt
+E6    defect_vac4_opt     neb_vac2-vac4_opt
+
+lattice perfect_stat
+#HVf is for host vacancy formation energy and may be calculated separately once
+HVf 3.0527
+#HVf  perfect_stat defect_pureinit_q=p0_stat
+#HB  perfect_stat  defect_1nn_q=p0_stat  defect_subnovac_q=p0_stat defect_pureinit_q=p0_stat
+#HB is not needed in nine-frequency model
+end
+
+$end
+
+$neb
+# w_2
+begin vac1a-vac1b
+X2, 0.1666666667 0.1666666667 0.1666666667, 0.3333333333 0.3333333333 0.3333333333
+images 1
+phonon w2 0.25 0.25 0.25 0.5
+end
+
+# w_3 (w_4)
+begin vac1a-vac2
+X1, 0.5 0.1666666667 0.1666666667, 0.3333333333 0.3333333333 0.3333333333
+images 1
+phonon w3w4 0.4166666667 0.25 0.25 0.5
+end
+
+# w_3p (w_4p)
+begin vac1a-vac3
+X1, 0.1666666667 0.5 0.5, 0.3333333333 0.3333333333 0.3333333333
+images 1
+phonon w3w4p 0.25 0.4166666667 0.4166666667 0.5
+end
+
+# w_3pp (w_4pp)
+begin vac1a-vac5
+X1, 0.5 0.5 0.5, 0.3333333333 0.3333333333 0.3333333333
+images 1
+phonon w3w4pp 0.4166666667 0.4166666667 0.4166666667 0.5
+end
+
+# w_5 (w_6)
+begin vac2-vac4
+X1, 0.6666666667 0.0 0.0, 0.5 0.1666666667 0.1666666667
+images 1
+phonon w5w6 0.5833333333 0.0833333333 0.0833333333 0.5
+end
+
+$end
+
+
+$recipe
+perfect_stat (norun)
+    {begin}
+    induce_defect_<N> (inducedefect)
+        defect_<N>_opt (defect_relax)
+    {end}
+perfect_stat (norun_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{begin}
+defect_<N>_opt (defect_relax)
+    phonon_<N>_<P> (phonon)
+        diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+defect_<N>_opt (defect_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+defect_<B>_opt (defect_to_neb), defect_<E>_opt (defect_to_neb)
+    neb_<B-E>_opt (neb_to_phonon)
+{end}
+{begin}
+neb_<B-E>_opt (neb_to_phonon)
+    phonon_<B-E>_<P> (phonon)
+        diffcoeff_utility (diffcoeff)
+{end}
+{begin}
+neb_<B-E>_opt (neb_to_diffcoeff)
+    diffcoeff_utility (diffcoeff)
+{end}
+$end
