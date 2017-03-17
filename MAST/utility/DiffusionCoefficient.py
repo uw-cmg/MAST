@@ -54,7 +54,8 @@ class ParsingInputFiles(object):
                 keyword <str>: keywords that specify the desired items, including 'E', 'H', 'v', 'type', 'lattice'
         """
         item_name = dict()
-        content = open(self.inp,'r').readlines()
+        with open(self.inp,'r') as contentfile:
+            content = contentfile.readlines()
         Elist=['E0','E1','E2','E3','E4','E3p','E4p','E3pp','E4pp','E5','E6','Ea','Eb','Ec','EX','Eap','Ebp','Ecp','EXp','E11','E12','E13','E14','E23','E24','E33','E34','E44']
         vlist=['v0','v1','v2','v3','v4','v3p','v4p','v3pp','v4pp','v5','v6','va','vb','vc','vX','vap','vbp','vcp','vXp','v11','v12','v13','v14','v23','v24','v33','v34','v44']
         Hlist=['HB','HVf']
@@ -146,7 +147,8 @@ class ParsingInputFiles(object):
                     ene[key]=float(Hdir[keyword][key])
                 except ValueError: 
                     ene[key] = Hdir[keyword][key]
-                    line = open(ene[key]+'_OSZICAR','r').readlines()      
+                    with open(ene[key]+'_OSZICAR','r') as efile:
+                        line = efile.readlines()
                     pt = -1   
                     while not 'E0' in line[pt]: pt = pt - 1
                     ene[key] = float(self.getinfo(line[pt])[4])
@@ -169,7 +171,8 @@ class ParsingInputFiles(object):
             if not len(Edir[freq])==1: 
                 try: enesaddle[freq]=float(Edir_saddle[freq])
                 except ValueError:
-                    line = open(Edir_saddle[freq]+'_OSZICAR','r').readlines()
+                    with open(Edir_saddle[freq]+'_OSZICAR','r') as esfile:
+                        line = esfile.readlines()
                     pt = -1
                     while not 'E0' in line[pt]: pt = pt - 1
                     enesaddle[freq] = float(self.getinfo(line[pt])[4])
@@ -177,7 +180,8 @@ class ParsingInputFiles(object):
             if not len(Edir[freq])==1: 
                 try: eneend[freq]=float(Edir_min[freq])
                 except ValueError:
-                    line = open(Edir_min[freq]+'_OSZICAR','r').readlines()
+                    with open(Edir_min[freq]+'_OSZICAR','r') as emfile:
+                        line = emfile.readlines()
                     pt = -1
                     while not 'E0' in line[pt]: pt = pt - 1
                     eneend[freq] = float(self.getinfo(line[pt])[4])
@@ -200,8 +204,9 @@ class ParsingInputFiles(object):
             if len(vdir[freq])==1: v[freq] = vdir[freq][0]
             else:
                 if os.path.isfile(vdir_num[freq]+'_FREQ') and os.path.isfile(vdir_num[freq]+'_FREQ'): # Reading data from FREQ files
-                    fn=open(vdir_num[freq]+'_FREQ','r')
-                    nthzlist=self.getinfo(fn.readline())
+                    with open(vdir_num[freq]+'_FREQ','r') as fn:
+                        fnline=fn.readline()
+                    nthzlist=self.getinfo(fnline)
                     i=0
                     num_num=0
                     v_num[freq]=1.0
@@ -210,8 +215,9 @@ class ParsingInputFiles(object):
                             v_num[freq]=v_num[freq]*float(nthzlist[i])
                             num_num+=1
                         i+=1
-                    fd=open(vdir_denom[freq]+'_FREQ','r')
-                    dthzlist=self.getinfo(fd.readline())
+                    with open(vdir_denom[freq]+'_FREQ','r') as fd:
+                        fdline=fd.readline()
+                    dthzlist=self.getinfo(fdline)
                     j=0
                     denom_num=0
                     v_denom[freq]=1.0
@@ -362,8 +368,8 @@ class DiffCoeff(ParsingInputFiles):
             tempend = temp[2]
         except: tempstart = 0.0; tempstep = 0.1; tempend = 2.0 # default temperature range
         if model==5:
-            fp = open('Diffusivity.txt','w+')
-            fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]\n')
+            with open('Diffusivity.txt','w+') as fp:
+                fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]\n')
             print '1000/T[K^(-1)]    D_solute[cm^2/s]'
             D = []
             f0 = 0.7815
@@ -386,7 +392,8 @@ class DiffCoeff(ParsingInputFiles):
                 else: Vacconc = np.exp(-kB*HVf/T)       
                 Dself = f0*Vacconc*a**2*jfreq['v0']
                 D.append(Dself*f2*jfreq['v2']*jfreq['v4']/f0/jfreq['v0']/jfreq['v3'])
-                fp.write('%f   %E\n'%(t,D[i]))
+                with open('Diffusivity.txt','a+') as fp:
+                    fp.write('%f   %E\n'%(t,D[i]))
                 print '%f   %E'%(t,D[i])
                 t = t + tempstep    
                 i = i + 1
@@ -406,8 +413,8 @@ class DiffCoeff(ParsingInputFiles):
                 plt.savefig('Diffusivity.png')
                 plt.show()
         if model==9:
-            fp = open('Diffusivity.txt','w+')
-            fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]\n')
+            with open('Diffusivity.txt','w+') as fp:
+                fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]\n')
             print '1000/T[K^(-1)]    D_solute[cm^2/s]'
             D = []
             f0 = 0.7272
@@ -426,7 +433,8 @@ class DiffCoeff(ParsingInputFiles):
                 else: Vacconc = np.exp(-kB*HVf/T)       
                 Dself = f0*Vacconc*a**2*jfreq['v0']
                 D.append(a**2*Vacconc*f2*jfreq['v2']*jfreq['v4p']/jfreq['v3p'])
-                fp.write('%f   %E\n'%(t,D[i]))
+                with open('Diffusivity.txt','a+') as fp:
+                    fp.write('%f   %E\n'%(t,D[i]))
                 print '%f   %E'%(t,D[i])
                 t = t + tempstep    
                 i = i + 1
@@ -446,11 +454,11 @@ class DiffCoeff(ParsingInputFiles):
                 plt.savefig('Diffusivity.png')
                 plt.show()
         if model==14:
-            fp = open('Diffusivity.txt','w+')
-            fp.write('D_host(c) = D_host(0) * [ 1 + b1*c + b2*c^2 + ...]\n')
-            fp.write('D_solute(c) = D_solute(0) * [ 1 + B1*c + ...]\n')
-            fp.write('c = solute concentration [atomic fraction]\n\n')
-            fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]    b1        b2        B1\n')
+            with open('Diffusivity.txt','w+') as fp:
+                fp.write('D_host(c) = D_host(0) * [ 1 + b1*c + b2*c^2 + ...]\n')
+                fp.write('D_solute(c) = D_solute(0) * [ 1 + B1*c + ...]\n')
+                fp.write('c = solute concentration [atomic fraction]\n\n')
+                fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]    b1        b2        B1\n')
             print 'D_host(c) = D_host(0) * [ 1 + b1*c + b2*c^2 + ...]'
             print 'D_solute(c) = D_solute(0) * [ 1 + B1*c + ...]'
             print 'c = solute concentration [atomic fraction]\n'
@@ -482,7 +490,8 @@ class DiffCoeff(ParsingInputFiles):
                 b1.append(-18 + (jfreq['v4']/jfreq['v3'])*((4*jfreq['v1'] + 14*jfreq['v3'])/jfreq['v0']))
                 b2.append((jfreq['v23']/jfreq['v24'])*(jfreq['v4']/jfreq['v3'])*((jfreq['v4']/jfreq['v3'])*(jfreq['v4']/jfreq['v3'])*(8*jfreq['v13']+2*jfreq['v11']+10*jfreq['v33']-16*jfreq['v1']-28*jfreq['v3'])/jfreq['v0'] + (jfreq['v4']/jfreq['v3'])*(8*(jfreq['v14']-jfreq['v1'])+2*(jfreq['v34']-jfreq['v3']))/jfreq['v0'] +(10*jfreq['v44']-37*jfreq['v4'])/jfreq['v0'] + 63) + (jfreq['v4']/jfreq['v3'])*(jfreq['v4']/jfreq['v3'])*(4*jfreq['v11']+20*jfreq['v13']+11*jfreq['v33']-28*jfreq['v1']-49*jfreq['v3'])/jfreq['v0'] + (jfreq['v4']/jfreq['v3'])*(20*(jfreq['v14']-jfreq['v1'])+47*(jfreq['v34']-jfreq['v3']))/jfreq['v0'] + 11*jfreq['v44']/jfreq['v0'] - 173*jfreq['v4']/jfreq['v0'] + 192)
                 B1.append(-6 - 12*((jfreq['v23']/jfreq['v24'])*(jfreq['v4']/jfreq['v3'])) + (jfreq['v4']/jfreq['v3'])*(4*(jfreq['v21']/jfreq['v2'])*(jfreq['v23']/jfreq['v24'])*(jfreq['v4']/jfreq['v3']) + 14*(jfreq['v23']/jfreq['v2'])))
-                fp.write('%f   %E    %f    %f    %f\n'%(t,D[i],b1[i],b2[i],B1[i]))
+                with open('Diffusivity.txt','a+') as fp:
+                    fp.write('%f   %E    %f    %f    %f\n'%(t,D[i],b1[i],b2[i],B1[i]))
                 print '%f   %E    %f    %f    %f'%(t,D[i],b1[i],b2[i],B1[i])
                 t = t + tempstep    
                 i = i + 1
@@ -502,8 +511,8 @@ class DiffCoeff(ParsingInputFiles):
                 plt.savefig('Diffusivity.png')
                 plt.show()
         elif model==8:
-            fp = open('Diffusivity.txt','w+')
-            fp.write('1000/T[K^(-1)]    D_basal[cm^2/s]    D_c-axis[cm^2/s]\n')
+            with open('Diffusivity.txt','w+') as fp:
+                fp.write('1000/T[K^(-1)]    D_basal[cm^2/s]    D_c-axis[cm^2/s]\n')
             print '1000/T[K^(-1)]    D_basal[cm^2/s]    D_c-axis[cm^2/s]'
             Dperp = []
             Dpara = []
@@ -529,7 +538,8 @@ class DiffCoeff(ParsingInputFiles):
                 else: C2=np.exp(-kB*(HVf+HB)/T)
                 Dperp.append(a**2*(3*f2x*jfreq['vX']+f1b*jfreq['vXp'])*C2/2)
                 Dpara.append(c**2*f1z*jfreq['vXp']*C2*0.75)
-                fp.write('%f   %E   %E\n'%(t,Dperp[i],Dpara[i]))
+                with open('Diffusivity.txt','a+') as fp:
+                    fp.write('%f   %E   %E\n'%(t,Dperp[i],Dpara[i]))
                 print '%f   %E   %E'%(t,Dperp[i],Dpara[i])
                 t = t + tempstep
                 i = i + 1
