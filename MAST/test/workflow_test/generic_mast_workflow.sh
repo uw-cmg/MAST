@@ -35,7 +35,8 @@ export MAST_SCRATCH=$mast_test_dir/SCRATCH
 export MAST_ARCHIVE=$mast_test_dir/ARCHIVE
 export MAST_CONTROL=$mast_test_dir/CONTROL
 
-which mast
+mastver=`which mast`
+echo "MAST command found: "$mastver
 
 nice -n 19 mast -i $examples_located"/"$which_example
 mydir=`find $MAST_SCRATCH -mindepth 1 -maxdepth 1 -type d`
