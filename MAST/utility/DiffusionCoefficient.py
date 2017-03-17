@@ -6,6 +6,7 @@
 # Last updated: 2015-05-xx
 # FCC dilute Five-frequency model equation from R. E. Howard and J. R. Manning, Physical Review, Vol. 154, 1967.
 # HCP dilute Eight-frequency model equation from P. B. Ghate, Physical Review, Vol. 133, 1963.
+# BCC dilute Nine-frequency model equation from A. D. Le Claire, Physical Chemistry: An Advanced Treatise, (Academic Press, 1970)
 # FCC concentrated 14-frequency model equation from Bocquet J.-L. and Le Claire A. D.
 #   Bocquet (X1 = X2 = f0)
 #   b1 = -18 + (w4/w3)*[(4*w1 + 14*w3)/w0]
@@ -18,8 +19,8 @@
 
 import sys, getopt, os
 import numpy as np
+import pymatgen as mg
 from pymatgen.io.vasp import Poscar
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from MAST.utility import fileutil
   
 class ParsingInputFiles(object):
@@ -54,8 +55,8 @@ class ParsingInputFiles(object):
         """
         item_name = dict()
         content = open(self.inp,'r').readlines()
-        Elist=['E0','E1','E2','E3','E4','Ea','Eb','Ec','EX','Eap','Ebp','Ecp','EXp','E11','E12','E13','E14','E23','E24','E33','E34','E44']
-        vlist=['v0','v1','v2','v3','v4','va','vb','vc','vX','vap','vbp','vcp','vXp','v11','v12','v13','v14','v23','v24','v33','v34','v44']
+        Elist=['E0','E1','E2','E3','E4','E3p','E4p','E3pp','E4pp','E5','E6','Ea','Eb','Ec','EX','Eap','Ebp','Ecp','EXp','E11','E12','E13','E14','E23','E24','E33','E34','E44']
+        vlist=['v0','v1','v2','v3','v4','v3p','v4p','v3pp','v4pp','v5','v6','va','vb','vc','vX','vap','vbp','vcp','vXp','v11','v12','v13','v14','v23','v24','v33','v34','v44']
         Hlist=['HB','HVf']
         for i in range(len(content)):
             line = self.getinfo(content[i])
@@ -94,6 +95,8 @@ class ParsingInputFiles(object):
                         item_name = 5
                     elif line[0]=='type' and line[1]=='hcp_8freq':
                         item_name = 8
+                    elif line[0]=='type' and line[1]=='bcc_9freq':
+                        item_name = 9
                     elif line[0]=='type' and line[1]=='fcc_14freq':
                         item_name = 14
                 elif keyword=='lattice' and 'lattice' in line[0]:
@@ -113,9 +116,11 @@ class ParsingInputFiles(object):
 
         struct = Poscar.from_file('POSCAR').structure
         os.system('rm POSCAR')
-        reduced = SpacegroupAnalyzer(struct,0.001).get_primitive_standard_structure()   
+        reduced = mg.symmetry.analyzer.SpacegroupAnalyzer(struct,0.001).get_primitive_standard_structure()   
         data['No.'] = len(struct)
         if model==5:
+            data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
+        if model==9:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
         if model==14:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
@@ -330,6 +335,15 @@ class DiffCoeff(ParsingInputFiles):
             print "Attempt Frequencies [THz]:  va: {va:.4f}  vb: {vb:.4f}  vc: {vc:.4f}  vX: {vX:.4f}  v'a: {vap:.4f}  v'b: {vbp:.4f}  v'c: {vcp:.4f}  v'X: {vXp:.4f}".format(**v)
             print "Vacancy Formation Energy [eV]: {0:.4f}".format(HVf)
             print "Vacancy-Solute Binding Energy [eV]:  {0:.4f}\n".format(HB)
+        if model==9:
+            print "BCC Nine-Frequency Dilute Diffusion Model"
+            print "BCC lattice constant [Angstrom]: {0:.4f}".format(a*10**8)
+            print "Energy Barriers [eV]:       E0: {E0:.4f}      E2: {E2:.4f}      E3: {E3:.4f}  E4: {E4:.4f}  E'3: {E3p:.4f}  E'4: {E4p:.4f}".format(**enebarr)
+            print "Energy Barriers [eV]:       E''3: {E3pp:.4f}  E''4: {E4pp:.4f}  E5: {E5:.4f}  E6: {E6:.4f}".format(**enebarr)
+            print "Attempt Frequencies [THz]:  v0: {v0:.4f}      v2: {v2:.4f}      v3: {v3:.4f}  v4: {v4:.4f}  v'3: {v3p:.4f}  v'4: {v4p:.4f}".format(**v)
+            print "Attempt Frequencies [THz]:  v''3: {v3pp:.4f}  v''4: {v4pp:.4f}  v5: {v5:.4f}  v6: {v6:.4f}".format(**v)
+            print "Vacancy Formation Energy [eV]: {0:.4f}\n".format(HVf)
+            print ""
         if model==14:
             print "FCC 14-Frequency Concentrated Diffusion Model"
             print "FCC lattice constant [Angstrom]: {0:.4f}".format(a*10**8)
@@ -372,6 +386,46 @@ class DiffCoeff(ParsingInputFiles):
                 else: Vacconc = np.exp(-kB*HVf/T)       
                 Dself = f0*Vacconc*a**2*jfreq['v0']
                 D.append(Dself*f2*jfreq['v2']*jfreq['v4']/f0/jfreq['v0']/jfreq['v3'])
+                fp.write('%f   %E\n'%(t,D[i]))
+                print '%f   %E'%(t,D[i])
+                t = t + tempstep    
+                i = i + 1
+            if plotdisplay.lower() == "none": #No plot display
+                pass
+            else:
+                import matplotlib
+                if len(plotdisplay) == 0:
+                    pass
+                else:
+                    matplotlib.use(plotdisplay)
+                import matplotlib.pyplot as plt
+                tvals = np.linspace(tempstart, tempend, i)
+                plt.plot(tvals, np.log10(D), '.')
+                plt.xlabel('$10^3/T$ (K$^{-1}$)')
+                plt.ylabel('log$_{10}$$D$ (cm$^2$/s)')
+                plt.savefig('Diffusivity.png')
+                plt.show()
+        if model==9:
+            fp = open('Diffusivity.txt','w+')
+            fp.write('1000/T[K^(-1)]    D_solute[cm^2/s]\n')
+            print '1000/T[K^(-1)]    D_solute[cm^2/s]'
+            D = []
+            f0 = 0.7272
+            FF = 0.512
+            t = tempstart
+            i = 0
+            while t<tempend+tempstep:
+                for freq in ['v0','v2','v3','v4','v3p','v4p','v3pp','v4pp','v5','v6']:
+                    if t==0.0: jfreq[freq] = v[freq]*10**12
+                    else: 
+                        T=1000./t
+                        jfreq[freq] = v[freq]* 10**12 * np.exp(-enebarr[freq.replace('v','E')]*kB/T)
+                tt = -jfreq['v2']/( jfreq['v2'] + 3*jfreq['v3'] + 3*jfreq['v3p'] + jfreq['v3pp'] - (jfreq['v3']*jfreq['v4'])/(jfreq['v4']+FF*jfreq['v5']) - (2*jfreq['v3p']*jfreq['v4p'])/(jfreq['v4p']+3*FF*jfreq['v0']) - (jfreq['v3pp']*jfreq['v4pp'])/(jfreq['v4pp']+7*FF*jfreq['v0']) );
+                f2 = (1 + tt) / (1 - tt)       
+                if t==0.0: Vacconc=1.0
+                else: Vacconc = np.exp(-kB*HVf/T)       
+                Dself = f0*Vacconc*a**2*jfreq['v0']
+                D.append(a**2*Vacconc*f2*jfreq['v2']*jfreq['v4p']/jfreq['v3p'])
                 fp.write('%f   %E\n'%(t,D[i]))
                 print '%f   %E'%(t,D[i])
                 t = t + tempstep    
