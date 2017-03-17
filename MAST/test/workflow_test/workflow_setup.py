@@ -95,6 +95,8 @@ def generic_submit(inputfile):
         for tailline in tail3.split("\n"):
             if "Workflow completed" in tailline:
                 return ["Completed", mast_test_dir]
+            elif "ERROR: command not found" in tailline:
+                raise OSError("MAST command not found by test. See %s." % outputname)
         time.sleep(30)
         waitct = waitct + 1
         print "Output not complete. Attempt %i/%i" % (waitct, maxwait)
