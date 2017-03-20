@@ -121,8 +121,8 @@ class ParsingInputFiles(object):
         data['No.'] = len(struct)
         if model==5:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
-        if model==9:
-            data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
+        if model==9: #for BCC, primitive param is half of cubic body diagonal
+            data['a'] = reduced.lattice.abc[0]*10**(-8)*2.0/np.sqrt(3.0)
         if model==14:
             data['a'] = reduced.lattice.abc[0]*np.sqrt(2)*10**(-8)
         if model==8:
