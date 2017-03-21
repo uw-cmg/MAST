@@ -125,3 +125,40 @@ class TestDiffusionCoefficientTool(unittest.TestCase):
             self.assertEqual(ctemp, otemp)
             self.assertEqual(cval, oval)
         return
+    
+    def test_bcc_9freq(self):
+        """Test BCC 9 frequency
+        """
+        #set up paths
+        rwdir = os.path.join(self.wdir, 'diffcoeff_utility')
+        shutil.copytree(os.path.join(testdir,'files','diffcoeff_utility_bcc_9freq_WAg'), 
+                        rwdir)
+        outputname = os.path.join(rwdir, 'Diffusivity.txt')
+        plotname = os.path.join(rwdir, 'Diffusivity.png')
+        os.remove(outputname) #remove test output
+        #os.remove(plotname) #remove test output
+        print(os.listdir(rwdir))
+        #run the utility
+        dctool_input = os.path.join(rwdir, 'diffcoeff_input.txt')
+        curdir=os.getcwd()
+        os.chdir(rwdir)
+        DiffCoeff(dctool_input).calculatingD()
+        os.chdir(curdir)
+        #check output.
+        print "output in: %s" % (outputname)
+        with open(outputname, 'r') as opfile:
+            olines = opfile.readlines()
+        comparename = os.path.join(testdir,'files',
+                            'diffcoeff_utility_bcc_9freq_WAg',
+                            'Diffusivity.txt')
+        with open(comparename, 'r') as cfile:
+            clines = cfile.readlines()
+        print clines
+        print olines
+        self.assertEqual(len(clines),len(olines))
+        for cidx in range(0, len(clines))[-5:]: #compare last few numeric lines
+            [ctemp, cval] = clines[cidx].strip().split()
+            [otemp, oval] = olines[cidx].strip().split()
+            self.assertEqual(ctemp, otemp)
+            self.assertEqual(cval, oval)
+        return
