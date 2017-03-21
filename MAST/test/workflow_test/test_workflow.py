@@ -78,7 +78,12 @@ class TestWorkflows(unittest.TestCase):
             okays=0
             for myline in myfile.data:
                 if myline[0:3] == "1.0":
-                    self.assertEquals(myline.split()[1].strip(), "6.198170E-07")
+                    myval = myline.split()[1].strip()
+                    compareval = "%3.1E" % 8.09778E-7
+                    self.assertEquals("%3.1E" % float(myval),compareval)
+                    #Not sure about 6.198170E-07.
+                    #use results from 2014 pre structure-indexing
+                    #and 2017 post-structure-indexing fixes, in savedoff
                     okays=okays+1
             self.assertEquals(okays, 1)
             return
