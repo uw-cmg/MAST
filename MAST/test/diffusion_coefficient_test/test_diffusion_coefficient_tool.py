@@ -162,3 +162,28 @@ class TestDiffusionCoefficientTool(unittest.TestCase):
             self.assertEqual(ctemp, otemp)
             self.assertEqual(cval, oval)
         return
+    
+    def test_adjustment_tool(self):
+        """Test adjustment tool
+        """
+        testfile = os.path.join(testdir, 'files', 'diffcoeff_utility_bcc_9freq_WAg','Diffusivity.txt')
+        testscript = os.path.join(dirutil.get_mast_install_path(),'utility',
+                'diffcoeff_adjustment_util.py')
+        outputfile = os.path.join(self.wdir, 'diffcoeff_adjustment_tool_output')
+        mycommand = "python %s -i %s -m 3695 -q 1.3 -d 800 >> %s" % (testscript, testfile, outputfile) # values for host W
+        #run the utility
+        dproc = subprocess.Popen(mycommand, shell=True,
+                        stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        dproc.wait()
+        #check output
+        ofile = MASTFile(outputfile)
+        ofile.to_stdout()
+        dline = ofile.data[-1]
+        qline = ofile.data[-2]
+        qpc = qline.strip().split()[-2]
+        dpc = dline.strip().split()[-2]
+        self.assertEqual("5.613", qpc)
+        self.assertEqual("5.118", dpc)
+        #Adjusted Q: 5.613 eV
+        #Adjusted D0: 5.118 cm^2/sec
+        return

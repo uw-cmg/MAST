@@ -58,7 +58,7 @@ def main():
             my_T = 1.0/one_over_T
         if (my_T <= tmax) and (my_T >= tmin):
             shortlist.append(parseditem)
-    print("1/T and ln(D), and 1000/T and D within 0.5*Tmelt and Tmelt:")
+    print("1/T and ln(D), and 1000/T and D within 0.4*Tmelt and 1.1*Tmelt:")
     for shortitem in shortlist:
         print("%3.5E   %3.3E   %3.5E    %3.3E" % (shortitem[0],shortitem[1],
                     shortitem[2],shortitem[3]))
