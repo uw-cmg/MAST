@@ -25,6 +25,8 @@ class TestDefectformationenergy(unittest.TestCase):
         os.environ['MAST_ARCHIVE'] = oldarchive
         if os.path.isdir("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results"):
             shutil.rmtree("archive/GaAs_defects_AsGa_recipe_defects_20131125T220427/dfe_ingredient/dfe_results")
+        os.chdir(os.path.dirname(testdir))
+        return
 
     def test_dfe_tool(self):
         import subprocess
