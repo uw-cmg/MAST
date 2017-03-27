@@ -209,16 +209,22 @@ class TestSE(unittest.TestCase):
         hcp = Poscar.from_file("POSCAR_HCP").structure
         sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2,2,2", name=testdir)
         scaled = sxtend.scale_structure()
-        self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
-        self.assertEqual(scaled.lattice, Poscar.from_file("POSCAR_HCP_222").structure.lattice)
-        self.assertEqual(scaled.sites.sort(), Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+        compare = Poscar.from_file("POSCAR_HCP_222").structure
+        #self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertAlmostEqual(scaled.volume, compare.volume, places=4)
+        self.assertEqual(scaled.lattice, compare.lattice)
+        self.assertEqual(scaled.sites.sort(), compare.sites.sort())
+        return
     def test_scale_structure_nine(self):
         hcp = Poscar.from_file("POSCAR_HCP").structure
         sxtend = StructureExtensions(struc_work1=hcp, scaling_size="2 0 0,0 2 0,0 0 2", name=testdir)
         scaled = sxtend.scale_structure()
-        self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
-        self.assertEqual(scaled.lattice, Poscar.from_file("POSCAR_HCP_222").structure.lattice)
-        self.assertEqual(scaled.sites.sort(), Poscar.from_file("POSCAR_HCP_222").structure.sites.sort())
+        compare = Poscar.from_file("POSCAR_HCP_222").structure
+        #self.assertEqual(scaled, Poscar.from_file("POSCAR_HCP_222").structure)
+        self.assertAlmostEqual(scaled.volume, compare.volume, places=4)
+        self.assertEqual(scaled.lattice, compare.lattice)
+        self.assertEqual(scaled.sites.sort(), compare.sites.sort())
+        return
     def test_scale_defect(self):
         perfect = Poscar.from_file("POSCAR_perfect").structure
         scalingsize = "2,2,2"
