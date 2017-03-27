@@ -218,7 +218,6 @@ class TestInputparser(unittest.TestCase):
         myip.parse_recipe_section('recipe',cleanlines,myoptions)
         #print myoptions
         mdict=dict()
-        #mdict['recipe_file'] = os.path.join(os.getenv("MAST_RECIPE_PATH"),'defects_test.txt')
         mdict['recipe_file'] = cleanlines
         self.assertEqual(myoptions.options['recipe'],mdict)
         #self.testclass.parse_recipe_section(section_name, section_content, options)

@@ -14,11 +14,9 @@ from pymatgen.io.vasp import Poscar
 testname ="structure_extensions_test"
 testdir = dirutil.get_test_dir(testname)
 #oldcontrol = os.getenv("MAST_CONTROL")
-#oldrecipe = os.getenv("MAST_RECIPE_PATH")
 #oldscratch = os.getenv("MAST_SCRATCH")
 #print "Old directories:"
 #print oldcontrol
-#print oldrecipe
 #print oldscratch
 
 

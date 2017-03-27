@@ -15,11 +15,9 @@ from MAST.utility import dirutil
 from MAST.utility import MASTFile
 testname ="checker_test_vasp"
 #oldcontrol = os.getenv("MAST_CONTROL")
-#oldrecipe = os.getenv("MAST_RECIPE_PATH")
 #oldscratch = os.getenv("MAST_SCRATCH")
 #print "Old directories:"
 #print oldcontrol
-#print oldrecipe
 #print oldscratch
 testdir = dirutil.get_test_dir(testname)
 

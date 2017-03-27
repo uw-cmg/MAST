@@ -16,7 +16,6 @@ from pymatgen.io.vasp import Poscar
 testname="chop_test_run"
 testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
-old_recipe = os.getenv("MAST_RECIPE_PATH")
 old_scratch = os.getenv("MAST_SCRATCH")
 
 class TestRunIngredient(unittest.TestCase):
@@ -52,7 +51,6 @@ class TestRunIngredient(unittest.TestCase):
                 else:
                     os.remove(subpath)
         os.environ['MAST_CONTROL'] = old_control
-        os.environ['MAST_RECIPE_PATH'] = old_recipe
         os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):

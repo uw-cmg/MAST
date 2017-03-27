@@ -17,7 +17,6 @@ testname="recipeplan_test"
 testdir = dirutil.get_test_dir(testname)
 old_control = os.getenv("MAST_CONTROL")
 old_scratch = os.getenv("MAST_SCRATCH")
-old_recipe = os.getenv("MAST_RECIPE_PATH")
 
 class TestRecipeplan(unittest.TestCase):
 
@@ -34,7 +33,6 @@ class TestRecipeplan(unittest.TestCase):
         if not os.path.isdir("recipedir/ing3"):
             os.mkdir("recipedir/ing3")
         os.environ['MAST_CONTROL'] = testdir + "/test_control"
-        os.environ['MAST_RECIPE_PATH'] = testdir
         os.environ['MAST_SCRATCH'] = testdir
 
     def tearDown(self):
@@ -57,7 +55,6 @@ class TestRecipeplan(unittest.TestCase):
             except OSError:
                 pass
         os.environ['MAST_CONTROL'] = old_control
-        os.environ['MAST_RECIPE_PATH'] = old_recipe
         os.environ['MAST_SCRATCH'] = old_scratch
 
     def test___init__(self):

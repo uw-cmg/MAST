@@ -14,11 +14,9 @@ from MAST.utility.finite_size_scaling.GenSC import gensc
 from MAST.utility import dirutil
 testname ="fss_gensc_test"
 #oldcontrol = os.getenv("MAST_CONTROL")
-#oldrecipe = os.getenv("MAST_RECIPE_PATH")
 #oldscratch = os.getenv("MAST_SCRATCH")
 #print "Old directories:"
 #print oldcontrol
-#print oldrecipe
 #print oldscratch
 testdir = os.path.join(dirutil.get_mast_install_path(),'test',testname)
 

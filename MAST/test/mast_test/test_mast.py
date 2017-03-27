@@ -11,11 +11,9 @@ from MAST.controllers.mastinput import MASTInput as controllerMAST
 testname ="mast_test"
 testdir = dirutil.get_test_dir(testname)
 oldcontrol = os.getenv("MAST_CONTROL")
-oldrecipe = os.getenv("MAST_RECIPE_PATH")
 oldscratch = os.getenv("MAST_SCRATCH")
 print "Old directories:"
 print oldcontrol
-print oldrecipe
 print oldscratch
 
 
@@ -24,7 +22,6 @@ class TestMAST(unittest.TestCase):
     """
     def setUp(self):
         os.environ['MAST_CONTROL'] = testdir
-        os.environ['MAST_RECIPE_PATH'] = testdir
         os.environ['MAST_SCRATCH'] = testdir
         os.chdir(testdir)
 
@@ -33,14 +30,12 @@ class TestMAST(unittest.TestCase):
         for basicdir in basicdirs:
             shutil.rmtree(basicdir)
         os.environ['MAST_CONTROL'] = oldcontrol
-        os.environ['MAST_RECIPE_PATH'] = oldrecipe
         os.environ['MAST_SCRATCH'] = oldscratch
 
     def test_check_indep_loop_no_loops(self):
         raise SkipTest
         print "New paths:"
         print os.getenv("MAST_CONTROL")
-        print os.getenv("MAST_RECIPE_PATH")
         print os.getenv("MAST_SCRATCH")
         mymast = MAST.mast.MAST(inputfile="basic_test.inp",outputfile="output.inp")
         mymast.check_independent_loops()
