@@ -1,0 +1,113 @@
+##############################################################
+# This code is part of the MAterials Simulation Toolkit (MAST)
+# Example input file for SIMPLE OPTIMIZATION workflow
+# Maintainer: Tam Mayeshiba
+# Last updated: 2014-04-25
+##############################################################
+$mast
+system_name OptimizeWorkflowTest
+$end
+
+$structure
+use_structure_index True
+coord_type fractional
+
+begin elementmap
+X1 Al
+X2 Mg
+X3 Fe
+end
+
+begin lattice
+3.5 0 0
+0 3.5 0
+0 0 3.5
+end
+
+begin coordinates
+X1 0.0000000000 0.0000000000 0.0000000000
+X1 0.5000000000 0.5000000000 0.0000000000
+X1 0.0000000000 0.5000000000 0.5000000000
+X1 0.5000000000 0.0000000000 0.5000000000
+end
+
+$end
+
+$defects
+begin vac1
+vacancy 0.0 0.0 0.0 X1
+end
+
+begin int1
+interstitial 0.25 0.25 0.25 X2
+end
+
+begin sub1
+substitution 0.5 0.5 0.0 X3
+end
+
+$end
+
+$ingredients
+begin ingredients_global
+###Change the options below for your cluster
+mast_nodes         1
+mast_multiplyencut 1.5
+mast_ppn           64
+mast_processors    64
+mast_queue         normal
+mast_exec          ibrun $TACC_VASP_DIR/bin/vasp_std
+mast_walltime      24
+###
+mast_kpoints       2x2x2 M
+mast_xc            PBE
+isif 3
+ibrion 2
+nsw 191
+ismear 1
+sigma 0.2
+lwave False
+lcharg False
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+mast_update_children_method  give_structure
+end
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+end
+
+begin lowmesh
+mast_kpoints 1x1x1 G
+end  
+
+begin static
+ibrion -1
+nsw 0
+mast_multiplyencut 1.25
+end
+$end
+
+$recipe
+perfect_opt1 (lowmesh)
+    perfect_opt2
+        perfect_stat (static)
+        inducedefect_<N> (inducedefect)
+            defect_<N>_opt1 (lowmesh)
+                defect_<N>_opt2
+                    defect_<N>_stat (static)
+$end
+
+$summary
+perfect energy
+vac1 energy
+int energy
+sub energy
+$end

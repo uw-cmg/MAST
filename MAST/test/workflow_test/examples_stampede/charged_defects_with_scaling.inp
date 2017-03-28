@@ -1,0 +1,396 @@
+$mast
+system_name diamond
+$end
+
+$recipe
+perfect_GGA (volrelax_gga)
+    inducescaling_<S>_GGA (inducescaling)
+        perfect_<S>_GGA (static_gga)
+            dfe_utility (dfe)
+{begin}
+perfect_GGA (volrelax_gga)
+    perfect_dos_GGA (dos_gga)
+        dfe_utility (dfe)
+{end}
+{begin}
+perfect_GGA (volrelax_gga)
+    perfect_band_GGA (band_gga)
+        dfe_utility (dfe)
+{end}
+{begin}
+perfect_HSE (volrelax_hse)
+    perfect_dos_HSE (dos_hse)
+        dfe_utility (dfe)
+{end}
+{begin}
+perfect_HSE (volrelax_hse)
+    perfect_band_HSE (band_hse)
+        dfe_utility (dfe)
+{end}
+{begin}
+inducescaling_<S>_GGA (inducescaling)
+    inducedefect_<S>_<N>_GGA (inducedefect)
+        defect_<S>_<N>_<Q>_GGA (relax_gga)
+            dfe_utility (dfe)
+{end}
+{begin}
+perfect_GGAtoHSE (volrelax_gga_meta)
+    perfect_HSE (volrelax_hse)
+        inducescaling_2xlow_HSE (inducescaling)
+            perfect_2xlow_HSE (static_hse)
+                dfe_utility (dfe)
+{end}
+{begin}
+inducescaling_2xlow_HSE (inducescaling)
+    inducedefect_2xlow_<N>_HSE (inducedefect)
+        defect_2xlow_<N>_<Q>_GGAtoHSE (relax_gga_meta)
+            defect_2xlow_<N>_<Q>_HSE (relax_hse)
+                dfe_utility (dfe)
+{end}
+$end
+
+
+$ingredients
+begin ingredients_global
+mast_queue         morgan
+mast_nodes         2
+mast_ppn           16
+mast_processors    32
+mast_walltime      48
+mast_exec          /usr/mpi/intel/mvapich2-1.9/bin/mpiexec ~/shared/vasp.5.3.5-std > vasp.out
+mast_xc            PBE
+lreal Auto
+encut 450
+nsw 100
+nelm 100
+ediff 1e-5
+ediffg -0.005
+lcharg False
+lwave False
+ispin 2
+ismear 0
+sigma 0.2
+npar 4
+prec Accurate
+mast_program   vasp
+mast_write_method            write_singlerun
+mast_ready_method            ready_singlerun
+mast_run_method              run_singlerun
+mast_complete_method         complete_singlerun
+end
+
+begin inducescaling
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_scale
+mast_complete_method         complete_structure
+mast_update_children_method  give_structure
+end
+
+begin inducedefect
+mast_write_method            no_setup
+mast_ready_method            ready_structure
+mast_run_method              run_defect
+mast_complete_method         complete_structure
+mast_update_children_method  give_structure
+end
+
+begin volrelax_gga
+ibrion 2
+isif 3
+lcharg True
+mast_kpoints 8x8x8 M
+mast_update_children_method  give_structure_and_charge_density_full_copy
+end
+
+begin band_gga
+ibrion -1
+nsw 0
+icharg 11
+mast_kpoints 500, line, reciprocal, 0.0 0.0 0.0 1, 0.5 0.5 0.0 1
+mast_update_children_method  give_outcar_to_dfe
+end
+
+begin dos_gga
+ibrion -1
+nsw 0
+emin 5.0
+emax 15.0
+endos 10000
+mast_kpoints 24x24x24 M
+mast_update_children_method  give_doscar_to_dfe
+end
+
+
+begin volrelax_gga_meta
+ibrion 2
+isif 3
+lwave True
+mast_kpoints 4x4x4 M
+mast_update_children_method  give_structure_and_wavefunction_full_copy
+end
+
+begin static_gga
+ibrion -1
+nsw 0
+mast_update_children_method  give_energy_to_dfe
+end
+
+begin relax_gga
+ibrion 2
+isif 2
+mast_update_children_method  give_energy_to_dfe
+end
+
+begin relax_gga_meta
+ibrion 2
+isif 2
+lwave True
+mast_update_children_method  give_structure_and_wavefunction_full_copy
+end
+
+begin volrelax_hse
+ibrion 2
+isif 3
+lcharg True
+mast_kpoints 4x4x4 M
+lhfcalc True
+hfscreen 0.15
+algo Damped
+time 0.05
+precfock Fast
+mast_update_children_method  give_structure_and_charge_density_full_copy
+end
+
+begin static_hse
+ibrion -1
+nsw 0
+lhfcalc True
+hfscreen 0.15
+algo Damped
+time 0.05
+precfock Fast
+mast_update_children_method  give_energy_to_dfe
+end
+
+
+begin band_hse
+ibrion -1
+nsw 0
+lhfcalc True
+hfscreen 0.15
+algo Damped
+time 0.05
+precfock Fast
+icharg 11
+mast_kpoints 500, line, reciprocal, 0.0 0.0 0.0 1, 0.5 0.5 0.0 1
+mast_update_children_method  give_outcar_to_dfe
+end
+
+begin dos_hse
+ibrion -1
+nsw 0
+lhfcalc True
+hfscreen 0.15
+algo Damped
+time 0.05
+precfock Fast
+emin 5.0
+emax 15.0
+endos 10000
+mast_kpoints 12x12x12 M
+mast_update_children_method  give_doscar_to_dfe
+end
+
+begin relax_hse
+ediff 1e-4
+ediffg -0.01
+ibrion 2
+isif 2
+lhfcalc True
+hfscreen 0.15
+algo Damped
+time 0.05
+precfock Fast
+mast_update_children_method  give_energy_to_dfe
+end
+
+begin dfe
+mast_program    None
+mast_write_method       write_ingred_input_file dfe_input.txt all vasp_allowed_keywords.py 0; write_submit_script
+mast_ready_method       file_exists dfe_input.txt
+mast_run_method         run_singlerun
+mast_complete_method    file_exists dfe_results
+mast_exec               python mast_DFE_tool -i dfe_input.txt
+bandgap_GGA perfect_band_GGA
+bandgap_HSE perfect_dos_HSE
+size_GGA 2xhigh 3xhigh 4xhigh
+size_HSE 2xlow_GGA 2xlow_HSE
+Si-rich_GGA C -9.638
+C-rich_GGA C -8.988
+Si-rich_HSE C -11.892
+C-rich_HSE C -11.242
+method L1L3
+end
+
+$end
+
+
+$scaling
+begin 2xhigh
+mast_size [2, 2, 2]
+mast_kpoints 4x4x4 M
+end
+begin 2xlow
+mast_size [2, 2, 2]
+mast_kpoints 2x2x2 M
+end
+begin 3xhigh
+mast_size [3, 3, 3]
+mast_kpoints 3x3x3 M
+end
+begin 4xhigh
+mast_size [4, 4, 4]
+mast_kpoints 2x2x2 M
+end
+$end
+
+
+$structure
+coord_type fractional
+
+begin elementmap
+X1 C
+end
+
+
+begin lattice
+3.572567 0.0 0.0
+0.0 3.572567 0.0
+0.0 0.0 3.572567 
+end
+
+begin coordinates
+X1     0.750000000         0.250000000         0.750000000
+X1     0.750000000         0.750000000         0.250000000
+X1     0.250000000         0.250000000         0.250000000
+X1     0.250000000         0.750000000         0.750000000
+X1     0.000000000         0.000000000         0.000000000
+X1     0.000000000         0.500000000         0.500000000
+X1     0.500000000         0.000000000         0.500000000
+X1     0.500000000         0.500000000         0.000000000
+end
+$end
+
+$defects
+threshold 1e-4
+coord_type fractional
+begin vac
+vacancy 0.0 0.0 0.0 X1
+charge=-1,1
+end
+$end
+$personal_recipe
+perfect_GGA (volrelax_gga)
+    inducescaling_2xhigh_GGA (inducescaling)
+        perfect_2xhigh_GGA (static_gga)
+            dfe_utility (dfe)
+perfect_GGA (volrelax_gga)
+    inducescaling_2xlow_GGA (inducescaling)
+        perfect_2xlow_GGA (static_gga)
+            dfe_utility (dfe)
+perfect_GGA (volrelax_gga)
+    inducescaling_3xhigh_GGA (inducescaling)
+        perfect_3xhigh_GGA (static_gga)
+            dfe_utility (dfe)
+perfect_GGA (volrelax_gga)
+    inducescaling_4xhigh_GGA (inducescaling)
+        perfect_4xhigh_GGA (static_gga)
+            dfe_utility (dfe)
+perfect_GGA (volrelax_gga)
+    perfect_dos_GGA (dos_gga)
+        dfe_utility (dfe)
+perfect_GGA (volrelax_gga)
+    perfect_band_GGA (band_gga)
+        dfe_utility (dfe)
+perfect_HSE (volrelax_hse)
+    perfect_dos_HSE (dos_hse)
+        dfe_utility (dfe)
+perfect_HSE (volrelax_hse)
+    perfect_band_HSE (band_hse)
+        dfe_utility (dfe)
+inducescaling_2xhigh_GGA (inducescaling)
+    inducedefect_2xhigh_vac_GGA (inducedefect)
+        defect_2xhigh_vac_q=n1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_2xhigh_GGA (inducescaling)
+    inducedefect_2xhigh_vac_GGA (inducedefect)
+        defect_2xhigh_vac_q=p0_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_2xhigh_GGA (inducescaling)
+    inducedefect_2xhigh_vac_GGA (inducedefect)
+        defect_2xhigh_vac_q=p1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_2xlow_GGA (inducescaling)
+    inducedefect_2xlow_vac_GGA (inducedefect)
+        defect_2xlow_vac_q=n1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_2xlow_GGA (inducescaling)
+    inducedefect_2xlow_vac_GGA (inducedefect)
+        defect_2xlow_vac_q=p0_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_2xlow_GGA (inducescaling)
+    inducedefect_2xlow_vac_GGA (inducedefect)
+        defect_2xlow_vac_q=p1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_3xhigh_GGA (inducescaling)
+    inducedefect_3xhigh_vac_GGA (inducedefect)
+        defect_3xhigh_vac_q=n1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_3xhigh_GGA (inducescaling)
+    inducedefect_3xhigh_vac_GGA (inducedefect)
+        defect_3xhigh_vac_q=p0_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_3xhigh_GGA (inducescaling)
+    inducedefect_3xhigh_vac_GGA (inducedefect)
+        defect_3xhigh_vac_q=p1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_4xhigh_GGA (inducescaling)
+    inducedefect_4xhigh_vac_GGA (inducedefect)
+        defect_4xhigh_vac_q=n1_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_4xhigh_GGA (inducescaling)
+    inducedefect_4xhigh_vac_GGA (inducedefect)
+        defect_4xhigh_vac_q=p0_GGA (relax_gga)
+            dfe_utility (dfe)
+inducescaling_4xhigh_GGA (inducescaling)
+    inducedefect_4xhigh_vac_GGA (inducedefect)
+        defect_4xhigh_vac_q=p1_GGA (relax_gga)
+            dfe_utility (dfe)
+perfect_GGAtoHSE (volrelax_gga_meta)
+    perfect_HSE (volrelax_hse)
+        inducescaling_2xlow_HSE (inducescaling)
+            perfect_2xlow_HSE (static_hse)
+                dfe_utility (dfe)
+inducescaling_2xlow_HSE (inducescaling)
+    inducedefect_2xlow_vac_HSE (inducedefect)
+        defect_2xlow_vac_q=n1_GGAtoHSE (relax_gga_meta)
+            defect_2xlow_vac_q=n1_HSE (relax_hse)
+                dfe_utility (dfe)
+
+
+inducescaling_2xlow_HSE (inducescaling)
+    inducedefect_2xlow_vac_HSE (inducedefect)
+        defect_2xlow_vac_q=p0_GGAtoHSE (relax_gga_meta)
+            defect_2xlow_vac_q=p0_HSE (relax_hse)
+                dfe_utility (dfe)
+
+
+inducescaling_2xlow_HSE (inducescaling)
+    inducedefect_2xlow_vac_HSE (inducedefect)
+        defect_2xlow_vac_q=p1_GGAtoHSE (relax_gga_meta)
+            defect_2xlow_vac_q=p1_HSE (relax_hse)
+                dfe_utility (dfe)
+
+
+$end
