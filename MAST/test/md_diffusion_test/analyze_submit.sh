@@ -23,5 +23,4 @@ cat $PBS_NODEFILE
 
 #Type in commands to run. Replace a.out with the program name
 #to run.
-python xdatcar_converter.py XDATCAR_flibe.orig
 python pmg_diffanalyzer_wrapper.py flibe_input.txt > output_flibe_test
