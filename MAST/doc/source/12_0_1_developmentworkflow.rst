@@ -2,7 +2,7 @@
 MAST development workflow
 ###################################
 
-Last modified TTM 2016-02-11
+Last modified RJ 2017-04-13
 
 ***********************************
 I am a developer
@@ -193,7 +193,7 @@ Create a ``~/.pypirc`` file that looks something like::
     [distutils]
     index-servers=
         pypi
-        test
+        pypitest
 
     [pypitest]
     repository = https://testpypi.python.org/pypi
