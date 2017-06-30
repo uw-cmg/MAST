@@ -25,7 +25,7 @@ autodoc_mock_imports=['MAST',
                         'matplotlib.pyplot',
                         'pandas',
 ]
-from MAST.utility import dirutil
+import MAST.utility.dirutil
 #sys.path.insert(0, os.environ['MAST_INSTALL_PATH'])
 
 # -- General configuration -----------------------------------------------------
