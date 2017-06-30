@@ -12,6 +12,14 @@
 # serve to show the default.
 
 import sys, os
+sys.path.insert(0, os.path.abspath('../../'))
+autodoc_mock_imports=['MAST',
+                      'MAST.utility.dirutil',
+                      'numpy','scipy',
+                        'matplotlib',
+                        'matplotlib.pyplot',
+                        'pandas',
+]
 from MAST.utility import dirutil
 
 # If extensions (or modules to document with autodoc) are in another directory,
