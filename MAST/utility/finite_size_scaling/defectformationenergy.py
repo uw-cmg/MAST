@@ -30,10 +30,10 @@ class DefectFormationEnergy:
             if not 'CAR' in CARs[i]: continue
             elif 'HSE' in CARs[i]:
                 size = keywords[1]+'_HSE'
-            elif keywords[1] in ' '.join(HSE['size']):
-                size = keywords[1]+'_GGA'
-            else: size =  keywords[1]
-            
+            elif (len(keywords) > 0):
+                if (keywords[1] in ' '.join(HSE['size'])):
+                    size = keywords[1]+'_GGA'
+                else: size =  keywords[1]
             if keywords[0]==perfect_tag and keywords[-1]=='OSZICAR':
                 perfect[size]['energy'] = float(open(CARs[i]).readlines()[-1].split('E0=')[1].split()[0])
             elif keywords[0]==defect_tag and keywords[-1]=='OSZICAR':
