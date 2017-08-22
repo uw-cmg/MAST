@@ -44,7 +44,7 @@ class DefectFormationEnergy:
                 PA['%s_%s_%s'%(keywords[2],keywords[3],size)] = self.pa.read_outcar(CARs[i])
             elif keywords[0]==perfect_tag and (keywords[-1]=='POSCAR' or keywords[-1]=='CONTCAR'):
                 shutil.copy(CARs[i],'POSCAR')
-                Ele = pmg.read_structure('POSCAR').species
+                Ele = pmg.Structure.from_file('POSCAR').species
                 ele = dict()
                 for k in range(len(Ele)): 
                     if not Ele[k] in ele.keys():
@@ -53,7 +53,7 @@ class DefectFormationEnergy:
                 perfect[size]['ele'] = ele
             elif keywords[0]==defect_tag and (keywords[-1]=='POSCAR' or keywords[-1]=='CONTCAR'):
                 shutil.copy(CARs[i],'POSCAR')
-                Ele = pmg.read_structure('POSCAR').species
+                Ele = pmg.Structure.from_file('POSCAR').species
                 ele = dict()
                 os.system('rm POSCAR')
                 for k in range(len(Ele)): 
