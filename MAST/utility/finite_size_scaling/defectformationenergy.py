@@ -28,7 +28,7 @@ class DefectFormationEnergy:
         for i in range(len(CARs)):
             keywords = CARs[i].split('_')
             if not 'CAR' in CARs[i]: continue
-            if 'HSE' in CARs[i]:
+            elif 'HSE' in CARs[i]:
                 size = keywords[1]+'_HSE'
             elif keywords[1] in ' '.join(HSE['size']):
                 size = keywords[1]+'_GGA'
