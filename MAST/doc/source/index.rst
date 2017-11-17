@@ -11,7 +11,7 @@ MAterials Simulation Toolkit (MAST) Manual
     :maxdepth: 1
     :numbered:
 
-    16_2_0_0_whatsnew
+    16_0_changelog
     0_0_introduction
     2_0_ingredients
     4_0_recipe
