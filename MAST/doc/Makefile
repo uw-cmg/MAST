@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    = 
-SPHINXBUILD   = ~/anaconda/envs/mast_genfix_4/bin/sphinx-build
+SPHINXBUILD   = ~/anaconda2/envs/mast_201/bin/sphinx-build
 PAPER         =
 BUILDDIR      = build
 
