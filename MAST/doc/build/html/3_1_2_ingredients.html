@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>8.4. The Ingredients section &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>8.4. The Ingredients section &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="8.5. The Recipe section" href="3_1_3_recipe.html" />
     <link rel="prev" title="8.3. The Scaling section" href="3_1_9_scaling.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="3_1_9_scaling.html" title="8.3. The Scaling section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>  
@@ -81,7 +78,7 @@ $end
 <span class="n">end</span>
 </pre></div>
 </div>
-<p>For a specific ingredient type, if a keyword is not specified in that ingredient type&#8217;s subsection but is specified in the <strong>ingredients_global</strong> subsection, then, the value for that keyword will be taken from ingredients_global.</p>
+<p>For a specific ingredient type, if a keyword is not specified in that ingredient type’s subsection but is specified in the <strong>ingredients_global</strong> subsection, then, the value for that keyword will be taken from ingredients_global.</p>
 <ul class="simple">
 <li>In the example above, <code class="docutils literal"><span class="pre">ingredient_type2</span></code> would inherit <code class="docutils literal"><span class="pre">keyword1</span> <span class="pre">k1value1</span></code> from ingredients_global.</li>
 </ul>
@@ -209,7 +206,7 @@ Use a semicolon to separate out the methods:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast_complete_method</span> <span class="n">file_has_string</span> <span class="n">myoutput</span> <span class="s2">&quot;End of Execution&quot;</span><span class="p">;</span> <span class="n">file_exists</span> <span class="n">Parsed_Structures</span>
 </pre></div>
 </div>
-<p>In the example above, the file &#8220;myoutput&#8221; must exist and contain the phrase &#8220;End of Execution&#8221;, and the file &#8220;Parsed_Structures&#8221; must exist, in order for the ingredient to be considered complete.</p>
+<p>In the example above, the file “myoutput” must exist and contain the phrase “End of Execution”, and the file “Parsed_Structures” must exist, in order for the ingredient to be considered complete.</p>
 <p>Update-children methods will always get the child name appended as the end of the argument string. For example,</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mast_update_children_method</span> <span class="n">copy_file</span> <span class="n">EndStructure</span> <span class="n">BeginStructure</span>
 </pre></div>
@@ -231,7 +228,7 @@ Use a semicolon to separate out the methods:</p>
 <li><p class="first"><strong>write_ingred_input_file &lt;filename&gt; &lt;allowed file&gt; &lt;uppercase keywords&gt; &lt;delimiter&gt;</strong>: The allowed file specifies an allowed keywords file name in <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/MAST/ingredients/programkeys</span></code>.</p>
 <blockquote>
 <div><ul>
-<li><p class="first">Use &#8220;all&#8221; to put any non-mast keywords into the input file.</p>
+<li><p class="first">Use “all” to put any non-mast keywords into the input file.</p>
 </li>
 <li><p class="first">Use 1 to uppercase all keywords, or 0 to leave them as entered.</p>
 </li>
@@ -294,7 +291,7 @@ Use a semicolon to separate out the methods:</p>
 </ul>
 <p><strong>write_neb</strong></p>
 <ul class="simple">
-<li>Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/.../0N directories and uses linear interpolation between images.</li>
+<li>Write an NEB ingredient. This method writes interpolated images to the appropriate folders, creating 00/01/…/0N directories and uses linear interpolation between images.</li>
 <li>Programs supported: vasp</li>
 </ul>
 <p><strong>write_pathfinder_neb</strong></p>
@@ -347,7 +344,7 @@ Use a semicolon to separate out the methods:</p>
 </ul>
 <p><strong>ready_neb_subfolders</strong></p>
 <ul class="simple">
-<li>Checks that each 01/.../0(N-1) subfolder is ready to run as its own separate calculation, following the ready_singlerun criteria for each folder</li>
+<li>Checks that each 01/…/0(N-1) subfolder is ready to run as its own separate calculation, following the ready_singlerun criteria for each folder</li>
 <li>This method is used for NEB static calculations rather than NEB calculations themselves.</li>
 </ul>
 <p><strong>ready_subfolders</strong>
@@ -370,7 +367,7 @@ Use a semicolon to separate out the methods:</p>
 </ul>
 <p><strong>run_neb_subfolders</strong></p>
 <ul class="simple">
-<li>Run each 01/.../0(N-1) subfolder as run_singlerun</li>
+<li>Run each 01/…/0(N-1) subfolder as run_singlerun</li>
 <li>Generic</li>
 </ul>
 <p><strong>run_subfolders</strong></p>
@@ -412,7 +409,7 @@ Use a semicolon to separate out the methods:</p>
 </ul>
 <p><strong>complete_neb_subfolders</strong></p>
 <ul class="simple">
-<li>Check if all NEB subfolders 01/.../0(N-1) are complete, according to complete_singlerun criteria.</li>
+<li>Check if all NEB subfolders 01/…/0(N-1) are complete, according to complete_singlerun criteria.</li>
 <li>This method is not for checking the completion of NEBs! An NEB ingredient should have <code class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp_neb</span></code> and <code class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_singlerun</span></code>.</li>
 <li>An NEB static calculation, or a static calculation for each image, would use this keyword as <code class="docutils literal"><span class="pre">mast_complete_method</span> <span class="pre">complete_neb_subfolders</span></code> but have <code class="docutils literal"><span class="pre">mast_program</span> <span class="pre">vasp</span></code> instead of vasp_neb.</li>
 </ul>
@@ -442,7 +439,7 @@ Use a semicolon to separate out the methods:</p>
 <p><strong>give_neb_structures_to_neb</strong></p>
 <ul class="simple">
 <li>Give NEB output images structures as the starting point image input structures in another NEB</li>
-<li>Programs supported: vasp (01/.../0(N-1) CONTCAR files will be the child NEB ingredient.s starting 01/.../0(N-1) POSCAR files.</li>
+<li>Programs supported: vasp (01/…/0(N-1) CONTCAR files will be the child NEB ingredient.s starting 01/…/0(N-1) POSCAR files.</li>
 </ul>
 <p><strong>give_saddle_structure</strong></p>
 <ul class="simple">
@@ -654,13 +651,13 @@ $end
         <li class="right" >
           <a href="3_1_9_scaling.html" title="8.3. The Scaling section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

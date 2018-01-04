@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>9. Running MAST for real &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>9. Running MAST for real &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="10. MAST post-processing utilities" href="6_0_postprocessingtools.html" />
     <link rel="prev" title="8.10. The Summary section" href="3_1_8_summary.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="3_1_8_summary.html" title="8.10. The Summary section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -94,7 +91,7 @@
 </ul>
 </li>
 </ol>
-<p>Individual ingredients&#8217; submission scripts are created automatically through a combination of <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a> in the input file, and your the template submission script for your platform</p>
+<p>Individual ingredients’ submission scripts are created automatically through a combination of <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a> in the input file, and your the template submission script for your platform</p>
 <blockquote>
 <div><ul class="simple">
 <li>The template submission script is found in your MAST installation path under <code class="docutils literal"><span class="pre">submit/platforms/&lt;platform</span> <span class="pre">name&gt;/submit_template.sh</span></code>).</li>
@@ -190,7 +187,7 @@
 <li>Create an empty (or not, the contents do not matter) file named <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> in the recipe directory.</li>
 <li>Go through $MAST_CONTROL/submitlist and delete all ingredients associated with that recipe to keep them from being submitted during the next MAST run.</li>
 </ul>
-<p>If you would like to skip certain ingredients of a single recipe, edit the recipe&#8217;s status.txt file and replace ingredients to be skipped with the status <em>skip</em> (use the whole word).</p>
+<p>If you would like to skip certain ingredients of a single recipe, edit the recipe’s status.txt file and replace ingredients to be skipped with the status <em>skip</em> (use the whole word).</p>
 <ul>
 <li><p class="first">To un-skip these ingredients, set them back to W for waiting for parents in status.txt.</p>
 <blockquote>
@@ -239,7 +236,7 @@
 <h2>9.5. Modifying recipes<a class="headerlink" href="#modifying-recipes" title="Permalink to this headline">¶</a></h2>
 <p>Occasionally it is convenient to add additional ingredients onto an existent, completed or nearly-completed recipe.</p>
 <p>For example, it may be helpful to add an additional charge state, or calculate phonons, make additional defects on a relaxed structure, or calculate additional NEBs.</p>
-<p>The MAST &#8220;modify recipe&#8221; functionality allows new ingredient branches to be added onto an existing recipe in an existing recipe directory.</p>
+<p>The MAST “modify recipe” functionality allows new ingredient branches to be added onto an existing recipe in an existing recipe directory.</p>
 <p>Instructions are as follows:</p>
 <ul>
 <li><p class="first">In the recipe directory in $MAST_SCRATCH, modify the input file as you would want it. (If the recipe directory is not in $MAST_SCRATCH, move it there.)</p>
@@ -257,9 +254,9 @@
 <p>These steps may be accomplished over multiple recipes using a shell script, but with caution.</p>
 <div class="section" id="example">
 <h3>9.5.1. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
-<p>My charged supercell isn&#8217;t charged! What happened?</p>
+<p>My charged supercell isn’t charged! What happened?</p>
 <p>My input file had charge=2,2 in the $defects section, but it did not have the charge tag &lt;Q&gt; in the $recipe section</p>
-<p>The metadata.txt file wasn&#8217;t getting written correctly, and the checker wasn&#8217;t looking for a charge label, either.</p>
+<p>The metadata.txt file wasn’t getting written correctly, and the checker wasn’t looking for a charge label, either.</p>
 <p>Remove the $personal_recipe section. Redo the $recipe section to have the &lt;Q&gt; tags.</p>
 <p>Run mast -m modifyrecipe</p>
 <p>The uncharged supercell calculations were fine; move their data to folders with a &lt;Q&gt; tag for q=p0 (no charge).</p>
@@ -273,7 +270,7 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
 </li>
 <li><p class="first">An already-complete ingredient is not necessarily rerun, depending on how its completion is evaluated. It may not get any new parent information from a newly added ingredient.</p>
 </li>
-<li><p class="first">The recipe&#8217;s status.txt file is reset so that all ingredients are at status Initialized.</p>
+<li><p class="first">The recipe’s status.txt file is reset so that all ingredients are at status Initialized.</p>
 <blockquote>
 <div><ul class="simple">
 <li>Each ingredient, whether previously completed or not, gets its state re-evaluated when MAST is called (using the normal <code class="docutils literal"><span class="pre">mast</span></code> command).</li>
@@ -366,12 +363,12 @@ Now mast will rerun a new arm of charged supercell calculations.</p>
         <li class="right" >
           <a href="3_1_8_summary.html" title="8.10. The Summary section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

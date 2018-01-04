@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>8.2. The Structure section &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>8.2. The Structure section &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="8.3. The Scaling section" href="3_1_9_scaling.html" />
     <link rel="prev" title="8.1. The MAST section" href="3_1_0_mast.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="3_1_0_mast.html" title="8.1. The MAST section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>  
@@ -121,7 +118,7 @@ $end
 </pre></div>
 </div>
 <p>The coordinates in the <code class="docutils literal"><span class="pre">$defect</span></code>, <code class="docutils literal"><span class="pre">$neb</span></code>, etc. sections should exactly match the coordinates in the initial structure given to MAST. Scaling sizes will be handled automatically.</p>
-<p>MAST will create a separate structure index file, a &#8220;manifest&#8221; file, for the initial structure and each scaling size and defect configuration. Each NEB endpoint will have a separate manifest file, and each phonon calculation will have a separate manifest for detailing selective dynamics information.</p>
+<p>MAST will create a separate structure index file, a “manifest” file, for the initial structure and each scaling size and defect configuration. Each NEB endpoint will have a separate manifest file, and each phonon calculation will have a separate manifest for detailing selective dynamics information.</p>
 <p>These files are stored in the <code class="docutils literal"><span class="pre">structure_index_files</span></code> directory within the recipe directory.</p>
 <p>The manifest file consists of atomic index numbers, which correspond to <code class="docutils literal"><span class="pre">atom_index_&lt;index</span> <span class="pre">number&gt;</span></code> files. Each atomic index file is updated with the appropriate coordinates from a completed calculation.</p>
 <p>When a calculation is complete, its relaxed atomic coordinates will be saved back to the appropriate atom_index file.</p>
@@ -135,7 +132,7 @@ NEB manifests are created from defect manifests.</p>
 <p>Atoms indicated in the <code class="docutils literal"><span class="pre">$neb</span></code> section are pulled out of their order in the manifest and put in order at the bottom.</p>
 <p>As long as vacancies are accounted for in the <code class="docutils literal"><span class="pre">$neb</span></code> section, and grouped defects are entered in the same order in the defect endpoints in the <code class="docutils literal"><span class="pre">$defects</span></code> section, this process ensures lineup.</p>
 <p>Grouped defects that are intended to persist but not move should be placed in the same order, that is, if defect1 and defect2 are going to be in an NEB and both have unmoving Sr antisite defects, then the Sr antisite defects should be in the same order in the begin defect1 and begin defect2 sections.</p>
-<p>Pymatgen&#8217;s interpolate function resorts atoms, so a temporary manifest is made for pymatgen, and the interpolation is resorted back to match the NEB endpoint manifests.</p>
+<p>Pymatgen’s interpolate function resorts atoms, so a temporary manifest is made for pymatgen, and the interpolation is resorted back to match the NEB endpoint manifests.</p>
 <p>Also, all image atoms are ordered following the endpoint1 manifest. The final endpoint atoms are ordered following the endpoint2 manifest.</p>
 <p>Therefore, after completion, coordinates for image atoms are recorded in the atom index files indicated by the endpoint 1 manifest.</p>
 <script>
@@ -205,13 +202,13 @@ NEB manifests are created from defect manifests.</p>
         <li class="right" >
           <a href="3_1_0_mast.html" title="8.1. The MAST section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

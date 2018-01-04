@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>8.7. The Defects section &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>8.7. The Defects section &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="8.8. The NEB section" href="3_1_6_neb.html" />
     <link rel="prev" title="8.6. The Personal Recipe section" href="3_1_4_personalrecipe.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" accesskey="U">8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>  
@@ -120,11 +117,11 @@ $end
 <div class="section" id="charges-for-defects">
 <h2>8.7.1. Charges for defects<a class="headerlink" href="#charges-for-defects" title="Permalink to this headline">¶</a></h2>
 <p>Charges can be specified as <code class="docutils literal"><span class="pre">charge=0,10</span></code>, where a comma denotes the lower and upper ranges for the charges.</p>
-<p>Let&#8217;s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):</p>
+<p>Let’s say we want a Mg vacancy with charges from 0 to 3 (0, 1, 2, and 3):</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vacancy</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="n">Mg</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span>
 </pre></div>
 </div>
-<p>Let&#8217;s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a><a class="reference external" href="mailto:-Vac&#37;&#52;&#48;Mg">-Vac<span>&#64;</span>Mg</a>:</p>
+<p>Let’s say we want a dual Mg vacancy with a charge from 0 to 3 and labeled as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a><a class="reference external" href="mailto:-Vac&#37;&#52;&#48;Mg">-Vac<span>&#64;</span>Mg</a>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">begin</span> <span class="n">Vac</span><span class="nd">@Mg</span><span class="o">-</span><span class="n">Vac</span><span class="nd">@Mg</span>
 <span class="n">vacancy</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="n">Mg</span>
 <span class="n">vacancy</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="n">Mg</span>
@@ -133,7 +130,7 @@ $end
 </pre></div>
 </div>
 <p>For a single defect, charges and labels can be given at the same time:</p>
-<p>Let&#8217;s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a>:</p>
+<p>Let’s say we have a Mg vacancy with charges between 0 and 3, and we wish to label it as <a class="reference external" href="mailto:Vac&#37;&#52;&#48;Mg">Vac<span>&#64;</span>Mg</a>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">vacancy</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="n">Mg</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span> <span class="n">label</span><span class="o">=</span><span class="n">Vac</span><span class="nd">@Mg</span>
 </pre></div>
 </div>
@@ -145,7 +142,7 @@ $end
 </div>
 <div class="section" id="phonons-for-defects">
 <h2>8.7.2. Phonons for defects<a class="headerlink" href="#phonons-for-defects" title="Permalink to this headline">¶</a></h2>
-<p>Phonon calculations are described by a <em>phonon center site</em> coordinate and a <em>phonon center radius</em> (uses pymatgen&#8217;s find_in_coord_list_pbc method for radial tolerance).
+<p>Phonon calculations are described by a <em>phonon center site</em> coordinate and a <em>phonon center radius</em> (uses pymatgen’s find_in_coord_list_pbc method for radial tolerance).
 Atoms within the sphere specified by these two values will be included in phonon calculations.</p>
 <p>For VASP, this inclusion takes the form of selective dynamics T T T for the atoms within the sphere, and F F F otherwise, in a phonon calculation (IBRION = 5, 6, 7, 8)</p>
 <p>If the phonon center radius is 0, only the atom found at the phonon center site point will be considered.</p>
@@ -238,13 +235,13 @@ Atoms within the sphere specified by these two values will be included in phonon
         <li class="right" >
           <a href="3_1_4_personalrecipe.html" title="8.6. The Personal Recipe section"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="3_1_inputsections.html" >8. Sections of the Input File</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

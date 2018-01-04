@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>12. Programming for MAST &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>12. Programming for MAST &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="12.1. MAST development workflow" href="12_0_1_developmentworkflow.html" />
     <link rel="prev" title="11.5.1. StructOpt" href="8_0_4_structopt.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="8_0_4_structopt.html" title="11.5.1. StructOpt"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -87,16 +84,16 @@
 <p>To report any issues, please create an issue in this repository.</p>
 <p>To program with MAST:</p>
 <ol class="arabic">
-<li><p class="first">Clone from the dev branch (see github&#8217;s instructions for cloning) OR get the latest stable release from <cite>https://github.com/uw-cmg/MAST/releases</cite> and unzip it.</p>
+<li><p class="first">Clone from the dev branch (see github’s instructions for cloning) OR get the latest stable release from <cite>https://github.com/uw-cmg/MAST/releases</cite> and unzip it.</p>
 </li>
-<li><p class="first">Prepend the clone directory (the directory which contains the directory named MAST) to your <code class="docutils literal"><span class="pre">$PYTHONPATH</span></code> environment variable, and the clone directory&#8217;s <code class="docutils literal"><span class="pre">MAST/bin</span></code> directory to your <code class="docutils literal"><span class="pre">$PATH</span></code> environment variable.</p>
+<li><p class="first">Prepend the clone directory (the directory which contains the directory named MAST) to your <code class="docutils literal"><span class="pre">$PYTHONPATH</span></code> environment variable, and the clone directory’s <code class="docutils literal"><span class="pre">MAST/bin</span></code> directory to your <code class="docutils literal"><span class="pre">$PATH</span></code> environment variable.</p>
 <blockquote>
 <div><ul class="simple">
 <li>The command <code class="docutils literal"><span class="pre">mast</span></code> should reveal the clone directory instead of any other MAST installation directories.</li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">If you previously did a <code class="docutils literal"><span class="pre">pip</span></code> install in order to get the MAST dependencies, go to your python installation&#8217;s <code class="docutils literal"><span class="pre">lib/python2.7/site-packages/</span></code> directory and rename the MAST package directory there to something else.</p>
+<li><p class="first">If you previously did a <code class="docutils literal"><span class="pre">pip</span></code> install in order to get the MAST dependencies, go to your python installation’s <code class="docutils literal"><span class="pre">lib/python2.7/site-packages/</span></code> directory and rename the MAST package directory there to something else.</p>
 <blockquote>
 <div><ul class="simple">
 <li>Open python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">MAST</span></code> at the prompt. <code class="docutils literal"><span class="pre">help(MAST)</span></code> should then reveal MAST in the correct cloned directory, rather than the pip-installed MAST.</li>
@@ -157,14 +154,14 @@ The <code class="docutils literal"><span class="pre">verbose</span></code> optio
 <li>Methods are separated by semicolons, and can include arguments (see <a class="reference internal" href="3_1_2_ingredients.html"><span class="doc">The Ingredients section</span></a>.)</li>
 <li>The method in the ChopIngredient class may involve a checker, if they are generic but require program-specific treatment, for example, <code class="docutils literal"><span class="pre">forward_final_structure</span></code>.</li>
 <li>Or, the method in the ChopIngredient class may not need a checker, if it is totally generic, for example, <code class="docutils literal"><span class="pre">copy_file</span> <span class="pre">OLDNAME</span> <span class="pre">NEWNAME</span></code></li>
-<li>When used as an update method, please remember that the last argument to a method is going to be the child ingredient&#8217;s directory, as determined by <a class="reference internal" href="3_1_4_personalrecipe.html"><span class="doc">The Personal Recipe section</span></a> in the recipe folder.</li>
+<li>When used as an update method, please remember that the last argument to a method is going to be the child ingredient’s directory, as determined by <a class="reference internal" href="3_1_4_personalrecipe.html"><span class="doc">The Personal Recipe section</span></a> in the recipe folder.</li>
 </ul>
 <p>Support for using a new checker type as self.checker in a ChopIngredient class would need to be added at the top of <code class="docutils literal"><span class="pre">MAST/ingredients/baseingredient.py</span></code>.
 Alternately, a new checker instance may be initialized on-the-fly within a method, e.g. mychecker = VASPChecker(name=mydirectory)</p>
 </div>
 <div class="section" id="debugging">
 <h2>12.6. Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
-<p>For classes which have a self.logger attribute, or functions in which a logger is defined, messages may be logged to the DEBUG level. (self.logger.debug(&#8220;message&#8221;))</p>
+<p>For classes which have a self.logger attribute, or functions in which a logger is defined, messages may be logged to the DEBUG level. (self.logger.debug(“message”))</p>
 <p>Set the MAST_DEBUG environment variable to any value so that the mast.log file will print debug messages.</p>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -231,12 +228,12 @@ Alternately, a new checker instance may be initialized on-the-fly within a metho
         <li class="right" >
           <a href="8_0_4_structopt.html" title="11.5.1. StructOpt"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

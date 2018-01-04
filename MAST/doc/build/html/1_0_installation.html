@@ -1,20 +1,17 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>5. Installation &#8212; MAST 2.0.0 documentation</title>
-    
+    <title>5. Installation &#8212; MAST 2.0.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  false,
@@ -29,7 +26,7 @@
     <link rel="next" title="6. Trying out MAST" href="17_0_testmast.html" />
     <link rel="prev" title="4. Recipes" href="4_0_recipe.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,7 +39,7 @@
         <li class="right" >
           <a href="4_0_recipe.html" title="4. Recipes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,7 +66,7 @@
 <div><ul>
 <li><p class="first">These names usually start with a dot.</p>
 </li>
-<li><p class="first">You may need to use the command <code class="docutils literal"><span class="pre">ls</span> <span class="pre">-a</span></code> to see these &#8220;hidden&#8221; files.</p>
+<li><p class="first">You may need to use the command <code class="docutils literal"><span class="pre">ls</span> <span class="pre">-a</span></code> to see these “hidden” files.</p>
 </li>
 <li><p class="first">Sometimes you may need to create your own user profile file.</p>
 <blockquote>
@@ -167,7 +164,7 @@
 <div class="section" id="set-up-the-pseudopotential-folders">
 <h3>5.3.1. Set up the pseudopotential folders<a class="headerlink" href="#set-up-the-pseudopotential-folders" title="Permalink to this headline">¶</a></h3>
 <p>Locate the VASP pseudopotentials. If you cannot locate the VASP pseudopotentials, contact your system administrator or another person who uses VASP on the cluster.</p>
-<p>Follow the POTCAR Setup instructions from Pymatgen&#8217;s installation instructions at <a class="reference external" href="http://pymatgen.org">http://pymatgen.org</a></p>
+<p>Follow the POTCAR Setup instructions from Pymatgen’s installation instructions at <a class="reference external" href="http://pymatgen.org">http://pymatgen.org</a></p>
 <p>Later on, ingredients with a value of <code class="docutils literal"><span class="pre">pbe</span></code> for the ingredient keyword <code class="docutils literal"><span class="pre">mast_xc</span></code> will draw pseudopotentials out of the <code class="docutils literal"><span class="pre">POT_GGA_PAW_PBE</span></code> folder (see <a class="reference internal" href="3_0_inputfile.html"><span class="doc">Input File</span></a>).</p>
 <p>Ingredients with a value of <code class="docutils literal"><span class="pre">pw91</span></code> for the ingredient keyword <code class="docutils literal"><span class="pre">mast_xc</span></code> will draw pseudopotentials out of the <code class="docutils literal"><span class="pre">POT_GGA_PAW_PW91</span></code> folder, and so on.</p>
 <p>Use pymatgen-recognized values for <code class="docutils literal"><span class="pre">mast_xc</span></code> keyword values.</p>
@@ -219,7 +216,7 @@
 </li>
 </ol>
 <ul>
-<li><p class="first">On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate &#8220;work&#8221; or &#8220;scratch&#8221; directory. In this case, move the entire <code class="docutils literal"><span class="pre">$HOME/MAST</span></code> directory into the work or scratch directory, for example:</p>
+<li><p class="first">On some clusters, like Stampede, the home directory is not where you actually want to store calculations. Instead, there may be a separate “work” or “scratch” directory. In this case, move the entire <code class="docutils literal"><span class="pre">$HOME/MAST</span></code> directory into the work or scratch directory, for example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>mv $HOME/MAST $WORK/.
 </pre></div>
 </div>
@@ -288,7 +285,7 @@ export MAST_PLATFORM=&lt;platform_name&gt;
 </pre></div>
 </div>
 <p>and then some errors.</p>
-<p>Go to the &#8220;installed in&#8221; directory, and then:</p>
+<p>Go to the “installed in” directory, and then:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">submit</span><span class="o">/</span><span class="n">platforms</span>
 </pre></div>
 </div>
@@ -344,17 +341,17 @@ export MAST_PLATFORM=&lt;platform_name&gt;
 <p><code class="docutils literal"><span class="pre">mastmon_submit.sh</span></code> is the submission template that will submit the MAST Monitor to the queue every time <code class="docutils literal"><span class="pre">mast</span></code> is called.</p>
 <p>The MAST Monitor will check the completion status of every recipe and ingredient in the <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code> folder.</p>
 <ul class="simple">
-<li>If you have a recipe you would like to skip temporarily, manually put a file named <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> inside that recipe&#8217;s folder in <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code>. <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> can be an empty file, or it can contain notes; MAST does not check its contents.</li>
+<li>If you have a recipe you would like to skip temporarily, manually put a file named <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> inside that recipe’s folder in <code class="docutils literal"><span class="pre">$MAST_SCRATCH</span></code>. <code class="docutils literal"><span class="pre">MAST_SKIP</span></code> can be an empty file, or it can contain notes; MAST does not check its contents.</li>
 <li><code class="docutils literal"><span class="pre">mastmon_submit.sh</span></code> should be set to run on the shortest-wallclock, fastest-turnaround queue available, e.g. a serial queue</li>
 </ul>
 <p>The <code class="docutils literal"><span class="pre">mastmon_submit.sh</span></code> script is copied into the <code class="docutils literal"><span class="pre">$MAST_CONTROL</span></code> directory every time you run <code class="docutils literal"><span class="pre">mast</span></code>.</p>
-<p>If you see that after you type <code class="docutils literal"><span class="pre">mast</span></code>, no &#8220;mastmon&#8221; process appears on the queue, then test the submission script directly:</p>
+<p>If you see that after you type <code class="docutils literal"><span class="pre">mast</span></code>, no “mastmon” process appears on the queue, then test the submission script directly:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>cd $MAST_CONTROL
 qsub mastmon_submit.sh (or use sbatch for slurm, etc.)
 </pre></div>
 </div>
 <ul class="simple">
-<li>Modify the <code class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></code> file until it the &#8220;mastmon&#8221; process successfully runs on the queue.</li>
+<li>Modify the <code class="docutils literal"><span class="pre">$MAST_CONTROL/mastmon_submit.sh</span></code> file until it the “mastmon” process successfully runs on the queue.</li>
 <li>Copy your changes into the <code class="docutils literal"><span class="pre">&lt;MAST</span> <span class="pre">installation</span> <span class="pre">directory&gt;/submit/platforms/&lt;platform&gt;/mastmon_submit.sh</span></code> file so that your changes will be reflected the next time that you run MAST.</li>
 </ul>
 </div>
@@ -423,8 +420,8 @@ Submitted batch job 456789
 <blockquote>
 <div><ul class="simple">
 <li>This function should return the status of a specific job, based on the job number.</li>
-<li>For example, job 456789 in the queue snapshot above, with status &#8220;PD&#8221; should correspond to a &#8220;Q&#8221; status (queued status) for MAST.</li>
-<li>Job 456775 in the queue snapshot above, with status &#8220;R&#8221;, should correspond to an &#8220;R&#8221; status (running status) for MAST.</li>
+<li>For example, job 456789 in the queue snapshot above, with status “PD” should correspond to a “Q” status (queued status) for MAST.</li>
+<li>Job 456775 in the queue snapshot above, with status “R”, should correspond to an “R” status (running status) for MAST.</li>
 </ul>
 </div></blockquote>
 </li>
@@ -566,12 +563,12 @@ Submitted batch job 456789
         <li class="right" >
           <a href="4_0_recipe.html" title="4. Recipes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">MAST 2.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014-2017, University of Wisconsin-Madison Compuational Materials Group.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>
