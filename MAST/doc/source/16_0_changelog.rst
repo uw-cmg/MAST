@@ -8,6 +8,7 @@ version 2.0.1
 * Fixes to defect formation energy tool for compatibility with pymatgen 4.7.1
 * Pin pymatgen version in setup.py to 4.7.1
 * Replace "what's new" files with this changelog
+* Move documentation to mast.readthedocs.io
 
 ==============
 version 2.0.0

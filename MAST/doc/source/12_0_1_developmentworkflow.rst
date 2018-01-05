@@ -178,11 +178,9 @@ Modify ``MAST/doc/source`` pages as appropriate.
 
 Rebuild and preview until the documentation is complete.
 
-Zip the entire contents of html folder into a zip file by selecting all the files and folders in the html folder and compressing them (this has to be done from the desktop for some reason, or else it will not be readable by pythonhosted.org)
+(Documentation used to be on pythonhosted.org/MAST but pypi deprecated its use as of December 2017.)
 
-Log in to the pypi page at https://pypi.python.org/pypi/MAST
-At the bottom of the page, upload the zip into the Upload documentation section
-The upload may spin for a while, but it should work.
+Documentation should automatically rebuild from the dev branch at https://mast.readthedocs.io
 
 ============================================================
 Package to the pypi test repository and test the package
