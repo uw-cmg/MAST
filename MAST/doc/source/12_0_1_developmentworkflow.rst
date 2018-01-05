@@ -194,12 +194,12 @@ Create a ``~/.pypirc`` file that looks something like::
         pypitest
 
     [pypitest]
-    repository = https://testpypi.python.org/pypi
+    repository = https://test.pypi.org/legacy/
     username = <username>
     password =  <pwd>
 
     [pypi]
-    repository = https://pypi.python.org/pypi
+    repository = https://upload.python.org/legacy/
     username = <username>
     password =  <pwd>
 
