@@ -133,7 +133,7 @@ setup(
         version=verstr,
         install_requires=["numpy>=1.6.1", 
                 "scipy>=0.10.1", 
-                "pymatgen==4.7.1", 
+                "pymatgen==2024.2.20", 
                 "custodian>=0.7.5",
                 "pandas"],
         scripts=["MAST/bin/mast",
